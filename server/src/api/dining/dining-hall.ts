@@ -1,23 +1,21 @@
-import {
-    IDiningHall,
-    IDiningHallConcept,
-    IDiningHallConfig,
-    IDiningHallMenuItem
-} from '../../models/dining-hall.js';
+import { IDiningHall, IDiningHallConcept, IDiningHallConfig, IDiningHallMenuItem } from '../../models/dining-hall.js';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/dining-halls.js';
 import fetch from 'node-fetch';
 import { validateSuccessResponse } from '../../util/request.js';
-import { isDiningHallConfigResponse } from '../../util/typeguard.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
     IDiningHallConceptListItem,
-    IDiningHallMenuItemsResponseItem,
-    IDiningHallSitesByContextResponse
+    IDiningHallConfigResponse,
+    IDiningHallMenuItemsResponseItem
 } from '../../models/responses.js';
 
 const getHeaders = (token: string) => ({
     'Authorization': `Bearer ${token}`
-})
+});
+
+const jsonHeaders = {
+    'Content-Type': 'application/json'
+}
 
 export class DiningHallDiscoverySession {
     #token: string;
@@ -35,13 +33,32 @@ export class DiningHallDiscoverySession {
         return `${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}${path}`;
     }
 
-    private async performLoginAsync() {
-        const response = await fetch(this._getUrl(`/login/anonymous`),
-            {
-                method: 'POST'
-            });
+    private async _doRequestAsync(path: string, options: any = {}) {
+        const optionsWithToken = { ...options };
+        if (this.#token) {
+            optionsWithToken.headers = {
+                ...(optionsWithToken.headers ?? {}),
+                ...getHeaders(this.#token)
+            }
+        }
 
+        if (options.body) {
+            console.log('Request body:', options.body);
+        }
+
+        const url = this._getUrl(path);
+        console.log(`${options.method ?? 'GET'} ${url}`);
+
+        const response = await fetch(url, optionsWithToken);
         validateSuccessResponse(response);
+        return response;
+    }
+
+    private async performLoginAsync() {
+        const response = await this._doRequestAsync('/login/anonymous',
+            {
+                method: 'PUT'
+            });
 
         if (!response.headers.has('access-token')) {
             throw new Error(`Access token is missing from headers. Available headers: ${Array.from(response.headers.keys()).join(', ')}`);
@@ -51,43 +68,41 @@ export class DiningHallDiscoverySession {
     }
 
     private async retrieveConfigDataAsync() {
-        const response = await fetch(`${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}/config`,
-            {
-                headers: getHeaders(this.#token)
-            });
-
-        validateSuccessResponse(response);
+        const response = await this._doRequestAsync('/config');
 
         const json = await response.json();
 
-        if (!isDiningHallConfigResponse(json)) {
+        if (!isDuckType<IDiningHallConfigResponse>(json, {
+            tenantID: 'string',
+            contextID: 'string',
+            theme: 'object',
+            storeList: 'object'
+        })) {
             throw new Error(`JSON is missing some data!`);
         }
 
         this.config = {
-            tenantId:         json.tenantId,
-            contextId:        json.contextId,
+            tenantId:         json.tenantID,
+            contextId:        json.contextID,
             logoName:         json.theme.logoImage,
             displayProfileId: json.storeList[0].displayProfileId[0]
         };
     }
 
     private async retrieveConceptListAsync() {
-        const response = await fetch(
-            `${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}/sites/${this.config.contextId}/concepts/${this.config.displayProfileId}`,
+        const response = await this._doRequestAsync(
+            `/sites/${this.config.tenantId}/${this.config.contextId}/concepts/${this.config.displayProfileId}`,
             {
                 method:  'POST',
-                headers: getHeaders(this.#token),
+                headers: jsonHeaders,
                 body:    JSON.stringify({
                     isEasyMenuEnabled: false,
-                    scheduleTime:      { startTime: '1:45 PM', endTime: '2:00 PM' },
+                    scheduleTime:      { startTime: '12:00 PM', endTime: '12:15 PM' },
                     scheduledDay:      0,
                     // storeInfo { some huge object }
                 })
             }
         );
-
-        validateSuccessResponse(response);
 
         const json = await response.json();
         if (!isDuckTypeArray<IDiningHallConceptListItem>(json, {
@@ -124,16 +139,15 @@ export class DiningHallDiscoverySession {
     }
 
     private async retrieveMenuItemDetailsAsync(conceptId: string, menuId: string, itemIds: string[]): Promise<Array<IDiningHallMenuItem>> {
-        const response = await fetch(
-            `${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
+        const response = await this._doRequestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
             {
                 method:  'POST',
-                headers: getHeaders(this.#token),
+                headers: jsonHeaders,
                 body:    JSON.stringify({
                     conceptId,
-                    itemIds,
                     currencyUnit:       'USD',
                     isCategoryHasItems: true,
+                    itemIds,
                     menuPriceLevel:     {
                         menuId
                     },
@@ -142,8 +156,6 @@ export class DiningHallDiscoverySession {
                 })
             }
         );
-
-        validateSuccessResponse(response);
 
         const json = await response.json();
         if (!isDuckTypeArray<IDiningHallMenuItemsResponseItem>(json, {
@@ -166,6 +178,7 @@ export class DiningHallDiscoverySession {
 
     private async _populateMenuItemsForConceptAsync(concept: IDiningHallConcept) {
         const itemIds = Array.from(concept.menuItemIdsByCategory.values()).flat();
+        console.log('Retrieving menu items for menu id', concept.menuId, 'for', itemIds.length, 'items');
         const menuItems = await this.retrieveMenuItemDetailsAsync(concept.id, concept.menuId, itemIds);
         for (const menuItem of menuItems) {
             concept.menuItemsById.set(menuItem.id, menuItem);
@@ -173,7 +186,9 @@ export class DiningHallDiscoverySession {
     }
 
     private async populateMenuItemsForAllConceptsAsync() {
-        await Promise.all(this.concepts.map(concept => this._populateMenuItemsForConceptAsync(concept)));
+        for (const concept of this.concepts) {
+            await this._populateMenuItemsForConceptAsync(concept);
+        }
     }
 
     public async performDiscoveryAsync() {

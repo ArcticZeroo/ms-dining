@@ -1,6 +1,6 @@
 export interface IDiningHallConfigResponse {
-    tenantId: string;
-    contextId: string;
+    tenantID: string;
+    contextID: string;
     theme: {
         logoImage: string;
     },

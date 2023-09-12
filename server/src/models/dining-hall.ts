@@ -1,5 +1,4 @@
 export interface IDiningHall {
-    internalName: string;
     friendlyName: string;
     url: string;
 }
