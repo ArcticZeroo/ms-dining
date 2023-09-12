@@ -11,8 +11,19 @@ export interface IDiningHallConfig {
     displayProfileId: string;
 }
 
-export interface IDiningHallConceptHeader {
+export interface IDiningHallConcept {
+    id: string;
+    menuId: string;
     name: string;
     logoUrl: string;
-    menuItemsByCategory: Map<string, Array<string>>;
+    menuItemIdsByCategory: Map<string, Array<string>>;
+    menuItemsById: Map<string, IDiningHallMenuItem>;
+}
+
+export interface IDiningHallMenuItem {
+    id: string;
+    price: string;
+    displayName: string;
+    calories: string;
+    maxCalories: string;
 }

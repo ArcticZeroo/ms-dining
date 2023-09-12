@@ -37,9 +37,9 @@ export interface IDiningHallSitesByContextResponse {
     }>
 }
 
-export interface IDiningHallMenuItemResponse {
+export interface IDiningHallMenuItemsResponseItem {
+    id: string;
     amount: string;
-    description: string;
     displayText: string;
     properties: {
         calories: string;
