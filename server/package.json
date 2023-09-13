@@ -19,5 +19,8 @@
     "koa-static": "^5.0.0",
     "node-cron": "^3.0.2",
     "node-fetch": "^3.3.2"
+  },
+  "scripts": {
+    "run": "npx tsc && node dist/main.js"
   }
 }
