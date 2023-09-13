@@ -6,7 +6,7 @@ interface IDiningHallConceptMenuProps {
     menuItemsByCategoryName: IDiningHallMenuItemsByCategoryName;
 }
 
-export const Menu: React.FC<IDiningHallConceptMenuProps> = ({ menuItemsByCategoryName }) => {
+export const ConceptMenu: React.FC<IDiningHallConceptMenuProps> = ({ menuItemsByCategoryName }) => {
     return (
         <table className="menu-body">
             {
