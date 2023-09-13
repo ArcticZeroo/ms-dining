@@ -4,12 +4,13 @@ import { diningHalls } from '../../constants/dining-halls.js';
 
 export const diningHallSessionsByUrl = new Map<string, DiningHallDiscoverySession>();
 
-const populateSessions = async () => {
+const populateSessionsAsync = async () => {
     diningHallSessionsByUrl.clear();
 
     for (const diningHall of diningHalls) {
         const session = new DiningHallDiscoverySession(diningHall);
         try {
+            console.log('Performing discovery for', diningHall.friendlyName, 'at', diningHall.url, '...');
             await session.performDiscoveryAsync();
             diningHallSessionsByUrl.set(diningHall.url, session);
         } catch (e) {
@@ -18,8 +19,14 @@ const populateSessions = async () => {
     }
 };
 
+const populateSessions = () => {
+    populateSessionsAsync()
+        .catch(e => console.error('Failed to populate dining hall sessions', e));
+};
+
 // 9am on Monday through Friday
 cron.schedule('0 9 * * 1,2,3,4,5', () => {
-    populateSessions()
-        .catch(e => console.error('Failed to populate dining hall sessions', e));
+    populateSessions();
 });
+
+populateSessions();

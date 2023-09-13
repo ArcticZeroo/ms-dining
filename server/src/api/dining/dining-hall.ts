@@ -42,10 +42,6 @@ export class DiningHallDiscoverySession {
             }
         }
 
-        if (options.body) {
-            console.log('Request body:', options.body);
-        }
-
         const url = this._getUrl(path);
         console.log(`${options.method ?? 'GET'} ${url}`);
 
@@ -178,7 +174,6 @@ export class DiningHallDiscoverySession {
 
     private async _populateMenuItemsForConceptAsync(concept: IDiningHallConcept) {
         const itemIds = Array.from(concept.menuItemIdsByCategoryName.values()).flat();
-        console.log('Retrieving menu items for menu id', concept.menuId, 'for', itemIds.length, 'items');
         const menuItems = await this.retrieveMenuItemDetailsAsync(concept.id, concept.menuId, itemIds);
         for (const menuItem of menuItems) {
             concept.menuItemsById.set(menuItem.id, menuItem);
