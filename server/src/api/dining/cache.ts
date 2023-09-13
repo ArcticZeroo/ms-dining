@@ -7,6 +7,8 @@ export const diningHallSessionsByUrl = new Map<string, DiningHallDiscoverySessio
 const populateSessionsAsync = async () => {
     diningHallSessionsByUrl.clear();
 
+    console.log('Populating dining hall sessions...');
+
     for (const diningHall of diningHalls) {
         const session = new DiningHallDiscoverySession(diningHall);
         try {
@@ -17,6 +19,8 @@ const populateSessionsAsync = async () => {
             console.error(`Failed to populate dining hall ${diningHall.friendlyName} (${diningHall.url})`, e);
         }
     }
+
+    console.log('Finished populating dining hall sessions');
 };
 
 const populateSessions = () => {
