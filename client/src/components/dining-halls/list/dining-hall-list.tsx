@@ -20,7 +20,7 @@ export const DiningHallList: React.FC<IDiningHallListProps> = ({ diningHalls }) 
                 {
                     diningHalls.map((diningHall) => (
                         <li key={diningHall.id} className="dining-hall">
-                            <NavLink to={`/menu/${diningHall.id}`}>
+                            <NavLink to={`/menu/${diningHall.id}`} onClick={() => setIsVisible(false)}>
                                 {diningHall.name}
                             </NavLink>
                         </li>
