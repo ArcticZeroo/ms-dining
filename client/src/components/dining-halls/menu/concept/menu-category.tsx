@@ -12,13 +12,13 @@ export const MenuCategory: React.FC<IDiningHallConceptMenuCategoryProps> = ({
                                                                                 menuItems
                                                                             }) => {
     return (
-        <div key={categoryName}>
-            <div>{categoryName}</div>
-            <ul>
-                {
-                    menuItems.map(item => (<MenuItem key={item.id} menuItem={item}/>))
-                }
-            </ul>
-        </div>
+        <>
+            <tr>
+                <th>{categoryName}</th>
+            </tr>
+            {
+                menuItems.map(item => (<MenuItem key={item.id} menuItem={item}/>))
+            }
+        </>
     );
 };

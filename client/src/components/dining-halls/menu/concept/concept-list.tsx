@@ -9,7 +9,6 @@ export const ConceptList = () => {
 
     if (!isDuckTypeArray<IDiningHallConcept>(concepts, {
         name:    'string',
-        logoUrl: 'string',
         menu:    'object'
     })) {
         return (

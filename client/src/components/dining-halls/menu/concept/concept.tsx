@@ -12,7 +12,11 @@ export const Concept: React.FC<IDiningHallConceptProps> = ({ concept }) => {
     return (
         <div className="concept">
             <div className="title">
-                <img src={concept.logoUrl} alt={`Logo for concept ${concept.name}`}/>
+                {
+                    concept.logoUrl && (
+                        <img src={concept.logoUrl} alt={`Logo for concept ${concept.name}`}/>
+                    )
+                }
                 {concept.name}
             </div>
             <Menu menuItemsByCategoryName={concept.menu}/>

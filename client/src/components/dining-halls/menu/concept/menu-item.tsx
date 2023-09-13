@@ -15,14 +15,22 @@ const getCaloriesDisplay = (menuItem: IDiningHallMenuItem) => {
         parts.push(menuItem.maxCalories);
     }
 
-    return `Calories: ${parts.join('-')}`;
+    return `${parts.join('-')} Calories`;
 };
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     return (
-        <li key={menuItem.id}>
-            {menuItem.displayName} | ${menuItem.price}{caloriesDisplay && ` | ${caloriesDisplay}`}
-        </li>
+        <tr>
+            <td>
+                {menuItem.displayName}
+            </td>
+            <td>
+                ${menuItem.price}
+            </td>
+            <td>
+                {caloriesDisplay}
+            </td>
+        </tr>
     );
 };
