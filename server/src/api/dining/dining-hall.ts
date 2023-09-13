@@ -1,5 +1,5 @@
 import { IDiningHall, IDiningHallConcept, IDiningHallConfig, IDiningHallMenuItem } from '../../models/dining-hall.js';
-import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/dining-halls.js';
+import { diningHalls, getBaseApiUrlWithoutTrailingSlash } from '../../constants/dining-halls.js';
 import fetch from 'node-fetch';
 import { validateSuccessResponse } from '../../util/request.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
@@ -73,9 +73,9 @@ export class DiningHallDiscoverySession {
         const json = await response.json();
 
         if (!isDuckType<IDiningHallConfigResponse>(json, {
-            tenantID: 'string',
+            tenantID:  'string',
             contextID: 'string',
-            theme: 'object',
+            theme:     'object',
             storeList: 'object'
         })) {
             throw new Error(`JSON is missing some data!`);
@@ -116,12 +116,12 @@ export class DiningHallDiscoverySession {
 
         for (const conceptJson of json) {
             const conceptInfo: IDiningHallConcept = {
-                id:                    conceptJson.id,
-                name:                  conceptJson.name,
-                logoUrl:               conceptJson.image,
-                menuId:                conceptJson.priceLevelConfig.menuId,
-                menuItemIdsByCategory: new Map(),
-                menuItemsById:         new Map()
+                id:                        conceptJson.id,
+                name:                      conceptJson.name,
+                logoUrl:                   conceptJson.image,
+                menuId:                    conceptJson.priceLevelConfig.menuId,
+                menuItemIdsByCategoryName: new Map(),
+                menuItemsById:             new Map()
             };
 
             for (const menu of conceptJson.menus) {
@@ -130,7 +130,7 @@ export class DiningHallDiscoverySession {
                 }
 
                 for (const category of menu.categories) {
-                    conceptInfo.menuItemIdsByCategory.set(category.name, category.items);
+                    conceptInfo.menuItemIdsByCategoryName.set(category.name, category.items);
                 }
             }
 
@@ -177,7 +177,7 @@ export class DiningHallDiscoverySession {
     }
 
     private async _populateMenuItemsForConceptAsync(concept: IDiningHallConcept) {
-        const itemIds = Array.from(concept.menuItemIdsByCategory.values()).flat();
+        const itemIds = Array.from(concept.menuItemIdsByCategoryName.values()).flat();
         console.log('Retrieving menu items for menu id', concept.menuId, 'for', itemIds.length, 'items');
         const menuItems = await this.retrieveMenuItemDetailsAsync(concept.id, concept.menuId, itemIds);
         for (const menuItem of menuItems) {

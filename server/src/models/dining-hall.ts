@@ -15,7 +15,7 @@ export interface IDiningHallConcept {
     menuId: string;
     name: string;
     logoUrl: string;
-    menuItemIdsByCategory: Map<string, Array<string>>;
+    menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IDiningHallMenuItem>;
 }
 
