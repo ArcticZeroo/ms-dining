@@ -1,35 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { useEffect, useState } from 'react';
+import { IDiningHall } from './models/dining-halls.ts';
+import { DiningHallClient } from './api/dining.ts';
+import { usePromise } from './hooks/async.ts';
+import { PromiseStatus } from './models/async.ts';
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [diningHallListPromise, setDiningHallListPromise] = useState<Promise<Array<IDiningHall>>>();
+    const diningHallListPromiseState = usePromise(diningHallListPromise);
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    useEffect(() => {
+        setDiningHallListPromise(DiningHallClient.retrieveDiningHallList());
+    }, []);
+
+    if (diningHallListPromiseState.status === PromiseStatus.notStarted) {
+        return (
+            'Waiting to start...'
+        );
+    } else if (diningHallListPromiseState.status === PromiseStatus.inProgress) {
+        return (
+            'Loading...'
+        );
+    } else {
+        const { value, error } = diningHallListPromiseState;
+        if (error) {
+            return (
+                'Could not load dining hall list!'
+            );
+        } else {
+            const diningHalls = value ?? [];
+            
+        }
+    }
 }
 
 export default App
