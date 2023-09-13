@@ -12,10 +12,12 @@ export interface IDiningHallMenuItem {
     maxCalories: string;
 }
 
+export interface IDiningHallMenuItemsByCategoryName {
+    [categoryName: string]: Array<IDiningHallMenuItem>;
+}
+
 export interface IDiningHallConcept {
     name: string;
     logoUrl: string;
-    menu: {
-        [categoryName: string]: Array<IDiningHallMenuItem>;
-    }
+    menu: IDiningHallMenuItemsByCategoryName;
 }
