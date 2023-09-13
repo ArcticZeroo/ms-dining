@@ -1,17 +1,18 @@
 import { IDiningHall, IDiningHallConcept, IDiningHallConfig, IDiningHallMenuItem } from '../../models/dining-hall.js';
 import { diningHalls, getBaseApiUrlWithoutTrailingSlash } from '../../constants/dining-halls.js';
 import fetch from 'node-fetch';
-import { validateSuccessResponse } from '../../util/request.js';
+import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
     IDiningHallConceptListItem,
     IDiningHallConfigResponse,
     IDiningHallMenuItemsResponseItem
 } from '../../models/responses.js';
+import { requestRetryCount } from '../../constants/config.js';
 
-const getHeaders = (token: string) => ({
+const getHeaders = (token: string) => token ? ({
     'Authorization': `Bearer ${token}`
-});
+}) : {};
 
 const jsonHeaders = {
     'Content-Type': 'application/json'
@@ -33,25 +34,36 @@ export class DiningHallDiscoverySession {
         return `${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}${path}`;
     }
 
-    private async _doRequestAsync(path: string, options: any = {}) {
-        const optionsWithToken = { ...options };
-        if (this.#token) {
-            optionsWithToken.headers = {
-                ...(optionsWithToken.headers ?? {}),
+    private _getRequestOptions(options: any = {}) {
+        return {
+            ...options,
+            headers: {
+                ...(options.headers ?? {}),
                 ...getHeaders(this.#token)
             }
         }
+    }
+
+    private async _requestAsync(path: string, options: any = {}) {
+        const optionsWithToken = this._getRequestOptions(options);
 
         const url = this._getUrl(path);
-        console.log(`${options.method ?? 'GET'} ${url}`);
 
-        const response = await fetch(url, optionsWithToken);
+        const response = await makeRequestWithRetries(
+            () => {
+                console.log(`${options.method ?? 'GET'} ${url}`);
+                return fetch(url, optionsWithToken);
+            },
+            requestRetryCount
+        );
+
         validateSuccessResponse(response);
+
         return response;
     }
 
     private async performLoginAsync() {
-        const response = await this._doRequestAsync('/login/anonymous',
+        const response = await this._requestAsync('/login/anonymous',
             {
                 method: 'PUT'
             });
@@ -64,7 +76,7 @@ export class DiningHallDiscoverySession {
     }
 
     private async retrieveConfigDataAsync() {
-        const response = await this._doRequestAsync('/config');
+        const response = await this._requestAsync('/config');
 
         const json = await response.json();
 
@@ -86,7 +98,7 @@ export class DiningHallDiscoverySession {
     }
 
     private async retrieveConceptListAsync() {
-        const response = await this._doRequestAsync(
+        const response = await this._requestAsync(
             `/sites/${this.config.tenantId}/${this.config.contextId}/concepts/${this.config.displayProfileId}`,
             {
                 method:  'POST',
@@ -134,7 +146,7 @@ export class DiningHallDiscoverySession {
     }
 
     private async retrieveMenuItemDetailsAsync(conceptId: string, menuId: string, itemIds: string[]): Promise<Array<IDiningHallMenuItem>> {
-        const response = await this._doRequestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
+        const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
             {
                 method:  'POST',
                 headers: jsonHeaders,
