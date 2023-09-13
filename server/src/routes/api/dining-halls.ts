@@ -46,8 +46,20 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const menusByConcept = [];
         for (const concept of diningHallSession.concepts) {
             const itemsByCategory = {};
+
             for (const [categoryName, categoryItemIds] of concept.menuItemIdsByCategoryName) {
-                itemsByCategory[categoryName] = categoryItemIds.map(itemId => concept.menuItemsById.get(itemId));
+                const itemsForCategory = [];
+
+                for (const itemId of categoryItemIds) {
+                    // Expected; Some items are 86-ed
+                    if (!concept.menuItemsById.has(itemId)) {
+                        continue;
+                    }
+
+                    itemsForCategory.push(concept.menuItemsById.get(itemId));
+                }
+
+                itemsByCategory[categoryName] = itemsForCategory;
             }
 
             menusByConcept.push({
@@ -56,6 +68,8 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 menu:    itemsByCategory
             });
         }
+
+        ctx.body = JSON.stringify(menusByConcept);
     });
 
     attachRouter(parent, router);
