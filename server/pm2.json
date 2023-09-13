@@ -1,0 +1,10 @@
+{
+    "apps": [
+        {
+            "name": "MSDining",
+            "script": "dist/main.js",
+            "watch": false,
+            "ignore_watch": ["node_modules"]
+        }
+    ]
+}
