@@ -1,10 +1,10 @@
 import { useAsyncValue } from 'react-router-dom';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
-import { ErrorCard } from '../../card/error.tsx';
-import { DiningHallConcept } from './dining-hall-concept.tsx';
-import { IDiningHallConcept } from '../../../models/dining-halls.ts';
+import { ErrorCard } from '../../../card/error.tsx';
+import { Concept } from './concept.tsx';
+import { IDiningHallConcept } from '../../../../models/dining-halls.ts';
 
-export const DiningHallConceptList = () => {
+export const ConceptList = () => {
     const concepts = useAsyncValue();
 
     if (!isDuckTypeArray<IDiningHallConcept>(concepts, {
@@ -21,7 +21,7 @@ export const DiningHallConceptList = () => {
 
     return (
         <div className="concepts">
-            {concepts.map(concept => <DiningHallConcept key={concept.name} concept={concept}/>)}
+            {concepts.map(concept => <Concept key={concept.name} concept={concept}/>)}
         </div>
     );
 };

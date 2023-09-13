@@ -47,7 +47,6 @@ html,body, #root, .App {
   border-radius: 0.5rem;
   background: #FAFAFA;
   color: #212121;
-  padding: 1rem;
 }
 
 .concept .title {
@@ -55,6 +54,19 @@ html,body, #root, .App {
   display: flex;
   align-items: center;
   gap: 0.5em;
+  background: #BBB;
+  padding: 1rem;
+  border-top-right-radius: 0.5rem;
+  border-top-left-radius: 0.5rem;
+}
+
+.concept .title img {
+  height: 1.4em;
+  margin-right: 0.25rem;
+}
+
+.concept .menu-body {
+  padding: 1rem;
 }
 
 .dining-hall-list {

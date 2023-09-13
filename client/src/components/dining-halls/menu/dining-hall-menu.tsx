@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Await, useLoaderData } from 'react-router-dom';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { ErrorCard } from '../../card/error.tsx';
-import { DiningHallConceptList } from './dining-hall-concept-list.tsx';
+import { ConceptList } from './concept/concept-list.tsx';
 import { IConceptLoaderData } from '../../../models/router.ts';
 
 export const DiningHallMenu: React.FC = () => {
@@ -21,7 +21,7 @@ export const DiningHallMenu: React.FC = () => {
     return (
         <Suspense fallback={<div className="loading">Loading menu...</div>}>
             <Await resolve={data.concepts} errorElement={<ErrorCard>Failed to load menu!</ErrorCard>}>
-                <DiningHallConceptList/>
+                <ConceptList/>
             </Await>
         </Suspense>
     );
