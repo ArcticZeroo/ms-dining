@@ -7,8 +7,6 @@ export interface IDiningHallConceptProps {
 }
 
 export const Concept: React.FC<IDiningHallConceptProps> = ({ concept }) => {
-    console.log(concept);
-
     return (
         <div className="concept">
             <div className="title">
