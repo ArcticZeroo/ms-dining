@@ -103,7 +103,6 @@ export class DiningHallDiscoverySession {
         const json = await response.json();
         if (!isDuckTypeArray<IDiningHallConceptListItem>(json, {
             id:    'string',
-            image: 'string',
             name:  'string',
             menus: 'object'
         })) {

@@ -11,8 +11,8 @@ export interface IDiningHallConfigResponse {
 
 export interface IDiningHallConceptListItem {
     id: string;
-    image: string;
     name: string;
+    image?: string;
     priceLevelConfig: {
         menuId: string;
     };
