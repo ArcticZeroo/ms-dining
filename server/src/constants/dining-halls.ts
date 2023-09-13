@@ -64,44 +64,12 @@ export const diningHalls: IDiningHall[] = [
         url: "cafe121",
     },
     {
-        friendlyName: "Café Advanta",
-        url: "cafeadvanta",
-    },
-    {
-        friendlyName: "Café Bravern 1",
-        url: "cafebravern1",
-    },
-    {
-        friendlyName: "Café Bravern 2",
-        url: "cafebravern2",
-    },
-    {
-        friendlyName: "Boardwalk Restaurant",
-        url: "boardwalk",
-    },
-    {
-        friendlyName: "Café City Center",
-        url: "cafecitycenter",
-    },
-    {
-        friendlyName: "Café Lincoln Square",
-        url: "cafelincolnsquare",
-    },
-    {
-        friendlyName: "Café Millennium",
-        url: "cafemille",
-    },
-    {
         friendlyName: "Café RedWest",
         url: "caferedwest",
     },
     {
         friendlyName: "Café RTC",
         url: "cafertc5",
-    },
-    {
-        friendlyName: "Café Sammamish C",
-        url: "cafesammc",
     },
     {
         friendlyName: "Café Studio H",
@@ -116,57 +84,53 @@ export const diningHalls: IDiningHall[] = [
         url: "acapulcofresh",
     },
     {
-        friendlyName: "Boardwalk (The Commons)",
-        url: "boardwalk",
-    },
-    {
         friendlyName: "Chandy's (The Commons)",
         url: "chandys",
     },
     {
-        friendlyName: "Gather + Co (The Commons)",
-        url: "gatco",
-    },
-    {
-        friendlyName: "in.gredients. Restaurant",
-        url: "in-gredients",
+        friendlyName: "Just Poké",
+        url: "justpoke",
     },
     {
         friendlyName: "Kalia (The Commons)",
         url: "kalia",
     },
     {
-        friendlyName: "PAC NW Pizza (The Commons)",
-        url: "pnwpizza",
+        friendlyName: "Hometown (The Commons)",
+        url: "hometown",
     },
     {
-        friendlyName: "Paseo (The Commons)",
-        url: "paseo",
-    },
-    {
-        friendlyName: "The Classic (The Commons)",
-        url: "theclassic",
+        friendlyName: "S'wich (The Commons)",
+        url: "s-wich",
     },
     {
         friendlyName: "Typhoon! (The Commons)",
         url: "typhoon",
     },
     {
-        friendlyName: "The Learning Center (B92) Espresso",
+        friendlyName: "Boardwalk (The Commons)",
+        url: "boardwalk",
+    },
+    {
+        friendlyName: "in.gredients. Restaurant",
+        url: "in-gredients",
+    },
+    {
+        friendlyName: "Building 92 Espresso",
         url: "cafe92",
     },
     {
         friendlyName: "Studio A Espresso",
         url: "studioa",
     },
-    {
+    /*{
         friendlyName: "Studio B Espresso",
         url: "studiob",
     },
     {
         friendlyName: "Studio C Espresso",
         url: "studioc",
-    },
+    },*/
     {
         friendlyName: "Studio D Espresso",
         url: "studiod",
