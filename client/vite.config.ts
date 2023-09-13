@@ -14,15 +14,15 @@ export default defineConfig({
         secure: false,
         configure(proxy) {
           proxy.on('error', err => {
-            console.log('Proxy error: ', err);
+            console.error('ERR:', err);
           });
 
           proxy.on('proxyReq', (proxyRequest, request) => {
-            console.log('Proxy request: ', request.method, request.url);
+            console.log('REQ:', request.method, request.url);
           });
 
           proxy.on('proxyRes', (proxyResponse, request) => {
-            console.log('Proxy response: ', request.method, request.url, proxyResponse.statusCode, proxyResponse.statusMessage);
+            console.log('RES:', request.method, request.url, proxyResponse.statusCode, proxyResponse.statusMessage);
           });
         }
       }

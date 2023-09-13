@@ -2,9 +2,28 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import { DiningHallClient } from './api/dining.ts';
+import { DiningHallMenu } from './components/dining-halls/menu/dining-hall-menu.tsx';
+
+const router = createBrowserRouter(
+    createRoutesFromElements(
+        <Route path="/" element={<App/>} loader={() => DiningHallClient.retrieveDiningHallList()}>
+            <Route path="/menu/:id" element={<DiningHallMenu/>} loader={async (ctx) => {
+                const id = ctx.params.id;
+
+                if (!id) {
+                    return null
+                }
+
+                return DiningHallClient.retrieveDiningHallMenu(id);
+            }}/>
+        </Route>
+    )
+);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+    <React.StrictMode>
+        <RouterProvider router={router}/>
+    </React.StrictMode>,
+);
