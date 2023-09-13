@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, defer, Route, RouterProvider } from 'react-router-dom';
 import { DiningHallClient } from './api/dining.ts';
 import { DiningHallMenu } from './components/dining-halls/menu/dining-hall-menu.tsx';
 
@@ -16,7 +16,9 @@ const router = createBrowserRouter(
                     return null
                 }
 
-                return DiningHallClient.retrieveDiningHallMenu(id);
+                return defer({
+                    concepts: DiningHallClient.retrieveDiningHallMenu(id)
+                });
             }}/>
         </Route>
     )

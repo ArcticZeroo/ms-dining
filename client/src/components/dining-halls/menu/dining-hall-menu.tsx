@@ -1,23 +1,28 @@
-import React from 'react';
-import { DiningHallConcept } from './dining-hall-concept.tsx';
-import { useLoaderData } from 'react-router-dom';
+import React, { Suspense } from 'react';
+import { Await, useLoaderData } from 'react-router-dom';
+import { isDuckType } from '@arcticzeroo/typeguard';
+import { ErrorCard } from '../../card/error.tsx';
+import { DiningHallConceptList } from './dining-hall-concept-list.tsx';
+import { IConceptLoaderData } from '../../../models/router.ts';
 
 export const DiningHallMenu: React.FC = () => {
-    const concepts = useLoaderData();
+    const data = useLoaderData();
 
-    if (!concepts || !Array.isArray(concepts)) {
+    if (!isDuckType<IConceptLoaderData>(data, {
+        concepts: 'object'
+    })) {
         return (
             <div>
-                An error occurred! Menu data is missing!
+                Unable to load menu!
             </div>
         );
     }
 
     return (
-        <div className="concepts">
-            {
-                concepts.map(concept => <DiningHallConcept key={concept.name} concept={concept}/>)
-            }
-        </div>
+        <Suspense fallback={<div className="loading">Loading menu...</div>}>
+            <Await resolve={data.concepts} errorElement={<ErrorCard>Failed to load menu!</ErrorCard>}>
+                <DiningHallConceptList/>
+            </Await>
+        </Suspense>
     );
 };

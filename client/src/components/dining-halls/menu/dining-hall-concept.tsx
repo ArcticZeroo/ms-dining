@@ -10,8 +10,7 @@ export const DiningHallConcept: React.FC<IDiningHallConceptProps> = ({ concept }
 
     return (
         <div className="concept">
-            <img src={concept.logoUrl} alt={`Logo for ${concept.name}`}/>
-            <div>
+            <div className="title">
                 {concept.name}
             </div>
             {

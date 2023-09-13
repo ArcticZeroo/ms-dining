@@ -8,10 +8,10 @@ interface IDiningHallListProps {
 
 export const DiningHallList: React.FC<IDiningHallListProps> = ({ diningHalls }) => {
     return (
-        <ul>
+        <ul className="dining-hall-list">
             {
                 diningHalls.map((diningHall) => (
-                    <li key={diningHall.id}>
+                    <li key={diningHall.id} className="dining-hall">
                         <NavLink to={`/menu/${diningHall.id}`}>
                             {diningHall.name}
                         </NavLink>
