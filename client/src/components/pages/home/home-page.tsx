@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { SettingsContext } from '../../../context/settings.ts';
 import { Link } from 'react-router-dom';
-import { HomePageWithIds } from './home-page-with-ids.tsx';
+import { CombinedDiningHallMenuList } from '../../dining-halls/combined-dining-hall-menu-list.tsx';
 
 import './home.css';
 
@@ -28,6 +28,6 @@ export const HomePage = () => {
     }
 
     return (
-        <HomePageWithIds/>
+        <CombinedDiningHallMenuList diningHallIds={homepageDiningHallIds}/>
     );
 };

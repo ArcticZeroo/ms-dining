@@ -1,19 +1,23 @@
-import { useContext, useEffect, useState } from 'react';
-import { SettingsContext } from '../../../context/settings.ts';
-import { DiningHallMenu, IDiningHall } from '../../../models/dining-halls.ts';
-import { DiningHallClient } from '../../../api/dining.ts';
-import { ApplicationContext } from '../../../context/app.ts';
-import { sortDiningHallIds } from '../../../util/sorting.ts';
-import { HomePageDiningHallMenu } from './home-page-dining-hall-menu.tsx';
+import React, { useContext, useEffect, useState } from 'react';
+import { DiningHallMenu, IDiningHall } from '../../models/dining-halls.ts';
+import { DiningHallClient } from '../../api/dining.ts';
+import { ApplicationContext } from '../../context/app.ts';
+import { sortDiningHallIds } from '../../util/sorting.ts';
+import { CollapsibleDiningHallMenu } from './collapsible-dining-hall-menu.tsx';
+
+import './combined-dining-halls.css';
 
 interface IMenuWithDiningHall {
     diningHall: IDiningHall;
     menu: DiningHallMenu;
 }
 
-export const HomePageWithIds = () => {
+interface ICombinedDiningHallMenuListProps {
+    diningHallIds: Iterable<string>;
+}
+
+export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListProps> = ({ diningHallIds }) => {
     const { diningHallsById } = useContext(ApplicationContext);
-    const [{ homepageDiningHallIds }] = useContext(SettingsContext);
     const [menuData, setMenuData] = useState<Array<IMenuWithDiningHall>>([]);
 
     const loadMenuAsync = async (diningHall: IDiningHall): Promise<IMenuWithDiningHall> => {
@@ -24,7 +28,7 @@ export const HomePageWithIds = () => {
     const loadMenusAsync = async () => {
         const menuPromises = [];
 
-        for (const diningHallId of sortDiningHallIds(Array.from(homepageDiningHallIds))) {
+        for (const diningHallId of sortDiningHallIds(Array.from(diningHallIds))) {
             const diningHall = diningHallsById.get(diningHallId);
 
             if (diningHall == null) {
@@ -41,13 +45,13 @@ export const HomePageWithIds = () => {
     useEffect(() => {
         loadMenusAsync()
             .catch(err => console.error('Failed to load menus:', err));
-    }, [diningHallsById, homepageDiningHallIds]);
+    }, [diningHallsById, diningHallIds]);
 
     return (
-        <div className="home-menu">
+        <div className="combined-menu-list">
             {
                 menuData.map(({ diningHall, menu }) => (
-                    <HomePageDiningHallMenu key={diningHall.id} diningHall={diningHall} menu={menu}/>
+                    <CollapsibleDiningHallMenu key={diningHall.id} diningHall={diningHall} menu={menu}/>
                 ))
             }
         </div>
