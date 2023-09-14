@@ -66,6 +66,10 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 itemsByCategory[categoryName] = itemsForCategory;
             }
 
+            if (Object.keys(itemsByCategory).length === 0) {
+                continue;
+            }
+
             menusByConcept.push({
                 name:    concept.name,
                 logoUrl: concept.logoUrl,
