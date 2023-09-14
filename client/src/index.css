@@ -252,6 +252,7 @@ nav a.active {
         width: 100%;
         position: fixed;
         overflow-y: scroll;
+        z-index: 10;
     }
 
     nav .visibility-toggle {
