@@ -51,6 +51,8 @@ nav {
   border-radius: 0.5rem;
   background: #FAFAFA;
   color: #212121;
+  display: flex;
+  flex-direction: column;
 }
 
 .concept .title {
@@ -148,5 +150,9 @@ nav .visibility-toggle {
 
   .concept table {
     border-spacing: 0.75rem;
+  }
+
+  .concept {
+    width: 100%;
   }
 }
