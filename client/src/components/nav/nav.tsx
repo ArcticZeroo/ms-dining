@@ -21,16 +21,14 @@ export const Nav: React.FC<IDiningHallListProps> = ({ diningHalls }) => {
 
     return (
         <nav>
-            <ul className={`dining-hall-list${isVisible ? ' visible' : ''}`}>
+            <button onClick={() => setIsVisible(!isVisible)} className="visibility-toggle">
+                <img src={menuIcon} alt="Toggle menu"/>
+            </button>
+            <ul className={`expandable-nav-list${isVisible ? ' visible' : ''}`}>
                 <li>
-                    <NavLink to="/settings" className="link-button settings">
+                    <NavLink to="/settings" className="link-button settings" onClick={() => setIsVisible(false)}>
                         <img src={settingsIcon} alt="Toggle settings"/>
                     </NavLink>
-                </li>
-                <li>
-                    <button onClick={() => setIsVisible(!isVisible)} className="visibility-toggle">
-                        <img src={menuIcon} alt="Toggle menu"/>
-                    </button>
                 </li>
                 {
                     diningHalls.map((diningHall) => (

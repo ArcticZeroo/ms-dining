@@ -37,7 +37,7 @@ function App() {
                 <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
                     <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
                         <Nav diningHalls={diningHallList}/>
-                        <div className={`menu${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
+                        <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
                             <Outlet/>
                         </div>
                     </SelectedDiningHallContext.Provider>
