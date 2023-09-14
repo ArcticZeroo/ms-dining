@@ -19,6 +19,6 @@ export const ConceptListOutlet = () => {
     }
 
     return (
-        <ConceptList concepts={concepts}/>
+        <ConceptList concepts={concepts} isVisible={true}/>
     );
 };

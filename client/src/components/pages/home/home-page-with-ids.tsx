@@ -47,7 +47,7 @@ export const HomePageWithIds = () => {
         <div className="home-menu">
             {
                 menuData.map(({ diningHall, menu }) => (
-                    <HomePageDiningHallMenu diningHall={diningHall} menu={menu}/>
+                    <HomePageDiningHallMenu key={diningHall.id} diningHall={diningHall} menu={menu}/>
                 ))
             }
         </div>
