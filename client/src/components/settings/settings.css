@@ -1,3 +1,13 @@
+.card.settings .title {
+    font-size: 1.4em;
+    text-align: center;
+}
+
+.card.settings .body {
+    display: flex;
+    flex-direction: column;
+}
+
 .setting {
     display: flex;
     justify-content: space-between;
@@ -5,4 +15,32 @@
 
 .setting label {
     padding: 1rem;
+}
+
+.setting-info .setting-name {
+    font-size: 1.2em;
+}
+
+.setting-info .setting-description {
+    opacity: 0.75;
+}
+
+#setting-homepage {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#setting-homepage .setting-data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.setting-homepage-option {
+    display: flex;
+    justify-content: space-between;
+    background: #DDD;
+    border-radius: 1rem;
+    padding: 0 0.5rem 0 0.5rem;
 }

@@ -6,26 +6,30 @@ import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { SelectedDiningHallContext } from './context/dining-hall.ts';
 import { ISettingsContext, SettingsContext } from './context/settings.ts';
-import { getBooleanSetting } from './api/settings.ts';
-import { settingNames } from './constants/settings.ts';
 import { DiningHallClient } from './api/dining.ts';
 import { ApplicationContext } from './context/app.ts';
+import { ApplicationSettings } from './api/settings.ts';
 
 function App() {
     const diningHallList = useLoaderData() as Array<IDiningHall>;
 
     const [diningHallsById, setDiningHallsById] = useState<Map<string, IDiningHall>>(new Map());
+    const [diningHallIdsInOrder, setDiningHallIdsInOrder] = useState<Array<string>>([]);
 
     useEffect(() => {
         const diningHallsById = new Map<string, IDiningHall>();
+
         for (const diningHall of diningHallList) {
             diningHallsById.set(diningHall.id, diningHall);
         }
+
         setDiningHallsById(diningHallsById);
+        setDiningHallIdsInOrder(diningHallList.map(diningHall => diningHall.id).sort());
     }, [diningHallList]);
 
     const settingsState = useState<ISettingsContext>({
-        showImages: getBooleanSetting(settingNames.showImages, false /*defaultValue*/)
+        showImages: ApplicationSettings.showImages.get(),
+        homepageDiningHallIds: new Set(ApplicationSettings.homepageDiningHalls.get())
     });
 
     const [selectedDiningHall, setSelectedDiningHall] = useState<IDiningHall>();
@@ -51,11 +55,11 @@ function App() {
 
     return (
         <div className="App">
-            <ApplicationContext.Provider value={{ diningHallsById }}>
+            <ApplicationContext.Provider value={{ diningHallsById, diningHallIdsInOrder }}>
                 <SettingsContext.Provider value={settingsState}>
                     <NavExpansionContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
                         <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
-                            <Nav diningHalls={diningHallList}/>
+                            <Nav/>
                             <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
                                 <Outlet/>
                             </div>
