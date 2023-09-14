@@ -52,8 +52,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
 
     const addMenuToSearchResults = (diningHall: IDiningHall, concepts: DiningHallMenu) => {
         const matchingItems = getMatchingItems(queryText, concepts);
-        console.log(diningHall.name, 'matched items:', matchingItems);
-
         setSearchResultsByItemName((previousSearchResults) => {
             const newSearchResults = cloneSearchResultsByItemName(previousSearchResults);
             for (const item of matchingItems) {
@@ -76,7 +74,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         DiningHallClient.retrieveDiningHallMenu(diningHall.id)
             .then(menu => {
                 if (currentSymbol === searchSymbolRef.current) {
-                    console.log('adding dining hall', diningHall.name, 'to search results');
                     addMenuToSearchResults(diningHall, menu);
                 }
             })
