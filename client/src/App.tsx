@@ -2,7 +2,7 @@ import { Outlet, useLoaderData } from 'react-router-dom';
 import { IDiningHall } from './models/dining-halls.ts';
 import { Nav } from './components/nav/nav.tsx';
 import { useEffect, useRef, useState } from 'react';
-import { NavVisibilityContext } from './context/nav.ts';
+import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { SelectedDiningHallContext } from './context/dining-hall.ts';
 import { ISettingsContext, SettingsContext } from './context/settings.ts';
@@ -53,14 +53,14 @@ function App() {
         <div className="App">
             <ApplicationContext.Provider value={{ diningHallsById }}>
                 <SettingsContext.Provider value={settingsState}>
-                    <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
+                    <NavExpansionContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
                         <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
                             <Nav diningHalls={diningHallList}/>
                             <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
                                 <Outlet/>
                             </div>
                         </SelectedDiningHallContext.Provider>
-                    </NavVisibilityContext.Provider>
+                    </NavExpansionContext.Provider>
                 </SettingsContext.Provider>
             </ApplicationContext.Provider>
         </div>

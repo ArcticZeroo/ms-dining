@@ -1,0 +1,8 @@
+.setting {
+    display: flex;
+    justify-content: space-between;
+}
+
+.setting label {
+    padding: 1rem;
+}

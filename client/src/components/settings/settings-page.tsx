@@ -1,14 +1,16 @@
 import { SettingsContext } from '../../context/settings.ts';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { setBooleanSetting } from '../../api/settings.ts';
 import { settingNames } from '../../constants/settings.ts';
+import './settings.css';
 
 export const SettingsPage = () => {
     const [settings, setSettings] = useContext(SettingsContext);
 
-    const onShowImagesChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const showImages = event.target.checked;
-        setSettings({ ...settings, showImages: event.target.checked });
+    const toggleShowImages = () => {
+        const showImages = !settings.showImages;
+        console.log('show images clicked, toggling to new setting:', showImages);
+        setSettings({ ...settings, showImages });
         setBooleanSetting(settingNames.showImages, showImages);
     }
 
@@ -18,23 +20,15 @@ export const SettingsPage = () => {
                 Settings
             </div>
             <div className="body">
-                <table>
-                    <tbody>
-                    <tr>
-                        <td>
-                            <label htmlFor="setting-show-images">
-                                Enable Images
-                            </label>
-                        </td>
-                        <td>
-                            <input type="checkbox"
-                                   id="setting-show-images"
-                                   checked={settings.showImages}
-                                   onChange={onShowImagesChanged}/>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div className="setting">
+                    <label htmlFor="setting-show-images">
+                        Enable Images
+                    </label>
+                    <input type="checkbox"
+                           id="setting-show-images"
+                           checked={settings.showImages}
+                           onChange={toggleShowImages}/>
+                </div>
             </div>
         </div>
     );

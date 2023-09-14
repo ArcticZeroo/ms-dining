@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { IDiningHall } from '../../models/dining-halls.ts';
 import { NavLink } from 'react-router-dom';
 import menuIcon from '../../assets/menu.svg';
-import { NavVisibilityContext } from '../../context/nav.ts';
+import { NavExpansionContext } from '../../context/nav.ts';
 import { SelectedDiningHallContext } from '../../context/dining-hall.ts';
 import settingsIcon from '../../assets/settings.svg';
 import { SearchBar } from '../search/search-bar.tsx';
@@ -13,22 +13,22 @@ interface IDiningHallListProps {
 }
 
 export const Nav: React.FC<IDiningHallListProps> = ({ diningHalls }) => {
-    const [isVisible, setIsVisible] = useContext(NavVisibilityContext);
+    const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
     const [, setSelectedDiningHall] = useContext(SelectedDiningHallContext);
 
     const onDiningHallClicked = (diningHall: IDiningHall) => {
         setSelectedDiningHall(diningHall);
-        setIsVisible(false);
+        setIsExpanded(false);
     };
 
     return (
-        <nav>
-            <button onClick={() => setIsVisible(!isVisible)} className="visibility-toggle">
+        <nav className={isExpanded ? 'expanded' : ''}>
+            <button onClick={() => setIsExpanded(!isExpanded)} className="visibility-toggle">
                 <img src={menuIcon} alt="Toggle menu"/>
             </button>
-            <ul className={`expandable-nav-list${isVisible ? ' visible' : ''}`}>
+            <ul className="expandable-nav-list">
                 <li>
-                    <NavLink to="/settings" className="link-button settings" onClick={() => setIsVisible(false)}>
+                    <NavLink to="/settings" className="link-button settings" onClick={() => setIsExpanded(false)}>
                         <img src={settingsIcon} alt="Toggle settings"/>
                     </NavLink>
                 </li>

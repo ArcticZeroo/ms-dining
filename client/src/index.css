@@ -96,7 +96,7 @@ nav {
   background: #232323;
 }
 
-.expandable-nav-list.visible {
+nav.expanded .expandable-nav-list {
   display: block;
 }
 
@@ -219,9 +219,8 @@ nav a.active {
     flex-direction: column;
   }
 
-  nav {
+  nav.expanded {
     width: 100%;
-    height: 100%;
     position: fixed;
     overflow-y: scroll;
   }
