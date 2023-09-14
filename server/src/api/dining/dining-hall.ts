@@ -179,7 +179,8 @@ export class DiningHallDiscoverySession {
             price:       jsonItem.amount,
             displayName: jsonItem.displayText,
             calories:    jsonItem.properties.calories,
-            maxCalories: jsonItem.properties.maxCalories
+            maxCalories: jsonItem.properties.maxCalories,
+            imageUrl:    jsonItem.image
         }));
     }
 

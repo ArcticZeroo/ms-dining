@@ -25,4 +25,5 @@ export interface IDiningHallMenuItem {
     displayName: string;
     calories: string;
     maxCalories: string;
+    image?: string;
 }

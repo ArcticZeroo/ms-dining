@@ -44,5 +44,6 @@ export interface IDiningHallMenuItemsResponseItem {
     properties: {
         calories: string;
         maxCalories: string;
-    }
+    };
+    image?: string;
 }

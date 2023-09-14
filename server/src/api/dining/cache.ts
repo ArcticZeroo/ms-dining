@@ -18,6 +18,7 @@ const populateSessionsAsync = async () => {
         } catch (e) {
             console.error(`Failed to populate dining hall ${diningHall.friendlyName} (${diningHall.url})`, e);
         }
+        break;
     }
 
     console.log('Finished populating dining hall sessions');
