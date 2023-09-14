@@ -5,6 +5,7 @@ import menuIcon from '../../assets/menu.svg';
 import { NavVisibilityContext } from '../../context/nav.ts';
 import { SelectedDiningHallContext } from '../../context/dining-hall.ts';
 import settingsIcon from '../../assets/settings.svg';
+import { SearchBar } from '../search/search-bar.tsx';
 
 interface IDiningHallListProps {
     diningHalls: IDiningHall[];
@@ -30,6 +31,7 @@ export const Nav: React.FC<IDiningHallListProps> = ({ diningHalls }) => {
                         <img src={settingsIcon} alt="Toggle settings"/>
                     </NavLink>
                 </li>
+                <SearchBar/>
                 {
                     diningHalls.map((diningHall) => (
                         <li key={diningHall.id} className="dining-hall">
