@@ -57,7 +57,7 @@ export const SettingsPage = () => {
                                 const id = `setting-homepage-option-${diningHall.id}`;
                                 const isChecked = settingsData.homepageDiningHallIds.has(diningHall.id);
                                 return (
-                                    <div className="setting-homepage-option">
+                                    <div className="setting-homepage-option" key={diningHall.id}>
                                         <label htmlFor={id}>
                                             {diningHall.name}
                                         </label>
