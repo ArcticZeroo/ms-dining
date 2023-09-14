@@ -1,11 +1,19 @@
 export const getBooleanSetting = (key: string, defaultValue: boolean) => {
-    const value = localStorage.getItem(key);
-    if (value === null) {
+    try {
+        const value = localStorage.getItem(key);
+        if (value === null) {
+            return defaultValue;
+        }
+        return value === 'true';
+    } catch {
         return defaultValue;
     }
-    return value === 'true';
 };
 
 export const setBooleanSetting = (key: string, value: boolean) => {
-    localStorage.setItem(key, value ? 'true' : 'false');
+    try {
+        localStorage.setItem(key, value ? 'true' : 'false');
+    } catch {
+        // Do nothing - some security exception may have occurred.
+    }
 };
