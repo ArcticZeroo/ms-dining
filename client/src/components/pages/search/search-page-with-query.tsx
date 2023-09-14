@@ -47,6 +47,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     const searchSymbolRef = useRef(Symbol());
     const [searchResultsByItemName, setSearchResultsByItemName] = useState<SearchResultsByItemName>(new Map());
     const [failedDiningHallIds, setFailedDiningHallIds] = useState<string[]>([]);
+    const [waitingDiningHallIds, setWaitingDiningHallIds] = useState<Set<string>>(() => new Set());
 
     const addMenuToSearchResults = (diningHall: IDiningHall, concepts: DiningHallMenu) => {
         const matchingItems = getMatchingItems(queryText, concepts);
@@ -82,20 +83,41 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     console.log('Failed to retrieve menu:', err);
                     setFailedDiningHallIds(previousFailedDiningHallIds => [...previousFailedDiningHallIds, diningHall.id]);
                 }
+            })
+            .finally(() => {
+                setWaitingDiningHallIds((previousWaitingDiningHallIds) => {
+                    const newWaitingDiningHallIds = new Set(previousWaitingDiningHallIds);
+                    newWaitingDiningHallIds.delete(diningHall.id);
+                    return newWaitingDiningHallIds;
+                });
             });
     }
 
     useEffect(() => {
         searchSymbolRef.current = Symbol();
         setSearchResultsByItemName(new Map());
+        setWaitingDiningHallIds(new Set(diningHallsById.keys()));
         for (const diningHall of diningHallsById.values()) {
             searchAndAddToResults(diningHall);
         }
     }, [diningHallsById, queryText]);
 
     return (
-        <div>
-            <h1>Search Results for "{queryText}"</h1>
+        <div className="search-page">
+            <div className="search-info">
+                <div>
+                    <div className="page-title">Search Results for "{queryText}"</div>
+                    <div className="search-result-count">
+                        Search Results: {searchResultsByItemName.size}
+                    </div>
+                </div>
+                <div className={`search-waiting${waitingDiningHallIds.size > 0 ? ' visible' : ''}`}>
+                    <div className="loading-spinner"/>
+                    <div>
+                        Waiting for {waitingDiningHallIds.size} menu(s)
+                    </div>
+                </div>
+            </div>
             {
                 failedDiningHallIds.length > 0 && (
                     <div>
@@ -103,9 +125,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     </div>
                 )
             }
-            <div>
-                Search Results: {searchResultsByItemName.size}
-            </div>
             <SearchResults searchResultsByItemName={searchResultsByItemName}/>
         </div>
     );

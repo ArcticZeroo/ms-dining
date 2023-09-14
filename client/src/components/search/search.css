@@ -1,3 +1,25 @@
+.search-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.search-page .page-title {
+    font-size: 1.8em;
+}
+
+.search-page .search-result-count {
+    font-size: 1.5em;
+    opacity: 0.8;
+}
+
+.search-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
 .search-results {
     display: flex;
     flex-direction: column;
@@ -16,4 +38,17 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+}
+
+.search-waiting {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out
+}
+
+.search-waiting.visible {
+    opacity: 1;
 }
