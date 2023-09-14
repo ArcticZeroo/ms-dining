@@ -1,4 +1,4 @@
-import { IDiningHallMenuItem } from '../../../../models/dining-halls.ts';
+import { IDiningHallMenuItem } from '../../../models/dining-halls.ts';
 import React from 'react';
 import { MenuItem } from './menu-item.tsx';
 

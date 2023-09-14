@@ -1,4 +1,4 @@
-import { IDiningHallConcept } from '../../../../models/dining-halls.ts';
+import { IDiningHallConcept } from '../../../models/dining-halls.ts';
 import React from 'react';
 import { ConceptMenu } from './concept-menu.tsx';
 

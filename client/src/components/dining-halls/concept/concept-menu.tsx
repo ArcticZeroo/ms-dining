@@ -1,4 +1,4 @@
-import { IDiningHallMenuItemsByCategoryName } from '../../../../models/dining-halls.ts';
+import { IDiningHallMenuItemsByCategoryName } from '../../../models/dining-halls.ts';
 import React from 'react';
 import { MenuCategory } from './menu-category.tsx';
 

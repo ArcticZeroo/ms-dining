@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Await, useLoaderData } from 'react-router-dom';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { ErrorCard } from '../card/error.tsx';
-import { ConceptList } from '../dining-halls/menu/concept/concept-list.tsx';
+import { ConceptList } from '../dining-halls/concept/concept-list.tsx';
 import { IConceptLoaderData } from '../../models/router.ts';
 
 export const DiningHallMenu: React.FC = () => {

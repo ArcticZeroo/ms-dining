@@ -1,8 +1,8 @@
 import { useAsyncValue } from 'react-router-dom';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
-import { ErrorCard } from '../../../card/error.tsx';
+import { ErrorCard } from '../../card/error.tsx';
 import { Concept } from './concept.tsx';
-import { IDiningHallConcept } from '../../../../models/dining-halls.ts';
+import { IDiningHallConcept } from '../../../models/dining-halls.ts';
 
 export const ConceptList = () => {
     const concepts = useAsyncValue();
