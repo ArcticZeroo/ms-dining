@@ -1,4 +1,3 @@
-import { ErrorCard } from '../card/error.tsx';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
 
@@ -11,13 +10,13 @@ export const NotFoundPage = () => {
     };
 
     return (
-        <ErrorCard>
+        <div className="error-card">
             <div>
                 Page not found!
             </div>
             <button onClick={onButtonClicked}>
                 Navigate Home
             </button>
-        </ErrorCard>
+        </div>
     );
 };

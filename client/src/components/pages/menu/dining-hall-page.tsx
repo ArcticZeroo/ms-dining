@@ -1,28 +1,31 @@
-import React, { Suspense } from 'react';
-import { Await, useLoaderData } from 'react-router-dom';
-import { isDuckType } from '@arcticzeroo/typeguard';
-import { ErrorCard } from '../../card/error.tsx';
-import { ConceptListOutlet } from './concept-list-outlet.tsx';
-import { IConceptLoaderData } from '../../../models/router.ts';
+import React, { useContext } from 'react';
+import { useParams } from 'react-router-dom';
+import { DiningHallPageWithId } from './dining-hall-page-with-id.tsx';
+import { ApplicationContext } from '../../../context/app.ts';
 
 export const DiningHallPage: React.FC = () => {
-    const data = useLoaderData();
+    const { diningHallsById } = useContext(ApplicationContext);
+    const params = useParams();
+    const id = params.id;
 
-    if (!isDuckType<IConceptLoaderData>(data, {
-        concepts: 'object'
-    })) {
+    if (!id) {
         return (
-            <div>
-                Unable to load menu!
+            <div className="error-card">
+                No dining hall id provided!
+            </div>
+        );
+    }
+
+    const diningHall = diningHallsById.get(id);
+    if (!diningHall) {
+        return (
+            <div className="error-card">
+                No dining hall with id {id} found!
             </div>
         );
     }
 
     return (
-        <Suspense fallback={<div className="loading">Loading menu...</div>}>
-            <Await resolve={data.concepts} errorElement={<ErrorCard>Failed to load menu!</ErrorCard>}>
-                <ConceptListOutlet/>
-            </Await>
-        </Suspense>
+        <DiningHallPageWithId diningHall={diningHall}/>
     );
 };

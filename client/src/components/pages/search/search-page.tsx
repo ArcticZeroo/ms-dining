@@ -1,5 +1,4 @@
 import { useSearchParams } from 'react-router-dom';
-import { ErrorCard } from '../../card/error.tsx';
 import { SearchPageWithQuery } from './search-page-with-query.tsx';
 
 export const SearchPage = () => {
@@ -8,9 +7,9 @@ export const SearchPage = () => {
     const query = searchParams.get('q');
     if (query == null) {
         return (
-            <ErrorCard>
+            <div className="error-card">
                 No search query provided!
-            </ErrorCard>
+            </div>
         );
     }
 

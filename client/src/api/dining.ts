@@ -5,17 +5,32 @@ import { ApplicationSettings } from './settings.ts';
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
 export abstract class DiningHallClient {
+    private static _diningHallsPromise: Promise<Array<IDiningHall>> | undefined = undefined;
     private static readonly _diningHallMenusById: Map<string, Promise<Array<IDiningHallConcept>>> = new Map();
     private static readonly _lastUsedDiningHallIds: string[] = ApplicationSettings.lastUsedDiningHalls.get();
 
-    public static async retrieveDiningHallList(): Promise<Array<IDiningHall>> {
-        const response = await fetch('/api/dining/');
+    private static async _makeRequest<T>(path: string): Promise<T> {
+        const response = await fetch(path);
+        if (!response.ok) {
+            throw new Error(`Response failed with status: ${response.status}`);
+        }
         return await response.json();
     }
 
+    private static async _retrieveDiningHallListInner(): Promise<Array<IDiningHall>> {
+        return DiningHallClient._makeRequest('/api/dining/');
+    }
+
+    public static async retrieveDiningHallList(): Promise<Array<IDiningHall>> {
+        if (!DiningHallClient._diningHallsPromise) {
+            DiningHallClient._diningHallsPromise = DiningHallClient._retrieveDiningHallListInner();
+        }
+
+        return DiningHallClient._diningHallsPromise;
+    }
+
     private static async _retrieveDiningHallMenuInner(id: string): Promise<Array<IDiningHallConcept>> {
-        const response = await fetch(`/api/dining/${id}`);
-        return await response.json();
+        return DiningHallClient._makeRequest(`/api/dining/${id}`);
     }
 
     private static _addToLastUsedDiningHalls(id: string) {

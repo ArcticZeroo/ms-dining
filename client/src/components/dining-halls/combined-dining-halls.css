@@ -4,7 +4,7 @@
     gap: 1rem;
 }
 
-button.combined-dining-hall-title {
+.combined-dining-hall-title {
     font-size: 1.4em;
     text-align: center;
     padding: 1rem;
@@ -15,16 +15,24 @@ button.combined-dining-hall-title {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
     border: none;
+    text-decoration: none;
+}
+
+.combined-dining-hall-title span {
+    margin-left: 0.5rem;
+}
+
+button.combined-dining-hall-title {
+    width: 100%;
     cursor: pointer;
 }
 
-button.combined-dining-hall-title .expand-icon {
+.combined-dining-hall-title .expand-icon {
     transform: rotate(0deg);
     transition: transform 0.25s ease-in-out;
 }
 
-button.combined-dining-hall-title .expand-icon.collapsed {
+.combined-dining-hall-title .expand-icon.collapsed {
     transform: rotate(180deg);
 }

@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@arcticzeroo/react-promise-hook": "^1.0.1",
     "@arcticzeroo/typeguard": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
