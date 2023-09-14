@@ -1,32 +1,32 @@
 import { DiningHallDiscoverySession } from './dining-hall.js';
 import cron from 'node-cron';
 import { diningHalls } from '../../constants/dining-halls.js';
+import { logError, logInfo } from '../../util/log.js';
 
 export const diningHallSessionsByUrl = new Map<string, DiningHallDiscoverySession>();
 
 const populateSessionsAsync = async () => {
     diningHallSessionsByUrl.clear();
 
-    console.log('Populating dining hall sessions...');
+    logInfo('Populating dining hall sessions...');
 
     for (const diningHall of diningHalls) {
         const session = new DiningHallDiscoverySession(diningHall);
         try {
-            console.log('Performing discovery for', diningHall.friendlyName, 'at', diningHall.url, '...');
+            logInfo('Performing discovery for', diningHall.friendlyName, 'at', diningHall.url, '...');
             await session.performDiscoveryAsync();
             diningHallSessionsByUrl.set(diningHall.url, session);
         } catch (e) {
-            console.error(`Failed to populate dining hall ${diningHall.friendlyName} (${diningHall.url})`, e);
+            logError(`Failed to populate dining hall ${diningHall.friendlyName} (${diningHall.url})`, e);
         }
-        break;
     }
 
-    console.log('Finished populating dining hall sessions');
+    logInfo('Finished populating dining hall sessions');
 };
 
 const populateSessions = () => {
     populateSessionsAsync()
-        .catch(e => console.error('Failed to populate dining hall sessions', e));
+        .catch(e => logError('Failed to populate dining hall sessions', e));
 };
 
 // 9am on Monday through Friday

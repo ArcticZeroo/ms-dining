@@ -6,10 +6,10 @@ export const validateSuccessResponse = (response: Response) => {
     }
 };
 
-export const makeRequestWithRetries = async (makeRequest: () => Promise<Response>, retryCount: number = 3): Promise<Response> => {
+export const makeRequestWithRetries = async (makeRequest: (retry: number) => Promise<Response>, retryCount: number = 3): Promise<Response> => {
     // <= retryCount so that we get 1 attempt before counting retries
     for (let i = 0; i <= retryCount; i++) {
-        const response = await makeRequest();
+        const response = await makeRequest(i);
 
         // We only want to retry 5xx errors, anything else could be a client error
         if (response.status.toString().startsWith('5')) {

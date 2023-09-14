@@ -9,6 +9,7 @@ import {
     IDiningHallMenuItemsResponseItem
 } from '../../models/responses.js';
 import { requestRetryCount } from '../../constants/config.js';
+import { logInfo } from '../../util/log.js';
 
 const getHeaders = (token: string) => token ? ({
     'Authorization': `Bearer ${token}`
@@ -50,8 +51,8 @@ export class DiningHallDiscoverySession {
         const url = this._getUrl(path);
 
         const response = await makeRequestWithRetries(
-            () => {
-                console.log(`${options.method ?? 'GET'} ${url}`);
+            (retry) => {
+                logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
                 return fetch(url, optionsWithToken);
             },
             requestRetryCount
