@@ -9,6 +9,7 @@ import { ISettingsContext, SettingsContext } from './context/settings.ts';
 import { getBooleanSetting } from './api/settings.ts';
 import { settingNames } from './constants/settings.ts';
 import { DiningHallClient } from './api/dining.ts';
+import { ApplicationContext } from './context/app.ts';
 
 function App() {
     const diningHallList = useLoaderData() as Array<IDiningHall>;
@@ -40,16 +41,18 @@ function App() {
 
     return (
         <div className="App">
-            <SettingsContext.Provider value={settingsState}>
-                <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
-                    <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
-                        <Nav diningHalls={diningHallList}/>
-                        <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
-                            <Outlet/>
-                        </div>
-                    </SelectedDiningHallContext.Provider>
-                </NavVisibilityContext.Provider>
-            </SettingsContext.Provider>
+            <ApplicationContext.Provider value={{ diningHalls: diningHallList }}>
+                <SettingsContext.Provider value={settingsState}>
+                    <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
+                        <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
+                            <Nav diningHalls={diningHallList}/>
+                            <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
+                                <Outlet/>
+                            </div>
+                        </SelectedDiningHallContext.Provider>
+                    </NavVisibilityContext.Provider>
+                </SettingsContext.Provider>
+            </ApplicationContext.Provider>
         </div>
     )
 }

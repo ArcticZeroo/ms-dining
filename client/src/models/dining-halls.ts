@@ -22,3 +22,5 @@ export interface IDiningHallConcept {
     logoUrl: string;
     menu: IDiningHallMenuItemsByCategoryName;
 }
+
+export type DiningHallMenu = IDiningHallConcept[];

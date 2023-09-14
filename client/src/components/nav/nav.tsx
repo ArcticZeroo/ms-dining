@@ -6,6 +6,7 @@ import { NavVisibilityContext } from '../../context/nav.ts';
 import { SelectedDiningHallContext } from '../../context/dining-hall.ts';
 import settingsIcon from '../../assets/settings.svg';
 import { SearchBar } from '../search/search-bar.tsx';
+import { getDiningHallMenuUrl } from '../../util/link.ts';
 
 interface IDiningHallListProps {
     diningHalls: IDiningHall[];
@@ -35,7 +36,7 @@ export const Nav: React.FC<IDiningHallListProps> = ({ diningHalls }) => {
                 {
                     diningHalls.map((diningHall) => (
                         <li key={diningHall.id} className="dining-hall">
-                            <NavLink to={`/menu/${diningHall.id}`} onClick={() => onDiningHallClicked(diningHall)}>
+                            <NavLink to={getDiningHallMenuUrl(diningHall)} onClick={() => onDiningHallClicked(diningHall)}>
                                 {diningHall.name}
                             </NavLink>
                         </li>
