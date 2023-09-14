@@ -1,3 +1,4 @@
 export const settingNames = {
-    showImages: 'showImages'
+    showImages:          'showImages',
+    lastUsedDiningHalls: 'lastUsedDiningHalls'
 } as const;

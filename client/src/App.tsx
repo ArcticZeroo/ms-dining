@@ -8,6 +8,7 @@ import { SelectedDiningHallContext } from './context/dining-hall.ts';
 import { ISettingsContext, SettingsContext } from './context/settings.ts';
 import { getBooleanSetting } from './api/settings.ts';
 import { settingNames } from './constants/settings.ts';
+import { DiningHallClient } from './api/dining.ts';
 
 function App() {
     const diningHallList = useLoaderData() as Array<IDiningHall>;
@@ -30,6 +31,12 @@ function App() {
             menuDivRef.current.scrollTop = 0;
         }
     }, [selectedDiningHall]);
+
+    useEffect(() => {
+        DiningHallClient.retrieveAllMenusInOrder(diningHallList)
+            .then(() => console.log('Retrieved all dining hall menus!'))
+            .catch(err => console.error('Failed to retrieve all dining hall menus:', err));
+    }, [diningHallList]);
 
     return (
         <div className="App">
