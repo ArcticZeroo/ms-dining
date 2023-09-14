@@ -14,6 +14,16 @@ import { ApplicationContext } from './context/app.ts';
 function App() {
     const diningHallList = useLoaderData() as Array<IDiningHall>;
 
+    const [diningHallsById, setDiningHallsById] = useState<Map<string, IDiningHall>>(new Map());
+
+    useEffect(() => {
+        const diningHallsById = new Map<string, IDiningHall>();
+        for (const diningHall of diningHallList) {
+            diningHallsById.set(diningHall.id, diningHall);
+        }
+        setDiningHallsById(diningHallsById);
+    }, [diningHallList]);
+
     const settingsState = useState<ISettingsContext>({
         showImages: getBooleanSetting(settingNames.showImages, false /*defaultValue*/)
     });
@@ -41,7 +51,7 @@ function App() {
 
     return (
         <div className="App">
-            <ApplicationContext.Provider value={{ diningHalls: diningHallList }}>
+            <ApplicationContext.Provider value={{ diningHallsById }}>
                 <SettingsContext.Provider value={settingsState}>
                     <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
                         <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>

@@ -185,6 +185,8 @@ nav a.active {
   background: #FAFAFA;
   color: #212121;
   border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .card .title {

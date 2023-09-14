@@ -12,11 +12,17 @@ interface ISearchPageWithQueryProps {
 
 const getMatchingItems = (queryText: string, concepts: DiningHallMenu) => {
     const items = [];
+    const seenItemNames = new Set<string>();
     for (const concept of concepts) {
         for (const category of Object.keys(concept.menu)) {
             for (const item of concept.menu[category]) {
+                if (seenItemNames.has(item.displayName)) {
+                    continue;
+                }
+
                 if (fuzzySearch(item.displayName, queryText)) {
                     items.push(item);
+                    seenItemNames.add(item.displayName);
                 }
             }
         }
@@ -24,26 +30,38 @@ const getMatchingItems = (queryText: string, concepts: DiningHallMenu) => {
     return items;
 }
 
+const cloneSearchResultsByItemName = (searchResultsByItemName: SearchResultsByItemName) => {
+    const newSearchResults = new Map();
+    for (const [itemName, searchResult] of searchResultsByItemName.entries()) {
+        newSearchResults.set(itemName, {
+            diningHallIds: [...searchResult.diningHallIds],
+            stableId:      searchResult.stableId
+        });
+    }
+    return newSearchResults;
+}
+
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
-    const { diningHalls } = useContext(ApplicationContext);
+    const { diningHallsById } = useContext(ApplicationContext);
     const nextStableIdRef = useRef(0);
     const searchSymbolRef = useRef(Symbol());
-    // item name -> dining hall ids
     const [searchResultsByItemName, setSearchResultsByItemName] = useState<SearchResultsByItemName>(new Map());
     const [failedDiningHallIds, setFailedDiningHallIds] = useState<string[]>([]);
 
     const addMenuToSearchResults = (diningHall: IDiningHall, concepts: DiningHallMenu) => {
         const matchingItems = getMatchingItems(queryText, concepts);
+        console.log(diningHall.name, 'matched items:', matchingItems);
+
         setSearchResultsByItemName((previousSearchResults) => {
-            const newSearchResults = new Map(previousSearchResults.entries());
+            const newSearchResults = cloneSearchResultsByItemName(previousSearchResults);
             for (const item of matchingItems) {
                 if (!newSearchResults.has(item.displayName)) {
                     newSearchResults.set(item.displayName, {
-                        diningHalls: [],
-                        stableId: nextStableIdRef.current++
+                        diningHallIds: [],
+                        stableId:      nextStableIdRef.current++
                     });
                 }
-                newSearchResults.get(item.displayName)!.diningHalls.push(diningHall);
+                newSearchResults.get(item.displayName)!.diningHallIds.push(diningHall.id);
             }
             return newSearchResults;
         });
@@ -55,6 +73,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         DiningHallClient.retrieveDiningHallMenu(diningHall.id)
             .then(menu => {
                 if (currentSymbol === searchSymbolRef.current) {
+                    console.log('adding dining hall', diningHall.name, 'to search results');
                     addMenuToSearchResults(diningHall, menu);
                 }
             })
@@ -69,10 +88,10 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     useEffect(() => {
         searchSymbolRef.current = Symbol();
         setSearchResultsByItemName(new Map());
-        for (const diningHall of diningHalls) {
+        for (const diningHall of diningHallsById.values()) {
             searchAndAddToResults(diningHall);
         }
-    }, [diningHalls, queryText]);
+    }, [diningHallsById, queryText]);
 
     return (
         <div>

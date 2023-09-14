@@ -1,8 +1,6 @@
-import { IDiningHall } from './dining-halls.ts';
-
 export interface ISearchResult {
     stableId: number;
-    diningHalls: IDiningHall[];
+    diningHallIds: string[];
 }
 
 export type SearchResultsByItemName = Map<string, ISearchResult>;

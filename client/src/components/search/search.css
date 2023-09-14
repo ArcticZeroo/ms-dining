@@ -1,5 +1,19 @@
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .search-result-chip {
     background: #2196F3;
     border-radius: 2rem;
     color: white;
+    padding: 0.5rem;
+    text-underline: none;
+}
+
+.search-result-hits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
