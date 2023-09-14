@@ -5,6 +5,7 @@ import './index.css'
 import { createBrowserRouter, createRoutesFromElements, defer, Route, RouterProvider } from 'react-router-dom';
 import { DiningHallClient } from './api/dining.ts';
 import { DiningHallMenu } from './components/dining-halls/menu/dining-hall-menu.tsx';
+import { SettingsPage } from './components/settings/settings-page.tsx';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -20,6 +21,7 @@ const router = createBrowserRouter(
                     concepts: DiningHallClient.retrieveDiningHallMenu(id)
                 });
             }}/>
+            <Route path="/settings" element={<SettingsPage/>}/>
         </Route>
     )
 );

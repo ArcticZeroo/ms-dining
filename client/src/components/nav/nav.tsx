@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import menuIcon from '../../assets/menu.svg';
 import { NavVisibilityContext } from '../../context/nav.ts';
 import { SelectedDiningHallContext } from '../../context/dining-hall.ts';
+import settingsIcon from '../../assets/settings.svg';
 
 interface IDiningHallListProps {
     diningHalls: IDiningHall[];
@@ -20,10 +21,17 @@ export const Nav: React.FC<IDiningHallListProps> = ({ diningHalls }) => {
 
     return (
         <nav>
-            <button onClick={() => setIsVisible(!isVisible)} className="visibility-toggle">
-                <img src={menuIcon} alt="Toggle menu"/>
-            </button>
             <ul className={`dining-hall-list${isVisible ? ' visible' : ''}`}>
+                <li>
+                    <NavLink to="/settings" className="link-button settings">
+                        <img src={settingsIcon} alt="Toggle settings"/>
+                    </NavLink>
+                </li>
+                <li>
+                    <button onClick={() => setIsVisible(!isVisible)} className="visibility-toggle">
+                        <img src={menuIcon} alt="Toggle menu"/>
+                    </button>
+                </li>
                 {
                     diningHalls.map((diningHall) => (
                         <li key={diningHall.id} className="dining-hall">

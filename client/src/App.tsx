@@ -5,9 +5,16 @@ import { useEffect, useRef, useState } from 'react';
 import { NavVisibilityContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { SelectedDiningHallContext } from './context/dining-hall.ts';
+import { ISettingsContext, SettingsContext } from './context/settings.ts';
+import { getBooleanSetting } from './api/settings.ts';
+import { settingNames } from './constants/settings.ts';
 
 function App() {
     const diningHallList = useLoaderData() as Array<IDiningHall>;
+
+    const settingsState = useState<ISettingsContext>({
+        showImages: getBooleanSetting(settingNames.showImages, false /*defaultValue*/)
+    });
 
     const [selectedDiningHall, setSelectedDiningHall] = useState<IDiningHall>();
     const menuDivRef = useRef<HTMLDivElement>(null);
@@ -26,14 +33,16 @@ function App() {
 
     return (
         <div className="App">
-            <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
-                <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
-                    <Nav diningHalls={diningHallList}/>
-                    <div className={`menu${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
-                        <Outlet/>
-                    </div>
-                </SelectedDiningHallContext.Provider>
-            </NavVisibilityContext.Provider>
+            <SettingsContext.Provider value={settingsState}>
+                <NavVisibilityContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
+                    <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
+                        <Nav diningHalls={diningHallList}/>
+                        <div className={`menu${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
+                            <Outlet/>
+                        </div>
+                    </SelectedDiningHallContext.Provider>
+                </NavVisibilityContext.Provider>
+            </SettingsContext.Provider>
         </div>
     )
 }

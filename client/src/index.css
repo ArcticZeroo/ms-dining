@@ -82,6 +82,7 @@ nav {
   height: 100%;
   overflow-y: auto;
   display: none;
+  width: 100%;
 }
 
 .dining-hall-list.visible {
@@ -92,17 +93,42 @@ nav .visibility-toggle {
   display: none;
 }
 
-.dining-hall-list .dining-hall {
-  text-align: center;
-  padding: 1rem;
-  background: #333;
+nav a.link-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #FAFAFA;
+  transition: background-color 0.2s ease;
+}
+
+nav a.link-button.active {
+  background: deepskyblue;
 }
 
 .dining-hall-list .dining-hall a {
-  color: white;
+  text-align: center;
+  background: #333;
+  transition: background-color 0.2s ease;
+}
+
+.dining-hall-list .dining-hall a:hover {
+  background: #444;
 }
 
 .dining-hall-list .dining-hall a.active {
+  background: deepskyblue;
+  color: #333;
+}
+
+nav a {
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+nav a.active {
   color: deepskyblue;
 }
 
@@ -120,6 +146,17 @@ nav .visibility-toggle {
 
 .menu-item-image {
   height: 8rem;
+}
+
+.card {
+  padding: 1rem;
+  background: #FAFAFA;
+  color: #212121;
+  border-radius: 1rem;
+}
+
+.card .title {
+  font-size: 1.2em;
 }
 
 @media screen and (max-width: 800px) {
