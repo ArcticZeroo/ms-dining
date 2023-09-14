@@ -118,6 +118,10 @@ nav .visibility-toggle {
   text-align: left;
 }
 
+.menu-item-image {
+  height: 8rem;
+}
+
 @media screen and (max-width: 800px) {
   .App {
     flex-direction: column;

@@ -1,0 +1,1 @@
+export type ContextWithUpdate<T> = [T, (value: T) => void];

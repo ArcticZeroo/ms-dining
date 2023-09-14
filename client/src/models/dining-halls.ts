@@ -10,6 +10,7 @@ export interface IDiningHallMenuItem {
     displayName: string;
     calories: string;
     maxCalories: string;
+    imageUrl?: string;
 }
 
 export interface IDiningHallMenuItemsByCategoryName {
