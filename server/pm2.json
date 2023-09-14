@@ -2,7 +2,8 @@
     "apps": [
         {
             "name": "MSDining",
-            "script": "dist/main.js",
+            "script": "npm",
+            "args": ["run", "start"],
             "watch": false,
             "ignore_watch": ["node_modules"]
         }
