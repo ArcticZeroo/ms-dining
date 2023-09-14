@@ -23,6 +23,6 @@
     "node-fetch": "^3.3.2"
   },
   "scripts": {
-    "run": "npx tsc && node dist/main.js"
+    "start": "npx tsc && node dist/main.js"
   }
 }
