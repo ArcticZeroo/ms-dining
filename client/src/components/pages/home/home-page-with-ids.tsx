@@ -3,8 +3,8 @@ import { SettingsContext } from '../../../context/settings.ts';
 import { DiningHallMenu, IDiningHall } from '../../../models/dining-halls.ts';
 import { DiningHallClient } from '../../../api/dining.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { ConceptList } from '../../dining-halls/concept/concept-list.tsx';
 import { sortDiningHallIds } from '../../../util/sorting.ts';
+import { HomePageDiningHallMenu } from './home-page-dining-hall-menu.tsx';
 
 interface IMenuWithDiningHall {
     diningHall: IDiningHall;
@@ -47,12 +47,7 @@ export const HomePageWithIds = () => {
         <div className="home-menu">
             {
                 menuData.map(({ diningHall, menu }) => (
-                    <div className="home-menu-dining-hall" key={diningHall.id}>
-                        <div className="home-menu-dining-hall-title">
-                            {diningHall.name} Menu
-                        </div>
-                        <ConceptList concepts={menu}/>
-                    </div>
+                    <HomePageDiningHallMenu diningHall={diningHall} menu={menu}/>
                 ))
             }
         </div>

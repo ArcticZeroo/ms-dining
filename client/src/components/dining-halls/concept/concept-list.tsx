@@ -4,11 +4,12 @@ import { Concept } from './concept.tsx';
 
 interface IConceptListProps {
     concepts: DiningHallMenu;
+    isVisible: boolean;
 }
 
-export const ConceptList: React.FC<IConceptListProps> = ({ concepts }) => {
+export const ConceptList: React.FC<IConceptListProps> = ({ concepts, isVisible }) => {
     return (
-        <div className="concepts">
+        <div className={`concepts${isVisible ? '' : ' hidden'}`}>
             {concepts.map(concept => <Concept key={concept.name} concept={concept}/>)}
         </div>
     );

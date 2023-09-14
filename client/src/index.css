@@ -57,6 +57,10 @@ nav {
     justify-content: center;
 }
 
+.concepts.hidden {
+    display: none;
+}
+
 .concept {
     border-radius: 0.5rem;
     background: #FAFAFA;
@@ -209,6 +213,8 @@ nav a.active {
     background: #2196F3;
     color: white;
 }
+
+
 
 @keyframes loading-spinner {
     0% {
