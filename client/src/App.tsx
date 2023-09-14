@@ -61,7 +61,11 @@ function App() {
                         <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
                             <Nav/>
                             <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
-                                <Outlet/>
+                                {
+                                    diningHallsById.size > 0 && (
+                                        <Outlet/>
+                                    )
+                                }
                             </div>
                         </SelectedDiningHallContext.Provider>
                     </NavExpansionContext.Provider>

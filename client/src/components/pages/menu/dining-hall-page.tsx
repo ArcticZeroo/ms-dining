@@ -1,11 +1,11 @@
 import React, { Suspense } from 'react';
 import { Await, useLoaderData } from 'react-router-dom';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { ErrorCard } from '../card/error.tsx';
-import { ConceptList } from '../dining-halls/concept/concept-list.tsx';
-import { IConceptLoaderData } from '../../models/router.ts';
+import { ErrorCard } from '../../card/error.tsx';
+import { ConceptListOutlet } from './concept-list-outlet.tsx';
+import { IConceptLoaderData } from '../../../models/router.ts';
 
-export const DiningHallMenu: React.FC = () => {
+export const DiningHallPage: React.FC = () => {
     const data = useLoaderData();
 
     if (!isDuckType<IConceptLoaderData>(data, {
@@ -21,7 +21,7 @@ export const DiningHallMenu: React.FC = () => {
     return (
         <Suspense fallback={<div className="loading">Loading menu...</div>}>
             <Await resolve={data.concepts} errorElement={<ErrorCard>Failed to load menu!</ErrorCard>}>
-                <ConceptList/>
+                <ConceptListOutlet/>
             </Await>
         </Suspense>
     );

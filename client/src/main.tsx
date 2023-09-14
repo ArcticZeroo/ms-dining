@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, defer, Route, RouterProvider } from 'react-router-dom';
 import { DiningHallClient } from './api/dining.ts';
-import { DiningHallMenu } from './components/pages/dining-hall-menu.tsx';
+import { DiningHallPage } from './components/pages/menu/dining-hall-page.tsx';
 import { SettingsPage } from './components/settings/settings-page.tsx';
 import { NotFoundPage } from './components/pages/not-found-page.tsx';
 import { SearchPage } from './components/pages/search/search-page.tsx';
@@ -13,7 +13,7 @@ import { HomePage } from './components/pages/home/home-page.tsx';
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App/>} loader={() => DiningHallClient.retrieveDiningHallList()} errorElement={<NotFoundPage/>}>
-            <Route path="/menu/:id" element={<DiningHallMenu/>} loader={async (ctx) => {
+            <Route path="/menu/:id" element={<DiningHallPage/>} loader={async (ctx) => {
                 const id = ctx.params.id;
 
                 if (!id) {

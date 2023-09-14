@@ -1,6 +1,9 @@
 import { useContext } from 'react';
 import { SettingsContext } from '../../../context/settings.ts';
 import { Link } from 'react-router-dom';
+import { HomePageWithIds } from './home-page-with-ids.tsx';
+
+import './home.css';
 
 export const HomePage = () => {
     const [{ homepageDiningHallIds }] = useContext(SettingsContext);
@@ -25,8 +28,6 @@ export const HomePage = () => {
     }
 
     return (
-        <div>
-            Home dining halls ({homepageDiningHallIds.size}): {Array.from(homepageDiningHallIds).join(', ')}
-        </div>
+        <HomePageWithIds/>
     );
 };

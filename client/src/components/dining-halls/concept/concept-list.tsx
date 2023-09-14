@@ -1,23 +1,12 @@
-import { useAsyncValue } from 'react-router-dom';
-import { isDuckTypeArray } from '@arcticzeroo/typeguard';
-import { ErrorCard } from '../../card/error.tsx';
+import { DiningHallMenu } from '../../../models/dining-halls.ts';
+import React from 'react';
 import { Concept } from './concept.tsx';
-import { IDiningHallConcept } from '../../../models/dining-halls.ts';
 
-export const ConceptList = () => {
-    const concepts = useAsyncValue();
+interface IConceptListProps {
+    concepts: DiningHallMenu;
+}
 
-    if (!isDuckTypeArray<IDiningHallConcept>(concepts, {
-        name:    'string',
-        menu:    'object'
-    })) {
-        return (
-            <ErrorCard>
-                Unable to load menu!
-            </ErrorCard>
-        );
-    }
-
+export const ConceptList: React.FC<IConceptListProps> = ({ concepts }) => {
     return (
         <div className="concepts">
             {concepts.map(concept => <Concept key={concept.name} concept={concept}/>)}
