@@ -6,7 +6,8 @@ import { createBrowserRouter, createRoutesFromElements, defer, Route, RouterProv
 import { DiningHallClient } from './api/dining.ts';
 import { DiningHallMenu } from './components/pages/dining-hall-menu.tsx';
 import { SettingsPage } from './components/settings/settings-page.tsx';
-import { NotFoundPage } from './components/pages/not-found.tsx';
+import { NotFoundPage } from './components/pages/not-found-page.tsx';
+import { SearchPage } from './components/pages/search/search-page.tsx';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
                 });
             }}/>
             <Route path="/settings" element={<SettingsPage/>}/>
+            <Route path="/search" element={<SearchPage/>}/>
         </Route>
     )
 );
