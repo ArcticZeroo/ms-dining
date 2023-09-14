@@ -35,7 +35,8 @@ const cloneSearchResultsByItemName = (searchResultsByItemName: SearchResultsByIt
     for (const [itemName, searchResult] of searchResultsByItemName.entries()) {
         newSearchResults.set(itemName, {
             diningHallIds: [...searchResult.diningHallIds],
-            stableId:      searchResult.stableId
+            stableId:      searchResult.stableId,
+            imageUrl:      searchResult.imageUrl
         });
     }
     return newSearchResults;
@@ -59,7 +60,8 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                 if (!newSearchResults.has(item.displayName)) {
                     newSearchResults.set(item.displayName, {
                         diningHallIds: [],
-                        stableId:      nextStableIdRef.current++
+                        stableId:      nextStableIdRef.current++,
+                        imageUrl:      item.imageUrl
                     });
                 }
                 newSearchResults.get(item.displayName)!.diningHallIds.push(diningHall.id);
