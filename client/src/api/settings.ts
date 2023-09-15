@@ -1,4 +1,5 @@
 import { settingNames } from '../constants/settings.ts';
+import { randomUserId } from '../util/random.ts';
 
 const getBooleanSetting = (key: string, defaultValue: boolean) => {
     try {
@@ -84,8 +85,41 @@ class StringArraySetting extends Setting<Array<string>> {
     }
 }
 
+class StringSetting extends Setting<string> {
+    constructor(name: string, defaultValue: string) {
+        super(name, defaultValue);
+    }
+
+    public get() {
+        try {
+            return localStorage.getItem(this.name) ?? this.defaultValue;
+        } catch {
+            return this.defaultValue;
+        }
+    }
+
+    public set(value: string) {
+        try {
+            localStorage.setItem(this.name, value);
+        } catch {
+            // Do nothing
+        }
+    }
+}
+
 export const ApplicationSettings = {
     showImages:          new BooleanSetting(settingNames.showImages, true /*defaultValue*/),
     lastUsedDiningHalls: new StringArraySetting(settingNames.lastUsedDiningHalls, [] /*defaultValue*/),
-    homepageDiningHalls: new StringArraySetting(settingNames.homepageDiningHalls, [] /*defaultValue*/)
+    homepageDiningHalls: new StringArraySetting(settingNames.homepageDiningHalls, [] /*defaultValue*/),
+    visitorId:           new StringSetting(settingNames.visitorId, '' /*defaultValue*/)
+};
+
+export const getVisitorId = () => {
+    const visitorId = ApplicationSettings.visitorId.get();
+    if (visitorId.length === 0) {
+        const newVisitorId = randomUserId();
+        ApplicationSettings.visitorId.set(newVisitorId);
+        return newVisitorId;
+    }
+    return visitorId;
 };

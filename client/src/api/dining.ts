@@ -1,6 +1,6 @@
 import { IDiningHall, IDiningHallConcept } from '../models/dining-halls.ts';
 import { pause } from '../util/async.ts';
-import { ApplicationSettings } from './settings.ts';
+import { ApplicationSettings, getVisitorId } from './settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -9,8 +9,20 @@ export abstract class DiningHallClient {
     private static readonly _diningHallMenusById: Map<string, Promise<Array<IDiningHallConcept>>> = new Map();
     private static readonly _lastUsedDiningHallIds: string[] = ApplicationSettings.lastUsedDiningHalls.get();
 
-    private static async _makeRequest<T>(path: string): Promise<T> {
-        const response = await fetch(path);
+    private static _getRequestOptions(sendVisitorId: boolean) {
+        if (!sendVisitorId) {
+            return undefined;
+        }
+
+        return {
+            headers: {
+                'X-Visitor-Id': getVisitorId()
+            }
+        };
+    }
+
+    private static async _makeRequest<T>(path: string, sendVisitorId: boolean = false): Promise<T> {
+        const response = await fetch(path, DiningHallClient._getRequestOptions(sendVisitorId));
         if (!response.ok) {
             throw new Error(`Response failed with status: ${response.status}`);
         }
@@ -18,7 +30,7 @@ export abstract class DiningHallClient {
     }
 
     private static async _retrieveDiningHallListInner(): Promise<Array<IDiningHall>> {
-        return DiningHallClient._makeRequest('/api/dining/');
+        return DiningHallClient._makeRequest('/api/dining/', true /*sendVisitorId*/);
     }
 
     public static async retrieveDiningHallList(): Promise<Array<IDiningHall>> {
