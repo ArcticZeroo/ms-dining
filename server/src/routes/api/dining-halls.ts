@@ -2,6 +2,10 @@ import Router from '@koa/router';
 import { diningHalls } from '../../constants/dining-halls.js';
 import { attachRouter } from '../../util/koa.js';
 import { diningHallSessionsByUrl } from '../../api/dining/cache.js';
+import { sendVisitAsync } from '../../api/tracking/visitors.js';
+import { ApplicationContext } from '../../constants/context.js';
+
+const visitorIdHeader = 'X-Visitor-Id';
 
 export const registerDiningHallRoutes = (parent: Router) => {
     const router = new Router({
@@ -9,6 +13,13 @@ export const registerDiningHallRoutes = (parent: Router) => {
     });
 
     router.get('/', async ctx => {
+        const visitorId = ctx.get(visitorIdHeader);
+        if (ApplicationContext.hasCreatedTrackingApplication && visitorId) {
+            // Fire and forget, don't block the rest of the request
+            sendVisitAsync(visitorId)
+                .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
+        }
+
         const responseDiningHalls = [];
 
         for (const diningHall of diningHalls) {
