@@ -1,0 +1,5 @@
+#analytics-page #after-selector {
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+}

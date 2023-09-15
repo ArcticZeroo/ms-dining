@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export const InfoPage = () => {
     return (
         <>
@@ -24,6 +26,9 @@ export const InfoPage = () => {
                     tracking is available <a href="https://github.com/arcticzeroo/frozor-analytics" target="_blank">here on GitHub</a>.
                 </div>
             </div>
+            <Link to="/analytics" className="card blue centered">
+                Visit User Analytics
+            </Link>
         </>
     );
 };
