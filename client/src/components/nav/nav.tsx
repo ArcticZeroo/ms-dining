@@ -47,6 +47,13 @@ export const Nav: React.FC = () => {
                         </li>
                     ))
                 }
+                <li>
+                    <NavLink to="/info" className="link-button info" onClick={() => setIsExpanded(false)}>
+                        <span className="material-symbols-outlined">
+                            info
+                        </span>
+                    </NavLink>
+                </li>
             </ul>
         </nav>
     );
