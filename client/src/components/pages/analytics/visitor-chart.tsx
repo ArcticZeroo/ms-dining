@@ -14,13 +14,21 @@ interface ILineDataPoint {
 }
 
 const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
-    const [data, setData] = useState<Array<ILineDataPoint>>();
+    const [data, setData] = useState<Array<ILineDataPoint>>([]);
+    const [allDates, setAllDates] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        setData(visits.map(visit => ({
-            x: visit.date,
-            y: visit.count
-        })));
+        const newAllDates = new Set<string>();
+
+        setData(visits.map(visit => {
+            newAllDates.add(visit.date);
+            return {
+                x: visit.date,
+                y: visit.count
+            };
+        }));
+
+        setAllDates(newAllDates);
     }, [visits]);
 
     return (
@@ -38,7 +46,10 @@ const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
                             display: true,
                             text: 'Time'
                         },
-                        type: 'time'
+                        type: 'time',
+                        ticks: {
+                            callback: value => typeof value === 'string' && allDates.has(value) ? value : undefined
+                        }
                     },
                     y: {
                         title: {
