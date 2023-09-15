@@ -20,19 +20,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
     border: none;
     text-decoration: none;
     width: 100%;
     cursor: pointer;
 }
 
-.collapsible-dining-hall .dining-hall-name span {
-    margin-left: 0.5rem;
-}
-
 .collapsible-dining-hall .dining-hall-name .expand-icon {
     transform: rotate(0deg);
     transition: transform 0.25s ease-in-out;
+}
+
+.collapsible-dining-hall .dining-hall-name .logo {
+    height: 4rem;
 }
 
 .collapsible-dining-hall .dining-hall-name .expand-icon.collapsed {

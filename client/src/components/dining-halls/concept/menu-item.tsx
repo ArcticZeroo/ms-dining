@@ -32,7 +32,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             <td>
                 {
                     showImages && menuItem.imageUrl && (
-                        <img src={menuItem.imageUrl} alt="Click to open image" className="menu-item-image"/>
+                        <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
                     )
                 }
             </td>

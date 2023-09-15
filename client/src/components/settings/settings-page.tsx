@@ -34,8 +34,15 @@ export const SettingsPage = () => {
             </div>
             <div className="body">
                 <div className="setting">
-                    <label htmlFor="setting-show-images">
-                        Enable Images (Menus and Search)
+                    <label htmlFor="setting-show-images" className="setting-info">
+                        <div className="setting-name">
+                            Enable Images
+                        </div>
+                        <div className="setting-description">
+                            Enables images in menu headers, menu items, and search.
+                            <br/>
+                            Can cause some layout issues on mobile devices when enabled.
+                        </div>
                     </label>
                     <input type="checkbox"
                            id="setting-show-images"
