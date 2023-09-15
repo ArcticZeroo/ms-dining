@@ -3,7 +3,7 @@ import { DiningHallMenu, IDiningHall } from '../../models/dining-halls.ts';
 import { DiningHallClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { sortDiningHallIds } from '../../util/sorting.ts';
-import { CollapsibleDiningHallMenu, CollapsibleMenuDisplayType } from './collapsible-dining-hall-menu.tsx';
+import { CollapsibleDiningHallMenu } from './collapsible-dining-hall-menu.tsx';
 
 import './combined-dining-halls.css';
 
@@ -48,13 +48,12 @@ export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListPro
     }, [diningHallsById, diningHallIds]);
 
     return (
-        <div className="combined-menu-list">
+        <div className="collapsible-menu-list">
             {
                 menuData.map(({ diningHall, menu }) => (
                     <CollapsibleDiningHallMenu key={diningHall.id}
                                                diningHall={diningHall}
-                                               menu={menu}
-                                               type={CollapsibleMenuDisplayType.collapsible}/>
+                                               menu={menu} />
                 ))
             }
         </div>

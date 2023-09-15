@@ -2,10 +2,7 @@ import React, { useCallback } from 'react';
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { IDiningHall } from '../../../models/dining-halls.ts';
 import { DiningHallClient } from '../../../api/dining.ts';
-import {
-    CollapsibleDiningHallMenu,
-    CollapsibleMenuDisplayType
-} from '../../dining-halls/collapsible-dining-hall-menu.tsx';
+import { CollapsibleDiningHallMenu, } from '../../dining-halls/collapsible-dining-hall-menu.tsx';
 
 interface IDiningHallPageWithIdProps {
     diningHall: IDiningHall;
@@ -40,6 +37,6 @@ export const DiningHallPageWithId: React.FC<IDiningHallPageWithIdProps> = ({ din
 
     const data = menuPromiseState.value;
     return (
-        <CollapsibleDiningHallMenu diningHall={diningHall} menu={data} type={CollapsibleMenuDisplayType.singleMenu}/>
+        <CollapsibleDiningHallMenu diningHall={diningHall} menu={data}/>
     );
 };
