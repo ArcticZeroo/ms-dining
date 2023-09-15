@@ -16,37 +16,6 @@ interface ILineDataPoint {
 const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
     const [data, setData] = useState<Array<ILineDataPoint>>();
 
-    /*useEffect(() => {
-        // Probably not needed, maybe should skip?
-        const timeSortedVisits = [...visits].sort((a, b) => {
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
-
-        const dataWithoutGaps = [];
-
-        let currentTime = new Date(timeSortedVisits[0]?.date);
-        for (const visit of timeSortedVisits) {
-            const visitTime = new Date(visit.date);
-
-            // It's OK if we have a delta of a little more than an hour, the server might have been slow to aggregate.
-            while ((visitTime.getTime() - currentTime.getTime()) > oneHour.inMilliseconds) {
-                dataWithoutGaps.push({
-                    x: currentTime.toISOString(),
-                    y: 0,
-                });
-                currentTime = addDurationToDate(currentTime, oneHour);
-            }
-
-            dataWithoutGaps.push({
-                x: visit.date,
-                y: visit.count
-            });
-
-            currentTime = addDurationToDate(currentTime, oneHour);
-        }
-
-        setData(dataWithoutGaps);
-    }, [visits]);*/
     useEffect(() => {
         setData(visits.map(visit => ({
             x: visit.date,
@@ -58,6 +27,7 @@ const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
         <Bar
             data={{
                 datasets: [{
+                    label: 'Unique Hourly Visitors',
                     data
                 }],
             }}
@@ -65,14 +35,17 @@ const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
                 scales: {
                     x: {
                         title: {
+                            display: true,
                             text: 'Time'
                         },
                         type: 'time'
                     },
                     y: {
                         title: {
+                            display: true,
                             text: 'Visitors'
-                        }
+                        },
+                        beginAtZero: true
                     }
                 },
                 plugins: {
