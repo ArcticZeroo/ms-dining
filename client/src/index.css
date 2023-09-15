@@ -15,9 +15,11 @@ html {
     border-radius: 1rem;
     padding: 1rem;
     text-align: center;
+    display: flex;
+    flex-direction: column;
 }
 
-.error-card button {
+.error-card a {
     padding: 0.5rem;
     border-radius: 0.5rem;
     border: 0.125rem solid white;
