@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { IDiningHallMenuItem } from '../../../models/dining-halls.ts';
 import { SettingsContext } from '../../../context/settings.ts';
+
 //import imageSvg from '../../../../assets/image.svg';
 
 export interface IMenuItemProps {
@@ -21,7 +22,7 @@ const getCaloriesDisplay = (menuItem: IDiningHallMenuItem) => {
 };
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
-    const [{ showImages }] = useContext(SettingsContext);
+    const [{ showImages, showCalories }] = useContext(SettingsContext);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
 
     return (
@@ -29,19 +30,23 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             <td>
                 {menuItem.displayName}
             </td>
-            <td>
-                {
-                    showImages && menuItem.imageUrl && (
+            {
+                showImages && menuItem.imageUrl && (
+                    <td>
                         <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
-                    )
-                }
-            </td>
+                    </td>
+                )
+            }
             <td>
                 ${menuItem.price}
             </td>
-            <td>
-                {caloriesDisplay}
-            </td>
+            {
+                showCalories && (
+                    <td>
+                        {caloriesDisplay}
+                    </td>
+                )
+            }
         </tr>
     );
 };

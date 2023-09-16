@@ -1,4 +1,3 @@
-import { settingNames } from '../constants/settings.ts';
 import { randomUserId } from '../util/random.ts';
 
 const getBooleanSetting = (key: string, defaultValue: boolean) => {
@@ -108,11 +107,12 @@ export class StringSetting extends Setting<string> {
 }
 
 export const ApplicationSettings = {
-    showImages:               new BooleanSetting(settingNames.showImages, false /*defaultValue*/),
-    requestMenusInBackground: new BooleanSetting(settingNames.requestMenusInBackground, true /*defaultValue*/),
-    lastUsedDiningHalls:      new StringArraySetting(settingNames.lastUsedDiningHalls, [] /*defaultValue*/),
-    homepageDiningHalls:      new StringArraySetting(settingNames.homepageDiningHalls, [] /*defaultValue*/),
-    visitorId:                new StringSetting(settingNames.visitorId, '' /*defaultValue*/)
+    showImages:               new BooleanSetting('showImages', false /*defaultValue*/),
+    showCalories:             new BooleanSetting('showCalories', true /*defaultValue*/),
+    requestMenusInBackground: new BooleanSetting('requestMenusInBackground', true /*defaultValue*/),
+    lastUsedDiningHalls:      new StringArraySetting('lastUsedDiningHalls', [] /*defaultValue*/),
+    homepageDiningHalls:      new StringArraySetting('homepageDiningHalls', [] /*defaultValue*/),
+    visitorId:                new StringSetting('visitorId', '' /*defaultValue*/)
 };
 
 export const getVisitorId = () => {

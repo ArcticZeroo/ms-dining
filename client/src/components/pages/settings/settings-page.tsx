@@ -1,8 +1,8 @@
-import { SettingsContext } from '../../context/settings.ts';
+import { SettingsContext } from '../../../context/settings.ts';
 import { useContext } from 'react';
-import { ApplicationSettings } from '../../api/settings.ts';
-import { useDiningHalls } from '../../hooks/dining-halls.ts';
-import { IDiningHall } from '../../models/dining-halls.ts';
+import { ApplicationSettings } from '../../../api/settings.ts';
+import { useDiningHalls } from '../../../hooks/dining-halls.ts';
+import { IDiningHall } from '../../../models/dining-halls.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import './settings.css';
 
@@ -38,6 +38,11 @@ export const SettingsPage = () => {
                             Can cause some layout issues on mobile devices when enabled.
                         </>
                     }
+                />
+                <BooleanSettingInput
+                    setting={ApplicationSettings.showCalories}
+                    contextKey="showCalories"
+                    name={<>Show Calories</>}
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.requestMenusInBackground}

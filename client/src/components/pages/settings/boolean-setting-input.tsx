@@ -1,10 +1,10 @@
-import { BooleanSetting } from '../../api/settings.ts';
-import { ISettingsContext, SettingsContext } from '../../context/settings.ts';
+import { BooleanSetting } from '../../../api/settings.ts';
+import { ISettingsContext, SettingsContext } from '../../../context/settings.ts';
 import React, { useContext } from 'react';
 
 interface IBooleanSettingInputProps {
     name: React.ReactElement;
-    description: React.ReactElement;
+    description?: React.ReactElement;
     setting: BooleanSetting;
     contextKey: keyof ISettingsContext;
 }
@@ -40,9 +40,13 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({ name,
                 <div className="setting-name">
                     {name}
                 </div>
-                <div className="setting-description">
-                    {description}
-                </div>
+                {
+                    description && (
+                        <div className="setting-description">
+                            {description}
+                        </div>
+                    )
+                }
             </label>
             <input type="checkbox"
                    id={htmlId}

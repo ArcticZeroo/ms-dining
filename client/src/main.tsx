@@ -5,7 +5,7 @@ import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import { DiningHallClient } from './api/dining.ts';
 import { DiningHallPage } from './components/pages/menu/dining-hall-page.tsx';
-import { SettingsPage } from './components/settings/settings-page.tsx';
+import { SettingsPage } from './components/pages/settings/settings-page.tsx';
 import { NotFoundPage } from './components/pages/not-found/not-found-page.tsx';
 import { SearchPage } from './components/pages/search/search-page.tsx';
 import { HomePage } from './components/pages/home/home-page.tsx';

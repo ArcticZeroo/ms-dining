@@ -29,6 +29,7 @@ function App() {
 
     const settingsState = useState<ISettingsContext>(() => ({
         showImages:               ApplicationSettings.showImages.get(),
+        showCalories:             ApplicationSettings.showCalories.get(),
         requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
         homepageDiningHallIds:    new Set(ApplicationSettings.homepageDiningHalls.get())
     }));

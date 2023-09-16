@@ -3,6 +3,7 @@ import { ContextWithUpdate } from '../models/context.ts';
 
 export interface ISettingsContext {
     showImages: boolean;
+    showCalories: boolean;
     requestMenusInBackground: boolean;
     homepageDiningHallIds: Set<string>;
 }
@@ -10,6 +11,7 @@ export interface ISettingsContext {
 export const SettingsContext = React.createContext<ContextWithUpdate<ISettingsContext>>([
     {
         showImages: false,
+        showCalories: true,
         requestMenusInBackground: true,
         homepageDiningHallIds: new Set()
     },
