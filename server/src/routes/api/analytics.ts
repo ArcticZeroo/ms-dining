@@ -1,10 +1,7 @@
 import Router from '@koa/router';
 import { attachRouter } from '../../util/koa.js';
 import { RouteBuilder } from '../../models/routes.js';
-import Duration from '@arcticzeroo/duration';
-import { afterRegex, getVisitsAsync } from '../../api/tracking/visitors.js';
-
-const maxTimeForVisits = new Duration({ days: 35 });
+import { getVisitsAsync } from '../../api/tracking/visitors.js';
 
 export const registerAnalyticsRoutes: RouteBuilder = (parent) => {
     const router = new Router({
@@ -12,36 +9,18 @@ export const registerAnalyticsRoutes: RouteBuilder = (parent) => {
     });
 
     router.get('/visits', async ctx => {
-        const afterTimestamp = ctx.query.after;
+        const daysAgoString = ctx.query.days;
 
-        if (!afterTimestamp) {
-            return ctx.throw(400, 'Missing after timestamp');
+        if (!daysAgoString || typeof daysAgoString !== 'string') {
+            return ctx.throw(400, 'Invalid/missing days ago');
         }
 
-        if (typeof afterTimestamp !== 'string') {
-            return ctx.throw(400, 'After timestamp is not a string');
+        const daysAgo = Number(daysAgoString);
+        if (Number.isNaN(daysAgo)) {
+            return ctx.throw(400, 'Days ago is not a number');
         }
 
-        if (!afterRegex.test(afterTimestamp)) {
-            return ctx.throw(400, 'After timestamp is not in the correct format');
-        }
-
-        const afterDate = new Date(afterTimestamp);
-        if (Number.isNaN(afterDate.getTime())) {
-            return ctx.throw(400, 'After timestamp is not a valid date');
-        }
-
-        const timeFromNowMs = Date.now() - afterDate.getTime();
-
-        if (timeFromNowMs < 0) {
-            return ctx.throw(400, 'After timestamp is in the future');
-        }
-
-        if (timeFromNowMs > maxTimeForVisits.inMilliseconds) {
-            return ctx.throw(400, 'After timestamp is too far in the past');
-        }
-
-        ctx.body = await getVisitsAsync(afterDate);
+        ctx.body = await getVisitsAsync(daysAgo);
     });
 
     attachRouter(parent, router);

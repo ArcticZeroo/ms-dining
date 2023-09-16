@@ -21,15 +21,8 @@ export const sendVisitAsync = async (visitorId: string) => {
     }
 };
 
-const padTimeValue = (value: number) => value.toString().padStart(2, '0');
-
-const getDateString = (date: Date) => {
-    return `${date.getUTCFullYear()}-${padTimeValue(date.getUTCMonth() + 1)}-${padTimeValue(date.getUTCDate())}T${padTimeValue(date.getUTCHours())}:${padTimeValue(date.getUTCMinutes())}`;
-}
-
-export const getVisitsAsync = async (after: Date): Promise<Array<IAggregatedVisits>> => {
-    console.log(`${serverUrl}/applications/${applicationName}/visits?after=${getDateString(after)}`);
-    const response = await fetch(`${serverUrl}/applications/${applicationName}/visits?after=${getDateString(after)}`);
+export const getVisitsAsync = async (daysAgo: number): Promise<Array<IAggregatedVisits>> => {
+    const response = await fetch(`${serverUrl}/applications/${applicationName}/visits?days=${daysAgo}`);
 
     if (!response.ok) {
         throw new Error(`Failed to get visits. Status: ${response.status}, text: ${await response.text()}`);
