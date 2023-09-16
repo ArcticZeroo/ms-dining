@@ -107,8 +107,15 @@ export abstract class DiningHallClient {
     }
 
     public static async retrieveAllMenusInOrder(diningHalls: IDiningHall[]) {
+        console.log('Retrieving dining hall menus...');
+
         for (const diningHall of DiningHallClient.getDiningHallRetrievalOrder(diningHalls)) {
             await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
+
+            if (!ApplicationSettings.requestMenusInBackground.get()) {
+                break;
+            }
+
             await DiningHallClient.retrieveDiningHallMenu(diningHall.id, false /*shouldCountTowardsLastUsed*/);
         }
     }

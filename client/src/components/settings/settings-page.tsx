@@ -1,20 +1,14 @@
 import { SettingsContext } from '../../context/settings.ts';
 import { useContext } from 'react';
-import './settings.css';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { useDiningHalls } from '../../hooks/dining-halls.ts';
 import { IDiningHall } from '../../models/dining-halls.ts';
+import { BooleanSettingInput } from './boolean-setting-input.tsx';
+import './settings.css';
 
 export const SettingsPage = () => {
     const [settingsData, setSettingsData] = useContext(SettingsContext);
     const diningHalls = useDiningHalls();
-
-    const toggleShowImages = () => {
-        const showImages = !settingsData.showImages;
-        console.log('show images clicked, toggling to new setting:', showImages);
-        setSettingsData({ ...settingsData, showImages });
-        ApplicationSettings.showImages.set(showImages);
-    }
 
     const toggleHomepageDiningHall = (diningHall: IDiningHall) => {
         const homepageDiningHallIds = new Set(settingsData.homepageDiningHallIds);
@@ -33,22 +27,32 @@ export const SettingsPage = () => {
                 Settings
             </div>
             <div className="body">
-                <div className="setting">
-                    <label htmlFor="setting-show-images" className="setting-info">
-                        <div className="setting-name">
-                            Enable Images
-                        </div>
-                        <div className="setting-description">
-                            Enables images in menu headers, menu items, and search.
+                <BooleanSettingInput
+                    setting={ApplicationSettings.showImages}
+                    contextKey="showImages"
+                    name={<>Show Images</>}
+                    description={
+                        <>
+                            When enabled, images are shown in menu headers, menu items, and search.
                             <br/>
                             Can cause some layout issues on mobile devices when enabled.
-                        </div>
-                    </label>
-                    <input type="checkbox"
-                           id="setting-show-images"
-                           checked={settingsData.showImages}
-                           onChange={toggleShowImages}/>
-                </div>
+                        </>
+                    }
+                />
+                <BooleanSettingInput
+                    setting={ApplicationSettings.requestMenusInBackground}
+                    contextKey="requestMenusInBackground"
+                    name={<>Enable Fetching Menus in Background</>}
+                    description={
+                        <>
+                            When enabled, menus for each dining hall will be fetched in the background in order to
+                            facilitate faster search and menu switching.
+                            <br/>
+                            Menus are fetched 1 second apart from each other, with homepage dining halls first and then
+                            in order of last recently used.
+                        </>
+                    }
+                />
                 <div className="setting" id="setting-homepage">
                     <div className="setting-info">
                         <div className="setting-name">
@@ -80,5 +84,6 @@ export const SettingsPage = () => {
                 </div>
             </div>
         </div>
-    );
+    )
+        ;
 };

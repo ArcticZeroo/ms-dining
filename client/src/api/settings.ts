@@ -45,7 +45,7 @@ const setStringArraySetting = (key: string, value: string[], delimiter: string =
     }
 };
 
-abstract class Setting<T> {
+export abstract class Setting<T> {
     protected constructor(
         public readonly name: string,
         public readonly defaultValue: T
@@ -57,7 +57,7 @@ abstract class Setting<T> {
     public abstract set(value: T): void;
 }
 
-class BooleanSetting extends Setting<boolean> {
+export class BooleanSetting extends Setting<boolean> {
     constructor(name: string, defaultValue: boolean) {
         super(name, defaultValue);
     }
@@ -71,7 +71,7 @@ class BooleanSetting extends Setting<boolean> {
     }
 }
 
-class StringArraySetting extends Setting<Array<string>> {
+export class StringArraySetting extends Setting<Array<string>> {
     constructor(name: string, defaultValue: Array<string>) {
         super(name, defaultValue);
     }
@@ -85,7 +85,7 @@ class StringArraySetting extends Setting<Array<string>> {
     }
 }
 
-class StringSetting extends Setting<string> {
+export class StringSetting extends Setting<string> {
     constructor(name: string, defaultValue: string) {
         super(name, defaultValue);
     }
@@ -108,10 +108,11 @@ class StringSetting extends Setting<string> {
 }
 
 export const ApplicationSettings = {
-    showImages:          new BooleanSetting(settingNames.showImages, true /*defaultValue*/),
-    lastUsedDiningHalls: new StringArraySetting(settingNames.lastUsedDiningHalls, [] /*defaultValue*/),
-    homepageDiningHalls: new StringArraySetting(settingNames.homepageDiningHalls, [] /*defaultValue*/),
-    visitorId:           new StringSetting(settingNames.visitorId, '' /*defaultValue*/)
+    showImages:               new BooleanSetting(settingNames.showImages, false /*defaultValue*/),
+    requestMenusInBackground: new BooleanSetting(settingNames.requestMenusInBackground, true /*defaultValue*/),
+    lastUsedDiningHalls:      new StringArraySetting(settingNames.lastUsedDiningHalls, [] /*defaultValue*/),
+    homepageDiningHalls:      new StringArraySetting(settingNames.homepageDiningHalls, [] /*defaultValue*/),
+    visitorId:                new StringSetting(settingNames.visitorId, '' /*defaultValue*/)
 };
 
 export const getVisitorId = () => {

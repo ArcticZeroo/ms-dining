@@ -27,10 +27,12 @@ function App() {
         setDiningHallIdsInOrder(diningHallList.map(diningHall => diningHall.id).sort());
     }, [diningHallList]);
 
-    const settingsState = useState<ISettingsContext>({
-        showImages: ApplicationSettings.showImages.get(),
-        homepageDiningHallIds: new Set(ApplicationSettings.homepageDiningHalls.get())
-    });
+    const settingsState = useState<ISettingsContext>(() => ({
+        showImages:               ApplicationSettings.showImages.get(),
+        requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
+        homepageDiningHallIds:    new Set(ApplicationSettings.homepageDiningHalls.get())
+    }));
+    const [{ requestMenusInBackground }] = settingsState;
 
     const [selectedDiningHall, setSelectedDiningHall] = useState<IDiningHall>();
     const menuDivRef = useRef<HTMLDivElement>(null);
@@ -48,10 +50,14 @@ function App() {
     }, [selectedDiningHall]);
 
     useEffect(() => {
+        if (!requestMenusInBackground) {
+            return;
+        }
+
         DiningHallClient.retrieveAllMenusInOrder(diningHallList)
             .then(() => console.log('Retrieved all dining hall menus!'))
             .catch(err => console.error('Failed to retrieve all dining hall menus:', err));
-    }, [diningHallList]);
+    }, [diningHallList, requestMenusInBackground]);
 
     return (
         <div className="App">
