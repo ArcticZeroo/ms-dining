@@ -1,38 +1,28 @@
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { AnalyticsClient } from '../../../api/analytics.ts';
-import { addDurationToDate } from '../../../util/date.ts';
-import Duration from '@arcticzeroo/duration';
 import './analytics-page.css';
+import { pluralize } from '../../../util/string.ts';
+import { classNames } from '../../../util/react.ts';
 
 const VisitorChart = React.lazy(() => import('./visitor-chart.tsx'));
 
-const getDefaultAfterDate = () => {
-    const oneWeekAgo = addDurationToDate(new Date(), new Duration({ days: -7 }));
-    oneWeekAgo.setMinutes(0, 0, 0)
-    return AnalyticsClient.getDateString(oneWeekAgo);
-};
-
-const getMinimumDate = () => {
-    const thirtyFiveDaysAgo = addDurationToDate(new Date(), new Duration({ days: -35 }));
-    thirtyFiveDaysAgo.setMinutes(0, 0, 0);
-    return AnalyticsClient.getDateString(thirtyFiveDaysAgo);
-};
+const dayOptions: number[] = [
+    1,
+    7,
+    30
+];
 
 export const AnalyticsPage = () => {
-    const [afterDate, setAfterDate] = useState(getDefaultAfterDate);
+    const [currentDaysAgo, setCurrentDaysAgo] = useState(7);
 
-    const retrieveVisitsCallback = useCallback(() => AnalyticsClient.retrieveHourlyVisitCountAsync(afterDate), [afterDate]);
+    const retrieveVisitsCallback = useCallback(() => AnalyticsClient.retrieveHourlyVisitCountAsync(currentDaysAgo), [currentDaysAgo]);
 
     const analyticsPromiseState = useDelayedPromiseState(retrieveVisitsCallback, true /*keepLastValue*/);
 
     useEffect(() => {
         analyticsPromiseState.run();
     }, [retrieveVisitsCallback]);
-
-    const onAfterDateInputChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setAfterDate(event.target.value);
-    };
 
     if ([PromiseStage.notRun, PromiseStage.running].includes(analyticsPromiseState.stage)) {
         return (
@@ -67,15 +57,15 @@ export const AnalyticsPage = () => {
             </div>
             <div className="body">
                 <div id="after-selector">
-                    <label htmlFor="after-date">
-                        Since date:
-                    </label>
-                    <input type="datetime-local"
-                           id="after-date"
-                           value={afterDate}
-                           min={getMinimumDate()}
-                           max={AnalyticsClient.getDateString(new Date())}
-                           onChange={onAfterDateInputChanged}/>
+                    {
+                        dayOptions.map((daysAgoOption) => (
+                            <button
+                                className={classNames('days-ago-option', daysAgoOption === currentDaysAgo && 'active')}
+                                onClick={() => setCurrentDaysAgo(daysAgoOption)}>
+                                {daysAgoOption} {pluralize('Day', daysAgoOption)}
+                            </button>
+                        ))
+                    }
                 </div>
                 <Suspense fallback={<div>Loading chart...</div>}>
                     <VisitorChart visits={visits}/>

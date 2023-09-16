@@ -1,5 +1,18 @@
 #analytics-page #after-selector {
     display: flex;
-    padding: 1rem;
     gap: 1rem;
+}
+
+#analytics-page .days-ago-option {
+    padding: 1rem 2rem 1rem 2rem;
+    outline: none;
+    border: none;
+    border-radius: 1rem;
+    background: #2196F3;
+    color: white;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#analytics-page .days-ago-option:hover, #analytics-page .days-ago-option.active {
+    background: #1976D2;
 }
