@@ -8,14 +8,17 @@ interface IDiningHallConceptMenuProps {
 
 export const ConceptMenu: React.FC<IDiningHallConceptMenuProps> = ({ menuItemsByCategoryName }) => {
     return (
-        <table className="menu-body">
-            <tbody>
-            {
-                Object.keys(menuItemsByCategoryName).map(categoryName => (
-                    <MenuCategory key={categoryName} categoryName={categoryName} menuItems={menuItemsByCategoryName[categoryName]}/>
-                ))
-            }
-            </tbody>
-        </table>
+        // This div wrapper is needed for the table to scroll independently of the header
+        <div className="menu-body">
+            <table>
+                <tbody>
+                {
+                    Object.keys(menuItemsByCategoryName).map(categoryName => (
+                        <MenuCategory key={categoryName} categoryName={categoryName} menuItems={menuItemsByCategoryName[categoryName]}/>
+                    ))
+                }
+                </tbody>
+            </table>
+        </div>
     )
 };

@@ -256,6 +256,10 @@ nav a.active {
 }
 
 @media screen and (max-width: 800px) {
+    html, body, #root, .App, .collapsible-menu-list, .collapsible-dining-hall, .concepts, .concept {
+        width: 100%;
+    }
+
     .App {
         flex-direction: column;
     }
@@ -286,11 +290,16 @@ nav a.active {
         gap: 0.5rem;
     }
 
+    .concepts {
+        padding: 0;
+    }
+
     .concept table {
         border-spacing: 0.75rem;
     }
 
-    .concept {
+    .concept .menu-body {
         width: 100%;
+        overflow-x: auto;
     }
 }
