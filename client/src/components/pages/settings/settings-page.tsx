@@ -34,8 +34,6 @@ export const SettingsPage = () => {
                     description={
                         <>
                             When enabled, images are shown in menu headers, menu items, and search.
-                            <br/>
-                            Can cause some layout issues on mobile devices when enabled.
                         </>
                     }
                 />
