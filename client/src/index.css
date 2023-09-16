@@ -298,6 +298,10 @@ nav a.active {
         border-spacing: 0.75rem;
     }
 
+    .concept {
+        overflow-x: hidden;
+    }
+
     .concept .menu-body {
         width: 100%;
         overflow-x: auto;
