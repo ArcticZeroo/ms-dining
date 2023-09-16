@@ -31,9 +31,14 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 {menuItem.displayName}
             </td>
             {
-                showImages && menuItem.imageUrl && (
+                // Always show this <td> when images are enabled, even if there is no image url, in order to keep the same column count across rows
+                showImages && (
                     <td>
-                        <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
+                        {
+                            menuItem.imageUrl && (
+                                <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
+                            )
+                        }
                     </td>
                 )
             }
