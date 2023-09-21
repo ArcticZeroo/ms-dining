@@ -1,0 +1,33 @@
+{
+  "short_name": "MSDining",
+  "name": "MSDining: Menus for Microsoft cafeterias",
+  "icons": [
+    {
+      "src": "/penguin.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512 256x256 128x128 96x96 72x72 48x48"
+    }
+  ],
+  "id": "/",
+  "start_url": "/",
+  "background_color": "#2196F3",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#2196F3",
+  "shortcuts": [
+    {
+      "name": "Your homepage",
+      "short_name": "Home",
+      "description": "View your custom list of homepage dining hall menus!",
+      "url": "/",
+      "icons": [{ "src": "/icons/home.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Settings",
+      "description": "Change settings for your experience",
+      "url": "/settings",
+      "icons": [{ "src": "/icons/settings.png", "sizes": "192x192" }]
+    }
+  ],
+  "description": "Menus, search, and more for Microsoft cafeterias!"
+}
