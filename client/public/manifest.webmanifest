@@ -20,14 +20,30 @@
       "short_name": "Home",
       "description": "View your custom list of homepage dining hall menus!",
       "url": "/",
-      "icons": [{ "src": "/icons/home.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/home.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Settings",
       "description": "Change settings for your experience",
       "url": "/settings",
-      "icons": [{ "src": "/icons/settings.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/settings.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
-  "description": "Menus, search, and more for Microsoft cafeterias!"
+  "description": "Menus, search, and more for Microsoft cafeterias!",
+  "launch_handler": {
+    "client_mode": [
+      "focus-existing",
+      "auto"
+    ]
+  }
 }
