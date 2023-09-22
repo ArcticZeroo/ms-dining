@@ -16,6 +16,7 @@ import { classNames } from './util/react';
 function App() {
 	const { diningHalls, groups } = useLoaderData() as IViewListResponse;
 
+	// TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
 	const { viewsById, viewsInOrder } = useViewDataFromResponse(diningHalls, groups);
 	const retrieveDiningHallMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 

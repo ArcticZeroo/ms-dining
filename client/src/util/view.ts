@@ -35,7 +35,13 @@ export const getParentView = (viewsById: Map<string, DiningHallView>, useGroups:
 
 export const isViewVisible = (useGroups: boolean, view: DiningHallView) => {
     if (useGroups) {
-        return view.type === DiningHallViewType.group || !view.value.group;
+        if (view.type === DiningHallViewType.group) {
+            return view.value.members.length > 0;
+        } else {
+            // Views with a group should not be displayed, we want to display their parent group instead.
+            // There should never be a view with a group id whose group data wasn't received from the server.
+            return !view.value.group;
+        }
     } else {
         return view.type === DiningHallViewType.single;
     }
