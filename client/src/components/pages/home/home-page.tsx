@@ -5,25 +5,30 @@ import { CombinedDiningHallMenuList } from '../../dining-halls/combined-dining-h
 
 import './home.css';
 import { ApplicationContext } from '../../../context/app.ts';
+import { expandAndFlattenView } from '../../../util/view.ts';
 
 export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
     const [{ homepageViewIds }] = useContext(SettingsContext);
 
-    // Users may have added dining halls to their home set which are no temporarily unavailable
-    const [availableViewIds, setAvailableViewIds] = useState<Set<string>>(new Set());
+    // We need to expand views into a dining hall list
+    // Also, users may have added dining halls to their home set which are no temporarily unavailable
+    const [availableDiningHallIds, setAvailableDiningHallIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        const newAvailableViewId = new Set<string>();
+        const newAvailableDiningHallIds = new Set<string>();
         for (const viewId of homepageViewIds) {
             if (viewsById.has(viewId)) {
-                newAvailableViewId.add(viewId);
+                const diningHalls = expandAndFlattenView(viewId, viewsById);
+                for (const diningHall of diningHalls) {
+                    newAvailableDiningHallIds.add(diningHall.id);
+                }
             }
         }
-        setAvailableViewIds(newAvailableViewId);
+        setAvailableDiningHallIds(newAvailableDiningHallIds);
     }, [viewsById, homepageViewIds]);
 
-    if (availableViewIds.size === 0) {
+    if (availableDiningHallIds.size === 0) {
         return (
             <div className="centered-content">
                 <div className="card centered">
@@ -43,6 +48,6 @@ export const HomePage = () => {
     }
 
     return (
-        <CombinedDiningHallMenuList diningHallIds={homepageViewIds}/>
+        <CombinedDiningHallMenuList diningHallIds={availableDiningHallIds}/>
     );
 };
