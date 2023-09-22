@@ -1,14 +1,14 @@
-import { ApplicationContext } from '../../../context/app';
 import { SettingsContext } from '../../../context/settings.ts';
 import { useContext } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { DiningHallView } from '../../../models/dining-halls.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import './settings.css';
+import { useVisibleViews } from '../../../hooks/views.ts';
 
 export const SettingsPage = () => {
     const [settingsData, setSettingsData] = useContext(SettingsContext);
-    const { viewsInOrder } = useContext(ApplicationContext);
+    const visibleViews = useVisibleViews();
 
     const toggleHomepageView = (view: DiningHallView) => {
         const viewId = view.value.id;
@@ -71,7 +71,7 @@ export const SettingsPage = () => {
                     </div>
                     <div className="setting-data">
                         {
-                            viewsInOrder.map(view => {
+                            visibleViews.map(view => {
                                 const viewId = view.value.id;
                                 const htmlId = `setting-homepage-option-${viewId}`;
                                 const isChecked = settingsData.homepageViewIds.has(viewId);

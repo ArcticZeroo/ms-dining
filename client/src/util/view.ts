@@ -32,3 +32,11 @@ export const getParentView = (viewsById: Map<string, DiningHallView>, useGroups:
 
     return parentView;
 }
+
+export const isViewVisible = (useGroups: boolean, view: DiningHallView) => {
+    if (useGroups) {
+        return view.type === DiningHallViewType.group || !view.value.group;
+    } else {
+        return view.type === DiningHallViewType.single;
+    }
+}

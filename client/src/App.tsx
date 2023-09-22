@@ -8,7 +8,7 @@ import { SelectedViewContext } from './context/dining-hall.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { ISettingsContext, SettingsContext } from './context/settings.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
-import { useViewData } from './hooks/views';
+import { useViewDataFromResponse } from './hooks/views';
 import { DiningHallView, IViewListResponse } from './models/dining-halls.ts';
 import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
@@ -16,7 +16,7 @@ import { classNames } from './util/react';
 function App() {
 	const { diningHalls, groups } = useLoaderData() as IViewListResponse;
 
-	const { viewsById, viewsInOrder } = useViewData(diningHalls, groups);
+	const { viewsById, viewsInOrder } = useViewDataFromResponse(diningHalls, groups);
 	const retrieveDiningHallMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
 	const settingsState = useState<ISettingsContext>(() => ({

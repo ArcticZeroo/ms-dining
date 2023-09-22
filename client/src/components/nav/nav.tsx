@@ -1,38 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import homeIcon from '../../assets/home.svg';
 import menuIcon from '../../assets/menu.svg';
 import settingsIcon from '../../assets/settings.svg';
-import { ApplicationContext } from '../../context/app';
 import { SelectedViewContext } from '../../context/dining-hall.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
-import { SettingsContext } from '../../context/settings';
-import { DiningHallView, DiningHallViewType } from '../../models/dining-halls.ts';
+import { DiningHallView } from '../../models/dining-halls.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { SearchBar } from '../search/search-bar.tsx';
+import { useVisibleViews } from '../../hooks/views.ts';
 
 export const Nav: React.FC = () => {
-    const { viewsInOrder } = useContext(ApplicationContext);
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
     const [, setSelectedView] = useContext(SelectedViewContext);
-    const [{ useGroups }] = useContext(SettingsContext);
-    const [visibleViews, setVisibleViews] = useState<Array<DiningHallView>>();
-
-    useEffect(() => {
-        const newVisibleViews: DiningHallView[] = [];
-
-        for (const view of viewsInOrder) {
-            if (view.type === DiningHallViewType.single) {
-                if (!view.value.group || !useGroups) {
-                    newVisibleViews.push(view);
-                }
-            } else if (useGroups) {
-                newVisibleViews.push(view);
-            }
-        }
-
-        setVisibleViews(newVisibleViews);
-    }, [viewsInOrder, useGroups]);
+    const visibleViews = useVisibleViews();
 
     const onViewClicked = (view: DiningHallView) => {
         setSelectedView(view);
