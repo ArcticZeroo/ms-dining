@@ -16,14 +16,6 @@ export const expandAndFlattenView = (view: DiningHallView | string, viewsById: M
     return view.value.members.flatMap(viewId => expandAndFlattenView(viewId, viewsById));
 }
 
-export const generateDiningHallIds = function* (viewsById: Map<string, DiningHallView>) {
-    for (const [viewId, view] of viewsById) {
-        if (view.type === DiningHallViewType.single) {
-            yield viewId;
-        }
-    }
-}
-
 export const getParentView = (viewsById: Map<string, DiningHallView>, useGroups: boolean, view: DiningHallView) => {
     if (view.type === DiningHallViewType.group) {
         return view;
