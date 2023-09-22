@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { DiningHallMenu, DiningHallViewType, IDiningHall } from '../../models/dining-halls.ts';
 import { DiningHallClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
-import { sortDiningHallIds } from '../../util/sorting.ts';
+import { sortIds } from '../../util/sorting.ts';
 import { CollapsibleDiningHallMenu } from './collapsible-dining-hall-menu.tsx';
 
 import './combined-dining-halls.css';
@@ -28,7 +28,7 @@ export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListPro
     const loadMenusAsync = async () => {
         const menuPromises = [];
 
-        for (const diningHallId of sortDiningHallIds(Array.from(diningHallIds))) {
+        for (const diningHallId of sortIds(Array.from(diningHallIds))) {
             const view = viewsById.get(diningHallId);
 
             if (view == null) {

@@ -5,6 +5,7 @@ import {
 	IDiningHall,
 	IDiningHallGroupWithoutMembers
 } from '../models/dining-halls';
+import { sortIds } from '../util/sorting';
 
 export const useViewData = (diningHalls: IDiningHall[], groups: IDiningHallGroupWithoutMembers[]) => {
 	const [viewsById, setViewsById] = useState<Map<string, DiningHallView>>(new Map());
@@ -45,7 +46,7 @@ export const useViewData = (diningHalls: IDiningHall[], groups: IDiningHallGroup
 
 		setViewsById(viewsById);
 
-		const viewIdsInOrder = Array.from(viewsById.keys()).sort();
+		const viewIdsInOrder = sortIds(Array.from(viewsById.keys()));
 		const viewsInOrder = viewIdsInOrder.map(viewId => viewsById.get(viewId)!);
 
 		setViewsInOrder(viewsInOrder);
