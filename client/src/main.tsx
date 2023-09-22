@@ -15,7 +15,7 @@ import { ErrorPage } from './components/pages/error/error-page.tsx';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path="/" element={<App/>} loader={() => DiningHallClient.retrieveDiningHallList()} errorElement={<ErrorPage/>}>
+        <Route path="/" element={<App/>} loader={() => DiningHallClient.retrieveViewList()} errorElement={<ErrorPage/>}>
             <Route path="/menu/:id" element={<DiningHallPage/>}/>
             <Route path="/settings" element={<SettingsPage/>}/>
             <Route path="/search" element={<SearchPage/>}/>

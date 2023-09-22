@@ -13,11 +13,11 @@ const populateSessionsAsync = async () => {
     for (const diningHall of diningHalls) {
         const session = new DiningHallDiscoverySession(diningHall);
         try {
-            logInfo('Performing discovery for', diningHall.friendlyName, 'at', diningHall.url, '...');
+            logInfo('Performing discovery for', diningHall.name, 'at', diningHall.url, '...');
             await session.performDiscoveryAsync();
             diningHallSessionsByUrl.set(diningHall.url, session);
         } catch (e) {
-            logError(`Failed to populate dining hall ${diningHall.friendlyName} (${diningHall.url})`, e);
+            logError(`Failed to populate dining hall ${diningHall.name} (${diningHall.url})`, e);
         }
     }
 

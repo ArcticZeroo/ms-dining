@@ -1,5 +1,3 @@
-import { IDiningHall } from '../models/dining-halls.ts';
+import { DiningHallView } from '../models/dining-halls.ts';
 
-export const getDiningHallMenuUrl = (diningHall: IDiningHall) => {
-    return `/menu/${diningHall.id}`;
-}
+export const getViewUrl = (view: DiningHallView) => `/menu/${view.value.id}`;

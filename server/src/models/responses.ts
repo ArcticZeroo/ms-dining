@@ -9,6 +9,18 @@ export interface IDiningHallConfigResponse {
     }>
 }
 
+export interface IDiningHallMenuItem {
+    categoryId: string;
+    name: string;
+    items: string[];
+}
+
+export interface IDiningHallConceptMenu {
+    id: string;
+    name: string;
+    categories: Array<IDiningHallMenuItem>;
+}
+
 export interface IDiningHallConceptListItem {
     id: string;
     name: string;
@@ -16,25 +28,7 @@ export interface IDiningHallConceptListItem {
     priceLevelConfig: {
         menuId: string;
     };
-    menus: Array<{
-        id: string;
-        name: string;
-        categories: Array<{
-            categoryId: string;
-            name: string;
-            items: string[]
-        }>
-    }>
-}
-
-export interface IDiningHallSitesByContextResponse {
-    displayOptions: {
-        onDemandTerminalId: string;
-    };
-    conceptInfo: Array<{
-        id: string;
-        onDemandDisplayText: string;
-    }>
+    menus: Array<IDiningHallConceptMenu>;
 }
 
 export interface IDiningHallMenuItemsResponseItem {

@@ -1,7 +1,7 @@
-import { IDiningHall } from '../models/dining-halls.ts';
 import React from 'react';
+import { DiningHallView } from '../models/dining-halls.ts';
 
-export const SelectedDiningHallContext = React.createContext<[IDiningHall | undefined, (value: IDiningHall) => void]>([
+export const SelectedViewContext = React.createContext<[DiningHallView | undefined, (value: DiningHallView) => void]>([
     undefined,
     () => void 0
 ]);

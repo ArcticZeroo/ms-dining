@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getDiningHallMenuUrl } from '../../util/link.ts';
+import { getViewUrl } from '../../util/link.ts';
 import './search.css';
 import { ApplicationContext } from '../../context/app.ts';
 import { SettingsContext } from '../../context/settings.ts';
+import { getParentView } from '../../util/view';
 
 interface ISearchResultProps {
     name: string;
@@ -12,8 +13,8 @@ interface ISearchResultProps {
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, diningHallIds }) => {
-    const { diningHallsById } = useContext(ApplicationContext);
-    const [{ showImages }] = useContext(SettingsContext);
+    const { viewsById } = useContext(ApplicationContext);
+    const [{ showImages, useGroups }] = useContext(SettingsContext);
 
     return (
         <div className="card horizontal search-result">
@@ -22,15 +23,17 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, din
                 <div className="body search-result-hits">
                     {
                         diningHallIds.map(id => {
-                            const diningHall = diningHallsById.get(id);
+                            const view = viewsById.get(id);
 
-                            if (!diningHall) {
+                            if (!view) {
                                 return false;
                             }
 
+                            const parentView = getParentView(viewsById, useGroups, view);
+
                             return (
-                                <Link to={getDiningHallMenuUrl(diningHall)} className="search-result-chip" key={diningHall.id}>
-                                    {diningHall.name}
+                                <Link to={getViewUrl(parentView)} className="search-result-chip" key={view.id}>
+                                    {view.name}
                                 </Link>
                             );
                         })

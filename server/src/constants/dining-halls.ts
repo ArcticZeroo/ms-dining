@@ -1,127 +1,146 @@
-import { IDiningHall } from '../models/dining-hall.js';
+import { IDiningHall, IDiningHallGroup } from '../models/dining-hall.js';
 
 export const getBaseApiUrlWithoutTrailingSlash = ({ url }: IDiningHall) => `https://${url}.buy-ondemand.com/api`;
 
+export const groupIds = {
+    commons: 'commons'
+};
+
+export const groups: IDiningHallGroup[] = [
+    {
+        name: 'The Commons',
+        id:   groupIds.commons
+    }
+];
+
 export const diningHalls: IDiningHall[] = [
     {
-        friendlyName: "Café 16",
-        url: "cafe16",
+        name: "Café 16",
+        url:  "cafe16",
     },
     {
-        friendlyName: "Café 25",
-        url: "cafe25",
+        name: "Café 25",
+        url:  "cafe25",
     },
     {
-        friendlyName: "Café 31",
-        url: "cafe31",
+        name: "Café 31",
+        url:  "cafe31",
     },
     {
-        friendlyName: "Café 34",
-        url: "cafe34",
+        name: "Café 34",
+        url:  "cafe34",
     },
     {
-        friendlyName: "Café 36",
-        url: "cafe36",
+        name: "Café 36",
+        url:  "cafe36",
     },
     {
-        friendlyName: "Café 37",
-        url: "cafe37",
+        name: "Café 37",
+        url:  "cafe37",
     },
     {
-        friendlyName: "Café 40/41",
-        url: "cafe40-41",
+        name: "Café 40/41",
+        url:  "cafe40-41",
     },
     {
-        friendlyName: "Café 43",
-        url: "cafe43",
+        name: "Café 43",
+        url:  "cafe43",
     },
     {
-        friendlyName: "Café 50",
-        url: "cafe50",
+        name: "Café 50",
+        url:  "cafe50",
     },
     {
-        friendlyName: "Café 83",
-        url: "cafe83",
+        name: "Café 83",
+        url:  "cafe83",
     },
     {
-        friendlyName: "Café 86",
-        url: "cafe86",
+        name: "Café 86",
+        url:  "cafe86",
     },
     {
-        friendlyName: "Café 99",
-        url: "cafe99",
+        name: "Café 99",
+        url:  "cafe99",
     },
     {
-        friendlyName: "Café 109",
-        url: "cafe109",
+        name: "Café 109",
+        url:  "cafe109",
     },
     {
-        friendlyName: "Café 112",
-        url: "cafe112",
+        name: "Café 112",
+        url:  "cafe112",
     },
     {
-        friendlyName: "Café 121",
-        url: "cafe121",
+        name: "Café 121",
+        url:  "cafe121",
     },
     {
-        friendlyName: "Café RedWest",
-        url: "caferedwest",
+        name: "Café RedWest",
+        url:  "caferedwest",
     },
     {
-        friendlyName: "Café RTC",
-        url: "cafertc5",
+        name: "Café RTC",
+        url:  "cafertc5",
     },
     {
-        friendlyName: "Café Studio H",
-        url: "cafestudioh",
+        name: "Café Studio H",
+        url:  "cafestudioh",
     },
     {
-        friendlyName: "One Esterra Food Hall",
-        url: "one-esterra",
+        name: "One Esterra Food Hall",
+        url:  "one-esterra",
     },
     {
-        friendlyName: "Acapulco Fresh (The Commons)",
-        url: "acapulcofresh",
+        name:      "Acapulco Fresh (The Commons)",
+        url:       "acapulcofresh",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "Chandy's (The Commons)",
-        url: "chandys",
+        name:      "Chandy's (The Commons)",
+        url:       "chandys",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "Just Poké",
-        url: "justpoke",
+        name:      "Just Poké (The Commons)",
+        url:       "justpoke",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "Kalia (The Commons)",
-        url: "kalia",
+        name:      "Kalia (The Commons)",
+        url:       "kalia",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "Hometown (The Commons)",
-        url: "hometown",
+        name:      "Hometown (The Commons)",
+        url:       "hometown",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "S'wich (The Commons)",
-        url: "s-wich",
+        name:      "S'wich (The Commons)",
+        url:       "s-wich",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "Typhoon! (The Commons)",
-        url: "typhoon",
+        name:      "Typhoon! (The Commons)",
+        url:       "typhoon",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "Boardwalk (The Commons)",
-        url: "boardwalk",
+        name:      "Boardwalk (The Commons)",
+        url:       "boardwalk",
+        groupName: groupIds.commons
     },
     {
-        friendlyName: "in.gredients. Restaurant",
-        url: "in-gredients",
+        name: "in.gredients. Restaurant",
+        url:  "in-gredients",
     },
     {
-        friendlyName: "Building 92 Espresso",
-        url: "cafe92",
+        name: "Building 92 Espresso",
+        url:  "cafe92",
     },
     {
-        friendlyName: "Studio A Espresso",
-        url: "studioa",
+        name: "Studio A Espresso",
+        url:  "studioa",
     },
     /*{
         friendlyName: "Studio B Espresso",
@@ -132,7 +151,7 @@ export const diningHalls: IDiningHall[] = [
         url: "studioc",
     },*/
     {
-        friendlyName: "Studio D Espresso",
-        url: "studiod",
+        name: "Studio D Espresso",
+        url:  "studiod",
     }
 ]

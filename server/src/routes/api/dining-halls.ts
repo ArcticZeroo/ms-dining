@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { diningHalls } from '../../constants/dining-halls.js';
+import * as diningHallConfig from '../../constants/dining-halls.js';
 import { attachRouter } from '../../util/koa.js';
 import { diningHallSessionsByUrl } from '../../api/dining/cache.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
@@ -22,7 +22,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
         const responseDiningHalls = [];
 
-        for (const diningHall of diningHalls) {
+        for (const diningHall of diningHallConfig.diningHalls) {
             const diningHallSession = diningHallSessionsByUrl.get(diningHall.url);
 
             if (diningHallSession == null) {
@@ -30,13 +30,17 @@ export const registerDiningHallRoutes = (parent: Router) => {
             }
 
             responseDiningHalls.push({
-                name:    diningHall.friendlyName,
+                name:    diningHall.name,
                 id:      diningHall.url,
-                logoUrl: diningHallSession.logoUrl
+                group:   diningHall.groupName,
+                logoUrl: diningHallSession.logoUrl,
             });
         }
 
-        ctx.body = JSON.stringify(responseDiningHalls);
+        ctx.body = JSON.stringify({
+            diningHalls: responseDiningHalls,
+            groups: diningHallConfig.groups
+        });
     });
 
     router.get('/:id', async ctx => {

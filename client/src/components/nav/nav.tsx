@@ -1,22 +1,43 @@
-import React, { useContext } from 'react';
-import { IDiningHall } from '../../models/dining-halls.ts';
+import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { NavExpansionContext } from '../../context/nav.ts';
-import { SelectedDiningHallContext } from '../../context/dining-hall.ts';
-import { SearchBar } from '../search/search-bar.tsx';
-import { getDiningHallMenuUrl } from '../../util/link.ts';
-import { useDiningHalls } from '../../hooks/dining-halls.ts';
-import settingsIcon from '../../assets/settings.svg';
-import menuIcon from '../../assets/menu.svg';
 import homeIcon from '../../assets/home.svg';
+import menuIcon from '../../assets/menu.svg';
+import settingsIcon from '../../assets/settings.svg';
+import { ApplicationContext } from '../../context/app';
+import { SelectedViewContext } from '../../context/dining-hall.ts';
+import { NavExpansionContext } from '../../context/nav.ts';
+import { SettingsContext } from '../../context/settings';
+import { DiningHallView, DiningHallViewType } from '../../models/dining-halls.ts';
+import { getViewUrl } from '../../util/link.ts';
+import { SearchBar } from '../search/search-bar.tsx';
 
 export const Nav: React.FC = () => {
-    const diningHalls = useDiningHalls();
+    const { viewsInOrder } = useContext(ApplicationContext);
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
-    const [, setSelectedDiningHall] = useContext(SelectedDiningHallContext);
+    const [, setSelectedView] = useContext(SelectedViewContext);
+    const [{ useGroups }] = useContext(SettingsContext);
+    const [visibleViews, setVisibleViews] = useState<Array<DiningHallView>>();
 
-    const onDiningHallClicked = (diningHall: IDiningHall) => {
-        setSelectedDiningHall(diningHall);
+    useEffect(() => {
+        const newVisibleViews: DiningHallView[] = [];
+
+        for (const view of viewsInOrder) {
+            if (view.type === DiningHallViewType.single) {
+                if (!view.value.group || !useGroups) {
+                    newVisibleViews.push(view);
+                }
+            } else if (useGroups) {
+                newVisibleViews.push(view);
+            }
+        }
+
+        console.log(viewsInOrder, useGroups, newVisibleViews);
+
+        setVisibleViews(newVisibleViews);
+    }, [viewsInOrder, useGroups]);
+
+    const onViewClicked = (view: DiningHallView) => {
+        setSelectedView(view);
         setIsExpanded(false);
     };
 
@@ -38,11 +59,11 @@ export const Nav: React.FC = () => {
                 </li>
                 <SearchBar/>
                 {
-                    diningHalls.map((diningHall) => (
-                        <li key={diningHall.id} className="dining-hall">
-                            <NavLink to={getDiningHallMenuUrl(diningHall)}
-                                     onClick={() => onDiningHallClicked(diningHall)}>
-                                {diningHall.name}
+                    visibleViews?.map?.((view) => (
+                        <li key={view.value.id} className="dining-hall">
+                            <NavLink to={getViewUrl(view)}
+                                     onClick={() => onViewClicked(view)}>
+                                {view.value.name}
                             </NavLink>
                         </li>
                     ))

@@ -1,85 +1,93 @@
-import { Outlet, useLoaderData } from 'react-router-dom';
-import { IDiningHall } from './models/dining-halls.ts';
-import { Nav } from './components/nav/nav.tsx';
 import { useEffect, useRef, useState } from 'react';
-import { NavExpansionContext } from './context/nav.ts';
-import { DeviceType, useDeviceType } from './hooks/media-query.ts';
-import { SelectedDiningHallContext } from './context/dining-hall.ts';
-import { ISettingsContext, SettingsContext } from './context/settings.ts';
+import { Outlet, useLoaderData } from 'react-router-dom';
 import { DiningHallClient } from './api/dining.ts';
-import { ApplicationContext } from './context/app.ts';
 import { ApplicationSettings } from './api/settings.ts';
+import { Nav } from './components/nav/nav.tsx';
+import { ApplicationContext } from './context/app.ts';
+import { SelectedViewContext } from './context/dining-hall.ts';
+import { NavExpansionContext } from './context/nav.ts';
+import { ISettingsContext, SettingsContext } from './context/settings.ts';
+import { DeviceType, useDeviceType } from './hooks/media-query.ts';
+import { useViewData } from './hooks/views';
+import { DiningHallView, IDiningHall, IViewListResponse } from './models/dining-halls.ts';
+import { ICancellationToken } from './util/async';
+import { classNames } from './util/react';
 
 function App() {
-    const diningHallList = useLoaderData() as Array<IDiningHall>;
+	const { diningHalls, groups } = useLoaderData() as IViewListResponse;
 
-    const [diningHallsById, setDiningHallsById] = useState<Map<string, IDiningHall>>(new Map());
-    const [diningHallIdsInOrder, setDiningHallIdsInOrder] = useState<Array<string>>([]);
+	const { viewsById, viewsInOrder } = useViewData(diningHalls, groups);
+	const retrieveDiningHallMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
-    useEffect(() => {
-        const diningHallsById = new Map<string, IDiningHall>();
+	const settingsState = useState<ISettingsContext>(() => ({
+		useGroups:                ApplicationSettings.useGroups.get(),
+		showImages:               ApplicationSettings.showImages.get(),
+		showCalories:             ApplicationSettings.showCalories.get(),
+		requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
+		homepageViewIds:          new Set(ApplicationSettings.homepageViews.get())
+	}));
+	const [{ requestMenusInBackground }] = settingsState;
 
-        for (const diningHall of diningHallList) {
-            diningHallsById.set(diningHall.id, diningHall);
-        }
+	const [selectedView, setSelectedView] = useState<DiningHallView>();
+	const menuDivRef = useRef<HTMLDivElement>(null);
 
-        setDiningHallsById(diningHallsById);
-        setDiningHallIdsInOrder(diningHallList.map(diningHall => diningHall.id).sort());
-    }, [diningHallList]);
+	const [isNavToggleEnabled, setIsNavToggleEnabled] = useState(true);
+	const deviceType = useDeviceType();
 
-    const settingsState = useState<ISettingsContext>(() => ({
-        showImages:               ApplicationSettings.showImages.get(),
-        showCalories:             ApplicationSettings.showCalories.get(),
-        requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
-        homepageDiningHallIds:    new Set(ApplicationSettings.homepageDiningHalls.get())
-    }));
-    const [{ requestMenusInBackground }] = settingsState;
+	const isNavVisible = deviceType === DeviceType.Desktop || isNavToggleEnabled;
+	const shouldStopScroll = isNavToggleEnabled && deviceType === DeviceType.Mobile;
 
-    const [selectedDiningHall, setSelectedDiningHall] = useState<IDiningHall>();
-    const menuDivRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (menuDivRef.current) {
+			menuDivRef.current.scrollTop = 0;
+		}
+	}, [selectedView]);
 
-    const [isNavToggleEnabled, setIsNavToggleEnabled] = useState(true);
-    const deviceType = useDeviceType();
+	useEffect(() => {
+		if (!requestMenusInBackground || diningHalls.length === 0 || viewsById.size === 0) {
+			return;
+		}
 
-    const isNavVisible = deviceType === DeviceType.Desktop || isNavToggleEnabled;
-    const shouldStopScroll = isNavToggleEnabled && deviceType === DeviceType.Mobile;
+		const lastCancellationToken = retrieveDiningHallMenusCancellationToken.current;
+		if (lastCancellationToken) {
+			lastCancellationToken.isCancelled = true;
+		}
 
-    useEffect(() => {
-        if (menuDivRef.current) {
-            menuDivRef.current.scrollTop = 0;
-        }
-    }, [selectedDiningHall]);
+		const cancellationToken: ICancellationToken = { isCancelled: false };
+		retrieveDiningHallMenusCancellationToken.current = cancellationToken;
 
-    useEffect(() => {
-        if (!requestMenusInBackground) {
-            return;
-        }
+		DiningHallClient.retrieveAllMenusInOrder(diningHalls, viewsById, cancellationToken)
+			.then(() => console.log('Retrieved all dining hall menus!'))
+			.catch(err => console.error('Failed to retrieve all dining hall menus:', err));
+	}, [diningHalls, viewsById, requestMenusInBackground]);
 
-        DiningHallClient.retrieveAllMenusInOrder(diningHallList)
-            .then(() => console.log('Retrieved all dining hall menus!'))
-            .catch(err => console.error('Failed to retrieve all dining hall menus:', err));
-    }, [diningHallList, requestMenusInBackground]);
-
-    return (
-        <div className="App">
-            <ApplicationContext.Provider value={{ diningHallsById, diningHallIdsInOrder }}>
-                <SettingsContext.Provider value={settingsState}>
-                    <NavExpansionContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
-                        <SelectedDiningHallContext.Provider value={[selectedDiningHall, setSelectedDiningHall]}>
-                            <Nav/>
-                            <div className={`content${shouldStopScroll ? ' noscroll' : ''}`} ref={menuDivRef}>
-                                {
-                                    diningHallsById.size > 0 && (
-                                        <Outlet/>
-                                    )
-                                }
-                            </div>
-                        </SelectedDiningHallContext.Provider>
-                    </NavExpansionContext.Provider>
-                </SettingsContext.Provider>
-            </ApplicationContext.Provider>
-        </div>
-    )
+	return (
+		<div className="App">
+			<ApplicationContext.Provider value={{ viewsById, viewsInOrder, diningHalls, groups }}>
+				<SettingsContext.Provider value={settingsState}>
+					<NavExpansionContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
+						<SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
+							<Nav/>
+							<div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
+								{
+									viewsById.size > 0 && (
+										               <Outlet/>
+									               )
+								}
+								{
+									viewsById.size === 0 && (
+										               <div className="error-card">
+											               There are no views available!
+										               </div>
+									               )
+								}
+							</div>
+						</SelectedViewContext.Provider>
+					</NavExpansionContext.Provider>
+				</SettingsContext.Provider>
+			</ApplicationContext.Provider>
+		</div>
+	);
 }
 
-export default App
+export default App;

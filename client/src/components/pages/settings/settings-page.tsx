@@ -1,24 +1,27 @@
+import { ApplicationContext } from '../../../context/app';
 import { SettingsContext } from '../../../context/settings.ts';
 import { useContext } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { useDiningHalls } from '../../../hooks/dining-halls.ts';
-import { IDiningHall } from '../../../models/dining-halls.ts';
+import { DiningHallView, IDiningHall } from '../../../models/dining-halls.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import './settings.css';
 
 export const SettingsPage = () => {
     const [settingsData, setSettingsData] = useContext(SettingsContext);
-    const diningHalls = useDiningHalls();
+    const { viewsInOrder } = useContext(ApplicationContext);
 
-    const toggleHomepageDiningHall = (diningHall: IDiningHall) => {
-        const homepageDiningHallIds = new Set(settingsData.homepageDiningHallIds);
-        if (homepageDiningHallIds.has(diningHall.id)) {
-            homepageDiningHallIds.delete(diningHall.id);
+    const toggleHomepageView = (view: DiningHallView) => {
+        const viewId = view.value.id;
+
+        const homepageViewIds = new Set(settingsData.homepageViewIds);
+        if (homepageViewIds.has(viewId)) {
+            homepageViewIds.delete(viewId);
         } else {
-            homepageDiningHallIds.add(diningHall.id);
+            homepageViewIds.add(viewId);
         }
-        setSettingsData({ ...settingsData, homepageDiningHallIds });
-        ApplicationSettings.homepageDiningHalls.set(Array.from(homepageDiningHallIds));
+
+        setSettingsData({ ...settingsData, homepageViewIds });
+        ApplicationSettings.homepageViews.set(Array.from(homepageViewIds));
     };
 
     return (
@@ -30,22 +33,23 @@ export const SettingsPage = () => {
                 <BooleanSettingInput
                     setting={ApplicationSettings.showImages}
                     contextKey="showImages"
-                    name={<>Show Images</>}
-                    description={
-                        <>
-                            When enabled, images are shown in menu headers, menu items, and search.
-                        </>
-                    }
+                    name="Show Images"
+                    description="When enabled, images are shown in menu headers, menu items, and search."
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.showCalories}
                     contextKey="showCalories"
-                    name={<>Show Calories</>}
+                    name="Show Calories"
+                />
+                <BooleanSettingInput
+                    setting={ApplicationSettings.useGroups}
+                    contextKey="useGroups"
+                    name="Allow Dining Hall Groups"
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.requestMenusInBackground}
                     contextKey="requestMenusInBackground"
-                    name={<>Enable Fetching Menus in Background</>}
+                    name="Enable Fetching Menus in Background"
                     description={
                         <>
                             When enabled, menus for each dining hall will be fetched in the background in order to
@@ -59,26 +63,27 @@ export const SettingsPage = () => {
                 <div className="setting" id="setting-homepage">
                     <div className="setting-info">
                         <div className="setting-name">
-                            Homepage Dining Halls
+                            Homepage Views
                         </div>
                         <div className="setting-description">
-                            Select the dining halls you want to appear on the homepage.
+                            Select the views that you want to appear on the homepage.
                         </div>
                     </div>
                     <div className="setting-data">
                         {
-                            diningHalls.map(diningHall => {
-                                const id = `setting-homepage-option-${diningHall.id}`;
-                                const isChecked = settingsData.homepageDiningHallIds.has(diningHall.id);
+                            viewsInOrder.map(view => {
+                                const viewId = view.value.id;
+                                const htmlId = `setting-homepage-option-${viewId}`;
+                                const isChecked = settingsData.homepageViewIds.has(viewId);
                                 return (
-                                    <div className="setting-homepage-option" key={diningHall.id}>
-                                        <label htmlFor={id}>
-                                            {diningHall.name}
+                                    <div className="setting-homepage-option" key={viewId}>
+                                        <label htmlFor={htmlId}>
+                                            {view.value.name}
                                         </label>
                                         <input type="checkbox"
-                                               id={id}
+                                               id={htmlId}
                                                checked={isChecked}
-                                               onChange={() => toggleHomepageDiningHall(diningHall)}/>
+                                               onChange={() => toggleHomepageView(view)}/>
                                     </div>
                                 )
                             })

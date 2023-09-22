@@ -7,23 +7,23 @@ import './home.css';
 import { ApplicationContext } from '../../../context/app.ts';
 
 export const HomePage = () => {
-    const { diningHallsById } = useContext(ApplicationContext);
-    const [{ homepageDiningHallIds }] = useContext(SettingsContext);
+    const { viewsById } = useContext(ApplicationContext);
+    const [{ homepageViewIds }] = useContext(SettingsContext);
 
     // Users may have added dining halls to their home set which are no temporarily unavailable
-    const [availableDiningHallIds, setAvailableDiningHallIds] = useState<Set<string>>(new Set());
+    const [availableViewIds, setAvailableViewIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        const newAvailableDiningHallIds = new Set<string>();
-        for (const diningHallId of homepageDiningHallIds) {
-            if (diningHallsById.has(diningHallId)) {
-                newAvailableDiningHallIds.add(diningHallId);
+        const newAvailableViewId = new Set<string>();
+        for (const viewId of homepageViewIds) {
+            if (viewsById.has(viewId)) {
+                newAvailableViewId.add(viewId);
             }
         }
-        setAvailableDiningHallIds(newAvailableDiningHallIds);
-    }, [diningHallsById, homepageDiningHallIds]);
+        setAvailableViewIds(newAvailableViewId);
+    }, [viewsById, homepageViewIds]);
 
-    if (availableDiningHallIds.size === 0) {
+    if (availableViewIds.size === 0) {
         return (
             <div className="centered-content">
                 <div className="card centered">
@@ -43,6 +43,6 @@ export const HomePage = () => {
     }
 
     return (
-        <CombinedDiningHallMenuList diningHallIds={homepageDiningHallIds}/>
+        <CombinedDiningHallMenuList diningHallIds={homepageViewIds}/>
     );
 };

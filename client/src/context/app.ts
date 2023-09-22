@@ -1,12 +1,14 @@
 import React from 'react';
-import { IDiningHall } from '../models/dining-halls.ts';
+import { DiningHallView, IDiningHall, IDiningHallGroup } from '../models/dining-halls.ts';
 
 interface IApplicationContext {
-    diningHallsById: Map<string, IDiningHall>;
-    diningHallIdsInOrder: string[];
+	viewsById: Map<string, DiningHallView>;
+	viewsInOrder: DiningHallView[];
+	diningHalls: IDiningHall[];
+	groups: IDiningHallGroup[];
 }
 
 export const ApplicationContext = React.createContext<IApplicationContext>({
-    diningHallsById: new Map(),
-    diningHallIdsInOrder: []
+	viewsById:    new Map(),
+	viewsInOrder: []
 });

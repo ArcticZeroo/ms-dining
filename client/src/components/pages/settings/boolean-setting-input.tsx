@@ -3,8 +3,8 @@ import { ISettingsContext, SettingsContext } from '../../../context/settings.ts'
 import React, { useContext } from 'react';
 
 interface IBooleanSettingInputProps {
-    name: React.ReactElement;
-    description?: React.ReactElement;
+    name: React.ReactElement | string;
+    description?: React.ReactElement | string;
     setting: BooleanSetting;
     contextKey: keyof ISettingsContext;
 }

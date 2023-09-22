@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DiningHallMenu, IDiningHall } from '../../models/dining-halls.ts';
+import { DiningHallMenu, DiningHallViewType, IDiningHall } from '../../models/dining-halls.ts';
 import { DiningHallClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { sortDiningHallIds } from '../../util/sorting.ts';
@@ -17,7 +17,7 @@ interface ICombinedDiningHallMenuListProps {
 }
 
 export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListProps> = ({ diningHallIds }) => {
-    const { diningHallsById } = useContext(ApplicationContext);
+    const { viewsById } = useContext(ApplicationContext);
     const [menuData, setMenuData] = useState<Array<IMenuWithDiningHall>>([]);
 
     const loadMenuAsync = async (diningHall: IDiningHall): Promise<IMenuWithDiningHall> => {
@@ -29,14 +29,20 @@ export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListPro
         const menuPromises = [];
 
         for (const diningHallId of sortDiningHallIds(Array.from(diningHallIds))) {
-            const diningHall = diningHallsById.get(diningHallId);
+            const view = viewsById.get(diningHallId);
 
-            if (diningHall == null) {
-                console.log('Cannot find dining hall with id:', diningHallId);
+            if (view == null) {
+                console.error('Cannot find view for dining hall with id:', diningHallId);
                 continue;
             }
 
-            menuPromises.push(loadMenuAsync(diningHall));
+            // TODO: Consider adding support for nested group views in the future
+            if (view.type !== DiningHallViewType.single) {
+                console.error('View has the wrong view type for dining hall with id:', diningHallId);
+                continue;
+            }
+
+            menuPromises.push(loadMenuAsync(view.value));
         }
 
         setMenuData(await Promise.all(menuPromises));
@@ -45,7 +51,7 @@ export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListPro
     useEffect(() => {
         loadMenusAsync()
             .catch(err => console.error('Failed to load menus:', err));
-    }, [diningHallsById, diningHallIds]);
+    }, [viewsById, diningHallIds]);
 
     return (
         <div className="collapsible-menu-list">

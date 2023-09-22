@@ -1,6 +1,12 @@
 export interface IDiningHall {
-    friendlyName: string;
+    name: string;
     url: string;
+    groupName?: string;
+}
+
+export interface IDiningHallGroup {
+    id: string;
+    name: string;
 }
 
 export interface IDiningHallConfig {

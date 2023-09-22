@@ -43,7 +43,7 @@ const cloneSearchResultsByItemName = (searchResultsByItemName: SearchResultsByIt
 }
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
-    const { diningHallsById } = useContext(ApplicationContext);
+    const { diningHalls } = useContext(ApplicationContext);
     const nextStableIdRef = useRef(0);
     const searchSymbolRef = useRef(Symbol());
     const [searchResultsByItemName, setSearchResultsByItemName] = useState<SearchResultsByItemName>(new Map());
@@ -95,11 +95,12 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     useEffect(() => {
         searchSymbolRef.current = Symbol();
         setSearchResultsByItemName(new Map());
-        setWaitingDiningHallIds(new Set(diningHallsById.keys()));
-        for (const diningHall of diningHallsById.values()) {
+
+        setWaitingDiningHallIds(new Set(diningHalls.map(diningHall => diningHall.id)));
+        for (const diningHall of diningHalls) {
             searchAndAddToResults(diningHall);
         }
-    }, [diningHallsById, queryText]);
+    }, [diningHalls, queryText]);
 
     return (
         <div className="search-page">
