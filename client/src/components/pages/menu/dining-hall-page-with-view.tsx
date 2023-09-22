@@ -10,7 +10,7 @@ interface IDiningHallPageWithViewProps {
 
 export const DiningHallPageWithView: React.FC<IDiningHallPageWithViewProps> = ({ view }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const [diningHallIds, setDiningHallIds] = useState<Array<string>>();
+    const [diningHallIds, setDiningHallIds] = useState<Array<string>>([]);
 
     useEffect(() => {
         const diningHalls = expandAndFlattenView(view, viewsById);

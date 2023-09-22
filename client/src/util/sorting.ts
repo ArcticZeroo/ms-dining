@@ -1,4 +1,4 @@
-const normalizeId = id => {
+const normalizeId = (id: string) => {
     id = id.toLowerCase();
 
     if (id.startsWith('cafe')) {

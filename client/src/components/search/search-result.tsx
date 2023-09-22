@@ -32,8 +32,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, din
                             const parentView = getParentView(viewsById, useGroups, view);
 
                             return (
-                                <Link to={getViewUrl(parentView)} className="search-result-chip" key={view.id}>
-                                    {view.name}
+                                <Link to={getViewUrl(parentView)} className="search-result-chip" key={view.value.id}>
+                                    {view.value.name}
                                 </Link>
                             );
                         })

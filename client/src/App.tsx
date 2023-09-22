@@ -9,7 +9,7 @@ import { NavExpansionContext } from './context/nav.ts';
 import { ISettingsContext, SettingsContext } from './context/settings.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewData } from './hooks/views';
-import { DiningHallView, IDiningHall, IViewListResponse } from './models/dining-halls.ts';
+import { DiningHallView, IViewListResponse } from './models/dining-halls.ts';
 import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
 
@@ -31,11 +31,11 @@ function App() {
 	const [selectedView, setSelectedView] = useState<DiningHallView>();
 	const menuDivRef = useRef<HTMLDivElement>(null);
 
-	const [isNavToggleEnabled, setIsNavToggleEnabled] = useState(true);
+	const [isNavExpanded, setIsNavExpanded] = useState(false);
 	const deviceType = useDeviceType();
 
-	const isNavVisible = deviceType === DeviceType.Desktop || isNavToggleEnabled;
-	const shouldStopScroll = isNavToggleEnabled && deviceType === DeviceType.Mobile;
+	const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
+	const shouldStopScroll = isNavExpanded && deviceType === DeviceType.Mobile;
 
 	useEffect(() => {
 		if (menuDivRef.current) {
@@ -65,7 +65,7 @@ function App() {
 		<div className="App">
 			<ApplicationContext.Provider value={{ viewsById, viewsInOrder, diningHalls, groups }}>
 				<SettingsContext.Provider value={settingsState}>
-					<NavExpansionContext.Provider value={[isNavVisible, setIsNavToggleEnabled]}>
+					<NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
 						<SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
 							<Nav/>
 							<div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
@@ -75,7 +75,7 @@ function App() {
 									               )
 								}
 								{
-									viewsById.size === 0 && (
+									diningHalls.length === 0 && (
 										               <div className="error-card">
 											               There are no views available!
 										               </div>

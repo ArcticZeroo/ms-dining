@@ -1,6 +1,6 @@
 import { DiningHallView, IDiningHall, IDiningHallConcept, IViewListResponse } from '../models/dining-halls.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
-import { expandAndFlattenView, generateDiningHallIds } from '../util/view';
+import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;

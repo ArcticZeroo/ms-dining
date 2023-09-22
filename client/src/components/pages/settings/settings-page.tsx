@@ -2,7 +2,7 @@ import { ApplicationContext } from '../../../context/app';
 import { SettingsContext } from '../../../context/settings.ts';
 import { useContext } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { DiningHallView, IDiningHall } from '../../../models/dining-halls.ts';
+import { DiningHallView } from '../../../models/dining-halls.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import './settings.css';
 
