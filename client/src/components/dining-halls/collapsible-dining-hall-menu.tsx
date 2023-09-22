@@ -2,6 +2,7 @@ import { DiningHallMenu, IDiningHall } from '../../models/dining-halls.ts';
 import React, { useContext, useState } from 'react';
 import { ConceptList } from './concept/concept-list.tsx';
 import { SettingsContext } from '../../context/settings.ts';
+import { ExpandIcon } from '../icon/expand.tsx';
 
 interface IHomePageDiningHallMenuProps {
     diningHall: IDiningHall;
@@ -36,9 +37,7 @@ export const CollapsibleDiningHallMenu: React.FC<IHomePageDiningHallMenuProps> =
                         )
                     }
                     {diningHall.name} Menu
-                    <span className={`material-symbols-outlined expand-icon ${isExpanded ? 'expanded' : 'collapsed'}`}>
-                        expand_more
-                    </span>
+                    <ExpandIcon isExpanded={isExpanded}/>
                 </button>
             </div>
             <ConceptList concepts={menu} isVisible={isExpanded}/>

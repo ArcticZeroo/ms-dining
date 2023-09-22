@@ -11,6 +11,8 @@ html {
 
 button {
     cursor: pointer;
+    border: none;
+    outline: none;
 }
 
 .error-card {
@@ -69,7 +71,6 @@ nav {
 
 .concept {
     border-radius: 0.5rem;
-    background: #FAFAFA;
     color: #212121;
     display: flex;
     flex-direction: column;
@@ -254,6 +255,16 @@ nav a.active {
     flex-direction: column;
     gap: 1rem;
 }
+
+.expand-icon {
+    transform: rotate(0deg);
+    transition: transform 0.25s ease-in-out;
+}
+
+.expand-icon.collapsed {
+    transform: rotate(180deg);
+}
+
 
 @media screen and (max-width: 800px) {
     html, body, #root, .App, .collapsible-menu-list, .collapsible-dining-hall, .concepts, .concept {

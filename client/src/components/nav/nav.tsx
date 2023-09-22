@@ -31,8 +31,6 @@ export const Nav: React.FC = () => {
             }
         }
 
-        console.log(viewsInOrder, useGroups, newVisibleViews);
-
         setVisibleViews(newVisibleViews);
     }, [viewsInOrder, useGroups]);
 

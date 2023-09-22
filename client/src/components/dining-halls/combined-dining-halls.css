@@ -27,17 +27,8 @@
     cursor: pointer;
 }
 
-.collapsible-dining-hall .dining-hall-name .expand-icon {
-    transform: rotate(0deg);
-    transition: transform 0.25s ease-in-out;
-}
-
 .collapsible-dining-hall .dining-hall-name .logo {
     height: 4rem;
-}
-
-.collapsible-dining-hall .dining-hall-name .expand-icon.collapsed {
-    transform: rotate(180deg);
 }
 
 .collapsible-dining-hall .dining-hall-order-link {
@@ -49,4 +40,26 @@
     align-items: center;
     justify-content: center;
     text-decoration: none;
+}
+
+.concept .title {transition-property: border-top-left-radius, border-top-right-radius;
+    transition-duration: 0.25s;
+    transition-timing-function: ease;
+    justify-content: space-between;
+}
+
+.concept .menu-body {
+    background: #FAFAFA;
+}
+
+.concept.collapsed {
+    background: none;
+}
+
+.concept.collapsed .title {
+    border-radius: 1rem;
+}
+
+.concept.collapsed .menu-body {
+    visibility: collapse;
 }
