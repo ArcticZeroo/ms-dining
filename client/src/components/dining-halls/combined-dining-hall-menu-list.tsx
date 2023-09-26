@@ -14,14 +14,15 @@ interface IMenuWithDiningHall {
 
 interface ICombinedDiningHallMenuListProps {
     diningHallIds: Iterable<string>;
+    countTowardsLastUsed: boolean;
 }
 
-export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListProps> = ({ diningHallIds }) => {
+export const CombinedDiningHallMenuList: React.FC<ICombinedDiningHallMenuListProps> = ({ diningHallIds, countTowardsLastUsed }) => {
     const { viewsById } = useContext(ApplicationContext);
     const [menuData, setMenuData] = useState<Array<IMenuWithDiningHall>>([]);
 
     const loadMenuAsync = async (diningHall: IDiningHall): Promise<IMenuWithDiningHall> => {
-        const menu = await DiningHallClient.retrieveDiningHallMenu(diningHall.id, false /*shouldCountTowardsLastUsed*/);
+        const menu = await DiningHallClient.retrieveDiningHallMenu(diningHall.id, countTowardsLastUsed /*shouldCountTowardsLastUsed*/);
         return { diningHall, menu };
     }
 

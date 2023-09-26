@@ -51,6 +51,6 @@ export const HomePage = () => {
     }
 
     return (
-        <CombinedDiningHallMenuList diningHallIds={availableDiningHallIds}/>
+        <CombinedDiningHallMenuList diningHallIds={availableDiningHallIds} countTowardsLastUsed={false}/>
     );
 };

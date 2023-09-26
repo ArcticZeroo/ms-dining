@@ -18,6 +18,6 @@ export const DiningHallPageWithView: React.FC<IDiningHallPageWithViewProps> = ({
     }, [view.value.id]);
 
     return (
-        <CombinedDiningHallMenuList diningHallIds={diningHallIds}/>
+        <CombinedDiningHallMenuList diningHallIds={diningHallIds} countTowardsLastUsed={true}/>
     );
 };
