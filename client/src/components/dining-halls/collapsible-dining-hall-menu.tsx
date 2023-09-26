@@ -33,7 +33,10 @@ export const CollapsibleDiningHallMenu: React.FC<IHomePageDiningHallMenuProps> =
                 <button className="dining-hall-name" onClick={toggleIsExpanded}>
                     {
                         showImages && (
-                            <img src={diningHall.logoUrl} alt={`${diningHall.name} logo`} className="logo"/>
+                            <img src={diningHall.logoUrl}
+                                 alt={`${diningHall.name} logo`}
+                                 className="logo"
+                                 decoding="async"/>
                         )
                     }
                     {diningHall.name} Menu

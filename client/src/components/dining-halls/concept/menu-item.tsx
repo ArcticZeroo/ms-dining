@@ -36,7 +36,10 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     <td>
                         {
                             menuItem.imageUrl && (
-                                <img src={menuItem.imageUrl} decoding="async" alt="Menu item image" className="menu-item-image"/>
+                                <img src={menuItem.imageUrl}
+                                     decoding="async"
+                                     alt="Menu item image"
+                                     className="menu-item-image"/>
                             )
                         }
                     </td>

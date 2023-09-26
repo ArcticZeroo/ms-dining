@@ -20,7 +20,9 @@ export const Concept: React.FC<IDiningHallConceptProps> = ({ concept }) => {
             <button className="title" onClick={toggleIsExpanded}>
                 {
                     concept.logoUrl && (
-                        <img src={concept.logoUrl} alt={`Logo for concept ${concept.name}`}/>
+                        <img src={concept.logoUrl}
+                             alt={`Logo for concept ${concept.name}`}
+                             decoding="async"/>
                     )
                 }
                 {concept.name}
