@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import homeIcon from '../../assets/home.svg';
 import menuIcon from '../../assets/menu.svg';
-import settingsIcon from '../../assets/settings.svg';
 import { SelectedViewContext } from '../../context/dining-hall.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { DiningHallView } from '../../models/dining-halls.ts';
 import { getViewUrl } from '../../util/link.ts';
-import { SearchBar } from '../search/search-bar.tsx';
 import { useVisibleViews } from '../../hooks/views.ts';
+
+import './nav.css';
+import { NavListHeaderItems } from './nav-header-buttons.tsx';
 
 export const Nav: React.FC = () => {
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
@@ -20,23 +20,20 @@ export const Nav: React.FC = () => {
         setIsExpanded(false);
     };
 
+    const visibilityToggleButton = (
+        <button onClick={() => setIsExpanded(!isExpanded)} className="visibility-toggle">
+            <img src={menuIcon} alt="Toggle menu"/>
+        </button>
+    );
+
     return (
         <nav className={isExpanded ? 'expanded' : ''}>
-            <button onClick={() => setIsExpanded(!isExpanded)} className="visibility-toggle">
-                <img src={menuIcon} alt="Toggle menu"/>
-            </button>
+            { !isExpanded && visibilityToggleButton }
+            <ul id="sticky-header-list" className="expandable-nav-list">
+                { isExpanded && visibilityToggleButton }
+                <NavListHeaderItems onClick={() => setIsExpanded(false)}/>
+            </ul>
             <ul className="expandable-nav-list">
-                <li>
-                    <NavLink to="/settings" className="link-button settings" onClick={() => setIsExpanded(false)}>
-                        <img src={settingsIcon} alt="Open settings"/>
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/" className="link-button home" onClick={() => setIsExpanded(false)}>
-                        <img src={homeIcon} alt="Navigate home"/>
-                    </NavLink>
-                </li>
-                <SearchBar/>
                 {
                     visibleViews?.map?.((view) => (
                         <li key={view.value.id} className="dining-hall">
