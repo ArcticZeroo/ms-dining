@@ -32,7 +32,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
             responseDiningHalls.push({
                 name:    diningHall.name,
                 id:      diningHall.url,
-                group:   diningHall.groupName,
+                group:   diningHall.groupId,
                 logoUrl: diningHallSession.logoUrl,
             });
         }

@@ -1,7 +1,7 @@
 export interface IDiningHall {
     name: string;
     url: string;
-    groupName?: string;
+    groupId?: string;
 }
 
 export interface IDiningHallGroup {
