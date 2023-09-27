@@ -10,12 +10,12 @@ interface ISearchPageWithQueryProps {
     queryText: string;
 }
 
-const getMatchingItems = (queryText: string, concepts: DiningHallMenu) => {
+const getMatchingItems = (queryText: string, stations: DiningHallMenu) => {
     const items = [];
     const seenItemNames = new Set<string>();
-    for (const concept of concepts) {
-        for (const category of Object.keys(concept.menu)) {
-            for (const item of concept.menu[category]) {
+    for (const station of stations) {
+        for (const category of Object.keys(station.menu)) {
+            for (const item of station.menu[category]) {
                 if (seenItemNames.has(item.displayName)) {
                     continue;
                 }
@@ -50,8 +50,8 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     const [failedDiningHallIds, setFailedDiningHallIds] = useState<string[]>([]);
     const [waitingDiningHallIds, setWaitingDiningHallIds] = useState<Set<string>>(() => new Set());
 
-    const addMenuToSearchResults = (diningHall: IDiningHall, concepts: DiningHallMenu) => {
-        const matchingItems = getMatchingItems(queryText, concepts);
+    const addMenuToSearchResults = (diningHall: IDiningHall, stations: DiningHallMenu) => {
+        const matchingItems = getMatchingItems(queryText, stations);
         setSearchResultsByItemName((previousSearchResults) => {
             const newSearchResults = cloneSearchResultsByItemName(previousSearchResults);
             for (const item of matchingItems) {

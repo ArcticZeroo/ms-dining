@@ -49,10 +49,10 @@ export interface IDiningHallMenuItemsByCategoryName {
     [categoryName: string]: Array<IDiningHallMenuItem>;
 }
 
-export interface IDiningHallConcept {
+export interface IDiningHallStation {
     name: string;
     logoUrl: string;
     menu: IDiningHallMenuItemsByCategoryName;
 }
 
-export type DiningHallMenu = IDiningHallConcept[];
+export type DiningHallMenu = IDiningHallStation[];

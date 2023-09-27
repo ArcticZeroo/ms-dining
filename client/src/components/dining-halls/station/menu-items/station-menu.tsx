@@ -1,12 +1,12 @@
-import { IDiningHallMenuItemsByCategoryName } from '../../../models/dining-halls.ts';
+import { IDiningHallMenuItemsByCategoryName } from '../../../../models/dining-halls.ts';
 import React from 'react';
 import { MenuCategory } from './menu-category.tsx';
 
-interface IDiningHallConceptMenuProps {
+interface IDiningHallStationMenuProps {
     menuItemsByCategoryName: IDiningHallMenuItemsByCategoryName;
 }
 
-export const ConceptMenu: React.FC<IDiningHallConceptMenuProps> = ({ menuItemsByCategoryName }) => {
+export const StationMenu: React.FC<IDiningHallStationMenuProps> = ({ menuItemsByCategoryName }) => {
     return (
         // This div wrapper is needed for the table to scroll independently of the header
         <div className="menu-body">

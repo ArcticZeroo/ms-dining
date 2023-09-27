@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { IDiningHallMenuItem } from '../../../models/dining-halls.ts';
-import { SettingsContext } from '../../../context/settings.ts';
+import { IDiningHallMenuItem } from '../../../../models/dining-halls.ts';
+import { SettingsContext } from '../../../../context/settings.ts';
 
 //import imageSvg from '../../../../assets/image.svg';
 

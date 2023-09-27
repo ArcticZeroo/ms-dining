@@ -1,6 +1,6 @@
 import { DiningHallMenu, IDiningHall } from '../../models/dining-halls.ts';
 import React, { useContext, useState } from 'react';
-import { ConceptList } from './concept/concept-list.tsx';
+import { StationList } from './station/station-list.tsx';
 import { SettingsContext } from '../../context/settings.ts';
 import { ExpandIcon } from '../icon/expand.tsx';
 
@@ -43,7 +43,7 @@ export const CollapsibleDiningHallMenu: React.FC<IHomePageDiningHallMenuProps> =
                     <ExpandIcon isExpanded={isExpanded}/>
                 </button>
             </div>
-            <ConceptList concepts={menu} isVisible={isExpanded}/>
+            <StationList stations={menu} isVisible={isExpanded}/>
         </div>
     );
 };

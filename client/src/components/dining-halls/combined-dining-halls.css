@@ -42,24 +42,24 @@
     text-decoration: none;
 }
 
-.concept .title {transition-property: border-top-left-radius, border-top-right-radius;
+.station .title {transition-property: border-top-left-radius, border-top-right-radius;
     transition-duration: 0.25s;
     transition-timing-function: ease;
     justify-content: space-between;
 }
 
-.concept .menu-body {
+.station .menu-body {
     background: #FAFAFA;
 }
 
-.concept.collapsed {
+.station.collapsed {
     background: none;
 }
 
-.concept.collapsed .title {
+.station.collapsed .title {
     border-radius: 1rem;
 }
 
-.concept.collapsed .menu-body {
+.station.collapsed .menu-body {
     visibility: collapse;
 }

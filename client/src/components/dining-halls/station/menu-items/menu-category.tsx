@@ -1,13 +1,13 @@
-import { IDiningHallMenuItem } from '../../../models/dining-halls.ts';
+import { IDiningHallMenuItem } from '../../../../models/dining-halls.ts';
 import React from 'react';
 import { MenuItem } from './menu-item.tsx';
 
-export interface IDiningHallConceptMenuCategoryProps {
+export interface IDiningHallStationMenuCategoryProps {
     categoryName: string;
     menuItems: IDiningHallMenuItem[];
 }
 
-export const MenuCategory: React.FC<IDiningHallConceptMenuCategoryProps> = ({
+export const MenuCategory: React.FC<IDiningHallStationMenuCategoryProps> = ({
                                                                                 categoryName,
                                                                                 menuItems
                                                                             }) => {

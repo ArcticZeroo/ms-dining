@@ -1,4 +1,4 @@
-import { DiningHallView, IDiningHall, IDiningHallConcept, IViewListResponse } from '../models/dining-halls.ts';
+import { DiningHallView, IDiningHall, IDiningHallStation, IViewListResponse } from '../models/dining-halls.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
@@ -7,7 +7,7 @@ const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
 export abstract class DiningHallClient {
 	private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
-	private static readonly _diningHallMenusById: Map<string, Promise<Array<IDiningHallConcept>>> = new Map();
+	private static readonly _diningHallMenusById: Map<string, Promise<Array<IDiningHallStation>>> = new Map();
 	private static readonly _lastUsedDiningHallIds: string[] = ApplicationSettings.lastUsedDiningHalls.get();
 
 	private static _getRequestOptions(sendVisitorId: boolean) {
@@ -42,7 +42,7 @@ export abstract class DiningHallClient {
 		return DiningHallClient._viewListPromise;
 	}
 
-	private static async _retrieveDiningHallMenuInner(id: string): Promise<Array<IDiningHallConcept>> {
+	private static async _retrieveDiningHallMenuInner(id: string): Promise<Array<IDiningHallStation>> {
 		return DiningHallClient._makeRequest(`/api/dining/${id}`);
 	}
 
@@ -55,7 +55,7 @@ export abstract class DiningHallClient {
 		ApplicationSettings.lastUsedDiningHalls.set(DiningHallClient._lastUsedDiningHallIds);
 	}
 
-	public static async retrieveDiningHallMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<Array<IDiningHallConcept>> {
+	public static async retrieveDiningHallMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<Array<IDiningHallStation>> {
 		try {
 			if (!DiningHallClient._diningHallMenusById.has(id)) {
 				DiningHallClient._diningHallMenusById.set(id, DiningHallClient._retrieveDiningHallMenuInner(id));
