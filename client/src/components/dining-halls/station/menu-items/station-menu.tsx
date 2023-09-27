@@ -6,15 +6,17 @@ interface IDiningHallStationMenuProps {
     menuItemsByCategoryName: IDiningHallMenuItemsByCategoryName;
 }
 
-export const StationMenu: React.FC<IDiningHallStationMenuProps> = ({ menuItemsByCategoryName }) => {
+const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IDiningHallStationMenuProps> = ({ menuItemsByCategoryName }, menuBodyRef) => {
+
     return (
         // This div wrapper is needed for the table to scroll independently of the header
-        <div className="menu-body">
+        <div className="menu-body" ref={menuBodyRef}>
             <table>
                 <tbody>
                 {
                     Object.keys(menuItemsByCategoryName).map(categoryName => (
-                        <MenuCategory key={categoryName} categoryName={categoryName} menuItems={menuItemsByCategoryName[categoryName]}/>
+                        <MenuCategory key={categoryName} categoryName={categoryName}
+                                      menuItems={menuItemsByCategoryName[categoryName]}/>
                     ))
                 }
                 </tbody>
@@ -22,3 +24,5 @@ export const StationMenu: React.FC<IDiningHallStationMenuProps> = ({ menuItemsBy
         </div>
     )
 };
+
+export const StationMenu = React.forwardRef(StationMenuWithRef);

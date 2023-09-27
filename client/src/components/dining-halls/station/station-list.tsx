@@ -1,6 +1,6 @@
 import { DiningHallMenu } from '../../../models/dining-halls.ts';
 import React from 'react';
-import { Station } from './station.tsx';
+import { CollapsibleStation } from './collapsible-station.tsx';
 import { classNames } from '../../../util/react.ts';
 
 interface IStationListProps {
@@ -11,7 +11,7 @@ interface IStationListProps {
 export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }) => {
     return (
         <div className={classNames('stations', !isVisible && 'hidden')}>
-            {stations.map(station => <Station key={station.name} station={station}/>)}
+            {stations.map(station => <CollapsibleStation key={station.name} station={station}/>)}
         </div>
     );
 };

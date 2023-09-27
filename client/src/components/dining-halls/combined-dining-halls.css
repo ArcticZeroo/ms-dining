@@ -61,5 +61,5 @@
 }
 
 .station.collapsed .menu-body {
-    visibility: collapse;
+    display: none;
 }
