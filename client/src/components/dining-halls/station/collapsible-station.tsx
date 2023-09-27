@@ -31,7 +31,8 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
 
         if (menuBodyElement && !isNowExpanded) {
             console.log(menuBodyElement.offsetWidth, menuBodyElement.clientWidth, menuBodyElement.scrollWidth);
-            setMenuWidthPx(menuBodyElement.offsetWidth);
+            // Apparently the browser sometimes renders with partial pixels. Why?
+            setMenuWidthPx(Math.ceil(menuBodyElement.offsetWidth));
         } else {
             setMenuWidthPx(undefined);
         }
@@ -40,7 +41,8 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     }
 
     return (
-        <div className={classNames('station', !isExpanded && 'collapsed')} style={getStationStyle(isExpanded, menuWidthPx)}>
+        <div className={classNames('station', !isExpanded && 'collapsed')}
+             style={getStationStyle(isExpanded, menuWidthPx)}>
             <button className="title" onClick={toggleIsExpanded}>
                 {
                     station.logoUrl && (

@@ -15,7 +15,8 @@ const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IDining
                 <tbody>
                 {
                     Object.keys(menuItemsByCategoryName).map(categoryName => (
-                        <MenuCategory key={categoryName} categoryName={categoryName}
+                        <MenuCategory key={categoryName}
+                                      categoryName={categoryName}
                                       menuItems={menuItemsByCategoryName[categoryName]}/>
                     ))
                 }
