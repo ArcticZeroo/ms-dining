@@ -45,8 +45,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                 {
                     station.logoUrl && (
                         <img src={station.logoUrl}
-                             alt={`Logo for station ${station.name}`}
-                             decoding="async"/>
+                             alt={`Logo for station ${station.name}`}/>
                     )
                 }
                 {station.name}

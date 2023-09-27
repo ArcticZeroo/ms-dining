@@ -35,8 +35,7 @@ export const CollapsibleDiningHallMenu: React.FC<IHomePageDiningHallMenuProps> =
                         showImages && (
                             <img src={diningHall.logoUrl}
                                  alt={`${diningHall.name} logo`}
-                                 className="logo"
-                                 decoding="async"/>
+                                 className="logo"/>
                         )
                     }
                     {diningHall.name} Menu
