@@ -1,10 +1,10 @@
-import { DiningHallMenu } from '../../../models/dining-halls.ts';
+import { CafeMenu } from '../../../models/cafe.ts';
 import React from 'react';
 import { CollapsibleStation } from './collapsible-station.tsx';
 import { classNames } from '../../../util/react.ts';
 
 interface IStationListProps {
-    stations: DiningHallMenu;
+    stations: CafeMenu;
     isVisible: boolean;
 }
 

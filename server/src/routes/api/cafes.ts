@@ -1,7 +1,7 @@
 import Router from '@koa/router';
-import * as diningHallConfig from '../../constants/dining-halls.js';
+import * as diningConfig from '../../constants/cafes.js';
 import { attachRouter } from '../../util/koa.js';
-import { diningHallSessionsByUrl } from '../../api/dining/cache.js';
+import { cafeSessionsByUrl } from '../../api/cafe/cache.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 
@@ -20,26 +20,26 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
         }
 
-        const responseDiningHalls = [];
+        const responseCafes = [];
 
-        for (const diningHall of diningHallConfig.diningHalls) {
-            const diningHallSession = diningHallSessionsByUrl.get(diningHall.url);
+        for (const cafe of diningConfig.cafeList) {
+            const cafeSession = cafeSessionsByUrl.get(cafe.url);
 
-            if (diningHallSession == null) {
+            if (cafeSession == null) {
                 continue;
             }
 
-            responseDiningHalls.push({
-                name:    diningHall.name,
-                id:      diningHall.url,
-                group:   diningHall.groupId,
-                logoUrl: diningHallSession.logoUrl,
+            responseCafes.push({
+                name:    cafe.name,
+                id:      cafe.url,
+                group:   cafe.groupId,
+                logoUrl: cafeSession.logoUrl,
             });
         }
 
         ctx.body = JSON.stringify({
-            diningHalls: responseDiningHalls,
-            groups: diningHallConfig.groups
+            cafes: responseCafes,
+            groups: diningConfig.groupList
         });
     });
 
@@ -51,27 +51,27 @@ export const registerDiningHallRoutes = (parent: Router) => {
             return;
         }
 
-        const diningHallSession = diningHallSessionsByUrl.get(id);
-        if (!diningHallSession) {
+        const cafeSession = cafeSessionsByUrl.get(id);
+        if (!cafeSession) {
             ctx.status = 404;
-            ctx.body = 'Dining hall not found or information is missing';
+            ctx.body = 'Cafe not found or information is missing';
             return;
         }
 
-        const menusByConcept = [];
-        for (const concept of diningHallSession.concepts) {
+        const menusByStation = [];
+        for (const station of cafeSession.stations) {
             const itemsByCategory = {};
 
-            for (const [categoryName, categoryItemIds] of concept.menuItemIdsByCategoryName) {
+            for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
                 const itemsForCategory = [];
 
                 for (const itemId of categoryItemIds) {
                     // Expected; Some items are 86-ed
-                    if (!concept.menuItemsById.has(itemId)) {
+                    if (!station.menuItemsById.has(itemId)) {
                         continue;
                     }
 
-                    itemsForCategory.push(concept.menuItemsById.get(itemId));
+                    itemsForCategory.push(station.menuItemsById.get(itemId));
                 }
 
                 if (itemsForCategory.length === 0) {
@@ -85,14 +85,14 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 continue;
             }
 
-            menusByConcept.push({
-                name:    concept.name,
-                logoUrl: concept.logoUrl,
+            menusByStation.push({
+                name:    station.name,
+                logoUrl: station.logoUrl,
                 menu:    itemsByCategory
             });
         }
 
-        ctx.body = JSON.stringify(menusByConcept);
+        ctx.body = JSON.stringify(menusByStation);
     });
 
     attachRouter(parent, router);

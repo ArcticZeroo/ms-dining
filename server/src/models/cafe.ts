@@ -1,31 +1,31 @@
-export interface IDiningHall {
+export interface ICafe {
     name: string;
     url: string;
     groupId?: string;
 }
 
-export interface IDiningHallGroup {
+export interface ICafeGroup {
     id: string;
     name: string;
 }
 
-export interface IDiningHallConfig {
+export interface ICafeConfig {
     tenantId: string;
     contextId: string;
     logoName: string;
     displayProfileId: string;
 }
 
-export interface IDiningHallConcept {
+export interface ICafeStation {
     id: string;
     menuId: string;
     name: string;
     logoUrl: string;
     menuItemIdsByCategoryName: Map<string, Array<string>>;
-    menuItemsById: Map<string, IDiningHallMenuItem>;
+    menuItemsById: Map<string, IMenuItem>;
 }
 
-export interface IDiningHallMenuItem {
+export interface IMenuItem {
     id: string;
     price: string;
     displayName: string;

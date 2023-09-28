@@ -1,13 +1,13 @@
-import { IDiningHall, IDiningHallGroup } from '../models/dining-hall.js';
+import { ICafe, ICafeGroup } from '../models/cafe.js';
 
-export const getBaseApiUrlWithoutTrailingSlash = ({ url }: IDiningHall) => `https://${url}.buy-ondemand.com/api`;
+export const getBaseApiUrlWithoutTrailingSlash = ({ url }: ICafe) => `https://${url}.buy-ondemand.com/api`;
 
 export const groupIds = {
     commons:   'commons',
     building6: 'building6'
 };
 
-export const groups: IDiningHallGroup[] = [
+export const groupList: ICafeGroup[] = [
     {
         name: 'The Commons',
         id:   groupIds.commons
@@ -18,7 +18,7 @@ export const groups: IDiningHallGroup[] = [
     }
 ];
 
-export const diningHalls: IDiningHall[] = [
+export const cafeList: ICafe[] = [
     {
         name: 'Café 16',
         url:  'cafe16',

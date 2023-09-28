@@ -1,14 +1,14 @@
-import { DiningHallView, IDiningHall, IDiningHallStation, IViewListResponse } from '../models/dining-halls.ts';
+import { CafeMenu, CafeView, ICafe, ICafeStation, IViewListResponse } from '../models/cafe.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
-export abstract class DiningHallClient {
+export abstract class DiningClient {
 	private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
-	private static readonly _diningHallMenusById: Map<string, Promise<Array<IDiningHallStation>>> = new Map();
-	private static readonly _lastUsedDiningHallIds: string[] = ApplicationSettings.lastUsedDiningHalls.get();
+	private static readonly _cafeMenusById: Map<string, Promise<CafeMenu>> = new Map();
+	private static readonly _lastUsedCafeIds: string[] = ApplicationSettings.lastUsedCafeIds.get();
 
 	private static _getRequestOptions(sendVisitorId: boolean) {
 		if (!sendVisitorId) {
@@ -23,7 +23,7 @@ export abstract class DiningHallClient {
 	}
 
 	private static async _makeRequest<T>(path: string, sendVisitorId: boolean = false): Promise<T> {
-		const response = await fetch(path, DiningHallClient._getRequestOptions(sendVisitorId));
+		const response = await fetch(path, DiningClient._getRequestOptions(sendVisitorId));
 		if (!response.ok) {
 			throw new Error(`Response failed with status: ${response.status}`);
 		}
@@ -31,63 +31,63 @@ export abstract class DiningHallClient {
 	}
 
 	private static async _retrieveViewListInner(): Promise<IViewListResponse> {
-		return DiningHallClient._makeRequest('/api/dining/', true /*sendVisitorId*/);
+		return DiningClient._makeRequest('/api/dining/', true /*sendVisitorId*/);
 	}
 
 	public static async retrieveViewList(): Promise<IViewListResponse> {
-		if (!DiningHallClient._viewListPromise) {
-			DiningHallClient._viewListPromise = DiningHallClient._retrieveViewListInner();
+		if (!DiningClient._viewListPromise) {
+			DiningClient._viewListPromise = DiningClient._retrieveViewListInner();
 		}
 
-		return DiningHallClient._viewListPromise;
+		return DiningClient._viewListPromise;
 	}
 
-	private static async _retrieveDiningHallMenuInner(id: string): Promise<Array<IDiningHallStation>> {
-		return DiningHallClient._makeRequest(`/api/dining/${id}`);
+	private static async _retrieveCafeMenuInner(id: string): Promise<Array<ICafeStation>> {
+		return DiningClient._makeRequest(`/api/dining/${id}`);
 	}
 
-	private static _addToLastUsedDiningHalls(id: string) {
-		const existingIndex = DiningHallClient._lastUsedDiningHallIds.indexOf(id);
+	private static _addToLastUsedCafeIds(id: string) {
+		const existingIndex = DiningClient._lastUsedCafeIds.indexOf(id);
 		if (existingIndex !== -1) {
-			DiningHallClient._lastUsedDiningHallIds.splice(existingIndex, 1);
+			DiningClient._lastUsedCafeIds.splice(existingIndex, 1);
 		}
-		DiningHallClient._lastUsedDiningHallIds.push(id);
-		ApplicationSettings.lastUsedDiningHalls.set(DiningHallClient._lastUsedDiningHallIds);
+		DiningClient._lastUsedCafeIds.push(id);
+		ApplicationSettings.lastUsedCafeIds.set(DiningClient._lastUsedCafeIds);
 	}
 
-	public static async retrieveDiningHallMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<Array<IDiningHallStation>> {
+	public static async retrieveCafeMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<CafeMenu> {
 		try {
-			if (!DiningHallClient._diningHallMenusById.has(id)) {
-				DiningHallClient._diningHallMenusById.set(id, DiningHallClient._retrieveDiningHallMenuInner(id));
+			if (!DiningClient._cafeMenusById.has(id)) {
+				DiningClient._cafeMenusById.set(id, DiningClient._retrieveCafeMenuInner(id));
 			}
 
-			const menu = await DiningHallClient._diningHallMenusById.get(id)!;
+			const menu = await DiningClient._cafeMenusById.get(id)!;
 
-			// Wait until retrieving successfully first so that we avoid holding a bunch of invalid dining halls
+			// Wait until retrieving successfully first so that we avoid holding a bunch of invalid cafes
 			if (shouldCountTowardsLastUsed) {
-				DiningHallClient._addToLastUsedDiningHalls(id);
+				DiningClient._addToLastUsedCafeIds(id);
 			}
 
 			return menu;
 		} catch (err) {
-			DiningHallClient._diningHallMenusById.delete(id);
+			DiningClient._cafeMenusById.delete(id);
 			throw err;
 		}
 	}
 
-	public static getDiningHallRetrievalOrder(diningHalls: IDiningHall[], viewsById: Map<string, DiningHallView>) {
+	public static getCafeRetrievalOrder(cafes: ICafe[], viewsById: Map<string, CafeView>) {
 		const homepageViewIds = ApplicationSettings.homepageViews.get();
-		const homepageDiningHallIds = new Set(
+		const homepageCafeIds = new Set(
 			homepageViewIds
 				.flatMap(viewId => expandAndFlattenView(viewId, viewsById))
-				.map(diningHall => diningHall.id)
+				.map(cafe => cafe.id)
 		);
 
-		return diningHalls.sort((a, b) => {
-			const aIndex = DiningHallClient._lastUsedDiningHallIds.indexOf(a.id);
-			const bIndex = DiningHallClient._lastUsedDiningHallIds.indexOf(b.id);
-			const isAHomepage = homepageDiningHallIds.has(a.id);
-			const isBHomepage = homepageDiningHallIds.has(b.id);
+		return cafes.sort((a, b) => {
+			const aIndex = DiningClient._lastUsedCafeIds.indexOf(a.id);
+			const bIndex = DiningClient._lastUsedCafeIds.indexOf(b.id);
+			const isAHomepage = homepageCafeIds.has(a.id);
+			const isBHomepage = homepageCafeIds.has(b.id);
 
 			if (isAHomepage && !isBHomepage) {
 				return -1;
@@ -113,17 +113,17 @@ export abstract class DiningHallClient {
 		});
 	}
 
-	public static async retrieveAllMenusInOrder(diningHalls: IDiningHall[], viewsById: Map<string, DiningHallView>, cancellationToken?: ICancellationToken) {
-		console.log('Retrieving dining hall menus...');
+	public static async retrieveAllMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
+		console.log('Retrieving cafe menus...');
 
-		for (const diningHall of DiningHallClient.getDiningHallRetrievalOrder(diningHalls, viewsById)) {
+		for (const cafe of DiningClient.getCafeRetrievalOrder(cafes, viewsById)) {
 			await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
 
 			if (cancellationToken?.isCancelled || !ApplicationSettings.requestMenusInBackground.get()) {
 				break;
 			}
 
-			await DiningHallClient.retrieveDiningHallMenu(diningHall.id, false /*shouldCountTowardsLastUsed*/);
+			await DiningClient.retrieveCafeMenu(cafe.id, false /*shouldCountTowardsLastUsed*/);
 		}
 	}
 }

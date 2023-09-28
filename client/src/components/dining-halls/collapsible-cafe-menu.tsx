@@ -1,16 +1,16 @@
-import { DiningHallMenu, IDiningHall } from '../../models/dining-halls.ts';
+import { CafeMenu, ICafe } from '../../models/cafe.ts';
 import React, { useContext, useState } from 'react';
 import { StationList } from './station/station-list.tsx';
 import { SettingsContext } from '../../context/settings.ts';
 import { ExpandIcon } from '../icon/expand.tsx';
 
-interface IHomePageDiningHallMenuProps {
-    diningHall: IDiningHall;
-    menu: DiningHallMenu;
+interface ICollapsibleCafeMenuProps {
+    cafe: ICafe;
+    menu: CafeMenu;
 }
 
-export const CollapsibleDiningHallMenu: React.FC<IHomePageDiningHallMenuProps> = ({
-                                                                                      diningHall,
+export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
+                                                                                      cafe,
                                                                                       menu,
                                                                                   }) => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -21,24 +21,24 @@ export const CollapsibleDiningHallMenu: React.FC<IHomePageDiningHallMenuProps> =
     };
 
     return (
-        <div className="collapsible-dining-hall" key={diningHall.id}>
-            <div className="dining-hall-header">
-                <a className="dining-hall-order-link"
-                   href={`https://${diningHall.id}.buy-ondemand.com`}
+        <div className="collapsible-cafe" key={cafe.id}>
+            <div className="cafe-header">
+                <a className="cafe-order-link"
+                   href={`https://${cafe.id}.buy-ondemand.com`}
                    target="_blank">
                     <span className="material-symbols-outlined">
                             open_in_new
                     </span>
                 </a>
-                <button className="dining-hall-name" onClick={toggleIsExpanded}>
+                <button className="cafe-name" onClick={toggleIsExpanded}>
                     {
                         showImages && (
-                            <img src={diningHall.logoUrl}
-                                 alt={`${diningHall.name} logo`}
+                            <img src={cafe.logoUrl}
+                                 alt={`${cafe.name} logo`}
                                  className="logo"/>
                         )
                     }
-                    {diningHall.name} Menu
+                    {cafe.name} Menu
                     <ExpandIcon isExpanded={isExpanded}/>
                 </button>
             </div>

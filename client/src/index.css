@@ -205,7 +205,7 @@ html, body, #root, .App {
 
 
 @media screen and (max-width: 800px) {
-    html, body, #root, .App, .collapsible-menu-list, .collapsible-dining-hall, .stations, .station {
+    html, body, #root, .App, .collapsible-menu-list, .collapsible-cafe, .stations, .station {
         width: 100%;
     }
 

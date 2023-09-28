@@ -1,25 +1,25 @@
 import { useContext, useEffect, useState } from 'react';
 import {
-    DiningHallView,
-    DiningHallViewType,
-    IDiningHall,
-    IDiningHallGroupWithoutMembers
-} from '../models/dining-halls';
+    CafeView,
+    CafeViewType,
+    ICafe,
+    ICafeGroupWithoutMembers
+} from '../models/cafe.ts';
 import { sortIds } from '../util/sorting';
 import { ApplicationContext } from '../context/app.ts';
 import { SettingsContext } from '../context/settings.ts';
 import { isViewVisible } from '../util/view.ts';
 
-export const useViewDataFromResponse = (diningHalls: IDiningHall[], groups: IDiningHallGroupWithoutMembers[]) => {
-    const [viewsById, setViewsById] = useState<Map<string, DiningHallView>>(new Map());
-    const [viewsInOrder, setViewsInOrder] = useState<Array<DiningHallView>>([]);
+export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithoutMembers[]) => {
+    const [viewsById, setViewsById] = useState<Map<string, CafeView>>(new Map());
+    const [viewsInOrder, setViewsInOrder] = useState<Array<CafeView>>([]);
 
     useEffect(() => {
-        const viewsById = new Map<string, DiningHallView>();
+        const viewsById = new Map<string, CafeView>();
 
         for (const group of groups) {
             viewsById.set(group.id, {
-                type:  DiningHallViewType.group,
+                type:  CafeViewType.group,
                 value: {
                     ...group,
                     members: []
@@ -27,23 +27,23 @@ export const useViewDataFromResponse = (diningHalls: IDiningHall[], groups: IDin
             });
         }
 
-        for (const diningHall of diningHalls) {
-            viewsById.set(diningHall.id, {
-                type:  DiningHallViewType.single,
-                value: diningHall
+        for (const cafe of cafes) {
+            viewsById.set(cafe.id, {
+                type:  CafeViewType.single,
+                value: cafe
             });
 
-            if (diningHall.group) {
-                if (!viewsById.has(diningHall.group)) {
-                    throw new Error(`Missing dining hall group with id ${diningHall.group}`);
+            if (cafe.group) {
+                if (!viewsById.has(cafe.group)) {
+                    throw new Error(`Missing cafe group with id ${cafe.group}`);
                 }
 
-                const groupView = viewsById.get(diningHall.group)!;
-                if (groupView.type !== DiningHallViewType.group) {
-                    throw new Error(`View with id ${diningHall.group} has the wrong view type!`);
+                const groupView = viewsById.get(cafe.group)!;
+                if (groupView.type !== CafeViewType.group) {
+                    throw new Error(`View with id ${cafe.group} has the wrong view type!`);
                 }
 
-                groupView.value.members.push(diningHall.id);
+                groupView.value.members.push(cafe.id);
             }
         }
 
@@ -53,7 +53,7 @@ export const useViewDataFromResponse = (diningHalls: IDiningHall[], groups: IDin
         const viewsInOrder = viewIdsInOrder.map(viewId => viewsById.get(viewId)!);
 
         setViewsInOrder(viewsInOrder);
-    }, [diningHalls, groups]);
+    }, [cafes, groups]);
 
     return { viewsById, viewsInOrder } as const;
 }
@@ -61,10 +61,10 @@ export const useViewDataFromResponse = (diningHalls: IDiningHall[], groups: IDin
 export const useVisibleViews = () => {
     const { viewsInOrder } = useContext(ApplicationContext);
     const [{ useGroups }] = useContext(SettingsContext);
-    const [visibleViews, setVisibleViews] = useState<Array<DiningHallView>>([]);
+    const [visibleViews, setVisibleViews] = useState<Array<CafeView>>([]);
 
     useEffect(() => {
-        const newVisibleViews: DiningHallView[] = [];
+        const newVisibleViews: CafeView[] = [];
 
         for (const view of viewsInOrder) {
             if (isViewVisible(useGroups, view)) {

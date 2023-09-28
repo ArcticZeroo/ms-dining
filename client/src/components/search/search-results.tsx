@@ -18,7 +18,7 @@ export const SearchResults: React.FC<ISearchResultsProps> = ({ searchResultsByIt
             {
                 entriesInOrder.map(([itemName, searchResult]) => (
                     <SearchResult name={itemName}
-                                  diningHallIds={searchResult.diningHallIds}
+                                  cafeIds={searchResult.cafeIds}
                                   imageUrl={searchResult.imageUrl}
                                   key={searchResult.stableId}/>
                 ))

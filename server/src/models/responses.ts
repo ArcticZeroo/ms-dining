@@ -1,4 +1,4 @@
-export interface IDiningHallConfigResponse {
+export interface ICafeConfigResponse {
     tenantID: string;
     contextID: string;
     theme: {
@@ -9,29 +9,29 @@ export interface IDiningHallConfigResponse {
     }>
 }
 
-export interface IDiningHallMenuItem {
+export interface ICafeMenuItem {
     categoryId: string;
     name: string;
     items: string[];
 }
 
-export interface IDiningHallConceptMenu {
+export interface ICafeStationMenu {
     id: string;
     name: string;
-    categories: Array<IDiningHallMenuItem>;
+    categories: Array<ICafeMenuItem>;
 }
 
-export interface IDiningHallConceptListItem {
+export interface ICafeStationListItem {
     id: string;
     name: string;
     image?: string;
     priceLevelConfig: {
         menuId: string;
     };
-    menus: Array<IDiningHallConceptMenu>;
+    menus: Array<ICafeStationMenu>;
 }
 
-export interface IDiningHallMenuItemsResponseItem {
+export interface ICafeMenuItemsResponseItem {
     id: string;
     amount: string;
     displayText: string;

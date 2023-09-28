@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
-import { IDiningHallMenuItem } from '../../../../models/dining-halls.ts';
+import { IMenuItem } from '../../../../models/cafe.ts';
 import { SettingsContext } from '../../../../context/settings.ts';
 
 //import imageSvg from '../../../../assets/image.svg';
 
 export interface IMenuItemProps {
-    menuItem: IDiningHallMenuItem;
+    menuItem: IMenuItem;
 }
 
-const getCaloriesDisplay = (menuItem: IDiningHallMenuItem) => {
+const getCaloriesDisplay = (menuItem: IMenuItem) => {
     if (!menuItem.calories) {
         return false;
     }

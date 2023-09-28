@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { DiningHallMenu, IDiningHall } from '../../../models/dining-halls.ts';
+import { CafeMenu, ICafe } from '../../../models/cafe.ts';
 import { fuzzySearch } from '../../../util/search.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { DiningHallClient } from '../../../api/dining.ts';
+import { DiningClient } from '../../../api/dining.ts';
 import { SearchResultsByItemName } from '../../../models/search.ts';
 import { SearchResults } from '../../search/search-results.tsx';
 
@@ -10,7 +10,7 @@ interface ISearchPageWithQueryProps {
     queryText: string;
 }
 
-const getMatchingItems = (queryText: string, stations: DiningHallMenu) => {
+const getMatchingItems = (queryText: string, stations: CafeMenu) => {
     const items = [];
     const seenItemNames = new Set<string>();
     for (const station of stations) {
@@ -34,60 +34,60 @@ const cloneSearchResultsByItemName = (searchResultsByItemName: SearchResultsByIt
     const newSearchResults = new Map();
     for (const [itemName, searchResult] of searchResultsByItemName.entries()) {
         newSearchResults.set(itemName, {
-            diningHallIds: [...searchResult.diningHallIds],
-            stableId:      searchResult.stableId,
-            imageUrl:      searchResult.imageUrl
+            cafeIds:  [...searchResult.cafeIds],
+            stableId: searchResult.stableId,
+            imageUrl: searchResult.imageUrl
         });
     }
     return newSearchResults;
 }
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
-    const { diningHalls } = useContext(ApplicationContext);
+    const { cafes } = useContext(ApplicationContext);
     const nextStableIdRef = useRef(0);
     const searchSymbolRef = useRef(Symbol());
     const [searchResultsByItemName, setSearchResultsByItemName] = useState<SearchResultsByItemName>(new Map());
-    const [failedDiningHallIds, setFailedDiningHallIds] = useState<string[]>([]);
-    const [waitingDiningHallIds, setWaitingDiningHallIds] = useState<Set<string>>(() => new Set());
+    const [failedCafeIds, setFailedCafeIds] = useState<string[]>([]);
+    const [waitingCafeIds, setWaitingCafeIds] = useState<Set<string>>(() => new Set());
 
-    const addMenuToSearchResults = (diningHall: IDiningHall, stations: DiningHallMenu) => {
+    const addMenuToSearchResults = (cafe: ICafe, stations: CafeMenu) => {
         const matchingItems = getMatchingItems(queryText, stations);
         setSearchResultsByItemName((previousSearchResults) => {
             const newSearchResults = cloneSearchResultsByItemName(previousSearchResults);
             for (const item of matchingItems) {
                 if (!newSearchResults.has(item.displayName)) {
                     newSearchResults.set(item.displayName, {
-                        diningHallIds: [],
-                        stableId:      nextStableIdRef.current++,
-                        imageUrl:      item.imageUrl
+                        cafeIds:  [],
+                        stableId: nextStableIdRef.current++,
+                        imageUrl: item.imageUrl
                     });
                 }
-                newSearchResults.get(item.displayName)!.diningHallIds.push(diningHall.id);
+                newSearchResults.get(item.displayName)!.cafeIds.push(cafe.id);
             }
             return newSearchResults;
         });
     };
 
-    const searchAndAddToResults = (diningHall: IDiningHall) => {
-        // If we change the dining hall list or search query while we're searching, we don't want to add the results.
+    const searchAndAddToResults = (cafe: ICafe) => {
+        // If we change the cafe list or search query while we're searching, we don't want to add the results.
         const currentSymbol = searchSymbolRef.current;
-        DiningHallClient.retrieveDiningHallMenu(diningHall.id, false /*shouldCountTowardsLastUsed*/)
+        DiningClient.retrieveCafeMenu(cafe.id, false /*shouldCountTowardsLastUsed*/)
             .then(menu => {
                 if (currentSymbol === searchSymbolRef.current) {
-                    addMenuToSearchResults(diningHall, menu);
+                    addMenuToSearchResults(cafe, menu);
                 }
             })
             .catch(err => {
                 if (currentSymbol === searchSymbolRef.current) {
                     console.log('Failed to retrieve menu:', err);
-                    setFailedDiningHallIds(previousFailedDiningHallIds => [...previousFailedDiningHallIds, diningHall.id]);
+                    setFailedCafeIds(previousFailedCafeIds => [...previousFailedCafeIds, cafe.id]);
                 }
             })
             .finally(() => {
-                setWaitingDiningHallIds((previousWaitingDiningHallIds) => {
-                    const newWaitingDiningHallIds = new Set(previousWaitingDiningHallIds);
-                    newWaitingDiningHallIds.delete(diningHall.id);
-                    return newWaitingDiningHallIds;
+                setWaitingCafeIds((previousWaitingCafeIds) => {
+                    const newWaitingCafeIds = new Set(previousWaitingCafeIds);
+                    newWaitingCafeIds.delete(cafe.id);
+                    return newWaitingCafeIds;
                 });
             });
     }
@@ -96,11 +96,11 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         searchSymbolRef.current = Symbol();
         setSearchResultsByItemName(new Map());
 
-        setWaitingDiningHallIds(new Set(diningHalls.map(diningHall => diningHall.id)));
-        for (const diningHall of diningHalls) {
-            searchAndAddToResults(diningHall);
+        setWaitingCafeIds(new Set(cafes.map(diningHall => diningHall.id)));
+        for (const cafe of cafes) {
+            searchAndAddToResults(cafe);
         }
-    }, [diningHalls, queryText]);
+    }, [cafes, queryText]);
 
     return (
         <div className="search-page">
@@ -111,17 +111,17 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                         Search Results: {searchResultsByItemName.size}
                     </div>
                 </div>
-                <div className={`search-waiting${waitingDiningHallIds.size > 0 ? ' visible' : ''}`}>
+                <div className={`search-waiting${waitingCafeIds.size > 0 ? ' visible' : ''}`}>
                     <div className="loading-spinner"/>
                     <div>
-                        Waiting for {waitingDiningHallIds.size} menu(s)
+                        Waiting for {waitingCafeIds.size} menu(s)
                     </div>
                 </div>
             </div>
             {
-                failedDiningHallIds.length > 0 && (
+                failedCafeIds.length > 0 && (
                     <div>
-                        Unable to retrieve menus for dining halls: {failedDiningHallIds.join(', ')}
+                        Unable to retrieve menus for cafes: {failedCafeIds.join(', ')}
                     </div>
                 )
             }

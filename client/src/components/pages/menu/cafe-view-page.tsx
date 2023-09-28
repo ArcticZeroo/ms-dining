@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { DiningHallPageWithView } from './dining-hall-page-with-view.tsx';
+import { CafeViewPageWithView } from './cafe-view-page-with-view.tsx';
 import { ApplicationContext } from '../../../context/app.ts';
 
-export const DiningHallPage: React.FC = () => {
+export const CafeViewPage: React.FC = () => {
     const { viewsById } = useContext(ApplicationContext);
     const params = useParams();
     const id = params.id;
@@ -26,6 +26,6 @@ export const DiningHallPage: React.FC = () => {
     }
 
     return (
-        <DiningHallPageWithView view={view}/>
+        <CafeViewPageWithView view={view}/>
     );
 };

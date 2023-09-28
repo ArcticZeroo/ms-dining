@@ -1,16 +1,16 @@
 import React from 'react';
-import { DiningHallView, IDiningHall, IDiningHallGroupWithoutMembers } from '../models/dining-halls.ts';
+import { CafeView, ICafe, ICafeGroupWithoutMembers } from '../models/cafe.ts';
 
 interface IApplicationContext {
-    viewsById: Map<string, DiningHallView>;
-    viewsInOrder: DiningHallView[];
-    diningHalls: IDiningHall[];
-    groups: IDiningHallGroupWithoutMembers[];
+    viewsById: Map<string, CafeView>;
+    viewsInOrder: CafeView[];
+    cafes: ICafe[];
+    groups: ICafeGroupWithoutMembers[];
 }
 
 export const ApplicationContext = React.createContext<IApplicationContext>({
     viewsById:    new Map(),
     viewsInOrder: [],
-    diningHalls:  [],
+    cafes:        [],
     groups:       []
 });

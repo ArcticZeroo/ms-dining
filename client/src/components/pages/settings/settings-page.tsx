@@ -1,7 +1,7 @@
 import { SettingsContext } from '../../../context/settings.ts';
 import { useContext } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { DiningHallView } from '../../../models/dining-halls.ts';
+import { CafeView } from '../../../models/cafe.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import './settings.css';
 import { useVisibleViews } from '../../../hooks/views.ts';
@@ -10,7 +10,7 @@ export const SettingsPage = () => {
     const [settingsData, setSettingsData] = useContext(SettingsContext);
     const visibleViews = useVisibleViews();
 
-    const toggleHomepageView = (view: DiningHallView) => {
+    const toggleHomepageView = (view: CafeView) => {
         const viewId = view.value.id;
 
         const homepageViewIds = new Set(settingsData.homepageViewIds);
@@ -44,7 +44,7 @@ export const SettingsPage = () => {
                 <BooleanSettingInput
                     setting={ApplicationSettings.useGroups}
                     contextKey="useGroups"
-                    name="Allow Dining Hall Groups"
+                    name="Allow Cafe Groups"
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.requestMenusInBackground}
@@ -52,10 +52,10 @@ export const SettingsPage = () => {
                     name="Enable Fetching Menus in Background"
                     description={
                         <>
-                            When enabled, menus for each dining hall will be fetched in the background in order to
+                            When enabled, menus for each cafe will be fetched in the background in order to
                             facilitate faster search and menu switching.
                             <br/>
-                            Menus are fetched 1 second apart from each other, with homepage dining halls first and then
+                            Menus are fetched 1 second apart from each other, with homepage cafes first and then
                             in order of last recently used.
                         </>
                     }

@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import menuIcon from '../../assets/menu.svg';
-import { SelectedViewContext } from '../../context/dining-hall.ts';
+import { SelectedViewContext } from '../../context/view.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
-import { DiningHallView } from '../../models/dining-halls.ts';
+import { CafeView } from '../../models/cafe.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { useVisibleViews } from '../../hooks/views.ts';
 
@@ -15,7 +15,7 @@ export const Nav: React.FC = () => {
     const [, setSelectedView] = useContext(SelectedViewContext);
     const visibleViews = useVisibleViews();
 
-    const onViewClicked = (view: DiningHallView) => {
+    const onViewClicked = (view: CafeView) => {
         setSelectedView(view);
         setIsExpanded(false);
     };
@@ -36,7 +36,7 @@ export const Nav: React.FC = () => {
             <ul className="expandable-nav-list">
                 {
                     visibleViews?.map?.((view) => (
-                        <li key={view.value.id} className="dining-hall">
+                        <li key={view.value.id} className="cafe">
                             <NavLink to={getViewUrl(view)}
                                      onClick={() => onViewClicked(view)}>
                                 {view.value.name}

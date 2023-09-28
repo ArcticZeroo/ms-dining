@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { registerDiningHallRoutes } from './dining-halls.js';
+import { registerDiningHallRoutes } from './cafes.js';
 import { attachRouter } from '../../util/koa.js';
 import { registerAnalyticsRoutes } from './analytics.js';
 

@@ -44,17 +44,17 @@ nav a.link-button.active {
     color: black;
 }
 
-.expandable-nav-list .dining-hall a {
+.expandable-nav-list .cafe a {
     text-align: center;
     background: #333;
     transition: background-color 0.2s ease;
 }
 
-.expandable-nav-list .dining-hall a:hover {
+.expandable-nav-list .cafe a:hover {
     background: #444;
 }
 
-.expandable-nav-list .dining-hall a.active {
+.expandable-nav-list .cafe a.active {
     background: deepskyblue;
     color: #333;
 }

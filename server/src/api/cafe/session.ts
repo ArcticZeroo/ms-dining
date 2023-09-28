@@ -1,12 +1,12 @@
-import { IDiningHall, IDiningHallConcept, IDiningHallConfig, IDiningHallMenuItem } from '../../models/dining-hall.js';
-import { diningHalls, getBaseApiUrlWithoutTrailingSlash } from '../../constants/dining-halls.js';
+import { ICafe, ICafeStation, ICafeConfig, IMenuItem } from '../../models/cafe.js';
+import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/cafes.js';
 import fetch from 'node-fetch';
 import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
-    IDiningHallConceptListItem,
-    IDiningHallConfigResponse,
-    IDiningHallMenuItemsResponseItem
+    ICafeStationListItem,
+    ICafeConfigResponse,
+    ICafeMenuItemsResponseItem
 } from '../../models/responses.js';
 import { requestRetryCount } from '../../constants/config.js';
 import { logInfo } from '../../util/log.js';
@@ -19,20 +19,20 @@ const jsonHeaders = {
     'Content-Type': 'application/json'
 }
 
-export class DiningHallDiscoverySession {
+export class CafeDiscoverySession {
     #token: string;
-    public config: IDiningHallConfig;
-    public readonly concepts: IDiningHallConcept[] = [];
+    public config: ICafeConfig;
+    public readonly stations: ICafeStation[] = [];
 
-    constructor(public readonly diningHall: IDiningHall) {
+    constructor(public readonly cafe: ICafe) {
     }
 
     get logoUrl() {
-        return `${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}/image/${this.config.tenantId}/${this.config.contextId}/${this.config.logoName}`;
+        return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}/image/${this.config.tenantId}/${this.config.contextId}/${this.config.logoName}`;
     }
 
     private _getUrl(path) {
-        return `${getBaseApiUrlWithoutTrailingSlash(this.diningHall)}${path}`;
+        return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}${path}`;
     }
 
     private _getRequestOptions(options: any = {}) {
@@ -81,7 +81,7 @@ export class DiningHallDiscoverySession {
 
         const json = await response.json();
 
-        if (!isDuckType<IDiningHallConfigResponse>(json, {
+        if (!isDuckType<ICafeConfigResponse>(json, {
             tenantID:  'string',
             contextID: 'string',
             theme:     'object',
@@ -114,7 +114,7 @@ export class DiningHallDiscoverySession {
         );
 
         const json = await response.json();
-        if (!isDuckTypeArray<IDiningHallConceptListItem>(json, {
+        if (!isDuckTypeArray<ICafeStationListItem>(json, {
             id:    'string',
             name:  'string',
             menus: 'object'
@@ -123,7 +123,7 @@ export class DiningHallDiscoverySession {
         }
 
         for (const conceptJson of json) {
-            const conceptInfo: IDiningHallConcept = {
+            const conceptInfo: ICafeStation = {
                 id:                        conceptJson.id,
                 name:                      conceptJson.name,
                 logoUrl:                   conceptJson.image,
@@ -142,11 +142,11 @@ export class DiningHallDiscoverySession {
                 }
             }
 
-            this.concepts.push(conceptInfo);
+            this.stations.push(conceptInfo);
         }
     }
 
-    private async retrieveMenuItemDetailsAsync(conceptId: string, menuId: string, itemIds: string[]): Promise<Array<IDiningHallMenuItem>> {
+    private async retrieveMenuItemDetailsAsync(conceptId: string, menuId: string, itemIds: string[]): Promise<Array<IMenuItem>> {
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
             {
                 method:  'POST',
@@ -166,7 +166,7 @@ export class DiningHallDiscoverySession {
         );
 
         const json = await response.json();
-        if (!isDuckTypeArray<IDiningHallMenuItemsResponseItem>(json, {
+        if (!isDuckTypeArray<ICafeMenuItemsResponseItem>(json, {
             id:          'string',
             amount:      'string',
             displayText: 'string',
@@ -185,7 +185,7 @@ export class DiningHallDiscoverySession {
         }));
     }
 
-    private async _populateMenuItemsForConceptAsync(concept: IDiningHallConcept) {
+    private async _populateMenuItemsForConceptAsync(concept: ICafeStation) {
         const itemIds = Array.from(concept.menuItemIdsByCategoryName.values()).flat();
         const menuItems = await this.retrieveMenuItemDetailsAsync(concept.id, concept.menuId, itemIds);
         for (const menuItem of menuItems) {
@@ -194,7 +194,7 @@ export class DiningHallDiscoverySession {
     }
 
     private async populateMenuItemsForAllConceptsAsync() {
-        for (const concept of this.concepts) {
+        for (const concept of this.stations) {
             await this._populateMenuItemsForConceptAsync(concept);
         }
     }

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { SettingsContext } from '../../../context/settings.ts';
 import { Link } from 'react-router-dom';
-import { CombinedDiningHallMenuList } from '../../dining-halls/combined-dining-hall-menu-list.tsx';
+import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
 
 import './home.css';
 import { ApplicationContext } from '../../../context/app.ts';
@@ -11,27 +11,26 @@ export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
     const [{ homepageViewIds, useGroups }] = useContext(SettingsContext);
 
-    // We need to expand views into a dining hall list
-    // Also, users may have added dining halls to their home set which are no temporarily unavailable
-    const [availableDiningHallIds, setAvailableDiningHallIds] = useState<Set<string>>(new Set());
+    // We need to expand views into a cafe list
+    // Also, users may have added cafes to their home set which are no temporarily unavailable
+    const [availableCafeIds, setAvailableCafeIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        const newAvailableDiningHallIds = new Set<string>();
+        const newAvailableCafeIds = new Set<string>();
         for (const viewId of homepageViewIds) {
             if (viewsById.has(viewId)) {
                 const view = viewsById.get(viewId)!;
                 if (isViewVisible(useGroups, view)) {
-                    const diningHalls = expandAndFlattenView(viewId, viewsById);
-                    for (const diningHall of diningHalls) {
-                        newAvailableDiningHallIds.add(diningHall.id);
+                    for (const cafe of expandAndFlattenView(viewId, viewsById)) {
+                        newAvailableCafeIds.add(cafe.id);
                     }
                 }
             }
         }
-        setAvailableDiningHallIds(newAvailableDiningHallIds);
+        setAvailableCafeIds(newAvailableCafeIds);
     }, [viewsById, homepageViewIds, useGroups]);
 
-    if (availableDiningHallIds.size === 0) {
+    if (availableCafeIds.size === 0) {
         return (
             <div className="centered-content">
                 <div className="card centered">
@@ -51,6 +50,6 @@ export const HomePage = () => {
     }
 
     return (
-        <CombinedDiningHallMenuList diningHallIds={availableDiningHallIds} countTowardsLastUsed={false}/>
+        <CombinedCafeMenuList cafeIds={availableCafeIds} countTowardsLastUsed={false}/>
     );
 };

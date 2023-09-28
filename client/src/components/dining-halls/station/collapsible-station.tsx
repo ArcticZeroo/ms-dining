@@ -1,4 +1,4 @@
-import { IDiningHallStation } from '../../../models/dining-halls.ts';
+import { ICafeStation } from '../../../models/cafe.ts';
 import React, { useRef, useState } from 'react';
 import { StationMenu } from './menu-items/station-menu.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
@@ -15,7 +15,7 @@ const getStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
 }
 
 export interface ICollapsibleStationProps {
-    station: IDiningHallStation;
+    station: ICafeStation;
 }
 
 export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station }) => {

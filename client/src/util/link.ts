@@ -1,3 +1,3 @@
-import { DiningHallView } from '../models/dining-halls.ts';
+import { CafeView } from '../models/cafe.ts';
 
-export const getViewUrl = (view: DiningHallView) => `/menu/${view.value.id}`;
+export const getViewUrl = (view: CafeView) => `/menu/${view.value.id}`;

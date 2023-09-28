@@ -1,24 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLoaderData } from 'react-router-dom';
-import { DiningHallClient } from './api/dining.ts';
+import { DiningClient } from './api/dining.ts';
 import { ApplicationSettings } from './api/settings.ts';
 import { Nav } from './components/nav/nav.tsx';
 import { ApplicationContext } from './context/app.ts';
-import { SelectedViewContext } from './context/dining-hall.ts';
+import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { ISettingsContext, SettingsContext } from './context/settings.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
-import { DiningHallView, IViewListResponse } from './models/dining-halls.ts';
+import { CafeView, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
 
 function App() {
-	const { diningHalls, groups } = useLoaderData() as IViewListResponse;
+	const { cafes, groups } = useLoaderData() as IViewListResponse;
 
 	// TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
-	const { viewsById, viewsInOrder } = useViewDataFromResponse(diningHalls, groups);
-	const retrieveDiningHallMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
+	const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
+	const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
 	const settingsState = useState<ISettingsContext>(() => ({
 		useGroups:                ApplicationSettings.useGroups.get(),
@@ -29,7 +29,7 @@ function App() {
 	}));
 	const [{ requestMenusInBackground }] = settingsState;
 
-	const [selectedView, setSelectedView] = useState<DiningHallView>();
+	const [selectedView, setSelectedView] = useState<CafeView>();
 	const menuDivRef = useRef<HTMLDivElement>(null);
 
 	const [isNavExpanded, setIsNavExpanded] = useState(false);
@@ -45,26 +45,26 @@ function App() {
 	}, [selectedView]);
 
 	useEffect(() => {
-		if (!requestMenusInBackground || diningHalls.length === 0 || viewsById.size === 0) {
+		if (!requestMenusInBackground || cafes.length === 0 || viewsById.size === 0) {
 			return;
 		}
 
-		const lastCancellationToken = retrieveDiningHallMenusCancellationToken.current;
+		const lastCancellationToken = retrieveCafeMenusCancellationToken.current;
 		if (lastCancellationToken) {
 			lastCancellationToken.isCancelled = true;
 		}
 
 		const cancellationToken: ICancellationToken = { isCancelled: false };
-		retrieveDiningHallMenusCancellationToken.current = cancellationToken;
+		retrieveCafeMenusCancellationToken.current = cancellationToken;
 
-		DiningHallClient.retrieveAllMenusInOrder(diningHalls, viewsById, cancellationToken)
-			.then(() => console.log('Retrieved all dining hall menus!'))
-			.catch(err => console.error('Failed to retrieve all dining hall menus:', err));
-	}, [diningHalls, viewsById, requestMenusInBackground]);
+		DiningClient.retrieveAllMenusInOrder(cafes, viewsById, cancellationToken)
+			.then(() => console.log('Retrieved all cafe menus!'))
+			.catch(err => console.error('Failed to retrieve all cafe menus:', err));
+	}, [cafes, viewsById, requestMenusInBackground]);
 
 	return (
 		<div className="App">
-			<ApplicationContext.Provider value={{ viewsById, viewsInOrder, diningHalls, groups }}>
+			<ApplicationContext.Provider value={{ viewsById, viewsInOrder, cafes, groups }}>
 				<SettingsContext.Provider value={settingsState}>
 					<NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
 						<SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
@@ -76,7 +76,7 @@ function App() {
 									               )
 								}
 								{
-									diningHalls.length === 0 && (
+									cafes.length === 0 && (
 										               <div className="error-card">
 											               There are no views available!
 										               </div>

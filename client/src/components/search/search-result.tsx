@@ -9,10 +9,10 @@ import { getParentView } from '../../util/view';
 interface ISearchResultProps {
     name: string;
     imageUrl?: string;
-    diningHallIds: string[];
+    cafeIds: string[];
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, diningHallIds }) => {
+export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, cafeIds }) => {
     const { viewsById } = useContext(ApplicationContext);
     const [{ showImages, useGroups }] = useContext(SettingsContext);
 
@@ -22,7 +22,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, din
                 <div className="title">{name}</div>
                 <div className="body search-result-hits">
                     {
-                        diningHallIds.map(id => {
+                        cafeIds.map(id => {
                             const view = viewsById.get(id);
 
                             if (!view) {

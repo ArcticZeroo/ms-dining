@@ -1,12 +1,12 @@
-import { IDiningHallMenuItemsByCategoryName } from '../../../../models/dining-halls.ts';
+import { IMenuItemsByCategoryName } from '../../../../models/cafe.ts';
 import React from 'react';
 import { MenuCategory } from './menu-category.tsx';
 
-interface IDiningHallStationMenuProps {
-    menuItemsByCategoryName: IDiningHallMenuItemsByCategoryName;
+interface IStationMenuProps {
+    menuItemsByCategoryName: IMenuItemsByCategoryName;
 }
 
-const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IDiningHallStationMenuProps> = ({ menuItemsByCategoryName }, menuBodyRef) => {
+const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStationMenuProps> = ({ menuItemsByCategoryName }, menuBodyRef) => {
 
     return (
         // This div wrapper is needed for the table to scroll independently of the header

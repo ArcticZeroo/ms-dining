@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
-import { DiningHallClient } from './api/dining.ts';
-import { DiningHallPage } from './components/pages/menu/dining-hall-page.tsx';
+import { DiningClient } from './api/dining.ts';
+import { CafeViewPage } from './components/pages/menu/cafe-view-page.tsx';
 import { SettingsPage } from './components/pages/settings/settings-page.tsx';
 import { NotFoundPage } from './components/pages/not-found/not-found-page.tsx';
 import { SearchPage } from './components/pages/search/search-page.tsx';
@@ -15,8 +15,8 @@ import { ErrorPage } from './components/pages/error/error-page.tsx';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path="/" element={<App/>} loader={() => DiningHallClient.retrieveViewList()} errorElement={<ErrorPage/>}>
-            <Route path="/menu/:id" element={<DiningHallPage/>}/>
+        <Route path="/" element={<App/>} loader={() => DiningClient.retrieveViewList()} errorElement={<ErrorPage/>}>
+            <Route path="/menu/:id" element={<CafeViewPage/>}/>
             <Route path="/settings" element={<SettingsPage/>}/>
             <Route path="/search" element={<SearchPage/>}/>
             <Route path="/info" element={<InfoPage/>}/>

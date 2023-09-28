@@ -1,6 +1,6 @@
-import { DiningHallView, DiningHallViewType, IDiningHall } from '../models/dining-halls';
+import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
 
-export const expandAndFlattenView = (view: DiningHallView | string, viewsById: Map<string, DiningHallView>): Array<IDiningHall> => {
+export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<string, CafeView>): Array<ICafe> => {
     if (typeof view === 'string') {
         const possibleView = viewsById.get(view);
         if (!possibleView) {
@@ -9,15 +9,15 @@ export const expandAndFlattenView = (view: DiningHallView | string, viewsById: M
         view = possibleView;
     }
 
-    if (view.type === DiningHallViewType.single) {
+    if (view.type === CafeViewType.single) {
         return [view.value];
     }
 
     return view.value.members.flatMap(viewId => expandAndFlattenView(viewId, viewsById));
 }
 
-export const getParentView = (viewsById: Map<string, DiningHallView>, useGroups: boolean, view: DiningHallView) => {
-    if (view.type === DiningHallViewType.group) {
+export const getParentView = (viewsById: Map<string, CafeView>, useGroups: boolean, view: CafeView) => {
+    if (view.type === CafeViewType.group) {
         return view;
     }
 
@@ -33,9 +33,9 @@ export const getParentView = (viewsById: Map<string, DiningHallView>, useGroups:
     return parentView;
 }
 
-export const isViewVisible = (useGroups: boolean, view: DiningHallView) => {
+export const isViewVisible = (useGroups: boolean, view: CafeView) => {
     if (useGroups) {
-        if (view.type === DiningHallViewType.group) {
+        if (view.type === CafeViewType.group) {
             return view.value.members.length > 0;
         } else {
             // Views with a group should not be displayed, we want to display their parent group instead.
@@ -43,6 +43,6 @@ export const isViewVisible = (useGroups: boolean, view: DiningHallView) => {
             return !view.value.group;
         }
     } else {
-        return view.type === DiningHallViewType.single;
+        return view.type === CafeViewType.single;
     }
 }

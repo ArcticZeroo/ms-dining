@@ -4,13 +4,13 @@
     gap: 1rem;
 }
 
-.collapsible-dining-hall .dining-hall-header {
+.collapsible-cafe .cafe-header {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
 
-.collapsible-dining-hall .dining-hall-name {
+.collapsible-cafe .cafe-name {
     font-size: 1.4em;
     text-align: center;
     padding: 1rem;
@@ -27,11 +27,11 @@
     cursor: pointer;
 }
 
-.collapsible-dining-hall .dining-hall-name .logo {
+.collapsible-cafe .cafe-name .logo {
     height: 4rem;
 }
 
-.collapsible-dining-hall .dining-hall-order-link {
+.collapsible-cafe .cafe-order-link {
     background: #0277BD;
     padding: 1rem;
     border-radius: 1rem;
@@ -42,7 +42,8 @@
     text-decoration: none;
 }
 
-.station .title {transition-property: border-top-left-radius, border-top-right-radius;
+.station .title {
+    transition-property: border-top-left-radius, border-top-right-radius;
     transition-duration: 0.25s;
     transition-timing-function: ease;
     justify-content: space-between;
