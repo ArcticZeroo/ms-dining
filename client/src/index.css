@@ -44,7 +44,7 @@ html, body, #root, .App {
 }
 
 .content {
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 1rem;
     flex-grow: 1;
 }
