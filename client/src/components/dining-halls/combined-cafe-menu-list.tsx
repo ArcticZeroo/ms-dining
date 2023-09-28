@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CafeMenu, CafeViewType, ICafe } from '../../models/cafe.ts';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
-import { sortIds } from '../../util/sorting.ts';
+import { sortCafeIds } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
@@ -29,7 +29,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ caf
     const loadMenusAsync = async () => {
         const menuPromises = [];
 
-        for (const cafeId of sortIds(Array.from(cafeIds))) {
+        for (const cafeId of sortCafeIds(Array.from(cafeIds))) {
             const view = viewsById.get(cafeId);
 
             if (view == null) {

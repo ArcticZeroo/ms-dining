@@ -13,7 +13,7 @@ const normalizeId = (id: string) => {
     return id;
 }
 
-export const sortIds = (ids: string[]) => {
+export const sortCafeIds = (ids: string[]) => {
     const normalizedIdsByOriginalId = new Map<string, string>();
 
     const getNormalizedId = (id: string) => {

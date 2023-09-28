@@ -5,7 +5,7 @@ import {
     ICafe,
     ICafeGroupWithoutMembers
 } from '../models/cafe.ts';
-import { sortIds } from '../util/sorting';
+import { sortCafeIds } from '../util/sorting';
 import { ApplicationContext } from '../context/app.ts';
 import { SettingsContext } from '../context/settings.ts';
 import { isViewVisible } from '../util/view.ts';
@@ -49,7 +49,7 @@ export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithou
 
         setViewsById(viewsById);
 
-        const viewIdsInOrder = sortIds(Array.from(viewsById.keys()));
+        const viewIdsInOrder = sortCafeIds(Array.from(viewsById.keys()));
         const viewsInOrder = viewIdsInOrder.map(viewId => viewsById.get(viewId)!);
 
         setViewsInOrder(viewsInOrder);
