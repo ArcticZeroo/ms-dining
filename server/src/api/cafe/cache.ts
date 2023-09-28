@@ -5,7 +5,8 @@ import { logError, logInfo } from '../../util/log.js';
 import * as fs from 'fs/promises';
 import { serverMenuItemThumbnailPath } from '../../constants/config.js';
 import { createAndSaveThumbnailForMenuItem } from './image/thumbnail.js';
-import { pause } from '../../util/async.js';
+import Semaphore from 'semaphore-async-await';
+import { IMenuItem } from '../../models/cafe.js';
 
 export const cafeSessionsByUrl = new Map<string, CafeDiscoverySession>();
 
@@ -15,34 +16,48 @@ const resetState = async () => {
     await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
 };
 
-const generateThumbnailItems = function*() {
-    for (const cafe of cafeList) {
-        const session = cafeSessionsByUrl.get(cafe.url);
+// This is really stupid, but whatever.
+const thumbnailSemaphore = new Semaphore.default(10);
 
-        if (!session) {
-            console.error('Failed to find session for cafe', cafe.name);
-            continue;
-        }
-
-        for (const station of session.stations) {
-            for (const menuItem of station.menuItemsById.values()) {
-                if (menuItem.imageUrl) {
-                    yield menuItem;
-                }
-            }
-        }
+const writeThumbnailForMenuItem = async (menuItem: IMenuItem) => {
+    try {
+        await thumbnailSemaphore.acquire();
+        await createAndSaveThumbnailForMenuItem(menuItem);
+    } catch (e) {
+        logError('Failed to write thumbnail for menu item', menuItem.id, 'at URL', menuItem.imageUrl, 'with error:', e);
+    } finally {
+        thumbnailSemaphore.release();
     }
 }
 
-const writeThumbnails = async () => {
-    logInfo('Writing thumbnails...');
+const writeThumbnailsForCafe = async (session: CafeDiscoverySession) => {
+    let count = 0;
 
-    for (const menuItem of generateThumbnailItems()) {
-        await createAndSaveThumbnailForMenuItem(menuItem);
-        await pause(10);
+    const thumbnailPromises = [];
+
+    for (const station of session.stations) {
+        for (const menuItem of station.menuItemsById.values()) {
+            if (menuItem.imageUrl) {
+                thumbnailPromises.push(writeThumbnailForMenuItem(menuItem));
+                count++;
+            }
+        }
     }
 
-    logInfo('Finished writing thumbnails');
+    logInfo('Writing', count, 'thumbnails for cafe', session.cafe.name);
+
+    const startTime = Date.now();
+
+    try {
+        await Promise.all(thumbnailPromises);
+    } catch (e) {
+        logError('Failed to write thumbnails for cafe', session.cafe.name, 'with error:', e);
+    }
+
+    const endTime = Date.now();
+    const elapsedSeconds = (endTime - startTime) / 1000;
+
+    logInfo('Finished writing', count, 'thumbnails for cafe', session.cafe.name, 'in', elapsedSeconds.toFixed(2), 'second(s)');
 }
 
 const populateSessionsAsync = async () => {
@@ -50,19 +65,23 @@ const populateSessionsAsync = async () => {
 
     logInfo('Populating cafe sessions...');
 
+    const thumbnailPromises = [];
+
     for (const cafe of cafeList) {
         const session = new CafeDiscoverySession(cafe);
         try {
             logInfo('Performing discovery for', cafe.name, 'at', cafe.url, '...');
+
             await session.performDiscoveryAsync();
             cafeSessionsByUrl.set(cafe.url, session);
-            break;
+
+            thumbnailPromises.push(writeThumbnailsForCafe(session));
         } catch (e) {
             logError(`Failed to populate cafe ${cafe.name} (${cafe.url})`, e);
         }
     }
 
-    await writeThumbnails();
+    await Promise.all(thumbnailPromises);
 
     logInfo('Finished populating cafe sessions');
 };

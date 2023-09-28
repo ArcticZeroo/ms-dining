@@ -3,9 +3,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { IMenuItem } from '../../../models/cafe.js';
+import { runPromiseWithRetries } from '../../../util/async.js';
+
+const loadImageRetries = 2;
 
 export const createThumbnailStream = async (url: string, maxHeightPx: number) => {
-    const image = await loadImage(url);
+    const image = await runPromiseWithRetries(() => loadImage(url), loadImageRetries);
 
     const scale = maxHeightPx / image.height;
 

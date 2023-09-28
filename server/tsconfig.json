@@ -8,7 +8,8 @@
       "ESNext",
       "DOM"
     ],
-    "outDir": "dist"
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "node_modules"
