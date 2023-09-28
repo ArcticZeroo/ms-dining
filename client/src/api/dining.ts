@@ -75,7 +75,7 @@ export abstract class DiningClient {
 		}
 	}
 
-	public static getCafeRetrievalOrder(cafes: ICafe[], viewsById: Map<string, CafeView>) {
+	public static getCafePriorityOrder(cafes: ICafe[], viewsById: Map<string, CafeView>) {
 		const homepageViewIds = ApplicationSettings.homepageViews.get();
 		const homepageCafeIds = new Set(
 			homepageViewIds
@@ -116,7 +116,7 @@ export abstract class DiningClient {
 	public static async retrieveAllMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
 		console.log('Retrieving cafe menus...');
 
-		for (const cafe of DiningClient.getCafeRetrievalOrder(cafes, viewsById)) {
+		for (const cafe of DiningClient.getCafePriorityOrder(cafes, viewsById)) {
 			await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
 
 			if (cancellationToken?.isCancelled || !ApplicationSettings.requestMenusInBackground.get()) {
