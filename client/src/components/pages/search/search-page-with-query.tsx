@@ -125,7 +125,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     </div>
                 )
             }
-            <SearchResults searchResultsByItemName={searchResultsByItemName}/>
+            <SearchResults searchResultsByItemName={searchResultsByItemName} queryText={queryText}/>
         </div>
     );
 }

@@ -1,17 +1,26 @@
 import { ISearchResult, SearchResultsByItemName } from '../../models/search.ts';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { SearchResult } from './search-result.tsx';
+import { sortSearchResults } from '../../util/sorting.ts';
+import { ApplicationContext } from '../../context/app.ts';
 
 interface ISearchResultsProps {
+    queryText: string;
     searchResultsByItemName: SearchResultsByItemName;
 }
 
-export const SearchResults: React.FC<ISearchResultsProps> = ({ searchResultsByItemName }) => {
+export const SearchResults: React.FC<ISearchResultsProps> = ({ queryText, searchResultsByItemName }) => {
+    const { cafes, viewsById } = useContext(ApplicationContext);
     const [entriesInOrder, setEntriesInOrder] = useState<Array<[string, ISearchResult]>>([]);
 
     useEffect(() => {
-        setEntriesInOrder(Array.from(searchResultsByItemName.entries()).sort(([, a], [, b]) => a.stableId - b.stableId));
-    }, [searchResultsByItemName]);
+        setEntriesInOrder(sortSearchResults({
+            searchResultsByItemName,
+            queryText,
+            cafes,
+            viewsById
+        }));
+    }, [searchResultsByItemName, queryText, cafes, viewsById]);
 
     return (
         <div className="search-results">
