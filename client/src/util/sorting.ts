@@ -60,12 +60,12 @@ const computeScore = (cafePriorityOrder: string[], itemName: string, searchResul
     return (longestSequentialSubstringLength * 20)
         + (longestNonSequentialSubstringLength * 10)
         + searchResult.cafeIds.length
-        // This is way too high.
+        // Divide the total number of cafes to avoid giving too much priority here
         + searchResult.cafeIds.reduce((score, cafeId) => {
             const priorityIndex = cafePriorityOrder.indexOf(cafeId);
             const priorityScore = priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
             return score + priorityScore;
-        }, 0) / searchResult.cafeIds.length;
+        }, 0) / cafePriorityOrder.length;
 }
 
 interface ISortSearchResultsParams {
