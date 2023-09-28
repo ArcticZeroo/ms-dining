@@ -1,4 +1,4 @@
-import { CafeMenu, CafeView, ICafe, ICafeStation, IViewListResponse } from '../models/cafe.ts';
+import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem, IViewListResponse } from '../models/cafe.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
@@ -125,5 +125,13 @@ export abstract class DiningClient {
 
 			await DiningClient.retrieveCafeMenu(cafe.id, false /*shouldCountTowardsLastUsed*/);
 		}
+	}
+
+	public static getThumbnailUrlForMenuItem(menuItem: IMenuItem) {
+		if (!menuItem.hasThumbnail) {
+			return menuItem.imageUrl;
+		}
+
+		return `/static/menu-items/thumbnail/${menuItem.id}.png`;
 	}
 }

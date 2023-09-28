@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { SettingsContext } from '../../../../context/settings.ts';
+import { DiningClient } from '../../../../api/dining.ts';
 
 //import imageSvg from '../../../../assets/image.svg';
 
@@ -24,6 +25,7 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const [{ showImages, showCalories }] = useContext(SettingsContext);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
+    const thumbnailUrl = DiningClient.getThumbnailUrlForMenuItem(menuItem);
 
     return (
         <tr>
@@ -35,8 +37,8 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 showImages && (
                     <td className="centered-content">
                         {
-                            menuItem.imageUrl && (
-                                <img src={menuItem.imageUrl}
+                            thumbnailUrl && (
+                                <img src={thumbnailUrl}
                                      decoding="async"
                                      alt="Menu item image"
                                      className="menu-item-image"
