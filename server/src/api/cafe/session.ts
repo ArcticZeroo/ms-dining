@@ -176,12 +176,13 @@ export class CafeDiscoverySession {
         }
 
         return json.map(jsonItem => ({
-            id:          jsonItem.id,
-            price:       jsonItem.amount,
-            displayName: jsonItem.displayText,
-            calories:    jsonItem.properties.calories,
-            maxCalories: jsonItem.properties.maxCalories,
-            imageUrl:    jsonItem.image
+            id:           jsonItem.id,
+            price:        jsonItem.amount,
+            displayName:  jsonItem.displayText,
+            calories:     jsonItem.properties.calories,
+            maxCalories:  jsonItem.properties.maxCalories,
+            imageUrl:     jsonItem.image,
+            hasThumbnail: false
         }));
     }
 

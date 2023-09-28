@@ -2,7 +2,7 @@ import Koa from 'koa';
 import json from 'koa-json';
 import { registerRoutes } from './routes/register.js';
 import serve from 'koa-static';
-import { clientFolderDistPath, clientIndexHtmlPath } from './constants/config.js';
+import { clientFolderDistPath, clientIndexHtmlPath, serverStaticPath } from './constants/config.js';
 import mount from 'koa-mount';
 import * as fs from 'fs';
 import * as fsPromises from 'fs/promises';
@@ -13,6 +13,7 @@ app.use(json());
 
 registerRoutes(app);
 
+app.use(mount('/static', serve(serverStaticPath)));
 app.use(mount('/', serve(clientFolderDistPath)));
 
 app.use(async (ctx) => {
