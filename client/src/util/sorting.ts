@@ -1,5 +1,5 @@
 import { ISearchResult, SearchResultsByItemName } from '../models/search.ts';
-import { findLongestSequentialSubstringLength, findLongestNonSequentialSubstringLength } from './string.ts';
+import { findLongestNonSequentialSubstringLength, findLongestSequentialSubstringLength } from './string.ts';
 import { DiningClient } from '../api/dining.ts';
 import { CafeView, ICafe } from '../models/cafe.ts';
 
@@ -50,22 +50,77 @@ export const sortCafeIds = (ids: string[]) => {
     });
 }
 
+interface ISubstringScoreParams {
+    itemName: string;
+    queryText: string;
+    isSequential: boolean;
+    perfectMatchScore?: number;
+    perfectMatchWithoutBoundaryScore?: number;
+}
+
+const getSubstringScore = ({
+                               itemName,
+                               queryText,
+                               isSequential,
+                               perfectMatchScore,
+                               perfectMatchWithoutBoundaryScore
+                           }: ISubstringScoreParams) => {
+    const substringLength = isSequential
+        ? findLongestSequentialSubstringLength(itemName, queryText)
+        : findLongestNonSequentialSubstringLength(itemName, queryText);
+
+    const queryLength = queryText.length;
+
+    if (queryLength === substringLength) {
+        // A "perfect match" is not only the exact substring, but is on a word boundary too
+        // e.g. "Pumpkin Spice Latte" should score higher than "Platter" for the search term "Latte"
+        if (perfectMatchScore && new RegExp(`\\b${queryText}\\b`).test(itemName)) {
+            return perfectMatchScore;
+        }
+
+        if (perfectMatchWithoutBoundaryScore) {
+            return perfectMatchWithoutBoundaryScore;
+        }
+    }
+
+    return substringLength / queryLength;
+}
+
+const getCafeRelevancyScore = (searchResult: ISearchResult, cafePriorityOrder: string[]) => {
+    // Divide the total number of cafes to avoid giving too much priority here
+    const totalRelevancyScore = searchResult.cafeIds.reduce((score, cafeId) => {
+        const priorityIndex = cafePriorityOrder.indexOf(cafeId);
+        const priorityScore = priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
+        return score + priorityScore;
+    }, 0);
+    return ((totalRelevancyScore / searchResult.cafeIds.length) / cafePriorityOrder.length) + searchResult.cafeIds.length;
+}
+
 const computeScore = (cafePriorityOrder: string[], itemName: string, searchResult: ISearchResult, queryText: string) => {
     // TODO: Should I remove whitespace? Probably not?
     itemName = itemName.toLowerCase();
+    queryText = queryText.toLowerCase();
 
-    const longestSequentialSubstringLength = findLongestSequentialSubstringLength(itemName, queryText);
-    const longestNonSequentialSubstringLength = findLongestNonSequentialSubstringLength(itemName, queryText);
+    const longestSequentialSubstringLength = getSubstringScore({
+        itemName,
+        queryText,
+        isSequential:                     true,
+        perfectMatchWithoutBoundaryScore: 1.25,
+        perfectMatchScore:                2
+    });
+
+    const longestNonSequentialSubstringLength = getSubstringScore({
+        itemName,
+        queryText,
+        isSequential:                     false,
+        perfectMatchWithoutBoundaryScore: 1.25,
+    });
+
+    const cafeRelevancyScore = getCafeRelevancyScore(searchResult, cafePriorityOrder);
 
     return (longestSequentialSubstringLength * 20)
-        + (longestNonSequentialSubstringLength * 10)
-        + searchResult.cafeIds.length
-        // Divide the total number of cafes to avoid giving too much priority here
-        + searchResult.cafeIds.reduce((score, cafeId) => {
-            const priorityIndex = cafePriorityOrder.indexOf(cafeId);
-            const priorityScore = priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
-            return score + priorityScore;
-        }, 0) / cafePriorityOrder.length;
+        + (longestNonSequentialSubstringLength * 5)
+        + cafeRelevancyScore;
 }
 
 interface ISortSearchResultsParams {
