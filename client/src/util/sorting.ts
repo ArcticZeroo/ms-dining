@@ -1,4 +1,10 @@
-import { ISearchResult, SearchResultsByItemName } from '../models/search.ts';
+import {
+    allSearchEntityTypes,
+    ISearchResult,
+    SearchEntityFilterType,
+    SearchEntityType,
+    SearchResultsMap
+} from '../models/search.ts';
 import { findLongestNonSequentialSubstringLength, findLongestSequentialSubstringLength } from './string.ts';
 import { DiningClient } from '../api/dining.ts';
 import { CafeView, ICafe } from '../models/cafe.ts';
@@ -13,7 +19,7 @@ const normalizeId = (id: string) => {
     return id;
 }
 
-export const sortCafeIds = (ids: string[]) => {
+export const sortCafeIds = (cafeIds: Iterable<string>) => {
     const normalizedIdsByOriginalId = new Map<string, string>();
 
     const getNormalizedId = (id: string) => {
@@ -23,7 +29,7 @@ export const sortCafeIds = (ids: string[]) => {
         return normalizedIdsByOriginalId.get(id)!;
     }
 
-    return ids.sort((a, b) => {
+    return Array.from(cafeIds).sort((a, b) => {
         const normalizedA = getNormalizedId(a);
         const normalizedB = getNormalizedId(b);
 
@@ -87,18 +93,21 @@ const getSubstringScore = ({
 }
 
 const getCafeRelevancyScore = (searchResult: ISearchResult, cafePriorityOrder: string[]) => {
-    // Divide the total number of cafes to avoid giving too much priority here
-    const totalRelevancyScore = searchResult.cafeIds.reduce((score, cafeId) => {
+    let totalRelevancyScore = 0;
+
+    for (const cafeId of searchResult.cafeIds) {
         const priorityIndex = cafePriorityOrder.indexOf(cafeId);
         const priorityScore = priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
-        return score + priorityScore;
-    }, 0);
-    return ((totalRelevancyScore / searchResult.cafeIds.length) / cafePriorityOrder.length) + searchResult.cafeIds.length;
+        totalRelevancyScore += priorityScore;
+    }
+
+    // Divide the total number of cafes to avoid giving too much priority here
+    return ((totalRelevancyScore / searchResult.cafeIds.size) / cafePriorityOrder.length) + searchResult.cafeIds.size;
 }
 
-const computeScore = (cafePriorityOrder: string[], itemName: string, searchResult: ISearchResult, queryText: string) => {
+const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, queryText: string) => {
     // TODO: Should I remove whitespace? Probably not?
-    itemName = itemName.toLowerCase();
+    const itemName = searchResult.name.toLowerCase();
     queryText = queryText.toLowerCase();
 
     const longestSequentialSubstringLength = getSubstringScore({
@@ -118,40 +127,83 @@ const computeScore = (cafePriorityOrder: string[], itemName: string, searchResul
 
     const cafeRelevancyScore = getCafeRelevancyScore(searchResult, cafePriorityOrder);
 
-    return (longestSequentialSubstringLength * 20)
+    const baseScore = (longestSequentialSubstringLength * 20)
         + (longestNonSequentialSubstringLength * 5)
         + cafeRelevancyScore;
+
+    if (searchResult.entityType === SearchEntityType.menuItem) {
+        return baseScore;
+    } else {
+        // Stations should not be ranked as high as menu items
+        return baseScore / 1.5;
+    }
+}
+
+const flattenSearchResults = (searchResults: SearchResultsMap, entityTypes: Set<SearchEntityType>): ISearchResult[] => {
+    const flattenedSearchResults: ISearchResult[] = [];
+
+    for (const [entityType, resultsByName] of searchResults.entries()) {
+        if (!entityTypes.has(entityType)) {
+            continue;
+        }
+
+        for (const result of resultsByName.values()) {
+            flattenedSearchResults.push(result);
+        }
+    }
+
+    return flattenedSearchResults;
+}
+
+export const getAllowedSearchEntityTypes = (filterType: SearchEntityFilterType): Set<SearchEntityType> => {
+    switch (filterType) {
+        case SearchEntityFilterType.all:
+            return new Set(allSearchEntityTypes);
+        case SearchEntityFilterType.menuItem:
+            return new Set([SearchEntityType.menuItem]);
+        case SearchEntityFilterType.station:
+            return new Set([SearchEntityType.station]);
+        default:
+            throw new Error('Invalid filter type!');
+    }
 }
 
 interface ISortSearchResultsParams {
-    searchResultsByItemName: SearchResultsByItemName;
+    searchResults: SearchResultsMap;
     queryText: string;
     cafes: ICafe[];
     viewsById: Map<string, CafeView>;
+    entityType: SearchEntityFilterType;
 }
 
 export const sortSearchResults = ({
-                                      searchResultsByItemName,
+                                      searchResults,
                                       queryText,
                                       cafes,
-                                      viewsById
-                                  }: ISortSearchResultsParams) => {
+                                      viewsById,
+                                      entityType
+                                  }: ISortSearchResultsParams): ISearchResult[] => {
+    const allowedEntityTypes = getAllowedSearchEntityTypes(entityType);
     const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById).map(cafe => cafe.id);
+    const flattenedSearchResults = flattenSearchResults(searchResults, allowedEntityTypes);
+    const searchResultScores = new Map<SearchEntityType, Map<string, number>>();
 
-    const searchResultEntries = Array.from(searchResultsByItemName.entries());
-
-    const scoresByItemName = new Map<string, number>();
-
-    const getScore = (itemName: string, searchResult: ISearchResult) => {
-        if (!scoresByItemName.has(itemName)) {
-            scoresByItemName.set(itemName, computeScore(cafePriorityOrder, itemName, searchResult, queryText));
+    const getScore = (searchResult: ISearchResult) => {
+        if (!searchResultScores.has(searchResult.entityType)) {
+            searchResultScores.set(searchResult.entityType, new Map());
         }
-        return scoresByItemName.get(itemName)!;
+
+        const searchResultScoresByItemName = searchResultScores.get(searchResult.entityType)!;
+
+        if (!searchResultScoresByItemName.has(searchResult.name)) {
+            searchResultScoresByItemName.set(searchResult.name, computeScore(cafePriorityOrder, searchResult, queryText));
+        }
+        return searchResultScoresByItemName.get(searchResult.name)!;
     };
 
-    searchResultEntries.sort(([itemNameA, resultA], [itemNameB, resultB]) => {
-        const scoreA = getScore(itemNameA, resultA);
-        const scoreB = getScore(itemNameB, resultB);
+    flattenedSearchResults.sort((resultA, resultB) => {
+        const scoreA = getScore(resultA);
+        const scoreB = getScore(resultB);
 
         if (scoreA === scoreB) {
             return resultA.stableId - resultB.stableId;
@@ -160,5 +212,5 @@ export const sortSearchResults = ({
         return scoreB - scoreA;
     });
 
-    return searchResultEntries;
+    return flattenedSearchResults;
 }

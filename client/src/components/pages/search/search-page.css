@@ -1,0 +1,29 @@
+.search-entity-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.entity-button {
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #2196F3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.entity-button.active {
+    background: #0277BD;
+}
+
+.entity-button input {
+    padding: 0;
+    margin: 0;
+    appearance: none;
+}
+
+.entity-button label {
+    cursor: pointer;
+}

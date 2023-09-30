@@ -40,3 +40,5 @@ export const findLongestSequentialSubstringLength = (parent: string, child: stri
 
     return longestLength;
 }
+
+export const normalizeName = (name: string) => name.toLowerCase().trim();

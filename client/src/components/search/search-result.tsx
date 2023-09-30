@@ -1,20 +1,25 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getViewUrl } from '../../util/link.ts';
 import './search.css';
 import { ApplicationContext } from '../../context/app.ts';
 import { SettingsContext } from '../../context/settings.ts';
 import { getParentView } from '../../util/view';
+import { ISearchResult } from '../../models/search.ts';
+import { sortCafeIds } from '../../util/sorting.ts';
 
 interface ISearchResultProps {
-    name: string;
-    imageUrl?: string;
-    cafeIds: string[];
+    result: ISearchResult;
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, cafeIds }) => {
+export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, cafeIds, imageUrl } }) => {
     const { viewsById } = useContext(ApplicationContext);
     const [{ showImages, useGroups }] = useContext(SettingsContext);
+    const [cafeIdsInOrder, setCafeIdsInOrder] = useState<Array<string>>([]);
+
+    useEffect(() => {
+        setCafeIdsInOrder(sortCafeIds(cafeIds));
+    }, [cafeIds]);
 
     return (
         <div className="card horizontal search-result">
@@ -22,7 +27,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ name, imageUrl, caf
                 <div className="title">{name}</div>
                 <div className="body search-result-hits">
                     {
-                        cafeIds.map(id => {
+                        cafeIdsInOrder.map(id => {
                             const view = viewsById.get(id);
 
                             if (!view) {
