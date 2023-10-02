@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { SettingsContext } from '../../../../context/settings.ts';
 import { DiningClient } from '../../../../api/dining.ts';
@@ -26,6 +26,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const [{ showImages, showCalories }] = useContext(SettingsContext);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const thumbnailUrl = DiningClient.getThumbnailUrlForMenuItem(menuItem);
+    const [forceFullImage, setForceFullImage] = useState(false);
 
     return (
         <tr>
@@ -38,11 +39,12 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     <td className="centered-content">
                         {
                             thumbnailUrl && (
-                                <img src={thumbnailUrl}
+                                <img src={forceFullImage ? menuItem.imageUrl : thumbnailUrl}
                                      decoding="async"
                                      alt="Menu item image"
                                      className="menu-item-image"
-                                     loading="lazy"/>
+                                     loading="lazy"
+                                     onError={() => setForceFullImage(true)}/>
                             )
                         }
                     </td>
