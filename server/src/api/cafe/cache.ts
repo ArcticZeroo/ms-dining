@@ -25,6 +25,7 @@ const writeThumbnailForMenuItem = async (menuItem: IMenuItem) => {
         await thumbnailSemaphore.acquire();
         await createAndSaveThumbnailForMenuItem(menuItem);
     } catch (e) {
+        menuItem.hasThumbnail = false;
         logError('Failed to write thumbnail for menu item', menuItem.id, 'at URL', menuItem.imageUrl, 'with error:', e);
     } finally {
         thumbnailSemaphore.release();
