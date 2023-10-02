@@ -6,6 +6,7 @@ import { clientFolderDistPath, clientIndexHtmlPath, serverStaticPath } from './c
 import mount from 'koa-mount';
 import * as fs from 'fs';
 import * as fsPromises from 'fs/promises';
+import { createStaticRoutingApp } from './routes/static.js';
 
 const app = new Koa();
 
@@ -13,7 +14,7 @@ app.use(json());
 
 registerRoutes(app);
 
-app.use(mount('/static', serve(serverStaticPath)));
+app.use(mount('/static', createStaticRoutingApp()));
 app.use(mount('/', serve(clientFolderDistPath)));
 
 app.use(async (ctx) => {
