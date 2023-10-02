@@ -16,6 +16,7 @@
     "@koa/router": "^12.0.0",
     "@types/koa-json": "^2.0.20",
     "canvas": "^2.11.2",
+    "exifreader": "^4.13.0",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
     "koa-json": "^2.0.2",

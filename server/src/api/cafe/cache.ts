@@ -3,6 +3,7 @@ import cron from 'node-cron';
 import { cafeList } from '../../constants/cafes.js';
 import { logError, logInfo } from '../../util/log.js';
 import * as fs from 'fs/promises';
+import * as fsSync from 'fs';
 import { serverMenuItemThumbnailPath } from '../../constants/config.js';
 import { createAndSaveThumbnailForMenuItem } from './image/thumbnail.js';
 import Semaphore from 'semaphore-async-await';
@@ -12,7 +13,7 @@ export const cafeSessionsByUrl = new Map<string, CafeDiscoverySession>();
 
 const resetState = async () => {
     cafeSessionsByUrl.clear();
-    await fs.rm(serverMenuItemThumbnailPath, { recursive: true, force: true });
+    await fsSync.rmSync(serverMenuItemThumbnailPath, { recursive: true, force: true });
     await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
 };
 
