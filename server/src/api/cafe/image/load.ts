@@ -28,8 +28,6 @@ export const loadImageData = async (url: string): Promise<IImageData> => {
 export const getRotationDegreesClockwise = (tags: ExifReader.Tags): number => {
     const orientationTag = tags.Orientation;
 
-    console.log('Orientation tag: ', orientationTag);
-
     if (!orientationTag) {
         return 0;
     }
