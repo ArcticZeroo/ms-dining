@@ -79,6 +79,7 @@ export abstract class DiningClient {
 		const homepageViewIds = ApplicationSettings.homepageViews.get();
 		const homepageCafeIds = new Set(
 			homepageViewIds
+				.filter(viewId => viewsById.has(viewId))
 				.flatMap(viewId => expandAndFlattenView(viewId, viewsById))
 				.map(cafe => cafe.id)
 		);
