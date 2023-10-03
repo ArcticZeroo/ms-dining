@@ -27,10 +27,11 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const thumbnailUrl = DiningClient.getThumbnailUrlForMenuItem(menuItem);
     const [forceFullImage, setForceFullImage] = useState(false);
+    const canShowImage = thumbnailUrl != null || (forceFullImage && menuItem.imageUrl != null);
 
     return (
         <tr>
-            <td>
+            <td colSpan={showImages && !canShowImage ? 2 : 1}>
                 <div className="menu-item-head">
                     <span className="menu-item-name">{menuItem.displayName}</span>
                     {
@@ -45,7 +46,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 showImages && (
                     <td className="centered-content">
                         {
-                            thumbnailUrl && (
+                            canShowImage && (
                                 <img src={forceFullImage ? menuItem.imageUrl : thumbnailUrl}
                                      decoding="async"
                                      alt="Menu item image"
