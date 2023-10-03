@@ -2,7 +2,11 @@ import searchIcon from '../../assets/search.svg';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export const SearchBar = () => {
+interface ISearchBarProps {
+    onSubmit(): void;
+}
+
+export const SearchBar: React.FC<ISearchBarProps> = ({ onSubmit }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [query, setQuery] = useState('');
     const navigate = useNavigate();
@@ -16,6 +20,7 @@ export const SearchBar = () => {
             inputRef?.current?.focus();
         } else {
             navigate(`/search?q=${trimmedQuery}`);
+            onSubmit();
         }
     };
 

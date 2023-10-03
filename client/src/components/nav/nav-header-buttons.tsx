@@ -7,10 +7,10 @@ import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 
 
 interface INavListHeaderItemsProps {
-    onClick(): void;
+    closeNav(): void;
 }
 
-export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ onClick }) => {
+export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ closeNav }) => {
     const deviceType = useDeviceType();
 
     return (
@@ -26,16 +26,16 @@ export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ onClick
                 )
             }
             <li>
-                <NavLink to="/settings" className="link-button settings" onClick={onClick}>
+                <NavLink to="/settings" className="link-button settings" onClick={closeNav}>
                     <img src={settingsIcon} alt="Open settings"/>
                 </NavLink>
             </li>
             <li>
-                <NavLink to="/" className="link-button home" onClick={onClick}>
+                <NavLink to="/" className="link-button home" onClick={closeNav}>
                     <img src={homeIcon} alt="Navigate home"/>
                 </NavLink>
             </li>
-            <SearchBar/>
+            <SearchBar onSubmit={closeNav}/>
         </>
     );
 }
