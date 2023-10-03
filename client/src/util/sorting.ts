@@ -10,13 +10,9 @@ import { DiningClient } from '../api/dining.ts';
 import { CafeView, ICafe } from '../models/cafe.ts';
 
 const normalizeId = (id: string) => {
-    id = id.toLowerCase();
-
-    if (id.startsWith('cafe')) {
-        id = id.substring('cafe'.length);
-    }
-
-    return id;
+    return id
+        .toLowerCase()
+        .replace(/^cafe /, '');
 }
 
 export const sortCafeIds = (cafeIds: Iterable<string>) => {
@@ -33,8 +29,14 @@ export const sortCafeIds = (cafeIds: Iterable<string>) => {
         const normalizedA = getNormalizedId(a);
         const normalizedB = getNormalizedId(b);
 
-        const numberA = Number(normalizedA);
-        const numberB = Number(normalizedB);
+        // Normally I don't like parseInt, but for once
+        // I am going to intentionally rely on the weird
+        // parsing behavior.
+        // Cafe 40-41 will be normalized to "40-41", which
+        // fails to parse under Number but will parse into
+        // 40 under parseInt.
+        const numberA = parseInt(normalizedA);
+        const numberB = parseInt(normalizedB);
 
         const isNumberA = !Number.isNaN(numberA);
         const isNumberB = !Number.isNaN(numberB);
