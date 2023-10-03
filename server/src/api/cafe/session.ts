@@ -181,9 +181,10 @@ export class CafeDiscoverySession {
             displayName:  jsonItem.displayText,
             calories:     jsonItem.properties.calories,
             maxCalories:  jsonItem.properties.maxCalories,
-            // Make sure to encode the URI, since the API can return unencoded URIs that will throw 503s to azure
-            imageUrl:     jsonItem.image ? encodeURI(jsonItem.image) : undefined,
-            hasThumbnail: false
+            description:  jsonItem.description,
+            hasThumbnail: false,
+            // Make sure to encode the URI, since the API can return un-encoded URIs that will throw 503s to azure
+            imageUrl: jsonItem.image ? encodeURI(jsonItem.image) : undefined,
         }));
     }
 

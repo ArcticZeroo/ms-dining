@@ -44,6 +44,7 @@ export interface IMenuItem {
     maxCalories: string;
     imageUrl?: string;
     hasThumbnail: boolean;
+    description?: string;
 }
 
 export interface IMenuItemsByCategoryName {

@@ -42,6 +42,11 @@ export const SettingsPage = () => {
                     name="Show Calories"
                 />
                 <BooleanSettingInput
+                    setting={ApplicationSettings.showDescriptions}
+                    contextKey="showDescriptions"
+                    name="Show Descriptions"
+                />
+                <BooleanSettingInput
                     setting={ApplicationSettings.useGroups}
                     contextKey="useGroups"
                     name="Allow Cafe Groups"

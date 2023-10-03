@@ -110,6 +110,7 @@ export const ApplicationSettings = {
     useGroups:                new BooleanSetting('useGroups', true /*defaultValue*/),
     showImages:               new BooleanSetting('showImages', false /*defaultValue*/),
     showCalories:             new BooleanSetting('showCalories', true /*defaultValue*/),
+    showDescriptions:         new BooleanSetting('showDescription', true /*defaultValue*/),
     requestMenusInBackground: new BooleanSetting('requestMenusInBackground', true /*defaultValue*/),
     lastUsedCafeIds:          new StringArraySetting('lastUsedDiningHalls', [] /*defaultValue*/),
     homepageViews:            new StringArraySetting('homepageDiningHalls', [] /*defaultValue*/),

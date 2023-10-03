@@ -81,6 +81,8 @@ const populateSessionsAsync = async () => {
         } catch (e) {
             logError(`Failed to populate cafe ${cafe.name} (${cafe.url})`, e);
         }
+
+        break;
     }
 
     await Promise.all(thumbnailPromises);

@@ -9,7 +9,7 @@ export interface ICafeConfigResponse {
     }>
 }
 
-export interface ICafeMenuItem {
+export interface ICafeStationCategory {
     categoryId: string;
     name: string;
     items: string[];
@@ -18,7 +18,7 @@ export interface ICafeMenuItem {
 export interface ICafeStationMenu {
     id: string;
     name: string;
-    categories: Array<ICafeMenuItem>;
+    categories: Array<ICafeStationCategory>;
 }
 
 export interface ICafeStationListItem {
@@ -40,4 +40,5 @@ export interface ICafeMenuItemsResponseItem {
         maxCalories: string;
     };
     image?: string;
+    description?: string;
 }

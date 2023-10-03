@@ -14,81 +14,82 @@ import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
 
 function App() {
-	const { cafes, groups } = useLoaderData() as IViewListResponse;
+    const { cafes, groups } = useLoaderData() as IViewListResponse;
 
-	// TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
-	const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
-	const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
+    // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
+    const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
+    const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
-	const settingsState = useState<ISettingsContext>(() => ({
-		useGroups:                ApplicationSettings.useGroups.get(),
-		showImages:               ApplicationSettings.showImages.get(),
-		showCalories:             ApplicationSettings.showCalories.get(),
-		requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
-		homepageViewIds:          new Set(ApplicationSettings.homepageViews.get())
-	}));
-	const [{ requestMenusInBackground }] = settingsState;
+    const settingsState = useState<ISettingsContext>(() => ({
+        useGroups:                ApplicationSettings.useGroups.get(),
+        showImages:               ApplicationSettings.showImages.get(),
+        showCalories:             ApplicationSettings.showCalories.get(),
+        showDescriptions:         ApplicationSettings.showDescriptions.get(),
+        requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
+        homepageViewIds:          new Set(ApplicationSettings.homepageViews.get())
+    }));
+    const [{ requestMenusInBackground }] = settingsState;
 
-	const [selectedView, setSelectedView] = useState<CafeView>();
-	const menuDivRef = useRef<HTMLDivElement>(null);
+    const [selectedView, setSelectedView] = useState<CafeView>();
+    const menuDivRef = useRef<HTMLDivElement>(null);
 
-	const [isNavExpanded, setIsNavExpanded] = useState(false);
-	const deviceType = useDeviceType();
+    const [isNavExpanded, setIsNavExpanded] = useState(false);
+    const deviceType = useDeviceType();
 
-	const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
-	const shouldStopScroll = isNavExpanded && deviceType === DeviceType.Mobile;
+    const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
+    const shouldStopScroll = isNavExpanded && deviceType === DeviceType.Mobile;
 
-	useEffect(() => {
-		if (menuDivRef.current) {
-			menuDivRef.current.scrollTop = 0;
-		}
-	}, [selectedView]);
+    useEffect(() => {
+        if (menuDivRef.current) {
+            menuDivRef.current.scrollTop = 0;
+        }
+    }, [selectedView]);
 
-	useEffect(() => {
-		if (!requestMenusInBackground || cafes.length === 0 || viewsById.size === 0) {
-			return;
-		}
+    useEffect(() => {
+        if (!requestMenusInBackground || cafes.length === 0 || viewsById.size === 0) {
+            return;
+        }
 
-		const lastCancellationToken = retrieveCafeMenusCancellationToken.current;
-		if (lastCancellationToken) {
-			lastCancellationToken.isCancelled = true;
-		}
+        const lastCancellationToken = retrieveCafeMenusCancellationToken.current;
+        if (lastCancellationToken) {
+            lastCancellationToken.isCancelled = true;
+        }
 
-		const cancellationToken: ICancellationToken = { isCancelled: false };
-		retrieveCafeMenusCancellationToken.current = cancellationToken;
+        const cancellationToken: ICancellationToken = { isCancelled: false };
+        retrieveCafeMenusCancellationToken.current = cancellationToken;
 
-		DiningClient.retrieveAllMenusInOrder(cafes, viewsById, cancellationToken)
-			.then(() => console.log('Retrieved all cafe menus!'))
-			.catch(err => console.error('Failed to retrieve all cafe menus:', err));
-	}, [cafes, viewsById, requestMenusInBackground]);
+        DiningClient.retrieveAllMenusInOrder(cafes, viewsById, cancellationToken)
+            .then(() => console.log('Retrieved all cafe menus!'))
+            .catch(err => console.error('Failed to retrieve all cafe menus:', err));
+    }, [cafes, viewsById, requestMenusInBackground]);
 
-	return (
-		<div className="App">
-			<ApplicationContext.Provider value={{ viewsById, viewsInOrder, cafes, groups }}>
-				<SettingsContext.Provider value={settingsState}>
-					<NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
-						<SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
-							<Nav/>
-							<div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
-								{
-									viewsById.size > 0 && (
-										               <Outlet/>
-									               )
-								}
-								{
-									cafes.length === 0 && (
-										               <div className="error-card">
-											               There are no views available!
-										               </div>
-									               )
-								}
-							</div>
-						</SelectedViewContext.Provider>
-					</NavExpansionContext.Provider>
-				</SettingsContext.Provider>
-			</ApplicationContext.Provider>
-		</div>
-	);
+    return (
+        <div className="App">
+            <ApplicationContext.Provider value={{ viewsById, viewsInOrder, cafes, groups }}>
+                <SettingsContext.Provider value={settingsState}>
+                    <NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
+                        <SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
+                            <Nav/>
+                            <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
+                                {
+                                    viewsById.size > 0 && (
+                                        <Outlet/>
+                                    )
+                                }
+                                {
+                                    cafes.length === 0 && (
+                                        <div className="error-card">
+                                            There are no views available!
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </SelectedViewContext.Provider>
+                    </NavExpansionContext.Provider>
+                </SettingsContext.Provider>
+            </ApplicationContext.Provider>
+        </div>
+    );
 }
 
 export default App;

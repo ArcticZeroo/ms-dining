@@ -5,17 +5,19 @@ export interface ISettingsContext {
     useGroups: boolean;
     showImages: boolean;
     showCalories: boolean;
+    showDescriptions: boolean;
     requestMenusInBackground: boolean;
     homepageViewIds: Set<string>;
 }
 
 export const SettingsContext = React.createContext<ContextWithUpdate<ISettingsContext>>([
     {
-        useGroups: true,
-        showImages: false,
-        showCalories: true,
+        useGroups:                true,
+        showImages:               false,
+        showCalories:             true,
+        showDescriptions:         true,
         requestMenusInBackground: true,
-        homepageViewIds: new Set()
+        homepageViewIds:          new Set()
     },
     () => void 0
 ]);

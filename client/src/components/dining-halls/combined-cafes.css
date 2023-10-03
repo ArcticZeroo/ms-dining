@@ -64,3 +64,16 @@
 .station.collapsed .menu-body {
     display: none;
 }
+
+.menu-item-head {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-item-head .menu-item-description {
+    opacity: 0.75;
+    font-size: 0.9em;
+    font-style: italic;
+    word-wrap: break-word;
+    max-width: 20em;
+}
