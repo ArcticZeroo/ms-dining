@@ -123,6 +123,7 @@ html, body, #root, .App {
     border: none;
     padding: 0.5rem;
     background: none;
+    flex-grow: 1;
 }
 
 .search-bar button {
