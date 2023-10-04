@@ -13,7 +13,13 @@ export const loadImageData = async (url: string): Promise<IImageData> => {
     const response = await runPromiseWithRetries(() => fetch(url), loadImageRetries);
 
     if (!response.ok) {
-        throw new Error(`Response failed with status: ${response.status}`);
+        let text;
+        try {
+            text = await response.text();
+        } catch {
+            throw new Error(`Response failed with status: ${response.status}, could not deserialize text`);
+        }
+        throw new Error(`Response failed with status: ${response.status}, text: ${text}`);
     }
 
     const buffer = await response.arrayBuffer();
