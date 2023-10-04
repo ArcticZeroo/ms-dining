@@ -12,7 +12,7 @@ import { CafeView, ICafe } from '../models/cafe.ts';
 const normalizeId = (id: string) => {
     return id
         .toLowerCase()
-        .replace(/^cafe /, '');
+        .replace(/^cafe/, '');
 }
 
 export const sortCafeIds = (cafeIds: Iterable<string>) => {
@@ -28,6 +28,8 @@ export const sortCafeIds = (cafeIds: Iterable<string>) => {
     return Array.from(cafeIds).sort((a, b) => {
         const normalizedA = getNormalizedId(a);
         const normalizedB = getNormalizedId(b);
+
+        console.log('Comparing normalized values', a, b);
 
         // Normally I don't like parseInt, but for once
         // I am going to intentionally rely on the weird
