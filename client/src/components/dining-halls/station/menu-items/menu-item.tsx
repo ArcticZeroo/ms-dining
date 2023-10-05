@@ -27,11 +27,11 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const thumbnailUrl = DiningClient.getThumbnailUrlForMenuItem(menuItem);
     const [forceFullImage, setForceFullImage] = useState(false);
-    const canShowImage = thumbnailUrl != null || (forceFullImage && menuItem.imageUrl != null);
+    const canShowImage = showImages && (thumbnailUrl != null || (forceFullImage && menuItem.imageUrl != null));
 
     return (
         <tr>
-            <td colSpan={showImages && !canShowImage ? 2 : 1}>
+            <td colSpan={!canShowImage ? 2 : 1}>
                 <div className="menu-item-head">
                     <span className="menu-item-name">{menuItem.displayName}</span>
                     {
@@ -42,8 +42,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 </div>
             </td>
             {
-                // Always show this <td> when images are enabled, even if there is no image url, in order to keep the same column count across rows
-                showImages && (
+                canShowImage && (
                     <td className="centered-content">
                         {
                             canShowImage && (
