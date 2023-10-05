@@ -27,22 +27,28 @@ export const createThumbnailStream = async (url: string, maxHeightPx: number) =>
     const imageData = await loadImageData(url);
     const image = await loadImage(Buffer.from(imageData.data));
 
-    const scale = maxHeightPx / image.height;
-
-    const finalWidth = Math.floor(image.width * scale);
-    const finalHeight = Math.floor(image.height * scale);
-
     const rotationDegrees = getRotationDegreesClockwise(imageData.tags);
-    const [canvasWidth, canvasHeight] = getCanvasSize(finalWidth, finalHeight, rotationDegrees);
+    const [widthAfterRotate, heightAfterRotate] = getCanvasSize(image.width, image.height, rotationDegrees);
 
-    const canvas = createCanvas(canvasWidth, canvasHeight);
+    const scale = maxHeightPx / heightAfterRotate;
+
+    const finalWidth = Math.floor(widthAfterRotate * scale);
+    const finalHeight = Math.floor(heightAfterRotate * scale);
+
+    console.log();
+    console.log(url);
+    console.log('Rotating image', rotationDegrees, 'degrees');
+    console.log('initial width/height:', widthAfterRotate, heightAfterRotate);
+    console.log('scale:', scale, ', width/height after scale:', finalWidth, finalHeight);
+
+    const canvas = createCanvas(finalWidth, finalHeight);
     const ctx = canvas.getContext('2d');
 
     if (rotationDegrees != 0) {
         // Rotate around canvas center, then move back to the top left
-        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        ctx.translate(finalWidth / 2, finalHeight / 2);
         ctx.rotate(rotationDegrees * Math.PI / 180);
-        ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
+        ctx.translate(-finalWidth / 2, -finalHeight / 2);
     }
 
     ctx.drawImage(image, 0, 0, finalWidth, finalHeight);
