@@ -9,6 +9,7 @@
       "DOM"
     ],
     "outDir": "dist",
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
   "exclude": [

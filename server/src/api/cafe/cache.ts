@@ -24,9 +24,10 @@ const writeThumbnailForMenuItem = async (menuItem: IMenuItem) => {
     try {
         await thumbnailSemaphore.acquire();
         await createAndSaveThumbnailForMenuItem(menuItem);
+        menuItem.hasThumbnail = true;
     } catch (e) {
         menuItem.hasThumbnail = false;
-        logError('Failed to write thumbnail for menu item', menuItem.id, 'at URL', menuItem.imageUrl, 'with error:', e);
+        logError('Failed to write thumbnail for menu item', menuItem.displayName, 'at URL', menuItem.imageUrl, 'with error:', e);
     } finally {
         thumbnailSemaphore.release();
     }
@@ -46,7 +47,7 @@ const writeThumbnailsForCafe = async (session: CafeDiscoverySession) => {
         }
     }
 
-    logInfo('Writing', count, 'thumbnails for cafe', session.cafe.name);
+    logInfo('Creating and writing', count, 'thumbnails for cafe', session.cafe.name);
 
     const startTime = Date.now();
 
