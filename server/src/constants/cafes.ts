@@ -165,8 +165,17 @@ export const cafeList: ICafe[] = [
         groupId: groupIds.building6
     },
     {
-        name:    'Local Flavors 6 (Dote)',
+        name:    'Craft75 Pub (Building 6)',
+        url:     'craft75',
+        groupId: groupIds.building6
+    },
+    {
+        name:    'Dote (Building 6)',
         url:     'dote',
         groupId: groupIds.building6
+    },
+    {
+        name:    'Dote (Redmond Transit Station)',
+        url:     'dote-rts'
     }
 ]
