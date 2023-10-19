@@ -2,7 +2,7 @@ nav {
     overflow-y: auto;
     flex-shrink: 0;
     position: relative;
-    max-width: 20%;
+    width: 18rem;
 }
 
 nav #sticky-header-list {
@@ -111,6 +111,10 @@ nav form {
 }
 
 @media screen and (max-width: 800px) {
+    nav {
+        width: unset;
+    }
+
     nav.expanded {
         height: 100%;
         width: 100%;
