@@ -4,7 +4,7 @@ export const getBaseApiUrlWithoutTrailingSlash = ({ url }: ICafe) => `https://${
 
 export const groupIds = {
 	commons:               'commons',
-	localFlavorsBuilding6: 'localFlavorsBuilding6'
+	localFlavorsBuilding6: 'local-flavors'
 };
 
 export const groupList: ICafeGroup[] = [

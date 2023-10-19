@@ -7,17 +7,17 @@ import * as fsSync from 'fs';
 import { serverMenuItemThumbnailPath } from '../../constants/config.js';
 import { createAndSaveThumbnailForMenuItem } from './image/thumbnail.js';
 import Semaphore from 'semaphore-async-await';
-import { IMenuItem } from '../../models/cafe.js';
+import { ICafe, IMenuItem } from '../../models/cafe.js';
 
 export const cafeSessionsByUrl = new Map<string, CafeDiscoverySession>();
 
 const resetState = async () => {
     cafeSessionsByUrl.clear();
-    await fsSync.rmSync(serverMenuItemThumbnailPath, { recursive: true, force: true });
+    fsSync.rmSync(serverMenuItemThumbnailPath, { recursive: true, force: true });
     await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
 };
 
-// This is really stupid, but whatever.
+const cafeSemaphore = new Semaphore.default(5);
 const thumbnailSemaphore = new Semaphore.default(10);
 
 const writeThumbnailForMenuItem = async (menuItem: IMenuItem) => {
@@ -63,30 +63,46 @@ const writeThumbnailsForCafe = async (session: CafeDiscoverySession) => {
     logInfo('Finished writing', count, 'thumbnails for cafe', session.cafe.name, 'in', elapsedSeconds.toFixed(2), 'second(s)');
 }
 
+const discoverCafeAsync = async (cafe: ICafe) => {
+    const session = new CafeDiscoverySession(cafe);
+    try {
+        await cafeSemaphore.acquire();
+
+        logInfo('Performing discovery for', cafe.name, 'at', cafe.url, '...');
+
+        await session.performDiscoveryAsync();
+        cafeSessionsByUrl.set(cafe.url, session);
+    } catch (e) {
+        logError(`Failed to populate cafe ${cafe.name} (${cafe.url})`, e);
+    } finally {
+        cafeSemaphore.release();
+    }
+
+    try {
+        await writeThumbnailsForCafe(session);
+    } catch (e) {
+        logError('Unhandled error while populating thumbnails for cafe', cafe.name, 'with error:', e);
+    }
+}
+
 const populateSessionsAsync = async () => {
     await resetState();
 
     logInfo('Populating cafe sessions...');
+    const startTime = Date.now();
 
-    const thumbnailPromises = [];
+    const cafePromises: Array<Promise<unknown>> = [];
 
     for (const cafe of cafeList) {
-        const session = new CafeDiscoverySession(cafe);
-        try {
-            logInfo('Performing discovery for', cafe.name, 'at', cafe.url, '...');
-
-            await session.performDiscoveryAsync();
-            cafeSessionsByUrl.set(cafe.url, session);
-
-            thumbnailPromises.push(writeThumbnailsForCafe(session));
-        } catch (e) {
-            logError(`Failed to populate cafe ${cafe.name} (${cafe.url})`, e);
-        }
+        cafePromises.push(discoverCafeAsync(cafe));
     }
 
-    await Promise.all(thumbnailPromises);
+    await Promise.all(cafePromises);
 
-    logInfo('Finished populating cafe sessions');
+    const endTime = Date.now();
+    const elapsedSeconds = (endTime - startTime) / 1000;
+
+    logInfo(`Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
 };
 
 const populateSessions = () => {

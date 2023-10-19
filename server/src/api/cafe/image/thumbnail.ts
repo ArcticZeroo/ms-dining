@@ -1,7 +1,7 @@
-import * as fs from 'fs';
 import Jimp from 'jimp';
 import * as path from 'path';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
+import { defaultUserAgent } from '../../../constants/http.js';
 import { IMenuItem } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 
@@ -9,7 +9,11 @@ const maxThumbnailHeightPx = 200;
 const loadImageRetries = 2;
 
 export const loadImageData = async (url: string): Promise<Buffer> => {
-    const response = await runPromiseWithRetries(() => fetch(url), loadImageRetries);
+    const response = await runPromiseWithRetries(() => fetch(url, {
+        headers: {
+            'User-Agent': defaultUserAgent
+        }
+    }), loadImageRetries);
 
     if (!response.ok) {
         let text;
