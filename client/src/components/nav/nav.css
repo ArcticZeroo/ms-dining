@@ -2,6 +2,7 @@ nav {
     overflow-y: auto;
     flex-shrink: 0;
     position: relative;
+    max-width: 20%;
 }
 
 nav #sticky-header-list {
