@@ -18,7 +18,7 @@
     {
       "name": "Your homepage",
       "short_name": "Home",
-      "description": "View your custom list of homepage dining hall menus!",
+      "description": "View your custom list of homepage cafes!",
       "url": "/",
       "icons": [
         {

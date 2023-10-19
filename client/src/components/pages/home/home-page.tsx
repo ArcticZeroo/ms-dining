@@ -41,7 +41,7 @@ export const HomePage = () => {
                 <Link to={'/settings'} id="home-settings">
                     <div className="card centered blue">
                         <div className="title">
-                            Head to the settings page in order to select homepage dining halls!
+                            Head to the settings page in order to select homepage cafes!
                         </div>
                     </div>
                 </Link>

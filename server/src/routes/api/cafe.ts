@@ -47,7 +47,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const id = ctx.params.id;
         if (!id) {
             ctx.status = 400;
-            ctx.body = 'Missing dining hall id';
+            ctx.body = 'Missing cafe id';
             return;
         }
 

@@ -11,7 +11,7 @@ export const CafeViewPage: React.FC = () => {
     if (!id) {
         return (
             <div className="error-card">
-                No dining hall id provided!
+                No cafe id provided!
             </div>
         );
     }
