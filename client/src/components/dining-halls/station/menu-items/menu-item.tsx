@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { SettingsContext } from '../../../../context/settings.ts';
-import { DiningClient } from '../../../../api/dining.ts';
+import { MenuItemImage } from './menu-item-image.tsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -23,9 +23,8 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const [{ showImages, showCalories, showDescriptions }] = useContext(SettingsContext);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
-    const thumbnailUrl = DiningClient.getThumbnailUrlForMenuItem(menuItem);
-    const [shouldUseImageFallback, setShouldUseImageFallback] = useState(false);
-    const canShowImage = showImages && (thumbnailUrl != null || (shouldUseImageFallback && menuItem.imageUrl != null));
+
+    const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
     return (
         <tr>
@@ -34,24 +33,15 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     <span className="menu-item-name">{menuItem.displayName}</span>
                     {
                         showDescriptions
-                            && menuItem.description
-                            && <span className="menu-item-description">{menuItem.description}</span>
+                        && menuItem.description
+                        && <span className="menu-item-description">{menuItem.description}</span>
                     }
                 </div>
             </td>
             {
                 canShowImage && (
                     <td className="centered-content">
-                        {
-                            canShowImage && (
-                                <img src={shouldUseImageFallback ? menuItem.imageUrl : thumbnailUrl}
-                                     decoding="async"
-                                     alt="Menu item image"
-                                     className="menu-item-image"
-                                     loading="lazy"
-                                     onError={() => setShouldUseImageFallback(true)}/>
-                            )
-                        }
+                        <MenuItemImage menuItem={menuItem}/>
                     </td>
                 )
             }

@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { IMenuItem } from '../../../../models/cafe.ts';
-import { SettingsContext } from '../../../../context/settings.ts';
 import { Measurement } from '../../../../util/measurement.ts';
 import { DiningClient } from '../../../../api/dining.ts';
 import { DownscaledImage } from '../../../image/downscaled-image.tsx';
@@ -40,15 +39,11 @@ export const getImageSizeProps = (menuItem: IMenuItem) => {
 }
 
 export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
-    const [{ showImages }] = useContext(SettingsContext);
     const [forceImageFallback, setForceImageFallback] = useState(false);
-
-    if (!showImages) {
-        return null;
-    }
 
     const targetImageUrl = getTargetImageUrl(forceImageFallback, menuItem);
     if (!targetImageUrl) {
+        console.error('MenuItemImage should not be used on menu items without images');
         return null;
     }
 
@@ -60,6 +55,7 @@ export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
 
     // Try to downscale the full size image if we can, otherwise just show the full thing
     if (forceImageFallback) {
+        console.log('using image fallback on image', menuItem);
         return (
             <ErrorBoundary fallback={<img {...imageProps}/>}>
                 <DownscaledImage
@@ -73,7 +69,10 @@ export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
     return (
         <img
             {...imageProps}
-            onError={() => setForceImageFallback(true)}
+            onError={() => {
+                console.log('falling back for menu item', menuItem, 'with props', imageProps);
+                setForceImageFallback(true);
+            }}
         />
     );
 };
