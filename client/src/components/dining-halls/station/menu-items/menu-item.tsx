@@ -3,8 +3,6 @@ import { IMenuItem } from '../../../../models/cafe.ts';
 import { SettingsContext } from '../../../../context/settings.ts';
 import { DiningClient } from '../../../../api/dining.ts';
 
-//import imageSvg from '../../../../assets/image.svg';
-
 export interface IMenuItemProps {
     menuItem: IMenuItem;
 }
@@ -26,8 +24,8 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const [{ showImages, showCalories, showDescriptions }] = useContext(SettingsContext);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const thumbnailUrl = DiningClient.getThumbnailUrlForMenuItem(menuItem);
-    const [forceFullImage, setForceFullImage] = useState(false);
-    const canShowImage = showImages && (thumbnailUrl != null || (forceFullImage && menuItem.imageUrl != null));
+    const [shouldUseImageFallback, setShouldUseImageFallback] = useState(false);
+    const canShowImage = showImages && (thumbnailUrl != null || (shouldUseImageFallback && menuItem.imageUrl != null));
 
     return (
         <tr>
@@ -46,12 +44,12 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     <td className="centered-content">
                         {
                             canShowImage && (
-                                <img src={forceFullImage ? menuItem.imageUrl : thumbnailUrl}
+                                <img src={shouldUseImageFallback ? menuItem.imageUrl : thumbnailUrl}
                                      decoding="async"
                                      alt="Menu item image"
                                      className="menu-item-image"
                                      loading="lazy"
-                                     onError={() => setForceFullImage(true)}/>
+                                     onError={() => setShouldUseImageFallback(true)}/>
                             )
                         }
                     </td>

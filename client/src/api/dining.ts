@@ -129,10 +129,6 @@ export abstract class DiningClient {
 	}
 
 	public static getThumbnailUrlForMenuItem(menuItem: IMenuItem) {
-		if (!menuItem.hasThumbnail) {
-			return menuItem.imageUrl;
-		}
-
 		return `/static/menu-items/thumbnail/${menuItem.id}.png`;
 	}
 }
