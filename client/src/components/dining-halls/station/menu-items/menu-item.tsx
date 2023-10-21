@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { IMenuItem } from '../../../../models/cafe.ts';
-import { SettingsContext } from '../../../../context/settings.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
+import { ApplicationSettings } from '../../../../api/settings.ts';
+import { useValueNotifier } from '../../../../hooks/events.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -21,7 +22,9 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
 };
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
-    const [{ showImages, showCalories, showDescriptions }] = useContext(SettingsContext);
+    const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const showCalories = useValueNotifier(ApplicationSettings.showCalories);
+    const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
 
     const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);

@@ -1,15 +1,18 @@
 import { useContext, useEffect, useState } from 'react';
-import { SettingsContext } from '../../../context/settings.ts';
 import { Link } from 'react-router-dom';
 import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
 
 import './home.css';
 import { ApplicationContext } from '../../../context/app.ts';
 import { expandAndFlattenView, isViewVisible } from '../../../util/view.ts';
+import { ApplicationSettings } from '../../../api/settings.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 
 export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
-    const [{ homepageViewIds, useGroups }] = useContext(SettingsContext);
+
+    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
+    const useGroups = useValueNotifier(ApplicationSettings.useGroups);
 
     // We need to expand views into a cafe list
     // Also, users may have added cafes to their home set which are no temporarily unavailable

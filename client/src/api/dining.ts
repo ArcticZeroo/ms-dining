@@ -8,7 +8,7 @@ const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 export abstract class DiningClient {
 	private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
 	private static readonly _cafeMenusById: Map<string, Promise<CafeMenu>> = new Map();
-	private static readonly _lastUsedCafeIds: string[] = ApplicationSettings.lastUsedCafeIds.get();
+	private static _lastUsedCafeIds: string[] = [...ApplicationSettings.lastUsedCafeIds.value];
 
 	private static _getRequestOptions(sendVisitorId: boolean) {
 		if (!sendVisitorId) {
@@ -47,12 +47,9 @@ export abstract class DiningClient {
 	}
 
 	private static _addToLastUsedCafeIds(id: string) {
-		const existingIndex = DiningClient._lastUsedCafeIds.indexOf(id);
-		if (existingIndex !== -1) {
-			DiningClient._lastUsedCafeIds.splice(existingIndex, 1);
-		}
-		DiningClient._lastUsedCafeIds.push(id);
-		ApplicationSettings.lastUsedCafeIds.set(DiningClient._lastUsedCafeIds);
+		const newLastUsedCafeIds = DiningClient._lastUsedCafeIds.filter(existingId => existingId !== id);
+		DiningClient._lastUsedCafeIds = newLastUsedCafeIds;
+		ApplicationSettings.lastUsedCafeIds.value = newLastUsedCafeIds;
 	}
 
 	public static async retrieveCafeMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<CafeMenu> {
@@ -76,9 +73,9 @@ export abstract class DiningClient {
 	}
 
 	public static getCafePriorityOrder(cafes: ICafe[], viewsById: Map<string, CafeView>) {
-		const homepageViewIds = ApplicationSettings.homepageViews.get();
+		const homepageViewIds = ApplicationSettings.homepageViews.value;
 		const homepageCafeIds = new Set(
-			homepageViewIds
+			Array.from(homepageViewIds)
 				.filter(viewId => viewsById.has(viewId))
 				.flatMap(viewId => expandAndFlattenView(viewId, viewsById))
 				.map(cafe => cafe.id)
@@ -120,7 +117,7 @@ export abstract class DiningClient {
 		for (const cafe of DiningClient.getCafePriorityOrder(cafes, viewsById)) {
 			await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
 
-			if (cancellationToken?.isCancelled || !ApplicationSettings.requestMenusInBackground.get()) {
+			if (cancellationToken?.isCancelled || !ApplicationSettings.requestMenusInBackground.value) {
 				break;
 			}
 

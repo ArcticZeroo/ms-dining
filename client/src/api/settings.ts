@@ -1,4 +1,5 @@
 import { randomUserId } from '../util/random.ts';
+import { ValueNotifier } from '../util/events.ts';
 
 const getBooleanSetting = (key: string, defaultValue: boolean) => {
     try {
@@ -19,6 +20,14 @@ const setBooleanSetting = (key: string, value: boolean) => {
         // Do nothing - some security exception may have occurred.
     }
 };
+
+const getStringSetting = (key: string, defaultValue: string) => {
+    try {
+        return localStorage.getItem(key) ?? defaultValue;
+    } catch {
+        return defaultValue;
+    }
+}
 
 const getStringArraySetting = (key: string, delimiter: string = ';') => {
     try {
@@ -44,65 +53,63 @@ const setStringArraySetting = (key: string, value: string[], delimiter: string =
     }
 };
 
-export abstract class Setting<T> {
+export abstract class Setting<T> extends ValueNotifier<T> {
     protected constructor(
         public readonly name: string,
-        public readonly defaultValue: T
+        initialValue: T
     ) {
+        super(initialValue);
     }
 
-    public abstract get(): T;
+    get value() {
+        return this._value;
+    }
 
-    public abstract set(value: T): void;
+    set value(value: T) {
+        this.serialize(this._value);
+        this._value = value;
+    }
+
+    protected abstract serialize(value: T): void;
 }
 
 export class BooleanSetting extends Setting<boolean> {
     constructor(name: string, defaultValue: boolean) {
-        super(name, defaultValue);
+        super(name, getBooleanSetting(name, defaultValue));
     }
 
-    public get() {
-        return getBooleanSetting(this.name, this.defaultValue);
-    }
-
-    public set(value: boolean) {
+    protected serialize(value: boolean) {
         setBooleanSetting(this.name, value);
     }
 }
 
 export class StringArraySetting extends Setting<Array<string>> {
-    constructor(name: string, defaultValue: Array<string>) {
-        super(name, defaultValue);
+    constructor(name: string) {
+        super(name, getStringArraySetting(name));
     }
 
-    public get() {
-        return getStringArraySetting(this.name);
-    }
-
-    public set(value: Array<string>) {
+    protected serialize(value: Array<string>) {
         setStringArraySetting(this.name, value);
     }
 }
 
+export class StringSetSetting extends Setting<Set<string>> {
+    constructor(name: string) {
+        super(name, new Set(getStringArraySetting(name)));
+    }
+
+    protected serialize(value: Set<string>) {
+        setStringArraySetting(this.name, Array.from(value));
+    }
+}
+
 export class StringSetting extends Setting<string> {
-    constructor(name: string, defaultValue: string) {
-        super(name, defaultValue);
+    constructor(name: string, defaultValue: string = '') {
+        super(name, getStringSetting(name, defaultValue));
     }
 
-    public get() {
-        try {
-            return localStorage.getItem(this.name) ?? this.defaultValue;
-        } catch {
-            return this.defaultValue;
-        }
-    }
-
-    public set(value: string) {
-        try {
-            localStorage.setItem(this.name, value);
-        } catch {
-            // Do nothing
-        }
+    protected serialize(value: string) {
+        localStorage.setItem(this.name, value);
     }
 }
 
@@ -112,16 +119,19 @@ export const ApplicationSettings = {
     showCalories:             new BooleanSetting('showCalories', true /*defaultValue*/),
     showDescriptions:         new BooleanSetting('showDescription', true /*defaultValue*/),
     requestMenusInBackground: new BooleanSetting('requestMenusInBackground', true /*defaultValue*/),
-    lastUsedCafeIds:          new StringArraySetting('lastUsedDiningHalls', [] /*defaultValue*/),
-    homepageViews:            new StringArraySetting('homepageDiningHalls', [] /*defaultValue*/),
-    visitorId:                new StringSetting('visitorId', '' /*defaultValue*/)
-};
+    rememberCollapseState:    new BooleanSetting('rememberCollapseState', false /*defaultValue*/),
+    lastUsedCafeIds:          new StringArraySetting('lastUsedDiningHalls'),
+    homepageViews:            new StringSetSetting('homepageDiningHalls'),
+    collapsedStations:        new StringSetSetting('collapsedStations'),
+    collapsedCafeIds:         new StringSetSetting('collapsedCafeIds'),
+    visitorId:                new StringSetting('visitorId')
+} as const;
 
 export const getVisitorId = () => {
-    const visitorId = ApplicationSettings.visitorId.get();
+    const visitorId = ApplicationSettings.visitorId.value;
     if (visitorId.length === 0) {
         const newVisitorId = randomUserId();
-        ApplicationSettings.visitorId.set(newVisitorId);
+        ApplicationSettings.visitorId.value = newVisitorId;
         return newVisitorId;
     }
     return visitorId;

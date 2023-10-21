@@ -7,8 +7,9 @@ import {
 } from '../models/cafe.ts';
 import { sortCafeIds } from '../util/sorting';
 import { ApplicationContext } from '../context/app.ts';
-import { SettingsContext } from '../context/settings.ts';
 import { isViewVisible } from '../util/view.ts';
+import { useValueNotifier } from './events.ts';
+import { ApplicationSettings } from '../api/settings.ts';
 
 export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithoutMembers[]) => {
     const [viewsById, setViewsById] = useState<Map<string, CafeView>>(new Map());
@@ -60,20 +61,20 @@ export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithou
 
 export const useVisibleViews = () => {
     const { viewsInOrder } = useContext(ApplicationContext);
-    const [{ useGroups }] = useContext(SettingsContext);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.useGroups);
     const [visibleViews, setVisibleViews] = useState<Array<CafeView>>([]);
 
     useEffect(() => {
         const newVisibleViews: CafeView[] = [];
 
         for (const view of viewsInOrder) {
-            if (isViewVisible(useGroups, view)) {
+            if (isViewVisible(shouldUseGroups, view)) {
                 newVisibleViews.push(view);
             }
         }
 
         setVisibleViews(newVisibleViews);
-    }, [viewsInOrder, useGroups]);
+    }, [viewsInOrder, shouldUseGroups]);
 
     return visibleViews;
 };

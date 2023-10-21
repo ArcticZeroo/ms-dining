@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../context/app.ts';
-import { SettingsContext } from '../../context/settings.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { sortCafeIds } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
+import { ApplicationSettings } from '../../api/settings.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -31,7 +32,8 @@ interface ISearchResultProps {
 
 export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, cafeIds, imageUrl, entityType } }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const [{ showImages, useGroups }] = useContext(SettingsContext);
+    const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const useGroups = useValueNotifier(ApplicationSettings.useGroups);
     const [cafeIdsInOrder, setCafeIdsInOrder] = useState<Array<string>>([]);
 
     useEffect(() => {

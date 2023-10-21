@@ -6,12 +6,12 @@ import { Nav } from './components/nav/nav.tsx';
 import { ApplicationContext } from './context/app.ts';
 import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
-import { ISettingsContext, SettingsContext } from './context/settings.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
 import { CafeView, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
+import { useValueNotifier } from './hooks/events.ts';
 
 function App() {
     const { cafes, groups } = useLoaderData() as IViewListResponse;
@@ -20,15 +20,7 @@ function App() {
     const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
-    const settingsState = useState<ISettingsContext>(() => ({
-        useGroups:                ApplicationSettings.useGroups.get(),
-        showImages:               ApplicationSettings.showImages.get(),
-        showCalories:             ApplicationSettings.showCalories.get(),
-        showDescriptions:         ApplicationSettings.showDescriptions.get(),
-        requestMenusInBackground: ApplicationSettings.requestMenusInBackground.get(),
-        homepageViewIds:          new Set(ApplicationSettings.homepageViews.get())
-    }));
-    const [{ requestMenusInBackground }] = settingsState;
+    const requestMenusInBackground = useValueNotifier(ApplicationSettings.requestMenusInBackground);
 
     const [selectedView, setSelectedView] = useState<CafeView>();
     const menuDivRef = useRef<HTMLDivElement>(null);
@@ -66,27 +58,25 @@ function App() {
     return (
         <div className="App">
             <ApplicationContext.Provider value={{ viewsById, viewsInOrder, cafes, groups }}>
-                <SettingsContext.Provider value={settingsState}>
-                    <NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
-                        <SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
-                            <Nav/>
-                            <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
-                                {
-                                    viewsById.size > 0 && (
-                                        <Outlet/>
-                                    )
-                                }
-                                {
-                                    cafes.length === 0 && (
-                                        <div className="error-card">
-                                            There are no views available!
-                                        </div>
-                                    )
-                                }
-                            </div>
-                        </SelectedViewContext.Provider>
-                    </NavExpansionContext.Provider>
-                </SettingsContext.Provider>
+                <NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
+                    <SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
+                        <Nav/>
+                        <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
+                            {
+                                viewsById.size > 0 && (
+                                    <Outlet/>
+                                )
+                            }
+                            {
+                                cafes.length === 0 && (
+                                    <div className="error-card">
+                                        There are no views available!
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </SelectedViewContext.Provider>
+                </NavExpansionContext.Provider>
             </ApplicationContext.Provider>
         </div>
     );

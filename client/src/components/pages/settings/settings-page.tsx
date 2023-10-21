@@ -1,27 +1,25 @@
-import { SettingsContext } from '../../../context/settings.ts';
-import { useContext } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
-import './settings.css';
 import { useVisibleViews } from '../../../hooks/views.ts';
+import './settings.css';
+import { useValueNotifier } from '../../../hooks/events.ts';
 
 export const SettingsPage = () => {
-    const [settingsData, setSettingsData] = useContext(SettingsContext);
     const visibleViews = useVisibleViews();
+    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
 
     const toggleHomepageView = (view: CafeView) => {
         const viewId = view.value.id;
 
-        const homepageViewIds = new Set(settingsData.homepageViewIds);
-        if (homepageViewIds.has(viewId)) {
-            homepageViewIds.delete(viewId);
+        const newHomepageViewIds = new Set(homepageViewIds);
+        if (newHomepageViewIds.has(viewId)) {
+            newHomepageViewIds.delete(viewId);
         } else {
-            homepageViewIds.add(viewId);
+            newHomepageViewIds.add(viewId);
         }
 
-        setSettingsData({ ...settingsData, homepageViewIds });
-        ApplicationSettings.homepageViews.set(Array.from(homepageViewIds));
+        ApplicationSettings.homepageViews.value = newHomepageViewIds;
     };
 
     return (
@@ -32,28 +30,23 @@ export const SettingsPage = () => {
             <div className="body">
                 <BooleanSettingInput
                     setting={ApplicationSettings.showImages}
-                    contextKey="showImages"
                     name="Show Images"
                     description="When enabled, images are shown in menu headers, menu items, and search."
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.showCalories}
-                    contextKey="showCalories"
                     name="Show Calories"
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.showDescriptions}
-                    contextKey="showDescriptions"
                     name="Show Descriptions"
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.useGroups}
-                    contextKey="useGroups"
                     name="Allow Cafe Groups"
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.requestMenusInBackground}
-                    contextKey="requestMenusInBackground"
                     name="Enable Fetching Menus in Background"
                     description={
                         <>
@@ -64,6 +57,10 @@ export const SettingsPage = () => {
                             in order of last recently used.
                         </>
                     }
+                />
+                <BooleanSettingInput
+                    setting={ApplicationSettings.rememberCollapseState}
+                    name="Remember Collapse/Expand State"
                 />
                 <div className="setting" id="setting-homepage">
                     <div className="setting-info">
@@ -79,7 +76,7 @@ export const SettingsPage = () => {
                             visibleViews.map(view => {
                                 const viewId = view.value.id;
                                 const htmlId = `setting-homepage-option-${viewId}`;
-                                const isChecked = settingsData.homepageViewIds.has(viewId);
+                                const isChecked = ApplicationSettings.homepageViews.value.has(viewId);
                                 return (
                                     <div className="setting-homepage-option" key={viewId}>
                                         <label htmlFor={htmlId}>

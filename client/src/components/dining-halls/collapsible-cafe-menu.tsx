@@ -1,8 +1,9 @@
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
-import React, { useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StationList } from './station/station-list.tsx';
-import { SettingsContext } from '../../context/settings.ts';
 import { ExpandIcon } from '../icon/expand.tsx';
+import { ApplicationSettings } from '../../api/settings.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 interface ICollapsibleCafeMenuProps {
     cafe: ICafe;
@@ -10,14 +11,43 @@ interface ICollapsibleCafeMenuProps {
 }
 
 export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
-                                                                                      cafe,
-                                                                                      menu,
-                                                                                  }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-    const [{ showImages }] = useContext(SettingsContext);
+                                                                             cafe,
+                                                                             menu,
+                                                                         }) => {
+    const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
+    const collapsedCafeIds = useValueNotifier(ApplicationSettings.collapsedCafeIds);
+    const [isExpanded, setIsExpanded] = useState(() => {
+        if (rememberCollapseState) {
+            return !collapsedCafeIds.has(cafe.id);
+        }
+
+        return true;
+    });
+
+    useEffect(() => {
+        if (rememberCollapseState) {
+            console.log('collapsedCafeIds', collapsedCafeIds);
+            const isCollapsed = collapsedCafeIds.has(cafe.id);
+            setIsExpanded(!isCollapsed);
+        }
+    }, [rememberCollapseState, collapsedCafeIds]);
 
     const toggleIsExpanded = () => {
-        setIsExpanded(!isExpanded);
+        const isNowExpanded = !isExpanded;
+
+        if (rememberCollapseState) {
+            const newCollapsedCafeIds = new Set(collapsedCafeIds);
+            if (isNowExpanded) {
+                newCollapsedCafeIds.delete(cafe.id);
+            } else {
+                newCollapsedCafeIds.add(cafe.id);
+            }
+
+            ApplicationSettings.collapsedCafeIds.value = newCollapsedCafeIds;
+        } else {
+            setIsExpanded(isNowExpanded);
+        }
     };
 
     return (

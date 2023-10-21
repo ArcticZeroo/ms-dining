@@ -1,38 +1,21 @@
 import { BooleanSetting } from '../../../api/settings.ts';
-import { ISettingsContext, SettingsContext } from '../../../context/settings.ts';
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValueNotifier } from '../../../hooks/events.ts';
 
 interface IBooleanSettingInputProps {
     name: React.ReactElement | string;
     description?: React.ReactElement | string;
     setting: BooleanSetting;
-    contextKey: keyof ISettingsContext;
 }
 
-export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({ name, description, setting, contextKey }) => {
-    const [settingsData, setSettingsData] = useContext(SettingsContext);
-    const currentValue = settingsData[contextKey];
-
-    if (typeof currentValue !== 'boolean') {
-        return (
-            <div className="error-card">
-                Could not load setting {name}!
-            </div>
-        );
-    }
+export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({ name, description, setting }) => {
+    const currentValue = useValueNotifier(setting);
 
     const toggleSetting = () => {
-        const newValue = !currentValue;
-
-        setSettingsData({
-            ...settingsData,
-            [contextKey]: newValue
-        });
-
-        setting.set(newValue);
+        setting.value = !currentValue;
     }
 
-    const htmlId = `setting-${contextKey}`;
+    const htmlId = `setting-${setting.name}`;
 
     return (
         <div className="setting">
