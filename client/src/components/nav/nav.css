@@ -62,7 +62,7 @@ nav a.link-button.active {
 
 nav a {
     color: white;
-    padding: 1rem;
+    padding: var(--default-padding);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -78,7 +78,7 @@ nav a.active {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 1rem 1rem 0 1rem;
+    padding: var(--default-padding) var(--default-padding) 0 var(--default-padding);
     transition: padding 0.5s ease;
 }
 
@@ -92,7 +92,7 @@ nav form {
 }
 
 #site-header span {
-    padding-bottom: 1rem;
+    padding-bottom: var(--default-padding);
     transition: padding 0.5s ease;
 }
 

@@ -5,8 +5,8 @@
 }
 
 .entity-button {
-    padding: 1rem;
-    border-radius: 1rem;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
     background: #2196F3;
     display: flex;
     justify-content: center;

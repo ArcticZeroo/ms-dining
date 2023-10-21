@@ -14,7 +14,7 @@
 }
 
 .setting-info {
-    padding: 1rem;
+    padding: var(--default-padding);
 }
 
 .setting-info .setting-name {
@@ -28,7 +28,7 @@
 #setting-homepage {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--default-padding);
 }
 
 #setting-homepage .setting-data {
@@ -41,7 +41,7 @@
     display: flex;
     justify-content: space-between;
     background: #DDD;
-    border-radius: 1rem;
-    padding: 1rem;
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
     gap: 0.5rem;
 }

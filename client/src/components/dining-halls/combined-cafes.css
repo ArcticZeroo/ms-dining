@@ -1,7 +1,7 @@
 .stations {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--default-padding);
     justify-content: center;
 }
 
@@ -22,7 +22,7 @@
     align-items: center;
     gap: 0.5em;
     background: #BBB;
-    padding: 1rem;
+    padding: var(--default-padding);
     border-top-right-radius: 0.5rem;
     border-top-left-radius: 0.5rem;
 }
@@ -33,7 +33,7 @@
 }
 
 .station .menu-body {
-    padding: 1rem;
+    padding: var(--default-padding);
 }
 
 .category-name {
@@ -41,7 +41,7 @@
 }
 
 .station table {
-    border-spacing: 1rem;
+    border-spacing: var(--default-padding);
 }
 
 .station table th {
@@ -55,22 +55,22 @@
 .collapsible-menu-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-header {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-name {
     font-size: 1.4em;
     text-align: center;
-    padding: 1rem;
+    padding: var(--default-padding);
     background: #00796B;
     color: white;
-    border-radius: 1rem;
+    border-radius: var(--default-padding);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -82,13 +82,13 @@
 }
 
 .collapsible-cafe .cafe-name .logo {
-    height: 4rem;
+    height: var(--cafe-logo-height);
 }
 
 .collapsible-cafe .cafe-order-link {
     background: #0277BD;
-    padding: 1rem;
-    border-radius: 1rem;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
     color: white;
     display: flex;
     align-items: center;
@@ -112,7 +112,7 @@
 }
 
 .station.collapsed .title {
-    border-radius: 1rem;
+    border-radius: var(--default-padding);
 }
 
 .station.collapsed .menu-body {

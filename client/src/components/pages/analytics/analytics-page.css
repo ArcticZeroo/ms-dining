@@ -1,13 +1,13 @@
 #analytics-page #after-selector {
     display: flex;
-    gap: 1rem;
+    gap: var(--default-padding);
 }
 
 #analytics-page .days-ago-option {
-    padding: 1rem 2rem 1rem 2rem;
+    padding: var(--default-padding) 2rem var(--default-padding) 2rem;
     outline: none;
     border: none;
-    border-radius: 1rem;
+    border-radius: var(--default-padding);
     background: #2196F3;
     color: white;
     transition: background-color 0.2s ease-in-out;
