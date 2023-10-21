@@ -53,60 +53,6 @@ html, body, #root, .App {
     overflow-y: hidden;
 }
 
-.stations {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-}
-
-.stations.hidden {
-    display: none;
-}
-
-.station {
-    border-radius: 0.5rem;
-    color: #212121;
-    display: flex;
-    flex-direction: column;
-}
-
-.station .title {
-    font-size: 1.4em;
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    background: #BBB;
-    padding: 1rem;
-    border-top-right-radius: 0.5rem;
-    border-top-left-radius: 0.5rem;
-}
-
-.station .title img {
-    height: 1.4em;
-    margin-right: 0.25rem;
-}
-
-.station .menu-body {
-    padding: 1rem;
-}
-
-.category-name {
-    font-weight: bold;
-}
-
-.station table {
-    border-spacing: 1rem;
-}
-
-.station table th {
-    text-align: left;
-}
-
-.menu-item-image {
-    height: 10rem;
-}
-
 .search-bar-container {
     background: #232323;
     padding: 1rem;
