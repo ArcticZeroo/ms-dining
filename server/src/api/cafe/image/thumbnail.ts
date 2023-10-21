@@ -41,7 +41,6 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
     const { height } = image.bitmap;
     const scale = maxThumbnailHeightPx / height;
 
-    // @ts-ignore - Not sure why it thinks this doesn't exist
     image.scale(scale);
 
     const outputPath = path.join(serverMenuItemThumbnailPath, `${menuItem.id}.png`);
