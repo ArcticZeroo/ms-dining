@@ -3,9 +3,13 @@ import React, { useRef, useState } from 'react';
 import { StationMenu } from './menu-items/station-menu.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { classNames } from '../../../util/react.ts';
+import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 
-const getStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
-    if (isExpanded || !widthPx) {
+const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
+    const deviceType = useDeviceType();
+
+    // On Mobile, the station always has max width.
+    if (isExpanded || !widthPx || deviceType === DeviceType.Mobile) {
         return {};
     }
 
@@ -22,6 +26,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     const [isExpanded, setIsExpanded] = useState(true);
     const menuBodyRef = useRef<HTMLDivElement>(null);
     const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
+    const stationStyle = useStationStyle(isExpanded, menuWidthPx);
 
     const toggleIsExpanded = () => {
         const isNowExpanded = !isExpanded;
@@ -39,8 +44,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     }
 
     return (
-        <div className={classNames('station', !isExpanded && 'collapsed')}
-             style={getStationStyle(isExpanded, menuWidthPx)}>
+        <div className={classNames('station', !isExpanded && 'collapsed')} style={stationStyle}>
             <button className="title" onClick={toggleIsExpanded}>
                 {
                     station.logoUrl && (
