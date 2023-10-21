@@ -1,9 +1,11 @@
 import { ICafeStation } from '../../../models/cafe.ts';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StationMenu } from './menu-items/station-menu.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { classNames } from '../../../util/react.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { ApplicationSettings } from '../../../api/settings.ts';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -23,14 +25,16 @@ export interface ICollapsibleStationProps {
 }
 
 export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station }) => {
+    const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
+    const collapsedStationNames = useValueNotifier(ApplicationSettings.collapsedStationNames);
+
     const [isExpanded, setIsExpanded] = useState(true);
     const menuBodyRef = useRef<HTMLDivElement>(null);
     const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
+
     const stationStyle = useStationStyle(isExpanded, menuWidthPx);
 
-    const toggleIsExpanded = () => {
-        const isNowExpanded = !isExpanded;
-
+    const updateExpansionState = (isNowExpanded: boolean) => {
         const menuBodyElement = menuBodyRef.current;
 
         if (menuBodyElement && !isNowExpanded) {
@@ -43,9 +47,28 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         setIsExpanded(isNowExpanded);
     }
 
+    const onTitleClick = () => {
+        const isNowExpanded = !isExpanded;
+
+        updateExpansionState(isNowExpanded);
+
+        if (isNowExpanded) {
+            ApplicationSettings.collapsedStationNames.delete(station.name);
+        } else {
+            ApplicationSettings.collapsedStationNames.add(station.name);
+        }
+    }
+
+    // Allow one render first to allow for correct width to be set if we collapse
+    useEffect(() => {
+        if (rememberCollapseState && collapsedStationNames.has(station.name)) {
+            updateExpansionState(false);
+        }
+    }, []);
+
     return (
         <div className={classNames('station', !isExpanded && 'collapsed')} style={stationStyle}>
-            <button className="title" onClick={toggleIsExpanded}>
+            <button className="title" onClick={onTitleClick}>
                 {
                     station.logoUrl && (
                         <img src={station.logoUrl}
