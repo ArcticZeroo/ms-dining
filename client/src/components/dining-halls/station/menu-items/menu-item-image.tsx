@@ -27,6 +27,18 @@ const defaultImageProps = {
     loading:   'lazy'
 } as const;
 
+export const getImageSizeProps = (menuItem: IMenuItem) => {
+    // Even if we're using fallback, we should still set these props since we expect the same scale
+    if (menuItem.hasThumbnail && menuItem.thumbnailWidth && menuItem.thumbnailHeight) {
+        return {
+            width:  menuItem.thumbnailWidth,
+            height: menuItem.thumbnailHeight
+        };
+    }
+
+    return {};
+}
+
 export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
     const [{ showImages }] = useContext(SettingsContext);
     const [forceImageFallback, setForceImageFallback] = useState(false);
@@ -42,7 +54,8 @@ export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
 
     const imageProps = {
         ...defaultImageProps,
-        src: targetImageUrl
+        ...getImageSizeProps(menuItem),
+        src: targetImageUrl,
     };
 
     // Try to downscale the full size image if we can, otherwise just show the full thing
