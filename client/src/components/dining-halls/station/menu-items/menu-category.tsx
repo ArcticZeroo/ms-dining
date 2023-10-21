@@ -14,7 +14,7 @@ export const MenuCategory: React.FC<IMenuCategoryProps> = ({
     return (
         <>
             <tr>
-                <th>{categoryName}</th>
+                <th colSpan={3}>{categoryName}</th>
             </tr>
             {
                 menuItems.map(item => (<MenuItem key={item.id} menuItem={item}/>))
