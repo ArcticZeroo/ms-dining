@@ -1,5 +1,6 @@
 import Jimp from 'jimp';
-import * as path from 'path';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { defaultUserAgent } from '../../../constants/http.js';
 import { IMenuItem } from '../../../models/cafe.js';
@@ -35,6 +36,11 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
         return;
     }
 
+    const outputPath = path.join(serverMenuItemThumbnailPath, `${menuItem.id}.png`);
+    if (fs.existsSync(outputPath)) {
+        return;
+    }
+
     const imageData = await loadImageData(menuItem.imageUrl);
     const image = await Jimp.read(imageData);
 
@@ -43,6 +49,5 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
 
     image.scale(scale);
 
-    const outputPath = path.join(serverMenuItemThumbnailPath, `${menuItem.id}.png`);
     await image.writeAsync(outputPath);
 }
