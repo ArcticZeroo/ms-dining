@@ -13,7 +13,6 @@ export const cafeSessionsByUrl = new Map<string, CafeDiscoverySession>();
 
 const resetState = async () => {
     cafeSessionsByUrl.clear();
-    fsSync.rmSync(serverMenuItemThumbnailPath, { recursive: true, force: true });
     await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
 };
 
