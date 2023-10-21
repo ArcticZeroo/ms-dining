@@ -10,9 +10,6 @@ export const scaleImage = (image: HTMLImageElement, maxWidth?: number, maxHeight
     const imageWidthPx = image.naturalWidth;
     const imageHeightPx = image.naturalHeight;
 
-    console.log('Loaded an image with width', imageWidthPx, 'and height', imageHeightPx);
-    console.log('target max width', maxWidth, 'and target max height', maxHeight);
-
     let scale = 1;
 
     if (maxHeight && imageHeightPx > maxHeight) {
@@ -29,8 +26,6 @@ export const scaleImage = (image: HTMLImageElement, maxWidth?: number, maxHeight
     canvas.height = finalHeightPx;
     canvas.width = finalWidthPx;
     ctx.drawImage(image, 0, 0, finalWidthPx, finalHeightPx);
-
-    console.log('final canvas size:', finalWidthPx, 'x', finalHeightPx);
 
     return canvas.toDataURL('image/png');
 }
