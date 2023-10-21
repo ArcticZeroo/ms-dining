@@ -1,6 +1,8 @@
 import Jimp from 'jimp';
+import { imageSize as getImageSizeSync } from 'image-size';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+import { promisify } from 'node:util';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { defaultUserAgent } from '../../../constants/http.js';
 import { IMenuItem } from '../../../models/cafe.js';
@@ -8,6 +10,8 @@ import { runPromiseWithRetries } from '../../../util/async.js';
 
 const maxThumbnailHeightPx = 200;
 const loadImageRetries = 2;
+
+const getImageSizeAsync = promisify(getImageSizeSync);
 
 export const loadImageData = async (url: string): Promise<Buffer> => {
     const response = await runPromiseWithRetries(() => fetch(url, {
@@ -36,8 +40,15 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
         return;
     }
 
+    // May have been created on a previous day/run
     const outputPath = path.join(serverMenuItemThumbnailPath, `${menuItem.id}.png`);
     if (fs.existsSync(outputPath)) {
+        if (!menuItem.thumbnailHeight || !menuItem.thumbnailWidth) {
+            const { width, height } = await getImageSizeAsync(outputPath);
+            menuItem.thumbnailWidth = width;
+            menuItem.thumbnailHeight = height;
+        }
+
         return;
     }
 
@@ -50,4 +61,7 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
     image.scale(scale);
 
     await image.writeAsync(outputPath);
+
+    menuItem.thumbnailWidth = image.getWidth();
+    menuItem.thumbnailHeight = image.getHeight();
 }

@@ -8,6 +8,10 @@ export const runPromiseWithRetries = async <T>(promise: () => Promise<T>, retrie
             if (delayMs) {
                 await pause(delayMs);
             }
+
+            if (i === retries) {
+                throw err;
+            }
         }
     }
 }

@@ -32,6 +32,8 @@ export interface IMenuItem {
     calories: string;
     maxCalories: string;
     hasThumbnail: boolean;
+    thumbnailWidth?: number;
+    thumbnailHeight?: number;
     imageUrl?: string;
     description?: string;
 }

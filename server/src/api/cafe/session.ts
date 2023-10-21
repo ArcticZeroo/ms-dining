@@ -104,7 +104,8 @@ export class CafeDiscoverySession {
 				body:    JSON.stringify({
 					isEasyMenuEnabled: false,
 					scheduleTime:      { startTime: '12:00 PM', endTime: '12:15 PM' },
-					scheduledDay:      0,
+					// TODO remove this!
+					scheduledDay:      2,
 					// storeInfo { some huge object }
 				})
 			}
