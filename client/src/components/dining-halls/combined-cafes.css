@@ -120,10 +120,6 @@
     display: none;
 }
 
-.station * {
-    text-wrap: none;
-}
-
 .menu-item-head {
     display: flex;
     flex-direction: column;
@@ -133,6 +129,5 @@
     opacity: 0.75;
     font-size: 0.9em;
     font-style: italic;
-    text-wrap: unset;
     word-wrap: break-word;
 }
