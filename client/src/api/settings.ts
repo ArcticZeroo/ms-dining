@@ -66,8 +66,8 @@ export abstract class Setting<T> extends ValueNotifier<T> {
     }
 
     set value(value: T) {
-        this.serialize(this._value);
-        this._value = value;
+        this.serialize(value);
+        super.value = value;
     }
 
     protected abstract serialize(value: T): void;
