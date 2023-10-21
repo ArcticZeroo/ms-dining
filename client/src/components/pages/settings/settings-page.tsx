@@ -2,8 +2,8 @@ import { ApplicationSettings } from '../../../api/settings.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { useVisibleViews } from '../../../hooks/views.ts';
-import './settings.css';
 import { useValueNotifier } from '../../../hooks/events.ts';
+import './settings.css';
 
 export const SettingsPage = () => {
     const visibleViews = useVisibleViews();
@@ -11,15 +11,11 @@ export const SettingsPage = () => {
 
     const toggleHomepageView = (view: CafeView) => {
         const viewId = view.value.id;
-
-        const newHomepageViewIds = new Set(homepageViewIds);
-        if (newHomepageViewIds.has(viewId)) {
-            newHomepageViewIds.delete(viewId);
+        if (homepageViewIds.has(viewId)) {
+            ApplicationSettings.homepageViews.delete(viewId);
         } else {
-            newHomepageViewIds.add(viewId);
+            ApplicationSettings.homepageViews.add(viewId);
         }
-
-        ApplicationSettings.homepageViews.value = newHomepageViewIds;
     };
 
     return (
@@ -76,7 +72,7 @@ export const SettingsPage = () => {
                             visibleViews.map(view => {
                                 const viewId = view.value.id;
                                 const htmlId = `setting-homepage-option-${viewId}`;
-                                const isChecked = ApplicationSettings.homepageViews.value.has(viewId);
+                                const isChecked = homepageViewIds.has(viewId);
                                 return (
                                     <div className="setting-homepage-option" key={viewId}>
                                         <label htmlFor={htmlId}>

@@ -91,6 +91,14 @@ export class StringArraySetting extends Setting<Array<string>> {
     protected serialize(value: Array<string>) {
         setStringArraySetting(this.name, value);
     }
+
+    push(value: string) {
+        this.value = [...this.value, value];
+    }
+
+    clear() {
+        this.value = [];
+    }
 }
 
 export class StringSetSetting extends Setting<Set<string>> {
@@ -100,6 +108,22 @@ export class StringSetSetting extends Setting<Set<string>> {
 
     protected serialize(value: Set<string>) {
         setStringArraySetting(this.name, Array.from(value));
+    }
+
+    add(value: string) {
+        const newValue = new Set(this.value);
+        newValue.add(value);
+        this.value = newValue;
+    }
+
+    delete(value: string) {
+        const newValue = new Set(this.value);
+        newValue.delete(value);
+        this.value = newValue;
+    }
+
+    clear() {
+        this.value = new Set();
     }
 }
 
@@ -124,6 +148,7 @@ export const ApplicationSettings = {
     homepageViews:            new StringSetSetting('homepageDiningHalls'),
     collapsedStations:        new StringSetSetting('collapsedStations'),
     collapsedCafeIds:         new StringSetSetting('collapsedCafeIds'),
+    collapsedStationNames:    new StringSetSetting('collapsedStationNames'),
     visitorId:                new StringSetting('visitorId')
 } as const;
 
