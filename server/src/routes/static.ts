@@ -8,7 +8,6 @@ export const createStaticRoutingApp = () => {
 
     app.use(mount('/', serve(serverStaticPath)));
     app.use((ctx) => {
-        console.error(ctx.req.url);
         ctx.throw(404, 'Resource not found');
     });
 
