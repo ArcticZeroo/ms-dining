@@ -6,20 +6,19 @@ nav {
 }
 
 nav #sticky-header-list {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
     top: 0;
     position: sticky;
 }
 
-.expandable-nav-list {
+nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
+}
+
+.expandable-nav-list {
     overflow-y: auto;
     display: none;
-    width: 100%;
 }
 
 nav.expanded .expandable-nav-list {
@@ -58,6 +57,15 @@ nav a.link-button.active {
 .expandable-nav-list .cafe a.active {
     background: deepskyblue;
     color: #333;
+}
+
+.expandable-nav-list.group {
+    border: 0.5rem solid #141423;
+}
+
+.expandable-nav-list .view-group-name {
+    padding: 0.5rem;
+    text-align: center;
 }
 
 nav a {

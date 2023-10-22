@@ -4,16 +4,14 @@ import menuIcon from '../../assets/menu.svg';
 import { SelectedViewContext } from '../../context/view.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { CafeView } from '../../models/cafe.ts';
-import { getViewUrl } from '../../util/link.ts';
-import { useVisibleViews } from '../../hooks/views.ts';
 
 import './nav.css';
 import { NavListHeaderItems } from './nav-header-buttons.tsx';
+import { NavCafeList } from './nav-cafe-list.tsx';
 
 export const Nav: React.FC = () => {
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
     const [, setSelectedView] = useContext(SelectedViewContext);
-    const visibleViews = useVisibleViews();
 
     const onViewClicked = (view: CafeView) => {
         setSelectedView(view);
@@ -33,17 +31,8 @@ export const Nav: React.FC = () => {
                 { isExpanded && visibilityToggleButton }
                 <NavListHeaderItems closeNav={() => setIsExpanded(false)}/>
             </ul>
+            <NavCafeList onViewSelected={onViewClicked}/>
             <ul className="expandable-nav-list">
-                {
-                    visibleViews?.map?.((view) => (
-                        <li key={view.value.id} className="cafe">
-                            <NavLink to={getViewUrl(view)}
-                                     onClick={() => onViewClicked(view)}>
-                                {view.value.name}
-                            </NavLink>
-                        </li>
-                    ))
-                }
                 <li>
                     <NavLink to="/info" className="link-button info" onClick={() => setIsExpanded(false)}>
                         <span className="material-symbols-outlined">

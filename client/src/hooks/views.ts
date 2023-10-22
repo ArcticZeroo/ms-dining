@@ -10,6 +10,7 @@ import { ApplicationContext } from '../context/app.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
 import { ApplicationSettings } from '../api/settings.ts';
+import { uncategorizedGroupId } from '../constants/groups.ts';
 
 export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithoutMembers[]) => {
     const [viewsById, setViewsById] = useState<Map<string, CafeView>>(new Map());
@@ -77,4 +78,31 @@ export const useVisibleViews = () => {
     }, [viewsInOrder, shouldUseGroups]);
 
     return visibleViews;
+};
+
+export const useViewsByGroupId = () => {
+    const { viewsInOrder } = useContext(ApplicationContext);
+    const [viewsByGroupId, setViewsByGroupId] = useState<Map<string, Array<CafeView>>>(() => new Map());
+
+    useEffect(() => {
+        const newViewsByGroupId = new Map<string, Array<CafeView>>();
+
+        for (const view of viewsInOrder) {
+            if (view.type !== CafeViewType.single) {
+                continue;
+            }
+
+            const group = view.value.group ?? uncategorizedGroupId;
+
+            if (!newViewsByGroupId.has(group)) {
+                newViewsByGroupId.set(group, []);
+            }
+
+            newViewsByGroupId.get(group)!.push(view);
+        }
+
+        setViewsByGroupId(newViewsByGroupId);
+    }, [viewsInOrder]);
+
+    return viewsByGroupId;
 };

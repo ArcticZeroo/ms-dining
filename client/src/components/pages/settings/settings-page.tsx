@@ -39,7 +39,8 @@ export const SettingsPage = () => {
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.useGroups}
-                    name="Allow Cafe Groups"
+                    name="Group Cafes"
+                    description="When enabled, cafe menus are shown in location-based groups, and the navigation menu is condensed."
                 />
                 <BooleanSettingInput
                     setting={ApplicationSettings.requestMenusInBackground}
