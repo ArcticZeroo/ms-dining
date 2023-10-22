@@ -62,7 +62,7 @@ nav a.link-button.active {
 
 nav a {
     color: white;
-    padding: var(--default-padding);
+    padding: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
