@@ -12,6 +12,7 @@ import { CafeView, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
 import { useValueNotifier } from './hooks/events.ts';
+import { OutOfDateNotice } from './components/notice/out-of-date-notice.tsx';
 
 function App() {
     const { cafes, groups } = useLoaderData() as IViewListResponse;
@@ -62,18 +63,8 @@ function App() {
                     <SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
                         <Nav/>
                         <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
-                            {
-                                viewsById.size > 0 && (
-                                    <Outlet/>
-                                )
-                            }
-                            {
-                                cafes.length === 0 && (
-                                    <div className="error-card">
-                                        There are no views available!
-                                    </div>
-                                )
-                            }
+                            <OutOfDateNotice/>
+                            <Outlet/>
                         </div>
                     </SelectedViewContext.Provider>
                 </NavExpansionContext.Provider>

@@ -1,0 +1,19 @@
+.notice {
+    background: #FDD835;
+    color: #212121;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--default-padding);
+    gap: var(--default-padding);
+}
+
+.notice button {
+    background: #FAFAFA;
+    outline: none;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

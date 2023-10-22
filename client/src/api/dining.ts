@@ -3,6 +3,7 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
+import { nativeDayValues } from '../util/date.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -133,5 +134,19 @@ export abstract class DiningClient {
 
     public static getThumbnailUrlForMenuItem(menuItem: IMenuItem) {
         return `/static/menu-items/thumbnail/${menuItem.id}.png`;
+    }
+
+    public static get isMenuProbablyOutdated(): boolean {
+        const nowInLocalTime = new Date();
+        const nowInPacificTime = new Date(nowInLocalTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+
+        // Menu isn't updated on weekends
+        if ([nativeDayValues.Saturday, nativeDayValues.Sunday].includes(nowInPacificTime.getDay())) {
+            return true;
+        }
+
+        // Menu is updated at 9am Pacific Time. Menus for things like boardwalk/craft75 might be valid until around 8pm.
+        return nowInPacificTime.getHours() > 20
+            || nowInPacificTime.getHours() < 9;
     }
 }
