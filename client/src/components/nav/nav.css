@@ -60,12 +60,14 @@ nav a.link-button.active {
 }
 
 .expandable-nav-list.group {
-    border: 0.5rem solid #141423;
+    border: 0.5rem solid #4e92c2;
+    border-top: none;
 }
 
 .expandable-nav-list .view-group-name {
     padding: 0.5rem;
     text-align: center;
+    background: #4e92c2;
 }
 
 nav a {
