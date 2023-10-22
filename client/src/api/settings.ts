@@ -54,6 +54,8 @@ const setStringArraySetting = (key: string, value: string[], delimiter: string =
 };
 
 export abstract class Setting<T> extends ValueNotifier<T> {
+    private _shouldPersist: boolean = true;
+
     protected constructor(
         public readonly name: string,
         initialValue: T
@@ -61,12 +63,25 @@ export abstract class Setting<T> extends ValueNotifier<T> {
         super(initialValue);
     }
 
+    get shouldPersist() {
+        return this._shouldPersist;
+    }
+
+    set shouldPersist(shouldPersist: boolean) {
+        this._shouldPersist = shouldPersist;
+        if (shouldPersist) {
+            this.serialize(this.value);
+        }
+    }
+
     get value() {
         return this._value;
     }
 
     set value(value: T) {
-        this.serialize(value);
+        if (this.shouldPersist) {
+            this.serialize(value);
+        }
         super.value = value;
     }
 
@@ -102,8 +117,10 @@ export class StringArraySetting extends Setting<Array<string>> {
 }
 
 export class StringSetSetting extends Setting<Set<string>> {
-    constructor(name: string) {
-        super(name, new Set(getStringArraySetting(name)));
+    constructor(name: string, shouldPersist: boolean = true) {
+        const initialValue = shouldPersist ? new Set(getStringArraySetting(name)) : new Set<string>();
+        super(name, initialValue);
+        this.shouldPersist = shouldPersist;
     }
 
     protected serialize(value: Set<string>) {
@@ -148,7 +165,7 @@ export const ApplicationSettings = {
     homepageViews:            new StringSetSetting('homepageDiningHalls'),
     collapsedStations:        new StringSetSetting('collapsedStations'),
     collapsedCafeIds:         new StringSetSetting('collapsedCafeIds'),
-    collapsedStationNames:    new StringSetSetting('collapsedStationNames'),
+    collapsedStationNames:    new StringSetSetting('collapsedStationNames', false /*shouldPersist*/),
     visitorId:                new StringSetting('visitorId')
 } as const;
 
