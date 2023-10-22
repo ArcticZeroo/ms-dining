@@ -17,37 +17,26 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
     const collapsedCafeIds = useValueNotifier(ApplicationSettings.collapsedCafeIds);
-    const [isExpanded, setIsExpanded] = useState(() => {
-        if (rememberCollapseState) {
-            return !collapsedCafeIds.has(cafe.id);
-        }
+    const [isExpanded, setIsExpanded] = useState(true);
 
-        return true;
-    });
-
+    // Collapse memory is a boot setting. Also allows one render for width consistency of stations.
     useEffect(() => {
         if (rememberCollapseState) {
-            console.log('collapsedCafeIds', collapsedCafeIds);
             const isCollapsed = collapsedCafeIds.has(cafe.id);
             setIsExpanded(!isCollapsed);
         }
-    }, [rememberCollapseState, collapsedCafeIds]);
+    }, []);
 
     const toggleIsExpanded = () => {
         const isNowExpanded = !isExpanded;
 
-        if (rememberCollapseState) {
-            const newCollapsedCafeIds = new Set(collapsedCafeIds);
-            if (isNowExpanded) {
-                newCollapsedCafeIds.delete(cafe.id);
-            } else {
-                newCollapsedCafeIds.add(cafe.id);
-            }
-
-            ApplicationSettings.collapsedCafeIds.value = newCollapsedCafeIds;
+        if (isNowExpanded) {
+            ApplicationSettings.collapsedCafeIds.delete(cafe.id);
         } else {
-            setIsExpanded(isNowExpanded);
+            ApplicationSettings.collapsedCafeIds.add(cafe.id);
         }
+
+        setIsExpanded(isNowExpanded);
     };
 
     return (

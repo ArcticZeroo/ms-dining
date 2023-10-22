@@ -45,7 +45,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         }
 
         setIsExpanded(isNowExpanded);
-    }
+    };
 
     const onTitleClick = () => {
         const isNowExpanded = !isExpanded;
@@ -59,10 +59,11 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         }
     }
 
-    // Allow one render first to allow for correct width to be set if we collapse
+    // Collapse memory is a boot setting. Also allows one render for width consistency.
     useEffect(() => {
-        if (rememberCollapseState && collapsedStationNames.has(station.name)) {
-            updateExpansionState(false);
+        if (rememberCollapseState) {
+            const isExpanded = !collapsedStationNames.has(station.name);
+            updateExpansionState(isExpanded);
         }
     }, []);
 
