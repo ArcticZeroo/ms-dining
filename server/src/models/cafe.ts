@@ -12,8 +12,8 @@ export interface ICafeGroup {
 export interface ICafeConfig {
     tenantId: string;
     contextId: string;
-    logoName: string;
     displayProfileId: string;
+    logoName?: string;
 }
 
 export interface ICafeStation {

@@ -18,6 +18,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
     const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
     const collapsedCafeIds = useValueNotifier(ApplicationSettings.collapsedCafeIds);
     const [isExpanded, setIsExpanded] = useState(true);
+    const showCafeLogo = showImages && cafe.logoUrl != null;
 
     // Collapse memory is a boot setting. Also allows one render for width consistency of stations.
     useEffect(() => {
@@ -51,7 +52,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
                 </a>
                 <button className="cafe-name" onClick={toggleIsExpanded}>
                     {
-                        showImages && (
+                        showCafeLogo && (
                             <img src={cafe.logoUrl}
                                  alt={`${cafe.name} logo`}
                                  className="logo"/>
