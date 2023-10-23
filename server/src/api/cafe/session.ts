@@ -107,7 +107,7 @@ export class CafeDiscoverySession {
 				headers: jsonHeaders,
 				body:    JSON.stringify({
 					isEasyMenuEnabled: false,
-					scheduleTime:      { startTime: '12:00 PM', endTime: '12:15 PM' },
+					scheduleTime:      { startTime: '11:00 AM', endTime: '11:15 PM' },
 					scheduledDay:      0,
 					// storeInfo { some huge object }
 				})
