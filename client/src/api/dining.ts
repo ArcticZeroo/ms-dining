@@ -145,8 +145,8 @@ export abstract class DiningClient {
             return true;
         }
 
-        // Menu is updated at 9am Pacific Time. Menus for things like boardwalk/craft75 might be valid until around 8pm.
+        // Menu is updated at 3am Pacific Time. Menus for things like boardwalk/craft75 might be valid until around 8pm.
         return nowInPacificTime.getHours() > 20
-            || nowInPacificTime.getHours() < 9;
+            || nowInPacificTime.getHours() < 3;
     }
 }

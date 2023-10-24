@@ -34,7 +34,7 @@ export const OutOfDateNotice = () => {
 
     return (
         <div className="notice">
-            Menus are updated daily at 9am pacific time. You may be viewing outdated menus.
+            Menus are updated daily at 3am pacific time. You may be viewing outdated menus.
             <button onClick={() => setIsAcknowledged(true)}>
                 OK
             </button>
