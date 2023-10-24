@@ -109,8 +109,8 @@ const populateSessions = () => {
         .catch(e => logError('Failed to populate cafe sessions', e));
 };
 
-// 9am on Monday through Friday
-cron.schedule('0 9 * * 1,2,3,4,5', () => {
+// 3am on Monday through Friday
+cron.schedule('0 3 * * 1,2,3,4,5', () => {
     populateSessions();
 });
 
