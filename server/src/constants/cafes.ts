@@ -181,13 +181,11 @@ export const cafeList: ICafe[] = [
         url:     'saltandstraw',
         groupId: groupIds.localFlavorsBuilding6
     },
-    /*
     {
         name:    'L\'Experience (Local Flavors @ Building 6)',
-        url:     'lexperience',
+        url:     'l-experience',
         groupId: groupIds.localFlavorsBuilding6
     },
-     */
     {
         name:    'Pinkabella Cupcakes (Local Flavors @ Building 6)',
         url:     'pinkabella',
