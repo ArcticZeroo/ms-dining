@@ -28,7 +28,7 @@ export interface ICafeStation {
 export interface IMenuItem {
     id: string;
     price: string;
-    displayName: string;
+    name: string;
     calories: string;
     maxCalories: string;
     hasThumbnail: boolean;

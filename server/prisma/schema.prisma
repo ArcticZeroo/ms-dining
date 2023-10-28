@@ -40,6 +40,7 @@ model Station {
   id      String @id
   name    String
   logoUrl String
+  menuId  String
 
   dailyStations DailyStation[]
 }
@@ -55,6 +56,17 @@ model DailyStation {
   cafeId String
   cafe   Cafe   @relation(fields: [cafeId], references: [id])
 
+  categories DailyCategory[]
+}
+
+model DailyCategory {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  stationId Int
+  station   DailyStation @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
   menuItems DailyMenuItem[]
 }
 
@@ -64,6 +76,6 @@ model DailyMenuItem {
   menuItemId String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
 
-  stationId Int
-  station   DailyStation @relation(fields: [stationId], references: [id])
+  categoryId Int
+  category   DailyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }

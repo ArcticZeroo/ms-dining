@@ -16,27 +16,11 @@ const jsonHeaders = {
     'Content-Type': 'application/json'
 };
 
-interface ICafeDiscoverySessionParams {
-    cafe: ICafe;
-    scheduledDay: number;
-}
-
 export class CafeDiscoverySession {
     #token: string = '';
     public config: ICafeConfig | undefined;
-    public readonly stations: ICafeStation[] = [];
-    public readonly cafe: ICafe;
-    public readonly scheduledDay: number;
 
-    constructor({ cafe, scheduledDay }: ICafeDiscoverySessionParams) {
-        this.cafe = cafe;
-        this.scheduledDay = scheduledDay;
-    }
-
-    get dateString() {
-        const now = new Date();
-        now.setDate(now.getDate() + this.scheduledDay);
-        return `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
+    constructor(public readonly cafe: ICafe) {
     }
 
     get logoUrl() {
@@ -143,7 +127,7 @@ export class CafeDiscoverySession {
         }
     }
 
-    private async retrieveStationListAsync() {
+    private async retrieveStationListAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
         const response = await this._requestAsync(
             `/sites/${this.config.tenantId}/${this.config.contextId}/concepts/${this.config.displayProfileId}`,
             {
@@ -152,8 +136,8 @@ export class CafeDiscoverySession {
                 body:    JSON.stringify({
                     isEasyMenuEnabled: false,
                     // TODO: use schedule time discovered in config?
-                    scheduleTime:      { startTime: '11:00 AM', endTime: '11:15 PM' },
-                    scheduledDay:      this.scheduledDay,
+                    scheduleTime: { startTime: '11:00 AM', endTime: '11:15 PM' },
+                    scheduledDay: scheduledDay,
                     // storeInfo { some huge object }
                 })
             }
@@ -167,6 +151,8 @@ export class CafeDiscoverySession {
         })) {
             throw new Error('Invalid object type');
         }
+
+        const stations: ICafeStation[] = [];
 
         for (const stationJson of json) {
             const station: ICafeStation = {
@@ -188,8 +174,10 @@ export class CafeDiscoverySession {
                 }
             }
 
-            this.stations.push(station);
+            stations.push(station);
         }
+
+        return stations;
     }
 
     private async retrieveMenuItemDetailsAsync(stationId: string, menuId: string, itemIds: string[]): Promise<Array<IMenuItem>> {
@@ -224,7 +212,7 @@ export class CafeDiscoverySession {
         return json.map(jsonItem => ({
             id:           jsonItem.id,
             price:        jsonItem.amount,
-            displayName:  jsonItem.displayText,
+            name:         jsonItem.displayText,
             calories:     jsonItem.properties.calories,
             maxCalories:  jsonItem.properties.maxCalories,
             description:  jsonItem.description,
@@ -242,16 +230,20 @@ export class CafeDiscoverySession {
         }
     }
 
-    private async populateMenuItemsForAllStationsAsync() {
-        for (const station of this.stations) {
+    private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[]) {
+        for (const station of stations) {
             await this._populateMenuItemsForStationAsync(station);
         }
     }
 
-    public async performDiscoveryAsync() {
+    public async populateMenuAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
+        const stations = await this.retrieveStationListAsync(scheduledDay);
+        await this.populateMenuItemsForAllStationsAsync(stations);
+        return stations;
+    }
+
+    public async initialize() {
         await this.performLoginAsync();
         await this.retrieveConfigDataAsync();
-        await this.retrieveStationListAsync();
-        await this.populateMenuItemsForAllStationsAsync();
     }
 }
