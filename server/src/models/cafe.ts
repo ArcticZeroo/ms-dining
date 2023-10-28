@@ -1,6 +1,6 @@
 export interface ICafe {
     name: string;
-    url: string;
+    id: string;
     groupId?: string;
 }
 

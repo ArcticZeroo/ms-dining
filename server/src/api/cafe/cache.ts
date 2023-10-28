@@ -67,12 +67,12 @@ const discoverCafeAsync = async (cafe: ICafe) => {
     try {
         await cafeSemaphore.acquire();
 
-        logInfo('Performing discovery for', cafe.name, 'at', cafe.url, '...');
+        logInfo('Performing discovery for', cafe.name, 'at', cafe.id, '...');
 
         await session.performDiscoveryAsync();
-        cafeSessionsByUrl.set(cafe.url, session);
+        cafeSessionsByUrl.set(cafe.id, session);
     } catch (e) {
-        logError(`Failed to populate cafe ${cafe.name} (${cafe.url})`, e);
+        logError(`Failed to populate cafe ${cafe.name} (${cafe.id})`, e);
     } finally {
         cafeSemaphore.release();
     }

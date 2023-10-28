@@ -1,6 +1,6 @@
 import { ICafe, ICafeGroup } from '../models/cafe.js';
 
-export const getBaseApiUrlWithoutTrailingSlash = ({ url }: ICafe) => `https://${url}.buy-ondemand.com/api`;
+export const getBaseApiUrlWithoutTrailingSlash = ({ id }: ICafe) => `https://${id}.buy-ondemand.com/api`;
 
 export const groupIds = {
 	commons:               'commons',
@@ -21,130 +21,130 @@ export const groupList: ICafeGroup[] = [
 export const cafeList: ICafe[] = [
 	{
 		name: 'Café 16',
-		url:  'cafe16',
+		id:   'cafe16',
 	},
 	{
 		name: 'Café 25',
-		url:  'cafe25',
+		id:   'cafe25',
 	},
 	{
 		name: 'Café 31',
-		url:  'cafe31',
+		id:   'cafe31',
 	},
 	{
 		name: 'Café 34',
-		url:  'cafe34',
+		id:   'cafe34',
 	},
 	{
 		name: 'Café 36',
-		url:  'cafe36',
+		id:   'cafe36',
 	},
 	{
 		name: 'Café 37',
-		url:  'cafe37',
+		id:   'cafe37',
 	},
 	{
 		name: 'Café 40/41',
-		url:  'cafe40-41',
+		id:   'cafe40-41',
 	},
 	{
 		name: 'Café 43',
-		url:  'cafe43',
+		id:   'cafe43',
 	},
 	{
 		name: 'Café 50',
-		url:  'cafe50',
+		id:   'cafe50',
 	},
 	{
 		name: 'Café 83',
-		url:  'cafe83',
+		id:   'cafe83',
 	},
 	{
 		name: 'Café 86',
-		url:  'cafe86',
+		id:   'cafe86',
 	},
 	{
 		name: 'Café 99',
-		url:  'cafe99',
+		id:   'cafe99',
 	},
 	{
 		name: 'Café 109',
-		url:  'cafe109',
+		id:   'cafe109',
 	},
 	{
 		name: 'Café 112',
-		url:  'cafe112',
+		id:   'cafe112',
 	},
 	{
 		name: 'Café 121',
-		url:  'cafe121',
+		id:   'cafe121',
 	},
 	{
 		name: 'Café RedWest',
-		url:  'caferedwest',
+		id:   'caferedwest',
 	},
 	{
 		name: 'Café RTC',
-		url:  'cafertc5',
+		id:   'cafertc5',
 	},
 	{
 		name: 'Café Studio H',
-		url:  'cafestudioh',
+		id:   'cafestudioh',
 	},
 	{
 		name: 'One Esterra Food Hall',
-		url:  'one-esterra',
+		id:   'one-esterra',
 	},
 	{
 		name:    'Acapulco Fresh (The Commons)',
-		url:     'acapulcofresh',
+		id:      'acapulcofresh',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'Chandy\'s (The Commons)',
-		url:     'chandys',
+		id:      'chandys',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'Just Poké (The Commons)',
-		url:     'justpoke',
+		id:      'justpoke',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'Kalia (The Commons)',
-		url:     'kalia',
+		id:      'kalia',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'Hometown (The Commons)',
-		url:     'hometown',
+		id:      'hometown',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'S\'wich (The Commons)',
-		url:     's-wich',
+		id:      's-wich',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'Typhoon! (The Commons)',
-		url:     'typhoon',
+		id:      'typhoon',
 		groupId: groupIds.commons
 	},
 	{
 		name:    'Boardwalk @ The Commons',
-		url:     'boardwalk'
+		id: 'boardwalk'
 	},
 	{
 		name: 'in.gredients. Restaurant',
-		url:  'in-gredients',
+		id:   'in-gredients',
 	},
 	{
 		name: 'Building 92 Espresso',
-		url:  'cafe92',
+		id:   'cafe92',
 	},
 	{
 		name: 'Studio A Espresso',
-		url:  'studioa',
+		id:   'studioa',
 	},
 	/*{
 		friendlyName: "Studio B Espresso",
@@ -156,43 +156,43 @@ export const cafeList: ICafe[] = [
 	},*/
 	{
 		name: 'Studio D Espresso',
-		url:  'studiod',
+		id:   'studiod',
 	},
 	{
 		name:    'Food Hall 6',
-		url:     'foodhall6'
+		id: 'foodhall6'
 	},
 	{
 		name:    'Craft75 Pub (Building 6)',
-		url:     'craft75'
+		id: 'craft75'
 	},
 	{
 		name:    'Dote (Local Flavors @ Building 6)',
-		url:     'dote',
+		id:      'dote',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
 		name:    'The Collective 🧀 (Local Flavors @ Building 6)',
-		url:     'thecollective',
+		id:      'thecollective',
 		groupId: groupIds.localFlavorsBuilding6
 	},
     {
         name:    'Salt & Straw (Local Flavors @ Building 6)',
-        url:     'saltandstraw',
+        id:      'saltandstraw',
         groupId: groupIds.localFlavorsBuilding6
     },
     {
         name:    'L\'Experience (Local Flavors @ Building 6)',
-        url:     'l-experience',
+        id:      'l-experience',
         groupId: groupIds.localFlavorsBuilding6
     },
     {
         name:    'Pinkabella Cupcakes (Local Flavors @ Building 6)',
-        url:     'pinkabella',
+        id:      'pinkabella',
         groupId: groupIds.localFlavorsBuilding6
     },
 	{
 		name: 'Dote (Redmond Transit Station)',
-		url:  'dote-rts'
+		id: 'dote-rts'
 	}
 ];

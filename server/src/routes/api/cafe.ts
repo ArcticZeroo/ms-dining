@@ -23,7 +23,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const responseCafes = [];
 
         for (const cafe of diningConfig.cafeList) {
-            const cafeSession = cafeSessionsByUrl.get(cafe.url);
+            const cafeSession = cafeSessionsByUrl.get(cafe.id);
 
             if (cafeSession == null) {
                 continue;
@@ -31,7 +31,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
             responseCafes.push({
                 name:    cafe.name,
-                id:      cafe.url,
+                id:      cafe.id,
                 group:   cafe.groupId,
                 logoUrl: cafeSession.logoUrl,
             });
