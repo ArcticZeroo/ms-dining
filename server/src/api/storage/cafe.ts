@@ -186,7 +186,7 @@ export abstract class CafeStorageClient {
         };
     }
 
-    private static async _retrieveMenuItemAsync(id: string): Promise<IMenuItem> {
+    public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem> {
         if (!this._menuItemsById.has(id)) {
             const menuItem = await this._doRetrieveMenuItemAsync(id);
             this._menuItemsById.set(id, menuItem);
@@ -237,7 +237,7 @@ export abstract class CafeStorageClient {
 
                 for (const dailyMenuItem of category.menuItems) {
                     // Don't resolve these in parallel, we can't have too many concurrent requests to SQLite
-                    const menuItem = await this._retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await this.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
                     menuItemIds.push(dailyMenuItem.menuItemId);
                     menuItemsById.set(menuItem.id, menuItem);
                 }

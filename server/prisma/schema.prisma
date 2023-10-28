@@ -28,7 +28,7 @@ model MenuItem {
   name        String
   calories    Int
   maxCalories Int
-  description String
+  description String?
   imageUrl    String?
   price       Float
 

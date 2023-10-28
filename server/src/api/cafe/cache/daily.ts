@@ -3,7 +3,7 @@ import { logError } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
 
 const populateDailySessionsAsync = async () => {
-    const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);
+    const updateSession = new DailyCafeUpdateSession(2 /*daysInFuture*/);
     await updateSession.populateAsync();
     // what do I do with this information now?
 };

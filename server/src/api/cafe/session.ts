@@ -173,7 +173,7 @@ export class CafeDiscoverySession {
         return stations;
     }
 
-    private async retrieveMenuItemDetailsAsync(stationId: string, menuId: string, itemIds: string[]): Promise<Array<IMenuItem>> {
+    private async _doRetrieveMenuItemDetails(stationId: string, menuId: string, itemIds: string[]): Promise<Array<IMenuItem>> {
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
             {
                 method:  'POST',
@@ -215,23 +215,38 @@ export class CafeDiscoverySession {
         }));
     }
 
-    private async _populateMenuItemsForStationAsync(station: ICafeStation) {
+    private async retrieveMenuItemDetailsAsync(stationId: string, menuId: string, itemIds: string[], alwaysGetServerItems: boolean): Promise<Array<IMenuItem>> {
+        const itemIdsToRetrieve = new Set(itemIds);
+
+        if (!alwaysGetServerItems) {
+            for (const itemId of itemIds) {
+                const existingItem = await CafeStorageClient.retrieveMenuItemAsync(itemId);
+                if (existingItem != null) {
+                    itemIdsToRetrieve.delete(itemId);
+                }
+            }
+        }
+
+
+    }
+
+    private async _populateMenuItemsForStationAsync(station: ICafeStation, alwaysGetServerItems: boolean) {
         const itemIds = Array.from(station.menuItemIdsByCategoryName.values()).flat();
-        const menuItems = await this.retrieveMenuItemDetailsAsync(station.id, station.menuId, itemIds);
+        const menuItems = await this.retrieveMenuItemDetailsAsync(station.id, station.menuId, itemIds, alwaysGetServerItems);
         for (const menuItem of menuItems) {
             station.menuItemsById.set(menuItem.id, menuItem);
         }
     }
 
-    private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[]) {
+    private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
         for (const station of stations) {
-            await this._populateMenuItemsForStationAsync(station);
+            await this._populateMenuItemsForStationAsync(station, alwaysGetServerItems);
         }
     }
 
     public async populateMenuAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
         const stations = await this.retrieveStationListAsync(scheduledDay);
-        await this.populateMenuItemsForAllStationsAsync(stations);
+        await this.populateMenuItemsForAllStationsAsync(stations, scheduledDay === 0 /*alwaysGetServerItems*/);
         return stations;
     }
 

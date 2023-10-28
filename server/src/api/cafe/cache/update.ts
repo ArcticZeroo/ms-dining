@@ -46,7 +46,7 @@ export class DailyCafeUpdateSession {
             logInfo('Performing discovery for', cafe.name, 'at', cafe.id, '...');
 
             await session.initialize();
-            stations = await session.populateMenuAsync();
+            stations = await session.populateMenuAsync(this.daysInFuture);
             this.cafeSessionsById.set(cafe.id, session);
         } catch (e) {
             logError(`Failed to populate cafe ${cafe.name} (${cafe.id})`, e);
