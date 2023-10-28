@@ -19,7 +19,7 @@ model Cafe {
   contextId        String
   displayProfileId String
 
-  dailyCafes DailyCafe[]
+  dailyStations DailyStation[]
 }
 
 model MenuItem {
@@ -44,24 +44,16 @@ model Station {
   dailyStations DailyStation[]
 }
 
-model DailyCafe {
-  id     Int      @id @default(autoincrement())
-  date   DateTime
-  cafeId String
-  cafe   Cafe     @relation(fields: [cafeId], references: [id])
-
-  stations DailyStation[]
-}
-
 model DailyStation {
-  id   Int      @id @default(autoincrement())
-  date DateTime
+  id Int @id @default(autoincrement())
+
+  dateString String
 
   stationId String
   station   Station @relation(fields: [stationId], references: [id])
 
-  cafeId Int
-  cafe   DailyCafe @relation(fields: [cafeId], references: [id])
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id])
 
   menuItems DailyMenuItem[]
 }

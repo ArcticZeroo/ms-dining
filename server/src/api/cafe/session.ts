@@ -2,7 +2,6 @@ import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import fetch from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/cafes.js';
 import { requestRetryCount } from '../../constants/config.js';
-import { defaultUserAgent } from '../../constants/http.js';
 import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
 import { ICafeConfigResponse, ICafeMenuItemsResponseItem, ICafeStationListItem } from '../../models/responses.js';
 import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
@@ -10,7 +9,6 @@ import * as cafeStorage from '../storage/cafe.js';
 import { logError, logInfo } from '../../util/log.js';
 
 const getHeaders = (token: string) => token ? ({
-    'User-Agent':    defaultUserAgent,
     'Authorization': `Bearer ${token}`
 }) : {};
 
@@ -18,16 +16,31 @@ const jsonHeaders = {
     'Content-Type': 'application/json'
 };
 
+interface ICafeDiscoverySessionParams {
+    cafe: ICafe;
+    scheduledDay: number;
+}
+
 export class CafeDiscoverySession {
     #token: string = '';
-    public config: ICafeConfig | undefined = undefined;
+    public config: ICafeConfig | undefined;
     public readonly stations: ICafeStation[] = [];
+    public readonly cafe: ICafe;
+    public readonly scheduledDay: number;
 
-    constructor(public readonly cafe: ICafe) {
+    constructor({ cafe, scheduledDay }: ICafeDiscoverySessionParams) {
+        this.cafe = cafe;
+        this.scheduledDay = scheduledDay;
+    }
+
+    get dateString() {
+        const now = new Date();
+        now.setDate(now.getDate() + this.scheduledDay);
+        return `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
     }
 
     get logoUrl() {
-        if (!this.config.logoName) {
+        if (!this.config?.logoName) {
             return undefined;
         }
 
@@ -138,8 +151,9 @@ export class CafeDiscoverySession {
                 headers: jsonHeaders,
                 body:    JSON.stringify({
                     isEasyMenuEnabled: false,
+                    // TODO: use schedule time discovered in config?
                     scheduleTime:      { startTime: '11:00 AM', endTime: '11:15 PM' },
-                    scheduledDay:      0,
+                    scheduledDay:      this.scheduledDay,
                     // storeInfo { some huge object }
                 })
             }
