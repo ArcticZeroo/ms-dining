@@ -50,6 +50,7 @@ export class DailyCafeUpdateSession {
             this.cafeSessionsById.set(cafe.id, session);
         } catch (e) {
             logError(`Failed to populate cafe ${cafe.name} (${cafe.id})`, e);
+            return;
         } finally {
             cafeSemaphore.release();
         }

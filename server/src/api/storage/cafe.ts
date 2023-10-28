@@ -40,6 +40,11 @@ export abstract class CafeStorageClient {
         return this._cafeDataById.get(id);
     }
 
+    public static async retrieveCafesAsync(): Promise<ReadonlyMap<string, Cafe>> {
+        await this._ensureCafesExist();
+        return this._cafeDataById;
+    }
+
     public static async createCafeAsync(cafe: ICafe, config: ICafeConfig): Promise<void> {
         const cafeWithConfig: Cafe = {
             id:               cafe.id,
@@ -219,7 +224,9 @@ export abstract class CafeStorageClient {
             }
         });
 
-        const resolveStation = async (dailyStation: typeof dailyStations[0]): Promise<ICafeStation> => {
+        const stations: ICafeStation[] = [];
+
+        for (const dailyStation of dailyStations) {
             const stationData = dailyStation.station;
 
             const menuItemIdsByCategoryName = new Map<string, Array<string>>();
@@ -238,17 +245,17 @@ export abstract class CafeStorageClient {
                 menuItemIdsByCategoryName.set(category.name, menuItemIds);
             }
 
-            return {
+            stations.push({
                 id:      dailyStation.stationId,
                 menuId:  stationData.menuId,
                 logoUrl: stationData.logoUrl,
                 name:    stationData.name,
                 menuItemsById,
                 menuItemIdsByCategoryName
-            };
-        };
+            });
+        }
 
-        return Promise.all(dailyStations.map(resolveStation));
+        return stations;
     }
 
     public static async retrieveDailyMenuAsync(cafeId: string, dateString: string): Promise<ICafeStation[]> {

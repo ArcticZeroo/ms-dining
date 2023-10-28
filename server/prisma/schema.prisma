@@ -12,10 +12,10 @@ datasource db {
 
 model Cafe {
   // string id from buy-ondemand
-  id               String @id
+  id               String  @id
   name             String
   tenantId         String
-  logoName         String
+  logoName         String?
   contextId        String
   displayProfileId String
 
@@ -37,9 +37,9 @@ model MenuItem {
 
 model Station {
   // string id from buy-ondemand
-  id      String @id
+  id      String  @id
   name    String
-  logoUrl String
+  logoUrl String?
   menuId  String
 
   dailyStations DailyStation[]

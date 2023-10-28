@@ -4,7 +4,7 @@ import { attachRouter } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { toDateString } from '../../util/date.js';
-import { cachedCafeLogosById } from '../../api/storage/cafe.js';
+import { CafeStorageClient } from '../../api/storage/cafe.js';
 
 const visitorIdHeader = 'X-Visitor-Id';
 
@@ -23,14 +23,20 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
         const responseCafes = [];
 
-        const cafeLogosById = await cachedCafeLogosById.retrieve();
+        const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
         for (const cafe of diningConfig.cafeList) {
+            const cafeData = cafeDataById.get(cafe.id);
+            if (!cafeData) {
+                console.warn('Missing cafe data for cafe id', cafeData.id);
+                continue;
+            }
+
             responseCafes.push({
                 name:    cafe.name,
                 id:      cafe.id,
                 group:   cafe.groupId,
-                logoUrl: cafeLogosById.get(cafe.id),
+                logoUrl: cafeData.logoName,
             });
         }
 
@@ -50,15 +56,15 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
         const nowDateString = toDateString(new Date());
 
-        const cafeSession = cafeSessionsByUrl.get(id);
-        if (!cafeSession) {
+        const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, nowDateString);
+        if (menuStations.length === 0) {
             ctx.status = 404;
             ctx.body = 'Cafe not found or information is missing';
             return;
         }
 
         const menusByStation = [];
-        for (const station of cafeSession.stations) {
+        for (const station of menuStations) {
             const itemsByCategory = {};
 
             for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
