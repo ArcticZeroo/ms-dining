@@ -35,31 +35,50 @@ export const loadImageData = async (url: string): Promise<Buffer> => {
 }
 
 // static/menu-items/thumbnail/<id>
-export const getThumbnailPath = (menuItem: IMenuItem): string => path.join(serverMenuItemThumbnailPath, `${menuItem.id}.png`);
+export const getThumbnailPath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
 
-export const populateExistingThumbnailData = async (menuItem: IMenuItem): Promise<boolean> => {
-    const thumbnailPath = getThumbnailPath(menuItem);
+interface IThumbnailData {
+    hasThumbnail: boolean;
+    thumbnailWidth?: number;
+    thumbnailHeight?: number;
+}
+
+export const retrieveExistingThumbnailData = async (id: string, existingThumbnailData?: IThumbnailData): Promise<IThumbnailData> => {
+    const thumbnailPath = getThumbnailPath(id);
+
     if (!fs.existsSync(thumbnailPath)) {
-        return false;
+        return {
+            hasThumbnail: false
+        };
     }
 
-    if (!menuItem.thumbnailHeight || !menuItem.thumbnailWidth) {
-        const { width, height } = await getImageSizeAsync(thumbnailPath);
-        menuItem.thumbnailWidth = width;
-        menuItem.thumbnailHeight = height;
+    if (existingThumbnailData?.thumbnailWidth && existingThumbnailData?.thumbnailHeight) {
+        return {
+            hasThumbnail:    true,
+            thumbnailWidth:  existingThumbnailData.thumbnailWidth,
+            thumbnailHeight: existingThumbnailData.thumbnailHeight
+        };
     }
 
-    return true;
+    const { width, height } = await getImageSizeAsync(thumbnailPath);
+    return {
+        hasThumbnail:    true,
+        thumbnailWidth:  width,
+        thumbnailHeight: height
+    };
 }
 
 export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Promise<void> => {
-    if (!menuItem.imageUrl || menuItem.hasThumbnail) {
+    if (!menuItem.imageUrl || (menuItem.hasThumbnail && menuItem.thumbnailWidth && menuItem.thumbnailHeight)) {
         return;
     }
 
     // May have been created on a previous day/run
-    const didExistingDataExist = await populateExistingThumbnailData(menuItem);
-    if (didExistingDataExist) {
+    const thumbnailData = await retrieveExistingThumbnailData(menuItem.id, menuItem /*existingThumbnailData*/);
+    if (thumbnailData.hasThumbnail) {
+        menuItem.hasThumbnail = true;
+        menuItem.thumbnailWidth = thumbnailData.thumbnailWidth;
+        menuItem.thumbnailHeight = thumbnailData.thumbnailHeight;
         return;
     }
 
@@ -71,7 +90,7 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
 
     image.scale(scale);
 
-    await image.writeAsync(getThumbnailPath(menuItem));
+    await image.writeAsync(getThumbnailPath(menuItem.id));
 
     menuItem.thumbnailWidth = image.getWidth();
     menuItem.thumbnailHeight = image.getHeight();

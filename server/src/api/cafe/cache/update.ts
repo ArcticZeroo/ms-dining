@@ -2,14 +2,13 @@ import Semaphore from 'semaphore-async-await';
 import { toDateString } from '../../../util/date.js';
 import fs from 'fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
-import * as cafeStorage from '../../storage/cafe.js';
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
 import { CafeDiscoverySession } from '../session.js';
 import { logError, logInfo } from '../../../util/log.js';
 import { writeThumbnailsForCafe } from './thumbnail.js';
 import { saveSessionAsync } from './storage.js';
 import { cafeList } from '../../../constants/cafes.js';
-import { cachedCafeLogosById } from '../../storage/cafe.js';
+import { CafeStorageClient } from '../../storage/cafe.js';
 
 export const cafeSemaphore = new Semaphore.default(5);
 
@@ -30,11 +29,11 @@ export class DailyCafeUpdateSession {
     }
 
     private async resetDailyState() {
-        cachedCafeLogosById.invalidate();
+        CafeStorageClient.resetCache();
         this.cafeSessionsById.clear();
         await Promise.all([
             fs.mkdir(serverMenuItemThumbnailPath, { recursive: true }),
-            cafeStorage.deleteDailyMenusAsync(this.dateString)
+            CafeStorageClient.deleteDailyMenusAsync(this.dateString)
         ]);
     };
 

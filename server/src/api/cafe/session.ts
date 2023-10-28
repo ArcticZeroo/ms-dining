@@ -5,8 +5,8 @@ import { requestRetryCount } from '../../constants/config.js';
 import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
 import { ICafeConfigResponse, ICafeMenuItemsResponseItem, ICafeStationListItem } from '../../models/responses.js';
 import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
-import * as cafeStorage from '../storage/cafe.js';
 import { logError, logInfo } from '../../util/log.js';
+import { CafeStorageClient } from '../storage/cafe.js';
 
 const getHeaders = (token: string) => token ? ({
     'Authorization': `Bearer ${token}`
@@ -78,7 +78,7 @@ export class CafeDiscoverySession {
 
     private async retrieveConfigDataAsync() {
         try {
-            const cafeFromDatabase = await cafeStorage.getCafeByIdAsync(this.cafe.id);
+            const cafeFromDatabase = await CafeStorageClient.retrieveCafeAsync(this.cafe.id);
             if (cafeFromDatabase != null) {
                 logInfo('Got cafe from database, skipping config request');
                 this.config = {
@@ -114,14 +114,7 @@ export class CafeDiscoverySession {
         };
 
         try {
-            await cafeStorage.createCafeAsync({
-                id:               this.cafe.id,
-                name:             this.cafe.name,
-                tenantId:         this.config.tenantId,
-                contextId:        this.config.contextId,
-                logoName:         this.config.logoName,
-                displayProfileId: this.config.displayProfileId
-            });
+            await CafeStorageClient.createCafeAsync(this.cafe, this.config);
         } catch (err) {
             logError('Unable to save cafe to database:', err);
         }

@@ -1,8 +1,9 @@
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
-import * as cafeStorage from '../../storage/cafe.js';
 import { logError } from '../../../util/log.js';
 import Semaphore from 'semaphore-async-await';
+import { CafeStorageClient } from '../../storage/cafe.js';
 
+// todo: make this more automatic by requiring everyone to call an async function get the prisma client
 export const databaseLock = new Semaphore.Lock();
 
 interface ISaveStationParams {
@@ -14,21 +15,21 @@ interface ISaveStationParams {
 
 const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistingItems }: ISaveStationParams) => {
     try {
-        await cafeStorage.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
+        await CafeStorageClient.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
     } catch (err) {
         logError('Unable to save station to database:', err);
     }
 
     for (const menuItem of station.menuItemsById.values()) {
         try {
-            await cafeStorage.createMenuItemAsync(menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
+            await CafeStorageClient.createMenuItemAsync(menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
         } catch (err) {
             logError(`Unable to save menu item "${menuItem.name}"@${menuItem.id} to the database:`, err);
         }
     }
 
     try {
-        await cafeStorage.createDailyStationMenuAsync({
+        await CafeStorageClient.createDailyStationMenuAsync({
             cafeId: cafe.id,
             station,
             dateString
