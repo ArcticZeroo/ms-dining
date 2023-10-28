@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dining.db"
+}
+
+model Cafe {
+  // string id from buy-ondemand
+  id               String @id
+  name             String
+  tenantId         String
+  logoName         String
+  contextId        Int
+  displayProfileId Int
+
+  dailyCafes DailyCafe[]
+}
+
+model MenuItem {
+  // string id from buy-ondemand
+  id          String  @id
+  name        String
+  calories    Int
+  maxCalories Int
+  description String
+  imageUrl    String?
+  price       Float
+
+  dailyMenuItems DailyMenuItem[]
+}
+
+model Station {
+  // string id from buy-ondemand
+  id      String @id
+  name    String
+  logoUrl String
+
+  dailyStations DailyStation[]
+}
+
+model DailyCafe {
+  id     Int      @id @default(autoincrement())
+  date   DateTime
+  cafeId String
+  cafe   Cafe     @relation(fields: [cafeId], references: [id])
+
+  stations DailyStation[]
+}
+
+model DailyStation {
+  id   Int      @id @default(autoincrement())
+  date DateTime
+
+  stationId String
+  station   Station @relation(fields: [stationId], references: [id])
+
+  cafeId Int
+  cafe   DailyCafe @relation(fields: [cafeId], references: [id])
+
+  menuItems DailyMenuItem[]
+}
+
+model DailyMenuItem {
+  id Int @id @default(autoincrement())
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  stationId Int
+  station   DailyStation @relation(fields: [stationId], references: [id])
+}

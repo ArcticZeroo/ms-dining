@@ -7,6 +7,7 @@
     "@types/koa-static": "^4.0.2",
     "@types/node": "^20.6.0",
     "@types/node-cron": "^3.0.8",
+    "prisma": "^5.5.2",
     "typescript": "^5.2.2",
     "undici": "^5.24.0"
   },
@@ -14,6 +15,7 @@
     "@arcticzeroo/duration": "^2.0.2",
     "@arcticzeroo/typeguard": "^1.0.0",
     "@koa/router": "^12.0.0",
+    "@prisma/client": "^5.5.2",
     "@types/koa-json": "^2.0.20",
     "image-size": "^1.0.2",
     "jimp": "^0.22.10",
