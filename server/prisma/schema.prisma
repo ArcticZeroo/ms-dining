@@ -16,8 +16,8 @@ model Cafe {
   name             String
   tenantId         String
   logoName         String
-  contextId        Int
-  displayProfileId Int
+  contextId        String
+  displayProfileId String
 
   dailyCafes DailyCafe[]
 }

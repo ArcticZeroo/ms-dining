@@ -4,8 +4,8 @@ CREATE TABLE "Cafe" (
     "name" TEXT NOT NULL,
     "tenantId" TEXT NOT NULL,
     "logoName" TEXT NOT NULL,
-    "contextId" INTEGER NOT NULL,
-    "displayProfileId" INTEGER NOT NULL
+    "contextId" TEXT NOT NULL,
+    "displayProfileId" TEXT NOT NULL
 );
 
 -- CreateTable
