@@ -53,7 +53,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const now = new Date();
         const currentDayOfWeek = now.getDay();
 
-        let daysSinceMonday = currentDayOfWeek - nativeDayOfWeek.Monday
+        let daysSinceMonday = currentDayOfWeek - nativeDayOfWeek.Monday;
         if (daysSinceMonday <= 0) {
             daysSinceMonday += 7;
         }

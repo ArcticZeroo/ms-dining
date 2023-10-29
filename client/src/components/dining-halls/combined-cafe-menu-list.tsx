@@ -22,7 +22,10 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ caf
     const [menuData, setMenuData] = useState<Array<IMenuWithCafe>>([]);
 
     const loadMenuAsync = async (cafe: ICafe): Promise<IMenuWithCafe> => {
-        const menu = await DiningClient.retrieveCafeMenu(cafe.id, countTowardsLastUsed /*shouldCountTowardsLastUsed*/);
+        const menu = await DiningClient.retrieveCafeMenu({
+            id:                         cafe.id,
+            shouldCountTowardsLastUsed: countTowardsLastUsed
+        });
         return { cafe, menu };
     }
 
@@ -60,7 +63,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ caf
                 menuData.map(({ cafe, menu }) => (
                     <CollapsibleCafeMenu key={cafe.id}
                                          cafe={cafe}
-                                         menu={menu} />
+                                         menu={menu}/>
                 ))
             }
         </div>

@@ -3,13 +3,19 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
-import { nativeDayValues } from '../util/date.ts';
+import { nativeDayOfWeek, nativeDayValues, toDateString } from '../util/date.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
+interface IRetrieveCafeMenuParams {
+    id: string;
+    date?: Date;
+    shouldCountTowardsLastUsed?: boolean;
+}
+
 export abstract class DiningClient {
     private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
-    private static readonly _cafeMenusById: Map<string, Promise<CafeMenu>> = new Map();
+    private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
 
     private static _getRequestOptions(sendVisitorId: boolean) {
         if (!sendVisitorId) {
@@ -48,21 +54,78 @@ export abstract class DiningClient {
         return DiningClient._viewListPromise;
     }
 
-    private static async _retrieveCafeMenuInner(id: string): Promise<Array<ICafeStation>> {
-        return DiningClient._makeRequest(`/api/dining/${id}`);
+    private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
+        return DiningClient._makeRequest(`/api/dining/${id}&date=${dateString}`);
     }
 
     private static _addToLastUsedCafeIds(id: string) {
         ApplicationSettings.lastUsedCafeIds.value = ApplicationSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id);
     }
 
-    public static async retrieveCafeMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<CafeMenu> {
-        try {
-            if (!DiningClient._cafeMenusById.has(id)) {
-                DiningClient._cafeMenusById.set(id, DiningClient._retrieveCafeMenuInner(id));
+    public static getMinimumDateForMenu(): Date {
+        const now = new Date();
+        const currentDayOfWeek = now.getDay();
+
+        let daysSinceMonday = currentDayOfWeek - nativeDayOfWeek.Monday;
+        if (daysSinceMonday <= 0) {
+            daysSinceMonday += 7;
+        }
+
+        now.setDate(now.getDate() - daysSinceMonday);
+
+        return now;
+    }
+
+    public static getMaximumDateForMenu(): Date {
+        const now = new Date();
+        const currentDayOfWeek = now.getDay();
+
+        let daysUntilFriday = nativeDayOfWeek.Friday - currentDayOfWeek;
+        if (daysUntilFriday <= 0) {
+            daysUntilFriday += 7;
+        }
+
+        now.setDate(now.getDate() + daysUntilFriday);
+
+        return now;
+    }
+
+    public static ensureDateIsNotWeekendForMenu(date: Date): Date {
+        const dayOfWeek = date.getDay();
+
+        if ([nativeDayValues.Saturday, nativeDayValues.Sunday].includes(dayOfWeek)) {
+            let daysUntilMonday = nativeDayValues.Monday - dayOfWeek;
+            if (daysUntilMonday <= 0) {
+                daysUntilMonday += 7;
             }
 
-            const menu = await DiningClient._cafeMenusById.get(id)!;
+            date.setDate(date.getDate() + daysUntilMonday);
+        }
+        return date;
+    }
+
+    public static getTodayDateForMenu() {
+        return DiningClient.ensureDateIsNotWeekendForMenu(new Date());
+    }
+
+    public static async retrieveCafeMenu({
+                                             id,
+                                             shouldCountTowardsLastUsed,
+                                             date,
+                                         }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+        const dateString = toDateString(date ?? DiningClient.getTodayDateForMenu());
+
+        try {
+            if (!DiningClient._cafeMenusByIdPerDateString.has(id)) {
+                DiningClient._cafeMenusByIdPerDateString.set(dateString, new Map());
+            }
+
+            const cafeMenusById = DiningClient._cafeMenusByIdPerDateString.get(dateString)!;
+            if (!cafeMenusById.has(id)) {
+                cafeMenusById.set(id, DiningClient._retrieveCafeMenuInner(id, dateString));
+            }
+
+            const menu = await cafeMenusById.get(id)!;
 
             // Wait until retrieving successfully first so that we avoid holding a bunch of invalid cafes
             if (shouldCountTowardsLastUsed) {
@@ -71,7 +134,7 @@ export abstract class DiningClient {
 
             return menu;
         } catch (err) {
-            DiningClient._cafeMenusById.delete(id);
+            DiningClient._cafeMenusByIdPerDateString.delete(id);
             throw err;
         }
     }
@@ -127,7 +190,10 @@ export abstract class DiningClient {
                 break;
             }
 
-            await DiningClient.retrieveCafeMenu(cafe.id, false /*shouldCountTowardsLastUsed*/);
+            await DiningClient.retrieveCafeMenu({
+                id:                         cafe.id,
+                shouldCountTowardsLastUsed: false
+            });
         }
     }
 

@@ -116,7 +116,10 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     const searchAndAddToResults = (cafe: ICafe) => {
         // If we change the cafe list or search query while we're searching, we don't want to add the results.
         const currentSymbol = searchSymbolRef.current;
-        DiningClient.retrieveCafeMenu(cafe.id, false /*shouldCountTowardsLastUsed*/)
+        DiningClient.retrieveCafeMenu({
+            id:                         cafe.id,
+            shouldCountTowardsLastUsed: false
+        })
             .then(menu => {
                 if (currentSymbol === searchSymbolRef.current) {
                     addMenuToSearchResults(cafe, menu);
