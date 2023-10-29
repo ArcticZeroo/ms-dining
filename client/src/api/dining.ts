@@ -3,9 +3,10 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
-import { nativeDayOfWeek, nativeDayValues, toDateString } from '../util/date.ts';
+import { fromDateString, isDateBefore, nativeDayOfWeek, nativeDayValues, toDateString } from '../util/date.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
+const firstWeeklyMenusDate = fromDateString('2023-10-30');
 
 interface IRetrieveCafeMenuParams {
     id: string;
@@ -72,6 +73,10 @@ export abstract class DiningClient {
         }
 
         now.setDate(now.getDate() - daysSinceMonday);
+
+        if (isDateBefore(now, firstWeeklyMenusDate)) {
+            return firstWeeklyMenusDate;
+        }
 
         return now;
     }
