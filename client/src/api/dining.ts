@@ -10,7 +10,6 @@ const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 export abstract class DiningClient {
     private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
     private static readonly _cafeMenusById: Map<string, Promise<CafeMenu>> = new Map();
-    private static _lastUsedCafeIds: string[] = [...ApplicationSettings.lastUsedCafeIds.value];
 
     private static _getRequestOptions(sendVisitorId: boolean) {
         if (!sendVisitorId) {
@@ -54,9 +53,7 @@ export abstract class DiningClient {
     }
 
     private static _addToLastUsedCafeIds(id: string) {
-        const newLastUsedCafeIds = DiningClient._lastUsedCafeIds.filter(existingId => existingId !== id);
-        DiningClient._lastUsedCafeIds = newLastUsedCafeIds;
-        ApplicationSettings.lastUsedCafeIds.value = newLastUsedCafeIds;
+        ApplicationSettings.lastUsedCafeIds.value = ApplicationSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id);
     }
 
     public static async retrieveCafeMenu(id: string, shouldCountTowardsLastUsed: boolean = true): Promise<CafeMenu> {
@@ -88,9 +85,11 @@ export abstract class DiningClient {
                 .map(cafe => cafe.id)
         );
 
+        const lastUsedCafeIds = ApplicationSettings.lastUsedCafeIds.value;
+
         return cafes.sort((a, b) => {
-            const aIndex = DiningClient._lastUsedCafeIds.indexOf(a.id);
-            const bIndex = DiningClient._lastUsedCafeIds.indexOf(b.id);
+            const aIndex = lastUsedCafeIds.indexOf(a.id);
+            const bIndex = lastUsedCafeIds.indexOf(b.id);
             const isAHomepage = homepageCafeIds.has(a.id);
             const isBHomepage = homepageCafeIds.has(b.id);
 
