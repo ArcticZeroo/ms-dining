@@ -3,6 +3,7 @@ import { prismaClient } from './client.js';
 import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
 import { isUniqueConstraintFailedError } from '../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
+import { logError } from '../../util/log.js';
 
 interface ICreateDailyStationMenuParams {
     cafeId: string;
@@ -136,21 +137,39 @@ export abstract class CafeStorageClient {
     }
 
     public static async createDailyStationMenuAsync({ cafeId, dateString, station }: ICreateDailyStationMenuParams) {
-        await prismaClient.dailyStation.create({
+        // Nested query here seems to cause a foreign key error due to things being created in the wrong order.
+        const dailyStation = await prismaClient.dailyStation.create({
             data: {
                 cafeId,
                 dateString,
-                stationId:  station.id,
-                categories: {
-                    create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([name, menuItemIds]) => ({
-                        name,
-                        menuItems: {
-                            create: menuItemIds.map(menuItemId => ({ menuItemId }))
-                        }
-                    }))
-                }
+                stationId: station.id
             }
         });
+
+        for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName.entries()) {
+            const dailyCategory = await prismaClient.dailyCategory.create({
+                data: {
+                    name: categoryName,
+                    stationId: dailyStation.id
+                }
+            });
+
+            for (const menuItemId of menuItemIds) {
+                // Categories may list menu item ids that have been 86-ed, which we don't find out until we try to
+                // retrieve the menu item. So, if the menu item id is in the list of possible menu items, but isn't
+                // in the map for menu item data, it won't be on the menu today anyways.
+                if (!station.menuItemsById.has(menuItemId)) {
+                    continue;
+                }
+
+                await prismaClient.dailyMenuItem.create({
+                    data: {
+                        menuItemId,
+                        categoryId: dailyCategory.id
+                    }
+                });
+            }
+        }
 
         if (!this._cafeMenusByDateString.has(dateString)) {
             this._cafeMenusByDateString.set(dateString, new Map<string, ICafeStation[]>());
@@ -164,13 +183,16 @@ export abstract class CafeStorageClient {
         dailyMenuByCafeId.get(cafeId)!.push(station);
     }
 
-    private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem> {
-        const menuItemPromise = prismaClient.menuItem.findUnique({
+    private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
+        const menuItem = await prismaClient.menuItem.findUnique({
             where: { id }
         });
-        const thumbnailDataPromise = retrieveExistingThumbnailData(id);
 
-        const [menuItem, thumbnailData] = await Promise.all([menuItemPromise, thumbnailDataPromise]);
+        if (menuItem == null) {
+            return null;
+        }
+
+        const thumbnailData = await retrieveExistingThumbnailData(id);
 
         return {
             id:              menuItem.id,
@@ -186,9 +208,14 @@ export abstract class CafeStorageClient {
         };
     }
 
-    public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem> {
+    public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
         if (!this._menuItemsById.has(id)) {
             const menuItem = await this._doRetrieveMenuItemAsync(id);
+
+            if (menuItem == null) {
+                return null;
+            }
+
             this._menuItemsById.set(id, menuItem);
         }
 
@@ -238,6 +265,12 @@ export abstract class CafeStorageClient {
                 for (const dailyMenuItem of category.menuItems) {
                     // Don't resolve these in parallel, we can't have too many concurrent requests to SQLite
                     const menuItem = await this.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+
+                    if (menuItem == null) {
+                        logError(`Unable to find menu item ${dailyMenuItem.menuItemId} for category ${category.name} in station ${stationData.name} (${dailyStation.stationId})`);
+                        continue;
+                    }
+
                     menuItemIds.push(dailyMenuItem.menuItemId);
                     menuItemsById.set(menuItem.id, menuItem);
                 }

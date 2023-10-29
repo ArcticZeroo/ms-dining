@@ -52,7 +52,7 @@ export class CafeDiscoverySession {
 
         const response = await makeRequestWithRetries(
             (retry) => {
-                // logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
+                logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
                 return fetch(url, optionsWithToken);
             },
             requestRetryCount
@@ -217,17 +217,38 @@ export class CafeDiscoverySession {
 
     private async retrieveMenuItemDetailsAsync(stationId: string, menuId: string, itemIds: string[], alwaysGetServerItems: boolean): Promise<Array<IMenuItem>> {
         const itemIdsToRetrieve = new Set(itemIds);
+        const items = [];
 
         if (!alwaysGetServerItems) {
             for (const itemId of itemIds) {
                 const existingItem = await CafeStorageClient.retrieveMenuItemAsync(itemId);
                 if (existingItem != null) {
                     itemIdsToRetrieve.delete(itemId);
+                    items.push(existingItem);
                 }
             }
         }
 
+        // Side note: if we send a request with an empty list, we get EVERY item
+        if (itemIdsToRetrieve.size > 0) {
+            logInfo('Retrieving', itemIdsToRetrieve.size, 'menu items from the server out of a total', itemIds.length, 'items');
 
+            const serverItems = await this._doRetrieveMenuItemDetails(stationId, menuId, Array.from(itemIdsToRetrieve));
+            logInfo('Retrieved', serverItems.length, 'menu items from the server');
+
+            for (const item of serverItems) {
+                items.push(item);
+                try {
+                    await CafeStorageClient.createMenuItemAsync(item, true /*allowUpdateIfExisting*/);
+                } catch (err) {
+                    logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
+                }
+            }
+
+            logInfo(`Retrieved ${items.length} menu items for station ${stationId} with menu ${menuId}`);
+        }
+
+        return items;
     }
 
     private async _populateMenuItemsForStationAsync(station: ICafeStation, alwaysGetServerItems: boolean) {

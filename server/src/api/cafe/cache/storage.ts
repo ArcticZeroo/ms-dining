@@ -18,6 +18,7 @@ const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistin
         await CafeStorageClient.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
     } catch (err) {
         logError('Unable to save station to database:', err);
+        return;
     }
 
     for (const menuItem of station.menuItemsById.values()) {
@@ -25,6 +26,8 @@ const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistin
             await CafeStorageClient.createMenuItemAsync(menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
         } catch (err) {
             logError(`Unable to save menu item "${menuItem.name}"@${menuItem.id} to the database:`, err);
+            // if we fail here, we will fail later when creating the daily menu
+            return;
         }
     }
 
