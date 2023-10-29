@@ -60,12 +60,19 @@ export const retrieveExistingThumbnailData = async (id: string, existingThumbnai
         };
     }
 
-    const { width, height } = await getImageSizeAsync(thumbnailPath);
-    return {
-        hasThumbnail:    true,
-        thumbnailWidth:  width,
-        thumbnailHeight: height
-    };
+    try {
+        const { width, height } = await getImageSizeAsync(thumbnailPath);
+        return {
+            hasThumbnail:    true,
+            thumbnailWidth:  width,
+            thumbnailHeight: height
+        };
+    } catch (err) {
+        // Could not read file?
+        return {
+            hasThumbnail: false
+        };
+    }
 }
 
 export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Promise<void> => {
