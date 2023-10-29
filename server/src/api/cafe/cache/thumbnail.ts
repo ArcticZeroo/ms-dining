@@ -33,9 +33,9 @@ export const writeThumbnailsForCafe = async (cafe: ICafe, stations: ICafeStation
         }
     }
 
-    logInfo('Creating and writing', count, 'thumbnails for cafe', cafe.name);
-
-    const startTime = Date.now();
+    // logInfo('Creating and writing', count, 'thumbnails for cafe', cafe.name);
+    //
+    // const startTime = Date.now();
 
     try {
         await Promise.all(thumbnailPromises);
@@ -43,9 +43,9 @@ export const writeThumbnailsForCafe = async (cafe: ICafe, stations: ICafeStation
         logError('Failed to write thumbnails for cafe', cafe.name, 'with error:', e);
     }
 
-    const endTime = Date.now();
-    const elapsedSeconds = (endTime - startTime) / 1000;
-
-    logInfo('Finished writing', count, 'thumbnails for cafe', cafe.name, 'in', elapsedSeconds.toFixed(2), 'second(s)');
+    // const endTime = Date.now();
+    // const elapsedSeconds = (endTime - startTime) / 1000;
+    //
+    // logInfo('Finished writing', count, 'thumbnails for cafe', cafe.name, 'in', elapsedSeconds.toFixed(2), 'second(s)');
 }
 
