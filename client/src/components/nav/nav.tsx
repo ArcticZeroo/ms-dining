@@ -11,10 +11,10 @@ import { NavCafeList } from './nav-cafe-list.tsx';
 
 export const Nav: React.FC = () => {
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
-    const [, setSelectedView] = useContext(SelectedViewContext);
+    const selectedViewNotifier = useContext(SelectedViewContext);
 
     const onViewClicked = (view: CafeView) => {
-        setSelectedView(view);
+        selectedViewNotifier.value = view;
         setIsExpanded(false);
     };
 

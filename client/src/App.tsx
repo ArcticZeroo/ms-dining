@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLoaderData } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
 import { ApplicationSettings } from './api/settings.ts';
@@ -8,35 +8,16 @@ import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
-import { CafeView, IViewListResponse } from './models/cafe.ts';
+import { CafeView, ICafe, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
 import { useValueNotifier } from './hooks/events.ts';
-import { OutOfDateNotice } from './components/notice/out-of-date-notice.tsx';
+import { ValueNotifier } from './util/events.ts';
+import { SelectedDateContext } from './context/time.ts';
 
-function App() {
-    const { cafes, groups } = useLoaderData() as IViewListResponse;
-
-    // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
-    const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
-    const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
-
+const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const requestMenusInBackground = useValueNotifier(ApplicationSettings.requestMenusInBackground);
-
-    const [selectedView, setSelectedView] = useState<CafeView>();
-    const menuDivRef = useRef<HTMLDivElement>(null);
-
-    const [isNavExpanded, setIsNavExpanded] = useState(false);
-    const deviceType = useDeviceType();
-
-    const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
-    const shouldStopScroll = isNavExpanded && deviceType === DeviceType.Mobile;
-
-    useEffect(() => {
-        if (menuDivRef.current) {
-            menuDivRef.current.scrollTop = 0;
-        }
-    }, [selectedView]);
+    const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
     useEffect(() => {
         if (!requestMenusInBackground || cafes.length === 0 || viewsById.size === 0) {
@@ -55,17 +36,57 @@ function App() {
             .then(() => console.log('Retrieved all cafe menus!'))
             .catch(err => console.error('Failed to retrieve all cafe menus:', err));
     }, [cafes, viewsById, requestMenusInBackground]);
+};
+
+const useMenuScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | undefined>) => {
+    const selectedView = useValueNotifier(selectedViewNotifier);
+    const menuDivRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (menuDivRef.current) {
+            menuDivRef.current.scrollTop = 0;
+        }
+    }, [selectedView]);
+
+    return menuDivRef;
+};
+
+function App() {
+    const { cafes, groups } = useLoaderData() as IViewListResponse;
+
+    // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
+    const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
+
+    const selectedViewNotifier = useMemo(
+        () => new ValueNotifier<CafeView | undefined>(undefined),
+        []
+    );
+
+    const selectedDateNotifier = useMemo(
+        () => new ValueNotifier<Date>(DiningClient.getTodayDateForMenu()),
+        []
+    );
+
+    const [isNavExpanded, setIsNavExpanded] = useState(false);
+    const deviceType = useDeviceType();
+
+    const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
+    const shouldStopScroll = isNavExpanded && deviceType === DeviceType.Mobile;
+
+    const menuDivRef = useMenuScrollTopRef(selectedViewNotifier);
+    useBackgroundMenuUpdate(viewsById, cafes);
 
     return (
         <div className="App">
             <ApplicationContext.Provider value={{ viewsById, viewsInOrder, cafes, groups }}>
                 <NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
-                    <SelectedViewContext.Provider value={[selectedView, setSelectedView]}>
-                        <Nav/>
-                        <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
-                            <OutOfDateNotice/>
-                            <Outlet/>
-                        </div>
+                    <SelectedViewContext.Provider value={selectedViewNotifier}>
+                        <SelectedDateContext.Provider value={selectedDateNotifier}>
+                            <Nav/>
+                            <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
+                                <Outlet/>
+                            </div>
+                        </SelectedDateContext.Provider>
                     </SelectedViewContext.Provider>
                 </NavExpansionContext.Provider>
             </ApplicationContext.Provider>

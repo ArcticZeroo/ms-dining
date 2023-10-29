@@ -167,6 +167,9 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     <div className="search-result-count">
                         Search Results: {searchResultCount}
                     </div>
+                    <div>
+                        Note: search results are limited to today only for now
+                    </div>
                 </div>
                 <div className={classNames('search-waiting', waitingCafeIds.size > 0 && 'visible')}>
                     <div className="loading-spinner"/>

@@ -6,6 +6,9 @@ import { sortCafeIds } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
+import { CafeDatePicker } from './date/date-picker.tsx';
+import { useValueNotifierContext } from '../../hooks/events.ts';
+import { SelectedDateContext } from '../../context/time.ts';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -20,10 +23,12 @@ interface ICombinedCafeMenuListProps {
 export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ cafeIds, countTowardsLastUsed }) => {
     const { viewsById } = useContext(ApplicationContext);
     const [menuData, setMenuData] = useState<Array<IMenuWithCafe>>([]);
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const loadMenuAsync = async (cafe: ICafe): Promise<IMenuWithCafe> => {
         const menu = await DiningClient.retrieveCafeMenu({
             id:                         cafe.id,
+            date:                       selectedDate,
             shouldCountTowardsLastUsed: countTowardsLastUsed
         });
         return { cafe, menu };
@@ -55,10 +60,11 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ caf
     useEffect(() => {
         loadMenusAsync()
             .catch(err => console.error('Failed to load menus:', err));
-    }, [viewsById, cafeIds]);
+    }, [viewsById, cafeIds, selectedDate]);
 
     return (
         <div className="collapsible-menu-list">
+            <CafeDatePicker/>
             {
                 menuData.map(({ cafe, menu }) => (
                     <CollapsibleCafeMenu key={cafe.id}

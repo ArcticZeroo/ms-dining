@@ -1,0 +1,12 @@
+.date-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--default-padding);
+}
+
+.date-picker-buttons {
+    display: flex;
+    gap: var(--default-padding);
+}
