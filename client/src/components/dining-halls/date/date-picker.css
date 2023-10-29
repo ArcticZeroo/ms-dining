@@ -4,9 +4,16 @@
     align-items: center;
     justify-content: center;
     gap: var(--default-padding);
+    background: #32768a;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
 }
 
 .date-picker-buttons {
     display: flex;
     gap: var(--default-padding);
+}
+
+.date-picker-buttons button {
+    padding: 0.5rem;
 }

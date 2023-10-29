@@ -51,7 +51,6 @@ export const CafeDatePicker: React.FC = () => {
     const canGoForwards = isDateBefore(selectedDate, maximumDate);
     const isAtToday = isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
 
-    // todo: handle weekends in back/forward
     const goBackwards = () => {
         if (!canGoBackwards) {
             return;
