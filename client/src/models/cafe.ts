@@ -39,7 +39,7 @@ export type CafeView = ICafeSingleView | ICafeGroupView;
 export interface IMenuItem {
     id: string;
     price: string;
-    displayName: string;
+    name: string;
     calories: string;
     maxCalories: string;
     imageUrl?: string;

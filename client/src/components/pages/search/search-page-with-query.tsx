@@ -35,7 +35,7 @@ const getMatchingEntities = (queryText: string, stations: CafeMenu): ISearchMatc
 
         for (const category of Object.keys(station.menu)) {
             for (const menuItem of station.menu[category]) {
-                const menuItemNameNormalized = normalizeName(menuItem.displayName);
+                const menuItemNameNormalized = normalizeName(menuItem.name);
 
                 if (seenItemNames.has(menuItemNameNormalized)) {
                     continue;
@@ -43,7 +43,7 @@ const getMatchingEntities = (queryText: string, stations: CafeMenu): ISearchMatc
 
                 if (isMatch(menuItemNameNormalized, queryText)) {
                     matches.push({
-                        name:       menuItem.displayName,
+                        name:       menuItem.name,
                         imageUrl:   menuItem.imageUrl,
                         entityType: SearchEntityType.menuItem
                     });

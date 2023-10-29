@@ -33,7 +33,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         <tr>
             <td colSpan={!canShowImage ? 2 : 1}>
                 <div className="menu-item-head">
-                    <span className="menu-item-name">{menuItem.displayName}</span>
+                    <span className="menu-item-name">{menuItem.name}</span>
                     {
                         showDescriptions
                         && menuItem.description
