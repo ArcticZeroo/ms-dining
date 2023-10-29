@@ -79,7 +79,6 @@ export class DailyCafeUpdateSession {
 
         for (const cafe of cafeList) {
             cafePromises.push(this.discoverCafeAsync(cafe));
-            break;
         }
 
         await Promise.all(cafePromises);
