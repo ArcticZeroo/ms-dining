@@ -3,9 +3,6 @@ import { logError } from '../../../util/log.js';
 import Semaphore from 'semaphore-async-await';
 import { CafeStorageClient } from '../../storage/cafe.js';
 
-// todo: make this more automatic by requiring everyone to call an async function get the prisma client
-export const databaseLock = new Semaphore.Lock();
-
 interface ISaveStationParams {
     cafe: ICafe;
     dateString: string;
@@ -55,20 +52,13 @@ export const saveSessionAsync = async ({
                                            stations,
                                            shouldUpdateExistingItems
                                        }: ISaveSessionParams) => {
-    try {
-        // Only let one "thread" write to the database at a time
-        await databaseLock.acquire();
-
-        // Only update existing items if we're looking at the menu for today
-        for (const station of stations) {
-            await saveStationAsync({
-                station,
-                cafe,
-                dateString,
-                shouldUpdateExistingItems
-            });
-        }
-    } finally {
-        databaseLock.release();
+    // Only update existing items if we're looking at the menu for today
+    for (const station of stations) {
+        await saveStationAsync({
+            station,
+            cafe,
+            dateString,
+            shouldUpdateExistingItems
+        });
     }
 }

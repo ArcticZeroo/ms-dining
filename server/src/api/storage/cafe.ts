@@ -1,5 +1,5 @@
 import { Cafe, MenuItem, Station } from '@prisma/client';
-import { prismaClient } from './client.js';
+import { usePrismaClient } from './client.js';
 import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
 import { isUniqueConstraintFailedError } from '../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
@@ -30,7 +30,7 @@ export abstract class CafeStorageClient {
             return;
         }
 
-        const cafes = await prismaClient.cafe.findMany();
+        const cafes = await usePrismaClient(prismaClient => prismaClient.cafe.findMany());
         for (const cafe of cafes) {
             this._cafeDataById.set(cafe.id, cafe);
         }
@@ -56,9 +56,9 @@ export abstract class CafeStorageClient {
             displayProfileId: config.displayProfileId
         };
 
-        await prismaClient.cafe.create({
+        await usePrismaClient(prismaClient => prismaClient.cafe.create({
             data: cafeWithConfig
-        });
+        }));
 
         this._cafeDataById.set(cafe.id, cafeWithConfig);
     }
@@ -75,16 +75,16 @@ export abstract class CafeStorageClient {
         };
 
         if (allowUpdateIfExisting) {
-            await prismaClient.menuItem.upsert({
+            await usePrismaClient(prismaClient => prismaClient.menuItem.upsert({
                 where:  { id: menuItem.id },
                 update: data,
                 create: data
-            });
+            }));
             return;
         }
 
         try {
-            await prismaClient.menuItem.create({ data });
+            await usePrismaClient(prismaClient => prismaClient.menuItem.create({ data }));
         } catch (err) {
             // OK to fail unique constraint validation since we don't want to update existing items
             if (!isUniqueConstraintFailedError(err)) {
@@ -112,16 +112,16 @@ export abstract class CafeStorageClient {
         };
 
         if (allowUpdateIfExisting) {
-            await prismaClient.station.upsert({
+            await usePrismaClient(prismaClient => prismaClient.station.upsert({
                 where:  { id: station.id },
                 update: data,
                 create: data
-            });
+            }));
             return;
         }
 
         try {
-            await prismaClient.station.create({ data });
+            await usePrismaClient(prismaClient => prismaClient.station.create({ data }));
         } catch (err) {
             if (!isUniqueConstraintFailedError(err)) {
                 throw err;
@@ -130,10 +130,7 @@ export abstract class CafeStorageClient {
     }
 
     public static async deleteDailyMenusAsync(dateString: string) {
-        // We have cascade delete, so this should delete categories and menu items too
-        await prismaClient.dailyStation.deleteMany({
-            where: { dateString },
-        });
+        await usePrismaClient(prismaClient => prismaClient.dailyStation.deleteMany({ where: { dateString } }));
     }
 
     private static _getDailyMenuItemsCreateDataForCategory(station: ICafeStation, menuItemIds: string[]): Array<{
@@ -153,7 +150,7 @@ export abstract class CafeStorageClient {
     }
 
     public static async createDailyStationMenuAsync({ cafeId, dateString, station }: ICreateDailyStationMenuParams) {
-        await prismaClient.dailyStation.create({
+        await usePrismaClient(async (prismaClient) => prismaClient.dailyStation.create({
             data: {
                 cafeId,
                 dateString,
@@ -167,7 +164,7 @@ export abstract class CafeStorageClient {
                     }))
                 }
             }
-        });
+        }));
 
         if (!this._cafeMenusByDateString.has(dateString)) {
             this._cafeMenusByDateString.set(dateString, new Map<string, ICafeStation[]>());
@@ -182,9 +179,9 @@ export abstract class CafeStorageClient {
     }
 
     private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
-        const menuItem = await prismaClient.menuItem.findUnique({
+        const menuItem = await usePrismaClient(prismaClient => prismaClient.menuItem.findUnique({
             where: { id }
-        });
+        }));
 
         if (menuItem == null) {
             return null;
@@ -221,7 +218,7 @@ export abstract class CafeStorageClient {
     }
 
     public static async _doRetrieveDailyMenuAsync(cafeId: string, dateString: string) {
-        const dailyStations = await prismaClient.dailyStation.findMany({
+        const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 cafeId,
                 dateString
@@ -246,7 +243,7 @@ export abstract class CafeStorageClient {
                     }
                 }
             }
-        });
+        }));
 
         const stations: ICafeStation[] = [];
 
