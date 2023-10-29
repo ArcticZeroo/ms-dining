@@ -1,11 +1,17 @@
 import cron from 'node-cron';
-import { logError } from '../../../util/log.js';
+import { logError, logInfo } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
+import { isDateOnWeekend } from '../../../util/date.js';
 
 const populateDailySessionsAsync = async () => {
-    const updateSession = new DailyCafeUpdateSession(2 /*daysInFuture*/);
+    const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);
+
+    if (isDateOnWeekend(updateSession.date)) {
+        logInfo('Skipping daily update for weekend');
+        return;
+    }
+
     await updateSession.populateAsync();
-    // what do I do with this information now?
 };
 
 const populateDailySessions = () => {
@@ -18,6 +24,4 @@ export const scheduleDailyUpdateJob = () => {
     cron.schedule('0 3 * * 1,2,3,4,5', () => {
         populateDailySessions();
     });
-
-    populateDailySessions();
 }

@@ -297,4 +297,13 @@ export abstract class CafeStorageClient {
 
         return dailyMenuByCafeId.get(cafeId)!;
     }
+
+    public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {
+        const dailyStation = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
+            where: { dateString },
+            select: { id: true }
+        }));
+
+        return dailyStation != null;
+    }
 }

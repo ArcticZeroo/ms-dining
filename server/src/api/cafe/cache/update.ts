@@ -1,5 +1,5 @@
 import Semaphore from 'semaphore-async-await';
-import { toDateString } from '../../../util/date.js';
+import { getNowWithDaysInFuture, toDateString } from '../../../util/date.js';
 import fs from 'fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
@@ -19,9 +19,7 @@ export class DailyCafeUpdateSession {
     }
 
     get date() {
-        const date = new Date();
-        date.setDate(date.getDate() + this.daysInFuture);
-        return date;
+        return getNowWithDaysInFuture(this.daysInFuture);
     }
 
     get dateString() {
@@ -30,7 +28,6 @@ export class DailyCafeUpdateSession {
 
     private async resetDailyState() {
         CafeStorageClient.resetCache();
-        this.cafeSessionsById.clear();
         await Promise.all([
             fs.mkdir(serverMenuItemThumbnailPath, { recursive: true }),
             CafeStorageClient.deleteDailyMenusAsync(this.dateString)
