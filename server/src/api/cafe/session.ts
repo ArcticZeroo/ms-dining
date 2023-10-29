@@ -23,14 +23,6 @@ export class CafeDiscoverySession {
     constructor(public readonly cafe: ICafe) {
     }
 
-    get logoUrl() {
-        if (!this.config?.logoName) {
-            return undefined;
-        }
-
-        return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}/image/${this.config.tenantId}/${this.config.contextId}/${this.config.logoName}`;
-    }
-
     private _getUrl(path: string) {
         return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}${path}`;
     }
@@ -52,7 +44,7 @@ export class CafeDiscoverySession {
 
         const response = await makeRequestWithRetries(
             (retry) => {
-                // logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
+                logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
                 return fetch(url, optionsWithToken);
             },
             requestRetryCount
