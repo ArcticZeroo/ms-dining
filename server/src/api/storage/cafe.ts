@@ -222,11 +222,12 @@ export abstract class CafeStorageClient {
 
     public static async _doRetrieveDailyMenuAsync(cafeId: string, dateString: string) {
         const dailyStations = await prismaClient.dailyStation.findMany({
-            where:   {
+            where:  {
                 cafeId,
                 dateString
             },
-            include: {
+            select: {
+                stationId:  true,
                 station:    {
                     select: {
                         name:    true,
@@ -235,10 +236,8 @@ export abstract class CafeStorageClient {
                     }
                 },
                 categories: {
-                    select:  {
-                        name: true
-                    },
-                    include: {
+                    select: {
+                        name:      true,
                         menuItems: {
                             include: {
                                 menuItem: true

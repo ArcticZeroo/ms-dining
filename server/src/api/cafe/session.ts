@@ -80,7 +80,6 @@ export class CafeDiscoverySession {
         try {
             const cafeFromDatabase = await CafeStorageClient.retrieveCafeAsync(this.cafe.id);
             if (cafeFromDatabase != null) {
-                logInfo('Got cafe from database, skipping config request');
                 this.config = {
                     tenantId:         cafeFromDatabase.tenantId,
                     contextId:        cafeFromDatabase.contextId,
