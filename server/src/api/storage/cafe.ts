@@ -136,40 +136,38 @@ export abstract class CafeStorageClient {
         });
     }
 
+    private static _getDailyMenuItemsCreateDataForCategory(station: ICafeStation, menuItemIds: string[]): Array<{
+        menuItemId: string
+    }> {
+        const createItems: Array<{ menuItemId: string }> = [];
+
+        for (const menuItemId of menuItemIds) {
+            if (!station.menuItemsById.has(menuItemId)) {
+                continue;
+            }
+
+            createItems.push({ menuItemId });
+        }
+
+        return createItems;
+    }
+
     public static async createDailyStationMenuAsync({ cafeId, dateString, station }: ICreateDailyStationMenuParams) {
-        // Nested query here seems to cause a foreign key error due to things being created in the wrong order.
-        const dailyStation = await prismaClient.dailyStation.create({
+        await prismaClient.dailyStation.create({
             data: {
                 cafeId,
                 dateString,
-                stationId: station.id
+                stationId:  station.id,
+                categories: {
+                    create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([name, menuItemIds]) => ({
+                        name,
+                        menuItems: {
+                            create: this._getDailyMenuItemsCreateDataForCategory(station, menuItemIds)
+                        }
+                    }))
+                }
             }
         });
-
-        for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName.entries()) {
-            const dailyCategory = await prismaClient.dailyCategory.create({
-                data: {
-                    name: categoryName,
-                    stationId: dailyStation.id
-                }
-            });
-
-            for (const menuItemId of menuItemIds) {
-                // Categories may list menu item ids that have been 86-ed, which we don't find out until we try to
-                // retrieve the menu item. So, if the menu item id is in the list of possible menu items, but isn't
-                // in the map for menu item data, it won't be on the menu today anyways.
-                if (!station.menuItemsById.has(menuItemId)) {
-                    continue;
-                }
-
-                await prismaClient.dailyMenuItem.create({
-                    data: {
-                        menuItemId,
-                        categoryId: dailyCategory.id
-                    }
-                });
-            }
-        }
 
         if (!this._cafeMenusByDateString.has(dateString)) {
             this._cafeMenusByDateString.set(dateString, new Map<string, ICafeStation[]>());
