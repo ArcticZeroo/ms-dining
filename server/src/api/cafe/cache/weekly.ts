@@ -1,19 +1,8 @@
 import cron from 'node-cron';
 import { logError, logInfo } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
-import { getNowWithDaysInFuture, isDateOnWeekend, nativeDayOfWeek, toDateString } from '../../../util/date.js';
+import { getNowWithDaysInFuture, toDateString, yieldDaysForThisWeek } from '../../../util/date.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
-
-function* yieldDaysForThisWeek() {
-    const now = new Date();
-    const startWeekdayIndex = isDateOnWeekend(now)
-        ? nativeDayOfWeek.Monday
-        : Math.max(now.getDay(), nativeDayOfWeek.Monday);
-
-    for (let i = startWeekdayIndex; i <= nativeDayOfWeek.Friday; i++) {
-        yield i;
-    }
-}
 
 const updateWeeklyCafeMenusAsync = async () => {
     logInfo('Updating weekly cafe menus...');

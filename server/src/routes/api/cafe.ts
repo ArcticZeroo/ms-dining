@@ -3,7 +3,7 @@ import * as diningConfig from '../../constants/cafes.js';
 import { attachRouter } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
-import { fromDateString, nativeDayOfWeek, toDateString } from '../../util/date.js';
+import { fromDateString, getDateStringForMenuRequest, nativeDayOfWeek, toDateString } from '../../util/date.js';
 import { CafeStorageClient } from '../../api/storage/cafe.js';
 import { logInfo } from '../../util/log.js';
 import { getLogoUrl } from '../../util/cafe.js';
@@ -49,60 +49,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         });
     });
 
-    const getMinimumDateForMenuRequest = (): Date => {
-        const now = new Date();
-        const currentDayOfWeek = now.getDay();
-
-        let daysSinceMonday = currentDayOfWeek - nativeDayOfWeek.Monday;
-        if (daysSinceMonday <= 0) {
-            daysSinceMonday += 7;
-        }
-
-        now.setDate(now.getDate() - daysSinceMonday);
-
-        return now;
-    }
-
-    const getMaximumDateForMenuRequest = (): Date => {
-        const now = new Date();
-        const currentDayOfWeek = now.getDay();
-
-        let daysUntilFriday = nativeDayOfWeek.Friday - currentDayOfWeek;
-        if (daysUntilFriday <= 0) {
-            daysUntilFriday += 7;
-        }
-
-        now.setDate(now.getDate() + daysUntilFriday);
-
-        return now;
-    }
-
-    const getDateStringForMenuRequest = (ctx: Router.RouterContext): string => {
-        const now = new Date();
-        const queryDateRaw = ctx.query.date;
-
-        if (!queryDateRaw || typeof queryDateRaw !== 'string') {
-            return toDateString(now);
-        }
-
-        const date = fromDateString(queryDateRaw);
-        if (Number.isNaN(date.getTime())) {
-            return toDateString(now);
-        }
-
-        const dateTime = date.getTime();
-        const minimumDate = getMinimumDateForMenuRequest();
-        const maximumDate = getMaximumDateForMenuRequest();
-        const clampedTime = clamp({
-            min: minimumDate.getTime(),
-            max: maximumDate.getTime(),
-            value: dateTime
-        });
-
-        return toDateString(new Date(clampedTime));
-    };
-
-    router.get('/:id', async ctx => {
+    router.get('/menu/:id', async ctx => {
         const id = ctx.params.id;
         if (!id) {
             ctx.status = 400;
@@ -154,6 +101,33 @@ export const registerDiningHallRoutes = (parent: Router) => {
         }
 
         ctx.body = JSON.stringify(menusByStation);
+    });
+
+    router.get('/search', async ctx => {
+        const searchQuery = ctx.query.q;
+
+        if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
+            ctx.body = [];
+            return;
+        }
+
+        const searchResultsByIdPerEntityType = await CafeStorageClient.search(searchQuery);
+        const searchResults = [];
+        for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
+            for (const searchResult of searchResultsById.values()) {
+                searchResults.push({
+                    type:                searchResult.type,
+                    name:                searchResult.name,
+                    description:         searchResult.description,
+                    imageUrl:            searchResult.imageUrl,
+                    matchReasons:        Array.from(searchResult.matchReasons),
+                    matchingCafeIds:     Array.from(searchResult.matchingCafeIds),
+                    matchingDateStrings: Array.from(searchResult.matchingDateStrings),
+                });
+            }
+        }
+
+        ctx.body = searchResults;
     });
 
     attachRouter(parent, router);

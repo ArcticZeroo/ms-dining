@@ -4,6 +4,10 @@ import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.j
 import { isUniqueConstraintFailedError } from '../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
 import { logError } from '../../util/log.js';
+import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
+import { getNowWithDaysInFuture, toDateString, yieldDaysForThisWeek } from '../../util/date.js';
+import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
+import { getThumbnailUrl } from '../../util/cafe.js';
 
 interface ICreateDailyStationMenuParams {
     cafeId: string;
@@ -236,8 +240,8 @@ export abstract class CafeStorageClient {
                     select: {
                         name:      true,
                         menuItems: {
-                            include: {
-                                menuItem: true
+                            select: {
+                                menuItemId: true
                             }
                         }
                     }
@@ -300,10 +304,148 @@ export abstract class CafeStorageClient {
 
     public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {
         const dailyStation = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
-            where: { dateString },
+            where:  { dateString },
             select: { id: true }
         }));
 
         return dailyStation != null;
+    }
+
+    public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
+        const cafesById = await CafeStorageClient.retrieveCafesAsync();
+        const cafeIds = Array.from(cafesById.keys());
+        const dateStrings = Array.from(yieldDaysForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
+
+        const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  {
+                cafeId:     { in: cafeIds },
+                dateString: { in: dateStrings }
+            },
+            select: {
+                cafeId:     true,
+                dateString: true,
+                stationId:  true,
+                station:    {
+                    select: {
+                        name:    true,
+                        logoUrl: true,
+                        menuId:  true
+                    }
+                },
+                categories: {
+                    select: {
+                        name:      true,
+                        menuItems: {
+                            select: {
+                                menuItemId: true
+                            }
+                        }
+                    }
+                }
+            }
+        }));
+
+        const searchResultsByNameByEntityType = new Map<SearchResultEntityType, Map<string, ISearchResult>>();
+
+        const ensureEntityTypeExists = (entityType: SearchResultEntityType) => {
+            if (!searchResultsByNameByEntityType.has(entityType)) {
+                searchResultsByNameByEntityType.set(entityType, new Map<string, ISearchResult>());
+            }
+        }
+
+        interface IAddResultParams {
+            type: SearchResultEntityType;
+            dateString: string;
+            cafeId: string;
+            matchReasons: Iterable<SearchResultMatchReason>;
+            name: string;
+            description?: string;
+            imageUrl?: string;
+        }
+
+        const addResult = ({
+                               type,
+                               name,
+                               description,
+                               imageUrl,
+                               dateString,
+                               cafeId,
+                               matchReasons
+                           }: IAddResultParams) => {
+            ensureEntityTypeExists(type);
+
+            const searchResultsById = searchResultsByNameByEntityType.get(SearchResultEntityType.MenuItem)!;
+            const normalizedName = normalizeNameForSearch(name);
+
+            if (!searchResultsById.has(normalizedName)) {
+                searchResultsById.set(normalizedName, {
+                    type:                type,
+                    name:                name,
+                    description:         description,
+                    imageUrl:            imageUrl,
+                    matchReasons:        new Set<SearchResultMatchReason>([...matchReasons]),
+                    matchingCafeIds:     new Set<string>([cafeId]),
+                    matchingDateStrings: new Set<string>([dateString])
+                });
+            } else {
+                const searchResult = searchResultsById.get(normalizedName)!;
+
+                for (const matchReason of matchReasons) {
+                    searchResult.matchReasons.add(matchReason);
+                }
+                searchResult.matchingCafeIds.add(cafeId);
+                searchResult.matchingDateStrings.add(dateString);
+            }
+        };
+
+
+        for (const dailyStation of dailyStations) {
+            const stationData = dailyStation.station;
+
+            if (stationData.name.trim() && fuzzySearch(stationData.name, query)) {
+                addResult({
+                    type:         SearchResultEntityType.Station,
+                    matchReasons: [SearchResultMatchReason.Title],
+                    dateString:   dailyStation.dateString,
+                    cafeId:       dailyStation.cafeId,
+                    name:         stationData.name,
+                    imageUrl:     stationData.logoUrl
+                });
+            }
+
+            for (const category of dailyStation.categories) {
+                for (const dailyMenuItem of category.menuItems) {
+                    const menuItem = await this.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+
+                    if (menuItem == null) {
+                        continue;
+                    }
+
+                    const matchReasons: SearchResultMatchReason[] = [];
+
+                    if (fuzzySearch(menuItem.name, query)) {
+                        matchReasons.push(SearchResultMatchReason.Title);
+                    }
+
+                    if (menuItem.description && fuzzySearch(menuItem.description, query)) {
+                        matchReasons.push(SearchResultMatchReason.Description);
+                    }
+
+                    if (matchReasons.length > 0) {
+                        addResult({
+                            type:        SearchResultEntityType.MenuItem,
+                            matchReasons,
+                            dateString:  dailyStation.dateString,
+                            cafeId:      dailyStation.cafeId,
+                            name:        menuItem.name,
+                            description: menuItem.description,
+                            imageUrl:    getThumbnailUrl(menuItem)
+                        });
+                    }
+                }
+            }
+        }
+
+        return searchResultsByNameByEntityType;
     }
 }
