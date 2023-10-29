@@ -43,7 +43,7 @@ export class DailyCafeUpdateSession {
         try {
             await cafeSemaphore.acquire();
 
-            logInfo('Performing discovery for', `"${cafe.name}@${cafe.id}"`, 'with', this.daysInFuture, 'day(s) in the future...');
+            logInfo(`{${this.dateString}} Discovering menu for "${cafe.name}"@${cafe.id}...`);
 
             await session.initialize();
             stations = await session.populateMenuAsync(this.daysInFuture);
@@ -64,7 +64,7 @@ export class DailyCafeUpdateSession {
         await saveSessionAsync({
             cafe,
             stations,
-            dateString: toDateString(new Date()),
+            dateString: this.dateString,
             shouldUpdateExistingItems: true
         });
     }
