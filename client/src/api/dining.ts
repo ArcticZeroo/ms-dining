@@ -55,7 +55,7 @@ export abstract class DiningClient {
     }
 
     private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
-        return DiningClient._makeRequest(`/api/dining/${id}&date=${dateString}`);
+        return DiningClient._makeRequest(`/api/dining/${id}?date=${dateString}`);
     }
 
     private static _addToLastUsedCafeIds(id: string) {
