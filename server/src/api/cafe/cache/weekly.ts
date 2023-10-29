@@ -19,6 +19,6 @@ const updateWeeklyCafeMenus = () => {
 
 export const scheduleWeeklyUpdateJob = () => {
     cron.schedule('0 12 * * 0', async () => {
-
+        updateWeeklyCafeMenus();
     });
 }
