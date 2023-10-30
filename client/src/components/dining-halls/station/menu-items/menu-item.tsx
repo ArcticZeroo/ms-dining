@@ -9,12 +9,12 @@ export interface IMenuItemProps {
 }
 
 const getCaloriesDisplay = (menuItem: IMenuItem) => {
-    if (!menuItem.calories) {
+    if (!menuItem.calories || Number(menuItem.calories) < 1) {
         return false;
     }
 
     const parts = [menuItem.calories];
-    if (menuItem.maxCalories) {
+    if (menuItem.maxCalories && Number(menuItem.maxCalories) > 0) {
         parts.push(menuItem.maxCalories);
     }
 
