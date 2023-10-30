@@ -8,11 +8,15 @@ export enum SearchResultMatchReason {
     Description = 'description',
 }
 
+interface ISearchResultLocation {
+    cafeId: string;
+    date: string;
+}
+
 export interface ISearchResult {
     type: SearchResultEntityType;
     matchReasons: Set<SearchResultMatchReason>;
-    matchingCafeIds: Set<string>;
-    matchingDateStrings: Set<string>;
+    locations: ISearchResultLocation[];
     imageUrl: string;
     name: string;
     description?: string;

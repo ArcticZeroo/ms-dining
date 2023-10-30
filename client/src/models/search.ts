@@ -19,24 +19,31 @@ export enum SearchEntityFilterType {
     station
 }
 
+interface ISearchResultLocation {
+    cafeId: string;
+    date: Date;
+}
+
 export interface ISearchResult {
     entityType: SearchEntityType;
     name: string;
     description?: string;
     imageUrl?: string;
-    cafeIds: Set<string>;
-    dateStrings: Set<string>;
+    locations: ISearchResultLocation[];
     matchReasons: Set<SearchMatchReason>;
 }
 
-export type SearchResultsMap = Map<SearchEntityType, Map<string, ISearchResult>>;
+
+interface IServerSearchResultLocation {
+    cafeId: string;
+    date: string;
+}
 
 export interface IServerSearchResult {
     type: 'menuItem' | 'station';
     name: string;
     description?: string;
     imageUrl?: string;
-    matchingCafeIds: string[];
-    matchingDateStrings: string[];
+    locations: IServerSearchResultLocation[];
     matchReasons: Array<'description' | 'title'>;
 }

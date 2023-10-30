@@ -73,16 +73,19 @@
     background: #2196F3;
     border-radius: 2rem;
     color: white;
-    padding: 0.5rem;
+    padding: var(--default-padding);
     text-decoration: none;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
 }
 
-.search-result-chip.gray {
-    background: #777;
+.chip-data {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .search-result-hits {

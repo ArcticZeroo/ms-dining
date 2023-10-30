@@ -4,12 +4,12 @@ import { ApplicationContext } from '../../context/app.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
-import { sortCafeIds } from '../../util/sorting.ts';
+import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { fromDateString, getDateDisplay } from '../../util/date.ts';
+import { getDateDisplay, isDateAfter, isDateBefore } from '../../util/date.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -31,17 +31,27 @@ interface ISearchResultProps {
     result: ISearchResult;
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, description, cafeIds, dateStrings, imageUrl, entityType } }) => {
+export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, description, locations, imageUrl, entityType } }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
 
-    const cafeIdsInOrder = useMemo(() => sortCafeIds(cafeIds), [cafeIds]);
-    const dateStringsInOrder = useMemo(() => {
-        const dateStringsAsDates = Array.from(dateStrings).map(dateString => fromDateString(dateString));
-        dateStringsAsDates.sort((a, b) => a.getTime() - b.getTime());
-        return dateStringsAsDates.map(getDateDisplay);
-    }, [dateStrings]);
+    const locationsInOrder = useMemo(() => {
+        return [...locations].sort((a, b) => {
+            if (isDateBefore(a.date, b.date)) {
+                return -1;
+            }
+
+            if (isDateAfter(a.date, b.date)) {
+                return 1;
+            }
+
+            const normalizedCafeIdA = normalizeCafeId(a.cafeId);
+            const normalizedCafeIdB = normalizeCafeId(b.cafeId);
+
+            return compareNormalizedCafeIds(normalizedCafeIdA, normalizedCafeIdB);
+        });
+    }, [locations]);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -62,8 +72,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                     </div>
                     <div className="search-result-hits">
                         {
-                            cafeIdsInOrder.map(id => {
-                                const view = viewsById.get(id);
+                            locationsInOrder.map(({ cafeId, date }) => {
+                                const view = viewsById.get(cafeId);
 
                                 if (!view) {
                                     return false;
@@ -74,25 +84,25 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                                 return (
                                     <Link to={getViewUrl(parentView)} className="search-result-chip"
                                           key={view.value.id}>
-                                        <span className="material-symbols-outlined">
-                                            location_on
-                                        </span>
-                                        {view.value.name}
+                                        <div className="chip-data">
+                                            <span className="material-symbols-outlined icon">
+                                                location_on
+                                            </span>
+                                            <span className="value">
+                                                {view.value.name}
+                                            </span>
+                                        </div>
+                                        <div className="chip-data">
+                                            <span className="material-symbols-outlined icon">
+                                                timer
+                                            </span>
+                                            <span className="value">
+                                                {getDateDisplay(date)}
+                                            </span>
+                                        </div>
                                     </Link>
                                 );
                             })
-                        }
-                    </div>
-                    <div className="search-result-hits">
-                        {
-                            dateStringsInOrder.map(dateString => (
-                                <div className="search-result-chip gray" key={dateString}>
-                                    <span className="material-symbols-outlined">
-                                        timer
-                                    </span>
-                                    {dateString}
-                                </div>
-                            ))
                         }
                     </div>
                 </div>

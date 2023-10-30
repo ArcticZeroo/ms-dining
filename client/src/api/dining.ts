@@ -237,8 +237,10 @@ export abstract class DiningClient {
                 name:         serverResult.name,
                 description:  serverResult.description,
                 imageUrl:     serverResult.imageUrl,
-                cafeIds:      new Set(serverResult.matchingCafeIds),
-                dateStrings:  new Set(serverResult.matchingDateStrings),
+                locations:    serverResult.locations.map(location => ({
+                    cafeId: location.cafeId,
+                    date:   fromDateString(location.date)
+                })),
                 matchReasons: new Set(
                     serverResult.matchReasons.map(reason => reason === 'description'
                         ? SearchMatchReason.description

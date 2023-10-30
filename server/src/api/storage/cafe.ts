@@ -383,9 +383,8 @@ export abstract class CafeStorageClient {
                     name:                name,
                     description:         description,
                     imageUrl:            imageUrl,
+                    locations:           [{ cafeId, date: dateString }],
                     matchReasons:        new Set<SearchResultMatchReason>([...matchReasons]),
-                    matchingCafeIds:     new Set<string>([cafeId]),
-                    matchingDateStrings: new Set<string>([dateString])
                 });
             } else {
                 const searchResult = searchResultsById.get(normalizedName)!;
@@ -393,8 +392,10 @@ export abstract class CafeStorageClient {
                 for (const matchReason of matchReasons) {
                     searchResult.matchReasons.add(matchReason);
                 }
-                searchResult.matchingCafeIds.add(cafeId);
-                searchResult.matchingDateStrings.add(dateString);
+                searchResult.locations.push({
+                    cafeId,
+                    date: dateString
+                });
             }
         };
 

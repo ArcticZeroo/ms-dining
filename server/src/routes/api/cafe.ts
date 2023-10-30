@@ -115,13 +115,12 @@ export const registerDiningHallRoutes = (parent: Router) => {
         for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
             for (const searchResult of searchResultsById.values()) {
                 searchResults.push({
-                    type:                searchResult.type,
-                    name:                searchResult.name,
-                    description:         searchResult.description,
-                    imageUrl:            searchResult.imageUrl,
-                    matchReasons:        Array.from(searchResult.matchReasons),
-                    matchingCafeIds:     Array.from(searchResult.matchingCafeIds),
-                    matchingDateStrings: Array.from(searchResult.matchingDateStrings),
+                    type:         searchResult.type,
+                    name:         searchResult.name,
+                    description:  searchResult.description,
+                    imageUrl:     searchResult.imageUrl,
+                    locations:    searchResult.locations,
+                    matchReasons: Array.from(searchResult.matchReasons),
                 });
             }
         }
