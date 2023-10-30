@@ -5,6 +5,7 @@ import { DiningClient } from '../../../api/dining.ts';
 import { isSameDate, isDateOnWeekend, isDateAfter, isDateBefore, getDateDisplay } from '../../../util/date.ts';
 
 import './date-picker.css';
+import { FutureMenuOutOfDateNotice } from '../../notice/future-menu-out-of-date-notice.tsx';
 
 const getPreviousDate = (date: Date) => {
     const newDate = new Date(date.getTime());
@@ -37,8 +38,6 @@ export const CafeDatePicker: React.FC = () => {
 
     const minimumDate = DiningClient.getMinimumDateForMenu();
     const maximumDate = DiningClient.getMaximumDateForMenu();
-
-    console.log(selectedDate, minimumDate, maximumDate);
 
     const canGoBackwards = isDateAfter(selectedDate, minimumDate);
     const canGoForwards = isDateBefore(selectedDate, maximumDate);
@@ -88,6 +87,7 @@ export const CafeDatePicker: React.FC = () => {
                 </button>
             </div>
             {getDateDisplay(selectedDate)}
+            <FutureMenuOutOfDateNotice/>
         </div>
     );
 };

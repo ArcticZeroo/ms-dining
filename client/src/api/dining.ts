@@ -3,7 +3,14 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
-import { fromDateString, isDateBefore, nativeDayOfWeek, nativeDayValues, toDateString } from '../util/date.ts';
+import {
+    fromDateString,
+    isDateAfter,
+    isDateBefore,
+    nativeDayOfWeek,
+    nativeDayValues,
+    toDateString
+} from '../util/date.ts';
 import { ISearchResult, IServerSearchResult, SearchEntityType, SearchMatchReason } from '../models/search.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
@@ -208,18 +215,20 @@ export abstract class DiningClient {
         return `/static/menu-items/thumbnail/${menuItem.id}.png`;
     }
 
-    public static get isMenuProbablyOutdated(): boolean {
+    public static isMenuProbablyOutdated(selectedDate: Date): boolean {
         const nowInLocalTime = new Date();
         const nowInPacificTime = new Date(nowInLocalTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
 
-        // Menu isn't updated on weekends
-        if ([nativeDayValues.Saturday, nativeDayValues.Sunday].includes(nowInPacificTime.getDay())) {
+        if (isDateBefore(nowInPacificTime, selectedDate)) {
             return true;
         }
 
-        // Menu is updated at 3am Pacific Time. Menus for things like boardwalk/craft75 might be valid until around 8pm.
-        return nowInPacificTime.getHours() > 20
-            || nowInPacificTime.getHours() < 3;
+        if (isDateAfter(nowInPacificTime, selectedDate)) {
+            return false;
+        }
+
+        // Menu is updated at 9am Pacific Time. Menus for things like boardwalk/craft75 might be valid until around 8pm.
+        return nowInPacificTime.getHours() < 9;
     }
 
     public static async retrieveSearchResults(query: string): Promise<Array<ISearchResult>> {
