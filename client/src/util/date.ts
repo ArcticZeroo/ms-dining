@@ -53,3 +53,11 @@ export const isDateAfter = (date: Date, compareDate: Date) => {
         || date.getMonth() > compareDate.getMonth()
         || date.getDate() > compareDate.getDate();
 }
+
+export const getDateDisplay = (date: Date) => date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year:    'numeric',
+    month:   'long',
+    day:     'numeric'
+});
+

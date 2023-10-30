@@ -74,7 +74,15 @@
     border-radius: 2rem;
     color: white;
     padding: 0.5rem;
-    text-underline: none;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.search-result-chip.gray {
+    background: #777;
 }
 
 .search-result-hits {

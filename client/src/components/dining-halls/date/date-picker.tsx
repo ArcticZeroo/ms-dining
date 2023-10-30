@@ -2,16 +2,9 @@ import { SelectedDateContext } from '../../../context/time.ts';
 import React, { useContext, useMemo } from 'react';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DiningClient } from '../../../api/dining.ts';
-import { isSameDate, isDateOnWeekend, isDateAfter, isDateBefore } from '../../../util/date.ts';
+import { isSameDate, isDateOnWeekend, isDateAfter, isDateBefore, getDateDisplay } from '../../../util/date.ts';
 
 import './date-picker.css';
-
-const getDateDisplay = (date: Date) => date.toLocaleDateString(undefined, {
-    weekday: 'long',
-    year:    'numeric',
-    month:   'long',
-    day:     'numeric'
-});
 
 const getPreviousDate = (date: Date) => {
     const newDate = new Date(date.getTime());

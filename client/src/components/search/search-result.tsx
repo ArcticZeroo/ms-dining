@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../context/app.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
@@ -9,6 +9,7 @@ import { getParentView } from '../../util/view';
 import './search.css';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { fromDateString, getDateDisplay } from '../../util/date.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -18,11 +19,11 @@ interface IEntityDisplayData {
 const entityDisplayDataByType: Record<SearchEntityType, IEntityDisplayData> = {
     [SearchEntityType.menuItem]: {
         className: 'entity-menu-item',
-        iconName: 'lunch_dining'
+        iconName:  'lunch_dining'
     },
-    [SearchEntityType.station]: {
+    [SearchEntityType.station]:  {
         className: 'entity-station',
-        iconName: 'restaurant'
+        iconName:  'restaurant'
     }
 };
 
@@ -30,15 +31,17 @@ interface ISearchResultProps {
     result: ISearchResult;
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, cafeIds, imageUrl, entityType } }) => {
+export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, description, cafeIds, dateStrings, imageUrl, entityType } }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
-    const [cafeIdsInOrder, setCafeIdsInOrder] = useState<Array<string>>([]);
 
-    useEffect(() => {
-        setCafeIdsInOrder(sortCafeIds(cafeIds));
-    }, [cafeIds]);
+    const cafeIdsInOrder = useMemo(() => sortCafeIds(cafeIds), [cafeIds]);
+    const dateStringsInOrder = useMemo(() => {
+        const dateStringsAsDates = Array.from(dateStrings).map(dateString => fromDateString(dateString));
+        dateStringsAsDates.sort((a, b) => a.getTime() - b.getTime());
+        return dateStringsAsDates.map(getDateDisplay);
+    }, [dateStrings]);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -51,7 +54,12 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, caf
             </div>
             <div className="search-result-info">
                 <div className="search-result-info-header">
-                    <div className="search-result-name">{name}</div>
+                    <div className="search-result-name">
+                        {name}
+                        {
+                            description && <div className="search-result-description">{description}</div>
+                        }
+                    </div>
                     <div className="search-result-hits">
                         {
                             cafeIdsInOrder.map(id => {
@@ -64,18 +72,34 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, caf
                                 const parentView = getParentView(viewsById, useGroups, view);
 
                                 return (
-                                    <Link to={getViewUrl(parentView)} className="search-result-chip" key={view.value.id}>
+                                    <Link to={getViewUrl(parentView)} className="search-result-chip"
+                                          key={view.value.id}>
+                                        <span className="material-symbols-outlined">
+                                            location_on
+                                        </span>
                                         {view.value.name}
                                     </Link>
                                 );
                             })
                         }
                     </div>
+                    <div className="search-result-hits">
+                        {
+                            dateStringsInOrder.map(dateString => (
+                                <div className="search-result-chip gray" key={dateString}>
+                                    <span className="material-symbols-outlined">
+                                        timer
+                                    </span>
+                                    {dateString}
+                                </div>
+                            ))
+                        }
+                    </div>
                 </div>
                 {
                     (imageUrl && showImages) && (
-                                                 <img src={imageUrl} alt={name} className="search-result-image"/>
-                                             )
+                        <img src={imageUrl} alt={name} className="search-result-image"/>
+                    )
                 }
             </div>
         </div>
