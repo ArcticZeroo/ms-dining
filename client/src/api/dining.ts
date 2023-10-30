@@ -186,10 +186,11 @@ export abstract class DiningClient {
         });
     }
 
-    public static async retrieveAllMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
+    public static async retrieveRecentMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
         console.log('Retrieving cafe menus...');
+        const priorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById);
 
-        for (const cafe of DiningClient.getCafePriorityOrder(cafes, viewsById)) {
+        for (const cafe of priorityOrder.slice(0, 5)) {
             await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
 
             if (cancellationToken?.isCancelled || !ApplicationSettings.requestMenusInBackground.value) {

@@ -32,9 +32,9 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
         const cancellationToken: ICancellationToken = { isCancelled: false };
         retrieveCafeMenusCancellationToken.current = cancellationToken;
 
-        DiningClient.retrieveAllMenusInOrder(cafes, viewsById, cancellationToken)
-            .then(() => console.log('Retrieved all cafe menus!'))
-            .catch(err => console.error('Failed to retrieve all cafe menus:', err));
+        DiningClient.retrieveRecentMenusInOrder(cafes, viewsById, cancellationToken)
+            .then(() => console.log('Retrieved recent cafe menus!'))
+            .catch(err => console.error('Failed to retrieve recent cafe menus:', err));
     }, [cafes, viewsById, requestMenusInBackground]);
 };
 
