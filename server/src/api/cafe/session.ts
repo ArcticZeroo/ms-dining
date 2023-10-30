@@ -44,7 +44,7 @@ export class CafeDiscoverySession {
 
         const response = await makeRequestWithRetries(
             (retry) => {
-                logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
+                // logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
                 return fetch(url, optionsWithToken);
             },
             requestRetryCount

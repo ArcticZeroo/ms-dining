@@ -58,7 +58,6 @@ export const registerDiningHallRoutes = (parent: Router) => {
         }
 
         const dateString = getDateStringForMenuRequest(ctx);
-        logInfo('Retrieving menu for cafe', id, 'at date', dateString);
 
         const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
         if (menuStations.length === 0) {

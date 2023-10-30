@@ -1,10 +1,4 @@
-import {
-    allSearchEntityTypes,
-    ISearchResult,
-    SearchEntityFilterType,
-    SearchEntityType,
-    SearchResultsMap
-} from '../models/search.ts';
+import { ISearchResult, SearchEntityFilterType, SearchEntityType } from '../models/search.ts';
 import { findLongestNonSequentialSubstringLength, findLongestSequentialSubstringLength } from './string.ts';
 import { DiningClient } from '../api/dining.ts';
 import { CafeView, ICafe } from '../models/cafe.ts';
