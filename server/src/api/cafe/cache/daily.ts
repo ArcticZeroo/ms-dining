@@ -3,7 +3,7 @@ import { logError, logInfo } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { isDateOnWeekend } from '../../../util/date.js';
 
-const populateDailySessionsAsync = async () => {
+export const populateDailySessionsAsync = async () => {
     const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);
 
     if (isDateOnWeekend(updateSession.date)) {
