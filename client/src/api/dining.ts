@@ -232,16 +232,19 @@ export abstract class DiningClient {
         const results: Array<ISearchResult> = [];
 
         for (const serverResult of serverResults) {
+            const locationDatesByCafeId = new Map<string, Array<Date>>();
+            for (const [cafeId, dateStrings] of Object.entries(serverResult.locations)) {
+                const dates = dateStrings.map(fromDateString).sort((a, b) => a.getTime() - b.getTime());
+                locationDatesByCafeId.set(cafeId, dates);
+            }
+
             results.push({
-                entityType:   serverResult.type === 'menuItem' ? SearchEntityType.menuItem : SearchEntityType.station,
-                name:         serverResult.name,
-                description:  serverResult.description,
-                imageUrl:     serverResult.imageUrl,
-                locations:    serverResult.locations.map(location => ({
-                    cafeId: location.cafeId,
-                    date:   fromDateString(location.date)
-                })),
-                matchReasons: new Set(
+                entityType:            serverResult.type === 'menuItem' ? SearchEntityType.menuItem : SearchEntityType.station,
+                name:                  serverResult.name,
+                description:           serverResult.description,
+                imageUrl:              serverResult.imageUrl,
+                locationDatesByCafeId: locationDatesByCafeId,
+                matchReasons:          new Set(
                     serverResult.matchReasons.map(reason => reason === 'description'
                         ? SearchMatchReason.description
                         : SearchMatchReason.title)

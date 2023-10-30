@@ -114,12 +114,17 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const searchResults = [];
         for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
             for (const searchResult of searchResultsById.values()) {
+                const locationsDatesByCafeId = {};
+                for (const [cafeId, dates] of searchResult.locationDatesByCafeId.entries()) {
+                    locationsDatesByCafeId[cafeId] = Array.from(dates);
+                }
+
                 searchResults.push({
                     type:         searchResult.type,
                     name:         searchResult.name,
                     description:  searchResult.description,
                     imageUrl:     searchResult.imageUrl,
-                    locations:    searchResult.locations,
+                    locations:    locationsDatesByCafeId,
                     matchReasons: Array.from(searchResult.matchReasons),
                 });
             }

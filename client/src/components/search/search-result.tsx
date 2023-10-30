@@ -4,12 +4,12 @@ import { ApplicationContext } from '../../context/app.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
-import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
+import { sortCafeIds } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { getDateDisplay, isDateAfter, isDateBefore } from '../../util/date.ts';
+import { getWeekdayDisplay } from '../../util/date.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -31,27 +31,15 @@ interface ISearchResultProps {
     result: ISearchResult;
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, description, locations, imageUrl, entityType } }) => {
+export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, description, locationDatesByCafeId, imageUrl, entityType } }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
 
-    const locationsInOrder = useMemo(() => {
-        return [...locations].sort((a, b) => {
-            if (isDateBefore(a.date, b.date)) {
-                return -1;
-            }
-
-            if (isDateAfter(a.date, b.date)) {
-                return 1;
-            }
-
-            const normalizedCafeIdA = normalizeCafeId(a.cafeId);
-            const normalizedCafeIdB = normalizeCafeId(b.cafeId);
-
-            return compareNormalizedCafeIds(normalizedCafeIdA, normalizedCafeIdB);
-        });
-    }, [locations]);
+    const cafeIdsInOrder = useMemo(
+        () => sortCafeIds(Array.from(locationDatesByCafeId.keys())),
+        [locationDatesByCafeId]
+    );
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -72,7 +60,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                     </div>
                     <div className="search-result-hits">
                         {
-                            locationsInOrder.map(({ cafeId, date }) => {
+                            cafeIdsInOrder.map(cafeId => {
                                 const view = viewsById.get(cafeId);
 
                                 if (!view) {
@@ -80,6 +68,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                                 }
 
                                 const parentView = getParentView(viewsById, useGroups, view);
+                                const locationDates = locationDatesByCafeId.get(cafeId)!;
 
                                 return (
                                     <Link to={getViewUrl(parentView)} className="search-result-chip"
@@ -97,7 +86,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                                                 timer
                                             </span>
                                             <span className="value">
-                                                {getDateDisplay(date)}
+                                                {
+                                                    locationDates.map(date => getWeekdayDisplay(date)).join(', ')
+                                                }
                                             </span>
                                         </div>
                                     </Link>

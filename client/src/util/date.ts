@@ -61,3 +61,6 @@ export const getDateDisplay = (date: Date) => date.toLocaleDateString(undefined,
     day:     'numeric'
 });
 
+export const getWeekdayDisplay = (date: Date) => date.toLocaleDateString(undefined, {
+    weekday: 'long'
+});

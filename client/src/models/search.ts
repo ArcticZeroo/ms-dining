@@ -19,24 +19,13 @@ export enum SearchEntityFilterType {
     station
 }
 
-interface ISearchResultLocation {
-    cafeId: string;
-    date: Date;
-}
-
 export interface ISearchResult {
     entityType: SearchEntityType;
     name: string;
     description?: string;
     imageUrl?: string;
-    locations: ISearchResultLocation[];
+    locationDatesByCafeId: Map<string, Array<Date>>;
     matchReasons: Set<SearchMatchReason>;
-}
-
-
-interface IServerSearchResultLocation {
-    cafeId: string;
-    date: string;
 }
 
 export interface IServerSearchResult {
@@ -44,6 +33,6 @@ export interface IServerSearchResult {
     name: string;
     description?: string;
     imageUrl?: string;
-    locations: IServerSearchResultLocation[];
+    locations: Record<string, Array<string>>;
     matchReasons: Array<'description' | 'title'>;
 }

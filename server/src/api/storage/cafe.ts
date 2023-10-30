@@ -379,24 +379,25 @@ export abstract class CafeStorageClient {
 
             if (!searchResultsById.has(normalizedName)) {
                 searchResultsById.set(normalizedName, {
-                    type:                type,
-                    name:                name,
-                    description:         description,
-                    imageUrl:            imageUrl,
-                    locations:           [{ cafeId, date: dateString }],
-                    matchReasons:        new Set<SearchResultMatchReason>([...matchReasons]),
-                });
-            } else {
-                const searchResult = searchResultsById.get(normalizedName)!;
-
-                for (const matchReason of matchReasons) {
-                    searchResult.matchReasons.add(matchReason);
-                }
-                searchResult.locations.push({
-                    cafeId,
-                    date: dateString
+                    type:                  type,
+                    name:                  name,
+                    description:           description,
+                    imageUrl:              imageUrl,
+                    locationDatesByCafeId: new Map<string, Set<string>>(),
+                    matchReasons:          new Set<SearchResultMatchReason>(),
                 });
             }
+
+            const searchResult = searchResultsById.get(normalizedName)!;
+
+            for (const matchReason of matchReasons) {
+                searchResult.matchReasons.add(matchReason);
+            }
+
+            if (!searchResult.locationDatesByCafeId.has(cafeId)) {
+                searchResult.locationDatesByCafeId.set(cafeId, new Set());
+            }
+            searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
         };
 
 

@@ -95,7 +95,7 @@ const getSubstringScore = ({
 const getCafeRelevancyScore = (searchResult: ISearchResult, cafePriorityOrder: string[]) => {
     let totalRelevancyScore = 0;
 
-    const cafeIds = new Set(Array.from(searchResult.locations).map(location => location.cafeId));
+    const cafeIds = new Set(Array.from(searchResult.locationDatesByCafeId.keys()));
 
     for (const cafeId of cafeIds) {
         const priorityIndex = cafePriorityOrder.indexOf(cafeId);
@@ -104,20 +104,24 @@ const getCafeRelevancyScore = (searchResult: ISearchResult, cafePriorityOrder: s
     }
 
     // Divide the total number of cafes to avoid giving too much priority here
-    return ((totalRelevancyScore / cafeIds.size) / cafePriorityOrder.length);
+    return ((totalRelevancyScore / cafeIds.size) / cafePriorityOrder.length) + cafeIds.size;
 }
 
 const getDateRelevancyScore = (searchResult: ISearchResult) => {
     let totalRelevancyScore = 0;
+    let totalDateCount = 0;
 
     const nowDay = new Date().getDay();
 
-    for (const { date } of searchResult.locations) {
-        const daysFromNow = date.getDay() - nowDay;
-        totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
+    for (const dates of searchResult.locationDatesByCafeId.values()) {
+        for (const date of dates) {
+            const daysFromNow = date.getDay() - nowDay;
+            totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
+            totalRelevancyScore += 1;
+        }
     }
 
-    return totalRelevancyScore;
+    return ((totalRelevancyScore * 5) / totalDateCount) + totalDateCount;
 };
 
 const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, queryText: string) => {
@@ -146,8 +150,7 @@ const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, 
     const baseScore = (longestSequentialSubstringLength * 20)
         + (longestNonSequentialSubstringLength * 5)
         + cafeRelevancyScore
-        + dateRelevancyScore
-        + searchResult.locations.length;
+        + dateRelevancyScore;
 
     if (searchResult.entityType === SearchEntityType.menuItem) {
         return baseScore;
