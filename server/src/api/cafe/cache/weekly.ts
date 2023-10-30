@@ -1,12 +1,12 @@
 import cron from 'node-cron';
 import { logError, logInfo } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
-import { getNowWithDaysInFuture, toDateString, yieldDaysForThisWeek } from '../../../util/date.js';
+import { getNowWithDaysInFuture, toDateString, yieldDaysInFutureForThisWeek } from '../../../util/date.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 
 const updateWeeklyCafeMenusAsync = async () => {
     logInfo('Updating weekly cafe menus...');
-    for (const i of yieldDaysForThisWeek()) {
+    for (const i of yieldDaysInFutureForThisWeek()) {
         const updateSession = new DailyCafeUpdateSession(i);
         await updateSession.populateAsync();
     }
@@ -21,7 +21,7 @@ const repairMissingWeeklyMenusAsync = async () => {
     logInfo('Repairing missing weekly menus...');
 
     let isRepairNeeded = false;
-    for (const i of yieldDaysForThisWeek()) {
+    for (const i of yieldDaysInFutureForThisWeek()) {
         const date = getNowWithDaysInFuture(i);
         const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(toDateString(date));
         if (!isAnyMenuAvailableToday) {

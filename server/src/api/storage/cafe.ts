@@ -5,7 +5,7 @@ import { isUniqueConstraintFailedError } from '../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
 import { logError } from '../../util/log.js';
 import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
-import { getNowWithDaysInFuture, toDateString, yieldDaysForThisWeek } from '../../util/date.js';
+import { getNowWithDaysInFuture, toDateString, yieldDaysInFutureForThisWeek } from '../../util/date.js';
 import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 
@@ -314,7 +314,7 @@ export abstract class CafeStorageClient {
     public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
         const cafesById = await CafeStorageClient.retrieveCafesAsync();
         const cafeIds = Array.from(cafesById.keys());
-        const dateStrings = Array.from(yieldDaysForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
+        const dateStrings = Array.from(yieldDaysInFutureForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
 
         const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
