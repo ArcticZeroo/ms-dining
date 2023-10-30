@@ -127,7 +127,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
             }
         }
 
-        ctx.body = searchResults;
+        ctx.body = JSON.stringify(searchResults, (_, value) => value ?? undefined);
     });
 
     attachRouter(parent, router);

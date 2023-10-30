@@ -1,5 +1,5 @@
 export enum SearchResultEntityType {
-    MenuItem = 'cafe',
+    MenuItem = 'menuItem',
     Station = 'station',
 }
 

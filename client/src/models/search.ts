@@ -3,6 +3,11 @@ export enum SearchEntityType {
     station,
 }
 
+export enum SearchMatchReason {
+    title,
+    description
+}
+
 export const allSearchEntityTypes = [
     SearchEntityType.menuItem,
     SearchEntityType.station,
@@ -14,15 +19,24 @@ export enum SearchEntityFilterType {
     station
 }
 
-export interface ISearchMatch {
+export interface ISearchResult {
     entityType: SearchEntityType;
     name: string;
+    description?: string;
     imageUrl?: string;
-}
-
-export interface ISearchResult extends ISearchMatch {
-    stableId: number;
     cafeIds: Set<string>;
+    dateStrings: Set<string>;
+    matchReasons: Set<SearchMatchReason>;
 }
 
 export type SearchResultsMap = Map<SearchEntityType, Map<string, ISearchResult>>;
+
+export interface IServerSearchResult {
+    type: 'menuItem' | 'station';
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    matchingCafeIds: string[];
+    matchingDateStrings: string[];
+    matchReasons: Array<'description' | 'title'>;
+}

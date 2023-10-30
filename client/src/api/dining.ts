@@ -4,6 +4,7 @@ import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
 import { fromDateString, isDateBefore, nativeDayOfWeek, nativeDayValues, toDateString } from '../util/date.ts';
+import { ISearchResult, IServerSearchResult, SearchEntityType, SearchMatchReason } from '../models/search.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const firstWeeklyMenusDate = fromDateString('2023-10-30');
@@ -56,7 +57,7 @@ export abstract class DiningClient {
     }
 
     private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
-        return DiningClient._makeRequest(`/api/dining/${id}?date=${dateString}`);
+        return DiningClient._makeRequest(`/api/dining/menu/${id}?date=${dateString}`);
     }
 
     private static _addToLastUsedCafeIds(id: string) {
@@ -218,5 +219,34 @@ export abstract class DiningClient {
         // Menu is updated at 3am Pacific Time. Menus for things like boardwalk/craft75 might be valid until around 8pm.
         return nowInPacificTime.getHours() > 20
             || nowInPacificTime.getHours() < 3;
+    }
+
+    public static async retrieveSearchResults(query: string): Promise<Array<ISearchResult>> {
+        const response = await DiningClient._makeRequest(`/api/dining/search?q=${encodeURIComponent(query)}`);
+
+        if (!Array.isArray(response) || response.length === 0) {
+            return [];
+        }
+
+        const serverResults: Array<IServerSearchResult> = response as Array<IServerSearchResult>;
+        const results: Array<ISearchResult> = [];
+
+        for (const serverResult of serverResults) {
+            results.push({
+                entityType:   serverResult.type === 'menuItem' ? SearchEntityType.menuItem : SearchEntityType.station,
+                name:         serverResult.name,
+                description:  serverResult.description,
+                imageUrl:     serverResult.imageUrl,
+                cafeIds:      new Set(serverResult.matchingCafeIds),
+                dateStrings:  new Set(serverResult.matchingDateStrings),
+                matchReasons: new Set(
+                    serverResult.matchReasons.map(reason => reason === 'description'
+                        ? SearchMatchReason.description
+                        : SearchMatchReason.title)
+                ),
+            });
+        }
+
+        return results;
     }
 }

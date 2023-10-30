@@ -141,37 +141,8 @@ const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, 
     }
 }
 
-const flattenSearchResults = (searchResults: SearchResultsMap, entityTypes: Set<SearchEntityType>): ISearchResult[] => {
-    const flattenedSearchResults: ISearchResult[] = [];
-
-    for (const [entityType, resultsByName] of searchResults.entries()) {
-        if (!entityTypes.has(entityType)) {
-            continue;
-        }
-
-        for (const result of resultsByName.values()) {
-            flattenedSearchResults.push(result);
-        }
-    }
-
-    return flattenedSearchResults;
-}
-
-export const getAllowedSearchEntityTypes = (filterType: SearchEntityFilterType): Set<SearchEntityType> => {
-    switch (filterType) {
-        case SearchEntityFilterType.all:
-            return new Set(allSearchEntityTypes);
-        case SearchEntityFilterType.menuItem:
-            return new Set([SearchEntityType.menuItem]);
-        case SearchEntityFilterType.station:
-            return new Set([SearchEntityType.station]);
-        default:
-            throw new Error('Invalid filter type!');
-    }
-}
-
 interface ISortSearchResultsParams {
-    searchResults: SearchResultsMap;
+    searchResults: ISearchResult[];
     queryText: string;
     cafes: ICafe[];
     viewsById: Map<string, CafeView>;
@@ -183,11 +154,8 @@ export const sortSearchResults = ({
                                       queryText,
                                       cafes,
                                       viewsById,
-                                      entityType
                                   }: ISortSearchResultsParams): ISearchResult[] => {
-    const allowedEntityTypes = getAllowedSearchEntityTypes(entityType);
     const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById).map(cafe => cafe.id);
-    const flattenedSearchResults = flattenSearchResults(searchResults, allowedEntityTypes);
     const searchResultScores = new Map<SearchEntityType, Map<string, number>>();
 
     const getScore = (searchResult: ISearchResult) => {
@@ -203,16 +171,12 @@ export const sortSearchResults = ({
         return searchResultScoresByItemName.get(searchResult.name)!;
     };
 
-    flattenedSearchResults.sort((resultA, resultB) => {
+    searchResults.sort((resultA, resultB) => {
         const scoreA = getScore(resultA);
         const scoreB = getScore(resultB);
-
-        if (scoreA === scoreB) {
-            return resultA.stableId - resultB.stableId;
-        }
 
         return scoreB - scoreA;
     });
 
-    return flattenedSearchResults;
+    return searchResults;
 }

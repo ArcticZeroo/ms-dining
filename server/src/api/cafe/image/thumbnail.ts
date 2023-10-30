@@ -35,7 +35,7 @@ export const loadImageData = async (url: string): Promise<Buffer> => {
 }
 
 // static/menu-items/thumbnail/<id>
-export const getThumbnailPath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
+export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
 
 interface IThumbnailData {
     hasThumbnail: boolean;
@@ -44,7 +44,7 @@ interface IThumbnailData {
 }
 
 export const retrieveExistingThumbnailData = async (id: string, existingThumbnailData?: IThumbnailData): Promise<IThumbnailData> => {
-    const thumbnailPath = getThumbnailPath(id);
+    const thumbnailPath = getThumbnailFilepath(id);
 
     if (!fs.existsSync(thumbnailPath)) {
         return {
@@ -97,7 +97,7 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
 
     image.scale(scale);
 
-    await image.writeAsync(getThumbnailPath(menuItem.id));
+    await image.writeAsync(getThumbnailFilepath(menuItem.id));
 
     menuItem.thumbnailWidth = image.getWidth();
     menuItem.thumbnailHeight = image.getHeight();

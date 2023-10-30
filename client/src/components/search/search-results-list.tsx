@@ -1,4 +1,4 @@
-import { ISearchResult, SearchEntityFilterType, SearchResultsMap } from '../../models/search.ts';
+import { ISearchResult, SearchEntityFilterType } from '../../models/search.ts';
 import React, { useContext, useEffect, useState } from 'react';
 import { SearchResult } from './search-result.tsx';
 import { sortSearchResults } from '../../util/sorting.ts';
@@ -6,7 +6,7 @@ import { ApplicationContext } from '../../context/app.ts';
 
 interface ISearchResultsListProps {
     queryText: string;
-    searchResults: SearchResultsMap;
+    searchResults: ISearchResult[];
     entityType: SearchEntityFilterType;
 }
 
@@ -29,7 +29,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
             {
                 entriesInOrder.map(searchResult => (
                     <SearchResult result={searchResult}
-                                  key={searchResult.stableId}/>
+                                  key={`${searchResult.entityType}.${searchResult.name}`}/>
                 ))
             }
         </div>
