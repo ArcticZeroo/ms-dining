@@ -4,10 +4,10 @@ import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
-import { getLocationDatesDisplay } from '../../util/date.ts';
+import { getLocationDatesDisplay, isDateAfter, isDateBefore } from '../../util/date.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
-import { sortCafeIds } from '../../util/sorting.ts';
+import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
 
@@ -36,8 +36,38 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
 
-    const cafeIdsInOrder = useMemo(
-        () => sortCafeIds(Array.from(locationDatesByCafeId.keys())),
+    const locationEntriesInOrder = useMemo(
+        () => {
+            const locationEntries = Array.from(locationDatesByCafeId.entries());
+            return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
+                const firstDateA = datesA[0];
+                const firstDateB = datesB[0];
+
+                console.log(name, cafeA, cafeB, firstDateA, firstDateB);
+
+                if (isDateBefore(firstDateA, firstDateB)) {
+                    return -1;
+                }
+
+                if (isDateAfter(firstDateA, firstDateB)) {
+                    return 1;
+                }
+
+                // The more "limited time only" locations get to go first
+                const lastDateA = datesA[datesA.length - 1];
+                const lastDateB = datesB[datesB.length - 1];
+
+                if (isDateBefore(lastDateA, lastDateB)) {
+                    return -1;
+                }
+
+                if (isDateAfter(lastDateA, lastDateB)) {
+                    return 1;
+                }
+
+                return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
+            });
+        },
         [locationDatesByCafeId]
     );
 
@@ -60,7 +90,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                     </div>
                     <div className="search-result-hits">
                         {
-                            cafeIdsInOrder.map(cafeId => {
+                            locationEntriesInOrder.map(([cafeId, locationDates]) => {
                                 const view = viewsById.get(cafeId);
 
                                 if (!view) {
@@ -68,7 +98,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                                 }
 
                                 const parentView = getParentView(viewsById, useGroups, view);
-                                const locationDates = locationDatesByCafeId.get(cafeId)!;
 
                                 return (
                                     <Link to={getViewUrl(parentView)} className="search-result-chip"

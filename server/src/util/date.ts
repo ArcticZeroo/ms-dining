@@ -104,13 +104,13 @@ export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string =
     return toDateString(new Date(clampedTime));
 };
 
-export function* yieldDaysForThisWeek() {
+export function* yieldDaysInFutureForThisWeek() {
     const now = new Date();
     const startWeekdayIndex = isDateOnWeekend(now)
         ? nativeDayOfWeek.Monday
         : Math.max(now.getDay(), nativeDayOfWeek.Monday);
 
     for (let i = startWeekdayIndex; i <= nativeDayOfWeek.Friday; i++) {
-        yield i;
+        yield (i - nativeDayOfWeek.Monday);
     }
 }
