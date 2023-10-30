@@ -104,8 +104,21 @@ const getCafeRelevancyScore = (searchResult: ISearchResult, cafePriorityOrder: s
     }
 
     // Divide the total number of cafes to avoid giving too much priority here
-    return ((totalRelevancyScore / cafeIds.size) / cafePriorityOrder.length) + cafeIds.size;
+    return ((totalRelevancyScore / cafeIds.size) / cafePriorityOrder.length);
 }
+
+const getDateRelevancyScore = (searchResult: ISearchResult) => {
+    let totalRelevancyScore = 0;
+
+    const nowDay = new Date().getDay();
+
+    for (const { date } of searchResult.locations) {
+        const daysFromNow = date.getDay() - nowDay;
+        totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
+    }
+
+    return totalRelevancyScore;
+};
 
 const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, queryText: string) => {
     // TODO: Should I remove whitespace? Probably not?
@@ -128,10 +141,13 @@ const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, 
     });
 
     const cafeRelevancyScore = getCafeRelevancyScore(searchResult, cafePriorityOrder);
+    const dateRelevancyScore = getDateRelevancyScore(searchResult);
 
     const baseScore = (longestSequentialSubstringLength * 20)
         + (longestNonSequentialSubstringLength * 5)
-        + cafeRelevancyScore;
+        + cafeRelevancyScore
+        + dateRelevancyScore
+        + searchResult.locations.length;
 
     if (searchResult.entityType === SearchEntityType.menuItem) {
         return baseScore;
