@@ -21,7 +21,7 @@ const populateDailySessions = () => {
 
 export const scheduleDailyUpdateJob = () => {
     // 3am on Monday through Friday
-    cron.schedule('0 3 * * 1,2,3,4,5', () => {
+    cron.schedule('0 9 * * 1,2,3,4,5', () => {
         populateDailySessions();
     });
 }

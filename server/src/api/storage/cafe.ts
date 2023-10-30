@@ -207,7 +207,7 @@ export abstract class CafeStorageClient {
         };
     }
 
-    public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
+    public static async retrieveMenuItemLocallyAsync(id: string): Promise<IMenuItem | null> {
         if (!this._menuItemsById.has(id)) {
             const menuItem = await this._doRetrieveMenuItemAsync(id);
 
@@ -262,7 +262,7 @@ export abstract class CafeStorageClient {
 
                 for (const dailyMenuItem of category.menuItems) {
                     // Don't resolve these in parallel, we can't have too many concurrent requests to SQLite
-                    const menuItem = await this.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await this.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
 
                     if (menuItem == null) {
                         logError(`Unable to find menu item ${dailyMenuItem.menuItemId} for category ${category.name} in station ${stationData.name} (${dailyStation.stationId})`);
@@ -417,7 +417,7 @@ export abstract class CafeStorageClient {
 
             for (const category of dailyStation.categories) {
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await this.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await this.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
 
                     if (menuItem == null) {
                         continue;
