@@ -36,25 +36,22 @@ export const isDateOnWeekend = (date: Date) => {
 	return [nativeDayOfWeek.Saturday, nativeDayOfWeek.Sunday].includes(dayOfWeek);
 };
 
+export const getDateWithoutTime = (date: Date) => {
+	const result = new Date(date.getTime());
+	result.setHours(0, 0, 0, 0);
+	return result;
+}
+
 export const isSameDate = (a: Date, b: Date) => {
-	return a.getFullYear() === b.getFullYear()
-	       && a.getMonth() === b.getMonth()
-	       && a.getDate() === b.getDate();
+	return getDateWithoutTime(a).getTime() === getDateWithoutTime(b).getTime();
 };
 
 export const isDateBefore = (date: Date, compareDate: Date) => {
-	return (date.getFullYear() < compareDate.getFullYear())
-	       || (
-		       (date.getFullYear() === compareDate.getFullYear())
-		       && (
-			       date.getMonth() < compareDate.getMonth()
-			       || (date.getMonth() === compareDate.getMonth() && date.getDate() < compareDate.getDate())
-		       )
-	       );
+	return getDateWithoutTime(date).getTime() < getDateWithoutTime(compareDate).getTime();
 };
 
 export const isDateAfter = (date: Date, compareDate: Date) => {
-   return !isSameDate(date, compareDate) && !isDateBefore(date, compareDate);
+   return getDateWithoutTime(date).getTime() > getDateWithoutTime(compareDate).getTime();
 };
 
 export const getDateDisplay = (date: Date) => date.toLocaleDateString(undefined, {
