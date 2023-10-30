@@ -71,8 +71,8 @@
 
 .search-result-chip {
     background: #2196F3;
-    border-radius: 2rem;
     color: white;
+    border-radius: var(--default-padding);
     padding: var(--default-padding);
     text-decoration: none;
     display: flex;
