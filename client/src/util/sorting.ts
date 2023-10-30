@@ -114,14 +114,16 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
     const nowDay = new Date().getDay();
 
     for (const dates of searchResult.locationDatesByCafeId.values()) {
-        for (const date of dates) {
-            const daysFromNow = date.getDay() - nowDay;
-            totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
-            totalRelevancyScore += 1;
-        }
+        // These are sorted, so we'll just grab the next most recent one
+        const nextDate = dates[0];
+        const daysFromNow = nextDate.getDay() - nowDay;
+        totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
+        //
+        totalRelevancyScore += (dates.length / 5);
+        totalDateCount += 1;
     }
 
-    return ((totalRelevancyScore * 5) / totalDateCount) + totalDateCount;
+    return (5 * totalRelevancyScore / totalDateCount) + totalDateCount;
 };
 
 const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, queryText: string) => {
@@ -156,7 +158,7 @@ const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, 
         return baseScore;
     } else {
         // Stations should not be ranked as high as menu items
-        return baseScore / 1.5;
+        return baseScore * 0.8;
     }
 }
 
