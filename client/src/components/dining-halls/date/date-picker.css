@@ -10,15 +10,19 @@
     position: relative;
 }
 
-.date-picker .controls {
-    gap: var(--default-padding);
-}
-
 .date-picker-buttons {
     display: flex;
+    justify-content: center;
+    align-items: center;
     gap: var(--default-padding);
 }
 
 .date-picker-buttons button {
     padding: 0.5rem;
+}
+
+@media screen and (max-width: 768px) {
+    .date-picker-buttons button {
+        flex-grow: 1;
+    }
 }
