@@ -29,6 +29,8 @@ const repairMissingWeeklyMenusAsync = async () => {
             logInfo(`Repairing missing menu for ${toDateString(date)}`);
             const updateSession = new DailyCafeUpdateSession(i);
             await updateSession.populateAsync();
+        } else {
+            logInfo(`No repair needed for ${toDateString(date)}`);
         }
     }
 

@@ -40,7 +40,7 @@ export class DailyCafeUpdateSession {
         try {
             await cafeSemaphore.acquire();
 
-            logInfo(`{${this.dateString}} Discovering menu for "${cafe.name}"@${cafe.id}...`);
+            logInfo(`{${this.dateString}} Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
 
             await session.initialize();
             stations = await session.populateMenuAsync(this.daysInFuture);
