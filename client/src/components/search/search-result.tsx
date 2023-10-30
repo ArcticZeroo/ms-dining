@@ -1,15 +1,15 @@
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
+import { getLocationDatesDisplay } from '../../util/date.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { sortCafeIds } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
-import { ApplicationSettings } from '../../api/settings.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
-import { getWeekdayDisplay } from '../../util/date.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -86,9 +86,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
                                                 timer
                                             </span>
                                             <span className="value">
-                                                {
-                                                    locationDates.map(date => getWeekdayDisplay(date)).join(', ')
-                                                }
+                                                {getLocationDatesDisplay(locationDates)}
                                             </span>
                                         </div>
                                     </Link>
