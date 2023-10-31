@@ -81,11 +81,19 @@ export const getMaximumDateForMenuRequest = (): Date => {
 
 export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
     const queryDateRaw = ctx.query.date;
+
+    console.log('checking', queryDateRaw);
+
     if (!queryDateRaw || typeof queryDateRaw !== 'string') {
         return null;
     }
 
+    console.log(queryDateRaw);
+
     const date = fromDateString(queryDateRaw);
+
+    console.log(date);
+
     if (Number.isNaN(date.getTime())) {
         return null;
     }
@@ -93,6 +101,8 @@ export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string |
     const dateTime = date.getTime();
     const minimumDate = getMinimumDateForMenuRequest();
     const maximumDate = getMaximumDateForMenuRequest();
+
+    console.log('min:', minimumDate, 'max:', maximumDate);
 
     if (dateTime < minimumDate.getTime() || dateTime > maximumDate.getTime()) {
         return null;
