@@ -16,7 +16,7 @@ const padDateValue = (value: number) => value.toString().padStart(2, '0');
 export const toDateString = (date: Date) => `${date.getFullYear()}-${padDateValue(date.getMonth() + 1)}-${padDateValue(date.getDate())}`;
 export const fromDateString = (dateString: string) => new Date(`${dateString}T00:00`);
 
-const firstWeeklyMenusDate = fromDateString('2023-10-30');
+const firstWeeklyMenusTime = fromDateString('2023-10-30').getTime();
 
 export const isDateOnWeekend = (date: Date) => {
     const dayOfWeek = date.getDay();
@@ -58,6 +58,7 @@ export const getMinimumDateForMenuRequest = (): Date => {
 
     now.setDate(now.getDate() - daysSinceMonday);
 
+    const firstWeeklyMenusDate = new Date(firstWeeklyMenusTime);
     if (isDateBefore(now, firstWeeklyMenusDate)) {
         return firstWeeklyMenusDate;
     }
