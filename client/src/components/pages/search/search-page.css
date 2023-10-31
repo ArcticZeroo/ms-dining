@@ -39,9 +39,3 @@
 .entity-button label {
     cursor: pointer;
 }
-
-.search-result-description {
-    opacity: 0.70;
-    font-style: italic;
-    font-size: 0.9em;
-}

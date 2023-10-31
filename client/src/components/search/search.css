@@ -116,3 +116,10 @@
     align-self: center;
     max-height: 10rem;
 }
+
+.search-result-description {
+    opacity: 0.70;
+    font-style: italic;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+}
