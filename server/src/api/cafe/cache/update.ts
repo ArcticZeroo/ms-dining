@@ -10,7 +10,7 @@ import { saveSessionAsync } from './storage.js';
 import { cafeList } from '../../../constants/cafes.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 
-export const cafeSemaphore = new Semaphore.default(5);
+export const cafeSemaphore = new Semaphore.default(3);
 
 export class DailyCafeUpdateSession {
     public readonly cafeSessionsById = new Map<string, CafeDiscoverySession>();
