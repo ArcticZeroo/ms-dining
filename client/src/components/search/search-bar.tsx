@@ -27,13 +27,17 @@ export const SearchBar: React.FC<ISearchBarProps> = ({ onSubmit }) => {
         }
     };
 
+    const onInputChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+        searchQueryNotifier.value = event.target.value;
+    }
+
     return (
         <li className="search-bar-container">
             <form className="search-bar" onSubmit={onFormSubmitted}>
                 <input type="text" placeholder="Search..."
                        ref={inputRef}
                        value={searchQuery}
-                       onChange={event => searchQueryNotifier.value = event.target.value}/>
+                       onChange={onInputChanged}/>
                 <button type="submit" className="search-button">
                     <img src={searchIcon} alt="Search Icon"/>
                 </button>
