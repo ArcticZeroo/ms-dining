@@ -166,6 +166,7 @@ const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, 
 	for (const matchReason of searchResult.matchReasons) {
 		totalSubstringScore += getSubstringScoreForMatchReason(queryText, searchResult, matchReason);
 	}
+	totalSubstringScore /= searchResult.matchReasons.size;
 
 	const cafeRelevancyScore = getCafeRelevancyScore(searchResult, cafePriorityOrder);
 	const dateRelevancyScore = getDateRelevancyScore(searchResult);
