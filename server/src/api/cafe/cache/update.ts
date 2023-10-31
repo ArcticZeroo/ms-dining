@@ -1,4 +1,5 @@
 import Semaphore from 'semaphore-async-await';
+import { runPromiseWithRetries } from '../../../util/async.js';
 import { getNowWithDaysInFuture, toDateString } from '../../../util/date.js';
 import fs from 'fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
@@ -11,6 +12,8 @@ import { cafeList } from '../../../constants/cafes.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 
 export const cafeSemaphore = new Semaphore.default(3);
+const cafeDiscoveryRetryCount = 3;
+const cafeDiscoveryRetryDelayMs = 1000;
 
 export class DailyCafeUpdateSession {
     public readonly cafeSessionsById = new Map<string, CafeDiscoverySession>();
@@ -34,23 +37,32 @@ export class DailyCafeUpdateSession {
         ]);
     };
 
-    private async discoverCafeAsync(cafe: ICafe) {
-        const session = new CafeDiscoverySession(cafe);
-        let stations: ICafeStation[];
+    private async _doDiscoverCafeAsync(cafe: ICafe, attemptIndex: number) {
         try {
             await cafeSemaphore.acquire();
 
-            logInfo(`{${this.dateString}} Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
+            logInfo(`{${this.dateString}} Discovering menu for "${cafe.name}" @ ${cafe.id}... (attempt ${attemptIndex})`);
 
+            const session = new CafeDiscoverySession(cafe);
             await session.initialize();
-            stations = await session.populateMenuAsync(this.daysInFuture);
+            const stations = await session.populateMenuAsync(this.daysInFuture);
+
             this.cafeSessionsById.set(cafe.id, session);
-        } catch (e) {
-            logError(`Failed to populate cafe ${cafe.name} (${cafe.id})`, e);
-            return;
+
+            return stations;
+        } catch (err) {
+            throw new Error(`Failed to discover menu for "${cafe.name}" @ ${cafe.id} (attempt ${attemptIndex}): ${err}`);
         } finally {
             cafeSemaphore.release();
         }
+    }
+
+    private async discoverCafeAsync(cafe: ICafe) {
+        const stations = await runPromiseWithRetries(
+            (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),
+            cafeDiscoveryRetryCount,
+            cafeDiscoveryRetryDelayMs
+        );
 
         try {
             await writeThumbnailsForCafe(cafe, stations);
