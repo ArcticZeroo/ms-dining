@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { CafeMenu, CafeViewType, ICafe } from '../../models/cafe.ts';
+import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
+import { SelectedDateContext } from '../../context/time.ts';
+import { useValueNotifierContext } from '../../hooks/events.ts';
+import { CafeMenu, CafeViewType, ICafe } from '../../models/cafe.ts';
 import { sortCafeIds } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
 import { CafeDatePicker } from './date/date-picker.tsx';
-import { useValueNotifierContext } from '../../hooks/events.ts';
-import { SelectedDateContext } from '../../context/time.ts';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -20,21 +21,20 @@ interface ICombinedCafeMenuListProps {
     countTowardsLastUsed: boolean;
 }
 
-export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ cafeIds, countTowardsLastUsed }) => {
+const useMenuData = (cafeIds: Iterable<string>, countTowardsLastUsed: boolean) => {
     const { viewsById } = useContext(ApplicationContext);
-    const [menuData, setMenuData] = useState<Array<IMenuWithCafe>>([]);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    const loadMenuAsync = async (cafe: ICafe): Promise<IMenuWithCafe> => {
+    const loadMenuAsync = useCallback(async (cafe: ICafe): Promise<IMenuWithCafe> => {
         const menu = await DiningClient.retrieveCafeMenu({
             id:                         cafe.id,
             date:                       selectedDate,
             shouldCountTowardsLastUsed: countTowardsLastUsed
         });
         return { cafe, menu };
-    }
+    }, [selectedDate, countTowardsLastUsed]);
 
-    const loadMenusAsync = async () => {
+    const loadMenusAsync = useCallback(async () => {
         const menuPromises = [];
 
         for (const cafeId of sortCafeIds(Array.from(cafeIds))) {
@@ -54,13 +54,20 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ caf
             menuPromises.push(loadMenuAsync(view.value));
         }
 
-        setMenuData(await Promise.all(menuPromises));
-    };
+        return Promise.all(menuPromises);
+    }, [cafeIds, viewsById, loadMenuAsync]);
+
+    const menuDataState = useDelayedPromiseState(loadMenusAsync, true /*keepLastValue*/);
 
     useEffect(() => {
-        loadMenusAsync()
-            .catch(err => console.error('Failed to load menus:', err));
-    }, [viewsById, cafeIds, selectedDate]);
+        menuDataState.run();
+    }, [menuDataState.run]);
+
+    return menuDataState.value ?? [];
+}
+
+export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ cafeIds, countTowardsLastUsed }) => {
+    const menuData = useMenuData(cafeIds, countTowardsLastUsed);
 
     return (
         <div className="collapsible-menu-list">
