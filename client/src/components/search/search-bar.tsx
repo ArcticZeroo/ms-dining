@@ -1,6 +1,8 @@
-import searchIcon from '../../assets/search.svg';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import searchIcon from '../../assets/search.svg';
+import { SearchQueryContext } from '../../context/search.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 interface ISearchBarProps {
     onSubmit(): void;
@@ -8,13 +10,14 @@ interface ISearchBarProps {
 
 export const SearchBar: React.FC<ISearchBarProps> = ({ onSubmit }) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [query, setQuery] = useState('');
     const navigate = useNavigate();
+    const searchQueryNotifier = useContext(SearchQueryContext);
+    const searchQuery = useValueNotifier(searchQueryNotifier);
 
     const onFormSubmitted = (event: React.FormEvent) => {
         event.preventDefault();
 
-        const trimmedQuery = query.trim();
+        const trimmedQuery = searchQuery.trim();
 
         if (trimmedQuery.length === 0) {
             inputRef?.current?.focus();
@@ -29,8 +32,8 @@ export const SearchBar: React.FC<ISearchBarProps> = ({ onSubmit }) => {
             <form className="search-bar" onSubmit={onFormSubmitted}>
                 <input type="text" placeholder="Search..."
                        ref={inputRef}
-                       value={query}
-                       onChange={event => setQuery(event.target.value)}/>
+                       value={searchQuery}
+                       onChange={event => searchQueryNotifier.value = event.target.value}/>
                 <button type="submit" className="search-button">
                     <img src={searchIcon} alt="Search Icon"/>
                 </button>

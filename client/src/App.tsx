@@ -4,6 +4,7 @@ import { DiningClient } from './api/dining.ts';
 import { ApplicationSettings } from './api/settings.ts';
 import { Nav } from './components/nav/nav.tsx';
 import { ApplicationContext } from './context/app.ts';
+import { SearchQueryContext } from './context/search.ts';
 import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
@@ -67,6 +68,8 @@ function App() {
         []
     );
 
+    const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
+
     const [isNavExpanded, setIsNavExpanded] = useState(false);
     const deviceType = useDeviceType();
 
@@ -82,10 +85,12 @@ function App() {
                 <NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
                     <SelectedViewContext.Provider value={selectedViewNotifier}>
                         <SelectedDateContext.Provider value={selectedDateNotifier}>
-                            <Nav/>
-                            <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
-                                <Outlet/>
-                            </div>
+                            <SearchQueryContext.Provider value={searchQueryNotifier}>
+                                <Nav/>
+                                <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
+                                    <Outlet/>
+                                </div>
+                            </SearchQueryContext.Provider>
                         </SelectedDateContext.Provider>
                     </SelectedViewContext.Provider>
                 </NavExpansionContext.Provider>
