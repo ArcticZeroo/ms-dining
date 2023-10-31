@@ -246,7 +246,9 @@ export class CafeDiscoverySession {
     }
 
     private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
-        return Promise.all(stations.map(station => this._populateMenuItemsForStationAsync(station, alwaysGetServerItems)));
+        for (const station of stations) {
+            await this._populateMenuItemsForStationAsync(station, alwaysGetServerItems);
+        }
     }
 
     public async populateMenuAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
