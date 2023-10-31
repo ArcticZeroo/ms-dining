@@ -8,6 +8,7 @@
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     background: #2196F3;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,6 +23,16 @@
     padding: 0;
     margin: 0;
     appearance: none;
+}
+
+.entity-button.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: #2c3041;
+}
+
+.entity-button.disabled label {
+    cursor: not-allowed;
 }
 
 .entity-button label {

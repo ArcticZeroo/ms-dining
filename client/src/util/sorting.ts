@@ -1,4 +1,4 @@
-import { ISearchResult, SearchEntityFilterType, SearchEntityType } from '../models/search.ts';
+import { ISearchResult, SearchEntityType } from '../models/search.ts';
 import { findLongestNonSequentialSubstringLength, findLongestSequentialSubstringLength } from './string.ts';
 import { DiningClient } from '../api/dining.ts';
 import { CafeView, ICafe } from '../models/cafe.ts';
@@ -167,7 +167,6 @@ interface ISortSearchResultsParams {
     queryText: string;
     cafes: ICafe[];
     viewsById: Map<string, CafeView>;
-    entityType: SearchEntityFilterType;
 }
 
 export const sortSearchResults = ({

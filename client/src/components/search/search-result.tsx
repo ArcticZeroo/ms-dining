@@ -29,9 +29,10 @@ const entityDisplayDataByType: Record<SearchEntityType, IEntityDisplayData> = {
 
 interface ISearchResultProps {
     result: ISearchResult;
+    isVisible: boolean;
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, description, locationDatesByCafeId, imageUrl, entityType } }) => {
+export const SearchResult: React.FC<ISearchResultProps> = ({ isVisible, result: { name, description, locationDatesByCafeId, imageUrl, entityType } }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
@@ -42,8 +43,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
             return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
                 const firstDateA = datesA[0];
                 const firstDateB = datesB[0];
-
-                console.log(name, cafeA, cafeB, firstDateA, firstDateB);
 
                 if (isDateBefore(firstDateA, firstDateB)) {
                     return -1;
@@ -74,7 +73,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ result: { name, des
     const entityDisplayData = entityDisplayDataByType[entityType];
 
     return (
-        <div className="search-result">
+        <div className={classNames('search-result', isVisible && 'visible')}>
             <div className={classNames('search-result-type', entityDisplayData.className)}>
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}

@@ -27,8 +27,12 @@
 }
 
 .search-result {
-    display: flex;
+    display: none;
     color: black;
+}
+
+.search-result.visible {
+    display: flex;
 }
 
 .search-result-type {
