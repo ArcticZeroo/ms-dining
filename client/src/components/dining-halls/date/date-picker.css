@@ -1,13 +1,16 @@
 .date-picker {
-    background: #32768a;
+    background: #32768ADA;
     padding: var(--default-padding);
-    border-radius: var(--default-padding);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     gap: var(--default-padding);
-    position: relative;
+    position: fixed;
+    z-index: 100;
+    right: 1rem;
+    top: 0;
+    border-bottom-left-radius: var(--default-padding);
 }
 
 .date-picker-buttons {
@@ -24,5 +27,13 @@
 @media screen and (max-width: 768px) {
     .date-picker-buttons button {
         flex-grow: 1;
+    }
+
+    .date-picker {
+        background: #32768a;
+        top: unset;
+        right: unset;
+        border-radius: var(--default-padding);
+        position: relative;
     }
 }
