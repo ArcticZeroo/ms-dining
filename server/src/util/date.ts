@@ -1,5 +1,4 @@
 import Router from '@koa/router';
-import { clamp } from './math.js';
 
 export const nativeDayOfWeek = {
     Sunday:    0,
@@ -104,11 +103,12 @@ export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string |
 
 export function* yieldDaysInFutureForThisWeek() {
     const now = new Date();
+    const nowWeekday = now.getDay();
     const startWeekdayIndex = isDateOnWeekend(now)
         ? nativeDayOfWeek.Monday
-        : Math.max(now.getDay(), nativeDayOfWeek.Monday);
+        : Math.max(nowWeekday, nativeDayOfWeek.Monday);
 
     for (let i = startWeekdayIndex; i <= nativeDayOfWeek.Friday; i++) {
-        yield (i - nativeDayOfWeek.Monday);
+        yield (i - nowWeekday);
     }
 }
