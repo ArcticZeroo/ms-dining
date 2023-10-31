@@ -5,7 +5,13 @@ import { isUniqueConstraintFailedError } from '../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
 import { logError } from '../../util/log.js';
 import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
-import { getNowWithDaysInFuture, toDateString, yieldDaysInFutureForThisWeek } from '../../util/date.js';
+import {
+    getMaximumDateForMenuRequest,
+    getMinimumDateForMenuRequest,
+    getNowWithDaysInFuture, isDateAfter, isDateOnWeekend,
+    toDateString,
+    yieldDaysInFutureForThisWeek
+} from '../../util/date.js';
 import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 
@@ -68,8 +74,7 @@ export abstract class CafeStorageClient {
     }
 
     private static async _doCreateMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean): Promise<void> {
-        const data: MenuItem = {
-            id:          menuItem.id,
+        const dataWithoutId: Omit<MenuItem, 'id'> = {
             name:        menuItem.name,
             imageUrl:    menuItem.imageUrl,
             description: menuItem.description,
@@ -78,17 +83,24 @@ export abstract class CafeStorageClient {
             maxCalories: Number(menuItem.maxCalories || 0),
         };
 
+        const data: MenuItem = {
+            id: menuItem.id,
+            ...dataWithoutId,
+        };
+
         if (allowUpdateIfExisting) {
             await usePrismaClient(prismaClient => prismaClient.menuItem.upsert({
                 where:  { id: menuItem.id },
-                update: data,
+                update: dataWithoutId,
                 create: data
             }));
             return;
         }
 
         try {
-            await usePrismaClient(prismaClient => prismaClient.menuItem.create({ data }));
+            await usePrismaClient(prismaClient => prismaClient.menuItem.create({
+                data
+            }));
         } catch (err) {
             // OK to fail unique constraint validation since we don't want to update existing items
             if (!isUniqueConstraintFailedError(err)) {
@@ -108,17 +120,21 @@ export abstract class CafeStorageClient {
     }
 
     public static async createStationAsync(station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
-        const data: Station = {
-            id:      station.id,
+        const dataWithoutId: Omit<Station, 'id'> = {
             name:    station.name,
-            logoUrl: station.logoUrl,
-            menuId:  station.menuId
+            menuId:  station.menuId,
+            logoUrl: station.logoUrl
+        };
+
+        const data: Station = {
+            id: station.id,
+            ...dataWithoutId,
         };
 
         if (allowUpdateIfExisting) {
             await usePrismaClient(prismaClient => prismaClient.station.upsert({
                 where:  { id: station.id },
-                update: data,
+                update: dataWithoutId,
                 create: data
             }));
             return;
@@ -133,8 +149,15 @@ export abstract class CafeStorageClient {
         }
     }
 
-    public static async deleteDailyMenusAsync(dateString: string) {
-        await usePrismaClient(prismaClient => prismaClient.dailyStation.deleteMany({ where: { dateString } }));
+    public static async deleteDailyMenusAsync(dateString: string, cafeIds: string[]) {
+        await usePrismaClient(prismaClient => prismaClient.dailyStation.deleteMany({
+            where: {
+                dateString,
+                cafeId: {
+                    in: cafeIds
+                }
+            }
+        }));
     }
 
     private static _getDailyMenuItemsCreateDataForCategory(station: ICafeStation, menuItemIds: string[]): Array<{
@@ -311,6 +334,37 @@ export abstract class CafeStorageClient {
         return dailyStation != null;
     }
 
+    public static async isAnyAllowedMenuAvailableForCafe(cafeId: string): Promise<boolean> {
+        const currentDate = getMinimumDateForMenuRequest();
+        const maximumDate = getMaximumDateForMenuRequest();
+        const allowedDateStrings: string[] = [];
+        while (!isDateAfter(currentDate, maximumDate)) {
+            if (!isDateOnWeekend(currentDate)) {
+                allowedDateStrings.push(toDateString(currentDate));
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        const result = await usePrismaClient(client => client.dailyStation.findFirst({
+            where: {
+                cafeId,
+                dateString: {
+                    in: allowedDateStrings
+                }
+            }
+        }));
+
+        return result != null;
+    }
+
+    public static async deleteCafe(cafeId: string): Promise<void> {
+        // This is going to be slower but hopefully this rarely ever happens anyway
+        await usePrismaClient(client => client.cafe.deleteMany({
+            where: { id: cafeId },
+        }));
+        this._cafeDataById.delete(cafeId);
+    }
+
     public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
         const cafesById = await CafeStorageClient.retrieveCafesAsync();
         const cafeIds = Array.from(cafesById.keys());
@@ -374,7 +428,7 @@ export abstract class CafeStorageClient {
                            }: IAddResultParams) => {
             ensureEntityTypeExists(type);
 
-            const searchResultsById = searchResultsByNameByEntityType.get(SearchResultEntityType.MenuItem)!;
+            const searchResultsById = searchResultsByNameByEntityType.get(type)!;
             const normalizedName = normalizeNameForSearch(name);
 
             if (!searchResultsById.has(normalizedName)) {

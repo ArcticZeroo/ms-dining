@@ -26,11 +26,11 @@ export class DailyCafeUpdateSession {
         return toDateString(this.date);
     }
 
-    private async resetDailyState() {
+    private async resetDailyState(cafes: ICafe[]) {
         CafeStorageClient.resetCache();
         await Promise.all([
             fs.mkdir(serverMenuItemThumbnailPath, { recursive: true }),
-            CafeStorageClient.deleteDailyMenusAsync(this.dateString)
+            CafeStorageClient.deleteDailyMenusAsync(this.dateString, cafes.map(cafe => cafe.id))
         ]);
     };
 
@@ -66,15 +66,15 @@ export class DailyCafeUpdateSession {
         });
     }
 
-    public async populateAsync() {
-        await this.resetDailyState();
+    public async populateAsync(cafes: ICafe[] = cafeList) {
+        await this.resetDailyState(cafes);
 
-        logInfo('Populating cafe sessions...');
+        logInfo(`{${this.dateString}} Populating cafe sessions...`);
         const startTime = Date.now();
 
         const cafePromises: Array<Promise<unknown>> = [];
 
-        for (const cafe of cafeList) {
+        for (const cafe of cafes) {
             cafePromises.push(this.discoverCafeAsync(cafe));
         }
 
@@ -83,6 +83,6 @@ export class DailyCafeUpdateSession {
         const endTime = Date.now();
         const elapsedSeconds = (endTime - startTime) / 1000;
 
-        logInfo(`Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
+        logInfo(`{${this.dateString}} Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
     };
 }

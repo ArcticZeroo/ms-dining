@@ -23,23 +23,23 @@ export const isDateOnWeekend = (date: Date) => {
     return [nativeDayOfWeek.Saturday, nativeDayOfWeek.Sunday].includes(dayOfWeek);
 }
 
-export const isSameDate = (a: Date, b: Date) => {
-    return a.getFullYear() === b.getFullYear()
-        && a.getMonth() === b.getMonth()
-        && a.getDate() === b.getDate();
+export const getDateWithoutTime = (date: Date) => {
+    const result = new Date(date.getTime());
+    result.setHours(0, 0, 0, 0);
+    return result;
 }
+
+export const isSameDate = (a: Date, b: Date) => {
+    return getDateWithoutTime(a).getTime() === getDateWithoutTime(b).getTime();
+};
 
 export const isDateBefore = (date: Date, compareDate: Date) => {
-    return date.getFullYear() < compareDate.getFullYear()
-        || date.getMonth() < compareDate.getMonth()
-        || date.getDate() < compareDate.getDate();
-}
+    return getDateWithoutTime(date).getTime() < getDateWithoutTime(compareDate).getTime();
+};
 
 export const isDateAfter = (date: Date, compareDate: Date) => {
-    return date.getFullYear() > compareDate.getFullYear()
-        || date.getMonth() > compareDate.getMonth()
-        || date.getDate() > compareDate.getDate();
-}
+    return getDateWithoutTime(date).getTime() > getDateWithoutTime(compareDate).getTime();
+};
 
 export const getNowWithDaysInFuture = (daysInFuture: number) => {
     const now = new Date();
