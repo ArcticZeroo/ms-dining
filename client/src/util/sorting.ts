@@ -1,202 +1,222 @@
-import { ISearchResult, SearchEntityType } from '../models/search.ts';
-import { findLongestNonSequentialSubstringLength, findLongestSequentialSubstringLength } from './string.ts';
 import { DiningClient } from '../api/dining.ts';
 import { CafeView, ICafe } from '../models/cafe.ts';
+import { ISearchResult, SearchEntityType, SearchMatchReason } from '../models/search.ts';
+import { findLongestNonSequentialSubstringLength, findLongestSequentialSubstringLength } from './string.ts';
 
 export const normalizeCafeId = (id: string) => {
-    return id
-        .toLowerCase()
-        .replace(/^cafe/, '');
-}
+	return id
+		.toLowerCase()
+		.replace(/^cafe/, '');
+};
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {
-    // Normally I don't like parseInt, but for once
-    // I am going to intentionally rely on the weird
-    // parsing behavior.
-    // Cafe 40-41 will be normalized to "40-41", which
-    // fails to parse under Number but will parse into
-    // 40 under parseInt.
-    const numberA = parseInt(normalizedA);
-    const numberB = parseInt(normalizedB);
+	// Normally I don't like parseInt, but for once
+	// I am going to intentionally rely on the weird
+	// parsing behavior.
+	// Cafe 40-41 will be normalized to "40-41", which
+	// fails to parse under Number but will parse into
+	// 40 under parseInt.
+	const numberA = parseInt(normalizedA);
+	const numberB = parseInt(normalizedB);
 
-    const isNumberA = !Number.isNaN(numberA);
-    const isNumberB = !Number.isNaN(numberB);
+	const isNumberA = !Number.isNaN(numberA);
+	const isNumberB = !Number.isNaN(numberB);
 
-    if (isNumberA && isNumberB) {
-        return numberA - numberB;
-    }
+	if (isNumberA && isNumberB) {
+		return numberA - numberB;
+	}
 
-    // Put numeric cafes at the bottom of the list
-    if (isNumberA) {
-        return 1;
-    }
+	// Put numeric cafes at the bottom of the list
+	if (isNumberA) {
+		return 1;
+	}
 
-    if (isNumberB) {
-        return -1;
-    }
+	if (isNumberB) {
+		return -1;
+	}
 
-    return normalizedA.localeCompare(normalizedB);
+	return normalizedA.localeCompare(normalizedB);
 };
 
 export const sortCafeIds = (cafeIds: Iterable<string>) => {
-    const normalizedIdsByOriginalId = new Map<string, string>();
+	const normalizedIdsByOriginalId = new Map<string, string>();
 
-    const getNormalizedId = (id: string) => {
-        if (!normalizedIdsByOriginalId.has(id)) {
-            normalizedIdsByOriginalId.set(id, normalizeCafeId(id));
-        }
-        return normalizedIdsByOriginalId.get(id)!;
-    }
+	const getNormalizedId = (id: string) => {
+		if (!normalizedIdsByOriginalId.has(id)) {
+			normalizedIdsByOriginalId.set(id, normalizeCafeId(id));
+		}
+		return normalizedIdsByOriginalId.get(id)!;
+	};
 
-    return Array.from(cafeIds).sort((a, b) => {
-        const normalizedA = getNormalizedId(a);
-        const normalizedB = getNormalizedId(b);
+	return Array.from(cafeIds).sort((a, b) => {
+		const normalizedA = getNormalizedId(a);
+		const normalizedB = getNormalizedId(b);
 
-        return compareNormalizedCafeIds(normalizedA, normalizedB);
-    });
-}
+		return compareNormalizedCafeIds(normalizedA, normalizedB);
+	});
+};
 
 interface ISubstringScoreParams {
-    itemName: string;
-    queryText: string;
-    isSequential: boolean;
-    perfectMatchScore?: number;
-    perfectMatchWithoutBoundaryScore?: number;
+	matchingText: string;
+	queryText: string;
+	isSequential: boolean;
+	perfectMatchScore?: number;
+	perfectMatchWithoutBoundaryScore?: number;
 }
 
 const getSubstringScore = ({
-                               itemName,
-                               queryText,
-                               isSequential,
-                               perfectMatchScore,
-                               perfectMatchWithoutBoundaryScore
+	                           matchingText,
+	                           queryText,
+	                           isSequential,
+	                           perfectMatchScore,
+	                           perfectMatchWithoutBoundaryScore
                            }: ISubstringScoreParams) => {
-    const substringLength = isSequential
-        ? findLongestSequentialSubstringLength(itemName, queryText)
-        : findLongestNonSequentialSubstringLength(itemName, queryText);
+	const substringLength = isSequential
+	                        ? findLongestSequentialSubstringLength(matchingText, queryText)
+	                        : findLongestNonSequentialSubstringLength(matchingText, queryText);
 
-    const queryLength = queryText.length;
+	const queryLength = queryText.length;
 
-    if (queryLength === substringLength) {
-        // A "perfect match" is not only the exact substring, but is on a word boundary too
-        // e.g. "Pumpkin Spice Latte" should score higher than "Platter" for the search term "Latte"
-        if (perfectMatchScore && new RegExp(`\\b${queryText}\\b`).test(itemName)) {
-            return perfectMatchScore;
-        }
+	if (queryLength === substringLength) {
+		// A "perfect match" is not only the exact substring, but is on a word boundary too
+		// e.g. "Pumpkin Spice Latte" should score higher than "Platter" for the search term "Latte"
+		if (perfectMatchScore && new RegExp(`\\b${queryText}\\b`).test(matchingText)) {
+			return perfectMatchScore;
+		}
 
-        if (perfectMatchWithoutBoundaryScore) {
-            return perfectMatchWithoutBoundaryScore;
-        }
-    }
+		if (perfectMatchWithoutBoundaryScore) {
+			return perfectMatchWithoutBoundaryScore;
+		}
+	}
 
-    return substringLength / queryLength;
-}
+	return substringLength / queryLength;
+};
 
 const getCafeRelevancyScore = (searchResult: ISearchResult, cafePriorityOrder: string[]) => {
-    let totalRelevancyScore = 0;
+	let totalRelevancyScore = 0;
 
-    const cafeIds = new Set(Array.from(searchResult.locationDatesByCafeId.keys()));
+	const cafeIds = new Set(Array.from(searchResult.locationDatesByCafeId.keys()));
 
-    for (const cafeId of cafeIds) {
-        const priorityIndex = cafePriorityOrder.indexOf(cafeId);
-        const priorityScore = priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
-        totalRelevancyScore += priorityScore;
-    }
+	for (const cafeId of cafeIds) {
+		const priorityIndex = cafePriorityOrder.indexOf(cafeId);
+		const priorityScore = priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
+		totalRelevancyScore += priorityScore;
+	}
 
-    // Divide the total number of cafes to avoid giving too much priority here
-    return ((totalRelevancyScore / cafeIds.size) / cafePriorityOrder.length) + cafeIds.size;
-}
+	// Divide the total number of cafes to avoid giving too much priority here
+	return ((totalRelevancyScore / cafeIds.size) / cafePriorityOrder.length) + cafeIds.size;
+};
 
 const getDateRelevancyScore = (searchResult: ISearchResult) => {
-    let totalRelevancyScore = 0;
-    let totalDateCount = 0;
+	let totalRelevancyScore = 0;
+	let totalDateCount = 0;
 
-    const nowDay = new Date().getDay();
+	const nowDay = new Date().getDay();
 
-    for (const dates of searchResult.locationDatesByCafeId.values()) {
-        // These are sorted, so we'll just grab the next most recent one
-        const nextDate = dates[0];
-        const daysFromNow = nextDate.getDay() - nowDay;
-        totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
-        //
-        totalRelevancyScore += (dates.length / 5);
-        totalDateCount += 1;
-    }
+	for (const dates of searchResult.locationDatesByCafeId.values()) {
+		// These are sorted, so we'll just grab the next most recent one
+		const nextDate = dates[0];
+		const daysFromNow = nextDate.getDay() - nowDay;
+		totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
+		//
+		totalRelevancyScore += (dates.length / 5);
+		totalDateCount += 1;
+	}
 
-    return (5 * totalRelevancyScore / totalDateCount) + totalDateCount;
+	return (5 * totalRelevancyScore / totalDateCount) + totalDateCount;
+};
+
+const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearchResult, matchReason: SearchMatchReason) => {
+	const targetText = matchReason === SearchMatchReason.title ? searchResult.name : searchResult.description;
+	const matchingText = targetText?.trim().toLowerCase();
+
+	if (!matchingText) {
+		return 0;
+	}
+
+	const longestSequentialSubstringLength = getSubstringScore({
+		isSequential:                     true,
+		perfectMatchWithoutBoundaryScore: 1.25,
+		perfectMatchScore:                2,
+		matchingText,
+		queryText,
+	});
+
+	const longestNonSequentialSubstringLength = getSubstringScore({
+		isSequential:                     false,
+		perfectMatchWithoutBoundaryScore: 1.25,
+		matchingText,
+		queryText,
+	});
+
+	const baseScore = (longestSequentialSubstringLength * 20)
+	                  + (longestNonSequentialSubstringLength * 5);
+
+	if (matchReason === SearchMatchReason.title) {
+		return baseScore;
+	}
+
+	return baseScore * 0.75;
 };
 
 const computeScore = (cafePriorityOrder: string[], searchResult: ISearchResult, queryText: string) => {
-    // TODO: Should I remove whitespace? Probably not?
-    const itemName = searchResult.name.toLowerCase();
-    queryText = queryText.toLowerCase();
+	queryText = queryText.toLowerCase();
 
-    const longestSequentialSubstringLength = getSubstringScore({
-        itemName,
-        queryText,
-        isSequential:                     true,
-        perfectMatchWithoutBoundaryScore: 1.25,
-        perfectMatchScore:                2
-    });
+	let totalSubstringScore = 0;
+	for (const matchReason of searchResult.matchReasons) {
+		totalSubstringScore += getSubstringScoreForMatchReason(queryText, searchResult, matchReason);
+	}
 
-    const longestNonSequentialSubstringLength = getSubstringScore({
-        itemName,
-        queryText,
-        isSequential:                     false,
-        perfectMatchWithoutBoundaryScore: 1.25,
-    });
+	const cafeRelevancyScore = getCafeRelevancyScore(searchResult, cafePriorityOrder);
+	const dateRelevancyScore = getDateRelevancyScore(searchResult);
 
-    const cafeRelevancyScore = getCafeRelevancyScore(searchResult, cafePriorityOrder);
-    const dateRelevancyScore = getDateRelevancyScore(searchResult);
+	const baseScore = totalSubstringScore
+	                  + cafeRelevancyScore
+	                  + dateRelevancyScore;
 
-    const baseScore = (longestSequentialSubstringLength * 20)
-        + (longestNonSequentialSubstringLength * 5)
-        + cafeRelevancyScore
-        + dateRelevancyScore;
-
-    if (searchResult.entityType === SearchEntityType.menuItem) {
-        return baseScore;
-    } else {
-        // Stations should not be ranked as high as menu items
-        return baseScore * 0.8;
-    }
-}
+	if (searchResult.entityType === SearchEntityType.menuItem) {
+		return baseScore;
+	} else {
+		// Stations should not be ranked as high as menu items
+		return baseScore * 0.8;
+	}
+};
 
 interface ISortSearchResultsParams {
-    searchResults: ISearchResult[];
-    queryText: string;
-    cafes: ICafe[];
-    viewsById: Map<string, CafeView>;
+	searchResults: ISearchResult[];
+	queryText: string;
+	cafes: ICafe[];
+	viewsById: Map<string, CafeView>;
 }
 
 export const sortSearchResults = ({
-                                      searchResults,
-                                      queryText,
-                                      cafes,
-                                      viewsById,
+	                                  searchResults,
+	                                  queryText,
+	                                  cafes,
+	                                  viewsById,
                                   }: ISortSearchResultsParams): ISearchResult[] => {
-    const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById).map(cafe => cafe.id);
-    const searchResultScores = new Map<SearchEntityType, Map<string, number>>();
+	const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById).map(cafe => cafe.id);
+	const searchResultScores = new Map<SearchEntityType, Map<string, number>>();
 
-    const getScore = (searchResult: ISearchResult) => {
-        if (!searchResultScores.has(searchResult.entityType)) {
-            searchResultScores.set(searchResult.entityType, new Map());
-        }
+	const getScore = (searchResult: ISearchResult) => {
+		if (!searchResultScores.has(searchResult.entityType)) {
+			searchResultScores.set(searchResult.entityType, new Map());
+		}
 
-        const searchResultScoresByItemName = searchResultScores.get(searchResult.entityType)!;
+		const searchResultScoresByItemName = searchResultScores.get(searchResult.entityType)!;
 
-        if (!searchResultScoresByItemName.has(searchResult.name)) {
-            searchResultScoresByItemName.set(searchResult.name, computeScore(cafePriorityOrder, searchResult, queryText));
-        }
-        return searchResultScoresByItemName.get(searchResult.name)!;
-    };
+		if (!searchResultScoresByItemName.has(searchResult.name)) {
+			searchResultScoresByItemName.set(searchResult.name, computeScore(cafePriorityOrder, searchResult, queryText));
+		}
+		return searchResultScoresByItemName.get(searchResult.name)!;
+	};
 
-    searchResults.sort((resultA, resultB) => {
-        const scoreA = getScore(resultA);
-        const scoreB = getScore(resultB);
+	searchResults.sort((resultA, resultB) => {
+		const scoreA = getScore(resultA);
+		const scoreB = getScore(resultB);
 
-        return scoreB - scoreA;
-    });
+		return scoreB - scoreA;
+	});
 
-    return searchResults;
-}
+	return searchResults;
+};
