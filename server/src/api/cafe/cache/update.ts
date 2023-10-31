@@ -11,7 +11,7 @@ import { saveSessionAsync } from './storage.js';
 import { cafeList } from '../../../constants/cafes.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 
-export const cafeSemaphore = new Semaphore.default(3);
+export const cafeSemaphore = new Semaphore.default(5);
 const cafeDiscoveryRetryCount = 3;
 const cafeDiscoveryRetryDelayMs = 1000;
 
@@ -41,7 +41,7 @@ export class DailyCafeUpdateSession {
         try {
             await cafeSemaphore.acquire();
 
-            logInfo(`{${this.dateString}} Discovering menu for "${cafe.name}" @ ${cafe.id}... (attempt ${attemptIndex})`);
+            logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
 
             const session = new CafeDiscoverySession(cafe);
             await session.initialize();

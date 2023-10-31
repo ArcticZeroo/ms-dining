@@ -9,7 +9,7 @@ const prismaClient = new PrismaClient();
 export const usePrismaClient = async <T>(callback: (client: PrismaClient) => Promise<T>) => {
     try {
         await databaseLock.acquire();
-        return callback(prismaClient);
+        return await callback(prismaClient);
     } finally {
         databaseLock.release();
     }

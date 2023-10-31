@@ -3,9 +3,9 @@ export const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, 
 export const runPromiseWithRetries = async <T>(promise: (retryIndex: number) => Promise<T>, retries: number, delayMs?: number): Promise<T> => {
     for (let i = 0; i <= retries; i++) {
         try {
-            return promise(i);
+            return await promise(i);
         } catch (err) {
-            if (delayMs) {
+            if (i < retries && delayMs) {
                 await pause(delayMs);
             }
 
