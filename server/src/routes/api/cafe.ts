@@ -59,11 +59,13 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
         const dateString = getDateStringForMenuRequest(ctx);
         if (dateString == null) {
+            logInfo('Invalid date string provided for menu request:', ctx.query.date);
             return [];
         }
 
         const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
         if (menuStations.length === 0) {
+            logInfo('No menus found for id:', id, dateString);
             ctx.body = [];
             return;
         }

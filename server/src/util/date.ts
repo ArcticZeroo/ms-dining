@@ -80,9 +80,7 @@ export const getMaximumDateForMenuRequest = (): Date => {
 }
 
 export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
-    const now = new Date();
     const queryDateRaw = ctx.query.date;
-
     if (!queryDateRaw || typeof queryDateRaw !== 'string') {
         return null;
     }
