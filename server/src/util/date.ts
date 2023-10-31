@@ -79,29 +79,28 @@ export const getMaximumDateForMenuRequest = (): Date => {
     return now;
 }
 
-export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string => {
+export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
     const now = new Date();
     const queryDateRaw = ctx.query.date;
 
     if (!queryDateRaw || typeof queryDateRaw !== 'string') {
-        return toDateString(now);
+        return null;
     }
 
     const date = fromDateString(queryDateRaw);
     if (Number.isNaN(date.getTime())) {
-        return toDateString(now);
+        return null;
     }
 
     const dateTime = date.getTime();
     const minimumDate = getMinimumDateForMenuRequest();
     const maximumDate = getMaximumDateForMenuRequest();
-    const clampedTime = clamp({
-        min: minimumDate.getTime(),
-        max: maximumDate.getTime(),
-        value: dateTime
-    });
 
-    return toDateString(new Date(clampedTime));
+    if (dateTime < minimumDate.getTime() || dateTime > maximumDate.getTime()) {
+        return null;
+    }
+
+    return toDateString(new Date(dateTime));
 };
 
 export function* yieldDaysInFutureForThisWeek() {
