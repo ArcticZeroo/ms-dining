@@ -3,11 +3,9 @@ import * as diningConfig from '../../constants/cafes.js';
 import { attachRouter } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
-import { fromDateString, getDateStringForMenuRequest, nativeDayOfWeek, toDateString } from '../../util/date.js';
+import { getDateStringForMenuRequest } from '../../util/date.js';
 import { CafeStorageClient } from '../../api/storage/cafe.js';
-import { logInfo } from '../../util/log.js';
 import { getLogoUrl } from '../../util/cafe.js';
-import { clamp } from '../../util/math.js';
 
 const visitorIdHeader = 'X-Visitor-Id';
 
@@ -52,21 +50,24 @@ export const registerDiningHallRoutes = (parent: Router) => {
     router.get('/menu/:id', async ctx => {
         const id = ctx.params.id;
         if (!id) {
-            ctx.status = 400;
-            ctx.body = 'Missing cafe id';
+            ctx.throw(400, 'Missing cafe id');
+            return;
+        }
+
+        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+        if (!cafe) {
+            ctx.throw(404, 'Cafe not found or data is missing');
             return;
         }
 
         const dateString = getDateStringForMenuRequest(ctx);
         if (dateString == null) {
-            logInfo('Invalid date string provided for menu request:', ctx.query.date);
             ctx.body = [];
             return;
         }
 
         const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
         if (menuStations.length === 0) {
-            logInfo('No menus found for id:', id, dateString);
             ctx.body = [];
             return;
         }

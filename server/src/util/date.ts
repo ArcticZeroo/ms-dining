@@ -16,7 +16,7 @@ const padDateValue = (value: number) => value.toString().padStart(2, '0');
 export const toDateString = (date: Date) => `${date.getFullYear()}-${padDateValue(date.getMonth() + 1)}-${padDateValue(date.getDate())}`;
 export const fromDateString = (dateString: string) => new Date(`${dateString}T00:00`);
 
-const firstWeeklyMenusTime = fromDateString('2023-10-30').getTime();
+const firstWeeklyMenusTime = fromDateString('2023-10-31').getTime();
 
 export const isDateOnWeekend = (date: Date) => {
     const dayOfWeek = date.getDay();
@@ -83,29 +83,19 @@ export const getMaximumDateForMenuRequest = (): Date => {
 export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
     const queryDateRaw = ctx.query.date;
 
-    console.log('checking', queryDateRaw);
-
     if (!queryDateRaw || typeof queryDateRaw !== 'string') {
         return null;
     }
 
-    console.log(queryDateRaw);
-
     const date = fromDateString(queryDateRaw);
-
-    console.log(date);
 
     if (Number.isNaN(date.getTime())) {
         return null;
     }
 
     const dateTime = date.getTime();
-    const minimumDate = getMinimumDateForMenuRequest();
-    const maximumDate = getMaximumDateForMenuRequest();
 
-    console.log('min:', minimumDate, 'max:', maximumDate);
-
-    if (dateTime < minimumDate.getTime() || dateTime > maximumDate.getTime()) {
+    if (dateTime < getMinimumDateForMenuRequest().getTime() || dateTime > getMaximumDateForMenuRequest().getTime()) {
         return null;
     }
 

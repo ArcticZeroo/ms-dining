@@ -14,7 +14,7 @@ import {
 import { ISearchResult, IServerSearchResult, SearchEntityType, SearchMatchReason } from '../models/search.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
-const firstWeeklyMenusDate = fromDateString('2023-10-30');
+const firstWeeklyMenusTime = fromDateString('2023-10-31').getTime();
 
 interface IRetrieveCafeMenuParams {
     id: string;
@@ -82,6 +82,8 @@ export abstract class DiningClient {
 
         now.setDate(now.getDate() - daysSinceMonday);
 
+        // Clone to avoid problems with modifying it down the line
+        const firstWeeklyMenusDate = new Date(firstWeeklyMenusTime);
         if (isDateBefore(now, firstWeeklyMenusDate)) {
             return firstWeeklyMenusDate;
         }
