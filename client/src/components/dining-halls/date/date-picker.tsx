@@ -2,16 +2,17 @@ import { SelectedDateContext } from '../../../context/time.ts';
 import React, { useContext, useMemo } from 'react';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DiningClient } from '../../../api/dining.ts';
-import { isSameDate, isDateOnWeekend, isDateAfter, isDateBefore, getDateDisplay } from '../../../util/date.ts';
 
 import './date-picker.css';
 import { FutureMenuOutOfDateNotice } from '../../notice/future-menu-out-of-date-notice.tsx';
+import { DateUtil } from '@msdining/common';
+import { getDateDisplay } from '../../../util/date.ts';
 
 const getPreviousDate = (date: Date) => {
     const newDate = new Date(date.getTime());
     newDate.setDate(newDate.getDate() - 1);
 
-    while (isDateOnWeekend(newDate)) {
+    while (DateUtil.isDateOnWeekend(newDate)) {
         newDate.setDate(newDate.getDate() - 1);
     }
 
@@ -22,7 +23,7 @@ const getNextDate = (date: Date) => {
     const newDate = new Date(date.getTime());
     newDate.setDate(newDate.getDate() + 1);
 
-    while (isDateOnWeekend(newDate)) {
+    while (DateUtil.isDateOnWeekend(newDate)) {
         newDate.setDate(newDate.getDate() + 1);
     }
 
@@ -39,9 +40,9 @@ export const CafeDatePicker: React.FC = () => {
     const minimumDate = DiningClient.getMinimumDateForMenu();
     const maximumDate = DiningClient.getMaximumDateForMenu();
 
-    const canGoBackwards = isDateAfter(selectedDate, minimumDate);
-    const canGoForwards = isDateBefore(selectedDate, maximumDate);
-    const isAtToday = isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
+    const canGoBackwards = DateUtil.isDateAfter(selectedDate, minimumDate);
+    const canGoForwards = DateUtil.isDateBefore(selectedDate, maximumDate);
+    const isAtToday = DateUtil.isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
 
     const goBackwards = () => {
         if (!canGoBackwards) {

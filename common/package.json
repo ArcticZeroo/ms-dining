@@ -1,5 +1,6 @@
 {
   "name": "@msdining/common",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -11,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@arcticzeroo/duration": "^2.0.2"
   }
 }

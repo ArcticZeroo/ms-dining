@@ -4,11 +4,12 @@ import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ISearchResult, SearchEntityType } from '../../models/search.ts';
-import { getLocationDatesDisplay, isDateAfter, isDateBefore } from '../../util/date.ts';
+import { getLocationDatesDisplay } from '../../util/date.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
+import { DateUtil } from '@msdining/common';
 import './search.css';
 
 interface IEntityDisplayData {
@@ -44,11 +45,11 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ isVisible, result: 
                 const firstDateA = datesA[0];
                 const firstDateB = datesB[0];
 
-                if (isDateBefore(firstDateA, firstDateB)) {
+                if (DateUtil.isDateBefore(firstDateA, firstDateB)) {
                     return -1;
                 }
 
-                if (isDateAfter(firstDateA, firstDateB)) {
+                if (DateUtil.isDateAfter(firstDateA, firstDateB)) {
                     return 1;
                 }
 
@@ -56,11 +57,11 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ isVisible, result: 
                 const lastDateA = datesA[datesA.length - 1];
                 const lastDateB = datesB[datesB.length - 1];
 
-                if (isDateBefore(lastDateA, lastDateB)) {
+                if (DateUtil.isDateBefore(lastDateA, lastDateB)) {
                     return -1;
                 }
 
-                if (isDateAfter(lastDateA, lastDateB)) {
+                if (DateUtil.isDateAfter(lastDateA, lastDateB)) {
                     return 1;
                 }
 

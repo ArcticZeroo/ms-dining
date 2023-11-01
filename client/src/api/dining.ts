@@ -3,18 +3,11 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
-import {
-    fromDateString,
-    isDateAfter,
-    isDateBefore,
-    nativeDayOfWeek,
-    nativeDayValues,
-    toDateString
-} from '../util/date.ts';
+import { DateUtil } from '@msdining/common';
 import { ISearchResult, IServerSearchResult, SearchEntityType, SearchMatchReason } from '../models/search.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
-const firstWeeklyMenusTime = fromDateString('2023-10-31').getTime();
+const firstWeeklyMenusTime = DateUtil.fromDateString('2023-10-31').getTime();
 
 interface IRetrieveCafeMenuParams {
     id: string;
@@ -75,7 +68,7 @@ export abstract class DiningClient {
         const now = new Date();
         const currentDayOfWeek = now.getDay();
 
-        let daysSinceMonday = currentDayOfWeek - nativeDayOfWeek.Monday;
+        let daysSinceMonday = currentDayOfWeek - DateUtil.nativeDayOfWeek.Monday;
         if (daysSinceMonday <= 0) {
             daysSinceMonday += 7;
         }
@@ -84,7 +77,7 @@ export abstract class DiningClient {
 
         // Clone to avoid problems with modifying it down the line
         const firstWeeklyMenusDate = new Date(firstWeeklyMenusTime);
-        if (isDateBefore(now, firstWeeklyMenusDate)) {
+        if (DateUtil.isDateBefore(now, firstWeeklyMenusDate)) {
             return firstWeeklyMenusDate;
         }
 
@@ -95,7 +88,7 @@ export abstract class DiningClient {
         const now = new Date();
         const currentDayOfWeek = now.getDay();
 
-        let daysUntilFriday = nativeDayOfWeek.Friday - currentDayOfWeek;
+        let daysUntilFriday = DateUtil.nativeDayOfWeek.Friday - currentDayOfWeek;
         if (daysUntilFriday <= 0) {
             daysUntilFriday += 7;
         }
@@ -108,8 +101,8 @@ export abstract class DiningClient {
     public static ensureDateIsNotWeekendForMenu(date: Date): Date {
         const dayOfWeek = date.getDay();
 
-        if ([nativeDayValues.Saturday, nativeDayValues.Sunday].includes(dayOfWeek)) {
-            let daysUntilMonday = nativeDayValues.Monday - dayOfWeek;
+        if ([DateUtil.nativeDayValues.Saturday, DateUtil.nativeDayValues.Sunday].includes(dayOfWeek)) {
+            let daysUntilMonday = DateUtil.nativeDayValues.Monday - dayOfWeek;
             if (daysUntilMonday <= 0) {
                 daysUntilMonday += 7;
             }
@@ -128,7 +121,7 @@ export abstract class DiningClient {
                                              shouldCountTowardsLastUsed,
                                              date,
                                          }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
-        const dateString = toDateString(date ?? DiningClient.getTodayDateForMenu());
+        const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
             if (!DiningClient._cafeMenusByIdPerDateString.has(id)) {
@@ -221,11 +214,11 @@ export abstract class DiningClient {
         const nowInLocalTime = new Date();
         const nowInPacificTime = new Date(nowInLocalTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
 
-        if (isDateBefore(nowInPacificTime, selectedDate)) {
+        if (DateUtil.isDateBefore(nowInPacificTime, selectedDate)) {
             return true;
         }
 
-        if (isDateAfter(nowInPacificTime, selectedDate)) {
+        if (DateUtil.isDateAfter(nowInPacificTime, selectedDate)) {
             return false;
         }
 
@@ -246,7 +239,7 @@ export abstract class DiningClient {
         for (const serverResult of serverResults) {
             const locationDatesByCafeId = new Map<string, Array<Date>>();
             for (const [cafeId, dateStrings] of Object.entries(serverResult.locations)) {
-                const dates = dateStrings.map(fromDateString).sort((a, b) => a.getTime() - b.getTime());
+                const dates = dateStrings.map(DateUtil.fromDateString).sort((a, b) => a.getTime() - b.getTime());
                 locationDatesByCafeId.set(cafeId, dates);
             }
 
