@@ -1,6 +1,6 @@
 import Semaphore from 'semaphore-async-await';
 import { runPromiseWithRetries } from '../../../util/async.js';
-import { getNowWithDaysInFuture, toDateString } from '../../../util/date.js';
+import { DateUtil } from '@msdining/common';
 import fs from 'fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
@@ -22,11 +22,11 @@ export class DailyCafeUpdateSession {
     }
 
     get date() {
-        return getNowWithDaysInFuture(this.daysInFuture);
+        return DateUtil.getNowWithDaysInFuture(this.daysInFuture);
     }
 
     get dateString() {
-        return toDateString(this.date);
+        return DateUtil.toDateString(this.date);
     }
 
     private async resetDailyState(cafes: ICafe[]) {

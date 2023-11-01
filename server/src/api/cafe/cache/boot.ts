@@ -1,4 +1,4 @@
-import { getNowWithDaysInFuture, toDateString, yieldDaysInFutureForThisWeek } from '../../../util/date.js';
+import { DateUtil } from '@msdining/common';
 import { logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
@@ -10,16 +10,16 @@ const repairMissingWeeklyMenusAsync = async () => {
     logInfo('Repairing missing weekly menus...');
 
     let isRepairNeeded = false;
-    for (const i of yieldDaysInFutureForThisWeek()) {
-        const date = getNowWithDaysInFuture(i);
-        const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(toDateString(date));
+    for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
+        const date = DateUtil.getNowWithDaysInFuture(i);
+        const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(date));
         if (!isAnyMenuAvailableToday) {
             isRepairNeeded = true;
-            logInfo(`Repairing missing menu for ${toDateString(date)}`);
+            logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}`);
             const updateSession = new DailyCafeUpdateSession(i);
             await updateSession.populateAsync();
         } else {
-            logInfo(`No repair needed for ${toDateString(date)}`);
+            logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
         }
     }
 
@@ -45,7 +45,7 @@ const repairCafesWithoutMenusAsync = async () => {
         await CafeStorageClient.deleteCafe(cafe.id);
 
         logInfo(cafe.id, 'is missing allowed menus, attempting to repair...');
-        for (const i of yieldDaysInFutureForThisWeek()) {
+        for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
             try {
                 const updateSession = new DailyCafeUpdateSession(i);
                 await updateSession.populateAsync([cafe]);
@@ -69,7 +69,7 @@ const repairTodaySessionsAsync = async () => {
     // In case I'm making server changes and need to restart the server, I don't
     // want to clear history.
     if (now.getHours() > 17) {
-        const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(toDateString(now));
+        const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(now));
         if (isAnyMenuAvailableToday) {
 			logInfo('Skipping repair of today\'s sessions because it is after 5pm and there is already a menu for today');
             return;

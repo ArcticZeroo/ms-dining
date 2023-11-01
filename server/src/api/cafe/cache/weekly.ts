@@ -1,12 +1,11 @@
 import cron from 'node-cron';
 import { logError, logInfo } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
-import { getNowWithDaysInFuture, toDateString, yieldDaysInFutureForThisWeek } from '../../../util/date.js';
-import { CafeStorageClient } from '../../storage/cafe.js';
+import { DateUtil } from '@msdining/common';
 
 const updateWeeklyCafeMenusAsync = async () => {
     logInfo('Updating weekly cafe menus...');
-    for (const i of yieldDaysInFutureForThisWeek()) {
+    for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
         const updateSession = new DailyCafeUpdateSession(i);
         await updateSession.populateAsync();
     }

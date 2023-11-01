@@ -5,15 +5,17 @@ import { isUniqueConstraintFailedError } from '../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
 import { logError } from '../../util/log.js';
 import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
-import {
+import { DateUtil } from '@msdining/common';
+import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
+import { getThumbnailUrl } from '../../util/cafe.js';
+
+const {
     getMaximumDateForMenuRequest,
     getMinimumDateForMenuRequest,
     getNowWithDaysInFuture, isDateAfter, isDateOnWeekend,
     toDateString,
     yieldDaysInFutureForThisWeek
-} from '../../util/date.js';
-import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
-import { getThumbnailUrl } from '../../util/cafe.js';
+} = DateUtil;
 
 interface ICreateDailyStationMenuParams {
     cafeId: string;
