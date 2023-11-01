@@ -21,7 +21,7 @@
     font-size: 1.4em;
     display: flex;
     align-items: center;
-    gap: 0.5em;
+    gap: var(--default-padding);
     background: #BBB;
     padding: var(--default-padding);
     border-top-right-radius: 0.5rem;

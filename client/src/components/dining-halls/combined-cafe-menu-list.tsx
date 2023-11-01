@@ -9,7 +9,6 @@ import { sortCafeIds } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
-import { CafeDatePicker } from './date/date-picker.tsx';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -71,7 +70,6 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ caf
 
     return (
         <div className="collapsible-menu-list">
-            <CafeDatePicker/>
             {
                 menuData.map(({ cafe, menu }) => (
                     <CollapsibleCafeMenu key={cafe.id}

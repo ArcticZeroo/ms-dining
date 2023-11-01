@@ -1,13 +1,13 @@
-import { Cafe, MenuItem, Station } from '@prisma/client';
-import { usePrismaClient } from './client.js';
-import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
-import { isUniqueConstraintFailedError } from '../../util/prisma.js';
-import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
-import { logError } from '../../util/log.js';
-import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
 import { DateUtil } from '@msdining/common';
-import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
+import { Cafe, MenuItem, Station } from '@prisma/client';
+import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
+import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
+import { logError } from '../../util/log.js';
+import { isUniqueConstraintFailedError } from '../../util/prisma.js';
+import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
+import { retrieveExistingThumbnailData } from '../cafe/image/thumbnail.js';
+import { usePrismaClient } from './client.js';
 
 const {
     getMaximumDateForMenuRequest,
@@ -368,14 +368,9 @@ export abstract class CafeStorageClient {
     }
 
     public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
-        const cafesById = await CafeStorageClient.retrieveCafesAsync();
-        const cafeIds = Array.from(cafesById.keys());
-        const dateStrings = Array.from(yieldDaysInFutureForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
-
         const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
-                cafeId:     { in: cafeIds },
-                dateString: { in: dateStrings }
+                dateString: toDateString(new Date())
             },
             select: {
                 cafeId:     true,
