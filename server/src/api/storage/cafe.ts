@@ -151,13 +151,11 @@ export abstract class CafeStorageClient {
 		}
 	}
 
-	public static async deleteDailyMenusAsync(dateString: string, cafeIds: string[]) {
+	public static async deleteDailyMenusAsync(dateString: string, cafeId: string) {
 		await usePrismaClient(prismaClient => prismaClient.dailyStation.deleteMany({
 			where: {
 				dateString,
-				cafeId: {
-					in: cafeIds
-				}
+				cafeId
 			}
 		}));
 	}

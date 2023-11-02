@@ -29,13 +29,10 @@ export class DailyCafeUpdateSession {
         return DateUtil.toDateString(this.date);
     }
 
-    private async resetDailyState(cafes: ICafe[]) {
+    private async resetDailyState() {
         CafeStorageClient.resetCache();
-        await Promise.all([
-            fs.mkdir(serverMenuItemThumbnailPath, { recursive: true }),
-            CafeStorageClient.deleteDailyMenusAsync(this.dateString, cafes.map(cafe => cafe.id))
-        ]);
-    };
+        await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
+    }
 
     private async _doDiscoverCafeAsync(cafe: ICafe, attemptIndex: number) {
         try {
@@ -58,6 +55,8 @@ export class DailyCafeUpdateSession {
     }
 
     private async discoverCafeAsync(cafe: ICafe) {
+        await CafeStorageClient.deleteDailyMenusAsync(this.dateString, cafe.id);
+
         const stations = await runPromiseWithRetries(
             (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),
             cafeDiscoveryRetryCount,
@@ -79,7 +78,7 @@ export class DailyCafeUpdateSession {
     }
 
     public async populateAsync(cafes: ICafe[] = cafeList) {
-        await this.resetDailyState(cafes);
+        await this.resetDailyState();
 
         logInfo(`{${this.dateString}} Populating cafe sessions...`);
         const startTime = Date.now();

@@ -20,8 +20,9 @@ const populateDailySessions = () => {
 };
 
 export const scheduleDailyUpdateJob = () => {
-    // 3am on Monday through Friday
-    cron.schedule('0 9 * * 1,2,3,4,5', () => {
+    // We run a weekly update job at 8am, but we'll update again at 10am just in case there were changes.
+    // I think (tentatively) that menus are updated by 9am, unclear how accurate they are before then.
+    cron.schedule('0 3,10 * * 1,2,3,4,5', () => {
         populateDailySessions();
     });
 }
