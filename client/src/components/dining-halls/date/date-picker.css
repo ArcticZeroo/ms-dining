@@ -24,7 +24,7 @@
     padding: 0.5rem;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 800px) {
     .date-picker-buttons button {
         flex-grow: 1;
     }
