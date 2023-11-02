@@ -1,9 +1,10 @@
 import { ISearchResult, SearchEntityFilterType } from '../../models/search.ts';
 import React, { useContext, useMemo } from 'react';
 import { SearchResult } from './search-result.tsx';
-import { sortSearchResults } from '../../util/sorting.ts';
+import { SearchUtil } from '@msdining/common';
 import { ApplicationContext } from '../../context/app.ts';
 import { matchesEntityFilter } from '../../util/search.ts';
+import { DiningClient } from '../../api/dining.ts';
 
 interface ISearchResultsListProps {
     queryText: string;
@@ -15,12 +16,14 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
     const { cafes, viewsById } = useContext(ApplicationContext);
 
     const entriesInOrder = useMemo(
-        () => sortSearchResults({
-            searchResults,
-            queryText,
-            cafes,
-            viewsById
-        }),
+        () => {
+            const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById);
+            return SearchUtil.sortSearchResults({
+                searchResults,
+                queryText,
+                cafePriorityOrder: cafePriorityOrder.map(cafe => cafe.id)
+            });
+        },
         [searchResults, queryText, cafes, viewsById]
     );
 
