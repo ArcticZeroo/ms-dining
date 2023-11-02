@@ -161,6 +161,7 @@ export const ApplicationSettings = {
     showDescriptions:         new BooleanSetting('showDescription', true /*defaultValue*/),
     requestMenusInBackground: new BooleanSetting('requestMenusInBackground', true /*defaultValue*/),
     rememberCollapseState:    new BooleanSetting('rememberCollapseState', false /*defaultValue*/),
+    allowFutureMenus:         new BooleanSetting('allowFutureMenus', false /*defaultValue*/),
     lastUsedCafeIds:          new StringArraySetting('lastUsedDiningHalls'),
     homepageViews:            new StringSetSetting('homepageDiningHalls'),
     collapsedStations:        new StringSetSetting('collapsedStations'),

@@ -33,14 +33,39 @@ interface ISearchResultProps {
     isVisible: boolean;
 }
 
-export const SearchResult: React.FC<ISearchResultProps> = ({ isVisible, result: { name, description, locationDatesByCafeId, imageUrl, entityType } }) => {
+const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean): Array<[string, Array<Date>]> => {
+    const locationEntries = Array.from(locationDatesByCafeId.entries());
+
+    if (allowFutureMenus) {
+        return locationEntries;
+    }
+
+    const now = new Date();
+    return locationEntries.map(([cafeId, dates]) => [
+        cafeId,
+        dates.filter(date => DateUtil.isSameDate(date, now))
+    ]);
+}
+
+export const SearchResult: React.FC<ISearchResultProps> = ({
+                                                               isVisible,
+                                                               result: {
+                                                                           name,
+                                                                           description,
+                                                                           locationDatesByCafeId,
+                                                                           imageUrl,
+                                                                           entityType
+                                                                       }
+                                                           }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
+    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 
     const locationEntriesInOrder = useMemo(
         () => {
-            const locationEntries = Array.from(locationDatesByCafeId.entries());
+            const locationEntries = getLocationEntries(locationDatesByCafeId, allowFutureMenus);
+
             return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
                 const firstDateA = datesA[0];
                 const firstDateB = datesB[0];
@@ -68,7 +93,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({ isVisible, result: 
                 return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
             });
         },
-        [locationDatesByCafeId]
+        [locationDatesByCafeId, allowFutureMenus]
     );
 
     const entityDisplayData = entityDisplayDataByType[entityType];

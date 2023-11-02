@@ -43,6 +43,19 @@ export const SettingsPage = () => {
                     description="When enabled, cafe menus are shown in location-based groups, and the navigation menu is condensed."
                 />
                 <BooleanSettingInput
+                    setting={ApplicationSettings.allowFutureMenus}
+                    name="(Experimental) Allow Future Menus"
+                    description={
+                        <>
+                            When enabled, a date picker will be shown on cafe pages, and you can see future menu
+                            information in search.
+                            <br/>
+                            Menus are known to change frequently before online ordering is actually available!
+                            In some cases, menus have changed as late as 9am on the day that they are available.
+                        </>
+                    }
+                />
+                <BooleanSettingInput
                     setting={ApplicationSettings.requestMenusInBackground}
                     name="Enable Fetching Menus in Background"
                     description={

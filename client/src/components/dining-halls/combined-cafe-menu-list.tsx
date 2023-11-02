@@ -3,12 +3,14 @@ import React, { useCallback, useContext, useEffect } from 'react';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeMenu, CafeViewType, ICafe } from '../../models/cafe.ts';
 import { sortCafeIds } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
+import { ApplicationSettings } from '../../api/settings.ts';
+import { CafeDatePicker } from './date/date-picker.tsx';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -67,9 +69,13 @@ const useMenuData = (cafeIds: Iterable<string>, countTowardsLastUsed: boolean) =
 
 export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ cafeIds, countTowardsLastUsed }) => {
     const menuData = useMenuData(cafeIds, countTowardsLastUsed);
+    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 
     return (
         <div className="collapsible-menu-list">
+            {
+                allowFutureMenus && <CafeDatePicker/>
+            }
             {
                 menuData.map(({ cafe, menu }) => (
                     <CollapsibleCafeMenu key={cafe.id}
