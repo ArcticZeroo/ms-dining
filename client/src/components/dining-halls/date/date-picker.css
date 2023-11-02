@@ -35,5 +35,6 @@
         right: unset;
         border-radius: var(--default-padding);
         position: relative;
+        z-index: unset;
     }
 }
