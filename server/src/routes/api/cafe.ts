@@ -6,6 +6,7 @@ import { ApplicationContext } from '../../constants/context.js';
 import { getDateStringForMenuRequest } from '../../util/date.js';
 import { CafeStorageClient } from '../../api/storage/cafe.js';
 import { getLogoUrl } from '../../util/cafe.js';
+import { ICafeStation } from '../../models/cafe.js';
 
 const visitorIdHeader = 'X-Visitor-Id';
 
@@ -47,31 +48,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         });
     });
 
-    router.get('/menu/:id', async ctx => {
-        const id = ctx.params.id;
-        if (!id) {
-            ctx.throw(400, 'Missing cafe id');
-            return;
-        }
-
-        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-        if (!cafe) {
-            ctx.throw(404, 'Cafe not found or data is missing');
-            return;
-        }
-
-        const dateString = getDateStringForMenuRequest(ctx);
-        if (dateString == null) {
-            ctx.body = JSON.stringify([]);
-            return;
-        }
-
-        const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
-        if (menuStations.length === 0) {
-            ctx.body = JSON.stringify([]);
-            return;
-        }
-
+    const convertMenuToSerializable = (menuStations: ICafeStation[]) => {
         const menusByStation = [];
         for (const station of menuStations) {
             const itemsByCategory = {};
@@ -105,8 +82,41 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 menu:    itemsByCategory
             });
         }
+        return menusByStation;
+    }
 
-        ctx.body = JSON.stringify(menusByStation);
+    router.get('/menu/:id', async ctx => {
+        const id = ctx.params.id?.toLowerCase();
+        if (!id) {
+            ctx.throw(400, 'Missing cafe id');
+            return;
+        }
+
+        const dateString = getDateStringForMenuRequest(ctx);
+        if (dateString == null) {
+            ctx.body = JSON.stringify([]);
+            return;
+        }
+
+        if (id === 'all') {
+            const cafes = await CafeStorageClient.retrieveCafesAsync();
+            const menusByCafeId = {};
+            for (const cafeId of cafes.keys()) {
+                const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(cafeId, dateString);
+                menusByCafeId[cafeId] = convertMenuToSerializable(menuStations);
+            }
+            ctx.body = JSON.stringify(menusByCafeId);
+            return;
+        }
+
+        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+        if (!cafe) {
+            ctx.throw(404, 'Cafe not found or data is missing');
+            return;
+        }
+
+        const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
+        ctx.body = JSON.stringify(convertMenuToSerializable(menuStations));
     });
 
     router.get('/search', async ctx => {
