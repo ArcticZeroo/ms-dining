@@ -366,9 +366,12 @@ export abstract class CafeStorageClient {
 	}
 
 	public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
+		const dateStringsForWeek = Array.from(DateUtil.yieldDaysInFutureForThisWeek()).map(i => DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i)));
 		const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
 			where:  {
-				dateString: toDateString(new Date())
+				dateString: {
+					in: dateStringsForWeek
+				}
 			},
 			select: {
 				cafeId:     true,

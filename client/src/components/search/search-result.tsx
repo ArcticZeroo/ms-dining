@@ -41,10 +41,14 @@ const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFut
     }
 
     const now = new Date();
-    return locationEntries.map(([cafeId, dates]) => [
-        cafeId,
-        dates.filter(date => DateUtil.isSameDate(date, now))
-    ]);
+    const resultEntries: Array<[string, Array<Date>]> = [];
+    for (const [cafeId, dates] of locationEntries) {
+        const filteredDates = dates.filter(date => DateUtil.isSameDate(date, now));
+        if (filteredDates.length > 0) {
+            resultEntries.push([cafeId, filteredDates]);
+        }
+    }
+    return resultEntries;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
