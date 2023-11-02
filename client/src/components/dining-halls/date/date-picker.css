@@ -9,8 +9,8 @@
     position: fixed;
     z-index: 100;
     right: 1rem;
-    top: 0;
-    border-bottom-left-radius: var(--default-padding);
+    bottom: 0;
+    border-top-left-radius: var(--default-padding);
 }
 
 .date-picker-buttons {
