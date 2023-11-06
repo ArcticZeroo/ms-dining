@@ -89,7 +89,11 @@ export class DailyCafeUpdateSession {
             cafePromises.push(this.discoverCafeAsync(cafe));
         }
 
-        await Promise.all(cafePromises);
+        try {
+            await Promise.all(cafePromises);
+        } catch (err) {
+            logError(`{${this.dateString}}`, 'Failed to populate cafe sessions:', err);
+        }
 
         const endTime = Date.now();
         const elapsedSeconds = (endTime - startTime) / 1000;
