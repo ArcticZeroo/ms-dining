@@ -6,8 +6,12 @@ import { DateUtil } from '@msdining/common';
 const updateWeeklyCafeMenusAsync = async () => {
     logInfo('Updating weekly cafe menus...');
     for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
-        const updateSession = new DailyCafeUpdateSession(i);
-        await updateSession.populateAsync();
+        try {
+            const updateSession = new DailyCafeUpdateSession(i);
+            await updateSession.populateAsync();
+        } catch (err) {
+            logError(`Failed to update weekly cafe menus for ${i} day(s) in the future:`, err);
+        }
     }
 }
 
