@@ -30,5 +30,15 @@ export default defineConfig({
             '/api':    defaultLocalProxy,
             '/static': defaultLocalProxy
         }
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                // Avoids issues with sleeping tabs/keeping the site loaded around when changes are made
+                entryFileNames: 'assets/[name].js',
+                chunkFileNames: 'assets/[name].js',
+                assetFileNames: 'assets/[name].[ext]'
+            }
+        }
     }
 })
