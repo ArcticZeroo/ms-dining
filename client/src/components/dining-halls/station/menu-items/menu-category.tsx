@@ -8,9 +8,9 @@ export interface IMenuCategoryProps {
 }
 
 export const MenuCategory: React.FC<IMenuCategoryProps> = ({
-                                                                                categoryName,
-                                                                                menuItems
-                                                                            }) => {
+    categoryName,
+    menuItems
+}) => {
     return (
         <>
             <tr>

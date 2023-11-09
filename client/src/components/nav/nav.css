@@ -106,7 +106,7 @@ nav form {
     transition: padding 0.5s ease;
 }
 
-@media(max-height: 800px) {
+@media (max-height: 800px) {
     #site-header {
         padding: 0.5rem 0.5rem 0 0.5rem;
     }

@@ -14,13 +14,13 @@ interface IEntityButtonProps {
 }
 
 export const EntityButton: React.FC<IEntityButtonProps> = ({
-                                                               name,
-                                                               onClick,
-                                                               type,
-                                                               currentFilter,
-                                                               totalResultCount,
-                                                               tabCounts
-                                                           }) => {
+    name,
+    onClick,
+    type,
+    currentFilter,
+    totalResultCount,
+    tabCounts
+}) => {
     const tabCount = useMemo(() => {
         if (type === SearchEntityFilterType.all) {
             return totalResultCount;
@@ -50,19 +50,20 @@ export const EntityButton: React.FC<IEntityButtonProps> = ({
     };
 
     return (
-        <button className={classNames('entity-button', isChecked && 'active', isDisabled && 'disabled')} onClick={onButtonClicked}>
+        <button className={classNames('entity-button', isChecked && 'active', isDisabled && 'disabled')}
+            onClick={onButtonClicked}>
             <input type="radio"
-                   name="entity-type"
-                   id={htmlId}
-                   title={name}
-                   value={name}
-                   checked={isChecked}
-                   disabled={isDisabled}
-                   readOnly={true}
+                name="entity-type"
+                id={htmlId}
+                title={name}
+                value={name}
+                checked={isChecked}
+                disabled={isDisabled}
+                readOnly={true}
             />
             <label htmlFor={htmlId}>
                 {name} ({tabCount})
             </label>
         </button>
     );
-}
+};
