@@ -131,8 +131,8 @@ export const cafeList: ICafe[] = [
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Boardwalk @ The Commons',
-		id: 'boardwalk'
+		name: 'Boardwalk @ The Commons',
+		id:   'boardwalk'
 	},
 	{
 		name: 'in.gredients. Restaurant',
@@ -159,12 +159,12 @@ export const cafeList: ICafe[] = [
 		id:   'studiod',
 	},
 	{
-		name:    'Food Hall 6',
-		id: 'foodhall6'
+		name: 'Food Hall 6',
+		id:   'foodhall6'
 	},
 	{
-		name:    'Craft75 Pub (Building 6)',
-		id: 'craft75'
+		name: 'Craft75 Pub (Building 6)',
+		id:   'craft75'
 	},
 	{
 		name:    'Dote (Local Flavors @ Building 6)',
@@ -176,23 +176,31 @@ export const cafeList: ICafe[] = [
 		id:      'thecollective',
 		groupId: groupIds.localFlavorsBuilding6
 	},
-    {
-        name:    'Salt & Straw (Local Flavors @ Building 6)',
-        id:      'saltandstraw',
-        groupId: groupIds.localFlavorsBuilding6
-    },
-    {
-        name:    'L\'Experience (Local Flavors @ Building 6)',
-        id:      'l-experience',
-        groupId: groupIds.localFlavorsBuilding6
-    },
-    {
-        name:    'Pinkabella Cupcakes (Local Flavors @ Building 6)',
-        id:      'pinkabella',
-        groupId: groupIds.localFlavorsBuilding6
-    },
+	{
+		name:    'Salt & Straw (Local Flavors @ Building 6)',
+		id:      'saltandstraw',
+		groupId: groupIds.localFlavorsBuilding6
+	},
+	{
+		name:    'L\'Experience (Local Flavors @ Building 6)',
+		id:      'l-experience',
+		groupId: groupIds.localFlavorsBuilding6
+	},
+	{
+		name:    'Pinkabella Cupcakes (Local Flavors @ Building 6)',
+		id:      'pinkabella',
+		groupId: groupIds.localFlavorsBuilding6
+	},
 	{
 		name: 'Dote (Redmond Transit Station)',
-		id: 'dote-rts'
+		id:   'dote-rts'
+	},
+	{
+		name: 'General Store (Building 8)',
+		id:   'generalstore'
+	},
+	{
+		name: 'Food Hall 9',
+		id:   'foodhall9'
 	}
 ];
