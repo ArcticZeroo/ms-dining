@@ -49,18 +49,18 @@ const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFut
         }
     }
     return resultEntries;
-}
+};
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
-                                                               isVisible,
-                                                               result: {
-                                                                           name,
-                                                                           description,
-                                                                           locationDatesByCafeId,
-                                                                           imageUrl,
-                                                                           entityType
-                                                                       }
-                                                           }) => {
+    isVisible,
+    result: {
+        name,
+        description,
+        locationDatesByCafeId,
+        imageUrl,
+        entityType
+    }
+}) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const useGroups = useValueNotifier(ApplicationSettings.useGroups);
@@ -130,7 +130,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
                                 return (
                                     <Link to={getViewUrl(parentView)} className="search-result-chip"
-                                          key={view.value.id}>
+                                        key={view.value.id}>
                                         <div className="chip-data">
                                             <span className="material-symbols-outlined icon">
                                                 location_on

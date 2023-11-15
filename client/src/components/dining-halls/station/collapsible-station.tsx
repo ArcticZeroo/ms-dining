@@ -18,7 +18,7 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     return {
         width: `${widthPx}px`
     };
-}
+};
 
 export interface ICollapsibleStationProps {
     station: ICafeStation;
@@ -57,7 +57,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         } else {
             ApplicationSettings.collapsedStationNames.add(station.name);
         }
-    }
+    };
 
     // Collapse memory is a boot setting. Also allows one render for width consistency.
     useEffect(() => {
@@ -73,7 +73,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                 {
                     station.logoUrl && (
                         <img src={station.logoUrl}
-                             alt={`Logo for station ${station.name}`}/>
+                            alt={`Logo for station ${station.name}`}/>
                     )
                 }
                 {station.name}

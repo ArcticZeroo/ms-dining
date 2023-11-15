@@ -93,11 +93,11 @@ export const SettingsPage = () => {
                                             {view.value.name}
                                         </label>
                                         <input type="checkbox"
-                                               id={htmlId}
-                                               checked={isChecked}
-                                               onChange={() => toggleHomepageView(view)}/>
+                                            id={htmlId}
+                                            checked={isChecked}
+                                            onChange={() => toggleHomepageView(view)}/>
                                     </div>
-                                )
+                                );
                             })
                         }
                     </div>
@@ -105,5 +105,5 @@ export const SettingsPage = () => {
             </div>
         </div>
     )
-        ;
+    ;
 };

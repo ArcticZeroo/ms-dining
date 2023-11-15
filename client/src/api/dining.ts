@@ -117,10 +117,10 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCafeMenu({
-                                             id,
-                                             shouldCountTowardsLastUsed,
-                                             date,
-                                         }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+        id,
+        shouldCountTowardsLastUsed,
+        date,
+    }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
@@ -248,7 +248,7 @@ export abstract class DiningClient {
                 name:                  serverResult.name,
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
-                locationDatesByCafeId: locationDatesByCafeId,
+                locationDatesByCafeId,
                 matchReasons:          new Set(
                     serverResult.matchReasons.map(reason => reason === 'description'
                         ? SearchMatchReason.description

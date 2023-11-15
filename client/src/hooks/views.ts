@@ -58,7 +58,7 @@ export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithou
     }, [cafes, groups]);
 
     return { viewsById, viewsInOrder } as const;
-}
+};
 
 export const useVisibleViews = () => {
     const { viewsInOrder } = useContext(ApplicationContext);

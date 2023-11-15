@@ -10,18 +10,18 @@ interface IDownscaledImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export const DownscaledImage: React.FC<IDownscaledImageProps> = ({
-                                                                     src,
-                                                                     alt,
-                                                                     className,
-                                                                     maxHeight,
-                                                                     maxWidth,
-                                                                     ...imageProps
-                                                                 }) => {
+    src,
+    alt,
+    className,
+    maxHeight,
+    maxWidth,
+    ...imageProps
+}) => {
     const [imageData, setImageData] = useState<string>('');
     const imageLoadSymbolRef = useRef<symbol | null>(null);
 
     useEffect(() => {
-        let currentSymbol = Symbol();
+        const currentSymbol = Symbol();
         imageLoadSymbolRef.current = currentSymbol;
 
         setImageData('');
@@ -52,4 +52,4 @@ export const DownscaledImage: React.FC<IDownscaledImageProps> = ({
             {...imageProps}
         />
     );
-}
+};

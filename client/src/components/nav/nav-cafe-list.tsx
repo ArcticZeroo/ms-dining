@@ -18,7 +18,7 @@ interface INavViewLinkProps {
 const NavViewLink: React.FC<INavViewLinkProps> = ({ view, onViewSelected }) => (
     <li key={view.value.id} className="cafe">
         <NavLink to={getViewUrl(view)}
-                 onClick={() => onViewSelected(view)}>
+            onClick={() => onViewSelected(view)}>
             {view.value.name}
         </NavLink>
     </li>
@@ -45,8 +45,8 @@ export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => 
                 {
                     viewsByGroupId.get(groupId)!.map(view => (
                         <NavViewLink key={view.value.id}
-                                     view={view}
-                                     onViewSelected={onViewSelected}/>
+                            view={view}
+                            onViewSelected={onViewSelected}/>
                     ))
                 }
             </ul>
@@ -58,10 +58,10 @@ export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => 
             {
                 visibleViews?.map?.(view => (
                     <NavViewLink key={view.value.id}
-                                 view={view}
-                                 onViewSelected={onViewSelected}/>
+                        view={view}
+                        onViewSelected={onViewSelected}/>
                 ))
             }
         </ul>
     );
-}
+};

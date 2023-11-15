@@ -13,17 +13,17 @@ const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStatio
         <div className="menu-body" ref={menuBodyRef}>
             <table>
                 <tbody>
-                {
-                    Object.keys(menuItemsByCategoryName).map(categoryName => (
-                        <MenuCategory key={categoryName}
-                                      categoryName={categoryName}
-                                      menuItems={menuItemsByCategoryName[categoryName]}/>
-                    ))
-                }
+                    {
+                        Object.keys(menuItemsByCategoryName).map(categoryName => (
+                            <MenuCategory key={categoryName}
+                                categoryName={categoryName}
+                                menuItems={menuItemsByCategoryName[categoryName]}/>
+                        ))
+                    }
                 </tbody>
             </table>
         </div>
-    )
+    );
 };
 
 export const StationMenu = React.forwardRef(StationMenuWithRef);

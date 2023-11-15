@@ -36,7 +36,7 @@ export const getImageSizeProps = (menuItem: IMenuItem) => {
     }
 
     return {};
-}
+};
 
 export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
     const [forceImageFallback, setForceImageFallback] = useState(false);

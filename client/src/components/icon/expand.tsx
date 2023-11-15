@@ -11,4 +11,4 @@ export const ExpandIcon: React.FC<IExpandIconProps> = ({ isExpanded }) => {
             expand_more
         </span>
     );
-}
+};

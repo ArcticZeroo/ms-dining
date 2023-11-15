@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
 
 const defaultLocalProxy = {
     target:       'http://localhost:3002',
@@ -41,4 +41,4 @@ export default defineConfig({
             }
         }
     }
-})
+});

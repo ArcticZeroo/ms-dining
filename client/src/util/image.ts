@@ -28,4 +28,4 @@ export const scaleImage = (image: HTMLImageElement, maxWidth?: number, maxHeight
     ctx.drawImage(image, 0, 0, finalWidthPx, finalHeightPx);
 
     return canvas.toDataURL('image/png');
-}
+};
