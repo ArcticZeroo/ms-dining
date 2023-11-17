@@ -26,9 +26,8 @@ export const scheduleWeeklyUpdateJob = () => {
     scheduleWeeklyJobs([
         // Try to keep menus up to date the day before
         '0 20 * * 0,1,2,3,4',
-        // Ensure that we have menus for next week by EOD on Fridays
-        '0 10 * * 5',
         // Each weekday, update all weekly menus to account for any changes
         '0 9 * * 1,2,3,4,5'
+        // TODO: Ensure that we have menus for next week by EOD on Fridays
     ]);
 }
