@@ -62,8 +62,8 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     // Collapse memory is a boot setting. Also allows one render for width consistency.
     useEffect(() => {
         if (rememberCollapseState) {
-            const isExpanded = !collapsedStationNames.has(station.name);
-            updateExpansionState(isExpanded);
+            const isExpandedOnBoot = !collapsedStationNames.has(station.name);
+            updateExpansionState(isExpandedOnBoot);
         }
     }, []);
 

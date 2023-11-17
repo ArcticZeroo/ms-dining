@@ -6,7 +6,7 @@ import { ApplicationContext } from '../../../context/app.ts';
 export const CafeViewPage: React.FC = () => {
     const { viewsById } = useContext(ApplicationContext);
     const params = useParams();
-    const id = params.id;
+    const { id } = params;
 
     if (!id) {
         return (

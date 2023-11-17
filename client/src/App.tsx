@@ -52,7 +52,7 @@ const useMenuScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | unde
     return menuDivRef;
 };
 
-function App() {
+const App = () => {
     const { cafes, groups } = useLoaderData() as IViewListResponse;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
@@ -97,6 +97,6 @@ function App() {
             </ApplicationContext.Provider>
         </div>
     );
-}
+};
 
 export default App;

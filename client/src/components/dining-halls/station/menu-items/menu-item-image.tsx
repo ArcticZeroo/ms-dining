@@ -26,7 +26,7 @@ const defaultImageProps = {
     loading:   'lazy'
 } as const;
 
-export const getImageSizeProps = (menuItem: IMenuItem) => {
+const getImageSizeProps = (menuItem: IMenuItem) => {
     // Even if we're using fallback, we should still set these props since we expect the same scale
     if (menuItem.hasThumbnail && menuItem.thumbnailWidth && menuItem.thumbnailHeight) {
         return {
