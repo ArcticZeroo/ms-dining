@@ -8,7 +8,7 @@ export const useValueNotifier = <T>(valueNotifier: ValueNotifier<T>) => {
 		const listener = (value: T) => setValue(value);
 		valueNotifier.addListener(listener);
 		return () => valueNotifier.removeListener(listener);
-	}, []);
+	}, [valueNotifier]);
 
 	return value;
 };
