@@ -18,10 +18,10 @@ export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ closeNa
             {
                 deviceType === DeviceType.Desktop && (
                     <div id="site-header">
-                        <img src={"/penguin.svg"} alt="Site Icon"/>
+                        <img src={'/penguin.svg'} alt="Site Icon"/>
                         <span>
                                 MSDining
-                            </span>
+                        </span>
                     </div>
                 )
             }
@@ -38,4 +38,4 @@ export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ closeNa
             <SearchBar onSubmit={closeNav}/>
         </>
     );
-}
+};

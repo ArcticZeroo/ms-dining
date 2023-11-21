@@ -12,5 +12,5 @@ export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: S
             console.error('Unknown filter type', filter);
             return false;
     }
-}
+};
 

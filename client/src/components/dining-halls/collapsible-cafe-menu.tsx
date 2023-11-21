@@ -11,9 +11,9 @@ interface ICollapsibleCafeMenuProps {
 }
 
 export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
-                                                                             cafe,
-                                                                             menu,
-                                                                         }) => {
+    cafe,
+    menu,
+}) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
     const collapsedCafeIds = useValueNotifier(ApplicationSettings.collapsedCafeIds);
@@ -44,8 +44,8 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
         <div className="collapsible-cafe" key={cafe.id}>
             <div className="cafe-header">
                 <a className="cafe-order-link"
-                   href={`https://${cafe.id}.buy-ondemand.com`}
-                   target="_blank">
+                    href={`https://${cafe.id}.buy-ondemand.com`}
+                    target="_blank">
                     <span className="material-symbols-outlined">
                             open_in_new
                     </span>
@@ -54,8 +54,8 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
                     {
                         showCafeLogo && (
                             <img src={cafe.logoUrl}
-                                 alt={`${cafe.name} logo`}
-                                 className="logo"/>
+                                alt={`${cafe.name} logo`}
+                                className="logo"/>
                         )
                     }
                     {cafe.name} Menu

@@ -1,6 +1,6 @@
 export const pluralize = (value: string, count: number): string => {
     return count === 1 ? value : `${value}s`;
-}
+};
 
 export const findLongestNonSequentialSubstringLength = (parent: string, child: string): number => {
     let score = 0;
@@ -16,10 +16,10 @@ export const findLongestNonSequentialSubstringLength = (parent: string, child: s
     }
 
     return score;
-}
+};
 
 export const findLongestSequentialSubstringLength = (parent: string, child: string): number => {
-    let longestLength = 0
+    let longestLength = 0;
 
     for (let i = 0; i < parent.length; i++) {
         for (let j = 0; j < child.length; j++) {
@@ -39,6 +39,6 @@ export const findLongestSequentialSubstringLength = (parent: string, child: stri
     }
 
     return longestLength;
-}
+};
 
 export const normalizeName = (name: string) => name.toLowerCase().trim();

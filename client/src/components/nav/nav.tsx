@@ -26,9 +26,9 @@ export const Nav: React.FC = () => {
 
     return (
         <nav className={isExpanded ? 'expanded' : ''}>
-            { !isExpanded && visibilityToggleButton }
+            {!isExpanded && visibilityToggleButton}
             <ul id="sticky-header-list" className="expandable-nav-list">
-                { isExpanded && visibilityToggleButton }
+                {isExpanded && visibilityToggleButton}
                 <NavListHeaderItems closeNav={() => setIsExpanded(false)}/>
             </ul>
             <NavCafeList onViewSelected={onViewClicked}/>
@@ -43,4 +43,4 @@ export const Nav: React.FC = () => {
             </ul>
         </nav>
     );
-}
+};

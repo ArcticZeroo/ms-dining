@@ -17,7 +17,7 @@ const getPreviousDate = (date: Date) => {
     }
 
     return newDate;
-}
+};
 
 const getNextDate = (date: Date) => {
     const newDate = new Date(date.getTime());
@@ -28,7 +28,7 @@ const getNextDate = (date: Date) => {
     }
 
     return newDate;
-}
+};
 
 export const CafeDatePicker: React.FC = () => {
     const selectedDateNotifier = useContext(SelectedDateContext);
@@ -58,7 +58,7 @@ export const CafeDatePicker: React.FC = () => {
         }
 
         selectedDateNotifier.value = DiningClient.getTodayDateForMenu();
-    }
+    };
 
     const goForwards = () => {
         if (!canGoForwards) {
@@ -71,17 +71,19 @@ export const CafeDatePicker: React.FC = () => {
     return (
         <div className="date-picker">
             <div className="date-picker-buttons">
-                <button onClick={goBackwards} className="date-picker-button" disabled={!canGoBackwards} title={`Go to ${getDateDisplay(previousDate)}`}>
+                <button onClick={goBackwards} className="date-picker-button" disabled={!canGoBackwards}
+                    title={`Go to ${getDateDisplay(previousDate)}`}>
                     <span className="material-symbols-outlined">
                         arrow_back
                     </span>
                 </button>
-                <button onClick={goToToday} className="date-picker-button" disabled={isAtToday} title={`Go to Today`}>
+                <button onClick={goToToday} className="date-picker-button" disabled={isAtToday} title={'Go to Today'}>
                     <span className="material-symbols-outlined">
                         today
                     </span>
                 </button>
-                <button onClick={goForwards} className="date-picker-button" disabled={!canGoForwards} title={`Go to ${getDateDisplay(nextDate)}`}>
+                <button onClick={goForwards} className="date-picker-button" disabled={!canGoForwards}
+                    title={`Go to ${getDateDisplay(nextDate)}`}>
                     <span className="material-symbols-outlined">
                         arrow_forward
                     </span>

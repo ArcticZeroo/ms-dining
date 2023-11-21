@@ -40,29 +40,29 @@ const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
                 }],
             }}
             options={{
-                scales: {
+                scales:  {
                     x: {
                         title: {
                             display: true,
-                            text: 'Time'
+                            text:    'Time'
                         },
-                        type: 'time',
+                        type:  'time',
                         ticks: {
                             callback: value => typeof value === 'string' && allDates.has(value) ? value : undefined
                         }
                     },
                     y: {
-                        title: {
+                        title:       {
                             display: true,
-                            text: 'Visitors'
+                            text:    'Visitors'
                         },
                         beginAtZero: true
                     }
                 },
                 plugins: {
-                    title: {
+                    title:  {
                         display: true,
-                        text: 'Unique Visitors by Hour',
+                        text:    'Unique Visitors by Hour',
                     },
                     legend: {
                         display: false

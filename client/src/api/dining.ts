@@ -36,7 +36,7 @@ export abstract class DiningClient {
         if (!response.ok) {
             throw new Error(`Response failed with status: ${response.status}`);
         }
-        return await response.json();
+        return response.json();
     }
 
     private static async _retrieveViewListInner(): Promise<IViewListResponse> {
@@ -48,7 +48,7 @@ export abstract class DiningClient {
         return viewList;
     }
 
-    public static async retrieveViewList(): Promise<IViewListResponse> {
+    public static retrieveViewList(): Promise<IViewListResponse> {
         if (!DiningClient._viewListPromise) {
             DiningClient._viewListPromise = DiningClient._retrieveViewListInner();
         }
@@ -56,7 +56,7 @@ export abstract class DiningClient {
         return DiningClient._viewListPromise;
     }
 
-    private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
+    private static _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
         return DiningClient._makeRequest(`/api/dining/menu/${id}?date=${dateString}`);
     }
 
@@ -117,10 +117,10 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCafeMenu({
-                                             id,
-                                             shouldCountTowardsLastUsed,
-                                             date,
-                                         }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+        id,
+        shouldCountTowardsLastUsed,
+        date,
+    }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
@@ -248,7 +248,7 @@ export abstract class DiningClient {
                 name:                  serverResult.name,
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
-                locationDatesByCafeId: locationDatesByCafeId,
+                locationDatesByCafeId,
                 matchReasons:          new Set(
                     serverResult.matchReasons.map(reason => reason === 'description'
                         ? SearchMatchReason.description

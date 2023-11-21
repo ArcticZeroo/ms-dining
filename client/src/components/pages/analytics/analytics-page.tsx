@@ -58,7 +58,7 @@ export const AnalyticsPage = () => {
             <div className="body">
                 <div id="after-selector">
                     {
-                        dayOptions.map((daysAgoOption) => (
+                        dayOptions.map(daysAgoOption => (
                             <button
                                 className={classNames('days-ago-option', daysAgoOption === currentDaysAgo && 'active')}
                                 onClick={() => setCurrentDaysAgo(daysAgoOption)}>

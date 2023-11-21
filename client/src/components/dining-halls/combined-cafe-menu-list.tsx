@@ -1,4 +1,4 @@
-import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
@@ -7,10 +7,11 @@ import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts
 import { CafeMenu, CafeViewType, ICafe } from '../../models/cafe.ts';
 import { sortCafeIds } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
-
-import './combined-cafes.css';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { CafeDatePicker } from './date/date-picker.tsx';
+import { classNames } from '../../util/react.ts';
+
+import './combined-cafes.css';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -35,7 +36,7 @@ const useMenuData = (cafeIds: Iterable<string>, countTowardsLastUsed: boolean) =
         return { cafe, menu };
     }, [selectedDate, countTowardsLastUsed]);
 
-    const loadMenusAsync = useCallback(async () => {
+    const loadMenusAsync = useCallback(() => {
         const menuPromises = [];
 
         for (const cafeId of sortCafeIds(Array.from(cafeIds))) {
@@ -58,29 +59,38 @@ const useMenuData = (cafeIds: Iterable<string>, countTowardsLastUsed: boolean) =
         return Promise.all(menuPromises);
     }, [cafeIds, viewsById, loadMenuAsync]);
 
-    const menuDataState = useDelayedPromiseState(loadMenusAsync, true /*keepLastValue*/);
+    const { stage, run, value } = useDelayedPromiseState(loadMenusAsync, true /*keepLastValue*/);
 
     useEffect(() => {
-        menuDataState.run();
-    }, [menuDataState.run]);
+        run();
+    }, [run]);
 
-    return menuDataState.value ?? [];
-}
+    return [stage, value ?? []] as const;
+};
 
 export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({ cafeIds, countTowardsLastUsed }) => {
-    const menuData = useMenuData(cafeIds, countTowardsLastUsed);
+    const [menuDataStage, menuData] = useMenuData(cafeIds, countTowardsLastUsed);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const isLoading = menuDataStage === PromiseStage.running;
 
     return (
-        <div className="collapsible-menu-list">
+        <div className={classNames('collapsible-menu-list', isLoading && 'centered-content')}>
             {
                 allowFutureMenus && <CafeDatePicker/>
             }
             {
+                menuDataStage === PromiseStage.running && (
+                    <div className="centered-content">
+                        <div className="loading-spinner"/>
+                        Loading menu(s)...
+                    </div>
+                )
+            }
+            {
                 menuData.map(({ cafe, menu }) => (
                     <CollapsibleCafeMenu key={cafe.id}
-                                         cafe={cafe}
-                                         menu={menu}/>
+                        cafe={cafe}
+                        menu={menu}/>
                 ))
             }
         </div>

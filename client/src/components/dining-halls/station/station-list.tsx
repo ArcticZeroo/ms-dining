@@ -11,7 +11,7 @@ interface IStationListProps {
 export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }) => {
     return (
         <div className={classNames('stations', !isVisible && 'hidden')}>
-            {stations.length === 0 && `There's nothing here! This cafe is probably closed during this time.`}
+            {stations.length === 0 && 'There\'s nothing here! This cafe is probably closed during this time.'}
             {stations.map(station => <CollapsibleStation key={station.name} station={station}/>)}
         </div>
     );

@@ -13,7 +13,7 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({ name,
 
     const toggleSetting = () => {
         setting.value = !currentValue;
-    }
+    };
 
     const htmlId = `setting-${setting.name}`;
 
@@ -32,9 +32,9 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({ name,
                 }
             </label>
             <input type="checkbox"
-                   id={htmlId}
-                   checked={currentValue}
-                   onChange={toggleSetting}/>
+                id={htmlId}
+                checked={currentValue}
+                onChange={toggleSetting}/>
         </div>
     );
 };

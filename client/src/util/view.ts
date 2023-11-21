@@ -14,7 +14,7 @@ export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<str
     }
 
     return view.value.members.flatMap(viewId => expandAndFlattenView(viewId, viewsById));
-}
+};
 
 export const getParentView = (viewsById: Map<string, CafeView>, useGroups: boolean, view: CafeView) => {
     if (view.type === CafeViewType.group) {
@@ -31,18 +31,18 @@ export const getParentView = (viewsById: Map<string, CafeView>, useGroups: boole
     }
 
     return parentView;
-}
+};
 
 export const isViewVisible = (useGroups: boolean, view: CafeView) => {
     if (useGroups) {
         if (view.type === CafeViewType.group) {
             return view.value.members.length > 0;
-        } else {
-            // Views with a group should not be displayed, we want to display their parent group instead.
-            // There should never be a view with a group id whose group data wasn't received from the server.
-            return !view.value.group;
-        }
-    } else {
-        return view.type === CafeViewType.single;
-    }
-}
+        } 
+        // Views with a group should not be displayed, we want to display their parent group instead.
+        // There should never be a view with a group id whose group data wasn't received from the server.
+        return !view.value.group;
+        
+    } 
+    return view.type === CafeViewType.single;
+    
+};

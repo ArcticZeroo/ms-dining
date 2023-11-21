@@ -27,7 +27,7 @@ const getStringSetting = (key: string, defaultValue: string) => {
     } catch {
         return defaultValue;
     }
-}
+};
 
 const getStringArraySetting = (key: string, delimiter: string = ';') => {
     try {

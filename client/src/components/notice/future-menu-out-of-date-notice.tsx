@@ -33,4 +33,4 @@ export const FutureMenuOutOfDateNotice = () => {
             This menu could change by the time it is available.
         </div>
     );
-}
+};
