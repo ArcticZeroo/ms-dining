@@ -1,13 +1,12 @@
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { DiningClient } from '../../../api/dining.ts';
 import { ISearchResult, SearchEntityFilterType, SearchEntityType } from '../../../models/search.ts';
-import { getSearchTabCount } from '../../../util/search.ts';
+import { classNames } from '../../../util/react.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
 import { EntityButton } from './entity-button.tsx';
-import { DiningClient } from '../../../api/dining.ts';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 
 import './search-page.css';
-import { classNames } from '../../../util/react.ts';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -61,15 +60,8 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     } as const;
 
     useEffect(() => {
-        if (entityFilterType === SearchEntityFilterType.all) {
-            return;
-        }
-
-        const countForEntityType = getSearchTabCount(entityFilterType, tabCounts, results.length /*totalResultCount*/);
-        if (countForEntityType === 0) {
-            setEntityFilterType(SearchEntityFilterType.all);
-        }
-    }, [entityFilterType, tabCounts]);
+        setEntityFilterType(SearchEntityFilterType.all);
+    }, [queryText]);
 
     return (
         <div className="search-page">
