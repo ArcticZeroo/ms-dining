@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 
 import { classNames } from '../../../util/react.ts';
 import { SearchEntityFilterType, SearchEntityType } from '../../../models/search.ts';
+import { getSearchTabCount } from '../../../util/search.ts';
 
 interface IEntityButtonProps {
     name: string;
@@ -21,21 +22,10 @@ export const EntityButton: React.FC<IEntityButtonProps> = ({
     totalResultCount,
     tabCounts
 }) => {
-    const tabCount = useMemo(() => {
-        if (type === SearchEntityFilterType.all) {
-            return totalResultCount;
-        }
-
-        if (type === SearchEntityFilterType.menuItem) {
-            return tabCounts.get(SearchEntityType.menuItem) ?? 0;
-        }
-
-        if (type === SearchEntityFilterType.station) {
-            return tabCounts.get(SearchEntityType.station) ?? 0;
-        }
-
-        return 0;
-    }, [tabCounts, totalResultCount, type]);
+    const tabCount = useMemo(
+        () => getSearchTabCount(type, tabCounts, totalResultCount),
+        [tabCounts, totalResultCount, type]
+    );
 
     const htmlId = `entity-button-${name}`;
     const isChecked = type === currentFilter;

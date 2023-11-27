@@ -14,3 +14,18 @@ export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: S
     }
 };
 
+export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<SearchEntityType, number>, totalResultCount: number) => {
+    if (type === SearchEntityFilterType.all) {
+        return totalResultCount;
+    }
+
+    if (type === SearchEntityFilterType.menuItem) {
+        return tabCounts.get(SearchEntityType.menuItem) ?? 0;
+    }
+
+    if (type === SearchEntityFilterType.station) {
+        return tabCounts.get(SearchEntityType.station) ?? 0;
+    }
+
+    return 0;
+}

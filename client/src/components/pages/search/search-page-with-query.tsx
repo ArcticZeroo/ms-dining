@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ISearchResult, SearchEntityFilterType, SearchEntityType } from '../../../models/search.ts';
+import { getSearchTabCount } from '../../../util/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
 import { EntityButton } from './entity-button.tsx';
 import { DiningClient } from '../../../api/dining.ts';
@@ -58,6 +59,17 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         totalResultCount: results.length,
         tabCounts,
     } as const;
+
+    useEffect(() => {
+        if (entityFilterType === SearchEntityFilterType.all) {
+            return;
+        }
+
+        const countForEntityType = getSearchTabCount(entityFilterType, tabCounts, results.length /*totalResultCount*/);
+        if (countForEntityType === 0) {
+            setEntityFilterType(SearchEntityFilterType.all);
+        }
+    }, [entityFilterType, tabCounts]);
 
     return (
         <div className="search-page">
