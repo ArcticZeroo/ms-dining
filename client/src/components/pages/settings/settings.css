@@ -28,6 +28,26 @@
     gap: var(--default-padding);
 }
 
+#setting-homepage .group {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background: #4e92c2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+#setting-homepage .group .view-group-name {
+    text-align: center;
+    color: white;
+}
+
+#setting-homepage .groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+}
+
 .setting-chips {
     display: flex;
     flex-wrap: wrap;
