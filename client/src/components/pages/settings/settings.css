@@ -37,8 +37,15 @@
 .setting-chip {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     background: #DDD;
     border-radius: var(--default-padding);
     padding: var(--default-padding);
+    gap: 0.5rem;
+}
+
+.setting-name, .setting-chip label {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
 }

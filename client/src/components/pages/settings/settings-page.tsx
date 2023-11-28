@@ -27,6 +27,9 @@ export const SettingsPage = () => {
                 <div className="setting" id="setting-homepage">
                     <div className="setting-info">
                         <div className="setting-name">
+                            <span className="material-symbols-outlined">
+                                visibility
+                            </span>
                             Display Settings
                         </div>
                         <div className="setting-description">
@@ -35,16 +38,19 @@ export const SettingsPage = () => {
                     </div>
                     <div className="setting-chips">
                         <BooleanSettingInput
+                            icon="photo_camera"
                             setting={ApplicationSettings.showImages}
                             name="Show Images"
                             isChip={true}
                         />
                         <BooleanSettingInput
+                            icon="local_fire_department"
                             setting={ApplicationSettings.showCalories}
                             name="Show Calories"
                             isChip={true}
                         />
                         <BooleanSettingInput
+                            icon="edit"
                             setting={ApplicationSettings.showDescriptions}
                             name="Show Descriptions"
                             isChip={true}
@@ -52,6 +58,7 @@ export const SettingsPage = () => {
                     </div>
                 </div>
                 <BooleanSettingInput
+                    icon="group"
                     setting={ApplicationSettings.useGroups}
                     name="Group Cafes"
                     description="When enabled, cafe menus are shown in location-based groups, and the navigation menu is condensed."
@@ -59,6 +66,9 @@ export const SettingsPage = () => {
                 <div className="setting" id="setting-homepage">
                     <div className="setting-info">
                         <div className="setting-name">
+                            <span className="material-symbols-outlined">
+                                home
+                            </span>
                             Homepage Views
                         </div>
                         <div className="setting-description">
@@ -87,6 +97,7 @@ export const SettingsPage = () => {
                     </div>
                 </div>
                 <BooleanSettingInput
+                    icon="schedule"
                     setting={ApplicationSettings.allowFutureMenus}
                     name="(Experimental) Allow Future Menus"
                     description={
@@ -100,6 +111,7 @@ export const SettingsPage = () => {
                     }
                 />
                 <BooleanSettingInput
+                    icon="expand_content"
                     setting={ApplicationSettings.rememberCollapseState}
                     name="Remember Collapse/Expand State"
                 />
