@@ -30,7 +30,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         for (const cafe of diningConfig.cafeList) {
             const cafeData = cafeDataById.get(cafe.id);
             if (!cafeData) {
-                console.warn('Missing cafe data for cafe id', cafeData.id);
+                console.warn('Missing cafe data for cafe id', cafe.id);
                 continue;
             }
 
