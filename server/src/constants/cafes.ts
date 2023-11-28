@@ -96,7 +96,7 @@ export const cafeList: ICafe[] = [
 		id:   'one-esterra',
 	},
 	{
-		name:    'Acapulco Fresh',
+		name:    'Acapulco Fresh 🌯',
 		id:      'acapulcofresh',
 		groupId: groupIds.commons
 	},
@@ -106,12 +106,12 @@ export const cafeList: ICafe[] = [
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Just Poké',
+		name:    'Just Poké 🐟',
 		id:      'justpoke',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Kalia',
+		name:    'Kalia 🍛',
 		id:      'kalia',
 		groupId: groupIds.commons
 	},
@@ -121,12 +121,12 @@ export const cafeList: ICafe[] = [
 		groupId: groupIds.commons
 	},
 	{
-		name:    'S\'wich',
+		name:    'S\'wich 🥪',
 		id:      's-wich',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Typhoon!',
+		name:    'Typhoon! 🍜',
 		id:      'typhoon',
 		groupId: groupIds.commons
 	},
@@ -139,23 +139,23 @@ export const cafeList: ICafe[] = [
 		id:   'in-gredients',
 	},
 	{
-		name: 'Building 92 Espresso',
+		name: 'Building 92 Espresso ☕',
 		id:   'cafe92',
 	},
 	{
-		name: 'Studio A Espresso',
+		name: 'Studio A Espresso ☕',
 		id:   'studioa',
 	},
 	/*{
-		friendlyName: "Studio B Espresso",
+		friendlyName: "Studio B Espresso ☕",
 		url: "studiob",
 	},
 	{
-		friendlyName: "Studio C Espresso",
+		friendlyName: "Studio C Espresso ☕",
 		url: "studioc",
 	},*/
 	{
-		name: 'Studio D Espresso',
+		name: 'Studio D Espresso ☕',
 		id:   'studiod',
 	},
 	{
@@ -167,7 +167,7 @@ export const cafeList: ICafe[] = [
 		id:   'craft75'
 	},
 	{
-		name:    'Dote',
+		name:    'Dote ☕',
 		id:      'dote',
 		groupId: groupIds.localFlavorsBuilding6
 	},
@@ -177,22 +177,22 @@ export const cafeList: ICafe[] = [
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'Salt & Straw',
+		name:    'Salt & Straw 🍨',
 		id:      'saltandstraw',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'L\'Experience',
+		name:    'L\'Experience 🥐',
 		id:      'l-experience',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'Pinkabella Cupcakes',
+		name:    'Pinkabella Cupcakes 🧁',
 		id:      'pinkabella',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name: 'Dote (Redmond Transit Station)',
+		name: 'Dote (Redmond Transit Station) ☕',
 		id:   'dote-rts'
 	},
 	{
