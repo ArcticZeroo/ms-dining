@@ -96,37 +96,37 @@ export const cafeList: ICafe[] = [
 		id:   'one-esterra',
 	},
 	{
-		name:    'Acapulco Fresh (The Commons)',
+		name:    'Acapulco Fresh',
 		id:      'acapulcofresh',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Chandy\'s (The Commons)',
+		name:    'Chandy\'s',
 		id:      'chandys',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Just Poké (The Commons)',
+		name:    'Just Poké',
 		id:      'justpoke',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Kalia (The Commons)',
+		name:    'Kalia',
 		id:      'kalia',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Hometown (The Commons)',
+		name:    'Hometown',
 		id:      'hometown',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'S\'wich (The Commons)',
+		name:    'S\'wich',
 		id:      's-wich',
 		groupId: groupIds.commons
 	},
 	{
-		name:    'Typhoon! (The Commons)',
+		name:    'Typhoon!',
 		id:      'typhoon',
 		groupId: groupIds.commons
 	},
@@ -167,27 +167,27 @@ export const cafeList: ICafe[] = [
 		id:   'craft75'
 	},
 	{
-		name:    'Dote (Local Flavors @ Building 6)',
+		name:    'Dote',
 		id:      'dote',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'The Collective 🧀 (Local Flavors @ Building 6)',
+		name:    'The Collective 🧀',
 		id:      'thecollective',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'Salt & Straw (Local Flavors @ Building 6)',
+		name:    'Salt & Straw',
 		id:      'saltandstraw',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'L\'Experience (Local Flavors @ Building 6)',
+		name:    'L\'Experience',
 		id:      'l-experience',
 		groupId: groupIds.localFlavorsBuilding6
 	},
 	{
-		name:    'Pinkabella Cupcakes (Local Flavors @ Building 6)',
+		name:    'Pinkabella Cupcakes',
 		id:      'pinkabella',
 		groupId: groupIds.localFlavorsBuilding6
 	},
