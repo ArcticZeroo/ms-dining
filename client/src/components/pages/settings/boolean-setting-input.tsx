@@ -40,20 +40,18 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({
 
 	if (isChip) {
 		return (
-			<div className="setting-chip">
-				<label htmlFor={htmlId}>
-					{iconComponent}
-					{name}
-				</label>
+			<label htmlFor={htmlId} className="setting-chip">
+				{iconComponent}
+				{name}
 				{inputComponent}
-			</div>
+			</label>
 		);
 
 	}
 
 	return (
-		<div className="setting">
-			<label htmlFor={htmlId} className="setting-info">
+		<label htmlFor={htmlId} className="setting boolean-setting">
+			<div className="setting-info">
 				<div className="setting-name">
 					{iconComponent}
 					{name}
@@ -65,8 +63,8 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({
 									</div>
 								)
 				}
-			</label>
+			</div>
 			{inputComponent}
-		</div>
+		</label>
 	);
 };
