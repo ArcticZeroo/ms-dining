@@ -195,7 +195,7 @@ export abstract class DiningClient {
         for (const cafe of priorityOrder.slice(0, 5)) {
             await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
 
-            if (cancellationToken?.isCancelled || !ApplicationSettings.requestMenusInBackground.value) {
+            if (cancellationToken?.isCancelled) {
                 break;
             }
 

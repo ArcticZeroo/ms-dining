@@ -6,15 +6,12 @@
 .card.settings .body {
     display: flex;
     flex-direction: column;
+    gap: var(--default-padding);
 }
 
 .setting {
     display: flex;
     justify-content: space-between;
-}
-
-.setting-info {
-    padding: var(--default-padding);
 }
 
 .setting-info .setting-name {
@@ -31,13 +28,13 @@
     gap: var(--default-padding);
 }
 
-#setting-homepage .setting-data {
+.setting-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-.setting-homepage-option {
+.setting-chip {
     display: flex;
     justify-content: space-between;
     background: #DDD;

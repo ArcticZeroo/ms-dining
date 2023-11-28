@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLoaderData } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
-import { ApplicationSettings } from './api/settings.ts';
 import { Nav } from './components/nav/nav.tsx';
 import { ApplicationContext } from './context/app.ts';
 import { SearchQueryContext } from './context/search.ts';
@@ -17,11 +16,10 @@ import { ValueNotifier } from './util/events.ts';
 import { SelectedDateContext } from './context/time.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
-    const requestMenusInBackground = useValueNotifier(ApplicationSettings.requestMenusInBackground);
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
     useEffect(() => {
-        if (!requestMenusInBackground || cafes.length === 0 || viewsById.size === 0) {
+        if (cafes.length === 0 || viewsById.size === 0) {
             return;
         }
 
@@ -36,7 +34,7 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
         DiningClient.retrieveRecentMenusInOrder(cafes, viewsById, cancellationToken)
             .then(() => console.log('Retrieved recent cafe menus!'))
             .catch(err => console.error('Failed to retrieve recent cafe menus:', err));
-    }, [cafes, viewsById, requestMenusInBackground]);
+    }, [cafes, viewsById]);
 };
 
 const useMenuScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | undefined>) => {

@@ -24,24 +24,68 @@ export const SettingsPage = () => {
                 Settings
             </div>
             <div className="body">
-                <BooleanSettingInput
-                    setting={ApplicationSettings.showImages}
-                    name="Show Images"
-                    description="When enabled, images are shown in menu headers, menu items, and search."
-                />
-                <BooleanSettingInput
-                    setting={ApplicationSettings.showCalories}
-                    name="Show Calories"
-                />
-                <BooleanSettingInput
-                    setting={ApplicationSettings.showDescriptions}
-                    name="Show Descriptions"
-                />
+                <div className="setting" id="setting-homepage">
+                    <div className="setting-info">
+                        <div className="setting-name">
+                            Display Settings
+                        </div>
+                        <div className="setting-description">
+                            Select the information that you want to appear on cafe menus, search, and headers.
+                        </div>
+                    </div>
+                    <div className="setting-chips">
+                        <BooleanSettingInput
+                            setting={ApplicationSettings.showImages}
+                            name="Show Images"
+                            isChip={true}
+                        />
+                        <BooleanSettingInput
+                            setting={ApplicationSettings.showCalories}
+                            name="Show Calories"
+                            isChip={true}
+                        />
+                        <BooleanSettingInput
+                            setting={ApplicationSettings.showDescriptions}
+                            name="Show Descriptions"
+                            isChip={true}
+                        />
+                    </div>
+                </div>
                 <BooleanSettingInput
                     setting={ApplicationSettings.useGroups}
                     name="Group Cafes"
                     description="When enabled, cafe menus are shown in location-based groups, and the navigation menu is condensed."
                 />
+                <div className="setting" id="setting-homepage">
+                    <div className="setting-info">
+                        <div className="setting-name">
+                            Homepage Views
+                        </div>
+                        <div className="setting-description">
+                            Select the views that you want to appear on the homepage.
+                        </div>
+                    </div>
+                    <div className="setting-chips">
+                        {
+                            visibleViews.map(view => {
+                                const viewId = view.value.id;
+                                const htmlId = `setting-homepage-option-${viewId}`;
+                                const isChecked = homepageViewIds.has(viewId);
+                                return (
+                                    <div className="setting-chip" key={viewId}>
+                                        <label htmlFor={htmlId}>
+                                            {view.value.name}
+                                        </label>
+                                        <input type="checkbox"
+                                            id={htmlId}
+                                            checked={isChecked}
+                                            onChange={() => toggleHomepageView(view)}/>
+                                    </div>
+                                );
+                            })
+                        }
+                    </div>
+                </div>
                 <BooleanSettingInput
                     setting={ApplicationSettings.allowFutureMenus}
                     name="(Experimental) Allow Future Menus"
@@ -56,52 +100,9 @@ export const SettingsPage = () => {
                     }
                 />
                 <BooleanSettingInput
-                    setting={ApplicationSettings.requestMenusInBackground}
-                    name="Enable Fetching Menus in Background"
-                    description={
-                        <>
-                            When enabled, menus for each cafe will be fetched in the background in order to
-                            facilitate faster search and menu switching.
-                            <br/>
-                            Menus are fetched 1 second apart from each other, with homepage cafes first and then
-                            in order of last recently used.
-                        </>
-                    }
-                />
-                <BooleanSettingInput
                     setting={ApplicationSettings.rememberCollapseState}
                     name="Remember Collapse/Expand State"
                 />
-                <div className="setting" id="setting-homepage">
-                    <div className="setting-info">
-                        <div className="setting-name">
-                            Homepage Views
-                        </div>
-                        <div className="setting-description">
-                            Select the views that you want to appear on the homepage.
-                        </div>
-                    </div>
-                    <div className="setting-data">
-                        {
-                            visibleViews.map(view => {
-                                const viewId = view.value.id;
-                                const htmlId = `setting-homepage-option-${viewId}`;
-                                const isChecked = homepageViewIds.has(viewId);
-                                return (
-                                    <div className="setting-homepage-option" key={viewId}>
-                                        <label htmlFor={htmlId}>
-                                            {view.value.name}
-                                        </label>
-                                        <input type="checkbox"
-                                            id={htmlId}
-                                            checked={isChecked}
-                                            onChange={() => toggleHomepageView(view)}/>
-                                    </div>
-                                );
-                            })
-                        }
-                    </div>
-                </div>
             </div>
         </div>
     )

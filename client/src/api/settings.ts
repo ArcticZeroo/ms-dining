@@ -159,7 +159,6 @@ export const ApplicationSettings = {
     showImages:               new BooleanSetting('showImages', false /*defaultValue*/),
     showCalories:             new BooleanSetting('showCalories', true /*defaultValue*/),
     showDescriptions:         new BooleanSetting('showDescription', true /*defaultValue*/),
-    requestMenusInBackground: new BooleanSetting('requestMenusInBackground', true /*defaultValue*/),
     rememberCollapseState:    new BooleanSetting('rememberCollapseState', false /*defaultValue*/),
     allowFutureMenus:         new BooleanSetting('allowFutureMenus', false /*defaultValue*/),
     lastUsedCafeIds:          new StringArraySetting('lastUsedDiningHalls'),
