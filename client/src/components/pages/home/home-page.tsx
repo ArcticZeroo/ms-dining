@@ -12,7 +12,7 @@ export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
 
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
-    const useGroups = useValueNotifier(ApplicationSettings.useGroups);
+    const useGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     // We need to expand views into a cafe list
     // Also, users may have added cafes to their home set which are no temporarily unavailable

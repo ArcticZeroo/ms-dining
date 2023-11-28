@@ -32,7 +32,7 @@ export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => 
     const { viewsById } = useContext(ApplicationContext);
     const visibleViews = useVisibleViews();
     const viewsByGroupId = useViewsByGroupId();
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.useGroups);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     if (!shouldUseGroups) {
         const groupIds = Array.from(viewsByGroupId.keys()).sort();

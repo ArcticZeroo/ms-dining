@@ -62,7 +62,7 @@ export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithou
 
 export const useVisibleViews = () => {
     const { viewsInOrder } = useContext(ApplicationContext);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.useGroups);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const [visibleViews, setVisibleViews] = useState<Array<CafeView>>([]);
 
     useEffect(() => {

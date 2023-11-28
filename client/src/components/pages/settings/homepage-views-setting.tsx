@@ -11,7 +11,7 @@ export const HomepageViewsSetting = () => {
 	const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
 	const { viewsById } = useContext(ApplicationContext);
 	const viewsByGroupId = useViewsByGroupId();
-	const shouldUseGroups = useValueNotifier(ApplicationSettings.useGroups);
+	const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
 	const toggleHomepageView = (view: CafeView) => {
 		const viewId = view.value.id;

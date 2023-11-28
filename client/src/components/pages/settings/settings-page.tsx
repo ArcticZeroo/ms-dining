@@ -44,7 +44,7 @@ export const SettingsPage = () => (
 			</div>
 			<BooleanSettingInput
 				icon="group"
-				setting={ApplicationSettings.useGroups}
+				setting={ApplicationSettings.shouldUseGroups}
 				name="Group Cafes"
 				description="When enabled, cafe menus are shown in location-based groups, and the navigation menu is condensed."
 			/>

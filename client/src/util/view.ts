@@ -16,12 +16,12 @@ export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<str
     return view.value.members.flatMap(viewId => expandAndFlattenView(viewId, viewsById));
 };
 
-export const getParentView = (viewsById: Map<string, CafeView>, useGroups: boolean, view: CafeView) => {
+export const getParentView = (viewsById: Map<string, CafeView>, shouldUseGroups: boolean, view: CafeView) => {
     if (view.type === CafeViewType.group) {
         return view;
     }
 
-    if (!view.value.group || !useGroups) {
+    if (!view.value.group || !shouldUseGroups) {
         return view;
     }
 

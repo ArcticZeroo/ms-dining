@@ -8,7 +8,7 @@ import { useValueNotifier } from '../../hooks/events.ts';
 
 const useCafeName = (cafe: ICafe) => {
     const { viewsById } = useContext(ApplicationContext);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.useGroups);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     return useMemo(() => {
         // If we're within a group, the user already know where the cafe is.
