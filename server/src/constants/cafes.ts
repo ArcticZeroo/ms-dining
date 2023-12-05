@@ -1,4 +1,5 @@
 import { ICafe, ICafeGroup } from '../models/cafe.js';
+import { DateUtil } from '@msdining/common';
 
 export const getBaseApiUrlWithoutTrailingSlash = ({ id }: ICafe) => `https://${id}.buy-ondemand.com/api`;
 
@@ -202,5 +203,10 @@ export const cafeList: ICafe[] = [
 	{
 		name: 'Food Hall 9',
 		id:   'foodhall9'
-	}
+	},
+	{
+		name: 'Food Hall 4',
+		id:   'foodhall4',
+		firstAvailable: new Date(2023, DateUtil.nativeMonth.December, 13)
+	},
 ];

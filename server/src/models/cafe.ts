@@ -2,6 +2,7 @@ export interface ICafe {
     name: string;
     id: string;
     groupId?: string;
+    firstAvailable?: Date;
 }
 
 export interface ICafeGroup {

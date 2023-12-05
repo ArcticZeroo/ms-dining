@@ -1,9 +1,10 @@
 import Router from '@koa/router';
+import { isDateBefore } from '@msdining/common/dist/util/date-util.js';
 import * as diningConfig from '../../constants/cafes.js';
 import { attachRouter } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
-import { getDateStringForMenuRequest } from '../../util/date.js';
+import { getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
 import { CafeStorageClient } from '../../api/storage/cafe.js';
 import { getLogoUrl } from '../../util/cafe.js';
 import { ICafeStation } from '../../models/cafe.js';
@@ -28,6 +29,13 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
         for (const cafe of diningConfig.cafeList) {
+            // Allows us to add cafes before they've officially opened, without polluting the menu list.
+            // For instance, when Food Hall 4 was added, the online ordering menu became available more than
+            // a week early.
+            if (!isCafeAvailable(cafe)) {
+                continue;
+            }
+
             const cafeData = cafeDataById.get(cafe.id);
             if (!cafeData) {
                 console.warn('Missing cafe data for cafe id', cafe.id);

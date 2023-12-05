@@ -6,7 +6,7 @@ export const addDurationToDate = (date: Date, time: Duration) => {
     return result;
 };
 
-export const nativeDayValues = {
+export const nativeDayOfWeek = {
     Sunday:    0,
     Monday:    1,
     Tuesday:   2,
@@ -16,14 +16,19 @@ export const nativeDayValues = {
     Saturday:  6
 };
 
-export const nativeDayOfWeek = {
-    Sunday:    0,
-    Monday:    1,
-    Tuesday:   2,
-    Wednesday: 3,
-    Thursday:  4,
-    Friday:    5,
-    Saturday:  6
+export const nativeMonth = {
+    January:   0,
+    February:  1,
+    March:     2,
+    April:     3,
+    May:       4,
+    June:      5,
+    July:      6,
+    August:    7,
+    September: 8,
+    October:   9,
+    November:  10,
+    December:  11
 };
 
 const padDateValue = (value: number) => value.toString().padStart(2, '0');

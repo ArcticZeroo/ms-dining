@@ -4,6 +4,7 @@ import { DateUtil } from '@msdining/common';
 import fs from 'fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
+import { isCafeAvailable } from '../../../util/date.js';
 import { CafeDiscoverySession } from '../session.js';
 import { logError, logInfo } from '../../../util/log.js';
 import { writeThumbnailsForCafe } from './thumbnail.js';
@@ -86,6 +87,10 @@ export class DailyCafeUpdateSession {
         const cafePromises: Array<Promise<unknown>> = [];
 
         for (const cafe of cafes) {
+            if (!isCafeAvailable(cafe, this.date)) {
+                continue;
+            }
+
             cafePromises.push(this.discoverCafeAsync(cafe));
         }
 

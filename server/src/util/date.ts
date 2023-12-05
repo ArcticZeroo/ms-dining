@@ -1,5 +1,6 @@
 import Router from '@koa/router';
 import { DateUtil } from '@msdining/common';
+import { ICafe } from '../models/cafe.js';
 
 export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
     const queryDateRaw = ctx.query.date;
@@ -21,4 +22,12 @@ export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string |
     }
 
     return DateUtil.toDateString(new Date(dateTime));
+};
+
+export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {
+    if (cafe.firstAvailable == null) {
+        return true;
+    }
+
+    return !DateUtil.isDateBefore(date, cafe.firstAvailable);
 };
