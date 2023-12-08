@@ -101,8 +101,8 @@ export abstract class DiningClient {
     public static ensureDateIsNotWeekendForMenu(date: Date): Date {
         const dayOfWeek = date.getDay();
 
-        if ([DateUtil.nativeDayValues.Saturday, DateUtil.nativeDayValues.Sunday].includes(dayOfWeek)) {
-            let daysUntilMonday = DateUtil.nativeDayValues.Monday - dayOfWeek;
+        if ([DateUtil.nativeDayOfWeek.Saturday, DateUtil.nativeDayOfWeek.Sunday].includes(dayOfWeek)) {
+            let daysUntilMonday = DateUtil.nativeDayOfWeek.Monday - dayOfWeek;
             if (daysUntilMonday <= 0) {
                 daysUntilMonday += 7;
             }
