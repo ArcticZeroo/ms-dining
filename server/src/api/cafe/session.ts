@@ -2,10 +2,18 @@ import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import fetch from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/cafes.js';
 import { requestRetryCount } from '../../constants/config.js';
-import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
-import { ICafeConfigResponse, ICafeMenuItemsResponseItem, ICafeStationListItem } from '../../models/responses.js';
+import {
+    ICafe,
+    ICafeConfig,
+    ICafeStation,
+    IMenuItem,
+    IMenuItemModifier,
+    ModifierChoices,
+    ModifierChoiceType
+} from '../../models/cafe.js';
+import { ICafeConfigResponse, ICafeMenuItemDetailsResponseItem, ICafeStationListItem } from '../../models/responses.js';
 import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
-import { logError, logInfo } from '../../util/log.js';
+import { logError } from '../../util/log.js';
 import { CafeStorageClient } from '../storage/cafe.js';
 
 const getHeaders = (token: string) => token ? ({
@@ -164,6 +172,36 @@ export class CafeDiscoverySession {
         return stations;
     }
 
+    private _mapModifierChoiceType(jsonChoiceType: string): ModifierChoiceType {
+        switch (jsonChoiceType) {
+            case 'radio':
+                return ModifierChoices.radio;
+            case 'checkbox':
+                return ModifierChoices.checkbox;
+            default:
+                return ModifierChoices.multiSelect;
+        }
+    }
+
+    private _mapResponseModifiers(jsonItem: ICafeMenuItemDetailsResponseItem): Array<IMenuItemModifier> {
+        if (jsonItem?.modifiers?.modifiers == null) {
+            return [];
+        }
+
+        return jsonItem.modifiers.modifiers.map(jsonModifier => ({
+            id:          jsonModifier.id,
+            description: jsonModifier.description,
+            minimum:     jsonModifier.minimum,
+            maximum:     jsonModifier.maximum,
+            choiceType:  this._mapModifierChoiceType(jsonModifier.type),
+            choices:     jsonModifier.options.map(jsonOption => ({
+                id:          jsonOption.id,
+                description: jsonOption.description,
+                price:       jsonOption.amount
+            }))
+        }));
+    }
+
     private async _doRetrieveMenuItemDetails(stationId: string, menuId: string, itemIds: string[]): Promise<Array<IMenuItem>> {
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
             {
@@ -184,7 +222,7 @@ export class CafeDiscoverySession {
         );
 
         const json = await response.json();
-        if (!isDuckTypeArray<ICafeMenuItemsResponseItem>(json, {
+        if (!isDuckTypeArray<ICafeMenuItemDetailsResponseItem>(json, {
             id:          'string',
             amount:      'string',
             displayText: 'string',
@@ -203,6 +241,7 @@ export class CafeDiscoverySession {
             hasThumbnail: false,
             // Make sure to encode the URI, since the API can return un-encoded URIs that will throw 503s to azure
             imageUrl: jsonItem.image ? encodeURI(jsonItem.image) : undefined,
+            modifiers: this._mapResponseModifiers(jsonItem)
         }));
     }
 

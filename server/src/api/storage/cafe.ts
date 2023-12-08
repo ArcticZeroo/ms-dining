@@ -226,7 +226,9 @@ export abstract class CafeStorageClient {
 			imageUrl:        menuItem.imageUrl,
 			hasThumbnail:    thumbnailData.hasThumbnail,
 			thumbnailHeight: thumbnailData.thumbnailHeight,
-			thumbnailWidth:  thumbnailData.thumbnailWidth
+			thumbnailWidth:  thumbnailData.thumbnailWidth,
+			// TODO
+			modifiers: []
 		};
 	}
 

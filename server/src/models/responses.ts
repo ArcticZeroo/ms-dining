@@ -31,7 +31,23 @@ export interface ICafeStationListItem {
     menus: Array<ICafeStationMenu>;
 }
 
-export interface ICafeMenuItemsResponseItem {
+export interface ICafeMenuItemDetailsResponseModifierOption {
+    id: string;
+    description: string;
+    // Aka price
+    amount: number;
+}
+
+export interface ICafeMenuItemDetailsResponseModifier {
+    id: string;
+    description: string;
+    minimum: number;
+    maximum: number;
+    type: string;
+    options: Array<ICafeMenuItemDetailsResponseModifierOption>;
+}
+
+export interface ICafeMenuItemDetailsResponseItem {
     id: string;
     amount: string;
     displayText: string;
@@ -41,4 +57,8 @@ export interface ICafeMenuItemsResponseItem {
     };
     image?: string;
     description?: string;
+    // No idea if mods always exist, assume that they don't to avoid breaking stuff
+    modifiers?: {
+        modifiers?: Array<ICafeMenuItemDetailsResponseModifier>;
+    }
 }

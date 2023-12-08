@@ -26,10 +26,13 @@ export interface ICafeStation {
     menuItemsById: Map<string, IMenuItem>;
 }
 
-export enum ModifierChoiceType {
-    radio,
-    checkbox
-}
+export const ModifierChoices = {
+    radio:       'radio',
+    checkbox:    'checkbox',
+    multiSelect: 'multiSelect'
+} as const;
+
+export type ModifierChoiceType = typeof ModifierChoices[keyof typeof ModifierChoices];
 
 export interface IMenuItemModifierChoice {
     id: string;
