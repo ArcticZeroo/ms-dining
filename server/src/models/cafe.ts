@@ -26,6 +26,26 @@ export interface ICafeStation {
     menuItemsById: Map<string, IMenuItem>;
 }
 
+export enum ModifierChoiceType {
+    radio,
+    checkbox
+}
+
+export interface IMenuItemModifierChoice {
+    id: string;
+    description: string;
+    price: number;
+}
+
+export interface IMenuItemModifier {
+    id: string;
+    description: string;
+    minimum: number;
+    maximum: number;
+    choiceType: ModifierChoiceType;
+    choices: IMenuItemModifierChoice[];
+}
+
 export interface IMenuItem {
     id: string;
     price: string;
@@ -37,4 +57,5 @@ export interface IMenuItem {
     thumbnailHeight?: number;
     imageUrl?: string;
     description?: string;
+    modifiers: IMenuItemModifier[];
 }
