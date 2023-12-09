@@ -33,6 +33,31 @@ model MenuItem {
   price       Float
 
   dailyMenuItems DailyMenuItem[]
+  modifiers      MenuItemModifier[]
+}
+
+model MenuItemModifier {
+  // string id from buy-ondemand
+  id          String @id
+  description String
+  minimum     Int
+  maximum     Int
+  choiceType  String
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  choices MenuItemModifierChoice[]
+}
+
+model MenuItemModifierChoice {
+  // string id from buy-ondemand
+  id          String @id
+  description String
+  price       Float
+
+  modifierId String
+  modifier   MenuItemModifier @relation(fields: [modifierId], references: [id])
 }
 
 model Station {

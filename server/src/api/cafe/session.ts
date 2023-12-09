@@ -184,11 +184,7 @@ export class CafeDiscoverySession {
     }
 
     private _mapResponseModifiers(jsonItem: ICafeMenuItemDetailsResponseItem): Array<IMenuItemModifier> {
-        if (jsonItem?.modifiers?.modifiers == null) {
-            return [];
-        }
-
-        return jsonItem.modifiers.modifiers.map(jsonModifier => ({
+        return jsonItem.options.map(jsonModifier => ({
             id:          jsonModifier.id,
             description: jsonModifier.description,
             minimum:     jsonModifier.minimum,

@@ -57,8 +57,5 @@ export interface ICafeMenuItemDetailsResponseItem {
     };
     image?: string;
     description?: string;
-    // No idea if mods always exist, assume that they don't to avoid breaking stuff
-    modifiers?: {
-        modifiers?: Array<ICafeMenuItemDetailsResponseModifier>;
-    }
+    options: Array<ICafeMenuItemDetailsResponseModifier>;
 }
