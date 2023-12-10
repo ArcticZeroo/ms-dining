@@ -300,7 +300,6 @@ export class CafeDiscoverySession {
 		const items: IMenuItem[] = [];
 
 		// Don't fail to retrieve the whole menu item because some failed
-		console.log('retrieving all details for', json.length, 'item(s)');
 		const menuItemPromises = json.map(jsonItem => this._retrieveMenuItemDetails(localItemsById, jsonItem));
 		for (const menuItemPromise of menuItemPromises) {
 			try {
@@ -339,12 +338,9 @@ export class CafeDiscoverySession {
 
 		// Side note: if we send a request with an empty list, we get EVERY item
 		if (itemIdsToRetrieve.size > 0) {
-			console.log('getting items online:', Array.from(itemIdsToRetrieve));
 			const serverItems = await this._doRetrieveMenuItemDetails(localItemsById, stationId, menuId, Array.from(itemIdsToRetrieve));
 
 			for (const item of serverItems) {
-				console.log('resolved item:', item);
-
 				items.push(item);
 
 				try {

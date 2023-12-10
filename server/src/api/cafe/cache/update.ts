@@ -1,16 +1,16 @@
-import Semaphore from 'semaphore-async-await';
-import { runPromiseWithRetries } from '../../../util/async.js';
 import { DateUtil } from '@msdining/common';
 import fs from 'fs/promises';
-import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
-import { ICafe, ICafeStation } from '../../../models/cafe.js';
-import { isCafeAvailable } from '../../../util/date.js';
-import { CafeDiscoverySession } from '../session.js';
-import { logError, logInfo } from '../../../util/log.js';
-import { writeThumbnailsForCafe } from './thumbnail.js';
-import { saveSessionAsync } from './storage.js';
+import Semaphore from 'semaphore-async-await';
 import { cafeList } from '../../../constants/cafes.js';
+import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
+import { ICafe } from '../../../models/cafe.js';
+import { runPromiseWithRetries } from '../../../util/async.js';
+import { isCafeAvailable } from '../../../util/date.js';
+import { logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
+import { CafeDiscoverySession } from '../session.js';
+import { saveSessionAsync } from './storage.js';
+import { writeThumbnailsForCafe } from './thumbnail.js';
 
 export const cafeSemaphore = new Semaphore.default(5);
 const cafeDiscoveryRetryCount = 3;
