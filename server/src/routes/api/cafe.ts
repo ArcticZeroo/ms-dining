@@ -38,7 +38,6 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
             const cafeData = cafeDataById.get(cafe.id);
             if (!cafeData) {
-                console.warn('Missing cafe data for cafe id', cafe.id);
                 continue;
             }
 
