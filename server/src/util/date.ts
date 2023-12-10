@@ -1,6 +1,9 @@
+import Duration from '@arcticzeroo/duration';
 import Router from '@koa/router';
 import { DateUtil } from '@msdining/common';
 import { ICafe } from '../models/cafe.js';
+
+const MENU_REQUEST_DAYS_WINDOW = 30;
 
 export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
     const queryDateRaw = ctx.query.date;
@@ -15,13 +18,14 @@ export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string |
         return null;
     }
 
-    const dateTime = date.getTime();
+    const timeFromNowMs = Math.abs(Date.now() - date.getTime());
+    const daysFromNow = new Duration({ milliseconds: timeFromNowMs }).inDays;
 
-    if (dateTime < DateUtil.getMinimumDateForMenuRequest().getTime() || dateTime > DateUtil.getMaximumDateForMenuRequest().getTime()) {
+    if (daysFromNow > MENU_REQUEST_DAYS_WINDOW) {
         return null;
     }
 
-    return DateUtil.toDateString(new Date(dateTime));
+    return DateUtil.toDateString(date);
 };
 
 export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {

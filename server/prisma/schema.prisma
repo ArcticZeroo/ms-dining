@@ -24,13 +24,14 @@ model Cafe {
 
 model MenuItem {
   // string id from buy-ondemand
-  id          String  @id
-  name        String
-  calories    Int
-  maxCalories Int
-  description String?
-  imageUrl    String?
-  price       Float
+  id                     String    @id
+  name                   String
+  calories               Int
+  maxCalories            Int
+  description            String?
+  imageUrl               String?
+  price                  Float
+  externalLastUpdateTime DateTime?
 
   dailyMenuItems DailyMenuItem[]
   modifiers      MenuItemModifier[]

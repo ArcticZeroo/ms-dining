@@ -47,7 +47,13 @@ export interface ICafeMenuItemDetailsResponseModifier {
     options: Array<ICafeMenuItemDetailsResponseModifierOption>;
 }
 
-export interface ICafeMenuItemDetailsResponseItem {
+export interface ICafeMenuItemDetailsResponse {
+    modifiers?: {
+        modifiers?: Array<ICafeMenuItemDetailsResponseModifier>;
+    }
+}
+
+export interface ICafeMenuItemListResponseItem {
     id: string;
     amount: string;
     displayText: string;
@@ -57,5 +63,5 @@ export interface ICafeMenuItemDetailsResponseItem {
     };
     image?: string;
     description?: string;
-    options: Array<ICafeMenuItemDetailsResponseModifier>;
+    lastUpdateTime: string;
 }

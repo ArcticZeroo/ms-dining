@@ -61,4 +61,5 @@ export interface IMenuItem {
     imageUrl?: string;
     description?: string;
     modifiers: IMenuItemModifier[];
+    lastUpdateTime?: Date;
 }
