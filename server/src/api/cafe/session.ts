@@ -239,14 +239,10 @@ export class CafeDiscoverySession {
 	}
 
 	private async _retrieveMenuItemDetails(localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
-		console.log('Retrieving details for item id', jsonItem.id);
 		const localItem = localItemsById.get(jsonItem.id);
-
-		console.log('does local item exist?', localItem != null);
 
 		let modifiers = localItem?.modifiers;
 		if (this._shouldRetrieveModifierDetails(localItem, jsonItem)) {
-			console.log('getting modifiers online...');
 			try {
 				modifiers = await this._retrieveModifierDetails(jsonItem.id);
 			} catch (err) {
@@ -303,10 +299,7 @@ export class CafeDiscoverySession {
 		const menuItemPromises = json.map(jsonItem => this._retrieveMenuItemDetails(localItemsById, jsonItem));
 		for (const menuItemPromise of menuItemPromises) {
 			try {
-				console.log('awaiting menu item promise');
-				const menuItem = await menuItemPromise;
-				console.log('got menu item:', menuItem);
-				items.push(menuItem);
+				items.push(await menuItemPromise);
 			} catch (err) {
 				logError('Unable to retrieve menu item:', err);
 			}
@@ -333,8 +326,6 @@ export class CafeDiscoverySession {
 				items.push(existingItem);
 			}
 		}
-
-		console.log('Retrieving data for', itemIds.length, 'item(s). There are', localItemsById.size, 'items stored locally from these ids, so we have to go online for', itemIdsToRetrieve.size, 'item(s)');
 
 		// Side note: if we send a request with an empty list, we get EVERY item
 		if (itemIdsToRetrieve.size > 0) {

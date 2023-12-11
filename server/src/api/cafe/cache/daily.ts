@@ -4,7 +4,7 @@ import { DailyCafeUpdateSession } from './update.js';
 import { DateUtil } from '@msdining/common';
 
 export const populateDailySessionsAsync = async () => {
-    const updateSession = new DailyCafeUpdateSession(1 /*daysInFuture*/);
+    const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);
 
     if (DateUtil.isDateOnWeekend(updateSession.date)) {
         logInfo('Skipping daily update for weekend');

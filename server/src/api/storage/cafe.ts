@@ -1,11 +1,19 @@
 import { DateUtil } from '@msdining/common';
-import { Cafe, MenuItem, Station, Prisma, MenuItemModifier } from '@prisma/client';
+import {
+	Cafe,
+	MenuItem,
+	MenuItemModifier,
+	MenuItemModifierChoice,
+	Prisma,
+	PrismaClient,
+	Station
+} from '@prisma/client';
 import {
 	ICafe,
 	ICafeConfig,
 	ICafeStation,
 	IMenuItem,
-	IMenuItemModifier, IMenuItemModifierChoice,
+	IMenuItemModifier,
 	ModifierChoiceType
 } from '../../models/cafe.js';
 import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
@@ -82,12 +90,79 @@ export abstract class CafeStorageClient {
 		this._cafeDataById.set(cafe.id, cafeWithConfig);
 	}
 
+	private static _doesExistingModifierMatchServer(existingModifier: MenuItemModifier, existingChoices: MenuItemModifierChoice[], serverModifier: IMenuItemModifier): boolean {
+		return existingModifier.id === serverModifier.id
+			   && existingModifier.description === serverModifier.description
+			   && existingModifier.maximum === serverModifier.maximum
+			   && existingModifier.minimum === serverModifier.minimum
+			   && existingModifier.choiceType === serverModifier.choiceType
+			   && existingChoices.length === serverModifier.choices.length
+			   && existingChoices.every(existingChoice => {
+				const serverChoice = serverModifier.choices.find(choice => choice.id === existingChoice.id);
+				return serverChoice != null
+					   && existingChoice.description === serverChoice.description
+					   && existingChoice.price === serverChoice.price;
+			});
+	}
+
+	private static async _doCreateSingleModifierAsync(prismaClient: PrismaClient, modifier: IMenuItemModifier): Promise<void> {
+		const existingModifier = await prismaClient.menuItemModifier.findUnique({
+			where:   { id: modifier.id },
+			include: { choices: true }
+		});
+
+		if (existingModifier != null && this._doesExistingModifierMatchServer(existingModifier, existingModifier.choices, modifier)) {
+			return;
+		}
+
+		await prismaClient.menuItemModifierChoice.deleteMany({
+			where: {
+				modifierId: modifier.id
+			}
+		});
+
+		// TODO: figure out better typing. UpdateInput doesn't work well here.
+		const dataWithoutId = {
+			id:          modifier.id,
+			description: modifier.description,
+			minimum:     modifier.minimum,
+			maximum:     modifier.maximum,
+			// Maybe a bad idea?
+			choiceType: modifier.choiceType as ModifierChoiceType,
+			choices:    {
+				create: modifier.choices.map(choice => ({
+					id:          choice.id,
+					description: choice.description,
+					price:       choice.price
+				}))
+			}
+		} as const;
+
+		if (existingModifier != null) {
+			await prismaClient.menuItemModifier.update({
+				where: {
+					id: modifier.id,
+				},
+				data:  dataWithoutId
+			});
+		} else {
+			await prismaClient.menuItemModifier.create({
+				data: {
+					...dataWithoutId,
+					id: modifier.id
+				}
+			});
+		}
+	}
+
 	private static async _doCreateMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean): Promise<void> {
 		const lastUpdateTime = menuItem.lastUpdateTime == null || Number.isNaN(menuItem.lastUpdateTime.getTime())
 							   ? null
 							   : menuItem.lastUpdateTime;
 
-		const dataWithoutId: Omit<MenuItem, 'id'> & { modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput } = {
+		const dataWithoutId: Omit<MenuItem, 'id'> & {
+			modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput
+		} = {
 			name:                   menuItem.name,
 			imageUrl:               menuItem.imageUrl,
 			description:            menuItem.description,
@@ -96,25 +171,7 @@ export abstract class CafeStorageClient {
 			calories:               Number(menuItem.calories || 0),
 			maxCalories:            Number(menuItem.maxCalories || 0),
 			modifiers:              {
-				connectOrCreate: menuItem.modifiers.map(modifier => ({
-					where: {
-						id: modifier.id
-					},
-					create: {
-						id:          modifier.id,
-						description: modifier.description,
-						minimum:     modifier.minimum,
-						maximum:     modifier.maximum,
-						choiceType:  modifier.choiceType,
-						choices:     {
-							create: modifier.choices.map(choice => ({
-								id:          choice.id,
-								description: choice.description,
-								price:       choice.price
-							}))
-						}
-					}
-				}))
+				connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
 			}
 		};
 
@@ -124,12 +181,33 @@ export abstract class CafeStorageClient {
 		};
 
 		await usePrismaClient(async prismaClient => {
+			// This is kind of messy, but I've chosen this after considering other options.
+			// We are many:many, and we don't want to just clear all the modifiers themselves,
+			// since that will either throw foreign key errors or sever the connection to other menu items
+			// (depending on how we've set up cascade, which at the time of writing is not configured at all).
+			// We also want to make sure that options are up-to-date for each modifier: the price, description,
+			// or id can change at any time. So, we pull modifiers from db, check if there are any changes, then
+			// clear all existing options and do an upsert.
+			for (const modifier of menuItem.modifiers) {
+				await this._doCreateSingleModifierAsync(prismaClient, modifier);
+			}
+
 			if (allowUpdateIfExisting) {
-				await prismaClient.menuItem.upsert({
-					where:  { id: menuItem.id },
-					update: dataWithoutId,
-					create: data
-				});
+				const existingItem = await prismaClient.menuItem.findUnique({ where: { id: menuItem.id } });
+				const doesExist = existingItem != null;
+
+				if (doesExist) {
+					await prismaClient.menuItem.update({
+						where: {
+							id: menuItem.id
+						},
+						data:  dataWithoutId
+					});
+				} else {
+					await prismaClient.menuItem.create({
+						data
+					});
+				}
 			} else {
 				try {
 					await prismaClient.menuItem.create({
