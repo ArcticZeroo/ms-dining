@@ -1,3 +1,5 @@
+import { CafeTypes } from "@msdining/common";
+
 export interface ICafe {
     name: string;
     id: string;
@@ -47,6 +49,7 @@ export interface IMenuItem {
     hasThumbnail: boolean;
     thumbnailWidth?: number;
     thumbnailHeight?: number;
+    modifiers: Array<CafeTypes.IMenuItemModifier>;
 }
 
 export interface IMenuItemsByCategoryName {
