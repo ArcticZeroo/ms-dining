@@ -1,11 +1,11 @@
 import { DateUtil } from '@msdining/common';
-import { Cafe, MenuItem, Station } from '@prisma/client';
+import { Cafe, MenuItem, Station, Prisma, MenuItemModifier } from '@prisma/client';
 import {
 	ICafe,
 	ICafeConfig,
 	ICafeStation,
 	IMenuItem,
-	IMenuItemModifier,
+	IMenuItemModifier, IMenuItemModifierChoice,
 	ModifierChoiceType
 } from '../../models/cafe.js';
 import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
@@ -87,7 +87,7 @@ export abstract class CafeStorageClient {
 							   ? null
 							   : menuItem.lastUpdateTime;
 
-		const dataWithoutId: Omit<MenuItem, 'id'> = {
+		const dataWithoutId: Omit<MenuItem, 'id'> & { modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput } = {
 			name:                   menuItem.name,
 			imageUrl:               menuItem.imageUrl,
 			description:            menuItem.description,
@@ -95,32 +95,54 @@ export abstract class CafeStorageClient {
 			price:                  Number(menuItem.price || 0),
 			calories:               Number(menuItem.calories || 0),
 			maxCalories:            Number(menuItem.maxCalories || 0),
+			modifiers:              {
+				connectOrCreate: menuItem.modifiers.map(modifier => ({
+					where: {
+						id: modifier.id
+					},
+					create: {
+						id:          modifier.id,
+						description: modifier.description,
+						minimum:     modifier.minimum,
+						maximum:     modifier.maximum,
+						choiceType:  modifier.choiceType,
+						choices:     {
+							create: modifier.choices.map(choice => ({
+								id:          choice.id,
+								description: choice.description,
+								price:       choice.price
+							}))
+						}
+					}
+				}))
+			}
 		};
 
-		const data: MenuItem = {
+		const data: Prisma.MenuItemCreateInput = {
 			id: menuItem.id,
 			...dataWithoutId,
 		};
 
-		if (allowUpdateIfExisting) {
-			await usePrismaClient(prismaClient => prismaClient.menuItem.upsert({
-				where:  { id: menuItem.id },
-				update: dataWithoutId,
-				create: data
-			}));
-			return;
-		}
-
-		try {
-			await usePrismaClient(prismaClient => prismaClient.menuItem.create({
-				data
-			}));
-		} catch (err) {
-			// OK to fail unique constraint validation since we don't want to update existing items
-			if (!isUniqueConstraintFailedError(err)) {
-				throw err;
+		await usePrismaClient(async prismaClient => {
+			if (allowUpdateIfExisting) {
+				await prismaClient.menuItem.upsert({
+					where:  { id: menuItem.id },
+					update: dataWithoutId,
+					create: data
+				});
+			} else {
+				try {
+					await prismaClient.menuItem.create({
+						data
+					});
+				} catch (err) {
+					// OK to fail unique constraint validation since we don't want to update existing items
+					if (!isUniqueConstraintFailedError(err)) {
+						throw err;
+					}
+				}
 			}
-		}
+		});
 	}
 
 	public static async createMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean = false): Promise<void> {
@@ -234,8 +256,6 @@ export abstract class CafeStorageClient {
 		if (menuItem == null) {
 			return null;
 		}
-
-		console.log(menuItem.modifiers);
 
 		const thumbnailData = await retrieveExistingThumbnailData(id);
 

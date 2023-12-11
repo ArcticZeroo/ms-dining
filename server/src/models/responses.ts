@@ -35,7 +35,7 @@ export interface ICafeMenuItemDetailsResponseModifierOption {
     id: string;
     description: string;
     // Aka price
-    amount: number;
+    amount: string;
 }
 
 export interface ICafeMenuItemDetailsResponseModifier {

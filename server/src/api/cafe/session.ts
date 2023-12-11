@@ -198,7 +198,7 @@ export class CafeDiscoverySession {
 			choices:     jsonModifier.options.map(jsonOption => ({
 				id:          jsonOption.id,
 				description: jsonOption.description,
-				price:       jsonOption.amount
+				price:       Number(jsonOption.amount || 0)
 			}))
 		}));
 	}
@@ -365,6 +365,7 @@ export class CafeDiscoverySession {
 	private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
 		for (const station of stations) {
 			await this._populateMenuItemsForStationAsync(station, alwaysGetServerItems);
+			break;
 		}
 	}
 
