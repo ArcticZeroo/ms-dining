@@ -1,15 +1,13 @@
-import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import fetch from 'node-fetch';
+import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
+import { CafeTypes } from '@msdining/common';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/cafes.js';
 import { requestRetryCount } from '../../constants/config.js';
 import {
 	ICafe,
 	ICafeConfig,
 	ICafeStation,
-	IMenuItem,
-	IMenuItemModifier,
-	ModifierChoices,
-	ModifierChoiceType
+	IMenuItem
 } from '../../models/cafe.js';
 import {
 	ICafeConfigResponse,
@@ -20,6 +18,10 @@ import {
 import { logError, logInfo } from '../../util/log.js';
 import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
 import { CafeStorageClient } from '../storage/cafe.js';
+
+type IMenuItemModifier = CafeTypes.IMenuItemModifier;
+type ModifierChoiceType = CafeTypes.ModifierChoiceType;
+const ModifierChoices = CafeTypes.ModifierChoices;
 
 const getHeaders = (token: string) => token ? ({
 	'Authorization': `Bearer ${token}`

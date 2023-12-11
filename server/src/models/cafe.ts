@@ -1,3 +1,5 @@
+import { CafeTypes } from '@msdining/common';
+
 export interface ICafe {
     name: string;
     id: string;
@@ -26,29 +28,6 @@ export interface ICafeStation {
     menuItemsById: Map<string, IMenuItem>;
 }
 
-export const ModifierChoices = {
-    radio:       'radio',
-    checkbox:    'checkbox',
-    multiSelect: 'multiSelect'
-} as const;
-
-export type ModifierChoiceType = typeof ModifierChoices[keyof typeof ModifierChoices];
-
-export interface IMenuItemModifierChoice {
-    id: string;
-    description: string;
-    price: number;
-}
-
-export interface IMenuItemModifier {
-    id: string;
-    description: string;
-    minimum: number;
-    maximum: number;
-    choiceType: ModifierChoiceType;
-    choices: IMenuItemModifierChoice[];
-}
-
 export interface IMenuItem {
     id: string;
     price: string;
@@ -60,6 +39,6 @@ export interface IMenuItem {
     thumbnailHeight?: number;
     imageUrl?: string;
     description?: string;
-    modifiers: IMenuItemModifier[];
+    modifiers: CafeTypes.IMenuItemModifier[];
     lastUpdateTime?: Date;
 }

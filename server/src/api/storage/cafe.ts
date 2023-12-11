@@ -1,4 +1,4 @@
-import { DateUtil } from '@msdining/common';
+import { CafeTypes, DateUtil } from '@msdining/common';
 import {
 	Cafe,
 	MenuItem,
@@ -13,8 +13,6 @@ import {
 	ICafeConfig,
 	ICafeStation,
 	IMenuItem,
-	IMenuItemModifier,
-	ModifierChoiceType
 } from '../../models/cafe.js';
 import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
@@ -31,6 +29,9 @@ const {
 	isDateOnWeekend,
 	toDateString,
 } = DateUtil;
+
+type IMenuItemModifier = CafeTypes.IMenuItemModifier;
+type ModifierChoiceType = CafeTypes.ModifierChoiceType;
 
 interface ICreateDailyStationMenuParams {
 	cafeId: string;
