@@ -7,7 +7,7 @@
     flex-direction: column;
     gap: var(--default-padding);
     position: fixed;
-    z-index: 100;
+    z-index: 10;
     right: 1rem;
     bottom: 0;
     border-top-left-radius: var(--default-padding);

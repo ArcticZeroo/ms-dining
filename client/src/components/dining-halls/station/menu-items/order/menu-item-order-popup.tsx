@@ -92,15 +92,16 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
             </div>
             <div className="menu-item-notes">
                 <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                <textarea id="notes" placeholder="Notes" value={notes}
+                <textarea id="notes"
+                          placeholder="Enter Special Requests & Preparation Notes Here"
+                          value={notes}
                           onChange={event => setNotes(event.target.value)}/>
             </div>
             <div className="footer">
-                <div>
-                    <span className="price">{getPriceDisplay(totalPrice)}</span>
-                    <span className="tax">+ tax</span>
+                <div className="price">
+                    {getPriceDisplay(totalPrice)}
                 </div>
-                <button className="button" disabled={!isOrderValid}>
+                <button className="add-to-cart" disabled={!isOrderValid} title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}>
                     Add to Cart
                 </button>
             </div>

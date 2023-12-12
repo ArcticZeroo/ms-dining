@@ -14,7 +14,7 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({ modifier, selecte
         <div>
             {
                 modifier.minimum === 0 && (
-                    <div>
+                    <div className="modifier-choice-option">
                         <input type="radio"
                                id="none"
                                name={modifier.id}
@@ -27,7 +27,7 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({ modifier, selecte
                 )
             }
             {modifier.choices.map(choice => (
-                <div key={choice.id}>
+                <div key={choice.id} className="modifier-choice-option">
                     <input type="radio"
                            id={choice.id}
                            name={modifier.id}

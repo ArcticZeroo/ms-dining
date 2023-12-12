@@ -32,7 +32,7 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({ modifie
     return (
         <div>
             {modifier.choices.map(choice => (
-                <div key={choice.id}>
+                <div key={choice.id} className="modifier-choice-option">
                     <input
                         type="checkbox"
                         id={choice.id}

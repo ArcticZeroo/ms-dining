@@ -1,7 +1,8 @@
 import { CafeTypes } from '@msdining/common';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ModifierChoices } from './choices/modifier-choices.tsx';
 import { getMinMaxDisplay } from '../../../../../util/cart.ts';
+import { classNames } from '../../../../../util/react.ts';
 
 interface IMenuItemModifierPickerProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -10,8 +11,12 @@ interface IMenuItemModifierPickerProps {
 }
 
 export const MenuItemModifierPicker: React.FC<IMenuItemModifierPickerProps> = ({ modifier, selectedChoiceIds, onSelectedChoiceIdsChanged }) => {
+    const isValid = useMemo(() => {
+        return selectedChoiceIds.size >= modifier.minimum && selectedChoiceIds.size <= modifier.maximum;
+    }, [modifier, selectedChoiceIds]);
+
     return (
-        <div className="menu-item-modifier">
+        <div className={classNames('menu-item-modifier', !isValid && 'error')}>
             <div className="menu-item-modifier-description">
                 {
                     modifier.minimum > 0 && '(Required) '

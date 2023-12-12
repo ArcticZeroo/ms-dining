@@ -31,9 +31,46 @@
     gap: var(--default-padding);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
+    transition: background-color 0.25s ease;
+}
+
+.menu-item-modifier.error {
+    background: #e7dede;
 }
 
 .menu-item-notes {
     display: flex;
     flex-direction: column;
+}
+
+.menu-item-order-popup .footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--default-padding);
+}
+
+.menu-item-order-popup .footer .add-to-cart {
+    background: #2196F3;
+    color: white;
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+}
+
+.menu-item-order-popup .footer .add-to-cart:disabled {
+    background: #BBDEFB;
+}
+
+.menu-item-order-popup .menu-item-notes textarea {
+    resize: none;
+}
+
+.menu-item-order-popup .modifier-choice-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.menu-item-order-popup .modifier-choice-option input {
+    margin: 0;
 }
