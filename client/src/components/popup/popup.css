@@ -14,6 +14,9 @@
 .modal {
     position: relative;
     margin: var(--default-padding);
+    max-height: 100%;
+    max-width: 100%;
+    overflow: auto;
 }
 
 .modal .title {

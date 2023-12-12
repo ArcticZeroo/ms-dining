@@ -26,6 +26,9 @@
 
 .menu-item-modifier {
     background: #EEE;
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
 }
