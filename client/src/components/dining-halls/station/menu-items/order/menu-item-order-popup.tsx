@@ -1,5 +1,5 @@
 import { IMenuItem } from '../../../../../models/cafe.ts';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
 import { CafeTypes } from '@msdining/common';
 import { getPriceDisplay } from '../../../../../util/cart.ts';
@@ -34,9 +34,9 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
         setSelectedChoiceIdsByModifierId(new Map<string, Set<string>>());
     }, [menuItem.modifiers]);
 
-    const getSelectedChoiceIdsForModifier = (modifier: CafeTypes.IMenuItemModifier) => {
+    const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
         return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
-    }
+    }, [selectedChoiceIdsByModifierId]);
 
     const onSelectedChoiceIdsChanged = (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => {
         const newSelectedChoiceIdsByModifierId = new Map(selectedChoiceIdsByModifierId);
@@ -47,6 +47,25 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
     const totalPrice = useMemo(
         () => calculatePrice(menuItem, selectedChoiceIdsByModifierId),
         [menuItem, selectedChoiceIdsByModifierId]
+    );
+
+    const isOrderValid = useMemo(
+        () => {
+            for (const modifier of menuItem.modifiers) {
+                const selectedChoiceIds = getSelectedChoiceIdsForModifier(modifier);
+
+                if (selectedChoiceIds.size < modifier.minimum) {
+                    return false;
+                }
+
+                if (selectedChoiceIds.size > modifier.maximum) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        [menuItem, getSelectedChoiceIdsForModifier]
     );
 
     return (
@@ -73,14 +92,17 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
             </div>
             <div className="menu-item-notes">
                 <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                <textarea id="notes" placeholder="Notes" value={notes} onChange={event => setNotes(event.target.value)}/>
+                <textarea id="notes" placeholder="Notes" value={notes}
+                          onChange={event => setNotes(event.target.value)}/>
             </div>
             <div className="footer">
                 <div>
                     <span className="price">{getPriceDisplay(totalPrice)}</span>
                     <span className="tax">+ tax</span>
                 </div>
-                <button className="button">Add to Cart</button>
+                <button className="button" disabled={!isOrderValid}>
+                    Add to Cart
+                </button>
             </div>
         </div>
     );
