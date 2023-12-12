@@ -1,6 +1,6 @@
 import { CafeTypes } from "@msdining/common";
 import React from 'react';
-import { getPriceDisplay } from '../../../../../../util/cart.ts';
+import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../util/cart.ts';
 
 interface IModifierCheckboxesProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -30,20 +30,20 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({ modifie
     };
 
     return (
-        <div>
+        <div className="modifier-choice-option-list">
             {modifier.choices.map(choice => (
-                <div key={choice.id} className="modifier-choice-option">
+                <label key={choice.id} htmlFor={getChoiceHtmlId(modifier, choice)} className="modifier-choice-option">
                     <input
                         type="checkbox"
-                        id={choice.id}
+                        id={getChoiceHtmlId(modifier, choice)}
                         name={choice.description}
                         value={choice.id}
                         onChange={() => handleChoiceChange(choice.id)}
                         checked={selectedChoiceIds.has(choice.id)}
                         disabled={isAtMaximum && !selectedChoiceIds.has(choice.id)}
                     />
-                    <label htmlFor={choice.id}>{choice.description} {getPriceDisplay(choice.price)}</label>
-                </div>
+                    <span>{choice.description} {getPriceDisplay(choice.price)}</span>
+                </label>
             ))}
         </div>
     );

@@ -1,3 +1,5 @@
+import { CafeTypes } from "@msdining/common";
+
 export const getPriceDisplay = (price: number) => {
     if (price === 0) {
         return '';
@@ -20,4 +22,8 @@ export const getMinMaxDisplay = (min: number, max: number) => {
     }
 
     return `Choose between ${min} and ${max}`;
+}
+
+export const getChoiceHtmlId = (modifier: CafeTypes.IMenuItemModifier, choice: CafeTypes.IMenuItemModifierChoice) => {
+    return `choice-${modifier.id}-${choice.id}`;
 }

@@ -1,6 +1,6 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getPriceDisplay } from '../../../../../../util/cart.ts';
+import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../util/cart.ts';
 
 interface IModifierRadioProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -9,34 +9,38 @@ interface IModifierRadioProps {
     onSelectedChoiceIdChanged(selection: string | null): void;
 }
 
-export const ModifierRadio: React.FC<IModifierRadioProps> = ({ modifier, selectedChoiceId, onSelectedChoiceIdChanged }) => {
+export const ModifierRadio: React.FC<IModifierRadioProps> = ({
+                                                                 modifier,
+                                                                 selectedChoiceId,
+                                                                 onSelectedChoiceIdChanged
+                                                             }) => {
     return (
-        <div>
+        <div className="modifier-choice-option-list">
             {
                 modifier.minimum === 0 && (
-                    <div className="modifier-choice-option">
+                    <label className="modifier-choice-option" htmlFor={`${modifier.id}-none`}>
                         <input type="radio"
-                               id="none"
+                               id={`${modifier.id}-none`}
                                name={modifier.id}
                                value="none"
                                checked={selectedChoiceId == null}
                                onChange={() => onSelectedChoiceIdChanged(null)}
                         />
                         <label htmlFor="none">None</label>
-                    </div>
+                    </label>
                 )
             }
             {modifier.choices.map(choice => (
-                <div key={choice.id} className="modifier-choice-option">
+                <label key={choice.id} htmlFor={getChoiceHtmlId(modifier, choice)} className="modifier-choice-option">
                     <input type="radio"
-                           id={choice.id}
+                           id={getChoiceHtmlId(modifier, choice)}
                            name={modifier.id}
                            value={choice.id}
                            checked={selectedChoiceId === choice.id}
                            onChange={() => onSelectedChoiceIdChanged(choice.id)}
                     />
-                    <label htmlFor={choice.id}>{choice.description} {getPriceDisplay(choice.price)}</label>
-                </div>
+                    <span>{choice.description} {getPriceDisplay(choice.price)}</span>
+                </label>
             ))}
         </div>
     );

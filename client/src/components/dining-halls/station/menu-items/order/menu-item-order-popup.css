@@ -65,10 +65,19 @@
     resize: none;
 }
 
+.menu-item-order-popup .modifier-choice-option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
 .menu-item-order-popup .modifier-choice-option {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    padding: 0.5rem;
+    background: #DADADA;
+    border-radius: var(--default-padding);
 }
 
 .menu-item-order-popup .modifier-choice-option input {
