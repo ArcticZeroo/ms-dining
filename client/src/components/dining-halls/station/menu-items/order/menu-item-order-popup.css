@@ -29,3 +29,8 @@
     padding: var(--default-padding);
     border-radius: var(--default-padding);
 }
+
+.menu-item-notes {
+    display: flex;
+    flex-direction: column;
+}

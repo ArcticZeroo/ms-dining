@@ -28,6 +28,7 @@ const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<
 
 export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuItem }) => {
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => new Map<string, Set<string>>());
+    const [notes, setNotes] = useState('');
 
     useEffect(() => {
         setSelectedChoiceIdsByModifierId(new Map<string, Set<string>>());
@@ -69,6 +70,10 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
                         />
                     ))
                 }
+            </div>
+            <div className="menu-item-notes">
+                <label htmlFor="notes">Special Requests & Preparation Notes</label>
+                <textarea id="notes" placeholder="Notes" value={notes} onChange={event => setNotes(event.target.value)}/>
             </div>
             <div className="footer">
                 <div>
