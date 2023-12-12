@@ -254,10 +254,10 @@ export class CafeDiscoverySession {
 
 		return {
 			id:             jsonItem.id,
-			price:          jsonItem.amount,
+			price:          Number(jsonItem.amount || 0),
 			name:           jsonItem.displayText,
-			calories:       jsonItem.properties.calories,
-			maxCalories:    jsonItem.properties.maxCalories,
+			calories:       Number(jsonItem.properties.calories || 0),
+			maxCalories:    Number(jsonItem.properties.maxCalories || 0),
 			hasThumbnail:   jsonItem.image != null,
 			imageUrl:       jsonItem.image,
 			description:    jsonItem.description,

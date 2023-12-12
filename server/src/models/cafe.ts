@@ -30,10 +30,10 @@ export interface ICafeStation {
 
 export interface IMenuItem {
     id: string;
-    price: string;
+    price: number;
     name: string;
-    calories: string;
-    maxCalories: string;
+    calories: number;
+    maxCalories: number;
     hasThumbnail: boolean;
     thumbnailWidth?: number;
     thumbnailHeight?: number;
