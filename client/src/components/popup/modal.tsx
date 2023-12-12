@@ -28,7 +28,11 @@ export const Modal = () => {
                 <div className="modal card">
                     <div className="title">
                         <h2>{modal.title}</h2>
-                        <button onClick={onCloseClicked}>X</button>
+                        <button className="close" onClick={onCloseClicked}>
+                            <span className="material-symbols-outlined">
+                                close
+                            </span>
+                        </button>
                     </div>
                     <div className="body">
                         {modal.body}

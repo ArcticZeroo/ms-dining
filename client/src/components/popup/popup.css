@@ -20,3 +20,13 @@
     display: flex;
     justify-content: space-between;
 }
+
+.modal .close {
+    background: none;
+}
+
+.modal .close span.material-symbols-outlined {
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+    background: #EEE;
+}
