@@ -54,6 +54,7 @@
 
 .menu-item-image {
     height: 10rem;
+    background: #CCC;
 }
 
 .collapsible-menu-list {

@@ -42,7 +42,7 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({ modifie
                         checked={selectedChoiceIds.has(choice.id)}
                         disabled={isAtMaximum && !selectedChoiceIds.has(choice.id)}
                     />
-                    <label htmlFor={choice.id}>{choice.description}{getPriceDisplay(choice.price)}</label>
+                    <label htmlFor={choice.id}>{choice.description} {getPriceDisplay(choice.price)}</label>
                 </div>
             ))}
         </div>

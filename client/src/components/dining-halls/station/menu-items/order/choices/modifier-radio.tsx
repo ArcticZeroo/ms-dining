@@ -35,7 +35,7 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({ modifier, selecte
                            checked={selectedChoiceId === choice.id}
                            onChange={() => onSelectedChoiceIdChanged(choice.id)}
                     />
-                    <label htmlFor={choice.id}>{choice.description}{getPriceDisplay(choice.price)}</label>
+                    <label htmlFor={choice.id}>{choice.description} {getPriceDisplay(choice.price)}</label>
                 </div>
             ))}
         </div>

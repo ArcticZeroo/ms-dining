@@ -4,6 +4,8 @@ import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
 import { CafeTypes } from '@msdining/common';
 import { getPriceDisplay } from '../../../../../util/cart.ts';
 
+import './menu-item-order-popup.css';
+
 interface IMenuItemOrderPopupProps {
     menuItem: IMenuItem;
 }
@@ -47,11 +49,11 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
     );
 
     return (
-        <div>
+        <div className="menu-item-order-popup">
             <div className="menu-item-description">{menuItem.description}</div>
             {
                 menuItem.imageUrl != null && (
-                    <div className="menu-item-image">
+                    <div className="menu-item-image-container">
                         <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
                     </div>
                 )

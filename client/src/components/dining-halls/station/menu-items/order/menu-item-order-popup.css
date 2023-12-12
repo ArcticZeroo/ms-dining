@@ -1,0 +1,31 @@
+.menu-item-order-popup {
+    /* todo */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+}
+
+.menu-item-order-popup .menu-item-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-item-order-popup .menu-item-description {
+    opacity: 0.8;
+    font-style: italic;
+    text-align: center;
+}
+
+.menu-item-modifiers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+}
+
+.menu-item-modifier {
+    background: #EEE;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+}
