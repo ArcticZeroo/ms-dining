@@ -192,3 +192,7 @@ html, body, #root, .App {
         overflow-x: auto;
     }
 }
+
+.pointer {
+    cursor: pointer;
+}

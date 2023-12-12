@@ -14,6 +14,8 @@ import { classNames } from './util/react';
 import { useValueNotifier } from './hooks/events.ts';
 import { ValueNotifier } from './util/events.ts';
 import { SelectedDateContext } from './context/time.ts';
+import { IModalContext, ModalContext } from './context/modal.ts';
+import { Modal } from './components/popup/modal.tsx';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -68,6 +70,8 @@ const App = () => {
 
     const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
 
+    const modalNotifier = useMemo(() => new ValueNotifier<IModalContext | null>(null), []);
+
     const [isNavExpanded, setIsNavExpanded] = useState(false);
     const deviceType = useDeviceType();
 
@@ -84,10 +88,14 @@ const App = () => {
                     <SelectedViewContext.Provider value={selectedViewNotifier}>
                         <SelectedDateContext.Provider value={selectedDateNotifier}>
                             <SearchQueryContext.Provider value={searchQueryNotifier}>
-                                <Nav/>
-                                <div className={classNames('content', shouldStopScroll && 'noscroll')} ref={menuDivRef}>
-                                    <Outlet/>
-                                </div>
+                                <ModalContext.Provider value={modalNotifier}>
+                                    <Modal/>
+                                    <Nav/>
+                                    <div className={classNames('content', shouldStopScroll && 'noscroll')}
+                                         ref={menuDivRef}>
+                                        <Outlet/>
+                                    </div>
+                                </ModalContext.Provider>
                             </SearchQueryContext.Provider>
                         </SelectedDateContext.Provider>
                     </SelectedViewContext.Provider>

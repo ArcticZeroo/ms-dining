@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
+import { classNames } from '../../../../util/react.ts';
+import { ModalContext } from '../../../../context/modal.ts';
+import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -21,7 +24,10 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
     return `${parts.join('-')} Calories`;
 };
 
+const menuItemSymbol = Symbol('menuItem');
+
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
+    const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
@@ -29,8 +35,27 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
     const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
+    const modalNotifier = useContext(ModalContext);
+
+    const onClick = () => {
+        if (!allowOnlineOrdering) {
+            return;
+        }
+
+        // There's already a modal active.
+        if (modalNotifier.value != null) {
+            return;
+        }
+
+        modalNotifier.value = {
+            id: menuItemSymbol,
+            title: menuItem.name,
+            body: <MenuItemOrderPopup menuItem={menuItem}/>,
+        }
+    }
+
     return (
-        <tr>
+        <tr className={classNames(allowOnlineOrdering && 'pointer')} onClick={onClick}>
             <td colSpan={!canShowImage ? 2 : 1}>
                 <div className="menu-item-head">
                     <span className="menu-item-name">{menuItem.name}</span>
