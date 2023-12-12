@@ -1,14 +1,20 @@
-import { CafeTypes } from "@msdining/common";
+import { CafeTypes } from '@msdining/common';
 import React from 'react';
 import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../util/cart.ts';
+import { classNames } from '../../../../../../util/react.ts';
 
 interface IModifierCheckboxesProps {
     modifier: CafeTypes.IMenuItemModifier;
     selectedChoiceIds: Set<string>;
+
     onSelectedChoiceIdsChanged(selection: Set<string>): void;
 }
 
-export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({ modifier, selectedChoiceIds, onSelectedChoiceIdsChanged }) => {
+export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
+                                                                           modifier,
+                                                                           selectedChoiceIds,
+                                                                           onSelectedChoiceIdsChanged
+                                                                       }) => {
     const isAtMaximum = selectedChoiceIds.size >= modifier.maximum;
 
     const handleChoiceChange = (choiceId: string) => {
@@ -31,20 +37,29 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({ modifie
 
     return (
         <div className="modifier-choice-option-list">
-            {modifier.choices.map(choice => (
-                <label key={choice.id} htmlFor={getChoiceHtmlId(modifier, choice)} className="modifier-choice-option">
-                    <input
-                        type="checkbox"
-                        id={getChoiceHtmlId(modifier, choice)}
-                        name={choice.description}
-                        value={choice.id}
-                        onChange={() => handleChoiceChange(choice.id)}
-                        checked={selectedChoiceIds.has(choice.id)}
-                        disabled={isAtMaximum && !selectedChoiceIds.has(choice.id)}
-                    />
-                    <span>{choice.description} {getPriceDisplay(choice.price)}</span>
-                </label>
-            ))}
+            {modifier.choices.map(choice => {
+                const htmlId = getChoiceHtmlId(modifier, choice);
+
+                const isSelected = selectedChoiceIds.has(choice.id);
+                const isDisabled = isAtMaximum && !isSelected;
+
+                return (
+                    <label key={choice.id}
+                           htmlFor={htmlId}
+                           className={classNames('modifier-choice-option', isDisabled && 'disabled')}>
+                        <input
+                            type="checkbox"
+                            id={htmlId}
+                            name={choice.description}
+                            value={choice.id}
+                            onChange={() => handleChoiceChange(choice.id)}
+                            checked={isSelected}
+                            disabled={isDisabled}
+                        />
+                        <span>{choice.description} {getPriceDisplay(choice.price)}</span>
+                    </label>
+                );
+            })}
         </div>
     );
 }

@@ -38,6 +38,10 @@
     background: #e7dede;
 }
 
+.menu-item-modifier.error .modifier-choice-option {
+    background: #dad1d1;
+}
+
 .menu-item-notes {
     display: flex;
     flex-direction: column;
@@ -78,6 +82,12 @@
     padding: 0.5rem;
     background: #DADADA;
     border-radius: var(--default-padding);
+    transition: all 0.25s ease;
+}
+
+.menu-item-order-popup .modifier-choice-option.disabled {
+    background: #E5E5E5;
+    color: #999;
 }
 
 .menu-item-order-popup .modifier-choice-option input {
