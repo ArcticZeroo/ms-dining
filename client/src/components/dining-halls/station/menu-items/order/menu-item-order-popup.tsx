@@ -38,7 +38,8 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
 
     console.log(selectedChoiceIdsByModifierId);
 
-    const [notes, setNotes] = useState('');
+    const [notes, setNotes] = useState(fromCartItem?.specialInstructions || '');
+
     const cartItemsNotifier = useContext(CartContext);
     const modalNotifier = useContext(ModalContext);
 
