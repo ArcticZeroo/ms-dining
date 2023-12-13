@@ -1,10 +1,11 @@
 import { IMenuItem } from '../../../../../models/cafe.ts';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
 import { CafeTypes } from '@msdining/common';
 import { getPriceDisplay } from '../../../../../util/cart.ts';
 
 import './menu-item-order-popup.css';
+import { CartContext } from '../../../../../context/cart.ts';
 
 interface IMenuItemOrderPopupProps {
     menuItem: IMenuItem;
@@ -29,6 +30,7 @@ const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<
 export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuItem }) => {
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => new Map<string, Set<string>>());
     const [notes, setNotes] = useState('');
+    const cartItemsNotifier = useContext(CartContext);
 
     useEffect(() => {
         setSelectedChoiceIdsByModifierId(new Map<string, Set<string>>());
@@ -68,6 +70,25 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
         [menuItem, getSelectedChoiceIdsForModifier]
     );
 
+    const onAddToCartClicked = () => {
+        if (!isOrderValid) {
+            return;
+        }
+
+        cartItemsNotifier.value = [
+            ...cartItemsNotifier.value,
+            {
+                itemName:            menuItem.name,
+                itemId:              menuItem.id,
+                quantity:            1,
+                specialInstructions: notes,
+                modifiers:           Array.from(selectedChoiceIdsByModifierId.entries())
+                                         .flatMap(([modifierId, selectedChoiceIds]) => Array.from(selectedChoiceIds)
+                                             .map(choiceId => ({ modifierId, choiceId })))
+            }
+        ];
+    }
+
     return (
         <div className="menu-item-order-popup">
             <div className="menu-item-description">{menuItem.description}</div>
@@ -101,7 +122,11 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
                 <div className="price">
                     {getPriceDisplay(totalPrice)}
                 </div>
-                <button className="add-to-cart" disabled={!isOrderValid} title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}>
+                <button className="add-to-cart"
+                        disabled={!isOrderValid}
+                        title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
+                        onClick={onAddToCartClicked}
+                >
                     Add to Cart
                 </button>
             </div>

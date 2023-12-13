@@ -3,7 +3,6 @@ import { Outlet, useLoaderData } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
 import { Nav } from './components/nav/nav.tsx';
 import { ApplicationContext } from './context/app.ts';
-import { SearchQueryContext } from './context/search.ts';
 import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
@@ -13,9 +12,9 @@ import { ICancellationToken } from './util/async';
 import { classNames } from './util/react';
 import { useValueNotifier } from './hooks/events.ts';
 import { ValueNotifier } from './util/events.ts';
-import { SelectedDateContext } from './context/time.ts';
-import { IModalContext, ModalContext } from './context/modal.ts';
 import { Modal } from './components/popup/modal.tsx';
+import { StaticContextProviders } from './components/context/static-context-providers.tsx';
+import { CartPopup } from './components/dining-halls/station/menu-items/order/cart/cart-popup.tsx';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -58,19 +57,12 @@ const App = () => {
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
 
+    useBackgroundMenuUpdate(viewsById, cafes);
+
     const selectedViewNotifier = useMemo(
         () => new ValueNotifier<CafeView | undefined>(undefined),
         []
     );
-
-    const selectedDateNotifier = useMemo(
-        () => new ValueNotifier<Date>(DiningClient.getTodayDateForMenu()),
-        []
-    );
-
-    const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
-
-    const modalNotifier = useMemo(() => new ValueNotifier<IModalContext | null>(null), []);
 
     const [isNavExpanded, setIsNavExpanded] = useState(false);
     const deviceType = useDeviceType();
@@ -79,25 +71,36 @@ const App = () => {
     const shouldStopScroll = isNavExpanded && deviceType === DeviceType.Mobile;
 
     const menuDivRef = useMenuScrollTopRef(selectedViewNotifier);
-    useBackgroundMenuUpdate(viewsById, cafes);
+
+    const applicationContext = useMemo(
+        () => ({
+            viewsById,
+            viewsInOrder,
+            cafes,
+            groups
+        }),
+        [viewsById, viewsInOrder, cafes, groups]
+    );
+
+    const navExpansionContext = useMemo(
+        () => [isNavVisible, (isExpanded: boolean) => setIsNavExpanded(isExpanded)] as const,
+        [isNavVisible]
+    );
 
     return (
         <div className="App">
-            <ApplicationContext.Provider value={{ viewsById, viewsInOrder, cafes, groups }}>
-                <NavExpansionContext.Provider value={[isNavVisible, setIsNavExpanded]}>
+            <ApplicationContext.Provider value={applicationContext}>
+                <NavExpansionContext.Provider value={navExpansionContext}>
                     <SelectedViewContext.Provider value={selectedViewNotifier}>
-                        <SelectedDateContext.Provider value={selectedDateNotifier}>
-                            <SearchQueryContext.Provider value={searchQueryNotifier}>
-                                <ModalContext.Provider value={modalNotifier}>
-                                    <Modal/>
-                                    <Nav/>
-                                    <div className={classNames('content', shouldStopScroll && 'noscroll')}
-                                         ref={menuDivRef}>
-                                        <Outlet/>
-                                    </div>
-                                </ModalContext.Provider>
-                            </SearchQueryContext.Provider>
-                        </SelectedDateContext.Provider>
+                        <StaticContextProviders>
+                            <Modal/>
+                            <Nav/>
+                            <div className={classNames('content', shouldStopScroll && 'noscroll')}
+                                 ref={menuDivRef}>
+                                <Outlet/>
+                            </div>
+                            <CartPopup/>
+                        </StaticContextProviders>
                     </SelectedViewContext.Provider>
                 </NavExpansionContext.Provider>
             </ApplicationContext.Provider>

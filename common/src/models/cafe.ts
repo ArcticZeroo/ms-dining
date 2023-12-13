@@ -21,3 +21,4 @@ export interface IMenuItemModifier {
 	choices: IMenuItemModifierChoice[];
 }
 
+export * from './cart.js';
