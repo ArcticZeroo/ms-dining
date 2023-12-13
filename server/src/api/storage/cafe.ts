@@ -31,6 +31,7 @@ const {
 } = DateUtil;
 
 type IMenuItemModifier = CafeTypes.IMenuItemModifier;
+type IMenuItemModifierChoice = CafeTypes.IMenuItemModifierChoice;
 type ModifierChoiceType = CafeTypes.ModifierChoiceType;
 
 interface ICreateDailyStationMenuParams {
@@ -106,6 +107,35 @@ export abstract class CafeStorageClient {
 			});
 	}
 
+	private static async _doCreateModifierChoiceAsync(prismaClient: PrismaClient, modifier: IMenuItemModifier, choice: IMenuItemModifierChoice): Promise<void> {
+		const existingChoice = await prismaClient.menuItemModifierChoice.findUnique({
+			where: { id: choice.id }
+		});
+
+		if (existingChoice != null) {
+			if (existingChoice.description === choice.description && existingChoice.price === choice.price) {
+				return;
+			}
+
+			await prismaClient.menuItemModifierChoice.update({
+				where: { id: choice.id },
+				data:  {
+					description: choice.description,
+					price:       choice.price
+				}
+			});
+		} else {
+			await prismaClient.menuItemModifierChoice.create({
+				data: {
+					id:          choice.id,
+					description: choice.description,
+					price:       choice.price,
+					modifierId:  modifier.id
+				}
+			});
+		}
+	}
+
 	private static async _doCreateSingleModifierAsync(prismaClient: PrismaClient, modifier: IMenuItemModifier): Promise<void> {
 		const existingModifier = await prismaClient.menuItemModifier.findUnique({
 			where:   { id: modifier.id },
@@ -129,14 +159,7 @@ export abstract class CafeStorageClient {
 			minimum:     modifier.minimum,
 			maximum:     modifier.maximum,
 			// Maybe a bad idea?
-			choiceType: modifier.choiceType as ModifierChoiceType,
-			choices:    {
-				create: modifier.choices.map(choice => ({
-					id:          choice.id,
-					description: choice.description,
-					price:       choice.price
-				}))
-			}
+			choiceType: modifier.choiceType as ModifierChoiceType
 		} as const;
 
 		if (existingModifier != null) {
@@ -153,6 +176,10 @@ export abstract class CafeStorageClient {
 					id: modifier.id
 				}
 			});
+		}
+
+		for (const choice of modifier.choices) {
+			await this._doCreateModifierChoiceAsync(prismaClient, modifier, choice);
 		}
 	}
 

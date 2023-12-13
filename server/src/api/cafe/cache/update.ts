@@ -92,7 +92,6 @@ export class DailyCafeUpdateSession {
             }
 
             cafePromises.push(this.discoverCafeAsync(cafe));
-            break;
         }
 
         try {
