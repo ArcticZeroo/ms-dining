@@ -207,6 +207,6 @@ export const cafeList: ICafe[] = [
 	{
 		name: 'Food Hall 4',
 		id:   'foodhall4',
-		firstAvailable: new Date(2023, DateUtil.nativeMonth.December, 13)
+		// firstAvailable: new Date(2023, DateUtil.nativeMonth.December, 13)
 	},
 ];
