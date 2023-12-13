@@ -54,8 +54,10 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         }
     }
 
+    const title = allowOnlineOrdering ? 'Click to open online ordering popup' : undefined;
+
     return (
-        <tr className={classNames(allowOnlineOrdering && 'pointer')} onClick={onClick}>
+        <tr className={classNames(allowOnlineOrdering && 'pointer')} onClick={onClick} title={title}>
             <td colSpan={!canShowImage ? 2 : 1}>
                 <div className="menu-item-head">
                     <span className="menu-item-name">{menuItem.name}</span>
