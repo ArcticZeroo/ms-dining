@@ -24,7 +24,7 @@ export const MenuItemModifierPicker: React.FC<IMenuItemModifierPickerProps> = ({
                 {modifier.description}
             </div>
             <div className="menu-item-modifier-count">
-                {getMinMaxDisplay(modifier.minimum, modifier.maximum)}
+                {getMinMaxDisplay(modifier)}
             </div>
             <ModifierChoices
                 modifier={modifier}
