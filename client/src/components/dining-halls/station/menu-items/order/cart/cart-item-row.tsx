@@ -1,4 +1,4 @@
-import { ICartItemWithMetadata } from "../../../../../../models/cart";
+import { ICartItemWithMetadata } from '../../../../../../models/cart';
 import { getPriceDisplay } from '../../../../../../util/cart.ts';
 import React from 'react';
 
@@ -10,20 +10,46 @@ interface ICartItemProps {
 }
 
 export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, onChangeQuantity }) => {
+    const canDecreaseQuantity = item.quantity > 1;
+
+    const onDecreaseQuantity = () => {
+        if (!canDecreaseQuantity) {
+            return;
+        }
+
+        onChangeQuantity(item.quantity - 1);
+    }
+
     return (
         <tr className="cart-item">
             <td>
                 <div className="cart-item-buttons">
-                    <button className="material-symbols-outlined" onClick={onRemove}>
+                    <button
+                        className="material-symbols-outlined"
+                        onClick={onRemove}
+                        title="Remove this item"
+                    >
                         delete
                     </button>
-                    <button className="material-symbols-outlined" onClick={() => onChangeQuantity(item.quantity - 1)}>
+                    <button
+                        className="material-symbols-outlined"
+                        disabled={!canDecreaseQuantity}
+                        onClick={onDecreaseQuantity}
+                        title={canDecreaseQuantity ? 'Remove one' : 'Use the trash can to remove this item'}
+                    >
                         remove
                     </button>
-                    <button className="material-symbols-outlined" onClick={() => onChangeQuantity(item.quantity + 1)}>
+                    <button
+                        className="material-symbols-outlined"
+                        onClick={() => onChangeQuantity(item.quantity + 1)}
+                    >
                         add
                     </button>
-                    <button className="material-symbols-outlined" onClick={onEdit}>
+                    <button
+                        className="material-symbols-outlined"
+                        onClick={onEdit}
+                        title="Edit this item"
+                    >
                         edit
                     </button>
                 </div>

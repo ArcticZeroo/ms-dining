@@ -48,4 +48,9 @@
 .cart-item-buttons button {
     color: white;
     background: none;
+    transition: opacity 0.25s ease;
+}
+
+.cart-item-buttons button:disabled {
+    opacity: 0.25;
 }
