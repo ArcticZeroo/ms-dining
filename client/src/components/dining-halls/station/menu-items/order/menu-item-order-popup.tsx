@@ -1,14 +1,18 @@
 import { IMenuItem } from '../../../../../models/cafe.ts';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
 import { CafeTypes } from '@msdining/common';
 import { getPriceDisplay } from '../../../../../util/cart.ts';
 
 import './menu-item-order-popup.css';
 import { CartContext } from '../../../../../context/cart.ts';
+import { ModalContext } from '../../../../../context/modal.ts';
+import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 
 interface IMenuItemOrderPopupProps {
     menuItem: IMenuItem;
+    modalSymbol: symbol;
+    fromCartItem?: ICartItemWithMetadata;
 }
 
 const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
@@ -27,14 +31,16 @@ const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<
     return price;
 }
 
-export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuItem }) => {
-    const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => new Map<string, Set<string>>());
+export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuItem, modalSymbol, fromCartItem }) => {
+    const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
+        return fromCartItem?.choicesByModifierId ?? new Map<string, Set<string>>();
+    });
+
+    console.log(selectedChoiceIdsByModifierId);
+
     const [notes, setNotes] = useState('');
     const cartItemsNotifier = useContext(CartContext);
-
-    useEffect(() => {
-        setSelectedChoiceIdsByModifierId(new Map<string, Set<string>>());
-    }, [menuItem.modifiers]);
+    const modalNotifier = useContext(ModalContext);
 
     const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
         return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
@@ -75,18 +81,33 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
             return;
         }
 
-        cartItemsNotifier.value = [
-            ...cartItemsNotifier.value,
-            {
-                itemName:            menuItem.name,
-                itemId:              menuItem.id,
-                quantity:            1,
-                specialInstructions: notes,
-                modifiers:           Array.from(selectedChoiceIdsByModifierId.entries())
-                                         .flatMap(([modifierId, selectedChoiceIds]) => Array.from(selectedChoiceIds)
-                                             .map(choiceId => ({ modifierId, choiceId })))
-            }
-        ];
+        const newCartItem: ICartItemWithMetadata = {
+            associatedItem:      menuItem,
+            itemId:              menuItem.id,
+            quantity:            1,
+            price:               totalPrice,
+            specialInstructions: notes,
+            choicesByModifierId: selectedChoiceIdsByModifierId
+        };
+
+        if (fromCartItem != null) {
+            cartItemsNotifier.value = cartItemsNotifier.value.map(item => {
+                if (item === fromCartItem) {
+                    return newCartItem;
+                }
+
+                return item;
+            });
+        } else {
+            cartItemsNotifier.value = [
+                ...cartItemsNotifier.value,
+                newCartItem
+            ];
+        }
+
+        if (modalNotifier.value?.id === modalSymbol) {
+            modalNotifier.value = null;
+        }
     }
 
     return (
@@ -127,7 +148,11 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
                         title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
                         onClick={onAddToCartClicked}
                 >
-                    Add to Cart
+                    {
+                        fromCartItem == null
+                            ? 'Add to Cart'
+                            : 'Update Cart Item'
+                    }
                 </button>
             </div>
         </div>

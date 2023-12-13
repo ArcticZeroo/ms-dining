@@ -1,11 +1,6 @@
-export interface ICartItemModifier {
-    modifierId: string;
-    choiceId: string;
-}
-
 export interface ICartItem {
     itemId: string;
     quantity: number;
-    modifiers: ICartItemModifier[];
+    choicesByModifierId: Map<string, Set<string>>;
     specialInstructions?: string;
 }

@@ -14,19 +14,21 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({
                                                                  selectedChoiceId,
                                                                  onSelectedChoiceIdChanged
                                                              }) => {
+    const noneChoiceId = `${modifier.id}-none`;
+
     return (
         <div className="modifier-choice-option-list">
             {
                 modifier.minimum === 0 && (
-                    <label className="modifier-choice-option" htmlFor={`${modifier.id}-none`}>
+                    <label className="modifier-choice-option" htmlFor={noneChoiceId}>
                         <input type="radio"
-                               id={`${modifier.id}-none`}
+                               id={noneChoiceId}
                                name={modifier.id}
                                value="none"
                                checked={selectedChoiceId == null}
                                onChange={() => onSelectedChoiceIdChanged(null)}
                         />
-                        <label htmlFor="none">None</label>
+                        <label htmlFor={noneChoiceId}>None</label>
                     </label>
                 )
             }

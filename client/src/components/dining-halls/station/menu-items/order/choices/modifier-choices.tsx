@@ -12,7 +12,6 @@ interface IModifierChoicesProps {
 export const ModifierChoices: React.FC<IModifierChoicesProps> = ({ modifier, selectedChoiceIds, onSelectedChoiceIdsChanged }) => {
     if (modifier.choiceType === CafeTypes.ModifierChoices.radio) {
         const choice = selectedChoiceIds.size === 0 ? null : Array.from(selectedChoiceIds)[0];
-        console.log(selectedChoiceIds, choice);
 
         const onRadioChoiceChanged = (choice: string | null) => {
             if (choice == null) {

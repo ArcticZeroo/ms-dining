@@ -1,5 +1,7 @@
 import { CafeTypes } from "@msdining/common";
+import { IMenuItem } from './cafe.ts';
 
-export interface INamedCartItem extends CafeTypes.ICartItem {
-    itemName: string;
+export interface ICartItemWithMetadata extends CafeTypes.ICartItem {
+    associatedItem: IMenuItem;
+    price: number;
 }

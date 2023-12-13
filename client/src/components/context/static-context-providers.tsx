@@ -5,7 +5,7 @@ import { IModalContext, ModalContext } from '../../context/modal.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { CartContext } from '../../context/cart.ts';
-import { INamedCartItem } from '../../models/cart.ts';
+import { ICartItemWithMetadata } from '../../models/cart.ts';
 
 interface IStaticContextProvidersProps {
     children: React.ReactNode;
@@ -20,7 +20,7 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
 
     const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
     const modalNotifier = useMemo(() => new ValueNotifier<IModalContext | null>(null), []);
-    const cartItemNotifier = useMemo(() => new ValueNotifier<Array<INamedCartItem>>([]), []);
+    const cartItemNotifier = useMemo(() => new ValueNotifier<Array<ICartItemWithMetadata>>([]), []);
 
     return (
         <SelectedDateContext.Provider value={selectedDateNotifier}>

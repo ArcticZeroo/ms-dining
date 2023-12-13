@@ -24,7 +24,7 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
     return `${parts.join('-')} Calories`;
 };
 
-const menuItemSymbol = Symbol('menuItem');
+const menuItemModalSymbol = Symbol('menuItem');
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
@@ -48,9 +48,9 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         }
 
         modalNotifier.value = {
-            id: menuItemSymbol,
+            id: menuItemModalSymbol,
             title: menuItem.name,
-            body: <MenuItemOrderPopup menuItem={menuItem}/>,
+            body: <MenuItemOrderPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
         }
     }
 
