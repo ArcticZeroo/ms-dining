@@ -14,14 +14,18 @@
 .modal {
     position: relative;
     margin: var(--default-padding);
-    max-height: 100%;
-    max-width: 100%;
-    overflow: auto;
+    max-height: 90%;
+    max-width: 90%;
 }
 
 .modal .title {
     display: flex;
     justify-content: space-between;
+    position: sticky;
+}
+
+.modal .body {
+    overflow: auto;
 }
 
 .modal .close {
