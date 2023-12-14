@@ -28,13 +28,12 @@ export const CartPopup = () => {
         }
 
         modalNotifier.value = {
-            id:    editCartItemSymbol,
-            title: `Edit ${item.associatedItem.name}`,
-            body:  <MenuItemOrderPopup
-                       menuItem={item.associatedItem}
-                       modalSymbol={editCartItemSymbol}
-                       fromCartItem={item}
-                   />
+            id:   editCartItemSymbol,
+            body: <MenuItemOrderPopup
+                      menuItem={item.associatedItem}
+                      modalSymbol={editCartItemSymbol}
+                      fromCartItem={item}
+                  />
         };
     }
 
