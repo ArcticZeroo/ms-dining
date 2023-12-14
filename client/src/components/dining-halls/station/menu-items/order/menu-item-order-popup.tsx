@@ -112,7 +112,7 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
 
     return (
         <Modal
-            title={menuItem.name}
+            title={`${fromCartItem != null ? 'Edit ' : ''}${menuItem.name}`}
             body={(
                 <div className="menu-item-order-body">
                     <div className="menu-item-description">{menuItem.description}</div>
