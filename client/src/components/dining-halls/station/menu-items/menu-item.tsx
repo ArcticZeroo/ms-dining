@@ -49,7 +49,6 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
         modalNotifier.value = {
             id: menuItemModalSymbol,
-            title: menuItem.name,
             body: <MenuItemOrderPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
         }
     }
