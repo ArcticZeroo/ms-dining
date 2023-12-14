@@ -12,3 +12,13 @@
 .notice.visible {
     opacity: 1;
 }
+
+@media screen and (max-height: 800px) {
+    .notice {
+        display: none;
+    }
+
+    .notice.visible {
+        display: flex;
+    }
+}

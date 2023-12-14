@@ -154,4 +154,8 @@
     .station .menu-body table tbody {
         gap: 1rem;
     }
+
+    .collapsible-cafe .cafe-name .logo {
+        display: none;
+    }
 }

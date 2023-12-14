@@ -63,7 +63,7 @@
     background: #2196F3;
     color: white;
     border-radius: var(--default-padding);
-    padding: var(--default-padding);
+    padding: 1rem;
 }
 
 .menu-item-order-popup .footer .add-to-cart:disabled {
