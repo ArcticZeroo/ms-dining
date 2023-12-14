@@ -150,4 +150,8 @@
         display: flex;
         flex-direction: column;
     }
+
+    .station .menu-body table tbody {
+        gap: 1rem;
+    }
 }
