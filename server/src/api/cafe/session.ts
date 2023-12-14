@@ -228,6 +228,11 @@ export class CafeDiscoverySession {
 	}
 
 	private _shouldRetrieveModifierDetails(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
+		// In case parsing is weird, don't treat null as a reason to skip retrieving
+		if (jsonItem.isItemCustomizationEnabled === false) {
+			return false;
+		}
+
 		if (localItem == null || localItem.lastUpdateTime == null || Number.isNaN(localItem.lastUpdateTime.getTime())) {
 			return true;
 		}
