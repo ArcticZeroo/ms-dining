@@ -34,24 +34,26 @@ export const OrderPopupFooter: React.FC<IOrderPopupFooterProps> = ({
                         onClick={onAddQuantityClicked}>
                     add
                 </button>
+                <div className="quantity">
+                    {quantity}x
+                </div>
             </div>
-            <div className="quantity">
-                {quantity}x
+            <div className="info">
+                <div className="price">
+                    {getPriceDisplay(totalPrice * quantity)}
+                </div>
+                <button className="add-to-cart"
+                        disabled={!isOrderValid}
+                        title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
+                        onClick={onAddToCartClicked}
+                >
+                    {
+                        isUpdate
+                            ? 'Update Cart Item'
+                            : 'Add to Cart'
+                    }
+                </button>
             </div>
-            <div className="price">
-                {getPriceDisplay(totalPrice * quantity)}
-            </div>
-            <button className="add-to-cart"
-                    disabled={!isOrderValid}
-                    title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
-                    onClick={onAddToCartClicked}
-            >
-                {
-                    isUpdate
-                        ? 'Update Cart Item'
-                        : 'Add to Cart'
-                }
-            </button>
         </div>
     );
 }

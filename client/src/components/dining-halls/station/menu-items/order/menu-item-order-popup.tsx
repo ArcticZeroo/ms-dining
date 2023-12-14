@@ -91,7 +91,7 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
         const newCartItem: ICartItemWithMetadata = {
             associatedItem:      menuItem,
             itemId:              menuItem.id,
-            quantity:            1,
+            quantity:            quantity,
             price:               totalPrice,
             specialInstructions: notes,
             choicesByModifierId: selectedChoiceIdsByModifierId
