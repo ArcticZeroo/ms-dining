@@ -146,7 +146,7 @@
 }
 
 @media screen and (max-width: 500px) {
-    .station .menu-body table tbody {
+    .station .menu-body table tbody, .station .menu-body table tr {
         display: flex;
         flex-direction: column;
     }
