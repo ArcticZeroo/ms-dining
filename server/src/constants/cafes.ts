@@ -258,5 +258,10 @@ export const cafeList: ICafe[] = [
         name:    'Paparepas',
         id:      'fh4papparepas',
         groupId: groupIds.building4
+    },
+    {
+        name:    'Boona Boona ☕',
+        id:      'fh4boonboona',
+        groupId: groupIds.building4
     }
 ];
