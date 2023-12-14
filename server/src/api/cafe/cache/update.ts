@@ -6,6 +6,7 @@ import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
+import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 import { CafeDiscoverySession } from '../session.js';
@@ -92,6 +93,10 @@ export class DailyCafeUpdateSession {
             }
 
             cafePromises.push(this.discoverCafeAsync(cafe));
+
+            if (ENVIRONMENT_SETTINGS.shouldFetchOnlyOneCafe) {
+                break;
+            }
         }
 
         try {
