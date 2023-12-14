@@ -1,4 +1,4 @@
-import { Modal } from './components/popup/modal.tsx';
+import { PopupContainer } from './components/popup/popup-container.tsx';
 import { Nav } from './components/nav/nav.tsx';
 import { classNames } from './util/react.ts';
 import { Outlet } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { ValueNotifier } from './util/events.ts';
 import { CafeView } from './models/cafe.ts';
 import { useContext, useEffect, useRef } from 'react';
 import { SelectedViewContext } from './context/view.ts';
-import { ModalContext } from './context/modal.ts';
+import { PopupContext } from './context/modal.ts';
 
 const useMenuScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | undefined>) => {
     const selectedView = useValueNotifier(selectedViewNotifier);
@@ -30,7 +30,7 @@ export const Root = () => {
     const deviceType = useDeviceType();
 
     const selectedViewNotifier = useContext(SelectedViewContext);
-    const currentModal = useValueNotifierContext(ModalContext);
+    const currentModal = useValueNotifierContext(PopupContext);
 
     const menuDivRef = useMenuScrollTopRef(selectedViewNotifier);
 
@@ -39,7 +39,7 @@ export const Root = () => {
 
     return (
         <>
-            <Modal/>
+            <PopupContainer/>
             <Nav/>
             <div className={classNames('content', shouldStopScroll && 'noscroll')}
                  ref={menuDivRef}>

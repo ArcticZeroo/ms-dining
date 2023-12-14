@@ -1,13 +1,14 @@
 import { IMenuItem } from '../../../../../models/cafe.ts';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
 import { CafeTypes } from '@msdining/common';
-import { getPriceDisplay } from '../../../../../util/cart.ts';
 
 import './menu-item-order-popup.css';
 import { CartContext } from '../../../../../context/cart.ts';
-import { ModalContext } from '../../../../../context/modal.ts';
+import { PopupContext } from '../../../../../context/modal.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
+import { Modal } from '../../../../popup/modal.tsx';
+import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
+import { getPriceDisplay } from '../../../../../util/cart.ts';
 
 interface IMenuItemOrderPopupProps {
     menuItem: IMenuItem;
@@ -39,7 +40,7 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
     const [notes, setNotes] = useState(fromCartItem?.specialInstructions || '');
 
     const cartItemsNotifier = useContext(CartContext);
-    const modalNotifier = useContext(ModalContext);
+    const modalNotifier = useContext(PopupContext);
 
     const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
         return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
@@ -110,52 +111,59 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
     }
 
     return (
-        <div className="menu-item-order-popup">
-            <div className="menu-item-description">{menuItem.description}</div>
-            {
-                menuItem.imageUrl != null && (
-                    <div className="menu-item-image-container">
-                        <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
+        <Modal
+            title={menuItem.name}
+            body={(
+                <div className="menu-item-order-body">
+                    <div className="menu-item-description">{menuItem.description}</div>
+                    {
+                        menuItem.imageUrl != null && (
+                            <div className="menu-item-image-container">
+                                <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
+                            </div>
+                        )
+                    }
+                    <div className="menu-item-configuration">
+                        <div className="menu-item-modifiers">
+                            {
+                                menuItem.modifiers.map(modifier => (
+                                    <MenuItemModifierPicker
+                                        key={modifier.id}
+                                        modifier={modifier}
+                                        selectedChoiceIds={getSelectedChoiceIdsForModifier(modifier)}
+                                        onSelectedChoiceIdsChanged={selection => onSelectedChoiceIdsChanged(modifier, selection)}
+                                    />
+                                ))
+                            }
+                        </div>
+                        <div className="menu-item-notes">
+                            <label htmlFor="notes">Special Requests & Preparation Notes</label>
+                            <textarea id="notes"
+                                      placeholder="Enter Special Requests & Preparation Notes Here"
+                                      value={notes}
+                                      onChange={event => setNotes(event.target.value)}/>
+                        </div>
                     </div>
-                )
-            }
-            <div className="menu-item-configuration">
-                <div className="menu-item-modifiers">
-                    {
-                        menuItem.modifiers.map(modifier => (
-                            <MenuItemModifierPicker
-                                key={modifier.id}
-                                modifier={modifier}
-                                selectedChoiceIds={getSelectedChoiceIdsForModifier(modifier)}
-                                onSelectedChoiceIdsChanged={selection => onSelectedChoiceIdsChanged(modifier, selection)}
-                            />
-                        ))
-                    }
                 </div>
-                <div className="menu-item-notes">
-                    <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                    <textarea id="notes"
-                              placeholder="Enter Special Requests & Preparation Notes Here"
-                              value={notes}
-                              onChange={event => setNotes(event.target.value)}/>
+            )}
+            footer={(
+                <div className="menu-item-order-footer">
+                    <div className="price">
+                        {getPriceDisplay(totalPrice)}
+                    </div>
+                    <button className="add-to-cart"
+                            disabled={!isOrderValid}
+                            title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
+                            onClick={onAddToCartClicked}
+                    >
+                        {
+                            fromCartItem == null
+                                ? 'Add to Cart'
+                                : 'Update Cart Item'
+                        }
+                    </button>
                 </div>
-            </div>
-            <div className="footer">
-                <div className="price">
-                    {getPriceDisplay(totalPrice)}
-                </div>
-                <button className="add-to-cart"
-                        disabled={!isOrderValid}
-                        title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
-                        onClick={onAddToCartClicked}
-                >
-                    {
-                        fromCartItem == null
-                            ? 'Add to Cart'
-                            : 'Update Cart Item'
-                    }
-                </button>
-            </div>
-        </div>
+            )}
+        />
     );
 }

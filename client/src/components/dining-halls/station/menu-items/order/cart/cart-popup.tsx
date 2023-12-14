@@ -5,7 +5,7 @@ import { classNames } from '../../../../../../util/react.ts';
 import { CartItemRow } from './cart-item-row.tsx';
 import { useContext } from 'react';
 import { ICartItemWithMetadata } from '../../../../../../models/cart.ts';
-import { ModalContext } from '../../../../../../context/modal.ts';
+import { PopupContext } from '../../../../../../context/modal.ts';
 
 import './cart-popup.css';
 import { MenuItemOrderPopup } from '../menu-item-order-popup.tsx';
@@ -13,7 +13,7 @@ import { MenuItemOrderPopup } from '../menu-item-order-popup.tsx';
 const editCartItemSymbol = Symbol('edit-cart-item');
 
 export const CartPopup = () => {
-    const modalNotifier = useContext(ModalContext);
+    const modalNotifier = useContext(PopupContext);
     const cartItemsNotifier = useContext(CartContext);
     const [cartItems, setCartItems] = useValueNotifierAsState(cartItemsNotifier);
 

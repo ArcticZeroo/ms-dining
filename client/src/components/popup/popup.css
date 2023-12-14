@@ -11,7 +11,7 @@
     animation-timing-function: ease;
 }
 
-#modal-wrapper {
+#popup-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,6 +43,10 @@
     border-radius: var(--default-padding);
     padding: var(--default-padding);
     background: #EEE;
+}
+
+.modal .footer {
+    margin-top: var(--default-padding);
 }
 
 @media screen and (max-width: 800px) {

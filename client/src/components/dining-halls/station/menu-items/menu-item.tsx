@@ -4,7 +4,7 @@ import { MenuItemImage } from './menu-item-image.tsx';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { classNames } from '../../../../util/react.ts';
-import { ModalContext } from '../../../../context/modal.ts';
+import { PopupContext } from '../../../../context/modal.ts';
 import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
 
 export interface IMenuItemProps {
@@ -35,7 +35,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
     const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
-    const modalNotifier = useContext(ModalContext);
+    const modalNotifier = useContext(PopupContext);
 
     const onClick = () => {
         if (!allowOnlineOrdering) {
