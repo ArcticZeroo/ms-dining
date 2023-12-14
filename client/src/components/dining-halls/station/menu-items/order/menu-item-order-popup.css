@@ -1,6 +1,4 @@
 .menu-item-order-popup {
-    /* todo */
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);

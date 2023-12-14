@@ -119,24 +119,26 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
                     </div>
                 )
             }
-            <div className="menu-item-modifiers">
-                {
-                    menuItem.modifiers.map(modifier => (
-                        <MenuItemModifierPicker
-                            key={modifier.id}
-                            modifier={modifier}
-                            selectedChoiceIds={getSelectedChoiceIdsForModifier(modifier)}
-                            onSelectedChoiceIdsChanged={selection => onSelectedChoiceIdsChanged(modifier, selection)}
-                        />
-                    ))
-                }
-            </div>
-            <div className="menu-item-notes">
-                <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                <textarea id="notes"
-                          placeholder="Enter Special Requests & Preparation Notes Here"
-                          value={notes}
-                          onChange={event => setNotes(event.target.value)}/>
+            <div className="menu-item-configuration">
+                <div className="menu-item-modifiers">
+                    {
+                        menuItem.modifiers.map(modifier => (
+                            <MenuItemModifierPicker
+                                key={modifier.id}
+                                modifier={modifier}
+                                selectedChoiceIds={getSelectedChoiceIdsForModifier(modifier)}
+                                onSelectedChoiceIdsChanged={selection => onSelectedChoiceIdsChanged(modifier, selection)}
+                            />
+                        ))
+                    }
+                </div>
+                <div className="menu-item-notes">
+                    <label htmlFor="notes">Special Requests & Preparation Notes</label>
+                    <textarea id="notes"
+                              placeholder="Enter Special Requests & Preparation Notes Here"
+                              value={notes}
+                              onChange={event => setNotes(event.target.value)}/>
+                </div>
             </div>
             <div className="footer">
                 <div className="price">

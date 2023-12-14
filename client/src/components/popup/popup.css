@@ -1,4 +1,4 @@
-.top-overlay {
+#top-overlay {
     position: absolute;
     z-index: 100;
     width: 100%;
@@ -9,6 +9,12 @@
     animation-name: fadeIn;
     animation-duration: 0.35s;
     animation-timing-function: ease;
+}
+
+#modal-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal {
