@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { ValueNotifier } from '../../util/events.ts';
 import { DiningClient } from '../../api/dining.ts';
-import { IModalContext, ModalContext } from '../../context/modal.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { CartContext } from '../../context/cart.ts';
@@ -19,17 +18,14 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
     );
 
     const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
-    const modalNotifier = useMemo(() => new ValueNotifier<IModalContext | null>(null), []);
     const cartItemNotifier = useMemo(() => new ValueNotifier<Array<ICartItemWithMetadata>>([]), []);
 
     return (
         <SelectedDateContext.Provider value={selectedDateNotifier}>
             <SearchQueryContext.Provider value={searchQueryNotifier}>
-                <ModalContext.Provider value={modalNotifier}>
-                    <CartContext.Provider value={cartItemNotifier}>
-                        {children}
-                    </CartContext.Provider>
-                </ModalContext.Provider>
+                <CartContext.Provider value={cartItemNotifier}>
+                    {children}
+                </CartContext.Provider>
             </SearchQueryContext.Provider>
         </SelectedDateContext.Provider>
     );
