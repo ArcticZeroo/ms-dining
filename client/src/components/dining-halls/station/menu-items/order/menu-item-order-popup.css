@@ -16,10 +16,17 @@
     text-align: center;
 }
 
+.menu-item-configuration {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+}
+
 .menu-item-modifiers {
     display: flex;
     flex-wrap: wrap;
     gap: var(--default-padding);
+    justify-content: center;
 }
 
 .menu-item-modifier {
