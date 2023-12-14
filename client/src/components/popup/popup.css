@@ -11,7 +11,7 @@
     animation-timing-function: ease;
 }
 
-#modal-container {
+#modal-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
