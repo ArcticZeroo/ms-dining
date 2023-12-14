@@ -2,6 +2,7 @@ import { ApplicationSettings } from '../../../api/settings.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import './settings.css';
 import { HomepageViewsSetting } from './homepage-views-setting.tsx';
+import { CustomKeySetting } from './custom-key-setting.tsx';
 
 export const SettingsPage = () => (
 	<div className="card settings">
@@ -68,6 +69,7 @@ export const SettingsPage = () => (
 				setting={ApplicationSettings.rememberCollapseState}
 				name="Remember Collapse/Expand State"
 			/>
+			<CustomKeySetting/>
 		</div>
 	</div>
 );
