@@ -7,8 +7,8 @@ import { CartContext } from '../../../../../context/cart.ts';
 import { PopupContext } from '../../../../../context/modal.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 import { Modal } from '../../../../popup/modal.tsx';
-import { MenuItemModifierPicker } from './menu-item-modifier-picker.tsx';
-import { getPriceDisplay } from '../../../../../util/cart.ts';
+import { OrderPopupFooter } from './order-popup-footer.tsx';
+import { OrderPopupBody } from './order-popup-body.tsx';
 
 interface IMenuItemOrderPopupProps {
     menuItem: IMenuItem;
@@ -32,12 +32,36 @@ const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<
     return price;
 }
 
+const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
+    return useMemo(
+        () => {
+            for (const modifier of menuItem.modifiers) {
+                const selectedChoiceIds = getSelectedChoiceIdsForModifier(modifier);
+
+                if (selectedChoiceIds.size < modifier.minimum) {
+                    return false;
+                }
+
+                if (selectedChoiceIds.size > modifier.maximum) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        [menuItem, getSelectedChoiceIdsForModifier]
+    );
+}
+
 export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuItem, modalSymbol, fromCartItem }) => {
+    const isUpdate = fromCartItem != null;
+
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
         return fromCartItem?.choicesByModifierId ?? new Map<string, Set<string>>();
     });
 
     const [notes, setNotes] = useState(fromCartItem?.specialInstructions || '');
+    const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
 
     const cartItemsNotifier = useContext(CartContext);
     const modalNotifier = useContext(PopupContext);
@@ -57,24 +81,7 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
         [menuItem, selectedChoiceIdsByModifierId]
     );
 
-    const isOrderValid = useMemo(
-        () => {
-            for (const modifier of menuItem.modifiers) {
-                const selectedChoiceIds = getSelectedChoiceIdsForModifier(modifier);
-
-                if (selectedChoiceIds.size < modifier.minimum) {
-                    return false;
-                }
-
-                if (selectedChoiceIds.size > modifier.maximum) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
-        [menuItem, getSelectedChoiceIdsForModifier]
-    );
+    const isOrderValid = useIsOrderValid(menuItem, getSelectedChoiceIdsForModifier);
 
     const onAddToCartClicked = () => {
         if (!isOrderValid) {
@@ -110,59 +117,40 @@ export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuIte
         }
     }
 
+    const onAddQuantityClicked = () => {
+        setQuantity(quantity + 1);
+    }
+
+    const onRemoveQuantityClicked = () => {
+        if (quantity <= 1) {
+            return;
+        }
+
+        setQuantity(quantity - 1);
+    }
+
     return (
         <Modal
-            title={`${fromCartItem != null ? 'Edit ' : ''}${menuItem.name}`}
+            title={`${isUpdate ? 'Edit ' : ''}${menuItem.name}`}
             body={(
-                <div className="menu-item-order-body">
-                    <div className="menu-item-description">{menuItem.description}</div>
-                    {
-                        menuItem.imageUrl != null && (
-                            <div className="menu-item-image-container">
-                                <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
-                            </div>
-                        )
-                    }
-                    <div className="menu-item-configuration">
-                        <div className="menu-item-modifiers">
-                            {
-                                menuItem.modifiers.map(modifier => (
-                                    <MenuItemModifierPicker
-                                        key={modifier.id}
-                                        modifier={modifier}
-                                        selectedChoiceIds={getSelectedChoiceIdsForModifier(modifier)}
-                                        onSelectedChoiceIdsChanged={selection => onSelectedChoiceIdsChanged(modifier, selection)}
-                                    />
-                                ))
-                            }
-                        </div>
-                        <div className="menu-item-notes">
-                            <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                            <textarea id="notes"
-                                      placeholder="Enter Special Requests & Preparation Notes Here"
-                                      value={notes}
-                                      onChange={event => setNotes(event.target.value)}/>
-                        </div>
-                    </div>
-                </div>
+                <OrderPopupBody
+                    menuItem={menuItem}
+                    notes={notes}
+                    getSelectedChoiceIdsForModifier={getSelectedChoiceIdsForModifier}
+                    onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
+                    onNotesChanged={setNotes}
+                />
             )}
             footer={(
-                <div className="menu-item-order-footer">
-                    <div className="price">
-                        {getPriceDisplay(totalPrice)}
-                    </div>
-                    <button className="add-to-cart"
-                            disabled={!isOrderValid}
-                            title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
-                            onClick={onAddToCartClicked}
-                    >
-                        {
-                            fromCartItem == null
-                                ? 'Add to Cart'
-                                : 'Update Cart Item'
-                        }
-                    </button>
-                </div>
+                <OrderPopupFooter
+                    isUpdate={isUpdate}
+                    totalPrice={totalPrice}
+                    quantity={quantity}
+                    isOrderValid={isOrderValid}
+                    onAddToCartClicked={onAddToCartClicked}
+                    onAddQuantityClicked={onAddQuantityClicked}
+                    onRemoveQuantityClicked={onRemoveQuantityClicked}
+                />
             )}
         />
     );
