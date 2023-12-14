@@ -142,4 +142,12 @@
         align-items: flex-start;
         justify-content: flex-start;
     }
+
+}
+
+@media screen and (max-width: 500px) {
+    .station .menu-body table tbody {
+        display: flex;
+        flex-direction: column;
+    }
 }
