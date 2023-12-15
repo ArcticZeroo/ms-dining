@@ -49,3 +49,9 @@ export interface IServerCheapItemSearchResult {
     locations: Record<string, Array<string>>;
     price: number;
 }
+
+export enum CheapItemsSortType {
+    priceAsc,
+    priceDesc,
+    relevance
+}

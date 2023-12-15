@@ -3,11 +3,11 @@ import { SearchTypes } from '@msdining/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
-import { classNames } from '../../../util/react.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
 import { EntityButton } from './entity-button.tsx';
 
 import './search-page.css';
+import { SearchWaiting } from '../../search/search-waiting.tsx';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -77,14 +77,9 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                         Total Results: {results.length}
                     </div>
                 </div>
-                <div className={classNames('search-waiting', stage === PromiseStage.running && 'visible')}>
-                    <div className="loading-spinner"/>
-                    <div>
-                        Loading search results...
-                    </div>
-                </div>
+                <SearchWaiting stage={stage}/>
             </div>
-            <div className="search-entity-selector">
+            <div className="search-filter-selector">
                 <EntityButton name="Menu Items and Stations"
                               type={SearchEntityFilterType.all}
                               onClick={() => setEntityFilterType(SearchEntityFilterType.all)}

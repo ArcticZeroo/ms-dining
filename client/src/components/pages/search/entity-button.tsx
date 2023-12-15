@@ -41,7 +41,7 @@ export const EntityButton: React.FC<IEntityButtonProps> = ({
     };
 
     return (
-        <button className={classNames('entity-button', isChecked && 'active', isDisabled && 'disabled')}
+        <button className={classNames('filter-button', isChecked && 'active', isDisabled && 'disabled')}
             onClick={onButtonClicked}>
             <input type="radio"
                 name="entity-type"

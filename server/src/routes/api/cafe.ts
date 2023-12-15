@@ -12,7 +12,7 @@ import { NumberUtil } from '@msdining/common';
 import { jsonStringifyWithoutNull } from '../../util/serde.js';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
-const DEFAULT_MAX_PRICE = 9;
+const DEFAULT_MAX_PRICE = 9.99;
 const DEFAULT_MIN_PRICE = 3;
 
 export const registerDiningHallRoutes = (parent: Router) => {

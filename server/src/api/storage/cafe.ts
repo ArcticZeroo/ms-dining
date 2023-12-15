@@ -58,7 +58,12 @@ const CHEAP_ITEM_IGNORE_TERMS = [
     'tea',
     'sweet',
     'sweet street',
-    'starbucks'
+    'starbucks',
+    'mocktail',
+    'soda',
+    'french press',
+    'cold brew',
+    'bakery'
 ];
 
 const CHEAP_ITEM_IGNORE_STRING = `(${CHEAP_ITEM_IGNORE_TERMS.join('|')})s?`;
@@ -721,7 +726,7 @@ export abstract class CafeStorageClient {
                         continue;
                     }
 
-                    if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name)) {
+                    if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name) || CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
                         continue;
                     }
 
@@ -729,8 +734,10 @@ export abstract class CafeStorageClient {
                         continue;
                     }
 
-                    if (!resultsByItemName.has(menuItem.name)) {
-                        resultsByItemName.set(menuItem.name, {
+                    const normalizedName = normalizeNameForSearch(menuItem.name);
+
+                    if (!resultsByItemName.has(normalizedName)) {
+                        resultsByItemName.set(normalizedName, {
                             name:        menuItem.name,
                             description: menuItem.description,
                             imageUrl:    getThumbnailUrl(menuItem),
@@ -739,7 +746,7 @@ export abstract class CafeStorageClient {
                         });
                     }
 
-                    const result = resultsByItemName.get(menuItem.name)!;
+                    const result = resultsByItemName.get(normalizedName)!;
 
                     if (!result.locationDatesByCafeId.has(dailyStation.cafeId)) {
                         result.locationDatesByCafeId.set(dailyStation.cafeId, new Set());
