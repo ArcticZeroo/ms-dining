@@ -1,27 +1,28 @@
-import fetch from 'node-fetch';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { CafeTypes } from '@msdining/common';
+import fetch from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/cafes.js';
 import { requestRetryCount } from '../../constants/config.js';
-import {
-	ICafe,
-	ICafeConfig,
-	ICafeStation,
-	IMenuItem
-} from '../../models/cafe.js';
+import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
 import {
 	ICafeConfigResponse,
 	ICafeMenuItemDetailsResponse,
 	ICafeMenuItemListResponseItem,
 	ICafeStationListItem
 } from '../../models/responses.js';
-import { logError, logInfo } from '../../util/log.js';
+import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
+import { logDebug, logError } from '../../util/log.js';
 import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
 import { CafeStorageClient } from '../storage/cafe.js';
+import Semaphore from 'semaphore-async-await';
 
 type IMenuItemModifier = CafeTypes.IMenuItemModifier;
 type ModifierChoiceType = CafeTypes.ModifierChoiceType;
 const ModifierChoices = CafeTypes.ModifierChoices;
+
+const requestSemaphore = ENVIRONMENT_SETTINGS.maxConcurrentRequests
+						 ? new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentRequests)
+						 : null;
 
 const getHeaders = (token: string) => token ? ({
 	'Authorization': `Bearer ${token}`
@@ -53,21 +54,27 @@ export class CafeDiscoverySession {
 	}
 
 	private async _requestAsync(path: string, options: any = {}) {
-		const optionsWithToken = this._getRequestOptions(options);
+		try {
+			await requestSemaphore?.acquire();
 
-		const url = this._getUrl(path);
+			const optionsWithToken = this._getRequestOptions(options);
 
-		const response = await makeRequestWithRetries(
-			(retry) => {
-				// logInfo(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
-				return fetch(url, optionsWithToken);
-			},
-			requestRetryCount
-		);
+			const url = this._getUrl(path);
 
-		validateSuccessResponse(response);
+			const response = await makeRequestWithRetries(
+				(retry) => {
+					logDebug(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
+					return fetch(url, optionsWithToken);
+				},
+				requestRetryCount
+			);
 
-		return response;
+			validateSuccessResponse(response);
+
+			return response;
+		} finally {
+			requestSemaphore?.release();
+		}
 	}
 
 	private async performLoginAsync() {
@@ -358,6 +365,10 @@ export class CafeDiscoverySession {
 	private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
 		for (const station of stations) {
 			await this._populateMenuItemsForStationAsync(station, alwaysGetServerItems);
+
+			if (ENVIRONMENT_SETTINGS.shouldFetchOnlyOneStation) {
+				break;
+			}
 		}
 	}
 

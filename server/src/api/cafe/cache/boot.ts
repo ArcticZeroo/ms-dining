@@ -1,4 +1,5 @@
 import { DateUtil } from '@msdining/common';
+import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/cafe.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
@@ -63,6 +64,10 @@ const repairCafesWithoutMenusAsync = async () => {
 }
 
 const repairTodaySessionsAsync = async () => {
+    if (ENVIRONMENT_SETTINGS.skipDailyRepair) {
+        return;
+    }
+
     const now = new Date();
 
     // Don't bother repairing today after 5pm if there is already a daily menu;
