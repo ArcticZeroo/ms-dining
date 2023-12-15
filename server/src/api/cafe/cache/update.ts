@@ -13,7 +13,7 @@ import { CafeDiscoverySession } from '../session.js';
 import { saveSessionAsync } from './storage.js';
 import { writeThumbnailsForCafe } from './thumbnail.js';
 
-export const cafeSemaphore = new Semaphore.default(5);
+export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryCount = 3;
 const cafeDiscoveryRetryDelayMs = 1000;
 

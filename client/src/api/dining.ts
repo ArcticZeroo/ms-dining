@@ -287,7 +287,9 @@ export abstract class DiningClient {
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                price:                 serverResult.price
+                price:                 serverResult.price,
+                minCalories:           serverResult.minCalories,
+                maxCalories:           serverResult.maxCalories,
             });
         }
 

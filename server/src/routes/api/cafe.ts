@@ -185,11 +185,13 @@ export const registerDiningHallRoutes = (parent: Router) => {
         const searchResults = [];
         for (const searchResult of cheapItems) {
             searchResults.push({
-                name:         searchResult.name,
-                description:  searchResult.description,
-                imageUrl:     searchResult.imageUrl,
-                locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
-                price:        searchResult.price,
+                name:        searchResult.name,
+                description: searchResult.description,
+                imageUrl:    searchResult.imageUrl,
+                locations:   serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+                price:       searchResult.price,
+                minCalories: searchResult.minCalories,
+                maxCalories: searchResult.maxCalories,
             });
         }
 

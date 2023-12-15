@@ -31,6 +31,8 @@ export interface ICheapItemSearchResult {
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
     price: number;
+    minCalories: number;
+    maxCalories: number;
 }
 
 export interface IServerSearchResult {
@@ -48,10 +50,13 @@ export interface IServerCheapItemSearchResult {
     imageUrl?: string;
     locations: Record<string, Array<string>>;
     price: number;
+    minCalories: number;
+    maxCalories: number;
 }
 
 export enum CheapItemsSortType {
     priceAsc,
     priceDesc,
-    relevance
+    relevance,
+    caloriesPerDollarDesc
 }

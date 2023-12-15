@@ -738,10 +738,12 @@ export abstract class CafeStorageClient {
 
                     if (!resultsByItemName.has(normalizedName)) {
                         resultsByItemName.set(normalizedName, {
-                            name:        menuItem.name,
-                            description: menuItem.description,
-                            imageUrl:    getThumbnailUrl(menuItem),
-                            price:       menuItem.price,
+                            name:                  menuItem.name,
+                            description:           menuItem.description,
+                            imageUrl:              getThumbnailUrl(menuItem),
+                            price:                 menuItem.price,
+                            minCalories:           menuItem.calories,
+                            maxCalories:           menuItem.maxCalories,
                             locationDatesByCafeId: new Map<string, Set<string>>()
                         });
                     }

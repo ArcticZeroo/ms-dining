@@ -23,4 +23,6 @@ export interface ICheapItemSearchResult {
     name: string;
     description?: string;
     price: number;
+    minCalories: number;
+    maxCalories: number;
 }

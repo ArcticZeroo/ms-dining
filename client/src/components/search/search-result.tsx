@@ -10,7 +10,6 @@ import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts
 import { getParentView } from '../../util/view';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import './search.css';
-import { getPriceDisplay } from '../../util/cart.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -82,6 +81,12 @@ const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFut
     );
 }
 
+interface ISearchResultField {
+    key: string;
+    iconName: string;
+    value: React.ReactNode;
+}
+
 interface ISearchResultProps {
     isVisible: boolean;
     name: string;
@@ -89,7 +94,7 @@ interface ISearchResultProps {
     locationDatesByCafeId: Map<string, Date[]>;
     imageUrl?: string;
     entityType: SearchTypes.SearchEntityType;
-    price?: number;
+    extraFields?: ISearchResultField[];
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -99,7 +104,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                                                locationDatesByCafeId,
                                                                imageUrl,
                                                                entityType,
-                                                               price
+                                                               extraFields
                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -125,12 +130,26 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             description && <div className="search-result-description">{description}</div>
                         }
                         {
-                            price && (
-                                <div className="search-result-price">
-                                    {getPriceDisplay(price)}
+                            extraFields && (
+                                <div className="search-result-fields">
+                                    {
+                                        extraFields.map(({ iconName, value, key }) => (
+                                            value &&
+                                            <div className="search-result-field" key={key}>
+                                                <span className="material-symbols-outlined icon">
+                                                    {iconName}
+                                                </span>
+                                                <span className="value">
+                                                    {value}
+                                                </span>
+                                            </div>
+                                        ))
+                                    }
                                 </div>
                             )
                         }
+                        <div className="search-result-fields">
+                        </div>
                     </div>
                     <div className="search-result-hits">
                         {

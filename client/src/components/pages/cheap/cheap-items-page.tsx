@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../../api/dining.ts';
-import { SearchResult } from '../../search/search-result.tsx';
-import { SearchTypes } from '@msdining/common';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemsSortType } from '../../../models/search.ts';
 import { SortButton } from './sort-button.tsx';
+import { CheapItemResult } from './cheap-item-result.tsx';
 
 const useCheapItems = (sortType: CheapItemsSortType) => {
     const { stage, value, error } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
@@ -20,6 +19,32 @@ const useCheapItems = (sortType: CheapItemsSortType) => {
                 return value.sort((a, b) => a.price - b.price);
             case CheapItemsSortType.priceDesc:
                 return value.sort((a, b) => b.price - a.price);
+            case CheapItemsSortType.caloriesPerDollarDesc:
+                return value.sort((a, b) => {
+                    const isMissingCaloriesA = a.minCalories === 0 && a.maxCalories === 0;
+                    const isMissingCaloriesB = b.minCalories === 0 && b.maxCalories === 0;
+
+                    if (isMissingCaloriesA && isMissingCaloriesB) {
+                        return a.price - b.price;
+                    }
+
+                    // Push to end of list if we have no calories
+                    if (isMissingCaloriesA) {
+                        return 1;
+                    }
+
+                    if (isMissingCaloriesB) {
+                        return -1;
+                    }
+
+                    const averageCaloriesA = (a.minCalories + a.maxCalories) / 2;
+                    const averageCaloriesB = (b.minCalories + b.maxCalories) / 2;
+
+                    const caloriesPerDollarA = averageCaloriesA / a.price;
+                    const caloriesPerDollarB = averageCaloriesB / b.price;
+
+                    return caloriesPerDollarB - caloriesPerDollarA;
+                });
             case CheapItemsSortType.relevance:
                 // TODO
                 return value;
@@ -34,7 +59,7 @@ const useCheapItems = (sortType: CheapItemsSortType) => {
 }
 
 export const CheapItemsPage: React.FC = () => {
-    const [sortType, setSortType] = useState(CheapItemsSortType.priceAsc);
+    const [sortType, setSortType] = useState(CheapItemsSortType.caloriesPerDollarDesc);
     const { stage, results, error } = useCheapItems(sortType);
 
     if (stage === PromiseStage.error) {
@@ -61,6 +86,12 @@ export const CheapItemsPage: React.FC = () => {
             </div>
             <div className="search-filter-selector">
                 <SortButton
+                    name="Calories per Dollar Ascending"
+                    currentSort={sortType}
+                    type={CheapItemsSortType.caloriesPerDollarDesc}
+                    onClick={() => setSortType(CheapItemsSortType.caloriesPerDollarDesc)}
+                />
+                <SortButton
                     name="Price Ascending"
                     currentSort={sortType}
                     type={CheapItemsSortType.priceAsc}
@@ -82,16 +113,7 @@ export const CheapItemsPage: React.FC = () => {
             <div className="search-results">
                 {
                     items.map(item => (
-                        <SearchResult
-                            key={item.name}
-                            isVisible={true}
-                            name={item.name}
-                            description={item.description}
-                            locationDatesByCafeId={item.locationDatesByCafeId}
-                            imageUrl={item.imageUrl}
-                            entityType={SearchTypes.SearchEntityType.menuItem}
-                            price={item.price}
-                        />
+                        <CheapItemResult key={item.name} item={item}/>
                     ))
                 }
             </div>

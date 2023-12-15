@@ -123,3 +123,9 @@
     font-size: 0.9em;
     white-space: pre-wrap;
 }
+
+.search-result-fields .search-result-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
