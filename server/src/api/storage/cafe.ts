@@ -751,7 +751,9 @@ export abstract class CafeStorageClient {
                             // I guess we'll assume that the calories are the same across cafes with the same menu item
                             // price, since those are presumably the same item? Not sure how to deal with this.
                             minCalories:           menuItem.calories,
-                            maxCalories:           menuItem.maxCalories,
+                            maxCalories:           menuItem.maxCalories === 0
+                                                       ? menuItem.calories
+                                                       : menuItem.maxCalories,
                             locationDatesByCafeId: new Map<string, Set<string>>()
                         });
                     }
@@ -761,6 +763,9 @@ export abstract class CafeStorageClient {
                     if (!result.locationDatesByCafeId.has(dailyStation.cafeId)) {
                         result.locationDatesByCafeId.set(dailyStation.cafeId, new Set());
                     }
+
+                    result.minCalories = Math.max(result.minCalories, menuItem.calories);
+                    result.maxCalories = Math.max(result.maxCalories, menuItem.maxCalories);
 
                     result.locationDatesByCafeId.get(dailyStation.cafeId)!.add(dailyStation.dateString);
                 }
