@@ -47,9 +47,9 @@ interface ICreateDailyStationMenuParams {
 
 type DailyMenuByCafeId = Map<string, ICafeStation[]>;
 
-const CHEAP_ITEM_IGNORE_TERMS = 'sides?|coffee|espresso|latte|drink|dessert|snacks?|tea';
-const CHEAP_ITEM_WORDS_REGEX = new RegExp(`\\b(${CHEAP_ITEM_IGNORE_TERMS})\\b`, 'i');
-const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`(${CHEAP_ITEM_IGNORE_TERMS})`, 'i');
+const CHEAP_ITEM_IGNORE_TERMS = '(side|coffee|espresso|latte|drink|dessert|snack|tea|sweet|sweet street)s?';
+const CHEAP_ITEM_WORDS_REGEX = new RegExp(`\\b${CHEAP_ITEM_IGNORE_TERMS}\\b`, 'i');
+const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`${CHEAP_ITEM_IGNORE_TERMS}`, 'i');
 
 export abstract class CafeStorageClient {
     private static readonly _menuItemsById = new Map<string, IMenuItem>();

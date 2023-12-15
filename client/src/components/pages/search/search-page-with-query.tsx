@@ -19,13 +19,17 @@ interface ISearchResultsState {
     tabCounts: Map<SearchTypes.SearchEntityType, number>;
 }
 
-const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilterType): ISearchResultsState => {
+const useSearchResultsState = (query: string): ISearchResultsState => {
     const doSearchCallback = useCallback(() => DiningClient.retrieveSearchResults(query), [query]);
-    const searchResultState = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
+    const {
+        stage: searchResultStage,
+        value: searchResults,
+        run:   retrieveSearchResults
+    } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
     const allSearchResults = useMemo(
-        () => searchResultState.value ?? [],
-        [searchResultState.value, entityFilterType]
+        () => searchResults ?? [],
+        [searchResults]
     );
 
     const resultCountByEntityType = useMemo(() => {
@@ -40,11 +44,11 @@ const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilt
     }, [allSearchResults]);
 
     useEffect(() => {
-        searchResultState.run();
-    }, [searchResultState.run]);
+        retrieveSearchResults();
+    }, [retrieveSearchResults]);
 
     return {
-        stage:     searchResultState.stage,
+        stage:     searchResultStage,
         results:   allSearchResults,
         tabCounts: resultCountByEntityType
     };
@@ -52,7 +56,7 @@ const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilt
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
-    const { stage, results, tabCounts } = useSearchResultsState(queryText, entityFilterType);
+    const { stage, results, tabCounts } = useSearchResultsState(queryText);
 
     const sharedEntityButtonProps = {
         currentFilter:    entityFilterType,
@@ -82,19 +86,19 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
             </div>
             <div className="search-entity-selector">
                 <EntityButton name="Menu Items and Stations"
-                    type={SearchEntityFilterType.all}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
-                    {...sharedEntityButtonProps}
+                              type={SearchEntityFilterType.all}
+                              onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
+                              {...sharedEntityButtonProps}
                 />
                 <EntityButton name="Menu Items Only"
-                    type={SearchEntityFilterType.menuItem}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
-                    {...sharedEntityButtonProps}
+                              type={SearchEntityFilterType.menuItem}
+                              onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
+                              {...sharedEntityButtonProps}
                 />
                 <EntityButton name="Stations Only"
-                    type={SearchEntityFilterType.station}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
-                    {...sharedEntityButtonProps}
+                              type={SearchEntityFilterType.station}
+                              onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
+                              {...sharedEntityButtonProps}
                 />
             </div>
             {

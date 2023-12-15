@@ -10,6 +10,7 @@ import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts
 import { getParentView } from '../../util/view';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import './search.css';
+import { getPriceDisplay } from '../../util/cart.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -87,7 +88,8 @@ interface ISearchResultProps {
     description?: string;
     locationDatesByCafeId: Map<string, Date[]>;
     imageUrl?: string;
-    entityType?: SearchTypes.SearchEntityType;
+    entityType: SearchTypes.SearchEntityType;
+    price?: number;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -96,34 +98,38 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                                                description,
                                                                locationDatesByCafeId,
                                                                imageUrl,
-                                                               entityType
+                                                               entityType,
+                                                               price
                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 
-    const entityDisplayData = entityType ? entityDisplayDataByType[entityType] : undefined;
+    const entityDisplayData = entityDisplayDataByType[entityType];
 
     const locationEntriesInOrder = useLocationEntries(locationDatesByCafeId, allowFutureMenus);
 
     return (
         <div className={classNames('search-result', isVisible && 'visible')}>
-            {
-                entityDisplayData && (
-                    <div className={classNames('search-result-type', entityDisplayData.className)}>
+            <div className={classNames('search-result-type', entityDisplayData.className)}>
                         <span className="material-symbols-outlined">
                             {entityDisplayData.iconName}
                         </span>
-                    </div>
-                )
-            }
+            </div>
             <div className="search-result-info">
                 <div className="search-result-info-header">
                     <div className="search-result-name">
                         {name}
                         {
                             description && <div className="search-result-description">{description}</div>
+                        }
+                        {
+                            price && (
+                                <div className="search-result-price">
+                                    {getPriceDisplay(price)}
+                                </div>
+                            )
                         }
                     </div>
                     <div className="search-result-hits">
@@ -169,7 +175,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                 </div>
                 {
                     (imageUrl && showImages) && (
-                        <img src={imageUrl} alt={name} className="search-result-image"/>
+                        <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
                     )
                 }
             </div>

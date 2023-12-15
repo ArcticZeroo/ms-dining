@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../../api/dining.ts';
+import { SearchResult } from '../../search/search-result.tsx';
+import { SearchTypes } from '@msdining/common';
 
 export const CheapItemsPage: React.FC = () => {
     const { stage: searchStage, value: results, error } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
@@ -31,22 +33,23 @@ export const CheapItemsPage: React.FC = () => {
     const items = results ?? [];
 
     return (
-        <div className="cheap-items-page">
-            {
-                items.map(item => (
-                    <div key={item.name}>
-                        <div>
-                            {item.name}
-                        </div>
-                        <div>
-                            {item.price}
-                        </div>
-                        <div>
-                            {item.description}
-                        </div>
-                    </div>
-                ))
-            }
+        <div className="search-page">
+            <div className="search-results">
+                {
+                    items.map(item => (
+                        <SearchResult
+                            key={item.name}
+                            isVisible={true}
+                            name={item.name}
+                            description={item.description}
+                            locationDatesByCafeId={item.locationDatesByCafeId}
+                            imageUrl={item.imageUrl}
+                            entityType={SearchTypes.SearchEntityType.menuItem}
+                            price={item.price}
+                        />
+                    ))
+                }
+            </div>
         </div>
     );
 }
