@@ -10,7 +10,7 @@ export const NavNumberedCafeList: React.FC<INavNumberedCafeListProps> = ({ viewN
         const cafeNumberEntries = Array.from(viewNumbersById.entries()).sort(([, a], [, b]) => a - b);
 
         return cafeNumberEntries.map(([cafeId, cafeNumber]) => (
-            <NavLink key={cafeId} className="nav-numbered-cafe-list-item" to={`/menu/${cafeId}`}>
+            <NavLink key={cafeId} className="nav-numbered-cafe-list-item" to={`/menu/${cafeId}`} title={`Menu for Cafe ${cafeNumber}`}>
                 {cafeNumber}
             </NavLink>
         ));

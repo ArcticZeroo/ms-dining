@@ -6,8 +6,6 @@ interface IApplicationContext {
     viewsInOrder: CafeView[];
     cafes: ICafe[];
     groups: ICafeGroupWithoutMembers[];
-    // Cafes won't be in this list if they don't have a number
-    cafeNumbersById: Map<string, number>;
 }
 
 export const ApplicationContext = React.createContext<IApplicationContext>({
@@ -15,5 +13,4 @@ export const ApplicationContext = React.createContext<IApplicationContext>({
     viewsInOrder:    [],
     cafes:           [],
     groups:          [],
-    cafeNumbersById: new Map(),
 });

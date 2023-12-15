@@ -3,13 +3,12 @@ import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { ISearchResult, SearchEntityType } from '../../models/search.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
-import { DateUtil } from '@msdining/common';
+import { DateUtil, SearchTypes } from '@msdining/common';
 import './search.css';
 
 interface IEntityDisplayData {
@@ -17,21 +16,16 @@ interface IEntityDisplayData {
     iconName: string;
 }
 
-const entityDisplayDataByType: Record<SearchEntityType, IEntityDisplayData> = {
-    [SearchEntityType.menuItem]: {
+const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
+    [SearchTypes.SearchEntityType.menuItem]: {
         className: 'entity-menu-item',
         iconName:  'lunch_dining'
     },
-    [SearchEntityType.station]:  {
+    [SearchTypes.SearchEntityType.station]:  {
         className: 'entity-station',
         iconName:  'restaurant'
     }
 };
-
-interface ISearchResultProps {
-    result: ISearchResult;
-    isVisible: boolean;
-}
 
 const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean): Array<[string, Array<Date>]> => {
     const locationEntries = Array.from(locationDatesByCafeId.entries());
@@ -87,32 +81,43 @@ const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFut
     );
 }
 
+interface ISearchResultProps {
+    isVisible: boolean;
+    name: string;
+    description?: string;
+    locationDatesByCafeId: Map<string, Date[]>;
+    imageUrl?: string;
+    entityType?: SearchTypes.SearchEntityType;
+}
+
 export const SearchResult: React.FC<ISearchResultProps> = ({
                                                                isVisible,
-                                                               result: {
-                                                                           name,
-                                                                           description,
-                                                                           locationDatesByCafeId,
-                                                                           imageUrl,
-                                                                           entityType
-                                                                       }
+                                                               name,
+                                                               description,
+                                                               locationDatesByCafeId,
+                                                               imageUrl,
+                                                               entityType
                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 
-    const entityDisplayData = entityDisplayDataByType[entityType];
+    const entityDisplayData = entityType ? entityDisplayDataByType[entityType] : undefined;
 
     const locationEntriesInOrder = useLocationEntries(locationDatesByCafeId, allowFutureMenus);
 
     return (
         <div className={classNames('search-result', isVisible && 'visible')}>
-            <div className={classNames('search-result-type', entityDisplayData.className)}>
-                <span className="material-symbols-outlined">
-                    {entityDisplayData.iconName}
-                </span>
-            </div>
+            {
+                entityDisplayData && (
+                    <div className={classNames('search-result-type', entityDisplayData.className)}>
+                        <span className="material-symbols-outlined">
+                            {entityDisplayData.iconName}
+                        </span>
+                    </div>
+                )
+            }
             <div className="search-result-info">
                 <div className="search-result-info-header">
                     <div className="search-result-name">

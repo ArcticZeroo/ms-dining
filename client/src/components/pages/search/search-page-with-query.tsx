@@ -1,7 +1,8 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { SearchTypes } from '@msdining/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
-import { ISearchResult, SearchEntityFilterType, SearchEntityType } from '../../../models/search.ts';
+import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { classNames } from '../../../util/react.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
 import { EntityButton } from './entity-button.tsx';
@@ -14,8 +15,8 @@ interface ISearchPageWithQueryProps {
 
 interface ISearchResultsState {
     stage: PromiseStage;
-    results: ISearchResult[];
-    tabCounts: Map<SearchEntityType, number>;
+    results: IQuerySearchResult[];
+    tabCounts: Map<SearchTypes.SearchEntityType, number>;
 }
 
 const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilterType): ISearchResultsState => {
@@ -28,7 +29,7 @@ const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilt
     );
 
     const resultCountByEntityType = useMemo(() => {
-        const counts = new Map<SearchEntityType, number>();
+        const counts = new Map<SearchTypes.SearchEntityType, number>();
 
         for (const result of allSearchResults) {
             const count = counts.get(result.entityType) ?? 0;

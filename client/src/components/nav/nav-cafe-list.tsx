@@ -17,7 +17,7 @@ interface INavViewLinkProps {
 }
 
 const NavViewLink: React.FC<INavViewLinkProps> = ({ view, onViewSelected }) => (
-    <li key={view.value.id} className="cafe">
+    <li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`}>
         <NavLink to={getViewUrl(view)}
                  onClick={() => onViewSelected(view)}>
             {view.value.name}

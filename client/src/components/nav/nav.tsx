@@ -34,7 +34,14 @@ export const Nav: React.FC = () => {
             <NavCafeList onViewSelected={onViewClicked}/>
             <ul className="expandable-nav-list">
                 <li>
-                    <NavLink to="/info" className="link-button info" onClick={() => setIsExpanded(false)}>
+                    <NavLink to="/cheap" className="link-button info" onClick={() => setIsExpanded(false)} title="Cheap Items Page">
+                        <span className="material-symbols-outlined">
+                            attach_money
+                        </span>
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink to="/info" className="link-button info" onClick={() => setIsExpanded(false)} title="Info Page">
                         <span className="material-symbols-outlined">
                             info
                         </span>

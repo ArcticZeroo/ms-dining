@@ -14,7 +14,12 @@ import {
     ICafeStation,
     IMenuItem,
 } from '../../models/cafe.js';
-import { ISearchResult, SearchResultEntityType, SearchResultMatchReason } from '../../models/search.js';
+import {
+    ICheapItemSearchResult,
+    ISearchResult,
+    SearchResultEntityType,
+    SearchResultMatchReason
+} from '../../models/search.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { logError } from '../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../util/prisma.js';
@@ -41,6 +46,10 @@ interface ICreateDailyStationMenuParams {
 }
 
 type DailyMenuByCafeId = Map<string, ICafeStation[]>;
+
+const CHEAP_ITEM_IGNORE_TERMS = 'sides?|coffee|espresso|latte|drink|dessert|snacks?|tea';
+const CHEAP_ITEM_WORDS_REGEX = new RegExp(`\\b(${CHEAP_ITEM_IGNORE_TERMS})\\b`, 'i');
+const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`(${CHEAP_ITEM_IGNORE_TERMS})`, 'i');
 
 export abstract class CafeStorageClient {
     private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -530,9 +539,13 @@ export abstract class CafeStorageClient {
         this._cafeDataById.delete(cafeId);
     }
 
-    public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
-        const dateStringsForWeek = Array.from(DateUtil.yieldDaysInFutureForThisWeek()).map(i => DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i)));
-        const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+    private static _getDateStringsForWeek(): string[] {
+        return Array.from(DateUtil.yieldDaysInFutureForThisWeek()).map(i => DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i)));
+    }
+
+    private static _getAllMenusForWeek() {
+        const dateStringsForWeek = this._getDateStringsForWeek();
+        return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 dateString: {
                     in: dateStringsForWeek
@@ -561,6 +574,10 @@ export abstract class CafeStorageClient {
                 }
             }
         }));
+    }
+
+    public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
+        const dailyStations = await this._getAllMenusForWeek();
 
         const searchResultsByNameByEntityType = new Map<SearchResultEntityType, Map<string, ISearchResult>>();
 
@@ -666,5 +683,55 @@ export abstract class CafeStorageClient {
         }
 
         return searchResultsByNameByEntityType;
+    }
+
+    public static async searchForCheapItems(minPrice: number, maxPrice: number): Promise<ICheapItemSearchResult[]> {
+        const dailyStations = await this._getAllMenusForWeek();
+
+        const resultsByItemName = new Map<string, ICheapItemSearchResult>();
+
+        for (const dailyStation of dailyStations) {
+            for (const category of dailyStation.categories) {
+                if (CHEAP_ITEM_WORDS_REGEX.test(category.name)) {
+                    continue;
+                }
+
+                for (const dailyMenuItem of category.menuItems) {
+                    const menuItem = await this.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
+
+                    if (menuItem == null) {
+                        continue;
+                    }
+
+                    if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name)) {
+                        continue;
+                    }
+
+                    if (menuItem.price < minPrice || menuItem.price > maxPrice) {
+                        continue;
+                    }
+
+                    if (!resultsByItemName.has(menuItem.name)) {
+                        resultsByItemName.set(menuItem.name, {
+                            name:        menuItem.name,
+                            description: menuItem.description,
+                            imageUrl:    getThumbnailUrl(menuItem),
+                            price:       menuItem.price,
+                            locationDatesByCafeId: new Map<string, Set<string>>()
+                        });
+                    }
+
+                    const result = resultsByItemName.get(menuItem.name)!;
+
+                    if (!result.locationDatesByCafeId.has(dailyStation.cafeId)) {
+                        result.locationDatesByCafeId.set(dailyStation.cafeId, new Set());
+                    }
+
+                    result.locationDatesByCafeId.get(dailyStation.cafeId)!.add(dailyStation.dateString);
+                }
+            }
+        }
+
+        return Array.from(resultsByItemName.values());
     }
 }

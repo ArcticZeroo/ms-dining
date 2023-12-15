@@ -12,6 +12,7 @@ import { HomePage } from './components/pages/home/home-page.tsx';
 import { InfoPage } from './components/pages/info/info-page.tsx';
 import { AnalyticsPage } from './components/pages/analytics/analytics-page.tsx';
 import { ErrorPage } from './components/pages/error/error-page.tsx';
+import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -19,6 +20,7 @@ const router = createBrowserRouter(
             <Route path="/menu/:id" element={<CafeViewPage/>}/>
             <Route path="/settings" element={<SettingsPage/>}/>
             <Route path="/search" element={<SearchPage/>}/>
+            <Route path="/cheap" element={<CheapItemsPage/>}/>
             <Route path="/info" element={<InfoPage/>}/>
             <Route path="/analytics" element={<AnalyticsPage/>}/>
             <Route index={true} element={<HomePage/>}/>
