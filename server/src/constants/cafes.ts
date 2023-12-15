@@ -221,7 +221,7 @@ export const cafeList: ICafe[] = [
     },
     {
         name:    'Jack\'s BBQ 🍖',
-        id:      'fh4jacksbb4',
+        id:      'fh4jacksbbq',
         groupId: groupIds.building4,
     },
     {
@@ -229,11 +229,11 @@ export const cafeList: ICafe[] = [
         id:      'fh4justpoke',
         groupId: groupIds.building4,
     },
-    {
-        name:    'Just Poke',
-        id:      'fh4justpoke',
-        groupId: groupIds.building4,
-    },
+    // {
+    //     name:    'Joe\'s Burgers',
+    //     id:      'joesburgers',
+    //     groupId: groupIds.building4,
+    // },
     {
         name:    'MiLa',
         id:      'fh4mila',
