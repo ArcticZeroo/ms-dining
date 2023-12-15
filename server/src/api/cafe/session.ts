@@ -55,9 +55,7 @@ export class CafeDiscoverySession {
 
 	private async _requestAsync(path: string, options: any = {}) {
 		try {
-			if (requestSemaphore != null) {
-				await requestSemaphore.acquire();
-			}
+			await requestSemaphore?.acquire();
 
 			const optionsWithToken = this._getRequestOptions(options);
 
@@ -75,9 +73,7 @@ export class CafeDiscoverySession {
 
 			return response;
 		} finally {
-			if (requestSemaphore != null) {
-				requestSemaphore.release();
-			}
+			requestSemaphore?.release();
 		}
 	}
 
