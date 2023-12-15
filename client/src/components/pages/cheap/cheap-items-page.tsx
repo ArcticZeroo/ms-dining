@@ -72,12 +72,12 @@ export const CheapItemsPage: React.FC = () => {
                     type={CheapItemsSortType.priceDesc}
                     onClick={() => setSortType(CheapItemsSortType.priceDesc)}
                 />
-                <SortButton
-                    name="Relevance"
-                    currentSort={sortType}
-                    type={CheapItemsSortType.relevance}
-                    onClick={() => setSortType(CheapItemsSortType.relevance)}
-                />
+                {/*<SortButton*/}
+                {/*    name="Relevance"*/}
+                {/*    currentSort={sortType}*/}
+                {/*    type={CheapItemsSortType.relevance}*/}
+                {/*    onClick={() => setSortType(CheapItemsSortType.relevance)}*/}
+                {/*/>*/}
             </div>
             <div className="search-results">
                 {
