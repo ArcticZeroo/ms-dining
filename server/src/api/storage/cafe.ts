@@ -707,7 +707,7 @@ export abstract class CafeStorageClient {
     public static async searchForCheapItems(minPrice: number, maxPrice: number): Promise<ICheapItemSearchResult[]> {
         const dailyStations = await this._getAllMenusForWeek();
 
-        const resultsByItemName = new Map<string, ICheapItemSearchResult>();
+        const resultsByItemNameByPrice = new Map<string, Map<number, ICheapItemSearchResult>>();
 
         for (const dailyStation of dailyStations) {
             if (CHEAP_ITEM_WORDS_REGEX.test(dailyStation.station.name)) {
@@ -736,19 +736,27 @@ export abstract class CafeStorageClient {
 
                     const normalizedName = normalizeNameForSearch(menuItem.name);
 
-                    if (!resultsByItemName.has(normalizedName)) {
-                        resultsByItemName.set(normalizedName, {
+                    if (!resultsByItemNameByPrice.has(normalizedName)) {
+                        resultsByItemNameByPrice.set(normalizedName, new Map<number, ICheapItemSearchResult>());
+                    }
+
+                    const resultsByPrice = resultsByItemNameByPrice.get(normalizedName)!;
+
+                    if (!resultsByPrice.has(menuItem.price)) {
+                        resultsByPrice.set(menuItem.price, {
                             name:                  menuItem.name,
                             description:           menuItem.description,
                             imageUrl:              getThumbnailUrl(menuItem),
                             price:                 menuItem.price,
+                            // I guess we'll assume that the calories are the same across cafes with the same menu item
+                            // price, since those are presumably the same item? Not sure how to deal with this.
                             minCalories:           menuItem.calories,
                             maxCalories:           menuItem.maxCalories,
                             locationDatesByCafeId: new Map<string, Set<string>>()
                         });
                     }
 
-                    const result = resultsByItemName.get(normalizedName)!;
+                    const result = resultsByPrice.get(menuItem.price)!;
 
                     if (!result.locationDatesByCafeId.has(dailyStation.cafeId)) {
                         result.locationDatesByCafeId.set(dailyStation.cafeId, new Set());
@@ -759,6 +767,8 @@ export abstract class CafeStorageClient {
             }
         }
 
-        return Array.from(resultsByItemName.values());
+        return Array
+            .from(resultsByItemNameByPrice.values())
+            .flatMap(resultsByPrice => Array.from(resultsByPrice.values()));
     }
 }
