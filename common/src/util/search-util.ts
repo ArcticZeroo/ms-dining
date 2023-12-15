@@ -101,8 +101,8 @@ const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearc
 
     const longestSequentialSubstringLength = getSubstringScore({
         isSequential:                     true,
-        perfectMatchWithoutBoundaryScore: 1.25,
-        perfectMatchScore:                2,
+        perfectMatchWithoutBoundaryScore: 2,
+        perfectMatchScore:                5,
         matchingText,
         queryText,
     });
@@ -115,7 +115,7 @@ const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearc
     });
 
     const baseScore = (longestSequentialSubstringLength * 20)
-        + (longestNonSequentialSubstringLength * 5);
+        + (longestNonSequentialSubstringLength * 2);
 
     if (matchReason === SearchMatchReason.title) {
         return baseScore;
