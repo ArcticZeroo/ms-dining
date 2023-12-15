@@ -1,11 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import {
-    CafeView,
-    CafeViewType,
-    ICafe,
-    ICafeGroupWithoutMembers
-} from '../models/cafe.ts';
-import { sortCafeIds } from '../util/sorting';
+import { CafeView, CafeViewType, ICafe, ICafeGroupWithoutMembers } from '../models/cafe.ts';
+import { sortViews } from '../util/sorting';
 import { ApplicationContext } from '../context/app.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
@@ -51,9 +46,7 @@ export const useViewDataFromResponse = (cafes: ICafe[], groups: ICafeGroupWithou
 
         setViewsById(viewsById);
 
-        const viewIdsInOrder = sortCafeIds(Array.from(viewsById.keys()));
-        const viewsInOrder = viewIdsInOrder.map(viewId => viewsById.get(viewId)!);
-
+        const viewsInOrder = sortViews(viewsById.values());
         setViewsInOrder(viewsInOrder);
     }, [cafes, groups]);
 
