@@ -47,9 +47,23 @@ interface ICreateDailyStationMenuParams {
 
 type DailyMenuByCafeId = Map<string, ICafeStation[]>;
 
-const CHEAP_ITEM_IGNORE_TERMS = '(side|coffee|espresso|latte|drink|dessert|snack|tea|sweet|sweet street)s?';
-const CHEAP_ITEM_WORDS_REGEX = new RegExp(`\\b${CHEAP_ITEM_IGNORE_TERMS}\\b`, 'i');
-const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`${CHEAP_ITEM_IGNORE_TERMS}`, 'i');
+const CHEAP_ITEM_IGNORE_TERMS = [
+    'side',
+    'coffee',
+    'espresso',
+    'latte',
+    'drink',
+    'dessert',
+    'snack',
+    'tea',
+    'sweet',
+    'sweet street',
+    'starbucks'
+];
+
+const CHEAP_ITEM_IGNORE_STRING = `(${CHEAP_ITEM_IGNORE_TERMS.join('|')})s?`;
+const CHEAP_ITEM_WORDS_REGEX = new RegExp(`\\b${CHEAP_ITEM_IGNORE_STRING}\\b`, 'i');
+const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`${CHEAP_ITEM_IGNORE_STRING}`, 'i');
 
 export abstract class CafeStorageClient {
     private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -691,6 +705,10 @@ export abstract class CafeStorageClient {
         const resultsByItemName = new Map<string, ICheapItemSearchResult>();
 
         for (const dailyStation of dailyStations) {
+            if (CHEAP_ITEM_WORDS_REGEX.test(dailyStation.station.name)) {
+                continue;
+            }
+
             for (const category of dailyStation.categories) {
                 if (CHEAP_ITEM_WORDS_REGEX.test(category.name)) {
                     continue;
