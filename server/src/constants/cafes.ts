@@ -11,7 +11,7 @@ export const groupIds = {
 
 export const groupList: ICafeGroup[] = [
     {
-        name: 'The Commons',
+        name: 'Commons',
         id:   groupIds.commons
     },
     {
@@ -19,71 +19,87 @@ export const groupList: ICafeGroup[] = [
         id:   groupIds.localFlavorsBuilding6
     },
     {
-        name: 'Food Hall 4',
-        id:   groupIds.building4
+        name:   'Food Hall 4',
+        id:     groupIds.building4,
+        number: 4
     }
 ];
 
 export const cafeList: ICafe[] = [
     {
-        name: 'Café 16',
-        id:   'cafe16',
+        name:   'Café 16',
+        id:     'cafe16',
+        number: 16
     },
     {
-        name: 'Café 25',
-        id:   'cafe25',
+        name:   'Café 25',
+        id:     'cafe25',
+        number: 25
     },
     {
-        name: 'Café 31',
-        id:   'cafe31',
+        name:   'Café 31',
+        id:     'cafe31',
+        number: 31
     },
     {
-        name: 'Café 34',
-        id:   'cafe34',
+        name:   'Café 34',
+        id:     'cafe34',
+        number: 34
     },
     {
-        name: 'Café 36',
-        id:   'cafe36',
+        name:   'Café 36',
+        id:     'cafe36',
+        number: 36
     },
     {
-        name: 'Café 37',
-        id:   'cafe37',
+        name:   'Café 37',
+        id:     'cafe37',
+        number: 37
     },
     {
-        name: 'Café 40/41',
-        id:   'cafe40-41',
+        name:   'Café 40/41',
+        id:     'cafe40-41',
+        number: 40
     },
     {
-        name: 'Café 43',
-        id:   'cafe43',
+        name:   'Café 43',
+        id:     'cafe43',
+        number: 43
     },
     {
-        name: 'Café 50',
-        id:   'cafe50',
+        name:   'Café 50',
+        id:     'cafe50',
+        number: 50
     },
     {
-        name: 'Café 83',
-        id:   'cafe83',
+        name:   'Café 83',
+        id:     'cafe83',
+        number: 83
     },
     {
-        name: 'Café 86',
-        id:   'cafe86',
+        name:   'Café 86',
+        id:     'cafe86',
+        number: 86
     },
     {
-        name: 'Café 99',
-        id:   'cafe99',
+        name:   'Café 99',
+        id:     'cafe99',
+        number: 99
     },
     {
-        name: 'Café 109',
-        id:   'cafe109',
+        name:   'Café 109',
+        id:     'cafe109',
+        number: 109
     },
     {
-        name: 'Café 112',
-        id:   'cafe112',
+        name:   'Café 112',
+        id:     'cafe112',
+        number: 112
     },
     {
-        name: 'Café 121',
-        id:   'cafe121',
+        name:   'Café 121',
+        id:     'cafe121',
+        number: 121
     },
     {
         name: 'Café RedWest',
@@ -145,8 +161,9 @@ export const cafeList: ICafe[] = [
         id:   'in-gredients',
     },
     {
-        name: 'Building 92 Espresso ☕',
-        id:   'cafe92',
+        name:   'Building 92 Espresso ☕',
+        id:     'cafe92',
+        number: 92,
     },
     {
         name: 'Studio A Espresso ☕',
@@ -165,12 +182,13 @@ export const cafeList: ICafe[] = [
         id:   'studiod',
     },
     {
-        name: 'Food Hall 6',
-        id:   'foodhall6'
+        name:   'Food Hall 6',
+        id:     'foodhall6',
+        number: 6,
     },
     {
         name: 'Craft75 Pub (Building 6)',
-        id:   'craft75'
+        id:   'craft75',
     },
     {
         name:    'Dote ☕',
@@ -203,16 +221,18 @@ export const cafeList: ICafe[] = [
     },
     {
         name: 'General Store (Building 8)',
-        id:   'generalstore'
+        id:   'generalstore',
     },
     {
-        name: 'Food Hall 9',
-        id:   'foodhall9'
+        name:   'Food Hall 9',
+        id:     'foodhall9',
+        number: 9
     },
     {
         name:    'Food Hall 4',
         id:      'foodhall4',
         groupId: groupIds.building4,
+        number:  4
     },
     {
         name:    'Jack\'s BBQ 🍖',

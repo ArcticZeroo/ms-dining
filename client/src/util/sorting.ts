@@ -6,7 +6,7 @@ export const normalizeCafeId = (id: string) => {
         .replace(/^cafe/, '');
 };
 
-const getCafeNumber = (name: string) => {
+export const getCafeNumber = (name: string) => {
     const numberString = name
         .toLowerCase()
         .replace(/^caf[eé]/i, '')

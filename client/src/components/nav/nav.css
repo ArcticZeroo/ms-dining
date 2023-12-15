@@ -44,13 +44,16 @@ nav a.link-button.active {
     color: black;
 }
 
-.expandable-nav-list .cafe a {
-    text-align: center;
+.expandable-nav-list .cafe a, .nav-numbered-cafe-list, .nav-numbered-cafe-list-item {
     background: #333;
+}
+
+.expandable-nav-list .cafe a, .nav-numbered-cafe-list-item {
+    text-align: center;
     transition: background-color 0.2s ease;
 }
 
-.expandable-nav-list .cafe a:hover {
+.expandable-nav-list .cafe a:hover, .nav-numbered-cafe-list-item:hover {
     background: #444;
 }
 
@@ -104,6 +107,18 @@ nav form {
 #site-header span {
     padding-bottom: var(--default-padding);
     transition: padding 0.5s ease;
+}
+
+.nav-numbered-cafe-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-numbered-cafe-list-item {
+    width: 2rem;
+    height: 2rem;
+    flex-grow: 1;
 }
 
 @media (max-height: 800px) {
