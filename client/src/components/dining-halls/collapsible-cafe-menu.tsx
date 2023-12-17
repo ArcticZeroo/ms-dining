@@ -6,13 +6,11 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 
-const useCafeName = (cafe: ICafe) => {
+const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     const { viewsById } = useContext(ApplicationContext);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     return useMemo(() => {
-        // If we're within a group, the user already know where the cafe is.
-        if (shouldUseGroups || !cafe.group) {
+        if (!showGroupName || !cafe.group) {
             return cafe.name;
         }
 
@@ -21,25 +19,33 @@ const useCafeName = (cafe: ICafe) => {
             return cafe.name;
         }
 
-        return `${cafe.name} (${groupView.value.name})`;
-    }, [shouldUseGroups, cafe, viewsById]);
+        const groupName = groupView.value.name;
+
+        if (cafe.name === groupName) {
+            return cafe.name;
+        }
+
+        return `${cafe.name} (${groupName})`;
+    }, [cafe, viewsById, showGroupName]);
 }
 
 interface ICollapsibleCafeMenuProps {
     cafe: ICafe;
     menu: CafeMenu;
+    showGroupName: boolean;
 }
 
 export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
-    cafe,
-    menu,
-}) => {
+                                                                             cafe,
+                                                                             menu,
+                                                                             showGroupName
+                                                                         }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
     const collapsedCafeIds = useValueNotifier(ApplicationSettings.collapsedCafeIds);
     const [isExpanded, setIsExpanded] = useState(true);
     const showCafeLogo = showImages && cafe.logoUrl != null;
-    const cafeName = useCafeName(cafe);
+    const cafeName = useCafeName(cafe, showGroupName);
 
     // Collapse memory is a boot setting. Also allows one render for width consistency of stations.
     useEffect(() => {
@@ -65,8 +71,8 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
         <div className="collapsible-cafe" key={cafe.id}>
             <div className="cafe-header">
                 <a className="cafe-order-link"
-                    href={`https://${cafe.id}.buy-ondemand.com`}
-                    target="_blank">
+                   href={`https://${cafe.id}.buy-ondemand.com`}
+                   target="_blank">
                     <span className="material-symbols-outlined">
                             open_in_new
                     </span>
@@ -75,8 +81,8 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
                     {
                         showCafeLogo && (
                             <img src={cafe.logoUrl}
-                                alt={`${cafe.name} logo`}
-                                className="logo"/>
+                                 alt={`${cafe.name} logo`}
+                                 className="logo"/>
                         )
                     }
                     {cafeName}

@@ -1,7 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { ApplicationContext } from '../../../context/app';
-import { CafeView, ICafe } from '../../../models/cafe.ts';
-import { expandAndFlattenView } from '../../../util/view';
+import React, { useMemo } from 'react';
+import { CafeView } from '../../../models/cafe.ts';
 import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
 
 interface ICafePageWithViewProps {
@@ -9,14 +7,14 @@ interface ICafePageWithViewProps {
 }
 
 export const CafeViewPageWithView: React.FC<ICafePageWithViewProps> = ({ view }) => {
-    const { viewsById } = useContext(ApplicationContext);
-    const [cafes, setCafes] = useState<Array<ICafe>>([]);
-
-    useEffect(() => {
-        setCafes(expandAndFlattenView(view, viewsById));
-    }, [view, viewsById]);
+    const views = useMemo(() => [view], [view]);
 
     return (
-        <CombinedCafeMenuList cafes={cafes} countTowardsLastUsed={true}/>
+        <CombinedCafeMenuList
+            views={views}
+            countTowardsLastUsed={true}
+            // The user should already know what group this is in because they clicked on it.
+            showGroupNames={false}
+        />
     );
 };

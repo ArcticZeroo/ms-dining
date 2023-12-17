@@ -1,41 +1,38 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
 
 import './home.css';
 import { ApplicationContext } from '../../../context/app.ts';
-import { expandAndFlattenView, isViewVisible } from '../../../util/view.ts';
+import { isViewVisible } from '../../../util/view.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { ICafe } from '../../../models/cafe.ts';
+import { CafeView } from '../../../models/cafe.ts';
 
 export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
 
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
-    const useGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
-    // We need to expand views into a cafe list
-    // Also, users may have added cafes to their home set which are no temporarily unavailable
-    const [availableCafes, setAvailableCafes] = useState<Array<ICafe>>([]);
-
-    useEffect(() => {
-        const newAvailableCafesById = new Map<string, ICafe>();
+    // Users may have added cafes to their home set which are currently unavailable
+    const availableViews = useMemo(() => {
+        const newAvailableViews: CafeView[] = [];
 
         for (const viewId of homepageViewIds) {
             if (viewsById.has(viewId)) {
                 const view = viewsById.get(viewId)!;
-                if (isViewVisible(useGroups, view)) {
-                    for (const cafe of expandAndFlattenView(viewId, viewsById)) {
-                        newAvailableCafesById.set(cafe.id, cafe);
-                    }
+                if (isViewVisible(shouldUseGroups, view)) {
+                    // Assuming that there can't be any overlap between views
+                    newAvailableViews.push(view);
                 }
             }
         }
-        setAvailableCafes(Array.from(newAvailableCafesById.values()));
-    }, [viewsById, homepageViewIds, useGroups]);
 
-    if (availableCafes.length === 0) {
+        return newAvailableViews;
+    }, [viewsById, homepageViewIds, shouldUseGroups]);
+
+    if (availableViews.length === 0) {
         return (
             <div className="centered-content">
                 <div className="card centered">
@@ -55,6 +52,10 @@ export const HomePage = () => {
     }
 
     return (
-        <CombinedCafeMenuList cafes={availableCafes} countTowardsLastUsed={false}/>
+        <CombinedCafeMenuList
+            views={availableViews}
+            countTowardsLastUsed={false}
+            showGroupNames={true}
+        />
     );
 };
