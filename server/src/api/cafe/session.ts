@@ -255,7 +255,7 @@ export class CafeDiscoverySession {
     private async _retrieveMenuItemDetails(localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
         const localItem = localItemsById.get(jsonItem.id);
 
-        let modifiers = localItem?.modifiers;
+        let modifiers = localItem?.modifiers ?? [];
         if (this._shouldRetrieveModifierDetails(localItem, jsonItem)) {
             try {
                 modifiers = await this._retrieveModifierDetails(jsonItem.id);
