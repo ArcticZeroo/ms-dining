@@ -16,3 +16,13 @@ export interface ISearchResult {
     name: string;
     description?: string;
 }
+
+export interface ICheapItemSearchResult {
+    locationDatesByCafeId: Map<string, Set<string>>;
+    imageUrl: string;
+    name: string;
+    description?: string;
+    price: number;
+    minCalories: number;
+    maxCalories: number;
+}

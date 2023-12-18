@@ -9,8 +9,8 @@ interface IApplicationContext {
 }
 
 export const ApplicationContext = React.createContext<IApplicationContext>({
-    viewsById:    new Map(),
-    viewsInOrder: [],
-    cafes:        [],
-    groups:       []
+    viewsById:       new Map(),
+    viewsInOrder:    [],
+    cafes:           [],
+    groups:          [],
 });

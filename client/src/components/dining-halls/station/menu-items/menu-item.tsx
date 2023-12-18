@@ -4,8 +4,9 @@ import { MenuItemImage } from './menu-item-image.tsx';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { classNames } from '../../../../util/react.ts';
-import { ModalContext } from '../../../../context/modal.ts';
+import { PopupContext } from '../../../../context/modal.ts';
 import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
+import { getPriceDisplay } from '../../../../util/cart.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -35,7 +36,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
     const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
-    const modalNotifier = useContext(ModalContext);
+    const modalNotifier = useContext(PopupContext);
 
     const onClick = () => {
         if (!allowOnlineOrdering) {
@@ -49,7 +50,6 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
         modalNotifier.value = {
             id: menuItemModalSymbol,
-            title: menuItem.name,
             body: <MenuItemOrderPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
         }
     }
@@ -76,7 +76,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 )
             }
             <td>
-                ${menuItem.price}
+                {getPriceDisplay(menuItem.price)}
             </td>
             {
                 showCalories && (

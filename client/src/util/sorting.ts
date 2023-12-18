@@ -1,8 +1,19 @@
+import { CafeView, ICafe } from '../models/cafe.ts';
+
 export const normalizeCafeId = (id: string) => {
     return id
         .toLowerCase()
         .replace(/^cafe/, '');
 };
+
+export const getCafeNumber = (name: string) => {
+    const numberString = name
+        .toLowerCase()
+        .replace(/^caf[eé]/i, '')
+        .replace(/-/g, ' ')
+
+    return parseInt(numberString);
+}
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {
     // Normally I don't like parseInt, but for once
@@ -33,20 +44,25 @@ export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: strin
     return normalizedA.localeCompare(normalizedB);
 };
 
-export const sortCafeIds = (cafeIds: Iterable<string>) => {
-    const normalizedIdsByOriginalId = new Map<string, string>();
+const compareViewNames = (a: string, b: string) => {
+    const numberA = getCafeNumber(a);
+    const numberB = getCafeNumber(b);
 
-    const getNormalizedId = (id: string) => {
-        if (!normalizedIdsByOriginalId.has(id)) {
-            normalizedIdsByOriginalId.set(id, normalizeCafeId(id));
-        }
-        return normalizedIdsByOriginalId.get(id)!;
-    };
+    if (!Number.isNaN(numberA) && !Number.isNaN(numberB)) {
+        return numberA - numberB;
+    }
 
-    return Array.from(cafeIds).sort((a, b) => {
-        const normalizedA = getNormalizedId(a);
-        const normalizedB = getNormalizedId(b);
+    return a.localeCompare(b);
+}
 
-        return compareNormalizedCafeIds(normalizedA, normalizedB);
-    });
-};
+export const sortViews = (views: Iterable<CafeView>) => {
+    return Array
+        .from(views)
+        .sort((a, b) => compareViewNames(a.value.name, b.value.name));
+}
+
+export const sortCafes = (cafes: Iterable<ICafe>) => {
+    return Array
+        .from(cafes)
+        .sort((a, b) => compareViewNames(a.name, b.name));
+}

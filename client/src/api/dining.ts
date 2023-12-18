@@ -3,8 +3,14 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { uncategorizedGroupId } from '../constants/groups.ts';
-import { DateUtil } from '@msdining/common';
-import { ISearchResult, IServerSearchResult, SearchEntityType, SearchMatchReason } from '../models/search.ts';
+import { DateUtil, SearchTypes } from '@msdining/common';
+import {
+    ICheapItemSearchResult,
+    IQuerySearchResult,
+    IServerCheapItemSearchResult,
+    IServerSearchResult,
+    SearchMatchReason
+} from '../models/search.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const firstWeeklyMenusTime = DateUtil.fromDateString('2023-10-31').getTime();
@@ -117,10 +123,10 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCafeMenu({
-        id,
-        shouldCountTowardsLastUsed,
-        date,
-    }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+                                             id,
+                                             shouldCountTowardsLastUsed,
+                                             date,
+                                         }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
@@ -226,34 +232,64 @@ export abstract class DiningClient {
         return nowInPacificTime.getHours() < 9;
     }
 
-    public static async retrieveSearchResults(query: string): Promise<Array<ISearchResult>> {
+    private static _deserializeLocationDatesByCafeId(serialized: { [cafeId: string]: Array<string> }) {
+        const locationDatesByCafeId = new Map<string, Array<Date>>();
+        for (const [cafeId, dateStrings] of Object.entries(serialized)) {
+            const dates = dateStrings.map(DateUtil.fromDateString).sort((a, b) => a.getTime() - b.getTime());
+            locationDatesByCafeId.set(cafeId, dates);
+        }
+        return locationDatesByCafeId;
+    }
+
+    public static async retrieveSearchResults(query: string): Promise<Array<IQuerySearchResult>> {
         const response = await DiningClient._makeRequest(`/api/dining/search?q=${encodeURIComponent(query)}`);
 
         if (!Array.isArray(response) || response.length === 0) {
             return [];
         }
 
-        const serverResults: Array<IServerSearchResult> = response as Array<IServerSearchResult>;
-        const results: Array<ISearchResult> = [];
+        const serverResults = response as Array<IServerSearchResult>;
+        const results: Array<IQuerySearchResult> = [];
 
         for (const serverResult of serverResults) {
-            const locationDatesByCafeId = new Map<string, Array<Date>>();
-            for (const [cafeId, dateStrings] of Object.entries(serverResult.locations)) {
-                const dates = dateStrings.map(DateUtil.fromDateString).sort((a, b) => a.getTime() - b.getTime());
-                locationDatesByCafeId.set(cafeId, dates);
-            }
-
             results.push({
-                entityType:            serverResult.type === 'menuItem' ? SearchEntityType.menuItem : SearchEntityType.station,
+                entityType:            serverResult.type === 'menuItem'
+                                           ? SearchTypes.SearchEntityType.menuItem
+                                           : SearchTypes.SearchEntityType.station,
                 name:                  serverResult.name,
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
-                locationDatesByCafeId,
+                locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
                 matchReasons:          new Set(
                     serverResult.matchReasons.map(reason => reason === 'description'
                         ? SearchMatchReason.description
                         : SearchMatchReason.title)
                 ),
+            });
+        }
+
+        return results;
+    }
+
+    public static async retrieveCheapItems(): Promise<Array<ICheapItemSearchResult>> {
+        const response = await DiningClient._makeRequest(`/api/dining/search/cheap`);
+
+        if (!Array.isArray(response) || response.length === 0) {
+            return [];
+        }
+
+        const serverResults = response as Array<IServerCheapItemSearchResult>;
+        const results: Array<ICheapItemSearchResult> = [];
+
+        for (const serverResult of serverResults) {
+            results.push({
+                name:                  serverResult.name,
+                description:           serverResult.description,
+                imageUrl:              serverResult.imageUrl,
+                locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
+                price:                 serverResult.price,
+                minCalories:           serverResult.minCalories,
+                maxCalories:           serverResult.maxCalories,
             });
         }
 

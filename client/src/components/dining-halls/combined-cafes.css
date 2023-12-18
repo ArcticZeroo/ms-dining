@@ -136,3 +136,26 @@
     font-style: italic;
     word-wrap: break-word;
 }
+
+@media screen and (max-width: 800px) {
+    .station .menu-body {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+}
+
+@media screen and (max-width: 500px) {
+    .station .menu-body table tbody, .station .menu-body table tr {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .station .menu-body table tbody {
+        gap: 1rem;
+    }
+
+    .collapsible-cafe .cafe-name .logo {
+        display: none;
+    }
+}

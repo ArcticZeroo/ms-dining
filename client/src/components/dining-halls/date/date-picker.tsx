@@ -30,19 +30,44 @@ const getNextDate = (date: Date) => {
     return newDate;
 };
 
+const MINIMUM_DATE = DiningClient.getMinimumDateForMenu();
+const MAXIMUM_DATE = DiningClient.getMaximumDateForMenu();
+
 export const CafeDatePicker: React.FC = () => {
     const selectedDateNotifier = useContext(SelectedDateContext);
     const selectedDate = useValueNotifier(selectedDateNotifier);
 
-    const previousDate = useMemo(() => getPreviousDate(selectedDate), [selectedDate]);
-    const nextDate = useMemo(() => getNextDate(selectedDate), [selectedDate]);
+    const {
+        previousDate,
+        nextDate,
+        canGoBackwards,
+        canGoForwards,
+        isAtToday,
+        previousDateDisplay,
+        nextDateDisplay,
+        selectedDateDisplay
+    } = useMemo(() => {
+        const previousDate = getPreviousDate(selectedDate);
+        const nextDate = getNextDate(selectedDate);
+        const canGoBackwards = DateUtil.isDateAfter(selectedDate, MINIMUM_DATE);
+        const canGoForwards = DateUtil.isDateBefore(selectedDate, MAXIMUM_DATE);
+        const isAtToday = DateUtil.isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
 
-    const minimumDate = DiningClient.getMinimumDateForMenu();
-    const maximumDate = DiningClient.getMaximumDateForMenu();
+        const previousDateDisplay = getDateDisplay(previousDate);
+        const nextDateDisplay = getDateDisplay(nextDate);
+        const selectedDateDisplay = getDateDisplay(selectedDate);
 
-    const canGoBackwards = DateUtil.isDateAfter(selectedDate, minimumDate);
-    const canGoForwards = DateUtil.isDateBefore(selectedDate, maximumDate);
-    const isAtToday = DateUtil.isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
+        return {
+            previousDate,
+            nextDate,
+            canGoBackwards,
+            canGoForwards,
+            isAtToday,
+            previousDateDisplay,
+            nextDateDisplay,
+            selectedDateDisplay
+        };
+    }, [selectedDate]);
 
     const goBackwards = () => {
         if (!canGoBackwards) {
@@ -72,7 +97,7 @@ export const CafeDatePicker: React.FC = () => {
         <div className="date-picker">
             <div className="date-picker-buttons">
                 <button onClick={goBackwards} className="date-picker-button" disabled={!canGoBackwards}
-                    title={`Go to ${getDateDisplay(previousDate)}`}>
+                        title={`Go to ${previousDateDisplay}`}>
                     <span className="material-symbols-outlined">
                         arrow_back
                     </span>
@@ -83,13 +108,13 @@ export const CafeDatePicker: React.FC = () => {
                     </span>
                 </button>
                 <button onClick={goForwards} className="date-picker-button" disabled={!canGoForwards}
-                    title={`Go to ${getDateDisplay(nextDate)}`}>
+                        title={`Go to ${nextDateDisplay}`}>
                     <span className="material-symbols-outlined">
                         arrow_forward
                     </span>
                 </button>
             </div>
-            {getDateDisplay(selectedDate)}
+            {selectedDateDisplay}
             <FutureMenuOutOfDateNotice/>
         </div>
     );

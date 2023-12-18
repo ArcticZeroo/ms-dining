@@ -81,3 +81,29 @@
     align-items: center;
     gap: 0.5rem;
 }
+
+#setting-custom {
+    gap: var(--default-padding);
+}
+
+#setting-custom .setting-input {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+    flex-grow: 1;
+}
+
+#setting-custom button {
+    background: #4e92c2;
+    color: white;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    cursor: pointer;
+}
+
+#setting-custom #custom-key-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--default-padding);
+}

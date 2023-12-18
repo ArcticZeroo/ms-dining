@@ -206,3 +206,18 @@ html, body, #root, .App {
         opacity: 1;
     }
 }
+
+@keyframes fadeOutLeaveTree {
+    0% {
+        opacity: 100%;
+    }
+
+    99% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+        display: none;
+    }
+}

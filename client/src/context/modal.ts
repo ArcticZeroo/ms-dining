@@ -1,10 +1,9 @@
 import React from 'react';
 import { ValueNotifier } from '../util/events.ts';
 
-export interface IModalContext {
+export interface IPopupContext {
     id: symbol,
-    title: string,
     body: React.ReactNode,
 }
 
-export const ModalContext = React.createContext(new ValueNotifier<IModalContext | null>(null));
+export const PopupContext = React.createContext(new ValueNotifier<IPopupContext | null>(null));

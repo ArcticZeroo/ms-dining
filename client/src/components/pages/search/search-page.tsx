@@ -8,6 +8,16 @@ export const SearchPage = () => {
     const searchQueryNotifier = useContext(SearchQueryContext);
 
     const query = searchParams.get('q');
+
+    useEffect(() => {
+        if (query == null) {
+            return;
+        }
+
+        searchQueryNotifier.value = query;
+    }, [searchQueryNotifier, query]);
+
+
     if (query == null) {
         return (
             <div className="error-card">
@@ -15,10 +25,6 @@ export const SearchPage = () => {
             </div>
         );
     }
-
-    useEffect(() => {
-        searchQueryNotifier.value = query;
-    }, [query]);
 
     return (
         <SearchPageWithQuery queryText={query}/>

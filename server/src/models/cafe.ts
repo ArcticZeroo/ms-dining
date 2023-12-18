@@ -3,6 +3,7 @@ import { CafeTypes } from '@msdining/common';
 export interface ICafe {
     name: string;
     id: string;
+    number?: number;
     groupId?: string;
     firstAvailable?: Date;
 }
@@ -10,6 +11,7 @@ export interface ICafe {
 export interface ICafeGroup {
     id: string;
     name: string;
+    number?: number;
 }
 
 export interface ICafeConfig {

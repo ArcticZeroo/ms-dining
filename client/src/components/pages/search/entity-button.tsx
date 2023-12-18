@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react';
+import { SearchTypes } from '@msdining/common';
 
 import { classNames } from '../../../util/react.ts';
-import { SearchEntityFilterType, SearchEntityType } from '../../../models/search.ts';
+import { SearchEntityFilterType } from '../../../models/search.ts';
 import { getSearchTabCount } from '../../../util/search.ts';
 
 interface IEntityButtonProps {
     name: string;
     type: SearchEntityFilterType;
     currentFilter: SearchEntityFilterType;
-    tabCounts: Map<SearchEntityType, number>;
+    tabCounts: Map<SearchTypes.SearchEntityType, number>;
     totalResultCount: number;
 
     onClick(): void;
@@ -40,7 +41,7 @@ export const EntityButton: React.FC<IEntityButtonProps> = ({
     };
 
     return (
-        <button className={classNames('entity-button', isChecked && 'active', isDisabled && 'disabled')}
+        <button className={classNames('filter-button', isChecked && 'active', isDisabled && 'disabled')}
             onClick={onButtonClicked}>
             <input type="radio"
                 name="entity-type"

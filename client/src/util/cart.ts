@@ -1,11 +1,11 @@
 import { CafeTypes } from "@msdining/common";
 
-export const getPriceDisplay = (price: number) => {
+export const getPriceDisplay = (price: number, addCurrencySign: boolean = true) => {
     if (price === 0) {
         return '';
     }
 
-    return `$${price.toFixed(2)}`;
+    return `${addCurrencySign ? '$' : ''}${price.toFixed(2)}`;
 }
 
 const getModifierMax = (modifier: CafeTypes.IMenuItemModifier): number => {

@@ -1,4 +1,4 @@
-.top-overlay {
+#top-overlay {
     position: absolute;
     z-index: 100;
     width: 100%;
@@ -11,17 +11,28 @@
     animation-timing-function: ease;
 }
 
+#popup-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .modal {
     position: relative;
     margin: var(--default-padding);
-    max-height: 100%;
-    max-width: 100%;
-    overflow: auto;
+    max-height: 90%;
+    max-width: 90%;
+    box-sizing: border-box;
 }
 
 .modal .title {
     display: flex;
     justify-content: space-between;
+    position: sticky;
+}
+
+.modal .body {
+    overflow: auto;
 }
 
 .modal .close {
@@ -32,4 +43,18 @@
     border-radius: var(--default-padding);
     padding: var(--default-padding);
     background: #EEE;
+}
+
+.modal .footer {
+    margin-top: var(--default-padding);
+}
+
+@media screen and (max-width: 800px) {
+    .modal {
+        margin: 0;
+        max-height: 100%;
+        max-width: 100%;
+        height: 100%;
+        width: 100%;
+    }
 }

@@ -1,4 +1,4 @@
-import { ISearchResult, SearchEntityFilterType } from '../../models/search.ts';
+import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.ts';
 import React, { useContext, useMemo } from 'react';
 import { SearchResult } from './search-result.tsx';
 import { SearchUtil } from '@msdining/common';
@@ -8,7 +8,7 @@ import { DiningClient } from '../../api/dining.ts';
 
 interface ISearchResultsListProps {
     queryText: string;
-    searchResults: ISearchResult[];
+    searchResults: IQuerySearchResult[];
     filter: SearchEntityFilterType;
 }
 
@@ -33,8 +33,12 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                 entriesInOrder.map(searchResult => (
                     <SearchResult
                         key={`${searchResult.entityType}.${searchResult.name}`}
-                        result={searchResult}
                         isVisible={matchesEntityFilter(filter, searchResult.entityType)}
+                        name={searchResult.name}
+                        description={searchResult.description}
+                        locationDatesByCafeId={searchResult.locationDatesByCafeId}
+                        imageUrl={searchResult.imageUrl}
+                        entityType={searchResult.entityType}
                     />
                 ))
             }

@@ -1,12 +1,13 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { SearchTypes } from '@msdining/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
-import { ISearchResult, SearchEntityFilterType, SearchEntityType } from '../../../models/search.ts';
-import { classNames } from '../../../util/react.ts';
+import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
 import { EntityButton } from './entity-button.tsx';
 
 import './search-page.css';
+import { SearchWaiting } from '../../search/search-waiting.tsx';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -14,21 +15,25 @@ interface ISearchPageWithQueryProps {
 
 interface ISearchResultsState {
     stage: PromiseStage;
-    results: ISearchResult[];
-    tabCounts: Map<SearchEntityType, number>;
+    results: IQuerySearchResult[];
+    tabCounts: Map<SearchTypes.SearchEntityType, number>;
 }
 
-const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilterType): ISearchResultsState => {
+const useSearchResultsState = (query: string): ISearchResultsState => {
     const doSearchCallback = useCallback(() => DiningClient.retrieveSearchResults(query), [query]);
-    const searchResultState = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
+    const {
+        stage: searchResultStage,
+        value: searchResults,
+        run:   retrieveSearchResults
+    } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
     const allSearchResults = useMemo(
-        () => searchResultState.value ?? [],
-        [searchResultState.value, entityFilterType]
+        () => searchResults ?? [],
+        [searchResults]
     );
 
     const resultCountByEntityType = useMemo(() => {
-        const counts = new Map<SearchEntityType, number>();
+        const counts = new Map<SearchTypes.SearchEntityType, number>();
 
         for (const result of allSearchResults) {
             const count = counts.get(result.entityType) ?? 0;
@@ -39,11 +44,11 @@ const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilt
     }, [allSearchResults]);
 
     useEffect(() => {
-        searchResultState.run();
-    }, [searchResultState.run]);
+        retrieveSearchResults();
+    }, [retrieveSearchResults]);
 
     return {
-        stage:     searchResultState.stage,
+        stage:     searchResultStage,
         results:   allSearchResults,
         tabCounts: resultCountByEntityType
     };
@@ -51,7 +56,7 @@ const useSearchResultsState = (query: string, entityFilterType: SearchEntityFilt
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
-    const { stage, results, tabCounts } = useSearchResultsState(queryText, entityFilterType);
+    const { stage, results, tabCounts } = useSearchResultsState(queryText);
 
     const sharedEntityButtonProps = {
         currentFilter:    entityFilterType,
@@ -72,28 +77,23 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                         Total Results: {results.length}
                     </div>
                 </div>
-                <div className={classNames('search-waiting', stage === PromiseStage.running && 'visible')}>
-                    <div className="loading-spinner"/>
-                    <div>
-                        Loading search results...
-                    </div>
-                </div>
+                <SearchWaiting stage={stage}/>
             </div>
-            <div className="search-entity-selector">
+            <div className="search-filter-selector">
                 <EntityButton name="Menu Items and Stations"
-                    type={SearchEntityFilterType.all}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
-                    {...sharedEntityButtonProps}
+                              type={SearchEntityFilterType.all}
+                              onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
+                              {...sharedEntityButtonProps}
                 />
                 <EntityButton name="Menu Items Only"
-                    type={SearchEntityFilterType.menuItem}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
-                    {...sharedEntityButtonProps}
+                              type={SearchEntityFilterType.menuItem}
+                              onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
+                              {...sharedEntityButtonProps}
                 />
                 <EntityButton name="Stations Only"
-                    type={SearchEntityFilterType.station}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
-                    {...sharedEntityButtonProps}
+                              type={SearchEntityFilterType.station}
+                              onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
+                              {...sharedEntityButtonProps}
                 />
             </div>
             {

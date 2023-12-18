@@ -1,0 +1,1 @@
+export const jsonStringifyWithoutNull = (value: any) => JSON.stringify(value, (_, value) => value ?? undefined);

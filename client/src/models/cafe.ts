@@ -5,11 +5,13 @@ export interface ICafe {
     id: string;
     logoUrl: string;
     group?: string;
+    number?: number;
 }
 
 export interface ICafeGroupWithoutMembers {
     id: string;
     name: string;
+    number?: number;
 }
 
 export interface IViewListResponse {

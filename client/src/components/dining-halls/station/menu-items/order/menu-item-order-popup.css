@@ -1,31 +1,39 @@
-.menu-item-order-popup {
-    /* todo */
-    overflow-y: auto;
+.menu-item-order-body {
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
+    background: #F4F4F4;
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
 }
 
-.menu-item-order-popup .menu-item-image-container {
+.menu-item-order-body .menu-item-image-container {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.menu-item-order-popup .menu-item-description {
+.menu-item-order-body .menu-item-description {
     opacity: 0.8;
     font-style: italic;
     text-align: center;
+}
+
+.menu-item-configuration {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
 }
 
 .menu-item-modifiers {
     display: flex;
     flex-wrap: wrap;
     gap: var(--default-padding);
+    justify-content: center;
 }
 
 .menu-item-modifier {
-    background: #EEE;
+    background: #E7E7E7;
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
@@ -47,35 +55,41 @@
     flex-direction: column;
 }
 
-.menu-item-order-popup .footer {
+.menu-item-order-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     gap: var(--default-padding);
 }
 
-.menu-item-order-popup .footer .add-to-cart {
+.menu-item-order-footer .info, .menu-item-order-footer .controls {
+    display: flex;
+    gap: var(--default-padding);
+    align-items: center;
+}
+
+.menu-item-order-footer .add-to-cart {
     background: #2196F3;
     color: white;
     border-radius: var(--default-padding);
-    padding: var(--default-padding);
+    padding: 1rem;
 }
 
-.menu-item-order-popup .footer .add-to-cart:disabled {
+.menu-item-order-footer .add-to-cart:disabled {
     background: #BBDEFB;
 }
 
-.menu-item-order-popup .menu-item-notes textarea {
+.menu-item-order-body .menu-item-notes textarea {
     resize: none;
 }
 
-.menu-item-order-popup .modifier-choice-option-list {
+.menu-item-order-body .modifier-choice-option-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.menu-item-order-popup .modifier-choice-option {
+.menu-item-order-body .modifier-choice-option {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -85,11 +99,11 @@
     transition: all 0.25s ease;
 }
 
-.menu-item-order-popup .modifier-choice-option.disabled {
+.menu-item-order-body .modifier-choice-option.disabled {
     background: #E5E5E5;
     color: #999;
 }
 
-.menu-item-order-popup .modifier-choice-option input {
+.menu-item-order-body .modifier-choice-option input {
     margin: 0;
 }

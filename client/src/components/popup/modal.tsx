@@ -1,44 +1,39 @@
-import { useValueNotifier } from '../../hooks/events.ts';
-import { ModalContext } from '../../context/modal.ts';
 import React, { useContext } from 'react';
+import { PopupContext } from '../../context/modal.ts';
 
-import './popup.css';
+interface IModalProps {
+    title: string;
+    body: React.ReactNode;
+    footer: React.ReactNode;
+}
 
-export const Modal = () => {
-    const modalNotifier = useContext(ModalContext);
-    const modal = useValueNotifier(modalNotifier);
-
-    if (modal == null) {
-        return null;
-    }
-
-    const onOverlayClicked = (event: React.MouseEvent) => {
-        if (event.target === event.currentTarget) {
-            modalNotifier.value = null;
-        }
-    };
+export const Modal: React.FC<IModalProps> = ({ title, body, footer }) => {
+    const popupNotifier = useContext(PopupContext);
 
     const onCloseClicked = () => {
-        modalNotifier.value = null;
+        popupNotifier.value = null;
     };
 
     return (
-        <div className="top-overlay" onClick={onOverlayClicked}>
-            <div onClick={onOverlayClicked}>
-                <div className="modal card">
-                    <div className="title">
-                        <h2>{modal.title}</h2>
-                        <button className="close" onClick={onCloseClicked}>
+        <div className="modal card">
+            <div className="title">
+                <h2>{title}</h2>
+                <button className="close" onClick={onCloseClicked}>
                             <span className="material-symbols-outlined">
                                 close
                             </span>
-                        </button>
-                    </div>
-                    <div className="body">
-                        {modal.body}
-                    </div>
-                </div>
+                </button>
             </div>
+            <div className="body">
+                {body}
+            </div>
+            {
+                footer != null && (
+                    <div className="footer">
+                        {footer}
+                    </div>
+                )
+            }
         </div>
     );
-};
+}

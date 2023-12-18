@@ -1,7 +1,4 @@
-export enum SearchEntityType {
-    menuItem,
-    station,
-}
+import { SearchTypes } from '@msdining/common';
 
 export enum SearchMatchReason {
     title,
@@ -9,8 +6,8 @@ export enum SearchMatchReason {
 }
 
 export const allSearchEntityTypes = [
-    SearchEntityType.menuItem,
-    SearchEntityType.station,
+    SearchTypes.SearchEntityType.menuItem,
+    SearchTypes.SearchEntityType.station,
 ];
 
 export enum SearchEntityFilterType {
@@ -19,13 +16,23 @@ export enum SearchEntityFilterType {
     station
 }
 
-export interface ISearchResult {
-    entityType: SearchEntityType;
+export interface IQuerySearchResult {
+    entityType: SearchTypes.SearchEntityType;
     name: string;
     description?: string;
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
     matchReasons: Set<SearchMatchReason>;
+}
+
+export interface ICheapItemSearchResult {
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    locationDatesByCafeId: Map<string, Array<Date>>;
+    price: number;
+    minCalories: number;
+    maxCalories: number;
 }
 
 export interface IServerSearchResult {
@@ -35,4 +42,21 @@ export interface IServerSearchResult {
     imageUrl?: string;
     locations: Record<string, Array<string>>;
     matchReasons: Array<'description' | 'title'>;
+}
+
+export interface IServerCheapItemSearchResult {
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    locations: Record<string, Array<string>>;
+    price: number;
+    minCalories: number;
+    maxCalories: number;
+}
+
+export enum CheapItemsSortType {
+    priceAsc,
+    priceDesc,
+    relevance,
+    caloriesPerDollarDesc
 }
