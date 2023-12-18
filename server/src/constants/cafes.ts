@@ -260,8 +260,9 @@ export const cafeList: ICafe[] = [
         groupId: groupIds.building4
     },
     {
-        name:    'Boona Boona ☕',
+        name:    'Boona Boona ☕ (Building 4)',
         id:      'fh4boonboona',
-        groupId: groupIds.building4
+        // TODO: Some way to set view priority
+        // groupId: groupIds.building4
     }
 ];
