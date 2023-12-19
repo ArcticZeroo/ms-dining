@@ -62,7 +62,7 @@ const App = () => {
     );
 
     const navExpansionContext = useMemo(
-        () => [isNavVisible, (isExpanded: boolean) => setIsNavExpanded(isExpanded)] as const,
+        () => [isNavVisible, setIsNavExpanded] as const,
         [isNavVisible]
     );
 

@@ -2,15 +2,9 @@ import { NavLink } from 'react-router-dom';
 import settingsIcon from '../../assets/settings.svg';
 import homeIcon from '../../assets/home.svg';
 import { SearchBar } from '../search/search-bar.tsx';
-import React from 'react';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 
-
-interface INavListHeaderItemsProps {
-    closeNav(): void;
-}
-
-export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ closeNav }) => {
+export const NavListHeaderItems = () => {
     const deviceType = useDeviceType();
 
     return (
@@ -26,16 +20,16 @@ export const NavListHeaderItems: React.FC<INavListHeaderItemsProps> = ({ closeNa
                 )
             }
             <li>
-                <NavLink to="/settings" className="link-button settings" onClick={closeNav}>
+                <NavLink to="/settings" className="link-button settings">
                     <img src={settingsIcon} alt="Open settings"/>
                 </NavLink>
             </li>
             <li>
-                <NavLink to="/" className="link-button home" onClick={closeNav}>
+                <NavLink to="/" className="link-button home">
                     <img src={homeIcon} alt="Navigate home"/>
                 </NavLink>
             </li>
-            <SearchBar onSubmit={closeNav}/>
+            <SearchBar/>
         </>
     );
 };

@@ -4,11 +4,7 @@ import searchIcon from '../../assets/search.svg';
 import { SearchQueryContext } from '../../context/search.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 
-interface ISearchBarProps {
-    onSubmit(): void;
-}
-
-export const SearchBar: React.FC<ISearchBarProps> = ({ onSubmit }) => {
+export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
     const searchQueryNotifier = useContext(SearchQueryContext);
@@ -23,7 +19,6 @@ export const SearchBar: React.FC<ISearchBarProps> = ({ onSubmit }) => {
             inputRef?.current?.focus();
         } else {
             navigate(`/search?q=${trimmedQuery}`);
-            onSubmit();
         }
     };
 
