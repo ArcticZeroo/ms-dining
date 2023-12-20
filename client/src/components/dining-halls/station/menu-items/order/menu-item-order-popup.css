@@ -107,3 +107,9 @@
 .menu-item-order-body .modifier-choice-option input {
     margin: 0;
 }
+
+.menu-item-order-body .menu-item-image {
+    height: unset;
+    max-height: 25rem;
+    max-width: 100%;
+}
