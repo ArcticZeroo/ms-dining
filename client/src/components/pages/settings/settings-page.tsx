@@ -46,6 +46,12 @@ export const SettingsPage = () => {
                             name="Show Descriptions"
                             isChip={true}
                         />
+                        <BooleanSettingInput
+                            icon="book"
+                            setting={ApplicationSettings.showTags}
+                            name="Show Tags"
+                            isChip={true}
+                        />
                     </div>
                 </div>
                 <BooleanSettingInput

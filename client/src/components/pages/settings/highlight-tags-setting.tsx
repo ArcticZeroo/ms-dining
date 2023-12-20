@@ -41,7 +41,7 @@ export const HighlightTagsSetting = () => {
 					<span className="material-symbols-outlined">
 						book
 					</span>
-					Highlight Tag
+					Highlight Tags
 				</div>
 				<div className="setting-description">
 					Menu items with any of these tags will be highlighted in menus.

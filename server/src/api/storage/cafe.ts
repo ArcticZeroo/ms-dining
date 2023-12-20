@@ -227,7 +227,7 @@ export abstract class CafeStorageClient {
 			price:                  Number(menuItem.price || 0),
 			calories:               Number(menuItem.calories || 0),
 			maxCalories:            Number(menuItem.maxCalories || 0),
-			tags:                   menuItem.tags.join(';'),
+			tags:                   menuItem.tags.length === 0 ? null : menuItem.tags.join(';'),
 			modifiers:              {
 				connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
 			},
@@ -423,7 +423,7 @@ export abstract class CafeStorageClient {
 			hasThumbnail:    thumbnailData.hasThumbnail,
 			thumbnailHeight: thumbnailData.thumbnailHeight,
 			thumbnailWidth:  thumbnailData.thumbnailWidth,
-			tags:            menuItem.tags.split(';'),
+			tags:            (menuItem.tags && menuItem.tags.length > 0) ? menuItem.tags.split(';') : [],
 			modifiers
 		};
 	}

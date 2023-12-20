@@ -7,6 +7,7 @@ import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
 import { classNames } from '../../../../util/react.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
+import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
 
 export interface IMenuItemProps {
@@ -33,6 +34,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
+    const showTags = useValueNotifier(ApplicationSettings.showTags);
     const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
 
@@ -92,6 +94,13 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 showCalories && (
                     <td>
                         {caloriesDisplay}
+                    </td>
+                )
+            }
+            {
+                showTags && (
+                    <td>
+                        <MenuItemTags tags={menuItem.tags}/>
                     </td>
                 )
             }

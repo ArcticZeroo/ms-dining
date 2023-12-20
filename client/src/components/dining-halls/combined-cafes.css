@@ -153,6 +153,18 @@
     word-wrap: break-word;
 }
 
+.menu-item-tags {
+    display: flex;
+    gap: var(--default-padding);
+    align-items: center;
+}
+
+.menu-item-tag {
+    background: #EEE;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+}
+
 @media screen and (max-width: 800px) {
     .station .menu-body {
         align-items: flex-start;
