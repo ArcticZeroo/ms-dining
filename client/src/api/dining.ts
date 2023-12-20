@@ -46,12 +46,7 @@ export abstract class DiningClient {
     }
 
     private static async _retrieveViewListInner(): Promise<IViewListResponse> {
-        const viewList: IViewListResponse = await DiningClient._makeRequest('/api/dining/', true /*sendVisitorId*/);
-        viewList.groups.push({
-            id:   uncategorizedGroupId,
-            name: 'Individual Cafés',
-        });
-        return viewList;
+        return DiningClient._makeRequest('/api/dining/', true /*sendVisitorId*/);
     }
 
     public static retrieveViewList(): Promise<IViewListResponse> {

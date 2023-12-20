@@ -4,23 +4,18 @@ export interface ICafe {
     name: string;
     id: string;
     logoUrl: string;
-    group?: string;
     number?: number;
 }
 
-export interface ICafeGroupWithoutMembers {
+export interface ICafeGroup{
     id: string;
     name: string;
     number?: number;
+    members: ICafe[];
 }
 
 export interface IViewListResponse {
-    cafes: Array<ICafe>;
-    groups: Array<ICafeGroupWithoutMembers>;
-}
-
-export interface ICafeGroup extends ICafeGroupWithoutMembers {
-    members: string[];
+    groups: Array<ICafeGroup>;
 }
 
 export enum CafeViewType {

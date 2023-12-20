@@ -13,7 +13,7 @@ export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<str
         return [view.value];
     }
 
-    return view.value.members.flatMap(viewId => expandAndFlattenView(viewId, viewsById));
+    return view.value.members.flatMap(cafe => expandAndFlattenView(cafe.id, viewsById));
 };
 
 export const getParentView = (viewsById: Map<string, CafeView>, shouldUseGroups: boolean, view: CafeView) => {

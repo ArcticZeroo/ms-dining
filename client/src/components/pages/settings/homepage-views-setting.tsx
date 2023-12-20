@@ -1,63 +1,58 @@
-import { useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { useViewsByGroupId, useVisibleViews } from '../../../hooks/views.ts';
-import { CafeView } from '../../../models/cafe.ts';
 import { HomepageViewChip } from './homepage-view-chip.tsx';
 
 export const HomepageViewsSetting = () => {
-    const visibleViews = useVisibleViews();
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
-    const { viewsById } = useContext(ApplicationContext);
-    const viewsByGroupId = useViewsByGroupId();
+    const { groups } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
-    const toggleHomepageView = (view: CafeView) => {
-        const viewId = view.value.id;
+    const toggleHomepageView = useCallback((viewId: string) => {
         if (homepageViewIds.has(viewId)) {
             ApplicationSettings.homepageViews.delete(viewId);
         } else {
             ApplicationSettings.homepageViews.add(viewId);
         }
-    };
+    }, [homepageViewIds]);
 
     const chipsElement = useMemo(() => {
         if (shouldUseGroups) {
             return (
                 <div className="setting-chips">
                     {
-                        visibleViews.map(view => (
-                            <HomepageViewChip key={view.value.id}
-                                              view={view}
+                        groups.map(group => (
+                            <HomepageViewChip key={group.id}
+                                              viewName={group.name}
+                                              viewId={group.id}
                                               homepageViewIds={homepageViewIds}
-                                              onToggleClicked={() => toggleHomepageView(view)}/>
+                                              onToggleClicked={() => toggleHomepageView(group.id)}/>
                         ))
                     }
                 </div>
             );
         }
 
-        const groupIds = Array.from(viewsByGroupId.keys()).sort();
-
-        return groupIds.map(groupId => (
-            <div className="group" key={groupId}>
+        return groups.map(group => (
+            <div className="group" key={group.id}>
                 <div className="view-group-name">
-                    {viewsById.get(groupId)?.value.name ?? 'Unknown Group'}
+                    {group.name}
                 </div>
                 <div className="setting-chips">
                     {
-                        viewsByGroupId.get(groupId)!.map(view => (
-                            <HomepageViewChip key={view.value.id}
-                                              view={view}
+                        group.members.map(cafe => (
+                            <HomepageViewChip key={cafe.id}
+                                              viewName={cafe.name}
+                                              viewId={cafe.id}
                                               homepageViewIds={homepageViewIds}
-                                              onToggleClicked={() => toggleHomepageView(view)}/>
+                                              onToggleClicked={() => toggleHomepageView(cafe.id)}/>
                         ))
                     }
                 </div>
             </div>
         ));
-    }, [shouldUseGroups, homepageViewIds, viewsById, viewsByGroupId, visibleViews]);
+    }, [groups, shouldUseGroups, homepageViewIds, toggleHomepageView]);
 
     return (
         <div className="setting" id="setting-homepage">

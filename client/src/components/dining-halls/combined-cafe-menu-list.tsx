@@ -4,15 +4,15 @@ import { DiningClient } from '../../api/dining.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeMenu, CafeView, ICafe } from '../../models/cafe.ts';
-import { sortCafes, sortViews } from '../../util/sorting.ts';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { CafeDatePicker } from './date/date-picker.tsx';
 import { classNames } from '../../util/react.ts';
 
-import './combined-cafes.css';
 import { expandAndFlattenView } from '../../util/view.ts';
 import { ApplicationContext } from '../../context/app.ts';
+
+import './combined-cafes.css';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -40,8 +40,8 @@ const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>
     const loadMenusAsync = useCallback(() => {
         const menuPromises = [];
 
-        for (const view of sortViews(views)) {
-            const cafes = sortCafes(expandAndFlattenView(view, viewsById));
+        for (const view of views) {
+            const cafes = expandAndFlattenView(view, viewsById);
             for (const cafe of cafes) {
                 menuPromises.push(loadMenuAsync(cafe));
             }

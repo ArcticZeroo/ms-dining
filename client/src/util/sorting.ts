@@ -1,5 +1,3 @@
-import { CafeView, ICafe } from '../models/cafe.ts';
-
 export const normalizeCafeId = (id: string) => {
     return id
         .toLowerCase()
@@ -43,26 +41,3 @@ export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: strin
 
     return normalizedA.localeCompare(normalizedB);
 };
-
-const compareViewNames = (a: string, b: string) => {
-    const numberA = getCafeNumber(a);
-    const numberB = getCafeNumber(b);
-
-    if (!Number.isNaN(numberA) && !Number.isNaN(numberB)) {
-        return numberA - numberB;
-    }
-
-    return a.localeCompare(b);
-}
-
-export const sortViews = (views: Iterable<CafeView>) => {
-    return Array
-        .from(views)
-        .sort((a, b) => compareViewNames(a.value.name, b.value.name));
-}
-
-export const sortCafes = (cafes: Iterable<ICafe>) => {
-    return Array
-        .from(cafes)
-        .sort((a, b) => compareViewNames(a.name, b.name));
-}

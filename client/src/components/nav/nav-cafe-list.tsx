@@ -2,7 +2,6 @@ import React, { useContext, useMemo } from 'react';
 
 import { NavLink } from 'react-router-dom';
 import { getViewUrl } from '../../util/link.ts';
-import { useViewsByGroupId, useVisibleViews } from '../../hooks/views.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ApplicationSettings } from '../../api/settings.ts';
@@ -30,9 +29,7 @@ interface INavCafeListProps {
 }
 
 export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => {
-    const { viewsById } = useContext(ApplicationContext);
-    const visibleViews = useVisibleViews();
-    const viewsByGroupId = useViewsByGroupId();
+    const { viewsById, groups } = useContext(ApplicationContext);
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -49,17 +46,15 @@ export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => 
     }, [visibleViews]);
 
     if (!shouldUseGroups) {
-        const groupIds = Array.from(viewsByGroupId.keys()).sort();
-
-        return groupIds.map(groupId => (
-            <ul className={classNames('expandable-nav-list', 'group')} key={groupId}>
+        return groups.map(group => (
+            <ul className={classNames('expandable-nav-list', 'group')} key={group.id}>
                 <li className="view-group-name">
-                    {viewsById.get(groupId)?.value.name ?? 'Unknown Group'}
+                    {group.name}
                 </li>
                 {
-                    viewsByGroupId.get(groupId)!.map(view => (
-                        <NavViewLink key={view.value.id}
-                                     view={view}
+                    group.members.map(cafe => (
+                        <NavViewLink key={cafe.id}
+                                     view={cafe}
                                      onViewSelected={onViewSelected}/>
                     ))
                 }

@@ -6,13 +6,13 @@ import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
-import { CafeView, ICafe, IViewListResponse } from './models/cafe.ts';
+import { CafeView, ICafeGroup, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
 import { ValueNotifier } from './util/events.ts';
 import { StaticContextProviders } from './components/context/static-context-providers.tsx';
 import { Root } from './Root.tsx';
 
-const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
+const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, groups: ICafeGroup[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
 
     useEffect(() => {
@@ -35,12 +35,12 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 const App = () => {
-    const { cafes, groups } = useLoaderData() as IViewListResponse;
+    const { groups } = useLoaderData() as IViewListResponse;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
-    const { viewsById, viewsInOrder } = useViewDataFromResponse(cafes, groups);
+    const { viewsById, viewsInOrder } = useViewDataFromResponse(groups);
 
-    useBackgroundMenuUpdate(viewsById, cafes);
+    useBackgroundMenuUpdate(viewsById);
 
     const selectedViewNotifier = useMemo(
         () => new ValueNotifier<CafeView | undefined>(undefined),
@@ -55,10 +55,9 @@ const App = () => {
         () => ({
             viewsById,
             viewsInOrder,
-            cafes,
             groups
         }),
-        [viewsById, viewsInOrder, cafes, groups]
+        [viewsById, viewsInOrder, groups]
     );
 
     const navExpansionContext = useMemo(
