@@ -4,7 +4,6 @@ export interface ICafe {
     name: string;
     id: string;
     number?: number;
-    groupId?: string;
     firstAvailable?: Date;
 }
 
@@ -12,6 +11,7 @@ export interface ICafeGroup {
     id: string;
     name: string;
     number?: number;
+    members: ICafe[];
 }
 
 export interface ICafeConfig {

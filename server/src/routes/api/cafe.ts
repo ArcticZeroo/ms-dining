@@ -28,34 +28,42 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
         }
 
-        const responseCafes = [];
+        const responseGroups = [];
 
         const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
-        for (const cafe of diningConfig.cafeList) {
-            // Allows us to add cafes before they've officially opened, without polluting the menu list.
-            // For instance, when Food Hall 4 was added, the online ordering menu became available more than
-            // a week early.
-            if (!isCafeAvailable(cafe)) {
-                continue;
-            }
+        for (const group of diningConfig.groupList) {
+            const responseGroup = {
+                name:    group.name,
+                id:      group.id,
+                number:  group.number,
+                members: []
+            };
 
-            const cafeData = cafeDataById.get(cafe.id);
-            if (!cafeData) {
-                continue;
-            }
+            for (const cafe of group.members) {
+                // Allows us to add cafes before they've officially opened, without polluting the menu list.
+                // For instance, when Food Hall 4 was added, the online ordering menu became available more than
+                // a week early.
+                if (!isCafeAvailable(cafe)) {
+                    continue;
+                }
 
-            responseCafes.push({
-                name:    cafe.name,
-                id:      cafe.id,
-                group:   cafe.groupId,
-                number:  cafe.number,
-                logoUrl: getLogoUrl(cafe, cafeData),
-            });
+                const cafeData = cafeDataById.get(cafe.id);
+                if (!cafeData) {
+                    // Expected in case we have a cafe in config which isn't available online for some reason
+                    continue;
+                }
+
+                responseGroup.members.push({
+                    name:    cafe.name,
+                    id:      cafe.id,
+                    number:  cafe.number,
+                    logoUrl: getLogoUrl(cafe, cafeData),
+                });
+            }
         }
 
         ctx.body = jsonStringifyWithoutNull({
-            cafes:  responseCafes,
             groups: diningConfig.groupList
         });
     });
