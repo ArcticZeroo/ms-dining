@@ -165,6 +165,23 @@
     border-radius: var(--default-padding);
 }
 
+.menu-item-buttons {
+    display: flex;
+    align-items: center;
+}
+
+.menu-item-buttons button, .menu-item-buttons a {
+    background: #EEE;
+    color: #212121;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    text-decoration: none;
+}
+
 @media screen and (max-width: 800px) {
     .station .menu-body {
         align-items: flex-start;
