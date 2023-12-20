@@ -21,6 +21,12 @@ export interface ICafeStationMenu {
     categories: Array<ICafeStationCategory>;
 }
 
+export interface ICafeStationLabel {
+    tagId: string;
+    tagName: string;
+    imageName?: string;
+}
+
 export interface ICafeStationListItem {
     id: string;
     name: string;
@@ -29,6 +35,7 @@ export interface ICafeStationListItem {
         menuId: string;
     };
     menus: Array<ICafeStationMenu>;
+    lastUpdateTime: string;
 }
 
 export interface ICafeMenuItemDetailsResponseModifierOption {
@@ -65,4 +72,5 @@ export interface ICafeMenuItemListResponseItem {
     description?: string;
     lastUpdateTime: string;
     isItemCustomizationEnabled: boolean;
+    tagIds?: string[];
 }

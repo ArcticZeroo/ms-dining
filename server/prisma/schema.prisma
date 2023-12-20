@@ -35,6 +35,17 @@ model MenuItem {
 
   dailyMenuItems DailyMenuItem[]
   modifiers      MenuItemModifier[]
+
+  tags MenuItemTag[]
+}
+
+model MenuItemTag {
+  // string id from buy-ondemand
+  id       String  @id
+  name     String
+  imageUrl String?
+
+  menuItems MenuItem[]
 }
 
 model MenuItemModifier {
@@ -73,6 +84,7 @@ model DailyStation {
   id Int @id @default(autoincrement())
 
   dateString String
+  externalLastUpdateTime DateTime?
 
   stationId String
   station   Station @relation(fields: [stationId], references: [id])

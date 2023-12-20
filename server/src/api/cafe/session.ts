@@ -3,7 +3,7 @@ import { CafeTypes } from '@msdining/common';
 import fetch from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../constants/cafes.js';
 import { requestRetryCount } from '../../constants/config.js';
-import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.js';
+import { ICafe, ICafeConfig, ICafeStation, IMenuItemTag, IMenuItem } from '../../models/cafe.js';
 import {
     ICafeConfigResponse,
     ICafeMenuItemDetailsResponse,
@@ -166,6 +166,7 @@ export class CafeDiscoverySession {
                 name:                      stationJson.name,
                 logoUrl:                   stationJson.image,
                 menuId:                    stationJson.priceLevelConfig.menuId,
+                lastUpdateTime:            new Date(stationJson.lastUpdateTime),
                 menuItemIdsByCategoryName: new Map(),
                 menuItemsById:             new Map()
             };
@@ -212,7 +213,7 @@ export class CafeDiscoverySession {
         }));
     }
 
-    private async _retrieveModifierDetails(itemId: string): Promise<Array<IMenuItemModifier>> {
+    private async _requestModifierDetailsAsync(itemId: string): Promise<Array<IMenuItemModifier>> {
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/${itemId}`, {
             method: 'POST',
             body:   JSON.stringify({
@@ -234,15 +235,28 @@ export class CafeDiscoverySession {
         return this._mapModifiersFromDetails(json);
     }
 
+    private async _retrieveModifierDetailsAsync(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemModifier>> {
+        if (!this._shouldRetrieveModifierDetails(localItem, jsonItem)) {
+            return localItem?.modifiers ?? [];
+        }
+
+        try {
+            return await this._requestModifierDetailsAsync(jsonItem.id);
+        } catch (err) {
+            logError(`Unable to retrieve modifier details for item ${jsonItem.id}:`, err);
+            return [];
+        }
+    }
+
     private _shouldRetrieveModifierDetails(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
         // In case parsing is weird, don't treat null as a reason to skip retrieving
-		if (jsonItem.isItemCustomizationEnabled === false) {
-			return false;
-		}
+        if (jsonItem.isItemCustomizationEnabled === false) {
+            return false;
+        }
 
-		if (localItem == null || localItem.lastUpdateTime == null || Number.isNaN(localItem.lastUpdateTime.getTime())) {
-			return true;
-		}
+        if (localItem == null || localItem.lastUpdateTime == null || Number.isNaN(localItem.lastUpdateTime.getTime())) {
+            return true;
+        }
 
         const lastUpdateTime = new Date(jsonItem.lastUpdateTime);
         if (Number.isNaN(lastUpdateTime.getTime())) {
@@ -252,17 +266,33 @@ export class CafeDiscoverySession {
         return lastUpdateTime.getTime() > localItem.lastUpdateTime.getTime();
     }
 
-    private async _retrieveMenuItemDetails(localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
-        const localItem = localItemsById.get(jsonItem.id);
-
-        let modifiers = localItem?.modifiers ?? [];
-        if (this._shouldRetrieveModifierDetails(localItem, jsonItem)) {
-            try {
-                modifiers = await this._retrieveModifierDetails(jsonItem.id);
-            } catch (err) {
-                logError(`Unable to retrieve modifier details for item ${jsonItem.id}:`, err);
-            }
+    private _shouldRetrieveTags(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
+        if (localItem == null || localItem.tags.length !== jsonItem.tagIds.length) {
+            return true;
         }
+
+        const localTagIds = new Set(localItem.tags.map(tag => tag.id));
+        return jsonItem.tagIds.some(tagId => !localTagIds.has(tagId));
+    }
+
+    private async _retrieveTagsAsync(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemTag>> {
+        if (!this._shouldRetrieveTags(localItem, jsonItem)) {
+            return localItem?.tags ?? [];
+        }
+
+        try {
+            return await CafeStorageClient.retrieveTagsAsync(jsonItem.tagIds ?? []);
+        } catch (err) {
+            logError(`Unable to retrieve tags for item ${jsonItem.id}:`, err);
+            return [];
+        }
+    }
+
+    private async _retrieveMenuItemDetails(localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
+        const localItem: IMenuItem | undefined = localItemsById.get(jsonItem.id);
+
+        const modifiers = await this._retrieveModifierDetailsAsync(localItem, jsonItem);
+        const tags = await this._retrieveTagsAsync(localItem, jsonItem);
 
         return {
             id:             jsonItem.id,
@@ -273,8 +303,9 @@ export class CafeDiscoverySession {
             hasThumbnail:   jsonItem.image != null,
             imageUrl:       jsonItem.image,
             description:    jsonItem.description,
-            modifiers:      modifiers,
-            lastUpdateTime: new Date(jsonItem.lastUpdateTime)
+            lastUpdateTime: new Date(jsonItem.lastUpdateTime),
+            modifiers,
+            tags
         };
     }
 

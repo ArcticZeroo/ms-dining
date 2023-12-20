@@ -3,7 +3,7 @@ import {
     Cafe,
     MenuItem,
     MenuItemModifier,
-    MenuItemModifierChoice,
+    MenuItemModifierChoice, MenuItemTag,
     Prisma,
     PrismaClient,
     Station
@@ -12,7 +12,7 @@ import {
     ICafe,
     ICafeConfig,
     ICafeStation,
-    IMenuItem,
+    IMenuItem, IMenuItemTag,
 } from '../../models/cafe.js';
 import {
     ICheapItemSearchResult,
@@ -215,7 +215,8 @@ export abstract class CafeStorageClient {
             : menuItem.lastUpdateTime;
 
         const dataWithoutId: Omit<MenuItem, 'id'> & {
-            modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput
+            modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput,
+            tags: Prisma.MenuItemTagUpdateManyWithoutMenuItemsNestedInput
         } = {
             name:                   menuItem.name,
             imageUrl:               menuItem.imageUrl,
@@ -226,6 +227,9 @@ export abstract class CafeStorageClient {
             maxCalories:            Number(menuItem.maxCalories || 0),
             modifiers:              {
                 connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
+            },
+            tags:                   {
+                connect: menuItem.tags.map(tag => ({ id: tag.id }))
             }
         };
 
@@ -381,7 +385,8 @@ export abstract class CafeStorageClient {
                     include: {
                         choices: true
                     }
-                }
+                },
+                tags:      true
             }
         }));
 
@@ -416,6 +421,7 @@ export abstract class CafeStorageClient {
             calories:        menuItem.calories,
             maxCalories:     menuItem.maxCalories,
             imageUrl:        menuItem.imageUrl,
+            tags:            menuItem.tags,
             hasThumbnail:    thumbnailData.hasThumbnail,
             thumbnailHeight: thumbnailData.thumbnailHeight,
             thumbnailWidth:  thumbnailData.thumbnailWidth,
@@ -444,15 +450,16 @@ export abstract class CafeStorageClient {
                 dateString
             },
             select: {
-                stationId:  true,
-                station:    {
+                stationId:              true,
+                externalLastUpdateTime: true,
+                station:                {
                     select: {
                         name:    true,
                         logoUrl: true,
-                        menuId:  true
+                        menuId:  true,
                     }
                 },
-                categories: {
+                categories:             {
                     select: {
                         name:      true,
                         menuItems: {
@@ -493,10 +500,11 @@ export abstract class CafeStorageClient {
             }
 
             stations.push({
-                id:      dailyStation.stationId,
-                menuId:  stationData.menuId,
-                logoUrl: stationData.logoUrl,
-                name:    stationData.name,
+                id:             dailyStation.stationId,
+                menuId:         stationData.menuId,
+                logoUrl:        stationData.logoUrl,
+                name:           stationData.name,
+                lastUpdateTime: new Date(dailyStation.externalLastUpdateTime),
                 menuItemsById,
                 menuItemIdsByCategoryName
             });
@@ -744,10 +752,10 @@ export abstract class CafeStorageClient {
 
                     if (!resultsByPrice.has(menuItem.price)) {
                         resultsByPrice.set(menuItem.price, {
-                            name:                  menuItem.name,
-                            description:           menuItem.description,
-                            imageUrl:              getThumbnailUrl(menuItem),
-                            price:                 menuItem.price,
+                            name:        menuItem.name,
+                            description: menuItem.description,
+                            imageUrl:    getThumbnailUrl(menuItem),
+                            price:       menuItem.price,
                             // I guess we'll assume that the calories are the same across cafes with the same menu item
                             // price, since those are presumably the same item? Not sure how to deal with this.
                             minCalories:           menuItem.calories,
@@ -775,5 +783,37 @@ export abstract class CafeStorageClient {
         return Array
             .from(resultsByItemNameByPrice.values())
             .flatMap(resultsByPrice => Array.from(resultsByPrice.values()));
+    }
+
+    public static async retrieveTagsAsync(tagIds: string[]): Promise<Array<MenuItemTag>> {
+        if (tagIds.length === 0) {
+            return [];
+        }
+
+        console.log(tagIds);
+
+        return usePrismaClient(prismaClient => prismaClient.menuItemTag.findMany({
+            where: {
+                id: {
+                    in: tagIds
+                }
+            }
+        }));
+    }
+
+    public static async createTags(tags: IMenuItemTag[]): Promise<void> {
+        await usePrismaClient(async prismaClient => {
+            for (const tag of tags) {
+                try {
+                    await prismaClient.menuItemTag.create({ data: tag });
+                } catch (err) {
+                    if (isUniqueConstraintFailedError(err)) {
+                        continue;
+                    }
+
+                    throw err;
+                }
+            }
+        });
     }
 }
