@@ -6,11 +6,6 @@ import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { cafeList } from '../../../constants/cafes.js';
-import { knownTags } from '../../../constants/tags.js';
-
-const ensureHardcodedTagsExist = async () => {
-    await CafeStorageClient.createTags(knownTags);
-}
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -94,7 +89,6 @@ const repairTodaySessionsAsync = async () => {
 };
 
 export const performBootTasks = async () => {
-    await ensureHardcodedTagsExist();
     await repairTodaySessionsAsync();
     await repairMissingWeeklyMenusAsync();
     await repairCafesWithoutMenusAsync();

@@ -21,12 +21,6 @@ export interface ICafeConfig {
     logoName?: string;
 }
 
-export interface IMenuItemTag {
-    id: string;
-    name: string;
-    imageName?: string;
-}
-
 export interface ICafeStation {
     id: string;
     menuId: string;
@@ -35,6 +29,11 @@ export interface ICafeStation {
     menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IMenuItem>;
     lastUpdateTime?: Date;
+}
+
+export interface IMenuItemTag {
+    id: string;
+    name: string;
 }
 
 export interface IMenuItem {
@@ -50,5 +49,5 @@ export interface IMenuItem {
     description?: string;
     modifiers: CafeTypes.IMenuItemModifier[];
     lastUpdateTime?: Date;
-    tags: IMenuItemTag[];
+    tags: string[];
 }
