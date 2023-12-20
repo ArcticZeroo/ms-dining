@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
-import { IMenuItem } from '../../../../models/cafe.ts';
-import { MenuItemImage } from './menu-item-image.tsx';
+import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../api/settings.ts';
-import { useValueNotifier } from '../../../../hooks/events.ts';
-import { classNames } from '../../../../util/react.ts';
+import { knownTags } from '../../../../constants/tags.tsx';
 import { PopupContext } from '../../../../context/modal.ts';
-import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
+import { useValueNotifier } from '../../../../hooks/events.ts';
+import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
+import { classNames } from '../../../../util/react.ts';
+import { MenuItemImage } from './menu-item-image.tsx';
+import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -32,11 +33,12 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
+    const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
 
-    const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
-
     const modalNotifier = useContext(PopupContext);
+
+    const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
     const onClick = () => {
         if (!allowOnlineOrdering) {
@@ -53,11 +55,19 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             body: <MenuItemOrderPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
         }
     }
+    
+    const currentHighlightTag = useMemo(() => {
+        for (const tagName of menuItem.tags) {
+            if (highlightTagNames.has(tagName)) {
+                return knownTags[tagName];
+            }
+        }
+    }, [highlightTagNames, menuItem.tags]);
 
     const title = allowOnlineOrdering ? 'Click to open online ordering popup' : undefined;
 
     return (
-        <tr className={classNames(allowOnlineOrdering && 'pointer')} onClick={onClick} title={title}>
+        <tr className={classNames(allowOnlineOrdering && 'pointer')} onClick={onClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
             <td colSpan={!canShowImage ? 2 : 1}>
                 <div className="menu-item-head">
                     <span className="menu-item-name">{menuItem.name}</span>

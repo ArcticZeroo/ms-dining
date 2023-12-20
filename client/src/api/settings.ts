@@ -165,6 +165,7 @@ export const ApplicationSettings = {
     allowOnlineOrdering:   new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),
     lastUsedCafeIds:       new StringArraySetting('lastUsedDiningHalls'),
     homepageViews:         new StringSetSetting('homepageDiningHalls'),
+    highlightTagNames:     new StringSetSetting('highlightTagNames'),
     collapsedStations:     new StringSetSetting('collapsedStations'),
     collapsedCafeIds:      new StringSetSetting('collapsedCafeIds'),
     collapsedStationNames: new StringSetSetting('collapsedStationNames', false /*shouldPersist*/),

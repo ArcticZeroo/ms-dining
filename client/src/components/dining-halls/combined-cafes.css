@@ -45,7 +45,22 @@
 }
 
 .station table {
-    border-spacing: var(--default-padding);
+    border-spacing: 0 var(--default-padding);
+}
+
+.station table th, .station table td {
+    padding: var(--default-padding);
+    margin: var(--default-padding);
+}
+
+.station table td:first-child {
+    border-bottom-left-radius: var(--default-padding);
+    border-top-left-radius: var(--default-padding);
+}
+
+.station table td:last-child {
+    border-bottom-right-radius: var(--default-padding);
+    border-top-right-radius: var(--default-padding);
 }
 
 .station table th {
@@ -55,6 +70,7 @@
 .menu-item-image {
     height: 10rem;
     background: #CCC;
+    border-radius: var(--default-padding);
 }
 
 .collapsible-menu-list {

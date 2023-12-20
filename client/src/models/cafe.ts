@@ -52,6 +52,7 @@ export interface IMenuItem {
     thumbnailWidth?: number;
     thumbnailHeight?: number;
     modifiers: Array<CafeTypes.IMenuItemModifier>;
+    tags: string[];
 }
 
 export interface IMenuItemsByCategoryName {

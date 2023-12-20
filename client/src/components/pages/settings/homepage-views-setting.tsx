@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
@@ -13,14 +13,14 @@ export const HomepageViewsSetting = () => {
     const viewsByGroupId = useViewsByGroupId();
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
-    const toggleHomepageView = (view: CafeView) => {
+    const toggleHomepageView = useCallback((view: CafeView) => {
         const viewId = view.value.id;
         if (homepageViewIds.has(viewId)) {
             ApplicationSettings.homepageViews.delete(viewId);
         } else {
             ApplicationSettings.homepageViews.add(viewId);
         }
-    };
+    }, [homepageViewIds]);
 
     const chipsElement = useMemo(() => {
         if (shouldUseGroups) {
@@ -57,7 +57,7 @@ export const HomepageViewsSetting = () => {
                 </div>
             </div>
         ));
-    }, [shouldUseGroups, homepageViewIds, viewsById, viewsByGroupId, visibleViews]);
+    }, [shouldUseGroups, viewsByGroupId, visibleViews, homepageViewIds, toggleHomepageView, viewsById]);
 
     return (
         <div className="setting" id="setting-homepage">

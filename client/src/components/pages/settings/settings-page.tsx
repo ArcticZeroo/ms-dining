@@ -1,9 +1,10 @@
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { BooleanSettingInput } from './boolean-setting-input.tsx';
-import './settings.css';
-import { HomepageViewsSetting } from './homepage-views-setting.tsx';
-import { CustomKeySetting } from './custom-key-setting.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
+import { BooleanSettingInput } from './boolean-setting-input.tsx';
+import { CustomKeySetting } from './custom-key-setting.tsx';
+import { HighlightTagsSetting } from './highlight-tags-setting.tsx';
+import { HomepageViewsSetting } from './homepage-views-setting.tsx';
+import './settings.css';
 
 export const SettingsPage = () => {
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
@@ -64,6 +65,7 @@ export const SettingsPage = () => {
                     )
                 }
                 <HomepageViewsSetting/>
+                <HighlightTagsSetting/>
                 <BooleanSettingInput
                     icon="schedule"
                     setting={ApplicationSettings.allowFutureMenus}
