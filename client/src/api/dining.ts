@@ -1,16 +1,15 @@
-import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem, IViewListResponse } from '../models/cafe.ts';
-import { ICancellationToken, pause } from '../util/async.ts';
-import { expandAndFlattenView } from '../util/view';
-import { ApplicationSettings, getVisitorId } from './settings.ts';
-import { uncategorizedGroupId } from '../constants/groups.ts';
 import { DateUtil, SearchTypes } from '@msdining/common';
+import { uncategorizedGroupId } from '../constants/groups.ts';
+import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem, IViewListResponse } from '../models/cafe.ts';
 import {
     ICheapItemSearchResult,
     IQuerySearchResult,
     IServerCheapItemSearchResult,
-    IServerSearchResult,
-    SearchMatchReason
+    IServerSearchResult
 } from '../models/search.ts';
+import { ICancellationToken, pause } from '../util/async.ts';
+import { expandAndFlattenView } from '../util/view';
+import { ApplicationSettings, getVisitorId } from './settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const firstWeeklyMenusTime = DateUtil.fromDateString('2023-10-31').getTime();
@@ -260,11 +259,7 @@ export abstract class DiningClient {
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                matchReasons:          new Set(
-                    serverResult.matchReasons.map(reason => reason === 'description'
-                        ? SearchMatchReason.description
-                        : SearchMatchReason.title)
-                ),
+                matchReasons:          new Set(serverResult.matchReasons),
             });
         }
 

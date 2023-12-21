@@ -1,9 +1,9 @@
-import { CafeTypes, DateUtil } from '@msdining/common';
+import { CafeTypes, DateUtil, SearchTypes } from '@msdining/common';
 import {
 	Cafe,
 	MenuItem,
 	MenuItemModifier,
-	MenuItemModifierChoice, MenuItemTag,
+	MenuItemModifierChoice,
 	Prisma,
 	PrismaClient,
 	Station
@@ -18,8 +18,6 @@ import {
 import {
 	ICheapItemSearchResult,
 	ISearchResult,
-	SearchResultEntityType,
-	SearchResultMatchReason
 } from '../../models/search.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { logError } from '../../util/log.js';
@@ -602,22 +600,22 @@ export abstract class CafeStorageClient {
 		}));
 	}
 
-	public static async search(query: string): Promise<Map<SearchResultEntityType, Map<string, ISearchResult>>> {
+	public static async search(query: string): Promise<Map<SearchTypes.SearchEntityType, Map<string, ISearchResult>>> {
 		const dailyStations = await this._getAllMenusForWeek();
 
-		const searchResultsByNameByEntityType = new Map<SearchResultEntityType, Map<string, ISearchResult>>();
+		const searchResultsByNameByEntityType = new Map<SearchTypes.SearchEntityType, Map<string, ISearchResult>>();
 
-		const ensureEntityTypeExists = (entityType: SearchResultEntityType) => {
+		const ensureEntityTypeExists = (entityType: SearchTypes.SearchEntityType) => {
 			if (!searchResultsByNameByEntityType.has(entityType)) {
 				searchResultsByNameByEntityType.set(entityType, new Map<string, ISearchResult>());
 			}
 		};
 
 		interface IAddResultParams {
-			type: SearchResultEntityType;
+			type: SearchTypes.SearchEntityType;
 			dateString: string;
 			cafeId: string;
-			matchReasons: Iterable<SearchResultMatchReason>;
+			matchReasons: Iterable<SearchTypes.SearchMatchReason>;
 			name: string;
 			description?: string;
 			imageUrl?: string;
@@ -644,7 +642,7 @@ export abstract class CafeStorageClient {
 					description:           description,
 					imageUrl:              imageUrl,
 					locationDatesByCafeId: new Map<string, Set<string>>(),
-					matchReasons:          new Set<SearchResultMatchReason>(),
+					matchReasons:          new Set<SearchTypes.SearchMatchReason>(),
 				});
 			}
 
@@ -666,8 +664,8 @@ export abstract class CafeStorageClient {
 
 			if (stationData.name.trim() && fuzzySearch(stationData.name, query)) {
 				addResult({
-					type:         SearchResultEntityType.Station,
-					matchReasons: [SearchResultMatchReason.Title],
+					type:         SearchTypes.SearchEntityType.station,
+					matchReasons: [SearchTypes.SearchMatchReason.title],
 					dateString:   dailyStation.dateString,
 					cafeId:       dailyStation.cafeId,
 					name:         stationData.name,
@@ -683,25 +681,25 @@ export abstract class CafeStorageClient {
 						continue;
 					}
 
-					const matchReasons: SearchResultMatchReason[] = [];
+					const matchReasons: SearchTypes.SearchMatchReason[] = [];
 
 					if (fuzzySearch(menuItem.name, query)) {
-						matchReasons.push(SearchResultMatchReason.Title);
+						matchReasons.push(SearchTypes.SearchMatchReason.title);
 					}
 
 					if (menuItem.description && fuzzySearch(menuItem.description, query)) {
-						matchReasons.push(SearchResultMatchReason.Description);
+						matchReasons.push(SearchTypes.SearchMatchReason.description);
 					}
 
 					if (matchReasons.length > 0) {
 						addResult({
-							type:        SearchResultEntityType.MenuItem,
-							matchReasons,
+							type:        SearchTypes.SearchEntityType.menuItem,
 							dateString:  dailyStation.dateString,
 							cafeId:      dailyStation.cafeId,
 							name:        menuItem.name,
 							description: menuItem.description,
-							imageUrl:    getThumbnailUrl(menuItem)
+							imageUrl:    getThumbnailUrl(menuItem),
+							matchReasons,
 						});
 					}
 				}

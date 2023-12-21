@@ -1,10 +1,10 @@
-import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.ts';
-import React, { useContext, useMemo } from 'react';
-import { SearchResult } from './search-result.tsx';
 import { SearchUtil } from '@msdining/common';
-import { ApplicationContext } from '../../context/app.ts';
-import { matchesEntityFilter } from '../../util/search.ts';
+import React, { useContext, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
+import { ApplicationContext } from '../../context/app.ts';
+import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.ts';
+import { matchesEntityFilter } from '../../util/search.ts';
+import { SearchResult } from './search-result.tsx';
 
 interface ISearchResultsListProps {
     queryText: string;

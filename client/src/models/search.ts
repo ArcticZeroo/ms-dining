@@ -41,7 +41,7 @@ export interface IServerSearchResult {
     description?: string;
     imageUrl?: string;
     locations: Record<string, Array<string>>;
-    matchReasons: Array<'description' | 'title'>;
+    matchReasons: Array<SearchMatchReason>;
 }
 
 export interface IServerCheapItemSearchResult {
