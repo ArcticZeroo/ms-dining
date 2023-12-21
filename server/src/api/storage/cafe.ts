@@ -731,11 +731,11 @@ export abstract class CafeStorageClient {
 						continue;
 					}
 
-					if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name) || CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
+					if (menuItem.price < minPrice || menuItem.price > maxPrice) {
 						continue;
 					}
 
-					if (menuItem.price < minPrice || menuItem.price > maxPrice) {
+					if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name) || CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
 						continue;
 					}
 
