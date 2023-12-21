@@ -1,21 +1,53 @@
+import React, { useEffect, useMemo, useState } from 'react';
 import { ApplicationSettings, BooleanSetting } from '../../../api/settings.ts';
-import React, { useState } from 'react';
+import { ValueNotifier } from '../../../util/events.ts';
+import { classNames } from '../../../util/react.ts';
 
 const ALLOWED_SETTINGS: BooleanSetting[] = [
     ApplicationSettings.allowOnlineOrdering
 ];
 
+const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {
+    const [value, setValue] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (valueNotifier == null) {
+            return;
+        }
+
+        setValue(valueNotifier.value);
+
+        const onChange = () => setValue(valueNotifier.value);
+        valueNotifier.addListener(onChange);
+
+        return () => valueNotifier.addListener(onChange);
+    }, [valueNotifier]);
+
+    return value;
+}
+
 export const CustomKeySetting: React.FC = () => {
     const [key, setKey] = useState<string>('');
-    const [shouldEnableKey, setShouldEnableKey] = useState(false);
 
-    const onSave = () => {
+    const selectedSetting = useMemo(() => {
         for (const allowedSetting of ALLOWED_SETTINGS) {
             if (allowedSetting.name === key) {
-                allowedSetting.value = shouldEnableKey;
-                return;
+                return allowedSetting;
             }
         }
+
+        return null;
+    }, [key]);
+
+    const isKeyValid = selectedSetting != null;
+    const isKeyEnabled = useIsKeyEnabled(selectedSetting);
+
+    const onChange = (value: boolean) => {
+        if (selectedSetting == null) {
+            return;
+        }
+
+        selectedSetting.value = value;
     };
 
     return (
@@ -38,17 +70,15 @@ export const CustomKeySetting: React.FC = () => {
                        value={key}
                        onChange={event => setKey(event.target.value)}
                 />
-                <label htmlFor="custom-key-should-enable" id="custom-key-checkbox">
+                <label htmlFor="custom-key-should-enable" id="custom-key-checkbox" className={classNames(!isKeyValid && 'disabled')}>
                     Enable Key
                     <input type="checkbox"
                            id="custom-key-should-enable"
-                           checked={shouldEnableKey}
-                           onChange={event => setShouldEnableKey(event.target.checked)}
+                           checked={isKeyEnabled}
+                           disabled={!isKeyValid}
+                           onChange={event => onChange(event.target.checked)}
                     />
                 </label>
-                <button onClick={onSave}>
-                    {shouldEnableKey ? 'Enable Setting' : 'Disable Setting'}
-                </button>
             </div>
         </div>
     );

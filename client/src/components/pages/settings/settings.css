@@ -107,3 +107,8 @@
     justify-content: space-between;
     gap: var(--default-padding);
 }
+
+#setting-custom #custom-key-checkbox.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
