@@ -185,6 +185,7 @@
     background: #EEE;
     padding: var(--default-padding);
     border-radius: var(--default-padding);
+    text-align: center;
 }
 
 .menu-item-buttons {
