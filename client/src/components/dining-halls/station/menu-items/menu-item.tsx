@@ -1,11 +1,12 @@
 import React, { useContext, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { PopupContext } from '../../../../context/modal.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
+import { navigateToSearch } from '../../../../util/search.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
@@ -37,6 +38,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 	const showTags = useValueNotifier(ApplicationSettings.showTags);
 	const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
 	const caloriesDisplay = getCaloriesDisplay(menuItem);
+	const navigate = useNavigate();
 
 	const modalNotifier = useContext(PopupContext);
 
@@ -58,6 +60,14 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 		};
 	};
 
+	const onClick = () => {
+		if (allowOnlineOrdering) {
+			onOpenModalClick();
+		} else {
+			navigateToSearch(navigate, menuItem.name);
+		}
+	}
+
 	const currentHighlightTag = useMemo(() => {
 		for (const tagName of menuItem.tags) {
 			if (highlightTagNames.has(tagName)) {
@@ -69,25 +79,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 	const title = allowOnlineOrdering ? 'Click to open online ordering popup' : undefined;
 
 	return (
-		<tr title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
-			<td>
-				<div className="menu-item-buttons default-gap">
-					<Link to={`/search?q=${encodeURIComponent(menuItem.name)}`} className="link-button" title="Search for this item">
-						<span className="material-symbols-outlined">
-							search
-						</span>
-					</Link>
-					{
-						allowOnlineOrdering && (
-												<button className="link-button" title="Add to cart" onClick={onOpenModalClick}>
-													<span className="material-symbols-outlined">
-														add_shopping_cart
-													</span>
-												</button>
-											)
-					}
-				</div>
-			</td>
+		<tr className="pointer" onClick={onClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
 			<td colSpan={!canShowImage ? 2 : 1}>
 				<div className="menu-item-head">
 					<span className="menu-item-name">{menuItem.name}</span>

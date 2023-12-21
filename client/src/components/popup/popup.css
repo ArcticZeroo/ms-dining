@@ -28,21 +28,33 @@
 .modal .title {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     position: sticky;
+}
+
+.modal .title #modal-title {
+    font-size: var(--card-title-font-size);
+}
+
+.modal .title #modal-buttons {
+    display: flex;
+    gap: var(--default-padding);
+    align-items: center;
+}
+
+.modal .title #modal-buttons button {
+    background: none;
+    cursor: pointer;
+}
+
+.modal .title #modal-buttons button span.material-symbols-outlined {
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+    background: #EEE;
 }
 
 .modal .body {
     overflow: auto;
-}
-
-.modal .close {
-    background: none;
-}
-
-.modal .close span.material-symbols-outlined {
-    border-radius: var(--default-padding);
-    padding: var(--default-padding);
-    background: #EEE;
 }
 
 .modal .footer {

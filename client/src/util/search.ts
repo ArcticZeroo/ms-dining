@@ -1,4 +1,5 @@
 import { SearchTypes } from '@msdining/common';
+import { NavigateFunction } from 'react-router-dom';
 import { SearchEntityFilterType } from '../models/search.ts';
 
 export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: SearchTypes.SearchEntityType) => {
@@ -29,4 +30,8 @@ export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<S
     }
 
     return 0;
+}
+
+export const navigateToSearch = (navigate: NavigateFunction, searchText: string) => {
+    navigate(`/search?query=${encodeURIComponent(searchText)}`);
 }

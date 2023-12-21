@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import searchIcon from '../../assets/search.svg';
 import { SearchQueryContext } from '../../context/search.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { navigateToSearch } from '../../util/search.ts';
 
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -18,7 +19,7 @@ export const SearchBar = () => {
         if (trimmedQuery.length === 0) {
             inputRef?.current?.focus();
         } else {
-            navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+            navigateToSearch(navigate, trimmedQuery);
         }
     };
 
