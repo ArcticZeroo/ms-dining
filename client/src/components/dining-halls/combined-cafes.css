@@ -46,6 +46,7 @@
     justify-content: center;
     max-width: 100%;
     overflow-x: scroll;
+    box-sizing: border-box;
 }
 
 .category-name {
