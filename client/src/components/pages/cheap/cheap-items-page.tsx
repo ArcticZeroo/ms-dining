@@ -1,10 +1,15 @@
-import React, { useMemo, useState } from 'react';
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import React, { useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
+import { CheapItemsSortType, ICheapItemSearchResult } from '../../../models/search.ts';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
-import { CheapItemsSortType } from '../../../models/search.ts';
-import { SortButton } from './sort-button.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
+import { SortButton } from './sort-button.tsx';
+
+const hasCalories = (item: ICheapItemSearchResult) => {
+    const isMissingCalories = item.minCalories === 0 && item.maxCalories === 0;
+    return !isMissingCalories;
+}
 
 const useCheapItems = (sortType: CheapItemsSortType) => {
     const { stage, value, error } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
@@ -20,23 +25,7 @@ const useCheapItems = (sortType: CheapItemsSortType) => {
             case CheapItemsSortType.priceDesc:
                 return value.sort((a, b) => b.price - a.price);
             case CheapItemsSortType.caloriesPerDollarDesc:
-                return value.sort((a, b) => {
-                    const isMissingCaloriesA = a.minCalories === 0 && a.maxCalories === 0;
-                    const isMissingCaloriesB = b.minCalories === 0 && b.maxCalories === 0;
-
-                    if (isMissingCaloriesA && isMissingCaloriesB) {
-                        return a.price - b.price;
-                    }
-
-                    // Push to end of list if we have no calories
-                    if (isMissingCaloriesA) {
-                        return 1;
-                    }
-
-                    if (isMissingCaloriesB) {
-                        return -1;
-                    }
-
+                return value.filter(hasCalories).sort((a, b) => {
                     const averageCaloriesA = (a.minCalories + a.maxCalories) / 2;
                     const averageCaloriesB = (b.minCalories + b.maxCalories) / 2;
 
