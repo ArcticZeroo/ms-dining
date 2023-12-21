@@ -125,7 +125,7 @@ export const groupList: ICafeGroup[] = [
                     id:   'craft75',
                 },
                 {
-                    name: 'in.gredients @ Building 32',
+                    name: 'in.gredients @ Building 34',
                     id:   'in-gredients',
                 },
             ]
@@ -147,6 +147,18 @@ export const groupList: ICafeGroup[] = [
                 {
                     name: 'Studio D Espresso ☕',
                     id:   'studiod',
+                },
+                {
+                    name: 'Dote (Redmond Transit Station) ☕',
+                    id:   'dote-rts'
+                },
+                {
+                    name: 'Building 3 Espresso',
+                    id:   'b3espresso'
+                },
+                {
+                    name: 'Building 7 Espresso',
+                    id:   'b7espresso'
                 },
                 {
                     name: 'Dote (Redmond Transit Station) ☕',
