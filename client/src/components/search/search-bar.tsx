@@ -18,7 +18,7 @@ export const SearchBar = () => {
         if (trimmedQuery.length === 0) {
             inputRef?.current?.focus();
         } else {
-            navigate(`/search?q=${trimmedQuery}`);
+            navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
         }
     };
 
