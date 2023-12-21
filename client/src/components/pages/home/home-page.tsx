@@ -1,10 +1,10 @@
 import { useContext, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
+import { HomepageViewsSetting } from '../settings/homepage-views-setting.tsx';
 
 import './home.css';
 
@@ -29,19 +29,13 @@ export const HomePage = () => {
 
     if (availableViews.length === 0) {
         return (
-            <div className="centered-content">
+            <div className="">
                 <div className="card centered">
                     <div className="title">
-                        Microsoft Cafeteria Menus Home
+                        Homepage Setup
                     </div>
+                    <HomepageViewsSetting requireButtonToCommit={true}/>
                 </div>
-                <Link to={'/settings'} id="home-settings">
-                    <div className="card centered blue">
-                        <div className="title">
-                            Head to the settings page in order to select homepage cafes!
-                        </div>
-                    </div>
-                </Link>
             </div>
         );
     }

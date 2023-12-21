@@ -112,3 +112,11 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+#homepage-views-commit-button {
+    background: #4e92c2;
+    color: white;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    cursor: pointer;
+}
