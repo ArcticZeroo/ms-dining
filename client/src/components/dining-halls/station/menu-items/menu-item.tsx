@@ -66,8 +66,10 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 		}
 	}, [highlightTagNames, menuItem.tags]);
 
+	const title = allowOnlineOrdering ? 'Click to open online ordering popup' : undefined;
+
 	return (
-		<tr style={{ backgroundColor: currentHighlightTag?.color }}>
+		<tr title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
 			<td>
 				<div className="menu-item-buttons default-gap">
 					<Link to={`/search?q=${encodeURIComponent(menuItem.name)}`} className="link-button" title="Search for this item">
