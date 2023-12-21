@@ -60,6 +60,11 @@
     margin: 0;
 }
 
+.station table th:first-child, .station table td:first-child {
+    padding-top: var(--table-padding);
+    margin-top: var(--table-padding);
+}
+
 .station table th:not(:first-child), .station table td:not(:first-child) {
     padding: var(--table-padding) 0 0 var(--table-padding);
     margin: var(--table-padding) 0 0 var(--table-padding);
