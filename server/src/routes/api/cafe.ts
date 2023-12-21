@@ -28,16 +28,16 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
         }
 
-        const responseGroups = [];
-
         const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
+        const responseGroups = [];
         for (const group of diningConfig.groupList) {
             const responseGroup = {
-                name:    group.name,
-                id:      group.id,
-                number:  group.number,
-                members: []
+                name:         group.name,
+                id:           group.id,
+                number:       group.number,
+                alwaysExpand: group.alwaysExpand ?? false,
+                members:      []
             };
 
             for (const cafe of group.members) {
@@ -61,10 +61,12 @@ export const registerDiningHallRoutes = (parent: Router) => {
                     logoUrl: getLogoUrl(cafe, cafeData),
                 });
             }
+
+            responseGroups.push(responseGroup);
         }
 
         ctx.body = jsonStringifyWithoutNull({
-            groups: diningConfig.groupList
+            groups: responseGroups
         });
     });
 

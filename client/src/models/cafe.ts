@@ -5,12 +5,14 @@ export interface ICafe {
     id: string;
     logoUrl: string;
     number?: number;
+    group?: string;
 }
 
 export interface ICafeGroup{
     id: string;
     name: string;
     number?: number;
+    alwaysExpand: boolean;
     members: ICafe[];
 }
 

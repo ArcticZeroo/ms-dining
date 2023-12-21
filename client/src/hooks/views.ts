@@ -1,28 +1,32 @@
-import { useContext, useEffect, useState } from 'react';
-import { CafeView, CafeViewType, ICafeGroup } from '../models/cafe.ts';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
 import { ApplicationSettings } from '../api/settings.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
-    const [viewsById, setViewsById] = useState<Map<string, CafeView>>(new Map());
-    const [viewsInOrder, setViewsInOrder] = useState<Array<CafeView>>([]);
-
-    useEffect(() => {
+    return useMemo(() => {
         const viewsById = new Map<string, CafeView>();
         const viewsInOrder: CafeView[] = [];
+        const cafes: ICafe[] = [];
 
         for (const group of groups) {
-            const groupView = {
-                type:  CafeViewType.group,
-                value: group
-            } as const;
+            if (!group.alwaysExpand) {
+                const groupView = {
+                    type:  CafeViewType.group,
+                    value: group
+                } as const;
 
-            viewsById.set(group.id, groupView);
-            viewsInOrder.push(groupView);
+                viewsById.set(group.id, groupView);
+                viewsInOrder.push(groupView);
+            }
 
             for (const cafe of group.members) {
+                if (!group.alwaysExpand) {
+                    cafe.group = group.id;
+                }
+
                 const cafeView = {
                     type:  CafeViewType.single,
                     value: cafe
@@ -30,14 +34,12 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
 
                 viewsById.set(cafe.id, cafeView);
                 viewsInOrder.push(cafeView);
+                cafes.push(cafe);
             }
         }
 
-        setViewsById(viewsById);
-        setViewsInOrder(viewsInOrder);
+        return { viewsById, viewsInOrder, groups, cafes } as const;
     }, [groups]);
-
-    return { viewsById, viewsInOrder } as const;
 };
 
 export const useVisibleViews = () => {

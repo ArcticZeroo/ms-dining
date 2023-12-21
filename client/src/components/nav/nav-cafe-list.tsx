@@ -8,6 +8,7 @@ import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { classNames } from '../../util/react.ts';
 import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
+import { useVisibleViews } from '../../hooks/views.ts';
 
 interface INavViewLinkProps {
     view: CafeView;
@@ -29,9 +30,10 @@ interface INavCafeListProps {
 }
 
 export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => {
-    const { viewsById, groups } = useContext(ApplicationContext);
+    const { groups, viewsById } = useContext(ApplicationContext);
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const visibleViews = useVisibleViews();
 
     const viewNumbersById = useMemo(() => {
         const viewNumbersById = new Map<string, number>();
@@ -54,7 +56,7 @@ export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => 
                 {
                     group.members.map(cafe => (
                         <NavViewLink key={cafe.id}
-                                     view={cafe}
+                                     view={viewsById.get(cafe.id)!}
                                      onViewSelected={onViewSelected}/>
                     ))
                 }

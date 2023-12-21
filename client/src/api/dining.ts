@@ -2,7 +2,6 @@ import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem, IViewListResponse }
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
-import { uncategorizedGroupId } from '../constants/groups.ts';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import {
     ICheapItemSearchResult,

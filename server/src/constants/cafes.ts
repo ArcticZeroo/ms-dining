@@ -70,8 +70,8 @@ export const groupList: ICafeGroup[] = [
                 id:   'fh4justpoke',
             },
             {
-                name: 'MiLa',
-                id:   'fh4mila',
+                name:           'MiLa',
+                id:             'fh4mila',
                 firstAvailable: new Date(2024, DateUtil.nativeMonth.January, 2)
             },
             {
@@ -111,9 +111,10 @@ export const groupList: ICafeGroup[] = [
         ]
     },
     {
-        name: 'Restaurants',
-        id: groupIds.restaurants,
-        members: [
+        name:         'Restaurants',
+        id:           groupIds.restaurants,
+        alwaysExpand: true,
+        members:      [
             {
                 name: 'Boardwalk @ The Commons',
                 id:   'boardwalk'
@@ -129,9 +130,10 @@ export const groupList: ICafeGroup[] = [
         ]
     },
     {
-        name:    'Individual Cafés',
-        id:      groupIds.individual,
-        members: [
+        name:         'Individual Cafés',
+        id:           groupIds.individual,
+        alwaysExpand: true,
+        members:      [
             {
                 name:   'Food Hall 6',
                 id:     'foodhall6',
