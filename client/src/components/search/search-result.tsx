@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { CafeView, CafeViewType } from '../../models/cafe.ts';
+import { getCafeName } from '../../util/cafe.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
@@ -79,6 +81,14 @@ const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFut
         },
         [locationDatesByCafeId, allowFutureMenus]
     );
+}
+
+const getViewNameForSearchResult = (view: CafeView) => {
+    if (view.type === CafeViewType.group) {
+        return view.value.name;
+    }
+
+    return getCafeName(view.value, true /*showGroupName*/);
 }
 
 interface ISearchResultField {
@@ -170,7 +180,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                                 location_on
                                             </span>
                                             <span className="value">
-                                                {view.value.name}
+                                                {getViewNameForSearchResult(view)}
                                             </span>
                                         </div>
                                         {

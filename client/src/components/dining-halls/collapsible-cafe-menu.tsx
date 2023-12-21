@@ -1,33 +1,14 @@
-import { ApplicationContext } from '../../context/app.ts';
-import { CafeMenu, ICafe } from '../../models/cafe.ts';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { StationList } from './station/station-list.tsx';
-import { ExpandIcon } from '../icon/expand.tsx';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { CafeMenu, ICafe } from '../../models/cafe.ts';
+import { getCafeName } from '../../util/cafe.ts';
+import { ExpandIcon } from '../icon/expand.tsx';
+import { StationList } from './station/station-list.tsx';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
-    const { viewsById } = useContext(ApplicationContext);
-
-    return useMemo(() => {
-        if (!showGroupName || !cafe.group) {
-            return cafe.name;
-        }
-
-        const groupView = viewsById.get(cafe.group);
-        if (!groupView) {
-            return cafe.name;
-        }
-
-        const groupName = groupView.value.name;
-
-        if (cafe.name === groupName) {
-            return cafe.name;
-        }
-
-        return `${cafe.name} (${groupName})`;
-    }, [cafe, viewsById, showGroupName]);
-}
+    return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
+};
 
 interface ICollapsibleCafeMenuProps {
     cafe: ICafe;
