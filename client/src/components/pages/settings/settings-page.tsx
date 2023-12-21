@@ -1,5 +1,4 @@
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { CustomKeySetting } from './custom-key-setting.tsx';
 import { HighlightTagsSetting } from './highlight-tags-setting.tsx';
@@ -7,8 +6,6 @@ import { HomepageViewsSetting } from './homepage-views-setting.tsx';
 import './settings.css';
 
 export const SettingsPage = () => {
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-
     return (
         <div className="card settings">
             <div className="title">
@@ -55,21 +52,11 @@ export const SettingsPage = () => {
                     </div>
                 </div>
                 <BooleanSettingInput
-                    icon="group"
-                    setting={ApplicationSettings.shouldUseGroups}
-                    name="Group Cafes"
-                    description="When enabled, cafe menus are shown in location-based groups, and the navigation menu is condensed."
+                    icon="tag"
+                    setting={ApplicationSettings.shouldCondenseNumbers}
+                    name="Condense Numbered Cafes"
+                    description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
                 />
-                {
-                    shouldUseGroups && (
-                        <BooleanSettingInput
-                            icon="tag"
-                            setting={ApplicationSettings.shouldCondenseNumbers}
-                            name="Condense Numbered Cafes"
-                            description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
-                        />
-                    )
-                }
                 <HomepageViewsSetting/>
                 <HighlightTagsSetting/>
                 <BooleanSettingInput

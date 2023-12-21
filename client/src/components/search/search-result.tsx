@@ -1,3 +1,4 @@
+import { DateUtil, SearchTypes } from '@msdining/common';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../api/settings.ts';
@@ -8,7 +9,6 @@ import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
-import { DateUtil, SearchTypes } from '@msdining/common';
 import './search.css';
 
 interface IEntityDisplayData {
@@ -108,7 +108,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
@@ -160,7 +159,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                     return false;
                                 }
 
-                                const parentView = getParentView(viewsById, shouldUseGroups, view);
+                                const parentView = getParentView(viewsById, view);
 
                                 return (
                                     <Link to={getViewUrl(parentView)}

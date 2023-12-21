@@ -1,9 +1,8 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
+import { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../context/app.ts';
+import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
+import { sortViews } from '../util/sorting.ts';
 import { isViewVisible } from '../util/view.ts';
-import { useValueNotifier } from './events.ts';
-import { ApplicationSettings } from '../api/settings.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     return useMemo(() => {
@@ -24,7 +23,7 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
 
             for (const cafe of group.members) {
                 if (!group.alwaysExpand) {
-                    cafe.group = group.id;
+                    cafe.group = group;
                 }
 
                 const cafeView = {
@@ -42,22 +41,18 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     }, [groups]);
 };
 
-export const useVisibleViews = () => {
+export const useViewsForNav = () => {
     const { viewsInOrder } = useContext(ApplicationContext);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const [visibleViews, setVisibleViews] = useState<Array<CafeView>>([]);
 
-    useEffect(() => {
-        const newVisibleViews: CafeView[] = [];
+    return useMemo(() => {
+        const visibleViews: CafeView[] = [];
 
         for (const view of viewsInOrder) {
-            if (isViewVisible(shouldUseGroups, view)) {
-                newVisibleViews.push(view);
+            if (isViewVisible(view)) {
+                visibleViews.push(view);
             }
         }
 
-        setVisibleViews(newVisibleViews);
-    }, [viewsInOrder, shouldUseGroups]);
-
-    return visibleViews;
+        return sortViews(visibleViews);
+    }, [viewsInOrder]);
 };

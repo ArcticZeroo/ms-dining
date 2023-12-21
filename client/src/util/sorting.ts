@@ -1,16 +1,21 @@
+import { CafeView } from '../models/cafe.ts';
+
 export const normalizeCafeId = (id: string) => {
     return id
         .toLowerCase()
         .replace(/^cafe/, '');
 };
 
-export const getCafeNumber = (name: string) => {
-    const numberString = name
-        .toLowerCase()
-        .replace(/^caf[eé]/i, '')
-        .replace(/-/g, ' ')
+const CAFE_NUMBER_REGEX = /(?:caf[eé]|food hall|building) (\d+)/i;
 
-    return parseInt(numberString);
+export const getCafeNumber = (name: string) => {
+    const match = name.match(CAFE_NUMBER_REGEX);
+
+    if (match) {
+        return Number(match[1]);
+    }
+
+    return NaN;
 }
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {
@@ -41,3 +46,20 @@ export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: strin
 
     return normalizedA.localeCompare(normalizedB);
 };
+
+const compareViewNames = (a: string, b: string) => {
+    const numberA = getCafeNumber(a);
+    const numberB = getCafeNumber(b);
+
+    if (!Number.isNaN(numberA) && !Number.isNaN(numberB)) {
+        return numberA - numberB;
+    }
+
+    return a.localeCompare(b);
+}
+
+export const sortViews = (views: Iterable<CafeView>) => {
+    return Array
+        .from(views)
+        .sort((a, b) => compareViewNames(a.value.name, b.value.name));
+}

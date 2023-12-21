@@ -1,11 +1,11 @@
-import { CafeTypes } from "@msdining/common";
+import { CafeTypes } from '@msdining/common';
 
 export interface ICafe {
     name: string;
     id: string;
     logoUrl: string;
     number?: number;
-    group?: string;
+    group?: ICafeGroup;
 }
 
 export interface ICafeGroup{

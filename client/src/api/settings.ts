@@ -156,7 +156,6 @@ export class StringSetting extends Setting<string> {
 
 export const ApplicationSettings = {
 	shouldCondenseNumbers: new BooleanSetting('shouldCondenseNumbers', true /*defaultValue*/),
-	shouldUseGroups:       new BooleanSetting('useGroups', true /*defaultValue*/),
 	showImages:            new BooleanSetting('showImages', false /*defaultValue*/),
 	showCalories:          new BooleanSetting('showCalories', true /*defaultValue*/),
 	showDescriptions:      new BooleanSetting('showDescription', true /*defaultValue*/),

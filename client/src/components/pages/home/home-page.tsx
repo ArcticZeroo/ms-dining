@@ -1,19 +1,17 @@
 import { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ApplicationSettings } from '../../../api/settings.ts';
+import { ApplicationContext } from '../../../context/app.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { CafeView } from '../../../models/cafe.ts';
 import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
 
 import './home.css';
-import { ApplicationContext } from '../../../context/app.ts';
-import { isViewVisible } from '../../../util/view.ts';
-import { ApplicationSettings } from '../../../api/settings.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { CafeView } from '../../../models/cafe.ts';
 
 export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
 
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     // Users may have added cafes to their home set which are currently unavailable
     const availableViews = useMemo(() => {
@@ -22,15 +20,12 @@ export const HomePage = () => {
         for (const viewId of homepageViewIds) {
             if (viewsById.has(viewId)) {
                 const view = viewsById.get(viewId)!;
-                if (isViewVisible(shouldUseGroups, view)) {
-                    // Assuming that there can't be any overlap between views
-                    newAvailableViews.push(view);
-                }
+                newAvailableViews.push(view);
             }
         }
 
         return newAvailableViews;
-    }, [viewsById, homepageViewIds, shouldUseGroups]);
+    }, [viewsById, homepageViewIds]);
 
     if (availableViews.length === 0) {
         return (

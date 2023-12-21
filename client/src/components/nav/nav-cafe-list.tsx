@@ -1,82 +1,61 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { NavLink } from 'react-router-dom';
-import { getViewUrl } from '../../util/link.ts';
-import { CafeView } from '../../models/cafe.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
 import { ApplicationSettings } from '../../api/settings.ts';
-import { ApplicationContext } from '../../context/app.ts';
-import { classNames } from '../../util/react.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
+import { useViewsForNav } from '../../hooks/views.ts';
+import { CafeView } from '../../models/cafe.ts';
+import { getViewUrl } from '../../util/link.ts';
 import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
-import { useVisibleViews } from '../../hooks/views.ts';
 
 interface INavViewLinkProps {
-    view: CafeView;
+	view: CafeView;
 
-    onViewSelected(view: CafeView): void;
+	onViewSelected(view: CafeView): void;
 }
 
 const NavViewLink: React.FC<INavViewLinkProps> = ({ view, onViewSelected }) => (
-    <li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`}>
-        <NavLink to={getViewUrl(view)}
-                 onClick={() => onViewSelected(view)}>
-            {view.value.name}
-        </NavLink>
-    </li>
+	<li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`}>
+		<NavLink to={getViewUrl(view)}
+				 onClick={() => onViewSelected(view)}>
+			{view.value.name}
+		</NavLink>
+	</li>
 );
 
 interface INavCafeListProps {
-    onViewSelected(view: CafeView): void;
+	onViewSelected(view: CafeView): void;
 }
 
 export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => {
-    const { groups, viewsById } = useContext(ApplicationContext);
-    const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const visibleViews = useVisibleViews();
+	const views = useViewsForNav();
+	const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
 
-    const viewNumbersById = useMemo(() => {
-        const viewNumbersById = new Map<string, number>();
+	const viewNumbersById = useMemo(() => {
+		const viewNumbersById = new Map<string, number>();
 
-        for (const view of visibleViews) {
-            if (view.value.number != null) {
-                viewNumbersById.set(view.value.id, view.value.number);
-            }
-        }
+		for (const view of views) {
+			if (view.value.number != null) {
+				viewNumbersById.set(view.value.id, view.value.number);
+			}
+		}
 
-        return viewNumbersById;
-    }, [visibleViews]);
+		return viewNumbersById;
+	}, [views]);
 
-    if (!shouldUseGroups) {
-        return groups.map(group => (
-            <ul className={classNames('expandable-nav-list', 'group')} key={group.id}>
-                <li className="view-group-name">
-                    {group.name}
-                </li>
-                {
-                    group.members.map(cafe => (
-                        <NavViewLink key={cafe.id}
-                                     view={viewsById.get(cafe.id)!}
-                                     onViewSelected={onViewSelected}/>
-                    ))
-                }
-            </ul>
-        ));
-    }
-
-    return (
-        <ul className="expandable-nav-list">
-            {
-                shouldCondenseNumbers && <NavNumberedCafeList viewNumbersById={viewNumbersById}/>
-            }
-            {
-                visibleViews?.map?.(view => (
-                    (!shouldCondenseNumbers || view.value.number == null) &&
-                    <NavViewLink key={view.value.id}
-                                 view={view}
-                                 onViewSelected={onViewSelected}/>
-                ))
-            }
-        </ul>
-    );
+	return (
+		<ul className="expandable-nav-list">
+			{
+				shouldCondenseNumbers && <NavNumberedCafeList viewNumbersById={viewNumbersById}/>
+			}
+			{
+				views.map(view => (
+					(!shouldCondenseNumbers || view.value.number == null) &&
+					<NavViewLink key={view.value.id}
+								 view={view}
+								 onViewSelected={onViewSelected}/>
+				))
+			}
+		</ul>
+	);
 };
