@@ -1,3 +1,7 @@
+:root {
+    --table-padding: var(--default-padding);
+}
+
 .stations {
     display: flex;
     flex-wrap: wrap;
@@ -15,6 +19,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    max-width: 100%;
 }
 
 .station .title {
@@ -38,6 +43,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    max-width: 100%;
+    overflow-x: scroll;
 }
 
 .category-name {
@@ -45,7 +52,32 @@
 }
 
 .station table {
-    border-spacing: var(--default-padding);
+    border-spacing: 0 var(--default-padding);
+}
+
+.station table th, .station table td {
+    padding: 0;
+    margin: 0;
+}
+
+.station table th:first-child, .station table td:first-child {
+    padding-top: var(--table-padding);
+    margin-top: var(--table-padding);
+}
+
+.station table th:not(:first-child), .station table td:not(:first-child) {
+    padding: var(--table-padding) 0 0 var(--table-padding);
+    margin: var(--table-padding) 0 0 var(--table-padding);
+}
+
+.station table td:first-child {
+    border-bottom-left-radius: var(--default-padding);
+    border-top-left-radius: var(--default-padding);
+}
+
+.station table td:last-child {
+    border-bottom-right-radius: var(--default-padding);
+    border-top-right-radius: var(--default-padding);
 }
 
 .station table th {
@@ -53,8 +85,14 @@
 }
 
 .menu-item-image {
-    height: 10rem;
     background: #CCC;
+    border-radius: var(--default-padding);
+    max-width: 20rem;
+}
+
+.menu-item-image.fallback {
+    /* same as thumbnails */
+    max-height: 200px;
 }
 
 .collapsible-menu-list {
@@ -137,12 +175,49 @@
     word-wrap: break-word;
 }
 
-@media screen and (max-width: 800px) {
+.menu-item-tags {
+    display: flex;
+    gap: var(--default-padding);
+    align-items: center;
+}
+
+.menu-item-tag {
+    background: #EEE;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+}
+
+.menu-item-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.menu-item-buttons button, .menu-item-buttons a {
+    background: #EEE;
+    color: #212121;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    text-decoration: none;
+}
+
+/* roughly when the table would horizontally overflow just a little -
+ * not enough for the UX to be unusable horizontally, but enough for
+ * scrolling to be broken since stuff is cut off with justify-content: center
+ */
+@media screen and (max-width: 1000px) {
+    :root {
+        --table-padding: 0.5rem;
+    }
+
     .station .menu-body {
         align-items: flex-start;
         justify-content: flex-start;
     }
-
 }
 
 @media screen and (max-width: 500px) {

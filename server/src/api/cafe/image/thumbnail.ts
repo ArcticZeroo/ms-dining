@@ -9,6 +9,7 @@ import { IMenuItem } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 
 const maxThumbnailHeightPx = 200;
+const maxThumbnailWidthPx = 400;
 const loadImageRetries = 2;
 const loadImageRetryDelayMs = 1000;
 
@@ -97,8 +98,8 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
 	const imageData = await loadImageData(menuItem.imageUrl);
 	const image = await Jimp.read(imageData);
 
-	const { height } = image.bitmap;
-	const scale = maxThumbnailHeightPx / height;
+	const { height, width } = image.bitmap;
+	const scale = Math.min(maxThumbnailHeightPx / height, maxThumbnailWidthPx / width);
 
 	image.scale(scale);
 

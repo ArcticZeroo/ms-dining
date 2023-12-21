@@ -31,6 +31,12 @@ export interface ICafeStation {
     logoUrl: string;
     menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IMenuItem>;
+    lastUpdateTime?: Date;
+}
+
+export interface IMenuItemTag {
+    id: string;
+    name: string;
 }
 
 export interface IMenuItem {
@@ -46,4 +52,5 @@ export interface IMenuItem {
     description?: string;
     modifiers: CafeTypes.IMenuItemModifier[];
     lastUpdateTime?: Date;
+    tags: string[];
 }

@@ -1,16 +1,8 @@
-export enum SearchResultEntityType {
-    MenuItem = 'menuItem',
-    Station = 'station',
-}
-
-export enum SearchResultMatchReason {
-    Title = 'title',
-    Description = 'description',
-}
+import { SearchTypes } from '@msdining/common';
 
 export interface ISearchResult {
-    type: SearchResultEntityType;
-    matchReasons: Set<SearchResultMatchReason>;
+    type: SearchTypes.SearchEntityType;
+    matchReasons: Set<SearchTypes.SearchMatchReason>;
     locationDatesByCafeId: Map<string, Set<string>>;
     imageUrl: string;
     name: string;

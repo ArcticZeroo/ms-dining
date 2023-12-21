@@ -16,3 +16,5 @@ export const getThumbnailUrl = (menuItem: IMenuItem): string | undefined => {
 
     return `/static/menu-items/thumbnail/${menuItem.id}.png`;
 }
+
+export const normalizeTagName = (tagName: string) => tagName.toLowerCase().trim();

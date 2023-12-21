@@ -1,6 +1,5 @@
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
 import { logError } from '../../../util/log.js';
-import Semaphore from 'semaphore-async-await';
 import { CafeStorageClient } from '../../storage/cafe.js';
 
 interface ISaveStationParams {
