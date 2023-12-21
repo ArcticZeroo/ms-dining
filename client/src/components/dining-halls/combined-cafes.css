@@ -23,7 +23,7 @@
 }
 
 .station .title {
-    font-size: 1.4em;
+    font-size: var(--section-title-font-size);
     display: flex;
     align-items: center;
     gap: var(--default-padding);
@@ -36,6 +36,7 @@
 .station .title img {
     height: 1.4em;
     margin-right: 0.25rem;
+    transition: height 0.5s ease;
 }
 
 .station .menu-body {
@@ -126,6 +127,7 @@
 
 .collapsible-cafe .cafe-name .logo {
     height: var(--cafe-logo-height);
+    transition: height 0.125s ease;
 }
 
 .collapsible-cafe .cafe-order-link {

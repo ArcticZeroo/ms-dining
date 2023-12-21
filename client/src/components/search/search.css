@@ -5,11 +5,11 @@
 }
 
 .search-page .page-title {
-    font-size: 1.8em;
+    font-size: var(--page-title-font-size);
 }
 
 .search-page .search-result-count {
-    font-size: 1.5em;
+    font-size: var(--page-subtitle-font-size);
     opacity: 0.8;
 }
 
@@ -71,7 +71,7 @@
 }
 
 .search-result-info-header .search-result-name {
-    font-size: 1.2em;
+    font-size: var(--card-title-font-size);
 }
 
 .search-result-chip {
