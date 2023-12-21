@@ -1,31 +1,75 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { DateUtil } from '@msdining/common';
 import React, { useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
+import { ApplicationSettings } from '../../../api/settings.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { CheapItemsSortType, ICheapItemSearchResult } from '../../../models/search.ts';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
 import { SortButton } from './sort-button.tsx';
 
-const hasCalories = (item: ICheapItemSearchResult) => {
-    const isMissingCalories = item.minCalories === 0 && item.maxCalories === 0;
-    return !isMissingCalories;
+const isMissingCalories = (item: ICheapItemSearchResult) => item.minCalories === 0 && item.maxCalories === 0;
+
+const isAnyDateToday = (locationEntriesByCafeId: Map<string, Date[]>) => {
+    const now = new Date();
+
+    for (const dates of locationEntriesByCafeId.values()) {
+        for (const date of dates) {
+            if (DateUtil.isSameDate(now, date)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 const useCheapItems = (sortType: CheapItemsSortType) => {
-    const { stage, value, error } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
+    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const { stage, value: results, error } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
+
+    const filteredResults = useMemo(
+        () => {
+            if (!results) {
+                return [];
+            }
+
+            if (allowFutureMenus && sortType !== CheapItemsSortType.caloriesPerDollarDesc) {
+                return results;
+            }
+
+            const filteredResults: ICheapItemSearchResult[] = [];
+
+            for (const item of results) {
+                if (sortType === CheapItemsSortType.caloriesPerDollarDesc && isMissingCalories(item)) {
+                    continue;
+                }
+
+                if (!allowFutureMenus && !isAnyDateToday(item.locationDatesByCafeId)) {
+                    continue;
+                }
+
+                filteredResults.push(item);
+            }
+
+            return filteredResults;
+        },
+        [results, sortType, allowFutureMenus]
+    );
 
     const sortedResults = useMemo(() => {
-        if (!value) {
+        if (!filteredResults) {
             return [];
         }
 
         switch (sortType) {
             case CheapItemsSortType.priceAsc:
-                return value.sort((a, b) => a.price - b.price);
+                return filteredResults.sort((a, b) => a.price - b.price);
             case CheapItemsSortType.priceDesc:
-                return value.sort((a, b) => b.price - a.price);
+                return filteredResults.sort((a, b) => b.price - a.price);
             case CheapItemsSortType.caloriesPerDollarDesc:
-                return value.filter(hasCalories).sort((a, b) => {
+                return filteredResults.sort((a, b) => {
                     const averageCaloriesA = (a.minCalories + a.maxCalories) / 2;
                     const averageCaloriesB = (b.minCalories + b.maxCalories) / 2;
 
@@ -36,9 +80,9 @@ const useCheapItems = (sortType: CheapItemsSortType) => {
                 });
             case CheapItemsSortType.relevance:
                 // TODO
-                return value;
+                return filteredResults;
         }
-    }, [value, sortType]);
+    }, [filteredResults, sortType]);
 
     return {
         stage,

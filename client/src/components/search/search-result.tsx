@@ -124,6 +124,10 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
     const locationEntriesInOrder = useLocationEntries(locationDatesByCafeId, allowFutureMenus);
 
+    if (locationEntriesInOrder.length === 0) {
+        return null;
+    }
+
     return (
         <div className={classNames('search-result', isVisible && 'visible')}>
             <div className={classNames('search-result-type', entityDisplayData.className)}>
