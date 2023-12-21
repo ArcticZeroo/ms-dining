@@ -1,3 +1,7 @@
+:root {
+    --table-padding: var(--default-padding);
+}
+
 .stations {
     display: flex;
     flex-wrap: wrap;
@@ -15,6 +19,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    max-width: 100%;
 }
 
 .station .title {
@@ -38,6 +43,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    max-width: 100%;
+    overflow-x: scroll;
 }
 
 .category-name {
@@ -49,8 +56,13 @@
 }
 
 .station table th, .station table td {
-    padding: var(--default-padding);
-    margin: var(--default-padding);
+    padding: 0;
+    margin: 0;
+}
+
+.station table th:not(:first-child), .station table td:not(:first-child) {
+    padding: var(--table-padding) 0 0 var(--table-padding);
+    margin: var(--table-padding) 0 0 var(--table-padding);
 }
 
 .station table td:first-child {
@@ -68,9 +80,14 @@
 }
 
 .menu-item-image {
-    height: 10rem;
     background: #CCC;
     border-radius: var(--default-padding);
+    max-width: 20rem;
+}
+
+.menu-item-image.fallback {
+    /* same as thumbnails */
+    max-height: 200px;
 }
 
 .collapsible-menu-list {
@@ -168,6 +185,7 @@
 .menu-item-buttons {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .menu-item-buttons button, .menu-item-buttons a {
@@ -182,12 +200,19 @@
     text-decoration: none;
 }
 
-@media screen and (max-width: 800px) {
+/* roughly when the table would horizontally overflow just a little -
+ * not enough for the UX to be unusable horizontally, but enough for
+ * scrolling to be broken since stuff is cut off with justify-content: center
+ */
+@media screen and (max-width: 1000px) {
+    :root {
+        --table-padding: 0.5rem;
+    }
+
     .station .menu-body {
         align-items: flex-start;
         justify-content: flex-start;
     }
-
 }
 
 @media screen and (max-width: 500px) {
