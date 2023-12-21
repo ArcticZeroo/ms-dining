@@ -212,24 +212,28 @@
  */
 @media screen and (max-width: 1000px) {
     :root {
-        --table-padding: 0;
+        --table-padding: 0.5rem;
     }
 
     .station .menu-body {
         align-items: flex-start;
         justify-content: flex-start;
     }
-
-    .station .menu-body * {
-        margin: auto;
-    }
 }
 
 @media screen and (max-width: 500px) {
+    :root {
+        --table-padding: 0;
+    }
+
     .station .menu-body table tbody, .station .menu-body table tr {
         display: flex;
         flex-direction: column;
         gap: var(--default-padding);
+        box-sizing: border-box;
+    }
+
+    .station * {
         box-sizing: border-box;
     }
 
