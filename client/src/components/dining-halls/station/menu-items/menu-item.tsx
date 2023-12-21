@@ -24,7 +24,7 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
 		parts.push(menuItem.maxCalories);
 	}
 
-	return `${parts.join('-')} Calories`;
+	return `${parts.join(' - ')} Calories`;
 };
 
 const menuItemModalSymbol = Symbol('menuItem');

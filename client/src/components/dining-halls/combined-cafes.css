@@ -212,12 +212,16 @@
  */
 @media screen and (max-width: 1000px) {
     :root {
-        --table-padding: 0.5rem;
+        --table-padding: 0;
     }
 
     .station .menu-body {
         align-items: flex-start;
         justify-content: flex-start;
+    }
+
+    .station .menu-body * {
+        margin: auto;
     }
 }
 
@@ -225,10 +229,19 @@
     .station .menu-body table tbody, .station .menu-body table tr {
         display: flex;
         flex-direction: column;
+        gap: var(--default-padding);
+        box-sizing: border-box;
     }
 
-    .station .menu-body table tbody {
-        gap: 1rem;
+    .station table th, .station table td {
+        margin: 0;
+        padding: var(--default-padding);
+    }
+
+    .station .menu-body table tr {
+        border-radius: 1rem;
+        padding: var(--default-padding);
+        width: 100%;
     }
 
     .collapsible-cafe .cafe-name .logo {
