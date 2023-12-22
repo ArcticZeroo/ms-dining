@@ -5,10 +5,11 @@ export interface ICafe {
     id: string;
     logoUrl: string;
     number?: number;
+    url?: string;
     group?: ICafeGroup;
 }
 
-export interface ICafeGroup{
+export interface ICafeGroup {
     id: string;
     name: string;
     number?: number;

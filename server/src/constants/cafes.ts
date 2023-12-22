@@ -127,6 +127,7 @@ export const groupList: ICafeGroup[] = [
                 {
                     name: 'in.gredients @ Building 34',
                     id:   'in-gredients',
+                    url: 'https://dining.azurewebsites.net/ingredients/'
                 },
             ]
         },
@@ -153,16 +154,12 @@ export const groupList: ICafeGroup[] = [
                     id:   'dote-rts'
                 },
                 {
-                    name: 'Building 3 Espresso',
+                    name: 'Building 3 Espresso ☕',
                     id:   'b3espresso'
                 },
                 {
-                    name: 'Building 7 Espresso',
+                    name: 'Building 7 Espresso ☕',
                     id:   'b7espresso'
-                },
-                {
-                    name: 'Dote (Redmond Transit Station) ☕',
-                    id:   'dote-rts'
                 },
                 /*{
                     friendlyName: "Studio B Espresso ☕",

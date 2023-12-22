@@ -58,6 +58,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
                     name:    cafe.name,
                     id:      cafe.id,
                     number:  cafe.number,
+                    url:     cafe.url,
                     logoUrl: getLogoUrl(cafe, cafeData),
                 });
             }

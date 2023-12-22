@@ -5,6 +5,7 @@ export interface ICafe {
     id: string;
     number?: number;
     firstAvailable?: Date;
+    url?: string;
 }
 
 export interface ICafeGroup {

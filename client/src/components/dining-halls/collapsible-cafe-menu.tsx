@@ -52,7 +52,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
         <div className="collapsible-cafe" key={cafe.id}>
             <div className="cafe-header">
                 <a className="cafe-order-link"
-                   href={`https://${cafe.id}.buy-ondemand.com`}
+                   href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
                    target="_blank">
                     <span className="material-symbols-outlined">
                             open_in_new

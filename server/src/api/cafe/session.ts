@@ -12,7 +12,7 @@ import {
 import { normalizeTagName } from '../../util/cafe.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
 import { logDebug, logError } from '../../util/log.js';
-import { makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
+import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
 import { CafeStorageClient } from '../storage/cafe.js';
 import Semaphore from 'semaphore-async-await';
 
@@ -66,11 +66,17 @@ export class CafeDiscoverySession {
 			const url = this._getUrl(path);
 
 			const response = await makeRequestWithRetries(
-				(retry) => {
-					logDebug(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
-					return fetch(url, optionsWithToken);
-				},
-				requestRetryCount
+				{
+					makeRequest: (retry) => {
+						logDebug(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
+						return fetch(url, optionsWithToken);
+					},
+					retryCount: requestRetryCount,
+					shouldRetry: (response) => {
+						const isImmediateFailure = isResponseServerError(response) || response.status === 410;
+						return !isImmediateFailure;
+					}
+				}
 			);
 
 			validateSuccessResponse(response);

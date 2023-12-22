@@ -11,18 +11,24 @@ export const tryGetResponseText = async (response: Response) => {
 	try {
 		return await response.text();
 	} catch (err) {
-		return '';
+		return '(response text unavailable)';
 	}
 };
 
-export const makeRequestWithRetries = async (makeRequest: (retry: number) => Promise<Response>, retryCount: number = 3): Promise<Response> => {
+interface IMakeRequestOptions {
+	makeRequest: (retry: number) => Promise<Response>;
+	retryCount?: number;
+	shouldRetry?: (response: Response) => boolean;
+}
+
+export const isResponseServerError = (response: Response) => response.status.toString().startsWith('5');
+
+export const makeRequestWithRetries = async ({ makeRequest, retryCount = 3, shouldRetry }: IMakeRequestOptions): Promise<Response> => {
 	return runPromiseWithRetries(
 		async (i) => {
 			const response = await makeRequest(i);
 
-			// We only want to retry 5xx errors, anything else could be a client error
-			if (response.status.toString().startsWith('5')) {
-				// noinspection ExceptionCaughtLocallyJS
+			if (shouldRetry != null && !shouldRetry(response)) {
 				throw new Error(`Response failed: ${response.status} ${await tryGetResponseText(response)}`);
 			}
 
