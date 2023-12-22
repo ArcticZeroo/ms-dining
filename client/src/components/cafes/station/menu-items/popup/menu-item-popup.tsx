@@ -7,10 +7,10 @@ import { IMenuItem } from '../../../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 import { navigateToSearch } from '../../../../../util/search.ts';
 import { Modal } from '../../../../popup/modal.tsx';
+import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
+import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
-import './menu-item-order-popup.css';
-import { OrderPopupBody } from './order-popup-body.tsx';
-import { OrderPopupFooter } from './order-popup-footer.tsx';
+import './menu-item-popup.css';
 
 interface IMenuItemPopupProps {
 	menuItem: IMenuItem;
@@ -150,7 +150,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 				</>
 			}
 			body={(
-				<OrderPopupBody
+				<MenuItemPopupBody
 					menuItem={menuItem}
 					notes={notes}
 					getSelectedChoiceIdsForModifier={getSelectedChoiceIdsForModifier}
@@ -159,7 +159,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 				/>
 			)}
 			footer={(
-				<OrderPopupFooter
+				<MenuItemPopupFooter
 					isUpdate={isUpdate}
 					totalPrice={totalPrice}
 					quantity={quantity}

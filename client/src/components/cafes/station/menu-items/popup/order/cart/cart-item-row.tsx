@@ -1,6 +1,6 @@
-import { ICartItemWithMetadata } from '../../../../../../models/cart';
-import { getPriceDisplay } from '../../../../../../util/cart.ts';
 import React from 'react';
+import { ICartItemWithMetadata } from '../../../../../../../models/cart.ts';
+import { getPriceDisplay } from '../../../../../../../util/cart.ts';
 
 interface ICartItemProps {
     item: ICartItemWithMetadata;

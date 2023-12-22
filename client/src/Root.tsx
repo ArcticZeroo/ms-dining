@@ -1,16 +1,16 @@
-import { PopupContainer } from './components/popup/popup-container.tsx';
-import { Nav } from './components/nav/nav.tsx';
-import { classNames } from './util/react.ts';
-import { Outlet } from 'react-router-dom';
-import { CartPopup } from './components/cafes/station/menu-items/popup/cart/cart-popup.tsx';
-import { DeviceType, useDeviceType } from './hooks/media-query.ts';
-import { NavExpansionContext } from './context/nav.ts';
-import { useValueNotifier, useValueNotifierContext } from './hooks/events.ts';
-import { ValueNotifier } from './util/events.ts';
-import { CafeView } from './models/cafe.ts';
 import { useContext, useEffect, useRef } from 'react';
-import { SelectedViewContext } from './context/view.ts';
+import { Outlet } from 'react-router-dom';
+import { CartPopup } from './components/cafes/station/menu-items/popup/order/cart/cart-popup.tsx';
+import { Nav } from './components/nav/nav.tsx';
+import { PopupContainer } from './components/popup/popup-container.tsx';
 import { PopupContext } from './context/modal.ts';
+import { NavExpansionContext } from './context/nav.ts';
+import { SelectedViewContext } from './context/view.ts';
+import { useValueNotifier, useValueNotifierContext } from './hooks/events.ts';
+import { DeviceType, useDeviceType } from './hooks/media-query.ts';
+import { CafeView } from './models/cafe.ts';
+import { ValueNotifier } from './util/events.ts';
+import { classNames } from './util/react.ts';
 
 const useMenuScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | undefined>) => {
     const selectedView = useValueNotifier(selectedViewNotifier);

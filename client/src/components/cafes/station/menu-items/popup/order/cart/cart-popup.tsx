@@ -1,14 +1,14 @@
-import { useValueNotifierAsState } from '../../../../../../hooks/events.ts';
-import { CartContext } from '../../../../../../context/cart.ts';
-
-import { classNames } from '../../../../../../util/react.ts';
-import { CartItemRow } from './cart-item-row.tsx';
 import { useContext } from 'react';
-import { ICartItemWithMetadata } from '../../../../../../models/cart.ts';
-import { PopupContext } from '../../../../../../context/modal.ts';
+import { CartContext } from '../../../../../../../context/cart.ts';
+import { PopupContext } from '../../../../../../../context/modal.ts';
+import { useValueNotifierAsState } from '../../../../../../../hooks/events.ts';
+import { ICartItemWithMetadata } from '../../../../../../../models/cart.ts';
+
+import { classNames } from '../../../../../../../util/react.ts';
+import { MenuItemPopup } from '../../menu-item-popup.tsx';
+import { CartItemRow } from './cart-item-row.tsx';
 
 import './cart-popup.css';
-import { MenuItemPopup } from '../menu-item-popup.tsx';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 

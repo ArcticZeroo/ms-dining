@@ -1,8 +1,8 @@
 import { CafeTypes } from '@msdining/common';
 import React, { useMemo } from 'react';
+import { getMinMaxDisplay } from '../../../../../../util/cart.ts';
+import { classNames } from '../../../../../../util/react.ts';
 import { ModifierChoices } from './choices/modifier-choices.tsx';
-import { getMinMaxDisplay } from '../../../../../util/cart.ts';
-import { classNames } from '../../../../../util/react.ts';
 
 interface IMenuItemModifierPickerProps {
     modifier: CafeTypes.IMenuItemModifier;

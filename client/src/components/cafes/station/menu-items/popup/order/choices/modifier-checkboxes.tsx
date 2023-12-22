@@ -1,7 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../util/cart.ts';
-import { classNames } from '../../../../../../util/react.ts';
+import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../../util/cart.ts';
+import { classNames } from '../../../../../../../util/react.ts';
 
 interface IModifierCheckboxesProps {
     modifier: CafeTypes.IMenuItemModifier;
