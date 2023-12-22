@@ -12,7 +12,7 @@ import './menu-item-order-popup.css';
 import { OrderPopupBody } from './order-popup-body.tsx';
 import { OrderPopupFooter } from './order-popup-footer.tsx';
 
-interface IMenuItemOrderPopupProps {
+interface IMenuItemPopupProps {
 	menuItem: IMenuItem;
 	modalSymbol: symbol;
 	fromCartItem?: ICartItemWithMetadata;
@@ -55,7 +55,7 @@ const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (
 	);
 };
 
-export const MenuItemOrderPopup: React.FC<IMenuItemOrderPopupProps> = ({ menuItem, modalSymbol, fromCartItem }) => {
+export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, fromCartItem }) => {
 	const isUpdate = fromCartItem != null;
 
 	const navigate = useNavigate();

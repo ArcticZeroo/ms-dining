@@ -8,7 +8,7 @@ import { ICartItemWithMetadata } from '../../../../../../models/cart.ts';
 import { PopupContext } from '../../../../../../context/modal.ts';
 
 import './cart-popup.css';
-import { MenuItemOrderPopup } from '../menu-item-order-popup.tsx';
+import { MenuItemPopup } from '../menu-item-popup.tsx';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
@@ -29,7 +29,7 @@ export const CartPopup = () => {
 
         modalNotifier.value = {
             id:   editCartItemSymbol,
-            body: <MenuItemOrderPopup
+            body: <MenuItemPopup
                       menuItem={item.associatedItem}
                       modalSymbol={editCartItemSymbol}
                       fromCartItem={item}

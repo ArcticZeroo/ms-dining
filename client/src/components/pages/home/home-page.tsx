@@ -3,10 +3,11 @@ import { ApplicationSettings } from '../../../api/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView } from '../../../models/cafe.ts';
-import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
+import { CombinedCafeMenuList } from '../../cafes/combined-cafe-menu-list.tsx';
 import { HomepageViewsSetting } from '../settings/homepage-views-setting.tsx';
 
 import './home.css';
+import { isViewVisible } from '../../../util/view.ts';
 
 export const HomePage = () => {
     const { viewsById } = useContext(ApplicationContext);
@@ -20,7 +21,11 @@ export const HomePage = () => {
         for (const viewId of homepageViewIds) {
             if (viewsById.has(viewId)) {
                 const view = viewsById.get(viewId)!;
-                newAvailableViews.push(view);
+
+                // If the user selected a single view that should be a group, don't show it
+                if (isViewVisible(view)) {
+                    newAvailableViews.push(view);
+                }
             }
         }
 

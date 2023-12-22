@@ -2,7 +2,7 @@ import { PopupContainer } from './components/popup/popup-container.tsx';
 import { Nav } from './components/nav/nav.tsx';
 import { classNames } from './util/react.ts';
 import { Outlet } from 'react-router-dom';
-import { CartPopup } from './components/dining-halls/station/menu-items/order/cart/cart-popup.tsx';
+import { CartPopup } from './components/cafes/station/menu-items/popup/cart/cart-popup.tsx';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { useValueNotifier, useValueNotifierContext } from './hooks/events.ts';

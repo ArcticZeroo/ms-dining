@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { CafeView } from '../../../models/cafe.ts';
-import { CombinedCafeMenuList } from '../../dining-halls/combined-cafe-menu-list.tsx';
+import { CombinedCafeMenuList } from '../../cafes/combined-cafe-menu-list.tsx';
 
 interface ICafePageWithViewProps {
     view: CafeView;

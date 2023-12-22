@@ -9,7 +9,7 @@ import { getPriceDisplay } from '../../../../util/cart.ts';
 import { navigateToSearch } from '../../../../util/search.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
-import { MenuItemOrderPopup } from './order/menu-item-order-popup.tsx';
+import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 
 export interface IMenuItemProps {
 	menuItem: IMenuItem;
@@ -56,7 +56,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
 		modalNotifier.value = {
 			id:   menuItemModalSymbol,
-			body: <MenuItemOrderPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
+			body: <MenuItemPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
 		};
 	};
 
