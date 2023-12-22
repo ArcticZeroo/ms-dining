@@ -1,12 +1,10 @@
 import React, { useContext, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { PopupContext } from '../../../../context/modal.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
-import { navigateToSearch } from '../../../../util/search.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
@@ -38,17 +36,12 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 	const showTags = useValueNotifier(ApplicationSettings.showTags);
 	const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
 	const caloriesDisplay = getCaloriesDisplay(menuItem);
-	const navigate = useNavigate();
 
 	const modalNotifier = useContext(PopupContext);
 
 	const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
 	const onOpenModalClick = () => {
-		if (!allowOnlineOrdering) {
-			return;
-		}
-
 		// There's already a modal active.
 		if (modalNotifier.value != null) {
 			return;
@@ -59,14 +52,6 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 			body: <MenuItemPopup menuItem={menuItem} modalSymbol={menuItemModalSymbol}/>,
 		};
 	};
-
-	const onClick = () => {
-		if (allowOnlineOrdering) {
-			onOpenModalClick();
-		} else {
-			navigateToSearch(navigate, menuItem.name);
-		}
-	}
 
 	const currentHighlightTag = useMemo(() => {
 		for (const tagName of menuItem.tags) {
@@ -79,7 +64,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 	const title = allowOnlineOrdering ? 'Click to open online ordering popup' : undefined;
 
 	return (
-		<tr className="pointer" onClick={onClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
+		<tr className="pointer" onClick={onOpenModalClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
 			<td colSpan={!canShowImage ? 2 : 1}>
 				<div className="menu-item-head">
 					<span className="menu-item-name">{menuItem.name}</span>

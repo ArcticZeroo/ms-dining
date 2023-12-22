@@ -70,6 +70,12 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 	const cartItemsNotifier = useContext(CartContext);
 	const modalNotifier = useContext(PopupContext);
 
+	const closeModal = () => {
+		if (modalNotifier.value?.id === modalSymbol) {
+			modalNotifier.value = null;
+		}
+	}
+
 	const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
 		return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
 	}, [selectedChoiceIdsByModifierId]);
@@ -116,9 +122,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 			];
 		}
 
-		if (modalNotifier.value?.id === modalSymbol) {
-			modalNotifier.value = null;
-		}
+		closeModal();
 	};
 
 	const onAddQuantityClicked = () => {
@@ -135,6 +139,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 
 	const onSearchClicked = () => {
 		navigateToSearch(navigate, menuItem.name);
+		closeModal();
 	};
 
 	return (
