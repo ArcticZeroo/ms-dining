@@ -1,7 +1,10 @@
+import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
-import { isDateBefore } from '@msdining/common/dist/util/date-util.js';
+import { SearchTypes } from '@msdining/common';
+import Koa from 'koa';
 import * as diningConfig from '../../constants/cafes.js';
-import { attachRouter } from '../../util/koa.js';
+import { ISearchResult } from '../../models/search.js';
+import { attachRouter, getTrimmedQueryParam } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
@@ -16,198 +19,232 @@ const DEFAULT_MAX_PRICE = 9.99;
 const DEFAULT_MIN_PRICE = 3;
 
 export const registerDiningHallRoutes = (parent: Router) => {
-    const router = new Router({
-        prefix: '/dining'
-    });
+	const router = new Router({
+		prefix: '/dining'
+	});
 
-    router.get('/', async ctx => {
-        const visitorId = ctx.get(VISITOR_ID_HEADER);
-        if (ApplicationContext.hasCreatedTrackingApplication && visitorId) {
-            // Fire and forget, don't block the rest of the request
-            sendVisitAsync(visitorId)
-                .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
-        }
+	router.get('/', async ctx => {
+		const visitorId = ctx.get(VISITOR_ID_HEADER);
+		if (ApplicationContext.hasCreatedTrackingApplication && visitorId) {
+			// Fire and forget, don't block the rest of the request
+			sendVisitAsync(visitorId)
+				.catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
+		}
 
-        const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
+		const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
-        const responseGroups = [];
-        for (const group of diningConfig.groupList) {
-            const responseGroup = {
-                name:         group.name,
-                id:           group.id,
-                number:       group.number,
-                alwaysExpand: group.alwaysExpand ?? false,
-                members:      []
-            };
+		const responseGroups = [];
+		for (const group of diningConfig.groupList) {
+			const responseGroup = {
+				name:         group.name,
+				id:           group.id,
+				number:       group.number,
+				alwaysExpand: group.alwaysExpand ?? false,
+				members:      []
+			};
 
-            for (const cafe of group.members) {
-                // Allows us to add cafes before they've officially opened, without polluting the menu list.
-                // For instance, when Food Hall 4 was added, the online ordering menu became available more than
-                // a week early.
-                if (!isCafeAvailable(cafe)) {
-                    continue;
-                }
+			for (const cafe of group.members) {
+				// Allows us to add cafes before they've officially opened, without polluting the menu list.
+				// For instance, when Food Hall 4 was added, the online ordering menu became available more than
+				// a week early.
+				if (!isCafeAvailable(cafe)) {
+					continue;
+				}
 
-                const cafeData = cafeDataById.get(cafe.id);
-                if (!cafeData) {
-                    // Expected in case we have a cafe in config which isn't available online for some reason
-                    continue;
-                }
+				const cafeData = cafeDataById.get(cafe.id);
+				if (!cafeData) {
+					// Expected in case we have a cafe in config which isn't available online for some reason
+					continue;
+				}
 
-                responseGroup.members.push({
-                    name:    cafe.name,
-                    id:      cafe.id,
-                    number:  cafe.number,
-                    url:     cafe.url,
-                    logoUrl: getLogoUrl(cafe, cafeData),
-                });
-            }
+				responseGroup.members.push({
+					name:    cafe.name,
+					id:      cafe.id,
+					number:  cafe.number,
+					url:     cafe.url,
+					logoUrl: getLogoUrl(cafe, cafeData),
+				});
+			}
 
-            responseGroups.push(responseGroup);
-        }
+			responseGroups.push(responseGroup);
+		}
 
-        ctx.body = jsonStringifyWithoutNull({
-            groups: responseGroups
-        });
-    });
+		ctx.body = jsonStringifyWithoutNull({
+			groups: responseGroups
+		});
+	});
 
-    const convertMenuToSerializable = (menuStations: ICafeStation[]) => {
-        const menusByStation = [];
-        for (const station of menuStations) {
-            const itemsByCategory = {};
+	const convertMenuToSerializable = (menuStations: ICafeStation[]) => {
+		const menusByStation = [];
+		for (const station of menuStations) {
+			const itemsByCategory = {};
 
-            for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
-                const itemsForCategory = [];
+			for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
+				const itemsForCategory = [];
 
-                for (const itemId of categoryItemIds) {
-                    // Expected; Some items are 86-ed
-                    if (!station.menuItemsById.has(itemId)) {
-                        continue;
-                    }
+				for (const itemId of categoryItemIds) {
+					// Expected; Some items are 86-ed
+					if (!station.menuItemsById.has(itemId)) {
+						continue;
+					}
 
-                    itemsForCategory.push(station.menuItemsById.get(itemId));
-                }
+					itemsForCategory.push(station.menuItemsById.get(itemId));
+				}
 
-                if (itemsForCategory.length === 0) {
-                    continue;
-                }
+				if (itemsForCategory.length === 0) {
+					continue;
+				}
 
-                itemsByCategory[categoryName] = itemsForCategory;
-            }
+				itemsByCategory[categoryName] = itemsForCategory;
+			}
 
-            if (Object.keys(itemsByCategory).length === 0) {
-                continue;
-            }
+			if (Object.keys(itemsByCategory).length === 0) {
+				continue;
+			}
 
-            menusByStation.push({
-                name:    station.name,
-                logoUrl: station.logoUrl,
-                menu:    itemsByCategory
-            });
-        }
-        return menusByStation;
-    }
+			menusByStation.push({
+				name:    station.name,
+				logoUrl: station.logoUrl,
+				menu:    itemsByCategory
+			});
+		}
+		return menusByStation;
+	};
 
-    router.get('/menu/:id', async ctx => {
-        const id = ctx.params.id?.toLowerCase();
-        if (!id) {
-            ctx.throw(400, 'Missing cafe id');
-            return;
-        }
+	router.get('/menu/:id', async ctx => {
+		const id = ctx.params.id?.toLowerCase();
+		if (!id) {
+			ctx.throw(400, 'Missing cafe id');
+			return;
+		}
 
-        const dateString = getDateStringForMenuRequest(ctx);
-        if (dateString == null) {
-            ctx.body = JSON.stringify([]);
-            return;
-        }
+		const dateString = getDateStringForMenuRequest(ctx);
+		if (dateString == null) {
+			ctx.body = JSON.stringify([]);
+			return;
+		}
 
-        if (id === 'all') {
-            const cafes = await CafeStorageClient.retrieveCafesAsync();
-            const menusByCafeId = {};
-            for (const cafeId of cafes.keys()) {
-                const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(cafeId, dateString);
-                menusByCafeId[cafeId] = convertMenuToSerializable(menuStations);
-            }
-            ctx.body = jsonStringifyWithoutNull(menusByCafeId);
-            return;
-        }
+		if (id === 'all') {
+			const cafes = await CafeStorageClient.retrieveCafesAsync();
+			const menusByCafeId = {};
+			for (const cafeId of cafes.keys()) {
+				const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(cafeId, dateString);
+				menusByCafeId[cafeId] = convertMenuToSerializable(menuStations);
+			}
+			ctx.body = jsonStringifyWithoutNull(menusByCafeId);
+			return;
+		}
 
-        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-        if (!cafe) {
-            ctx.throw(404, 'Cafe not found or data is missing');
-            return;
-        }
+		const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+		if (!cafe) {
+			ctx.throw(404, 'Cafe not found or data is missing');
+			return;
+		}
 
-        const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
-        ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations));
-    });
+		const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
+		ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations));
+	});
 
-    const serializeLocationDatesByCafeId = (locationDatesByCafeId: Map<string, Set<string>>) => {
-        const serialized = {};
-        for (const [cafeId, dates] of locationDatesByCafeId.entries()) {
-            serialized[cafeId] = Array.from(dates);
-        }
-        return serialized;
-    }
+	const serializeLocationDatesByCafeId = (locationDatesByCafeId: Map<string, Set<string>>) => {
+		const serialized = {};
+		for (const [cafeId, dates] of locationDatesByCafeId.entries()) {
+			serialized[cafeId] = Array.from(dates);
+		}
+		return serialized;
+	};
 
-    router.get('/search', async ctx => {
-        const searchQuery = ctx.query.q;
 
-        if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
-            ctx.body = [];
-            return;
-        }
+	const serializeSearchResult = (searchResult: ISearchResult) => ({
+		type:         searchResult.type,
+		name:         searchResult.name,
+		description:  searchResult.description,
+		imageUrl:     searchResult.imageUrl,
+		locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+		matchReasons: Array.from(searchResult.matchReasons),
+	});
 
-        const searchResultsByIdPerEntityType = await CafeStorageClient.search(searchQuery);
-        const searchResults = [];
-        for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
-            for (const searchResult of searchResultsById.values()) {
-                searchResults.push({
-                    type:         searchResult.type,
-                    name:         searchResult.name,
-                    description:  searchResult.description,
-                    imageUrl:     searchResult.imageUrl,
-                    locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
-                    matchReasons: Array.from(searchResult.matchReasons),
-                });
-            }
-        }
+	const getSearchType = (ctx: Koa.Context) => {
+		const searchTypeRaw = getTrimmedQueryParam(ctx, 't');
 
-        ctx.body = jsonStringifyWithoutNull(searchResults);
-    });
+		if (!searchTypeRaw) {
+			return null;
+		}
 
-    router.get('/search/cheap', async ctx => {
-        const maxPriceRaw = ctx.query.max;
-        const minPriceRaw = ctx.query.min;
+		switch (searchTypeRaw.toLowerCase()) {
+			case 'item':
+				return SearchTypes.SearchEntityType.menuItem;
+			case 'station':
+				return SearchTypes.SearchEntityType.station;
+			default:
+				return null;
+		}
+	};
 
-        const maxPrice = typeof maxPriceRaw === 'string'
-            ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
-            : DEFAULT_MAX_PRICE;
+	const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchTypes.SearchEntityType, Map<string, ISearchResult>>) => {
+		const searchResults = [];
+		for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
+			for (const searchResult of searchResultsById.values()) {
+				searchResults.push(serializeSearchResult(searchResult));
+			}
+		}
+		return jsonStringifyWithoutNull(searchResults);
+	}
 
-        const minPrice = typeof minPriceRaw === 'string'
-            ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
-            : DEFAULT_MIN_PRICE;
+	router.post('/search/favorites', async ctx => {
+		const queries = ctx.request.body;
+		if (!isDuckTypeArray<SearchTypes.ISearchQuery>(queries, { text: 'string', type: 'string' })) {
+			ctx.throw(400, 'Invalid request body');
+			return;
+		}
 
-        const cheapItems = await CafeStorageClient.searchForCheapItems(
-            minPrice,
-            maxPrice
-        );
+		const searchResultsByIdPerEntityType = await CafeStorageClient.searchFavorites(queries);
+		ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+	});
 
-        const searchResults = [];
-        for (const searchResult of cheapItems) {
-            searchResults.push({
-                name:        searchResult.name,
-                description: searchResult.description,
-                imageUrl:    searchResult.imageUrl,
-                locations:   serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
-                price:       searchResult.price,
-                minCalories: searchResult.minCalories,
-                maxCalories: searchResult.maxCalories,
-            });
-        }
+	router.get('/search', async ctx => {
+		const searchQuery = getTrimmedQueryParam(ctx, 'q');
 
-        ctx.body = jsonStringifyWithoutNull(searchResults);
-    });
+		if (!searchQuery) {
+			ctx.body = [];
+			return;
+		}
 
-    attachRouter(parent, router);
+		const searchResultsByIdPerEntityType = await CafeStorageClient.search(searchQuery);
+		ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+	});
+
+	router.get('/search/cheap', async ctx => {
+		const maxPriceRaw = ctx.query.max;
+		const minPriceRaw = ctx.query.min;
+
+		const maxPrice = typeof maxPriceRaw === 'string'
+						 ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
+						 : DEFAULT_MAX_PRICE;
+
+		const minPrice = typeof minPriceRaw === 'string'
+						 ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
+						 : DEFAULT_MIN_PRICE;
+
+		const cheapItems = await CafeStorageClient.searchForCheapItems(
+			minPrice,
+			maxPrice
+		);
+
+		const searchResults = [];
+		for (const searchResult of cheapItems) {
+			searchResults.push({
+				name:        searchResult.name,
+				description: searchResult.description,
+				imageUrl:    searchResult.imageUrl,
+				locations:   serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+				price:       searchResult.price,
+				minCalories: searchResult.minCalories,
+				maxCalories: searchResult.maxCalories,
+			});
+		}
+
+		ctx.body = jsonStringifyWithoutNull(searchResults);
+	});
+
+	attachRouter(parent, router);
 };

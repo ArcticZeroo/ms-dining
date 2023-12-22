@@ -27,3 +27,8 @@ export interface ISearchResult {
     locationDatesByCafeId: Map<string, Array<Date>>;
     matchReasons: Set<SearchMatchReason>;
 }
+
+export interface ISearchQuery {
+    text: string;
+    type?: SearchEntityType;
+}

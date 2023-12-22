@@ -13,3 +13,5 @@ export const getCafeName = (cafe: ICafe, showGroupName: boolean) => {
 
 	return `${cafe.name} (${groupName})`;
 }
+
+export const normalizeItemNameForFavorites = (name: string) => name.trim().toLowerCase().replace(/\W/g, '');

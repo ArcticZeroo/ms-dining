@@ -4,6 +4,7 @@ import { registerRoutes } from './routes/register.js';
 import serve from 'koa-static';
 import { clientFolderDistPath, clientIndexHtmlPath, serverStaticPath } from './constants/config.js';
 import mount from 'koa-mount';
+import bodyParser from 'koa-bodyparser';
 import * as fs from 'fs';
 import * as fsPromises from 'fs/promises';
 import { createStaticRoutingApp } from './routes/static.js';
@@ -11,6 +12,7 @@ import { createStaticRoutingApp } from './routes/static.js';
 const app = new Koa();
 
 app.use(json());
+app.use(bodyParser());
 
 registerRoutes(app);
 
