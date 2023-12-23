@@ -157,6 +157,14 @@ html, body, #root, .App {
     transform: rotate(180deg);
 }
 
+.pointer {
+    cursor: pointer;
+}
+
+.default-padding {
+    padding: var(--default-padding);
+}
+
 @media screen and (min-width: 801px) {
     :root {
         --default-padding: 1rem;
@@ -221,11 +229,7 @@ html, body, #root, .App {
     }
 }
 
-.pointer {
-    cursor: pointer;
-}
-
-@keyframes fadeIn {
+@keyframes fade-in {
     0% {
         opacity: 0;
     }
@@ -235,7 +239,7 @@ html, body, #root, .App {
     }
 }
 
-@keyframes fadeOutLeaveTree {
+@keyframes fade-out-leave-tree {
     0% {
         opacity: 100%;
     }

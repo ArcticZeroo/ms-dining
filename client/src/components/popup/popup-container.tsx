@@ -3,10 +3,13 @@ import { PopupContext } from '../../context/modal.ts';
 import React, { useContext, useEffect } from 'react';
 
 import './popup.css';
+import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
+import { classNames } from '../../util/react.ts';
 
 export const PopupContainer = () => {
     const popupNotifier = useContext(PopupContext);
     const popup = useValueNotifier(popupNotifier);
+    const deviceType = useDeviceType();
 
     useEffect(() => {
         if (popup == null) {
@@ -37,11 +40,24 @@ export const PopupContainer = () => {
     };
 
     return (
-        <div id="top-overlay" onClick={onOverlayClicked}>
-            {/* Avoids the popup being vertically stretched in the flexbox*/}
-            <div id="popup-wrapper" onClick={onOverlayClicked}>
-                {popup.body}
-            </div>
+        <div id="top-overlay"
+            // On mobile things jump around when the popup is shown, so we don't fade it in
+             className={classNames(deviceType === DeviceType.Desktop && 'fade-in')}
+             onClick={onOverlayClicked}
+        >
+            {
+                deviceType === DeviceType.Mobile && (
+                    popup.body
+                )
+            }
+            {
+                deviceType === DeviceType.Desktop && (
+                    // Avoids the popup being vertically stretched in the flexbox*
+                    <div id="popup-wrapper" onClick={onOverlayClicked}>
+                        {popup.body}
+                    </div>
+                )
+            }
         </div>
     );
 };

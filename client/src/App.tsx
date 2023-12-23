@@ -10,7 +10,7 @@ import { CafeView, ICafe, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
 import { ValueNotifier } from './util/events.ts';
 import { StaticContextProviders } from './components/context/static-context-providers.tsx';
-import { Root } from './Root.tsx';
+import { Root } from './root.tsx';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);

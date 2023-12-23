@@ -68,6 +68,10 @@
     align-items: center;
 }
 
+.menu-item-order-footer .controls button {
+    padding: 0.5rem;
+}
+
 .menu-item-order-footer .add-to-cart {
     background: #2196F3;
     color: white;
