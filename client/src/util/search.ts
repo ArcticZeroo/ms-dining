@@ -33,5 +33,5 @@ export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<S
 }
 
 export const navigateToSearch = (navigate: NavigateFunction, searchText: string) => {
-    navigate(`/search?query=${encodeURIComponent(searchText)}`);
+    navigate(`/search?q=${encodeURIComponent(searchText)}`);
 }

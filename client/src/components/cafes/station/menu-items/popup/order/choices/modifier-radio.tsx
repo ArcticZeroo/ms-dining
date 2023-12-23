@@ -1,6 +1,6 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../util/cart.ts';
+import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../../util/cart.ts';
 
 interface IModifierRadioProps {
     modifier: CafeTypes.IMenuItemModifier;

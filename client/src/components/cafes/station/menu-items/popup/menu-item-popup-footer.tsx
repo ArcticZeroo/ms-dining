@@ -1,7 +1,9 @@
 import React from 'react';
+import { ApplicationSettings } from '../../../../../api/settings.ts';
+import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { getPriceDisplay } from '../../../../../util/cart.ts';
 
-interface IOrderPopupFooterProps {
+interface IMenuItemPopupFooterProps {
     isUpdate: boolean;
     totalPrice: number;
     quantity: number;
@@ -11,7 +13,7 @@ interface IOrderPopupFooterProps {
     onRemoveQuantityClicked: () => void;
 }
 
-export const OrderPopupFooter: React.FC<IOrderPopupFooterProps> = ({
+export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
                                                                        isUpdate,
                                                                        totalPrice,
                                                                        quantity,
@@ -20,6 +22,12 @@ export const OrderPopupFooter: React.FC<IOrderPopupFooterProps> = ({
                                                                        onAddQuantityClicked,
                                                                        onRemoveQuantityClicked
                                                                    }) => {
+    const isOnlineOrderingAllowed = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
+
+    if (!isOnlineOrderingAllowed) {
+        return null;
+    }
+
     const canDecreaseQuantity = quantity > 1;
 
     return (
