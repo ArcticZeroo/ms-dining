@@ -2,7 +2,6 @@ import { PopupContainer } from './components/popup/popup-container.tsx';
 import { Nav } from './components/nav/nav.tsx';
 import { classNames } from './util/react.ts';
 import { Outlet } from 'react-router-dom';
-import { CartPopup } from './components/cafes/station/menu-items/popup/cart/cart-popup.tsx';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { useValueNotifier, useValueNotifierContext } from './hooks/events.ts';
@@ -11,6 +10,7 @@ import { CafeView } from './models/cafe.ts';
 import React, { useContext, useEffect, useRef } from 'react';
 import { SelectedViewContext } from './context/view.ts';
 import { PopupContext } from './context/modal.ts';
+import { CartPopup } from './components/cafes/station/menu-items/popup/order/cart/cart-popup.tsx';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
