@@ -160,6 +160,7 @@ export const ApplicationSettings = {
     showCalories:          new BooleanSetting('showCalories', true /*defaultValue*/),
     showDescriptions:      new BooleanSetting('showDescription', true /*defaultValue*/),
     showTags:              new BooleanSetting('showTags', true /*defaultValue*/),
+    showFavoritesOnHome:   new BooleanSetting('showFavoritesOnHome', true /*defaultValue*/),
     rememberCollapseState: new BooleanSetting('rememberCollapseState', false /*defaultValue*/),
     allowFutureMenus:      new BooleanSetting('allowFutureMenus', false /*defaultValue*/),
     allowOnlineOrdering:   new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),

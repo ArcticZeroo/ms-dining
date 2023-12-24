@@ -86,7 +86,7 @@ export const HomepageViewsSetting: React.FC<IHomepageViewsSettingProps> = ({ req
 			{
 				requireButtonToCommit && (
 										  <button onClick={onCommit} id="homepage-views-commit-button">
-											  Save Changes
+											  Save Homepage Views
 										  </button>
 									  )
 			}
