@@ -16,8 +16,6 @@ export const fuzzySearch = (source: string, search: string) => {
 	return true;
 };
 
-export const normalizeNameForSearch = (name: string) => name.toLowerCase().trim().replaceAll(/\s+/g, '');
-
 interface ISubstringScoreParams {
 	matchingText: string;
 	queryText: string;
@@ -245,3 +243,6 @@ export const sortSearchResults = ({
 
 	return searchResults;
 };
+
+// e.g. Chipotle Chicken + Bacon Sub should also match "Chipotle Chicken Bacon Sub" or "Chipotle Chicken and Bacon Sub"
+export const normalizeNameForSearch = (name: string) => name.toLowerCase().trim().replaceAll(/(\W|\s|\s+\s|\sand\s)/ig, '');

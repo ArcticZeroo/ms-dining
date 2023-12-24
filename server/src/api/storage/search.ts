@@ -1,9 +1,9 @@
 import { ICheapItemSearchResult, ISearchResult } from '../../models/search.js';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
-import { fuzzySearch, normalizeNameForSearch } from '../../util/search.js';
+import { ISearchQuery, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
+import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 const CHEAP_ITEM_IGNORE_TERMS = [
     'side',
@@ -31,7 +31,7 @@ const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`${CHEAP_ITEM_IGNORE_STRING}`, 'i'
 // This is not a storage client because it orchestrates multiple storage clients together,
 // which otherwise should not be interacting (to avoid circular dependencies).
 export abstract class SearchManager {
-    public static async search(query: string): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+    private static async _performMultiQuerySearch(queries: Array<ISearchQuery>, shouldUseExactMatch: boolean): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
         const dailyStations = await DailyMenuStorageClient.getAllMenusForWeek();
 
         const searchResultsByNameByEntityType = new Map<SearchEntityType, Map<string, ISearchResult>>();
@@ -89,11 +89,40 @@ export abstract class SearchManager {
             searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
         };
 
+        const normalizedQueries: Array<ISearchQuery> = queries.map(({ text, type }) => {
+            return {
+                text: normalizeNameForSearch(text),
+                type
+            } as const;
+        });
+
+        const isMatch = (text: string | undefined, entityType: SearchEntityType) => {
+            if (!text) {
+                return false;
+            }
+
+            const normalizedText = normalizeNameForSearch(text);
+            if (normalizedText.length === 0) {
+                return false;
+            }
+
+            return normalizedQueries.some(query => {
+                if (query.type != null && query.type !== entityType) {
+                    return false;
+                }
+
+                if (shouldUseExactMatch) {
+                    return normalizedText === query.text;
+                } else {
+                    return fuzzySearch(normalizedText, query.text);
+                }
+            });
+        };
 
         for (const dailyStation of dailyStations) {
             const stationData = dailyStation.station;
 
-            if (stationData.name.trim() && fuzzySearch(stationData.name, query)) {
+            if (isMatch(stationData.name, SearchEntityType.station)) {
                 addResult({
                     type:         SearchEntityType.station,
                     matchReasons: [SearchMatchReason.title],
@@ -114,11 +143,11 @@ export abstract class SearchManager {
 
                     const matchReasons: SearchMatchReason[] = [];
 
-                    if (fuzzySearch(menuItem.name, query)) {
+                    if (isMatch(menuItem.name, SearchEntityType.menuItem)) {
                         matchReasons.push(SearchMatchReason.title);
                     }
 
-                    if (menuItem.description && fuzzySearch(menuItem.description, query)) {
+                    if (isMatch(menuItem.description, SearchEntityType.menuItem)) {
                         matchReasons.push(SearchMatchReason.description);
                     }
 
@@ -138,6 +167,14 @@ export abstract class SearchManager {
         }
 
         return searchResultsByNameByEntityType;
+    }
+
+    public static async search(query: string): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+        return SearchManager._performMultiQuerySearch([{ text: query }], false /*shouldUseExactMatch*/);
+    }
+
+    public static async searchFavorites(queries: Array<ISearchQuery>): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+        return SearchManager._performMultiQuerySearch(queries, true /*shouldUseExactMatch*/);
     }
 
     public static async searchForCheapItems(minPrice: number, maxPrice: number): Promise<ICheapItemSearchResult[]> {

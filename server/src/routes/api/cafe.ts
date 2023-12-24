@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import * as diningConfig from '../../constants/cafes.js';
-import { attachRouter } from '../../util/koa.js';
+import { attachRouter, getTrimmedQueryParam } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
@@ -11,10 +11,14 @@ import { jsonStringifyWithoutNull } from '../../util/serde.js';
 import { CafeStorageClient } from '../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
 import { SearchManager } from '../../api/storage/search.js';
+import { ISearchResult } from '../../models/search.js';
+import Koa from 'koa';
+import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
+import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
-const DEFAULT_MAX_PRICE = 9.99;
-const DEFAULT_MIN_PRICE = 3;
+const DEFAULT_MAX_PRICE = 15;
+const DEFAULT_MIN_PRICE = 1;
 
 export const registerDiningHallRoutes = (parent: Router) => {
     const router = new Router({
@@ -151,30 +155,47 @@ export const registerDiningHallRoutes = (parent: Router) => {
         return serialized;
     }
 
-    router.get('/search', async ctx => {
-        const searchQuery = ctx.query.q;
+    const serializeSearchResult = (searchResult: ISearchResult) => ({
+        type:         searchResult.type,
+        name:         searchResult.name,
+        description:  searchResult.description,
+        imageUrl:     searchResult.imageUrl,
+        locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+        matchReasons: Array.from(searchResult.matchReasons),
+    });
 
-        if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
+    const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, ISearchResult>>) => {
+        const searchResults = [];
+        for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
+            for (const searchResult of searchResultsById.values()) {
+                searchResults.push(serializeSearchResult(searchResult));
+            }
+        }
+        return jsonStringifyWithoutNull(searchResults);
+    }
+
+    router.post('/search/favorites', async ctx => {
+        const queries = ctx.request.body;
+
+        if (!isDuckTypeArray<ISearchQuery>(queries, { text: 'string', type: 'string' })) {
+            ctx.throw(400, 'Invalid request body');
+            return;
+        }
+
+        const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries);
+        ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+    });
+
+    router.get('/search', async ctx => {
+        const searchQuery = getTrimmedQueryParam(ctx, 'q');
+
+        if (!searchQuery) {
             ctx.body = [];
             return;
         }
 
         const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery);
-        const searchResults = [];
-        for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
-            for (const searchResult of searchResultsById.values()) {
-                searchResults.push({
-                    type:         searchResult.type,
-                    name:         searchResult.name,
-                    description:  searchResult.description,
-                    imageUrl:     searchResult.imageUrl,
-                    locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
-                    matchReasons: Array.from(searchResult.matchReasons),
-                });
-            }
-        }
-
-        ctx.body = jsonStringifyWithoutNull(searchResults);
+        ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
     });
 
     router.get('/search/cheap', async ctx => {
