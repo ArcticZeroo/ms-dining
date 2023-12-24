@@ -13,6 +13,7 @@ import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts
 import { getParentView } from '../../util/view';
 import './search.css';
 import { SelectedDateContext } from '../../context/time.ts';
+import { isSameDate } from '@msdining/common/dist/date-util';
 
 interface IEntityDisplayData {
     className: string;
@@ -126,6 +127,12 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
+    const shouldShowLocationDates = onlyShowLocationsOnDate != null
+        ? !isSameDate(selectedDate, onlyShowLocationsOnDate)
+        : allowFutureMenus;
+
+    console.log(onlyShowLocationsOnDate, selectedDate, shouldShowLocationDates);
+
     if (onlyShowLocationsOnDate == null && !allowFutureMenus) {
         onlyShowLocationsOnDate = selectedDate;
     }
@@ -196,7 +203,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                             </span>
                                         </div>
                                         {
-                                            allowFutureMenus && (
+                                            shouldShowLocationDates && (
                                                 <div className="chip-data">
 													<span className="material-symbols-outlined icon">
 														timer

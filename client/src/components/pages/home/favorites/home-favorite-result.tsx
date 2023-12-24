@@ -5,9 +5,10 @@ import { SearchEntityType } from '@msdining/common/dist/models/search';
 
 interface IHomeFavoriteResultProps {
     result: IQuerySearchResult;
+    date: Date;
 }
 
-export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result }) => {
+export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result, date }) => {
     return (
         <SearchResult
             isVisible={true}
@@ -15,6 +16,7 @@ export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result 
             locationDatesByCafeId={result.locationDatesByCafeId}
             imageUrl={result.imageUrl}
             entityType={SearchEntityType.menuItem}
+            onlyShowLocationsOnDate={date}
         />
     );
 };
