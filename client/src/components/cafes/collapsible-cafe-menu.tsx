@@ -49,7 +49,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
     };
 
     return (
-        <div className="collapsible-cafe" key={cafe.id}>
+        <div className="collapsible-content collapsible-cafe flex-col" key={cafe.id}>
             <div className="cafe-header">
                 <a className="cafe-order-link"
                    href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
@@ -58,7 +58,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = ({
                             open_in_new
                     </span>
                 </a>
-                <button className="cafe-name" onClick={toggleIsExpanded}>
+                <button className="collapse-toggle cafe-name" onClick={toggleIsExpanded}>
                     {
                         showCafeLogo && (
                             <img src={cafe.logoUrl}

@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ValueNotifier } from '../../util/events.ts';
 import { DiningClient } from '../../api/dining.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { CartContext } from '../../context/cart.ts';
 import { ICartItemWithMetadata } from '../../models/cart.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
+import { ApplicationSettings } from '../../api/settings.ts';
 
 interface IStaticContextProvidersProps {
     children: React.ReactNode;
@@ -19,6 +21,14 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
 
     const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
     const cartItemNotifier = useMemo(() => new ValueNotifier<Array<ICartItemWithMetadata>>([]), []);
+
+    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+
+    useEffect(() => {
+        if (!allowFutureMenus) {
+            selectedDateNotifier.value = DiningClient.getTodayDateForMenu();
+        }
+    }, [selectedDateNotifier, allowFutureMenus]);
 
     return (
         <SelectedDateContext.Provider value={selectedDateNotifier}>

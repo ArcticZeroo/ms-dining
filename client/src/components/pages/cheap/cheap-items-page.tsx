@@ -1,5 +1,4 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DateUtil } from '@msdining/common';
 import React, { useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
@@ -8,22 +7,9 @@ import { CheapItemsSortType, ICheapItemSearchResult } from '../../../models/sear
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
 import { SortButton } from './sort-button.tsx';
+import { isSearchResultVisible } from '../../../util/search.ts';
 
 const isMissingCalories = (item: ICheapItemSearchResult) => item.minCalories === 0 && item.maxCalories === 0;
-
-const isAnyDateToday = (locationEntriesByCafeId: Map<string, Date[]>) => {
-    const now = new Date();
-
-    for (const dates of locationEntriesByCafeId.values()) {
-        for (const date of dates) {
-            if (DateUtil.isSameDate(now, date)) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
 
 const useCheapItems = (sortType: CheapItemsSortType) => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -46,7 +32,7 @@ const useCheapItems = (sortType: CheapItemsSortType) => {
                     continue;
                 }
 
-                if (!allowFutureMenus && !isAnyDateToday(item.locationDatesByCafeId)) {
+                if (!isSearchResultVisible(item.locationDatesByCafeId, allowFutureMenus)) {
                     continue;
                 }
 

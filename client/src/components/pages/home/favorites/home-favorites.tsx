@@ -1,11 +1,16 @@
-import { useValueNotifier } from '../../../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../../api/settings.ts';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { isAnyDateToday } from '../../../../util/search.ts';
+import { HomeFavoriteResultList } from './home-favorite-result-list.tsx';
+import { SelectedDateContext } from '../../../../context/time.ts';
 
 const useFavoriteSearchResults = (favoriteItemNames: Set<string>) => {
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
+
     const retrieveFavoriteSearchResults = useCallback(async () => {
         if (favoriteItemNames.size === 0) {
             return [];
@@ -21,7 +26,15 @@ const useFavoriteSearchResults = (favoriteItemNames: Set<string>) => {
 
     const { stage, value } = useImmediatePromiseState(retrieveFavoriteSearchResults);
 
-    return { stage, results: value ?? [] } as const;
+    const filteredResults = useMemo(
+        () => {
+            const results = value ?? [];
+            return results.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate));
+        },
+        [value, selectedDate]
+    );
+
+    return { stage, results: filteredResults } as const;
 }
 
 export const HomeFavorites = () => {
@@ -35,7 +48,7 @@ export const HomeFavorites = () => {
 
     if (stage === PromiseStage.running) {
         return (
-            <div>
+            <div className="card">
                 <span className="loading-spinner"/>
                 Loading favorites...
             </div>
@@ -50,12 +63,11 @@ export const HomeFavorites = () => {
         );
     }
 
+    if (results.length === 0) {
+        return;
+    }
+
     return (
-        <div>
-            Results:
-            {
-                results.map(result => result.name)
-            }
-        </div>
+        <HomeFavoriteResultList results={results}/>
     );
 };

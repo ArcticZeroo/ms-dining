@@ -3,7 +3,7 @@ import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
@@ -12,6 +12,7 @@ import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
+import { SelectedDateContext } from '../../context/time.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -29,28 +30,28 @@ const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDispl
     }
 };
 
-const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean): Array<[string, Array<Date>]> => {
+const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
     const locationEntries = Array.from(locationDatesByCafeId.entries());
 
-    if (allowFutureMenus) {
+    if (!onlyShowLocationsOnDate) {
         return locationEntries;
     }
 
-    const now = new Date();
     const resultEntries: Array<[string, Array<Date>]> = [];
     for (const [cafeId, dates] of locationEntries) {
-        const filteredDates = dates.filter(date => DateUtil.isSameDate(date, now));
+        const filteredDates = dates.filter(date => DateUtil.isSameDate(date, onlyShowLocationsOnDate));
         if (filteredDates.length > 0) {
             resultEntries.push([cafeId, filteredDates]);
         }
     }
+
     return resultEntries;
 };
 
-const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean) => {
+const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined) => {
     return useMemo(
         () => {
-            const locationEntries = getLocationEntries(locationDatesByCafeId, allowFutureMenus);
+            const locationEntries = getLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
 
             return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
                 const firstDateA = datesA[0];
@@ -79,7 +80,7 @@ const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, allowFut
                 return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
             });
         },
-        [locationDatesByCafeId, allowFutureMenus]
+        [locationDatesByCafeId, onlyShowLocationsOnDate]
     );
 }
 
@@ -105,6 +106,7 @@ interface ISearchResultProps {
     imageUrl?: string;
     entityType: SearchTypes.SearchEntityType;
     extraFields?: ISearchResultField[];
+    onlyShowLocationsOnDate?: Date;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -114,15 +116,21 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                                                locationDatesByCafeId,
                                                                imageUrl,
                                                                entityType,
-                                                               extraFields
+                                                               extraFields,
+                                                               onlyShowLocationsOnDate
                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
-    const locationEntriesInOrder = useLocationEntries(locationDatesByCafeId, allowFutureMenus);
+    if (onlyShowLocationsOnDate == null && !allowFutureMenus) {
+        onlyShowLocationsOnDate = selectedDate;
+    }
+
+    const locationEntriesInOrder = useLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
 
     if (locationEntriesInOrder.length === 0) {
         return null;

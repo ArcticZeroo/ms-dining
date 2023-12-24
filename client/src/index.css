@@ -165,6 +165,33 @@ html, body, #root, .App {
     padding: var(--default-padding);
 }
 
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+}
+
+.collapsible-content .collapse-toggle {
+    font-size: 1.4em;
+    text-align: center;
+    padding: var(--default-padding);
+    background: #00796B;
+    color: white;
+    border-radius: var(--default-padding);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    flex-grow: 1;
+}
+
+.collapsible-content .collapse-body.collapsed {
+    display: none;
+}
+
 @media screen and (min-width: 801px) {
     :root {
         --default-padding: 1rem;

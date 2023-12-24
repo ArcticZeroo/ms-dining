@@ -1,4 +1,4 @@
-import { SearchTypes } from '@msdining/common';
+import { DateUtil, SearchTypes } from '@msdining/common';
 import { NavigateFunction } from 'react-router-dom';
 import { SearchEntityFilterType } from '../models/search.ts';
 
@@ -34,4 +34,20 @@ export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<S
 
 export const navigateToSearch = (navigate: NavigateFunction, searchText: string) => {
     navigate(`/search?q=${encodeURIComponent(searchText)}`);
+}
+
+export const isAnyDateToday = (locationEntriesByCafeId: Map<string, Date[]>, today: Date = new Date()) => {
+    for (const dates of locationEntriesByCafeId.values()) {
+        for (const date of dates) {
+            if (DateUtil.isSameDate(today, date)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+export const isSearchResultVisible = (locationEntriesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean) => {
+    return allowFutureMenus || isAnyDateToday(locationEntriesByCafeId);
 }

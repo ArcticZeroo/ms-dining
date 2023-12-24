@@ -104,24 +104,6 @@
 .collapsible-cafe .cafe-header {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: var(--default-padding);
-}
-
-.collapsible-cafe .cafe-name {
-    font-size: 1.4em;
-    text-align: center;
-    padding: var(--default-padding);
-    background: #00796B;
-    color: white;
-    border-radius: var(--default-padding);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    border: none;
-    text-decoration: none;
-    width: 100%;
-    cursor: pointer;
 }
 
 .collapsible-cafe .cafe-name .logo {
