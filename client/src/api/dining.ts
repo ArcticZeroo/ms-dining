@@ -11,7 +11,11 @@ import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
-const firstWeeklyMenusTime = DateUtil.fromDateString('2023-10-31').getTime();
+const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();
+
+const JSON_HEADERS = {
+    'Content-Type': 'application/json'
+};
 
 interface IRetrieveCafeMenuParams {
     id: string;
@@ -91,7 +95,7 @@ export abstract class DiningClient {
         now.setDate(now.getDate() - daysSinceMonday);
 
         // Clone to avoid problems with modifying it down the line
-        const firstWeeklyMenusDate = new Date(firstWeeklyMenusTime);
+        const firstWeeklyMenusDate = new Date(FIRST_WEEKLY_MENUS_TIME);
         if (DateUtil.isDateBefore(now, firstWeeklyMenusDate)) {
             return firstWeeklyMenusDate;
         }
@@ -283,10 +287,13 @@ export abstract class DiningClient {
     }
 
     public static async retrieveFavoriteSearchResults(queries: Array<SearchTypes.ISearchQuery>): Promise<Array<IQuerySearchResult>> {
+        console.log(queries, JSON.stringify(queries));
+
         const response = await DiningClient._makeRequest({
             path: `/api/dining/search/favorites`,
             options: {
                 method: 'POST',
+                headers: JSON_HEADERS,
                 body: JSON.stringify(queries)
             }
         });
