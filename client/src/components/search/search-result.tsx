@@ -9,11 +9,12 @@ import { getCafeName } from '../../util/cafe.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
 import { getViewUrl } from '../../util/link.ts';
 import { classNames } from '../../util/react';
-import { compareNormalizedCafeIds, normalizeCafeId } from '../../util/sorting.ts';
+import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
 import { SelectedDateContext } from '../../context/time.ts';
 import { isSameDate } from '@msdining/common/dist/date-util';
+import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 
 interface IEntityDisplayData {
     className: string;
@@ -49,10 +50,24 @@ const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShow
     return resultEntries;
 };
 
-const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined) => {
+const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined) => {
     return useMemo(
         () => {
             const locationEntries = getLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
+
+            if (onlyShowLocationsOnDate != null) {
+                return locationEntries.sort(([cafeA], [cafeB]) => {
+                    const viewA = viewsById.get(cafeA);
+                    const viewB = viewsById.get(cafeB);
+
+                    if (!viewA || !viewB) {
+                        console.error('Cannot sort views due to missing entry in map');
+                        return 0;
+                    }
+
+                    return compareViewNames(viewA.value.name, viewB.value.name);
+                });
+            }
 
             return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
                 const firstDateA = datesA[0];
@@ -78,10 +93,17 @@ const useLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShow
                     return 1;
                 }
 
-                return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
+                const viewA = viewsById.get(cafeA);
+                const viewB = viewsById.get(cafeB);
+
+                if (!viewA || !viewB) {
+                    return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
+                } else {
+                    return compareViewNames(viewA.value.name, viewB.value.name);
+                }
             });
         },
-        [locationDatesByCafeId, onlyShowLocationsOnDate]
+        [viewsById, locationDatesByCafeId, onlyShowLocationsOnDate]
     );
 }
 
@@ -108,6 +130,8 @@ interface ISearchResultProps {
     entityType: SearchTypes.SearchEntityType;
     extraFields?: ISearchResultField[];
     onlyShowLocationsOnDate?: Date;
+    isCompact?: boolean;
+    showFavoriteButton?: boolean;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -118,7 +142,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                                                imageUrl,
                                                                entityType,
                                                                extraFields,
-                                                               onlyShowLocationsOnDate
+                                                               onlyShowLocationsOnDate,
+                                                               isCompact = false,
+                                                               showFavoriteButton = !isCompact
                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -131,20 +157,22 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
         ? !isSameDate(selectedDate, onlyShowLocationsOnDate)
         : allowFutureMenus;
 
-    console.log(onlyShowLocationsOnDate, selectedDate, shouldShowLocationDates);
-
     if (onlyShowLocationsOnDate == null && !allowFutureMenus) {
         onlyShowLocationsOnDate = selectedDate;
     }
 
-    const locationEntriesInOrder = useLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
+    const locationEntriesInOrder = useLocationEntries(viewsById, locationDatesByCafeId, onlyShowLocationsOnDate);
 
     if (locationEntriesInOrder.length === 0) {
         return null;
     }
 
+    const imageElement = (imageUrl && showImages) && (
+        <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
+    );
+
     return (
-        <div className={classNames('search-result', isVisible && 'visible')}>
+        <div className={classNames('search-result', isVisible && 'visible', isCompact && 'compact')}>
             <div className={classNames('search-result-type', entityDisplayData.className)}>
                         <span className="material-symbols-outlined">
                             {entityDisplayData.iconName}
@@ -152,33 +180,43 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
             </div>
             <div className="search-result-info">
                 <div className="search-result-info-header">
-                    <div className="search-result-name">
-                        {name}
+                    <div className="flex">
                         {
-                            description && <div className="search-result-description">{description}</div>
-                        }
-                        {
-                            extraFields && (
-                                <div className="search-result-fields">
-                                    {
-                                        extraFields.map(({ iconName, value, key }) => (
-                                            value &&
-                                            <div className="search-result-field" key={key}>
-                                                <span className="material-symbols-outlined icon">
-                                                    {iconName}
-                                                </span>
-                                                <span className="value">
-                                                    {value}
-                                                </span>
-                                            </div>
-                                        ))
-                                    }
+                            showFavoriteButton && (
+                                <div>
+                                    <FavoriteItemButton name={name}/>
                                 </div>
                             )
                         }
-                        <div className="search-result-fields">
+                        <div className="search-result-name">
+                            {name}
+                            {
+                                description && <div className="search-result-description">{description}</div>
+                            }
                         </div>
                     </div>
+                    {
+                        extraFields && (
+                            <div className="search-result-fields">
+                                {
+                                    extraFields.map(({ iconName, value, key }) => (
+                                        value &&
+                                        <div className="search-result-field" key={key}>
+                                            <span className="material-symbols-outlined icon">
+                                                {iconName}
+                                            </span>
+                                            <span className="value">
+                                                {value}
+                                            </span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        )
+                    }
+                    {
+                        isCompact && imageElement
+                    }
                     <div className="search-result-hits">
                         {
                             locationEntriesInOrder.map(([cafeId, locationDates]) => {
@@ -195,9 +233,13 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                           className="search-result-chip"
                                           key={view.value.id}>
                                         <div className="chip-data">
-                                            <span className="material-symbols-outlined icon">
-                                                location_on
-                                            </span>
+                                            {
+                                                !isCompact && (
+                                                    <span className="material-symbols-outlined icon">
+                                                        location_on
+                                                    </span>
+                                                )
+                                            }
                                             <span className="value">
                                                 {getViewNameForSearchResult(view)}
                                             </span>
@@ -221,9 +263,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     </div>
                 </div>
                 {
-                    (imageUrl && showImages) && (
-                        <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
-                    )
+                    !isCompact && imageElement
                 }
             </div>
         </div>

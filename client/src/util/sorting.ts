@@ -47,7 +47,7 @@ export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: strin
     return normalizedA.localeCompare(normalizedB);
 };
 
-const compareViewNames = (a: string, b: string) => {
+export const compareViewNames = (a: string, b: string) => {
     const numberA = getCafeNumber(a);
     const numberB = getCafeNumber(b);
 

@@ -1,0 +1,10 @@
+.favorite-item-button {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background: #EDEDED;
+    transition: background-color 0.25s ease;
+}
+
+.favorite-item-button.is-favorite {
+    background: #ffe7ab;
+}

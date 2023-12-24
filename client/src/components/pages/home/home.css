@@ -1,3 +1,9 @@
-#home-favorites {
+#home-favorites #home-favorites-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+    justify-content: center;
+}
 
+#home-favorites #home-favorites-results .search-result {
 }

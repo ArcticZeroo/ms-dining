@@ -31,12 +31,15 @@ export const HomeFavoriteResultList: React.FC<IHomeFavoriteResultListProps> = ({
     return (
         <div className="collapsible-content flex-col" id="home-favorites">
             <div className="collapse-toggle" onClick={onToggleExpansion}>
-                <div className="flex-col">
+                <div className="flex-row">
                     Favorites Across Campus on {selectedDate.toLocaleDateString()}
                 </div>
                 <ExpandIcon isExpanded={!isCollapsed}/>
             </div>
-            <div className={classNames('flex-col collapse-body', isCollapsed && 'collapsed')}>
+            <div
+                className={classNames('collapse-body', isCollapsed && 'collapsed')}
+                id="home-favorites-results"
+            >
                 {resultsView}
             </div>
         </div>

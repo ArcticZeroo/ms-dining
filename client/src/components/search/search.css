@@ -63,6 +63,11 @@
     gap: var(--default-padding);
 }
 
+.search-result.compact .search-result-hits {
+    max-width: 25rem;
+    justify-content: center;
+}
+
 .search-result-info-header {
     display: flex;
     flex-direction: column;

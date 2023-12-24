@@ -17,6 +17,8 @@ export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result,
             imageUrl={result.imageUrl}
             entityType={SearchEntityType.menuItem}
             onlyShowLocationsOnDate={date}
+            isCompact={true}
+            showFavoriteButton={true}
         />
     );
 };

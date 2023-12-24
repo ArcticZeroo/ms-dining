@@ -171,6 +171,12 @@ html, body, #root, .App {
     gap: var(--default-padding);
 }
 
+.flex {
+    display: flex;
+    align-items: center;
+    gap: var(--default-padding);
+}
+
 .collapsible-content .collapse-toggle {
     font-size: 1.4em;
     text-align: center;

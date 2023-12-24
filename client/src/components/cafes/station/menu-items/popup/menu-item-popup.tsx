@@ -10,13 +10,8 @@ import { Modal } from '../../../../popup/modal.tsx';
 import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
-import { useValueNotifier } from '../../../../../hooks/events.ts';
-import { ApplicationSettings } from '../../../../../api/settings.ts';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-
-import filledStarIcon from '../../../../../assets/star-filled.svg';
-
 import './menu-item-popup.css';
+import { FavoriteItemButton } from '../../../../button/favorite-item-button.tsx';
 
 interface IMenuItemPopupProps {
     menuItem: IMenuItem;
@@ -75,18 +70,6 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 
     const cartItemsNotifier = useContext(CartContext);
     const modalNotifier = useContext(PopupContext);
-
-    const favoriteItemNames = useValueNotifier(ApplicationSettings.favoriteItemNames);
-    
-    const normalizedItemName = useMemo(
-        () => normalizeNameForSearch(menuItem.name),
-        [menuItem.name]
-    );
-
-    const isItemFavorite = useMemo(
-        () => favoriteItemNames.has(normalizedItemName),
-        [favoriteItemNames, normalizedItemName]
-    );
 
     const closeModal = () => {
         if (modalNotifier.value?.id === modalSymbol) {
@@ -160,33 +143,12 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
         closeModal();
     };
 
-    const onFavoriteClicked = () => {
-        if (isItemFavorite) {
-            ApplicationSettings.favoriteItemNames.delete(normalizedItemName);
-        } else {
-            ApplicationSettings.favoriteItemNames.add(normalizedItemName);
-        }
-    };
-
     return (
         <Modal
             title={`${isUpdate ? 'Edit ' : ''}${menuItem.name}`}
             buttons={
                 <>
-                    <button title={isItemFavorite ? 'Click to remove from favorites' : 'Favorite this item'} onClick={onFavoriteClicked}>
-                        {
-                            isItemFavorite && (
-                                <img src={filledStarIcon} alt="favorite"/>
-                            )
-                        }
-                        {
-                            !isItemFavorite && (
-                                <span className="material-symbols-outlined">
-                                    star
-                                </span>
-                            )
-                        }
-                    </button>
+                    <FavoriteItemButton name={menuItem.name}/>
                     <button title="Search for this item across campus" onClick={onSearchClicked}>
 						<span className="material-symbols-outlined">
 							search
