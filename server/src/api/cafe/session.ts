@@ -7,14 +7,18 @@ import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../../models/cafe.j
 import {
     ICafeConfigResponse,
     ICafeMenuItemDetailsResponse,
-    ICafeMenuItemListResponseItem, ICafeStationDetailsResponseItem, ICafeStationListItem
+    ICafeMenuItemListResponseItem,
+    ICafeStationDetailsResponseItem,
+    ICafeStationListItem
 } from '../../models/responses.js';
 import { normalizeTagName } from '../../util/cafe.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
-import { logDebug, logError, logInfo } from '../../util/log.js';
+import { logDebug, logError } from '../../util/log.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../util/request.js';
-import { CafeStorageClient } from '../storage/cafe.js';
 import Semaphore from 'semaphore-async-await';
+import { CafeStorageClient } from '../storage/clients/cafe.js';
+import { TagStorageClient } from '../storage/clients/tags.js';
+import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
 
 type IMenuItemModifier = CafeTypes.IMenuItemModifier;
 type ModifierChoiceType = CafeTypes.ModifierChoiceType;
@@ -341,7 +345,7 @@ export class CafeDiscoverySession {
             // This might be a bottleneck, but we don't want to drop tags
             await tagLock.acquire();
 
-            const localTags = await CafeStorageClient.retrieveTagsAsync();
+            const localTags = await TagStorageClient.retrieveTagsAsync();
 
             if (localTags.has(tagId)) {
                 return localTags.get(tagId);
@@ -356,7 +360,7 @@ export class CafeDiscoverySession {
 
             const externalTags = await this._requestTagDefinitionsAsync(station.id, station.menuId);
 
-            await CafeStorageClient.createTags(
+            await TagStorageClient.createTags(
                 Array.from(externalTags.entries())
                     .map(([tagId, tagName]) => ({
                         id:   tagId,
@@ -453,7 +457,7 @@ export class CafeDiscoverySession {
         const localItemsById = new Map<string, IMenuItem>();
 
         const retrieveMenuItemDetailsLocallyAsync = async (itemId: string) => {
-            const existingItem = await CafeStorageClient.retrieveMenuItemLocallyAsync(itemId);
+            const existingItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(itemId);
             if (existingItem == null) {
                 return;
             }
@@ -476,7 +480,7 @@ export class CafeDiscoverySession {
                 items.push(item);
 
                 try {
-                    await CafeStorageClient.createMenuItemAsync(item, true /*allowUpdateIfExisting*/);
+                    await MenuItemStorageClient.createMenuItemAsync(item, true /*allowUpdateIfExisting*/);
                 } catch (err) {
                     logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
                 }

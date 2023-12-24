@@ -1,15 +1,16 @@
 import Router from '@koa/router';
-import { isDateBefore } from '@msdining/common/dist/util/date-util.js';
 import * as diningConfig from '../../constants/cafes.js';
 import { attachRouter } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
-import { CafeStorageClient } from '../../api/storage/cafe.js';
 import { getLogoUrl } from '../../util/cafe.js';
 import { ICafeStation } from '../../models/cafe.js';
 import { NumberUtil } from '@msdining/common';
 import { jsonStringifyWithoutNull } from '../../util/serde.js';
+import { CafeStorageClient } from '../../api/storage/clients/cafe.js';
+import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
+import { SearchManager } from '../../api/storage/search.js';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
 const DEFAULT_MAX_PRICE = 9.99;
@@ -125,7 +126,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
             const cafes = await CafeStorageClient.retrieveCafesAsync();
             const menusByCafeId = {};
             for (const cafeId of cafes.keys()) {
-                const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(cafeId, dateString);
+                const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, dateString);
                 menusByCafeId[cafeId] = convertMenuToSerializable(menuStations);
             }
             ctx.body = jsonStringifyWithoutNull(menusByCafeId);
@@ -138,7 +139,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
             return;
         }
 
-        const menuStations = await CafeStorageClient.retrieveDailyMenuAsync(id, dateString);
+        const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(id, dateString);
         ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations));
     });
 
@@ -158,7 +159,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
             return;
         }
 
-        const searchResultsByIdPerEntityType = await CafeStorageClient.search(searchQuery);
+        const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery);
         const searchResults = [];
         for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
             for (const searchResult of searchResultsById.values()) {
@@ -188,7 +189,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
             ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
             : DEFAULT_MIN_PRICE;
 
-        const cheapItems = await CafeStorageClient.searchForCheapItems(
+        const cheapItems = await SearchManager.searchForCheapItems(
             minPrice,
             maxPrice
         );

@@ -8,10 +8,11 @@ import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logError, logInfo } from '../../../util/log.js';
-import { CafeStorageClient } from '../../storage/cafe.js';
+import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { CafeDiscoverySession } from '../session.js';
 import { saveSessionAsync } from './storage.js';
 import { writeThumbnailsForCafe } from './thumbnail.js';
+import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 
 export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryCount = 3;
@@ -57,7 +58,7 @@ export class DailyCafeUpdateSession {
     }
 
     private async discoverCafeAsync(cafe: ICafe) {
-        await CafeStorageClient.deleteDailyMenusAsync(this.dateString, cafe.id);
+        await DailyMenuStorageClient.deleteDailyMenusAsync(this.dateString, cafe.id);
 
         const stations = await runPromiseWithRetries(
             (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),

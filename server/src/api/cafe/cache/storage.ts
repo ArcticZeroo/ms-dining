@@ -1,6 +1,8 @@
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
 import { logError } from '../../../util/log.js';
-import { CafeStorageClient } from '../../storage/cafe.js';
+import { StationStorageClient } from '../../storage/clients/station.js';
+import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
+import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 
 interface ISaveStationParams {
     cafe: ICafe;
@@ -11,7 +13,7 @@ interface ISaveStationParams {
 
 const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistingItems }: ISaveStationParams) => {
     try {
-        await CafeStorageClient.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
+        await StationStorageClient.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
     } catch (err) {
         logError('Unable to save station to database:', err);
         return;
@@ -19,7 +21,7 @@ const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistin
 
     for (const menuItem of station.menuItemsById.values()) {
         try {
-            await CafeStorageClient.createMenuItemAsync(menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
+            await MenuItemStorageClient.createMenuItemAsync(menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
         } catch (err) {
             logError(`Unable to save menu item "${menuItem.name}" @ ${menuItem.id} to the database:`, err);
             // if we fail here, we will fail later when creating the daily menu
@@ -28,7 +30,7 @@ const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistin
     }
 
     try {
-        await CafeStorageClient.createDailyStationMenuAsync({
+        await DailyMenuStorageClient.createDailyStationMenuAsync({
             cafeId: cafe.id,
             station,
             dateString

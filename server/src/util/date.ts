@@ -35,3 +35,7 @@ export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {
 
     return !DateUtil.isDateBefore(date, cafe.firstAvailable);
 };
+
+export const getDateStringsForWeek = (): string[] => {
+    return Array.from(DateUtil.yieldDaysInFutureForThisWeek()).map(i => DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i)));
+}

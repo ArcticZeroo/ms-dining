@@ -1,11 +1,12 @@
 import { DateUtil } from '@msdining/common';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logError, logInfo } from '../../../util/log.js';
-import { CafeStorageClient } from '../../storage/cafe.js';
+import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { cafeList } from '../../../constants/cafes.js';
+import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -17,7 +18,7 @@ const repairMissingWeeklyMenusAsync = async () => {
     let isRepairNeeded = false;
     for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
         const date = DateUtil.getNowWithDaysInFuture(i);
-        const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(date));
+        const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(date));
         if (!isAnyMenuAvailableToday) {
             isRepairNeeded = true;
             logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}`);
@@ -38,7 +39,7 @@ const repairCafesWithoutMenusAsync = async () => {
 
     let isRepairNeeded = false;
     for (const cafe of cafeList) {
-        const isAnyAllowedMenuAvailable = CafeStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
+        const isAnyAllowedMenuAvailable = await DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
 
         if (isAnyAllowedMenuAvailable) {
             continue;
