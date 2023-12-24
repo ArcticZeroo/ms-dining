@@ -136,8 +136,16 @@
 }
 
 @media screen and (max-width: 800px) {
+    .search-result {
+        flex-grow: 1;
+    }
+
     .search-result-info {
         display: flex;
         flex-direction: column;
+    }
+
+    .search-result.compact .search-result-hits {
+        max-width: unset;
     }
 }
