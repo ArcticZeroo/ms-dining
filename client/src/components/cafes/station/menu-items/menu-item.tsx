@@ -61,7 +61,9 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 		}
 	}, [highlightTagNames, menuItem.tags]);
 
-	const title = allowOnlineOrdering ? 'Click to open online ordering popup' : undefined;
+	const title = allowOnlineOrdering
+		? `Click to open item details (online ordering enabled)`
+		: 'Click to open item details';
 
 	return (
 		<tr className="pointer" onClick={onOpenModalClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>

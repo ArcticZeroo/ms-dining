@@ -1,6 +1,5 @@
 import React, { useContext, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import menuIcon from '../../assets/menu.svg';
 import { SelectedViewContext } from '../../context/view.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { CafeView } from '../../models/cafe.ts';
@@ -24,7 +23,9 @@ export const Nav: React.FC = () => {
 
     const visibilityToggleButton = (
         <button onClick={() => setIsExpanded(!isExpanded)} className="visibility-toggle">
-            <img src={menuIcon} alt="Toggle menu"/>
+            <span className="material-symbols-outlined">
+                menu
+            </span>
         </button>
     );
 

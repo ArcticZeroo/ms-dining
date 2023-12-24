@@ -1,6 +1,5 @@
 import React, { useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import searchIcon from '../../assets/search.svg';
 import { SearchQueryContext } from '../../context/search.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { navigateToSearch } from '../../util/search.ts';
@@ -35,7 +34,9 @@ export const SearchBar = () => {
                     value={searchQuery}
                     onChange={onInputChanged}/>
                 <button type="submit" className="search-button">
-                    <img src={searchIcon} alt="Search Icon"/>
+                    <span className="material-symbols-outlined">
+                        search
+                    </span>
                 </button>
             </form>
         </li>

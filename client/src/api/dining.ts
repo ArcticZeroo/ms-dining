@@ -19,6 +19,12 @@ interface IRetrieveCafeMenuParams {
     shouldCountTowardsLastUsed?: boolean;
 }
 
+interface IMakeRequestParams {
+    path: string;
+    sendVisitorId?: boolean;
+    options?: RequestInit;
+}
+
 export abstract class DiningClient {
     private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
@@ -35,16 +41,24 @@ export abstract class DiningClient {
         };
     }
 
-    private static async _makeRequest<T>(path: string, sendVisitorId: boolean = false): Promise<T> {
-        const response = await fetch(path, DiningClient._getRequestOptions(sendVisitorId));
+    private static async _makeRequest<T>({ path, sendVisitorId = false, options = {} }: IMakeRequestParams): Promise<T> {
+        const response = await fetch(path, {
+            ...DiningClient._getRequestOptions(sendVisitorId),
+            ...options
+        });
+
         if (!response.ok) {
             throw new Error(`Response failed with status: ${response.status}`);
         }
+
         return response.json();
     }
 
     private static async _retrieveViewListInner(): Promise<IViewListResponse> {
-        return DiningClient._makeRequest('/api/dining/', true /*sendVisitorId*/);
+        return DiningClient._makeRequest({
+            path: '/api/dining/',
+            sendVisitorId: true
+        });
     }
 
     public static retrieveViewList(): Promise<IViewListResponse> {
@@ -56,7 +70,9 @@ export abstract class DiningClient {
     }
 
     private static _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
-        return DiningClient._makeRequest(`/api/dining/menu/${id}?date=${dateString}`);
+        return DiningClient._makeRequest({
+            path: `/api/dining/menu/${id}?date=${dateString}`
+        });
     }
 
     private static _addToLastUsedCafeIds(id: string) {
@@ -234,9 +250,7 @@ export abstract class DiningClient {
         return locationDatesByCafeId;
     }
 
-    public static async retrieveSearchResults(query: string): Promise<Array<IQuerySearchResult>> {
-        const response = await DiningClient._makeRequest(`/api/dining/search?q=${encodeURIComponent(query)}`);
-
+    private static _deserializeSearchResults(response: unknown) {
         if (!Array.isArray(response) || response.length === 0) {
             return [];
         }
@@ -260,8 +274,30 @@ export abstract class DiningClient {
         return results;
     }
 
+    public static async retrieveSearchResults(query: string): Promise<Array<IQuerySearchResult>> {
+        const response = await DiningClient._makeRequest({
+            path: `/api/dining/search?q=${encodeURIComponent(query)}`
+        });
+
+        return DiningClient._deserializeSearchResults(response);
+    }
+
+    public static async retrieveFavoriteSearchResults(queries: Array<SearchTypes.ISearchQuery>): Promise<Array<IQuerySearchResult>> {
+        const response = await DiningClient._makeRequest({
+            path: `/api/dining/search/favorites`,
+            options: {
+                method: 'POST',
+                body: JSON.stringify(queries)
+            }
+        });
+
+        return DiningClient._deserializeSearchResults(response);
+    }
+
     public static async retrieveCheapItems(): Promise<Array<ICheapItemSearchResult>> {
-        const response = await DiningClient._makeRequest(`/api/dining/search/cheap`);
+        const response = await DiningClient._makeRequest({
+            path: `/api/dining/search/cheap`
+        });
 
         if (!Array.isArray(response) || response.length === 0) {
             return [];

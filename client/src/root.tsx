@@ -61,8 +61,6 @@ export const Root = () => {
 
     const pageBodyDivRef = useScrollTopRef(selectedViewNotifier, shouldStopScroll);
 
-    console.log('rendering with shouldStopScroll:', shouldStopScroll);
-
     return (
         <>
             <PopupContainer/>
