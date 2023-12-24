@@ -7,6 +7,7 @@ import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { cafeList } from '../../../constants/cafes.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
+import { isCafeAvailable } from '../../../util/date.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -39,6 +40,10 @@ const repairCafesWithoutMenusAsync = async () => {
 
     let isRepairNeeded = false;
     for (const cafe of cafeList) {
+        if (!isCafeAvailable(cafe)) {
+            continue;
+        }
+
         const isAnyAllowedMenuAvailable = await DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
 
         if (isAnyAllowedMenuAvailable) {
