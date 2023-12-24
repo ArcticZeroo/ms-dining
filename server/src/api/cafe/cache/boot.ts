@@ -60,11 +60,17 @@ const repairCafesWithoutMenusAsync = async () => {
             try {
                 const updateSession = new DailyCafeUpdateSession(i);
                 await updateSession.populateAsync([cafe]);
-            } catch {
-                logError(`Failed to repair ${cafe.id}. Removing it from the list for now...`);
-                await CafeStorageClient.deleteCafe(cafe.id);
+            } catch (err) {
+                logError(`Failed to repair ${cafe.id} on ${DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i))}: ${err}`);
                 break;
             }
+        }
+
+        const isAnyAllowedMenuAvailableAfterRepair = await DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
+        if (!isAnyAllowedMenuAvailableAfterRepair) {
+            logError(`Still no menus available for cafe ${cafe.id}. Removing it from the list for now...`);
+            // The UpdateSession may have re-added the cafe to storage. Remove it again just in case.
+            await CafeStorageClient.deleteCafe(cafe.id);
         }
     }
 
