@@ -103,11 +103,17 @@ export const getMaximumDateForMenuRequest = (): Date => {
 export function* yieldDaysInFutureForThisWeek() {
     const now = new Date();
     const nowWeekday = now.getDay();
+
+    // If it's Saturday, we want to start on Monday of next week
+    const dateOffset = nowWeekday === nativeDayOfWeek.Saturday
+        ? 7
+        : 0;
+
     const startWeekdayIndex = isDateOnWeekend(now)
         ? nativeDayOfWeek.Monday
         : Math.max(nowWeekday, nativeDayOfWeek.Monday);
 
     for (let i = startWeekdayIndex; i <= nativeDayOfWeek.Friday; i++) {
-        yield (i - nowWeekday);
+        yield ((i - nowWeekday) + dateOffset);
     }
 }
