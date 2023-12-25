@@ -1,13 +1,13 @@
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { DiningClient } from '../../../../api/dining.ts';
+import { SelectedDateContext } from '../../../../context/time.ts';
+import { useValueNotifierContext } from '../../../../hooks/events.ts';
+import { classNames } from '../../../../util/react.ts';
+import { isAnyDateToday } from '../../../../util/search.ts';
 import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
-import React, { useCallback, useMemo, useState } from 'react';
-import { classNames } from '../../../../util/react.ts';
-import { useValueNotifierContext } from '../../../../hooks/events.ts';
-import { SelectedDateContext } from '../../../../context/time.ts';
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { DiningClient } from '../../../../api/dining.ts';
-import { isAnyDateToday } from '../../../../util/search.ts';
 
 const useFavoriteSearchResults = (favoriteItemNames: Set<string>) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
@@ -25,7 +25,14 @@ const useFavoriteSearchResults = (favoriteItemNames: Set<string>) => {
         return DiningClient.retrieveFavoriteSearchResults(queries);
     }, [favoriteItemNames]);
 
-    const { stage, value } = useImmediatePromiseState(retrieveFavoriteSearchResults);
+    const { stage, value, run } = useDelayedPromiseState(
+        retrieveFavoriteSearchResults,
+        true /*keepLastValue*/
+    );
+
+    useEffect(() => {
+        run();
+    }, [run]);
 
     const filteredResults = useMemo(
         () => {

@@ -3,6 +3,7 @@ import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
+import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
@@ -13,7 +14,7 @@ import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../
 import { getParentView } from '../../util/view';
 import './search.css';
 import { SelectedDateContext } from '../../context/time.ts';
-import { isSameDate } from '@msdining/common/dist/date-util';
+import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 
 interface IEntityDisplayData {
@@ -151,6 +152,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
+    const isFavoriteItem = useIsFavoriteItem(name);
+
     const entityDisplayData = entityDisplayDataByType[entityType];
 
     const shouldShowLocationDates = onlyShowLocationsOnDate != null
@@ -172,7 +175,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     );
 
     return (
-        <div className={classNames('search-result', isVisible && 'visible', isCompact && 'compact')}>
+        <div className={classNames('search-result', isVisible && 'visible', isCompact && 'compact', isFavoriteItem && 'is-favorite')}>
             <div className={classNames('search-result-type', entityDisplayData.className)}>
                         <span className="material-symbols-outlined">
                             {entityDisplayData.iconName}

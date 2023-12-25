@@ -63,6 +63,14 @@
     gap: var(--default-padding);
 }
 
+.search-result.is-favorite .search-result-info {
+    background: var(--favorite-color);
+}
+
+.search-result.is-favorite .search-result-type {
+    background: #a7911b;
+}
+
 .search-result.compact .search-result-hits {
     max-width: 25rem;
     justify-content: center;

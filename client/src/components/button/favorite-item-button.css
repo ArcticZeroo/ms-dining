@@ -1,3 +1,7 @@
+:root {
+    --favorite-color: #ffe7ab;
+}
+
 .favorite-item-button {
     padding: 0.5rem;
     border-radius: 0.5rem;
@@ -6,5 +10,5 @@
 }
 
 .favorite-item-button.is-favorite {
-    background: #ffe7ab;
+    background: var(--favorite-color);
 }
