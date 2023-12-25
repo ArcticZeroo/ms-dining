@@ -2,9 +2,11 @@ import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { PopupContext } from '../../../../context/modal.ts';
+import { useIsFavoriteItem } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
+import { classNames } from '../../../../util/react.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
@@ -37,6 +39,8 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 	const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
 	const caloriesDisplay = getCaloriesDisplay(menuItem);
 
+	const isFavoriteItem = useIsFavoriteItem(menuItem.name);
+
 	const modalNotifier = useContext(PopupContext);
 
 	const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
@@ -66,7 +70,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 		: 'Click to open item details';
 
 	return (
-		<tr className="pointer" onClick={onOpenModalClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
+		<tr className={classNames('pointer', isFavoriteItem && 'is-favorite')} onClick={onOpenModalClick} title={title} style={{ backgroundColor: currentHighlightTag?.color }}>
 			<td colSpan={!canShowImage ? 2 : 1}>
 				<div className="menu-item-head">
 					<span className="menu-item-name">{menuItem.name}</span>

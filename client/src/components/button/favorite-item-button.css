@@ -1,5 +1,6 @@
 :root {
     --favorite-color: #ffe7ab;
+    --favorite-color-hover: #ffd97a;
 }
 
 .favorite-item-button {
