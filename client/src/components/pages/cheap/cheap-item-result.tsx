@@ -29,7 +29,6 @@ export const CheapItemResult: React.FC<ICheapItemResultProps> = ({ item }) => {
 
     return (
         <SearchResult
-            key={`${item.name} ${item.price}`}
             isVisible={true}
             name={item.name}
             description={item.description}

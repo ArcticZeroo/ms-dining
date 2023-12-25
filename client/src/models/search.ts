@@ -53,10 +53,3 @@ export interface IServerCheapItemSearchResult {
     minCalories: number;
     maxCalories: number;
 }
-
-export enum CheapItemsSortType {
-    priceAsc,
-    priceDesc,
-    relevance,
-    caloriesPerDollarDesc
-}
