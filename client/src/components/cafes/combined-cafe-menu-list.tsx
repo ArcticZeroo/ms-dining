@@ -1,17 +1,15 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
+import { useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeMenu, CafeView, ICafe } from '../../models/cafe.ts';
 import { expandAndFlattenView } from '../../util/view.ts';
 import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
-import { CafeDatePicker } from './date/date-picker.tsx';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -78,14 +76,10 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                                                                            }) => {
     const { viewsById } = useContext(ApplicationContext);
     const [menuDataStage, menuData] = useMenuData(views, viewsById, countTowardsLastUsed);
-    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const isLoading = menuDataStage === PromiseStage.running;
 
     return (
         <div className="collapsible-menu-list">
-            {
-                allowFutureMenus && <CafeDatePicker/>
-            }
             {
                 menuData.map(({ cafe, menu }) => (
                     <CollapsibleCafeMenu
