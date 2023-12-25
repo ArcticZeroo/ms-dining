@@ -134,6 +134,7 @@
 .search-result-image {
     align-self: center;
     max-height: 10rem;
+    border-radius: var(--default-padding);
 }
 
 .search-result-description {
