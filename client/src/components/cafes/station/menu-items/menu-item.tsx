@@ -1,3 +1,4 @@
+import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
@@ -39,7 +40,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 	const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
 	const caloriesDisplay = getCaloriesDisplay(menuItem);
 
-	const isFavoriteItem = useIsFavoriteItem(menuItem.name);
+	const isFavoriteItem = useIsFavoriteItem(menuItem.name, SearchEntityType.menuItem);
 
 	const modalNotifier = useContext(PopupContext);
 

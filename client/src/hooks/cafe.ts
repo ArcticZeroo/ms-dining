@@ -28,7 +28,7 @@ export const useFavoriteQueries = () => {
 	];
 };
 
-export const useIsFavoriteItem = (name: string, type: SearchEntityType = SearchEntityType.menuItem) => {
+export const useIsFavoriteItem = (name: string, type: SearchEntityType) => {
 	const targetSetting = getTargetSettingForFavorite(type);
 
 	const favoriteNames = useValueNotifier(targetSetting);

@@ -1,11 +1,13 @@
-import { ICafeStation } from '../../../models/cafe.ts';
+import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useEffect, useRef, useState } from 'react';
-import { StationMenu } from './menu-items/station-menu.tsx';
-import { ExpandIcon } from '../../icon/expand.tsx';
-import { classNames } from '../../../util/react.ts';
-import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
+import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
+import { ICafeStation } from '../../../models/cafe.ts';
+import { classNames } from '../../../util/react.ts';
+import { ExpandIcon } from '../../icon/expand.tsx';
+import { StationMenu } from './menu-items/station-menu.tsx';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -33,6 +35,8 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
 
     const stationStyle = useStationStyle(isExpanded, menuWidthPx);
+
+    const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
 
     const updateExpansionState = (isNowExpanded: boolean) => {
         const menuBodyElement = menuBodyRef.current;
@@ -68,7 +72,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     }, []);
 
     return (
-        <div className={classNames('station', !isExpanded && 'collapsed')} style={stationStyle}>
+        <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
             <button className="title" onClick={onTitleClick}>
                 {
                     station.logoUrl && (

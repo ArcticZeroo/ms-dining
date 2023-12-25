@@ -33,6 +33,10 @@
     border-top-left-radius: 0.5rem;
 }
 
+.station.is-favorite .title {
+    background: var(--favorite-color-dark);
+}
+
 .station .title img {
     height: 1.4em;
     margin-right: 0.25rem;
@@ -66,7 +70,7 @@
 }
 
 .station table tr.is-favorite:hover {
-    background: var(--favorite-color-hover);
+    background: var(--favorite-color-dark);
 }
 
 .station table tr:hover {
