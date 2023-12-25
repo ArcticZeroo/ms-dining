@@ -57,6 +57,14 @@
     border-spacing: 0 var(--default-padding);
 }
 
+.station table tr {
+    transition: background-color 0.25s ease;
+}
+
+.station table tr:hover {
+    background: #EEE;
+}
+
 .station table th, .station table td {
     padding: 0;
     margin: 0;
