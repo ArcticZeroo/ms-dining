@@ -73,7 +73,11 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
 		}
 
 		if (results.length === 0) {
-			return;
+			return (
+				<div className="centered-content">
+					Nothing here today!
+				</div>
+			);
 		}
 
 		return (
