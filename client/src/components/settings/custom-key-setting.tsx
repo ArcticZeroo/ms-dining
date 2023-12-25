@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ApplicationSettings, BooleanSetting } from '../../../api/settings.ts';
-import { ValueNotifier } from '../../../util/events.ts';
-import { classNames } from '../../../util/react.ts';
+import { ApplicationSettings, BooleanSetting } from '../../api/settings.ts';
+import { ValueNotifier } from '../../util/events.ts';
+import { classNames } from '../../util/react.ts';
 
 const ALLOWED_SETTINGS: BooleanSetting[] = [
     ApplicationSettings.allowOnlineOrdering

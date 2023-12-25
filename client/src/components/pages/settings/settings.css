@@ -1,9 +1,4 @@
-.card.settings .title {
-    font-size: 1.4em;
-    text-align: center;
-}
-
-.card.settings .body {
+#settings {
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
@@ -29,7 +24,7 @@
     opacity: 0.75;
 }
 
-#setting-homepage {
+#setting-homepage, #setting-display {
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
@@ -119,4 +114,10 @@
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     cursor: pointer;
+}
+
+.settings-group .body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
 }

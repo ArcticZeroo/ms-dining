@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
-import { ApplicationSettings } from '../../../api/settings.ts';
-import { knownTags } from '../../../constants/tags.tsx';
-import { useValueNotifier } from '../../../hooks/events.ts';
+import { ApplicationSettings } from '../../api/settings.ts';
+import { knownTags } from '../../constants/tags.tsx';
+import { useValueNotifier } from '../../hooks/events.ts';
 export const HighlightTagsSetting = () => {
 	const selectedTags = useValueNotifier(ApplicationSettings.highlightTagNames);
 

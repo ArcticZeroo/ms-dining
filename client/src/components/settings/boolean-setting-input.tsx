@@ -1,6 +1,6 @@
-import { BooleanSetting } from '../../../api/settings.ts';
+import { BooleanSetting } from '../../api/settings.ts';
 import React from 'react';
-import { useValueNotifier } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 interface IBooleanSettingInputProps {
     icon?: string;
