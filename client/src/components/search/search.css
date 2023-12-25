@@ -78,6 +78,10 @@
     justify-content: center;
 }
 
+.search-result.compact {
+    --card-title-font-size: 1em;
+}
+
 .search-result-info-header {
     display: flex;
     flex-direction: column;
