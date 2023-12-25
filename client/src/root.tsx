@@ -1,16 +1,13 @@
-import { PopupContainer } from './components/popup/popup-container.tsx';
-import { Nav } from './components/nav/nav.tsx';
-import { classNames } from './util/react.ts';
-import { Outlet } from 'react-router-dom';
-import { DeviceType, useDeviceType } from './hooks/media-query.ts';
-import { NavExpansionContext } from './context/nav.ts';
-import { useValueNotifier, useValueNotifierContext } from './hooks/events.ts';
-import { ValueNotifier } from './util/events.ts';
-import { CafeView } from './models/cafe.ts';
 import React, { useContext, useEffect, useRef } from 'react';
-import { SelectedViewContext } from './context/view.ts';
-import { PopupContext } from './context/modal.ts';
+import { Outlet, useLocation } from 'react-router-dom';
 import { CartPopup } from './components/cafes/station/menu-items/popup/order/cart/cart-popup.tsx';
+import { Nav } from './components/nav/nav.tsx';
+import { PopupContainer } from './components/popup/popup-container.tsx';
+import { PopupContext } from './context/modal.ts';
+import { NavExpansionContext } from './context/nav.ts';
+import { useValueNotifierContext } from './hooks/events.ts';
+import { DeviceType, useDeviceType } from './hooks/media-query.ts';
+import { classNames } from './util/react.ts';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -32,8 +29,8 @@ const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>
     }, [shouldStopScroll, scrollTopRef]);
 }
 
-const useScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | undefined>, shouldStopScroll: boolean) => {
-    const selectedView = useValueNotifier(selectedViewNotifier);
+const useScrollTopRef = (shouldStopScroll: boolean) => {
+    const location = useLocation();
     const pageBodyDivRef = useRef<HTMLDivElement>(null);
     const scrollTopRef = useRef<number | undefined>(undefined);
 
@@ -42,9 +39,9 @@ const useScrollTopRef = (selectedViewNotifier: ValueNotifier<CafeView | undefine
     useEffect(() => {
         if (pageBodyDivRef.current) {
             pageBodyDivRef.current.scrollTop = 0;
-            document.documentElement.scrollTop = 0;
         }
-    }, [selectedView]);
+        document.documentElement.scrollTop = 0;
+    }, [location.pathname]);
 
 
     return pageBodyDivRef;
@@ -54,12 +51,11 @@ export const Root = () => {
     const [isNavExpanded] = useContext(NavExpansionContext);
     const deviceType = useDeviceType();
 
-    const selectedViewNotifier = useContext(SelectedViewContext);
     const currentModal = useValueNotifierContext(PopupContext);
 
     const shouldStopScroll = (isNavExpanded && deviceType === DeviceType.Mobile) || currentModal != null;
 
-    const pageBodyDivRef = useScrollTopRef(selectedViewNotifier, shouldStopScroll);
+    const pageBodyDivRef = useScrollTopRef(shouldStopScroll);
 
     return (
         <>
