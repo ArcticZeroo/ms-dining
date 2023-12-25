@@ -194,7 +194,7 @@ html, body, #root, .App {
     flex-grow: 1;
 }
 
-.collapsible-content .collapse-body.collapsed {
+.collapsible-content.collapsed .collapse-body {
     display: none;
 }
 

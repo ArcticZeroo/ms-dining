@@ -1,18 +1,16 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
+import { ApplicationSettings } from '../../api/settings.ts';
+import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeMenu, CafeView, ICafe } from '../../models/cafe.ts';
-import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
-import { ApplicationSettings } from '../../api/settings.ts';
-import { CafeDatePicker } from './date/date-picker.tsx';
-import { classNames } from '../../util/react.ts';
-
 import { expandAndFlattenView } from '../../util/view.ts';
-import { ApplicationContext } from '../../context/app.ts';
+import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
+import { CafeDatePicker } from './date/date-picker.tsx';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -37,18 +35,20 @@ const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>
         return { cafe, menu };
     }, [selectedDate, countTowardsLastUsed]);
 
-    const loadMenusAsync = useCallback(() => {
-        const menuPromises = [];
+    const cafes = useMemo(
+        () => Array.from(views).flatMap(view => expandAndFlattenView(view, viewsById)),
+        [views, viewsById]
+    );
 
-        for (const view of views) {
-            const cafes = expandAndFlattenView(view, viewsById);
-            for (const cafe of cafes) {
-                menuPromises.push(loadMenuAsync(cafe));
-            }
+    const loadMenusAsync = useCallback(() => {
+        const menuPromises: Array<Promise<IMenuWithCafe>> = [];
+
+        for (const cafe of cafes) {
+            menuPromises.push(loadMenuAsync(cafe));
         }
 
         return Promise.all(menuPromises);
-    }, [views, viewsById, loadMenuAsync]);
+    }, [cafes, loadMenuAsync]);
 
     const { stage, run, value } = useDelayedPromiseState(loadMenusAsync, true /*keepLastValue*/);
 
@@ -56,7 +56,18 @@ const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>
         run();
     }, [run]);
 
-    return [stage, value ?? []] as const;
+    const menuData: IMenuWithCafe[] = useMemo(
+        () => {
+            if (!value) {
+                return cafes.map(cafe => ({ cafe, menu: [] }));
+            }
+
+            return value;
+        },
+        [value, cafes]
+    );
+
+    return [stage, menuData] as const;
 };
 
 export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
@@ -70,17 +81,9 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
     const isLoading = menuDataStage === PromiseStage.running;
 
     return (
-        <div className={classNames('collapsible-menu-list', isLoading && 'centered-content')}>
+        <div className="collapsible-menu-list">
             {
                 allowFutureMenus && <CafeDatePicker/>
-            }
-            {
-                menuDataStage === PromiseStage.running && (
-                    <div className="centered-content">
-                        <div className="loading-spinner"/>
-                        Loading menu(s)...
-                    </div>
-                )
             }
             {
                 menuData.map(({ cafe, menu }) => (
@@ -89,6 +92,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                         cafe={cafe}
                         menu={menu}
                         showGroupName={showGroupNames}
+                        isLoading={isLoading}
                     />
                 ))
             }

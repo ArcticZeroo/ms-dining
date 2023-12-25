@@ -10,95 +10,98 @@ import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
 
 const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+	const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    const retrieveFavoriteSearchResults = useCallback(async () => {
-        if (queries.length === 0) {
-            return [];
-        }
+	const retrieveFavoriteSearchResults = useCallback(async () => {
+		if (queries.length === 0) {
+			return [];
+		}
 
-        return DiningClient.retrieveFavoriteSearchResults(queries);
-    }, [queries]);
+		return DiningClient.retrieveFavoriteSearchResults(queries);
+	}, [queries]);
 
-    const { stage, value, run } = useDelayedPromiseState(
-        retrieveFavoriteSearchResults,
-        true /*keepLastValue*/
-    );
+	const { stage, value, run } = useDelayedPromiseState(
+		retrieveFavoriteSearchResults,
+		true /*keepLastValue*/
+	);
 
-    useEffect(() => {
-        run();
-    }, [run]);
+	useEffect(() => {
+		run();
+	}, [run]);
 
-    const filteredResults = useMemo(
-        () => {
-            const results = value ?? [];
-            return results.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate));
-        },
-        [value, selectedDate]
-    );
+	const filteredResults = useMemo(
+		() => {
+			const results = value ?? [];
+			return results.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate));
+		},
+		[value, selectedDate]
+	);
 
-    return { stage, results: filteredResults } as const;
-}
+	return { stage, results: filteredResults } as const;
+};
 
 interface IHomeFavoritesViewProps {
-    queries: ISearchQuery[];
+	queries: ISearchQuery[];
 }
 
 export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+	const [isCollapsed, setIsCollapsed] = useState(false);
+	const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    const onToggleExpansion = () => {
-        setIsCollapsed(!isCollapsed);
-    }
+	const onToggleExpansion = () => {
+		setIsCollapsed(!isCollapsed);
+	};
 
-    const { stage, results } = useFavoriteSearchResults(queries);
+	const { stage, results } = useFavoriteSearchResults(queries);
 
-    const bodyView = useMemo(() => {
-        if (stage === PromiseStage.running) {
-            return (
-                <div className="centered-content">
-                    <span className="loading-spinner"/>
-                    Loading favorites...
-                </div>
-            );
-        }
+	const bodyView = useMemo(() => {
+		if (stage === PromiseStage.running) {
+			return (
+				<div className="centered-content">
+					<span className="loading-spinner"/>
+					Loading favorites...
+				</div>
+			);
+		}
 
-        if (stage === PromiseStage.error) {
-            return (
-                <div className="error-card">
-                    Could not load favorites.
-                </div>
-            );
-        }
+		if (stage === PromiseStage.error) {
+			return (
+				<div className="error-card">
+					Could not load favorites.
+				</div>
+			);
+		}
 
-        if (results.length === 0) {
-            return;
-        }
+		if (results.length === 0) {
+			return;
+		}
 
-        return results.map(result => (
-            <HomeFavoriteResult
-                key={result.name}
-                result={result}
-                date={selectedDate}
-            />
-        ));
-    }, [stage, results, selectedDate]);
+		return (
+			<div id="home-favorites-results">
+				{
+					results.map(result => (
+						<HomeFavoriteResult
+							key={result.name}
+							result={result}
+							date={selectedDate}
+						/>
+					))
+				}
+			</div>
+		);
+	}, [stage, results, selectedDate]);
 
-    return (
-        <div className="collapsible-content flex-col" id="home-favorites">
-            <div className="collapse-toggle" onClick={onToggleExpansion}>
-                <div className="flex-row">
-                    Favorites Across Campus on {selectedDate.toLocaleDateString()}
-                </div>
-                <ExpandIcon isExpanded={!isCollapsed}/>
-            </div>
-            <div
-                className={classNames('collapse-body', isCollapsed && 'collapsed')}
-                id="home-favorites-results"
-            >
-                {bodyView}
-            </div>
-        </div>
-    );
+	return (
+		<div className={classNames('collapsible-content flex-col', isCollapsed && 'collapsed')} id="home-favorites">
+			<div className="collapse-toggle" onClick={onToggleExpansion}>
+				<div className="flex-row">
+					Favorites Across Campus on {selectedDate.toLocaleDateString()}
+				</div>
+				<ExpandIcon isExpanded={!isCollapsed}/>
+			</div>
+			<div className="collapse-body">
+				{bodyView}
+			</div>
+		</div>
+	);
 };
