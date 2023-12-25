@@ -7,6 +7,7 @@ import { SelectedDateContext } from '../../context/time.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeMenu, CafeView, ICafe } from '../../models/cafe.ts';
 import { expandAndFlattenView } from '../../util/view.ts';
+import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
@@ -96,6 +97,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                     />
                 ))
             }
+            <MenuSettings/>
         </div>
     );
 };
