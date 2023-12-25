@@ -22,7 +22,13 @@
     max-width: 100%;
 }
 
-.station .title {
+.station .station-header {
+    display: flex;
+    gap: var(--default-padding);
+    align-items: center;
+}
+
+.station .station-header .title {
     font-size: var(--section-title-font-size);
     display: flex;
     align-items: center;
@@ -31,13 +37,15 @@
     padding: var(--default-padding);
     border-top-right-radius: 0.5rem;
     border-top-left-radius: 0.5rem;
+    flex-grow: 1;
+    transition: background-color 0.25s ease;
 }
 
-.station.is-favorite .title {
+.station.is-favorite .station-header .title {
     background: var(--favorite-color-dark);
 }
 
-.station .title img {
+.station .station-header .title img {
     height: 1.4em;
     margin-right: 0.25rem;
     transition: height 0.5s ease;
@@ -51,6 +59,7 @@
     max-width: 100%;
     overflow-x: scroll;
     box-sizing: border-box;
+    border-top-left-radius: var(--default-padding);
 }
 
 .category-name {

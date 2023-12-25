@@ -6,6 +6,7 @@ import { useValueNotifier } from '../../../hooks/events.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation } from '../../../models/cafe.ts';
 import { classNames } from '../../../util/react.ts';
+import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
 
@@ -73,16 +74,19 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
 
     return (
         <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
-            <button className="title" onClick={onTitleClick}>
-                {
-                    station.logoUrl && (
-                        <img src={station.logoUrl}
-                            alt={`Logo for station ${station.name}`}/>
-                    )
-                }
-                {station.name}
-                <ExpandIcon isExpanded={isExpanded}/>
-            </button>
+            <div className="station-header flex-row">
+                <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
+                <button className="title" onClick={onTitleClick}>
+                    {
+                        station.logoUrl && (
+                                            <img src={station.logoUrl}
+                                                 alt={`Logo for station ${station.name}`}/>
+                                        )
+                    }
+                    {station.name}
+                    <ExpandIcon isExpanded={isExpanded}/>
+                </button>
+            </div>
             <StationMenu menuItemsByCategoryName={station.menu} ref={menuBodyRef}/>
         </div>
     );
