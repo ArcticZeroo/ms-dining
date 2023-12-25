@@ -15,5 +15,6 @@ module.exports = {
             'warn',
             {allowConstantExport: true},
         ],
+        'no-mixed-spaces-and-tabs': 'off'
     },
 }

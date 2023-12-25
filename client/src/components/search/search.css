@@ -42,6 +42,7 @@
     align-items: center;
     border-top-left-radius: var(--default-padding);
     border-bottom-left-radius: var(--default-padding);
+    transition: background-color 0.25s ease;
 }
 
 .entity-menu-item {
@@ -61,6 +62,7 @@
     flex-grow: 1;
     padding: var(--default-padding);
     gap: var(--default-padding);
+    transition: background-color 0.25s ease;
 }
 
 .search-result.is-favorite .search-result-info {

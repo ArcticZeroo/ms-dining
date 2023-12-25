@@ -1,18 +1,21 @@
+import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useMemo } from 'react';
 import filledStarIcon from '../../assets/star-filled.svg';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { getTargetSettingForFavorite } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 
 import './favorite-item-button.css';
 
 interface IFavoriteItemButtonProps {
     name: string;
+    type: SearchEntityType;
 }
 
-export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name }) => {
-    const favoriteItemNames = useValueNotifier(ApplicationSettings.favoriteItemNames);
+export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, type }) => {
+    const targetSetting = getTargetSettingForFavorite(type);
+    const favoriteItemNames = useValueNotifier(targetSetting);
 
     const normalizedItemName = useMemo(
         () => normalizeNameForSearch(name),
@@ -26,9 +29,9 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name })
 
     const onFavoriteClicked = () => {
         if (isItemFavorite) {
-            ApplicationSettings.favoriteItemNames.delete(normalizedItemName);
+            targetSetting.delete(normalizedItemName);
         } else {
-            ApplicationSettings.favoriteItemNames.add(normalizedItemName);
+            targetSetting.add(normalizedItemName);
         }
     };
 

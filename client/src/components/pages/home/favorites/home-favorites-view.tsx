@@ -1,5 +1,5 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
+import { ISearchQuery } from '@msdining/common/dist/models/search.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
@@ -9,21 +9,16 @@ import { isAnyDateToday } from '../../../../util/search.ts';
 import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
 
-const useFavoriteSearchResults = (favoriteItemNames: Set<string>) => {
+const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const retrieveFavoriteSearchResults = useCallback(async () => {
-        if (favoriteItemNames.size === 0) {
+        if (queries.length === 0) {
             return [];
         }
 
-        const queries: ISearchQuery[] = Array.from(favoriteItemNames).map(name => ({
-            text: name,
-            type: SearchEntityType.menuItem
-        }));
-
         return DiningClient.retrieveFavoriteSearchResults(queries);
-    }, [favoriteItemNames]);
+    }, [queries]);
 
     const { stage, value, run } = useDelayedPromiseState(
         retrieveFavoriteSearchResults,
@@ -46,10 +41,10 @@ const useFavoriteSearchResults = (favoriteItemNames: Set<string>) => {
 }
 
 interface IHomeFavoritesViewProps {
-    names: Set<string>;
+    queries: ISearchQuery[];
 }
 
-export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ names }) => {
+export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
@@ -57,7 +52,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ names }) 
         setIsCollapsed(!isCollapsed);
     }
 
-    const { stage, results } = useFavoriteSearchResults(names);
+    const { stage, results } = useFavoriteSearchResults(queries);
 
     const bodyView = useMemo(() => {
         if (stage === PromiseStage.running) {

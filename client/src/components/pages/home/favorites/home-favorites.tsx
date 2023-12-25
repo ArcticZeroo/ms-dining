@@ -1,15 +1,14 @@
-import { useValueNotifier } from '../../../../hooks/events.ts';
-import { ApplicationSettings } from '../../../../api/settings.ts';
+import { useFavoriteQueries } from '../../../../hooks/cafe.ts';
 import { HomeFavoritesView } from './home-favorites-view.tsx';
 
 export const HomeFavorites = () => {
-    const favoriteItemNames = useValueNotifier(ApplicationSettings.favoriteItemNames);
+	const favoriteQueries = useFavoriteQueries();
 
-    if (favoriteItemNames.size === 0) {
-        return null;
-    }
+	if (favoriteQueries.length === 0) {
+		return null;
+	}
 
-    return (
-        <HomeFavoritesView names={favoriteItemNames}/>
-    );
+	return (
+		<HomeFavoritesView queries={favoriteQueries}/>
+	);
 };

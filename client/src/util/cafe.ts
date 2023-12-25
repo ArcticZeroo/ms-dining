@@ -1,3 +1,5 @@
+import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { ApplicationSettings } from '../api/settings.ts';
 import { ICafe } from '../models/cafe.ts';
 
 export const getCafeName = (cafe: ICafe, showGroupName: boolean) => {
@@ -12,4 +14,8 @@ export const getCafeName = (cafe: ICafe, showGroupName: boolean) => {
 	}
 
 	return `${cafe.name} (${groupName})`;
-}
+};
+
+export const getTargetSettingForFavorite = (type: SearchEntityType) => type === SearchEntityType.menuItem
+																	   ? ApplicationSettings.favoriteItemNames
+																	   : ApplicationSettings.favoriteStationNames;
