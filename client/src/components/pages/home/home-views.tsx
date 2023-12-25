@@ -3,6 +3,7 @@ import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { CafeView } from '../../../models/cafe.ts';
+import { sortViews } from '../../../util/sorting.ts';
 import { isViewVisible } from '../../../util/view.ts';
 import { CombinedCafeMenuList } from '../../cafes/combined-cafe-menu-list.tsx';
 
@@ -26,7 +27,7 @@ export const HomeViews = () => {
             }
         }
 
-        return newAvailableViews;
+        return sortViews(newAvailableViews);
     }, [viewsById, homepageViewIds]);
 
     if (availableViews.length === 0) {
