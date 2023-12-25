@@ -1,7 +1,7 @@
 import Semaphore from 'semaphore-async-await';
 import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
 import { createAndSaveThumbnailForMenuItem } from '../image/thumbnail.js';
-import { logError, logInfo } from '../../../util/log.js';
+import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { CafeDiscoverySession } from '../session.js';
 
 export const thumbnailSemaphore = new Semaphore.default(10);
@@ -33,9 +33,8 @@ export const writeThumbnailsForCafe = async (cafe: ICafe, stations: ICafeStation
         }
     }
 
-    // logInfo('Creating and writing', count, 'thumbnails for cafe', cafe.name);
-    //
-    // const startTime = Date.now();
+    logDebug('Creating and writing', count, 'thumbnails for cafe', cafe.name);
+    const startTime = Date.now();
 
     try {
         await Promise.all(thumbnailPromises);
@@ -43,9 +42,8 @@ export const writeThumbnailsForCafe = async (cafe: ICafe, stations: ICafeStation
         logError('Failed to write thumbnails for cafe', cafe.name, 'with error:', e);
     }
 
-    // const endTime = Date.now();
-    // const elapsedSeconds = (endTime - startTime) / 1000;
-    //
-    // logInfo('Finished writing', count, 'thumbnails for cafe', cafe.name, 'in', elapsedSeconds.toFixed(2), 'second(s)');
+    const endTime = Date.now();
+    const elapsedSeconds = (endTime - startTime) / 1000;
+    logDebug('Finished writing', count, 'thumbnails for cafe', cafe.name, 'in', elapsedSeconds.toFixed(2), 'second(s)');
 }
 
