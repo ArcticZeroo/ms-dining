@@ -4,7 +4,7 @@ import { attachRouter, getTrimmedQueryParam } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
-import { getLogoUrl } from '../../util/cafe.js';
+import { getLogoUrl, getBetterLogoUrl } from '../../util/cafe.js';
 import { ICafeStation } from '../../models/cafe.js';
 import { NumberUtil } from '@msdining/common';
 import { jsonStringifyWithoutNull } from '../../util/serde.js';
@@ -15,6 +15,7 @@ import { ISearchResult } from '../../models/search.js';
 import Koa from 'koa';
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
+import { stat } from 'fs';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
 const DEFAULT_MAX_PRICE = 15;
@@ -106,7 +107,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
             menusByStation.push({
                 name:    station.name,
-                logoUrl: station.logoUrl,
+                logoUrl: getBetterLogoUrl(station.name, station.logoUrl),
                 menu:    itemsByCategory
             });
         }
@@ -159,7 +160,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         type:         searchResult.type,
         name:         searchResult.name,
         description:  searchResult.description,
-        imageUrl:     searchResult.imageUrl,
+        imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl),
         locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
         matchReasons: Array.from(searchResult.matchReasons),
     });

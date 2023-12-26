@@ -1,5 +1,7 @@
-import { ICafe, ICafeConfig, IMenuItem } from '../models/cafe.js';
+import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../models/cafe.js';
 import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
+import { betterLogosByNormalizedName } from '../constants/better-logos.js';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
     if (!config || !config.logoName) {
@@ -18,3 +20,8 @@ export const getThumbnailUrl = (menuItem: IMenuItem): string | undefined => {
 }
 
 export const normalizeTagName = (tagName: string) => tagName.toLowerCase().trim();
+
+export const getBetterLogoUrl = (stationName: string, stationLogoUrl: string) => {
+    const betterLogoUrl = betterLogosByNormalizedName[normalizeNameForSearch(stationName)];
+    return betterLogoUrl || stationLogoUrl;
+}
