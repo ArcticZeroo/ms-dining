@@ -6,6 +6,7 @@
     cursor: pointer;
     gap: var(--default-padding);
     transition: transform 0.2s ease;
+    padding: 0 0 1rem 1rem;
 }
 
 .cart-popup .cart-info {
@@ -33,16 +34,23 @@
 .cart-popup:hover .cart-contents {
     display: table;
     background: #5e76ff;
-    padding: var(--default-padding);
     border-bottom-left-radius: var(--default-padding);
+    border-spacing: var(--default-padding);
+    margin: 0;
+}
+
+.cart-popup:hover .cart-contents td, .cart-popup:hover .cart-contents th {
+    margin: 0;
+    padding: 0;
 }
 
 .cart-item-buttons {
     display: flex;
-    gap: 0.125rem;
+    gap: 0.5rem;
     background: rgba(0, 0, 0, 0.15);
     border-radius: var(--default-padding);
     padding: 0.5rem;
+    justify-content: space-around;
 }
 
 .cart-item-buttons button {

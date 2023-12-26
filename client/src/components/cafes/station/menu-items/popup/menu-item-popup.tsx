@@ -11,172 +11,166 @@ import { Modal } from '../../../../popup/modal.tsx';
 import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 import { FavoriteItemButton } from '../../../../button/favorite-item-button.tsx';
+import { getRandomId } from '../../../../../util/id.ts';
+import { addOrEditCartItem, shallowCloneCart } from '../../../../../util/cart.ts';
 
 import './menu-item-popup.css';
 
-interface IMenuItemPopupProps {
-	menuItem: IMenuItem;
-	modalSymbol: symbol;
-	fromCartItem?: ICartItemWithMetadata;
-}
-
 const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
-	let price = menuItem.price;
+    let price = menuItem.price;
 
-	for (const modifier of menuItem.modifiers) {
-		const selectedChoiceIds = selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
+    for (const modifier of menuItem.modifiers) {
+        const selectedChoiceIds = selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
 
-		for (const choice of modifier.choices) {
-			if (selectedChoiceIds.has(choice.id)) {
-				price += choice.price;
-			}
-		}
-	}
+        for (const choice of modifier.choices) {
+            if (selectedChoiceIds.has(choice.id)) {
+                price += choice.price;
+            }
+        }
+    }
 
-	return price;
+    return price;
 };
 
 const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
-	return useMemo(
-		() => {
-			for (const modifier of menuItem.modifiers) {
-				const selectedChoiceIds = getSelectedChoiceIdsForModifier(modifier);
+    return useMemo(
+        () => {
+            for (const modifier of menuItem.modifiers) {
+                const selectedChoiceIds = getSelectedChoiceIdsForModifier(modifier);
 
-				if (selectedChoiceIds.size < modifier.minimum) {
-					return false;
-				}
+                if (selectedChoiceIds.size < modifier.minimum) {
+                    return false;
+                }
 
-				if (selectedChoiceIds.size > modifier.maximum) {
-					return false;
-				}
-			}
+                if (selectedChoiceIds.size > modifier.maximum) {
+                    return false;
+                }
+            }
 
-			return true;
-		},
-		[menuItem, getSelectedChoiceIdsForModifier]
-	);
+            return true;
+        },
+        [menuItem, getSelectedChoiceIdsForModifier]
+    );
 };
 
-export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, fromCartItem }) => {
-	const isUpdate = fromCartItem != null;
+interface IMenuItemPopupProps {
+    menuItem: IMenuItem;
+    modalSymbol: symbol;
+    cafeId: string;
+    fromCartItem?: ICartItemWithMetadata;
+}
 
-	const navigate = useNavigate();
+export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, fromCartItem }) => {
+    const isUpdate = fromCartItem != null;
 
-	const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
-		return fromCartItem?.choicesByModifierId ?? new Map<string, Set<string>>();
-	});
+    const navigate = useNavigate();
 
-	const [notes, setNotes] = useState(fromCartItem?.specialInstructions || '');
-	const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
+    const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
+        return fromCartItem?.choicesByModifierId ?? new Map<string, Set<string>>();
+    });
 
-	const cartItemsNotifier = useContext(CartContext);
-	const modalNotifier = useContext(PopupContext);
+    const [notes, setNotes] = useState(fromCartItem?.specialInstructions || '');
+    const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
 
-	const closeModal = () => {
-		if (modalNotifier.value?.id === modalSymbol) {
-			modalNotifier.value = null;
-		}
-	};
+    const cartItemsNotifier = useContext(CartContext);
+    const modalNotifier = useContext(PopupContext);
 
-	const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
-		return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
-	}, [selectedChoiceIdsByModifierId]);
+    const closeModal = () => {
+        if (modalNotifier.value?.id === modalSymbol) {
+            modalNotifier.value = null;
+        }
+    };
 
-	const onSelectedChoiceIdsChanged = (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => {
-		const newSelectedChoiceIdsByModifierId = new Map(selectedChoiceIdsByModifierId);
-		newSelectedChoiceIdsByModifierId.set(modifier.id, selection);
-		setSelectedChoiceIdsByModifierId(newSelectedChoiceIdsByModifierId);
-	};
+    const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
+        return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
+    }, [selectedChoiceIdsByModifierId]);
 
-	const totalPrice = useMemo(
-		() => calculatePrice(menuItem, selectedChoiceIdsByModifierId),
-		[menuItem, selectedChoiceIdsByModifierId]
-	);
+    const onSelectedChoiceIdsChanged = (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => {
+        const newSelectedChoiceIdsByModifierId = new Map(selectedChoiceIdsByModifierId);
+        newSelectedChoiceIdsByModifierId.set(modifier.id, selection);
+        setSelectedChoiceIdsByModifierId(newSelectedChoiceIdsByModifierId);
+    };
 
-	const isOrderValid = useIsOrderValid(menuItem, getSelectedChoiceIdsForModifier);
+    const totalPrice = useMemo(
+        () => calculatePrice(menuItem, selectedChoiceIdsByModifierId),
+        [menuItem, selectedChoiceIdsByModifierId]
+    );
 
-	const onAddToCartClicked = () => {
-		if (!isOrderValid) {
-			return;
-		}
+    const isOrderValid = useIsOrderValid(menuItem, getSelectedChoiceIdsForModifier);
 
-		const newCartItem: ICartItemWithMetadata = {
-			associatedItem:      menuItem,
-			itemId:              menuItem.id,
-			quantity:            quantity,
-			price:               totalPrice,
-			specialInstructions: notes,
-			choicesByModifierId: selectedChoiceIdsByModifierId
-		};
+    const onAddToCartClicked = () => {
+        if (!isOrderValid) {
+            return;
+        }
 
-		if (fromCartItem != null) {
-			cartItemsNotifier.value = cartItemsNotifier.value.map(item => {
-				if (item === fromCartItem) {
-					return newCartItem;
-				}
+        const newCartItem: ICartItemWithMetadata = {
+            id:                  fromCartItem?.id ?? getRandomId(),
+            associatedItem:      menuItem,
+            itemId:              menuItem.id,
+            quantity:            quantity,
+            price:               totalPrice,
+            specialInstructions: notes,
+            choicesByModifierId: selectedChoiceIdsByModifierId,
+            cafeId
+        };
 
-				return item;
-			});
-		} else {
-			cartItemsNotifier.value = [
-				...cartItemsNotifier.value,
-				newCartItem
-			];
-		}
+        const newCart = shallowCloneCart(cartItemsNotifier.value);
+        addOrEditCartItem(newCart, newCartItem);
+        cartItemsNotifier.value = newCart;
 
-		closeModal();
-	};
+        closeModal();
+    };
 
-	const onAddQuantityClicked = () => {
-		setQuantity(quantity + 1);
-	};
+    const onAddQuantityClicked = () => {
+        setQuantity(quantity + 1);
+    };
 
-	const onRemoveQuantityClicked = () => {
-		if (quantity <= 1) {
-			return;
-		}
+    const onRemoveQuantityClicked = () => {
+        if (quantity <= 1) {
+            return;
+        }
 
-		setQuantity(quantity - 1);
-	};
+        setQuantity(quantity - 1);
+    };
 
-	const onSearchClicked = () => {
-		navigateToSearch(navigate, menuItem.name);
-		closeModal();
-	};
+    const onSearchClicked = () => {
+        navigateToSearch(navigate, menuItem.name);
+        closeModal();
+    };
 
-	return (
-		<Modal
-			title={`${isUpdate ? 'Edit ' : ''}${menuItem.name}`}
-			buttons={
-				<>
-					<FavoriteItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
-					<button title="Search for this item across campus" onClick={onSearchClicked}>
+    return (
+        <Modal
+            title={`${isUpdate ? 'Edit ' : ''}${menuItem.name}`}
+            buttons={
+                <>
+                    <FavoriteItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
+                    <button title="Search for this item across campus" onClick={onSearchClicked}>
 						<span className="material-symbols-outlined">
 							search
 						</span>
-					</button>
-				</>
-			}
-			body={(
-				<MenuItemPopupBody
-					menuItem={menuItem}
-					notes={notes}
-					getSelectedChoiceIdsForModifier={getSelectedChoiceIdsForModifier}
-					onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
-					onNotesChanged={setNotes}
-				/>
-			)}
-			footer={(
-				<MenuItemPopupFooter
-					isUpdate={isUpdate}
-					totalPrice={totalPrice}
-					quantity={quantity}
-					isOrderValid={isOrderValid}
-					onAddToCartClicked={onAddToCartClicked}
-					onAddQuantityClicked={onAddQuantityClicked}
-					onRemoveQuantityClicked={onRemoveQuantityClicked}
-				/>
-			)}
-		/>
-	);
+                    </button>
+                </>
+            }
+            body={(
+                <MenuItemPopupBody
+                    menuItem={menuItem}
+                    notes={notes}
+                    getSelectedChoiceIdsForModifier={getSelectedChoiceIdsForModifier}
+                    onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
+                    onNotesChanged={setNotes}
+                />
+            )}
+            footer={(
+                <MenuItemPopupFooter
+                    isUpdate={isUpdate}
+                    totalPrice={totalPrice}
+                    quantity={quantity}
+                    isOrderValid={isOrderValid}
+                    onAddToCartClicked={onAddToCartClicked}
+                    onAddQuantityClicked={onAddQuantityClicked}
+                    onRemoveQuantityClicked={onRemoveQuantityClicked}
+                />
+            )}
+        />
+    );
 };

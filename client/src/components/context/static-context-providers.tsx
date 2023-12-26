@@ -3,8 +3,7 @@ import { ValueNotifier } from '../../util/events.ts';
 import { DiningClient } from '../../api/dining.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
-import { CartContext } from '../../context/cart.ts';
-import { ICartItemWithMetadata } from '../../models/cart.ts';
+import { CartContext, CartItemsByCafeId } from '../../context/cart.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ApplicationSettings } from '../../api/settings.ts';
 
@@ -20,7 +19,7 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
     );
 
     const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
-    const cartItemNotifier = useMemo(() => new ValueNotifier<Array<ICartItemWithMetadata>>([]), []);
+    const cartItemNotifier = useMemo(() => new ValueNotifier<CartItemsByCafeId>(new Map()), []);
 
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 

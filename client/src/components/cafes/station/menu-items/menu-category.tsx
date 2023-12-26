@@ -11,8 +11,14 @@ export const MenuCategory: React.FC<IMenuCategoryProps> = ({
                                                                categoryName,
                                                                menuItems
                                                            }) => {
+
     const menuItemList = useMemo(
-        () => menuItems.map(item => (<MenuItem key={item.id} menuItem={item}/>)),
+        () => menuItems.map(item => (
+            <MenuItem
+                key={item.id}
+                menuItem={item}
+            />
+        )),
         [menuItems]
     );
 

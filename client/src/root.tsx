@@ -29,7 +29,7 @@ const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>
     }, [shouldStopScroll, scrollTopRef]);
 }
 
-const useScrollTopRef = (shouldStopScroll: boolean) => {
+const useScrollTracker = (shouldStopScroll: boolean) => {
     const location = useLocation();
     const pageBodyDivRef = useRef<HTMLDivElement>(null);
     const scrollTopRef = useRef<number | undefined>(undefined);
@@ -41,8 +41,13 @@ const useScrollTopRef = (shouldStopScroll: boolean) => {
             pageBodyDivRef.current.scrollTop = 0;
         }
         document.documentElement.scrollTop = 0;
-    }, [location.pathname]);
+    }, [location.pathname, location.search]);
 
+    useEffect(() => {
+        // Prevent the scrollbar from disappearing when we open a modal or something
+        // The scrolling isn't happening at the HTML level anyways, so this doesn't allow scrolling
+        document.documentElement.style.overflowY = shouldStopScroll ? 'scroll' : '';
+    }, [shouldStopScroll]);
 
     return pageBodyDivRef;
 };
@@ -55,7 +60,7 @@ export const Root = () => {
 
     const shouldStopScroll = (isNavExpanded && deviceType === DeviceType.Mobile) || currentModal != null;
 
-    const pageBodyDivRef = useScrollTopRef(shouldStopScroll);
+    const pageBodyDivRef = useScrollTracker(shouldStopScroll);
 
     return (
         <>

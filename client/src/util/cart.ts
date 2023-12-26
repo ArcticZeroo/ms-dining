@@ -1,4 +1,6 @@
-import { CafeTypes } from "@msdining/common";
+import { CafeTypes } from '@msdining/common';
+import { CartItemsByCafeId } from '../context/cart.ts';
+import { ICartItemWithMetadata } from '../models/cart.ts';
 
 export const getPriceDisplay = (price: number, addCurrencySign: boolean = true) => {
     if (price === 0) {
@@ -38,4 +40,42 @@ export const getMinMaxDisplay = (modifier: CafeTypes.IMenuItemModifier) => {
 
 export const getChoiceHtmlId = (modifier: CafeTypes.IMenuItemModifier, choice: CafeTypes.IMenuItemModifierChoice) => {
     return `choice-${modifier.id}-${choice.id}`;
+}
+
+export const addOrEditCartItem = (cart: CartItemsByCafeId, item: ICartItemWithMetadata) => {
+    const cafeItems = cart.get(item.cafeId) ?? new Map<string, ICartItemWithMetadata>();
+
+    const existingItem = cafeItems.get(item.id);
+    console.log(item, existingItem, existingItem === item);
+
+    cafeItems.set(item.id, item);
+    cart.set(item.cafeId, cafeItems);
+}
+
+export const removeFromCart = (cart: CartItemsByCafeId, item: ICartItemWithMetadata) => {
+    const cafeItems = cart.get(item.cafeId);
+
+    if (!cafeItems) {
+        return;
+    }
+
+    cafeItems.delete(item.id);
+
+    if (cafeItems.size === 0) {
+        cart.delete(item.cafeId);
+    }
+}
+
+export const clearCart = (cart: CartItemsByCafeId) => {
+    cart.clear();
+}
+
+export const shallowCloneCart = (cart: CartItemsByCafeId) => {
+    const newCart = new Map<string, Map<string, ICartItemWithMetadata>>();
+
+    for (const [cafeId, items] of cart.entries()) {
+        newCart.set(cafeId, new Map(items));
+    }
+
+    return newCart;
 }

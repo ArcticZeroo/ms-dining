@@ -7,7 +7,6 @@ interface IStationMenuProps {
 }
 
 const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStationMenuProps> = ({ menuItemsByCategoryName }, menuBodyRef) => {
-
     return (
         // This div wrapper is needed for the table to scroll independently of the header
         <div className="menu-body" ref={menuBodyRef}>
