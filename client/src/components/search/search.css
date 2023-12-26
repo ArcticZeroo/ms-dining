@@ -135,6 +135,7 @@
     align-self: center;
     max-height: 10rem;
     border-radius: var(--default-padding);
+    transition: max-height 0.25s ease;
 }
 
 .search-result-description {
@@ -148,6 +149,12 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+@media screen and (max-height: 800px) {
+    .search-result-image {
+        max-height: 8rem;
+    }
 }
 
 @media screen and (max-width: 800px) {
