@@ -10,16 +10,11 @@ import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
+import { useLocation } from 'react-router-dom';
 
 interface IMenuWithCafe {
     cafe: ICafe;
     menu: CafeMenu;
-}
-
-interface ICombinedCafeMenuListProps {
-    views: Iterable<CafeView>;
-    countTowardsLastUsed: boolean;
-    showGroupNames: boolean;
 }
 
 const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>, countTowardsLastUsed: boolean) => {
@@ -69,6 +64,34 @@ const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>
     return [stage, menuData] as const;
 };
 
+const useAnchorScroll = (...dependencies: unknown[]) => {
+    const location = useLocation();
+
+    useEffect(() => {
+        const hash = location.hash.trim();
+
+        if (!hash) {
+            return;
+        }
+
+        const anchorElement = document.querySelector(`[href='${hash}']`);
+
+        anchorElement?.scrollIntoView({
+            behavior: 'smooth'
+        });
+    }, [
+        location.hash,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        ...dependencies
+    ]);
+};
+
+interface ICombinedCafeMenuListProps {
+    views: Iterable<CafeView>;
+    countTowardsLastUsed: boolean;
+    showGroupNames: boolean;
+}
+
 export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                                                                                views,
                                                                                countTowardsLastUsed,
@@ -77,6 +100,8 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
     const { viewsById } = useContext(ApplicationContext);
     const [menuDataStage, menuData] = useMenuData(views, viewsById, countTowardsLastUsed);
     const isLoading = menuDataStage === PromiseStage.running;
+
+    useAnchorScroll(isLoading);
 
     return (
         <div className="collapsible-menu-list">

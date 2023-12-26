@@ -135,6 +135,10 @@
     gap: 0.5rem;
 }
 
+.collapsible-cafe .cafe-header a {
+    scroll-margin: var(--default-padding);
+}
+
 .collapsible-cafe .cafe-name .logo {
     height: var(--cafe-logo-height);
     transition: height 0.125s ease;

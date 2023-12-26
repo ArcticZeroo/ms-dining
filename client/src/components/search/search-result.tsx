@@ -8,7 +8,7 @@ import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
-import { getViewUrl } from '../../util/link.ts';
+import { getViewMenuUrlWithJump } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
@@ -243,7 +243,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 								const parentView = getParentView(viewsById, view);
 
 								return (
-									<Link to={getViewUrl(parentView)}
+									<Link to={getViewMenuUrlWithJump(parentView, view)}
 										  className="search-result-chip"
 										  key={view.value.id}>
 										<div className="chip-data">

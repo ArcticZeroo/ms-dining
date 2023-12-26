@@ -5,7 +5,7 @@ import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { useViewsForNav } from '../../hooks/views.ts';
 import { CafeView } from '../../models/cafe.ts';
-import { getViewUrl } from '../../util/link.ts';
+import { getViewMenuUrl } from '../../util/link.ts';
 import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
 
 interface INavViewLinkProps {
@@ -16,7 +16,7 @@ interface INavViewLinkProps {
 
 const NavViewLink: React.FC<INavViewLinkProps> = ({ view, onViewSelected }) => (
 	<li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`}>
-		<NavLink to={getViewUrl(view)}
+		<NavLink to={getViewMenuUrl(view)}
 				 onClick={() => onViewSelected(view)}>
 			{view.value.name}
 		</NavLink>

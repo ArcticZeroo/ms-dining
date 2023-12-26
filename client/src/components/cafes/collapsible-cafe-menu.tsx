@@ -61,10 +61,11 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                     <a className="cafe-order-link"
                        href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
                        target="_blank">
-                    <span className="material-symbols-outlined">
-                            open_in_new
-                    </span>
+                        <span className="material-symbols-outlined">
+                                open_in_new
+                        </span>
                     </a>
+                    <a href={`#${cafe.id}`}/>
                     <button className="collapse-toggle cafe-name" onClick={toggleIsExpanded}>
                         {
                             showCafeLogo && (
