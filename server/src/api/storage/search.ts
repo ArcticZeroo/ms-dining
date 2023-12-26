@@ -203,6 +203,11 @@ export abstract class SearchManager {
                         continue;
                     }
 
+                    // We only sort by calories per dollar, don't bother if there are no calories
+                    if (menuItem.calories === 0 && menuItem.maxCalories === 0) {
+                        continue;
+                    }
+
                     if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name) || CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
                         continue;
                     }
