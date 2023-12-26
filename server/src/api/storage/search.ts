@@ -87,6 +87,10 @@ export abstract class SearchManager {
                 searchResult.locationDatesByCafeId.set(cafeId, new Set());
             }
             searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
+
+            // The first item to make it into the map might not be the one with all the info.
+            searchResult.description = searchResult.description || description;
+            searchResult.imageUrl = searchResult.imageUrl || imageUrl;
         };
 
         const normalizedQueries: Array<ISearchQuery> = queries.map(({ text, type }) => {

@@ -245,4 +245,8 @@ export const sortSearchResults = ({
 };
 
 // e.g. Chipotle Chicken + Bacon Sub should also match "Chipotle Chicken Bacon Sub" or "Chipotle Chicken and Bacon Sub"
-export const normalizeNameForSearch = (name: string) => name.toLowerCase().trim().replaceAll(/(\W|\s|\s+\s|\sand\s)/ig, '');
+export const normalizeNameForSearch = (name: string) => name
+	.toLowerCase()
+	.trim()
+	.replace(/^the /i, '')
+	.replaceAll(/(\W|\s|\s+\s|\sand\s)/ig, '');

@@ -109,9 +109,9 @@ export abstract class MenuItemStorageClient {
         const dataWithoutId: Omit<MenuItem, 'id'> & {
             modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput
         } = {
-            name:                   menuItem.name,
+            name:                   menuItem.name.trim(),
             imageUrl:               menuItem.imageUrl,
-            description:            menuItem.description,
+            description:            menuItem.description?.trim(),
             externalLastUpdateTime: lastUpdateTime,
             price:                  Number(menuItem.price || 0),
             calories:               Number(menuItem.calories || 0),
