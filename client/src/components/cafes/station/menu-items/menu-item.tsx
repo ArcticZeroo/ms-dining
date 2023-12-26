@@ -77,7 +77,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         : 'Click to open item details';
 
     return (
-        <tr className={classNames('pointer', isFavoriteItem && 'is-favorite')} onClick={onOpenModalClick} title={title}
+        <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')} onClick={onOpenModalClick} title={title}
             style={{ backgroundColor: currentHighlightTag?.color }}>
             <td colSpan={!canShowImage ? 2 : 1}>
                 <div className="menu-item-head">

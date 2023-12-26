@@ -82,7 +82,7 @@
     background: var(--favorite-color-dark);
 }
 
-.station table tr:hover {
+.station table tr.menu-item:hover {
     background: #EEE;
 }
 
