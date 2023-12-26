@@ -35,6 +35,7 @@ const repairMissingWeeklyMenusAsync = async () => {
     }
 };
 
+// Doesn't fully work because we might not have menus for this week while we have menus for another week
 const repairCafesWithoutMenusAsync = async () => {
     logInfo('Checking for cafes without menus...');
 
@@ -52,10 +53,11 @@ const repairCafesWithoutMenusAsync = async () => {
 
         isRepairNeeded = true;
 
+        logInfo(cafe.id, 'is missing allowed menus, attempting to repair...');
+
         // Clear the cafe from storage in case we have a bad config
         await CafeStorageClient.deleteCafe(cafe.id);
 
-        logInfo(cafe.id, 'is missing allowed menus, attempting to repair...');
         for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
             try {
                 const updateSession = new DailyCafeUpdateSession(i);
@@ -69,7 +71,7 @@ const repairCafesWithoutMenusAsync = async () => {
         const isAnyAllowedMenuAvailableAfterRepair = await DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
         if (!isAnyAllowedMenuAvailableAfterRepair) {
             logError(`Still no menus available for cafe ${cafe.id}. Removing it from the list for now...`);
-            // The UpdateSession may have re-added the cafe to storage. Remove it again just in case.
+            // The update session may have re-added the cafe to storage. Remove it again just in case.
             await CafeStorageClient.deleteCafe(cafe.id);
         }
     }
@@ -103,7 +105,6 @@ const repairTodaySessionsAsync = async () => {
 export const performBootTasks = async () => {
     await repairTodaySessionsAsync();
     await repairMissingWeeklyMenusAsync();
-    await repairCafesWithoutMenusAsync();
 
     scheduleDailyUpdateJob();
     scheduleWeeklyUpdateJob();
