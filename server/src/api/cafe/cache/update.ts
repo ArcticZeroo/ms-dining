@@ -9,17 +9,17 @@ import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
-import { CafeDiscoverySession } from '../session.js';
 import { saveSessionAsync } from './storage.js';
 import { writeThumbnailsForCafe } from './thumbnail.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
+import { CafeMenuSession } from '../session/menu.js';
 
 export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryCount = 3;
 const cafeDiscoveryRetryDelayMs = 1000;
 
 export class DailyCafeUpdateSession {
-    public readonly cafeSessionsById = new Map<string, CafeDiscoverySession>();
+    public readonly cafeSessionsById = new Map<string, CafeMenuSession>();
 
     constructor(public readonly daysInFuture: number) {
     }
@@ -43,7 +43,7 @@ export class DailyCafeUpdateSession {
 
             logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
 
-            const session = new CafeDiscoverySession(cafe);
+            const session = new CafeMenuSession(cafe);
             await session.initialize();
             const stations = await session.populateMenuAsync(this.daysInFuture);
 

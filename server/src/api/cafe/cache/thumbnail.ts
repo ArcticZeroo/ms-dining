@@ -1,8 +1,7 @@
 import Semaphore from 'semaphore-async-await';
 import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
 import { createAndSaveThumbnailForMenuItem } from '../image/thumbnail.js';
-import { logDebug, logError, logInfo } from '../../../util/log.js';
-import { CafeDiscoverySession } from '../session.js';
+import { logDebug, logError } from '../../../util/log.js';
 
 export const thumbnailSemaphore = new Semaphore.default(10);
 
