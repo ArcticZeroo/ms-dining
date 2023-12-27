@@ -24,8 +24,11 @@
 
 .station .station-header {
     display: flex;
-    gap: var(--default-padding);
     align-items: center;
+}
+
+.station .station-header .favorite-item-button {
+    margin: var(--default-padding) var(--default-padding) var(--default-padding) 0;
 }
 
 .station .station-header .title {
@@ -39,6 +42,7 @@
     border-top-left-radius: 0.5rem;
     flex-grow: 1;
     transition: background-color 0.25s ease;
+    height: 100%; /*sometimes the favorite button is larger than the title when the margin is included*/
 }
 
 .station.is-favorite .station-header .title {
