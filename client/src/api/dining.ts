@@ -18,15 +18,15 @@ const JSON_HEADERS = {
 };
 
 interface IRetrieveCafeMenuParams {
-    id: string;
-    date?: Date;
-    shouldCountTowardsLastUsed?: boolean;
+	id: string;
+	date?: Date;
+	shouldCountTowardsLastUsed?: boolean;
 }
 
 interface IMakeRequestParams {
-    path: string;
-    sendVisitorId?: boolean;
-    options?: RequestInit;
+	path: string;
+	sendVisitorId?: boolean;
+	options?: RequestInit;
 }
 
 export abstract class DiningClient {
@@ -45,7 +45,11 @@ export abstract class DiningClient {
         };
     }
 
-    private static async _makeRequest<T>({ path, sendVisitorId = false, options = {} }: IMakeRequestParams): Promise<T> {
+    private static async _makeRequest<T>({
+											 path,
+											 sendVisitorId = false,
+											 options = {}
+										 }: IMakeRequestParams): Promise<T> {
         const response = await fetch(path, {
             ...DiningClient._getRequestOptions(sendVisitorId),
             ...options
@@ -60,7 +64,7 @@ export abstract class DiningClient {
 
     private static async _retrieveViewListInner(): Promise<IViewListResponse> {
         return DiningClient._makeRequest({
-            path: '/api/dining/',
+            path:          '/api/dining/',
             sendVisitorId: true
         });
     }
@@ -80,7 +84,11 @@ export abstract class DiningClient {
     }
 
     private static _addToLastUsedCafeIds(id: string) {
-        ApplicationSettings.lastUsedCafeIds.value = ApplicationSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id);
+        // Most recently used IDs are at the end of the list.
+        ApplicationSettings.lastUsedCafeIds.value = [
+            ...ApplicationSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id),
+            id
+        ];
     }
 
     public static getMinimumDateForMenu(): Date {
@@ -136,10 +144,10 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCafeMenu({
-                                             id,
-                                             shouldCountTowardsLastUsed,
-                                             date,
-                                         }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+											 id,
+											 shouldCountTowardsLastUsed,
+											 date,
+										 }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
@@ -265,8 +273,8 @@ export abstract class DiningClient {
         for (const serverResult of serverResults) {
             results.push({
                 entityType:            serverResult.type === 'menuItem'
-                                           ? SearchTypes.SearchEntityType.menuItem
-                                           : SearchTypes.SearchEntityType.station,
+									   ? SearchTypes.SearchEntityType.menuItem
+									   : SearchTypes.SearchEntityType.station,
                 name:                  serverResult.name,
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
@@ -290,11 +298,11 @@ export abstract class DiningClient {
         console.log(queries, JSON.stringify(queries));
 
         const response = await DiningClient._makeRequest({
-            path: `/api/dining/search/favorites`,
+            path:    `/api/dining/search/favorites`,
             options: {
-                method: 'POST',
+                method:  'POST',
                 headers: JSON_HEADERS,
-                body: JSON.stringify(queries)
+                body:    JSON.stringify(queries)
             }
         });
 
