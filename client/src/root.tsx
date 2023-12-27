@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { CartPopup } from './components/cafes/station/menu-items/popup/order/cart/cart-popup.tsx';
 import { Nav } from './components/nav/nav.tsx';
 import { PopupContainer } from './components/popup/popup-container.tsx';
 import { PopupContext } from './context/modal.ts';
@@ -70,7 +69,6 @@ export const Root = () => {
                  ref={pageBodyDivRef}>
                 <Outlet/>
             </div>
-            <CartPopup/>
         </>
     );
 };

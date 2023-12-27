@@ -11,6 +11,7 @@ import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
 import { useLocation } from 'react-router-dom';
+import { CartPopup } from './station/menu-items/popup/order/cart/cart-popup.tsx';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -117,6 +118,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                 ))
             }
             <MenuSettings/>
+            <CartPopup/>
         </div>
     );
 };

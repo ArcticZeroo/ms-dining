@@ -10,24 +10,17 @@ import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
 
 interface INavViewLinkProps {
 	view: CafeView;
-
-	onViewSelected(view: CafeView): void;
 }
 
-const NavViewLink: React.FC<INavViewLinkProps> = ({ view, onViewSelected }) => (
+const NavViewLink: React.FC<INavViewLinkProps> = ({ view }) => (
 	<li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`}>
-		<NavLink to={getViewMenuUrl(view)}
-				 onClick={() => onViewSelected(view)}>
+		<NavLink to={getViewMenuUrl(view)}>
 			{view.value.name}
 		</NavLink>
 	</li>
 );
 
-interface INavCafeListProps {
-	onViewSelected(view: CafeView): void;
-}
-
-export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => {
+export const NavCafeList: React.FC = () => {
 	const views = useViewsForNav();
 	const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
 
@@ -51,9 +44,7 @@ export const NavCafeList: React.FC<INavCafeListProps> = ({ onViewSelected }) => 
 			{
 				views.map(view => (
 					(!shouldCondenseNumbers || view.value.number == null) &&
-					<NavViewLink key={view.value.id}
-								 view={view}
-								 onViewSelected={onViewSelected}/>
+					<NavViewLink key={view.value.id} view={view}/>
 				))
 			}
 		</ul>

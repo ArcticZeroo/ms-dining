@@ -2,13 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
 import { ApplicationContext } from './context/app.ts';
-import { SelectedViewContext } from './context/view.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
 import { CafeView, ICafe, IViewListResponse } from './models/cafe.ts';
 import { ICancellationToken } from './util/async';
-import { ValueNotifier } from './util/events.ts';
 import { StaticContextProviders } from './components/context/static-context-providers.tsx';
 import { Root } from './root.tsx';
 
@@ -42,11 +40,6 @@ const App = () => {
 
     useBackgroundMenuUpdate(viewsById, cafes);
 
-    const selectedViewNotifier = useMemo(
-        () => new ValueNotifier<CafeView | undefined>(undefined),
-        []
-    );
-
     const [isNavExpanded, setIsNavExpanded] = useState(false);
     const deviceType = useDeviceType();
     const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
@@ -70,11 +63,9 @@ const App = () => {
         <div className="App">
             <ApplicationContext.Provider value={applicationContext}>
                 <NavExpansionContext.Provider value={navExpansionContext}>
-                    <SelectedViewContext.Provider value={selectedViewNotifier}>
-                        <StaticContextProviders>
-                            <Root/>
-                        </StaticContextProviders>
-                    </SelectedViewContext.Provider>
+                    <StaticContextProviders>
+                        <Root/>
+                    </StaticContextProviders>
                 </NavExpansionContext.Provider>
             </ApplicationContext.Provider>
         </div>
