@@ -143,7 +143,7 @@ export abstract class DiningClient {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
-            if (!DiningClient._cafeMenusByIdPerDateString.has(id)) {
+            if (!DiningClient._cafeMenusByIdPerDateString.has(dateString)) {
                 DiningClient._cafeMenusByIdPerDateString.set(dateString, new Map());
             }
 
