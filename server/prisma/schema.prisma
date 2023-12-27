@@ -19,7 +19,8 @@ model Cafe {
   contextId        String
   displayProfileId String
 
-  dailyStations DailyStation[]
+  dailyStations         DailyStation[]
+  dailyOrderingContexts DailyCafeOrderingContext[]
 }
 
 model MenuItem {
@@ -111,4 +112,16 @@ model DailyMenuItem {
 
   categoryId Int
   category   DailyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model DailyCafeOrderingContext {
+  dateString         String
+  onDemandTerminalId String
+  profitCenterId     String
+  storePriceLevel    String
+
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
+  @@id([dateString, cafeId])
 }

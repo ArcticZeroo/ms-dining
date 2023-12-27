@@ -1,16 +1,15 @@
-interface ICartItemModifier {
-	parentGroupId: string;
-	selectedOptionId: string;
-	quantity: number;
+export interface IOrderingContext {
+    onDemandTerminalId: string;
+    profitCenterId: string;
+    storePriceLevel: string;
 }
 
-interface ICartItem {
-	itemId: string;
-	quantity: number;
-	modifiers: [];
-	specialInstructions?: string;
-}
-
-interface ICart {
-	items: ICartItem[];
+export interface ICardData {
+    name: string;
+    cardNumber: string;
+    expirationMonth: string;
+    expirationYear: string;
+    securityCode: string;
+    postalCode: string;
+    userAgent: string;
 }
