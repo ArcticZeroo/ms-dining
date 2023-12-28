@@ -222,6 +222,11 @@ export class CafeOrderSession extends CafeDiscoverySession {
         if (!response.ok) {
             throw new Error(`Failed to submit order: ${response.statusText}`);
         }
+
+        // not sure what is returned here. some token?
+        const json = await response.json();
+
+        return json;
     }
 
     private async _sendPhoneConfirmation(phoneNumberWithCountryCode: string) {
