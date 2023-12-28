@@ -1,17 +1,19 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../api/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
+import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 import { PopupContext } from '../../../../context/modal.ts';
 import { useIsFavoriteItem } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
+import { idPrefixByEntityType } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
-import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -57,10 +59,10 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         modalNotifier.value = {
             id:   menuItemModalSymbol,
             body: <MenuItemPopup
-                      cafeId={cafe.id}
-                      menuItem={menuItem}
-                      modalSymbol={menuItemModalSymbol}
-                  />,
+                cafeId={cafe.id}
+                menuItem={menuItem}
+                modalSymbol={menuItemModalSymbol}
+            />,
         };
     };
 
@@ -72,47 +74,63 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         }
     }, [highlightTagNames, menuItem.tags]);
 
+    const normalizedName = useMemo(
+        () => normalizeNameForSearch(menuItem.name),
+        [menuItem.name]
+    );
+
     const title = allowOnlineOrdering
         ? `Click to open item details (online ordering enabled)`
         : 'Click to open item details';
 
     return (
-        <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')} onClick={onOpenModalClick} title={title}
-            style={{ backgroundColor: currentHighlightTag?.color }}>
-            <td colSpan={!canShowImage ? 2 : 1}>
-                <div className="menu-item-head">
-                    <span className="menu-item-name">{menuItem.name}</span>
-                    {
-                        showDescriptions
-                        && menuItem.description
-                        && <span className="menu-item-description">{menuItem.description}</span>
-                    }
-                </div>
-            </td>
-            {
-                canShowImage && (
-                    <td className="centered-content">
-                        <MenuItemImage menuItem={menuItem}/>
-                    </td>
-                )
-            }
-            <td>
-                {getPriceDisplay(menuItem.price)}
-            </td>
-            {
-                showCalories && (
-                    <td>
-                        {caloriesDisplay}
-                    </td>
-                )
-            }
-            {
-                showTags && (
-                    <td>
-                        <MenuItemTags tags={menuItem.tags}/>
-                    </td>
-                )
-            }
-        </tr>
+        <>
+            {/* This is a hack because the anchor needs to scroll the user to the top of the item, but td elements are horizontal. */}
+            <tr className="scroll-anchor-row">
+                <td>
+                    <a className="scroll-anchor" href={`#${idPrefixByEntityType[SearchEntityType.menuItem]}-${normalizedName}`}/>
+                </td>
+            </tr>
+            <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')}
+                onClick={onOpenModalClick}
+                title={title}
+                style={{ backgroundColor: currentHighlightTag?.color }}
+            >
+                <td colSpan={!canShowImage ? 2 : 1}>
+                    <div className="menu-item-head">
+                        <span className="menu-item-name">{menuItem.name}</span>
+                        {
+                            showDescriptions
+                            && menuItem.description
+                            && <span className="menu-item-description">{menuItem.description}</span>
+                        }
+                    </div>
+                </td>
+                {
+                    canShowImage && (
+                        <td className="centered-content">
+                            <MenuItemImage menuItem={menuItem}/>
+                        </td>
+                    )
+                }
+                <td>
+                    {getPriceDisplay(menuItem.price)}
+                </td>
+                {
+                    showCalories && (
+                        <td>
+                            {caloriesDisplay}
+                        </td>
+                    )
+                }
+                {
+                    showTags && (
+                        <td>
+                            <MenuItemTags tags={menuItem.tags}/>
+                        </td>
+                    )
+                }
+            </tr>
+        </>
     );
 };

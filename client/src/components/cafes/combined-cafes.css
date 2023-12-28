@@ -103,6 +103,12 @@
     padding: var(--table-padding) var(--table-padding) var(--table-padding) 0;
 }
 
+.station table .scroll-anchor-row td {
+    height: 0;
+    padding: 0;
+    margin: 0;
+}
+
 .station table td:first-child {
     border-bottom-left-radius: var(--default-padding);
     border-top-left-radius: var(--default-padding);
@@ -137,10 +143,6 @@
 .collapsible-cafe .cafe-header {
     display: flex;
     gap: 0.5rem;
-}
-
-.collapsible-cafe .cafe-header a {
-    scroll-margin: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-name .logo {

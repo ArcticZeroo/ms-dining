@@ -18,8 +18,8 @@ import './search.css';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 
 interface IEntityDisplayData {
-	className: string;
-	iconName: string;
+    className: string;
+    iconName: string;
 }
 
 const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
@@ -117,38 +117,38 @@ const getViewNameForSearchResult = (view: CafeView) => {
 };
 
 interface ISearchResultField {
-	key: string;
-	iconName: string;
-	value: React.ReactNode;
+    key: string;
+    iconName: string;
+    value: React.ReactNode;
 }
 
 interface ISearchResultProps {
-	isVisible: boolean;
-	name: string;
-	description?: string;
-	locationDatesByCafeId: Map<string, Date[]>;
-	imageUrl?: string;
-	entityType: SearchTypes.SearchEntityType;
-	extraFields?: ISearchResultField[];
-	onlyShowLocationsOnDate?: Date;
-	isCompact?: boolean;
-	showFavoriteButton?: boolean;
-	shouldColorForFavorites?: boolean;
+    isVisible: boolean;
+    name: string;
+    description?: string;
+    locationDatesByCafeId: Map<string, Date[]>;
+    imageUrl?: string;
+    entityType: SearchTypes.SearchEntityType;
+    extraFields?: ISearchResultField[];
+    onlyShowLocationsOnDate?: Date;
+    isCompact?: boolean;
+    showFavoriteButton?: boolean;
+    shouldColorForFavorites?: boolean;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
-															   isVisible,
-															   name,
-															   description,
-															   locationDatesByCafeId,
-															   imageUrl,
-															   entityType,
-															   extraFields,
-															   onlyShowLocationsOnDate,
-															   isCompact = false,
-															   showFavoriteButton = !isCompact,
-															   shouldColorForFavorites = true,
-														   }) => {
+    isVisible,
+    name,
+    description,
+    locationDatesByCafeId,
+    imageUrl,
+    entityType,
+    extraFields,
+    onlyShowLocationsOnDate,
+    isCompact = false,
+    showFavoriteButton = !isCompact,
+    shouldColorForFavorites = true,
+}) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -193,14 +193,14 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     <div className="flex">
                         {
                             showFavoriteButton
-							&& (
-							    <div>
-							        <FavoriteItemButton
-							            name={name}
-							            type={entityType}
-							        />
-							    </div>
-							)
+                            && (
+                                <div>
+                                    <FavoriteItemButton
+                                        name={name}
+                                        type={entityType}
+                                    />
+                                </div>
+                            )
                         }
                         <div className="search-result-name">
                             {name}
@@ -243,17 +243,17 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                 const parentView = getParentView(viewsById, view);
 
                                 return (
-                                    <Link to={getViewMenuUrlWithJump(parentView, view)}
-										  className="search-result-chip"
-										  key={view.value.id}>
+                                    <Link to={getViewMenuUrlWithJump({ view: parentView, name, entityType })}
+                                        className="search-result-chip"
+                                        key={view.value.id}>
                                         <div className="chip-data">
                                             {
                                                 !isCompact
-												&& (
-												    <span className="material-symbols-outlined icon">
+                                                && (
+                                                    <span className="material-symbols-outlined icon">
                                                         location_on
 												    </span>
-												)
+                                                )
                                             }
                                             <span className="value">
                                                 {getViewNameForSearchResult(view)}

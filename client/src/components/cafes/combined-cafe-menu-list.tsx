@@ -1,5 +1,6 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
@@ -10,7 +11,6 @@ import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
-import { useLocation } from 'react-router-dom';
 
 interface IMenuWithCafe {
     cafe: ICafe;
@@ -93,10 +93,10 @@ interface ICombinedCafeMenuListProps {
 }
 
 export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
-                                                                               views,
-                                                                               countTowardsLastUsed,
-                                                                               showGroupNames
-                                                                           }) => {
+    views,
+    countTowardsLastUsed,
+    showGroupNames
+}) => {
     const { viewsById } = useContext(ApplicationContext);
     const [menuDataStage, menuData] = useMenuData(views, viewsById, countTowardsLastUsed);
     const isLoading = menuDataStage === PromiseStage.running;

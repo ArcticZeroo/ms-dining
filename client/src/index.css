@@ -198,6 +198,10 @@ html, body, #root, .App {
     display: none;
 }
 
+.scroll-anchor {
+    scroll-margin: var(--default-padding);
+}
+
 @media screen and (min-width: 801px) {
     :root {
         --default-padding: 1rem;
