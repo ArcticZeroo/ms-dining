@@ -73,11 +73,15 @@
 }
 
 .station table {
-    border-spacing: 0 var(--default-padding);
+    border-spacing: 0;
 }
 
 .station table tr {
     transition: background-color 0.25s ease;
+}
+
+.station table tr.menu-item:hover {
+    background: #EEE;
 }
 
 .station table tr.is-favorite {
@@ -86,10 +90,6 @@
 
 .station table tr.is-favorite:hover {
     background: var(--favorite-color-dark);
-}
-
-.station table tr.menu-item:hover {
-    background: #EEE;
 }
 
 .station table th, .station table td {
@@ -106,7 +106,7 @@
 }
 
 .station table .scroll-anchor-row td {
-    height: 0;
+    height: var(--default-padding);
     padding: 0;
     margin: 0;
 }
