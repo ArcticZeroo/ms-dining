@@ -49,6 +49,7 @@ html, body, #root, .App {
     overflow-y: scroll;
     padding: var(--default-padding);
     flex-grow: 1;
+    scrollbar-gutter: stable;
 }
 
 .content.noscroll {

@@ -42,12 +42,6 @@ const useScrollTracker = (shouldStopScroll: boolean) => {
         document.documentElement.scrollTop = 0;
     }, [location.pathname, location.search]);
 
-    useEffect(() => {
-        // Prevent the scrollbar from disappearing when we open a modal or something
-        // The scrolling isn't happening at the HTML level anyways, so this doesn't allow scrolling
-        document.documentElement.style.overflowY = shouldStopScroll ? 'scroll' : '';
-    }, [shouldStopScroll]);
-
     return pageBodyDivRef;
 };
 
@@ -66,7 +60,7 @@ export const Root = () => {
             <PopupContainer/>
             <Nav/>
             <div className={classNames('content', shouldStopScroll && 'noscroll')}
-                 ref={pageBodyDivRef}>
+                ref={pageBodyDivRef}>
                 <Outlet/>
             </div>
         </>
