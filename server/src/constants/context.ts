@@ -1,3 +1,4 @@
 export const ApplicationContext = {
-    hasCreatedTrackingApplication: false
+    hasCreatedTrackingApplication: false,
+    isMenuUpdateInProgress: false,
 };

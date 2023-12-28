@@ -1,5 +1,6 @@
 import Router from '@koa/router';
 import * as diningConfig from '../../constants/cafes.js';
+import { requireMenusNotUpdating } from '../../middleware/menu.js';
 import { attachRouter, getTrimmedQueryParam } from '../../util/koa.js';
 import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
@@ -115,7 +116,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         return menusByStation;
     }
 
-    router.get('/menu/:id', async ctx => {
+    router.get('/menu/:id', requireMenusNotUpdating, async ctx => {
         const id = ctx.params.id?.toLowerCase();
         if (!id) {
             ctx.throw(400, 'Missing cafe id');
@@ -176,7 +177,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         return jsonStringifyWithoutNull(searchResults);
     }
 
-    router.post('/search/favorites', async ctx => {
+    router.post('/search/favorites', requireMenusNotUpdating, async ctx => {
         const queries = ctx.request.body;
 
         if (!isDuckTypeArray<ISearchQuery>(queries, { text: 'string', type: 'string' })) {
@@ -188,7 +189,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
     });
 
-    router.get('/search', async ctx => {
+    router.get('/search', requireMenusNotUpdating, async ctx => {
         const searchQuery = getTrimmedQueryParam(ctx, 'q');
 
         if (!searchQuery) {
@@ -200,7 +201,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
     });
 
-    router.get('/search/cheap', async ctx => {
+    router.get('/search/cheap', requireMenusNotUpdating, async ctx => {
         const maxPriceRaw = ctx.query.max;
         const minPriceRaw = ctx.query.min;
 

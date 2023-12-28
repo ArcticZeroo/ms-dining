@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import Semaphore from 'semaphore-async-await';
 import { cafeList } from '../../../constants/cafes.js';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
+import { ApplicationContext } from '../../../constants/context.js';
 import { ICafe } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
@@ -80,7 +81,14 @@ export class DailyCafeUpdateSession {
         });
     }
 
-    public async populateAsync(cafes: ICafe[] = cafeList) {
+    public async populateAsync() {
+        if (ApplicationContext.isMenuUpdateInProgress) {
+            logError(`{${this.dateString}} Menu update already in progress, skipping...`);
+            return;
+        }
+
+        ApplicationContext.isMenuUpdateInProgress = true;
+
         await this.resetDailyState();
 
         logInfo(`{${this.dateString}} Populating cafe sessions...`);
@@ -88,7 +96,7 @@ export class DailyCafeUpdateSession {
 
         const cafePromises: Array<Promise<unknown>> = [];
 
-        for (const cafe of cafes) {
+        for (const cafe of cafeList) {
             if (!isCafeAvailable(cafe, this.date)) {
                 continue;
             }
@@ -110,5 +118,7 @@ export class DailyCafeUpdateSession {
         const elapsedSeconds = (endTime - startTime) / 1000;
 
         logInfo(`{${this.dateString}} Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
+
+        ApplicationContext.isMenuUpdateInProgress = false;
     };
 }
