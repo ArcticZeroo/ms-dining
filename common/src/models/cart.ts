@@ -4,3 +4,12 @@ export interface ICartItem {
     choicesByModifierId: Map<string, Set<string>>;
     specialInstructions?: string;
 }
+
+export enum SubmitOrderStage {
+    notStarted = 'notStarted',
+    addToCart = 'addToCart',
+    payment = 'payment',
+    closeOrder = 'closeOrder',
+    sendTextReceipt = 'sendTextReceipt',
+    complete = 'complete'
+}

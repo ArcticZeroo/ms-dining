@@ -1,3 +1,5 @@
+import { ICartItem } from "@msdining/common/dist/models/cart.js";
+
 export interface IOrderingContext {
     onDemandTerminalId: string;
     profitCenterId: string;
@@ -12,4 +14,13 @@ export interface ICardData {
     securityCode: string;
     postalCode: string;
     userAgent: string;
+}
+
+export interface ISubmitOrderParams {
+    alias: string;
+    cafeId: string;
+    items: ICartItem[];
+    cardData: ICardData;
+    // +12345678900
+    phoneNumberWithCountryCode: string;
 }

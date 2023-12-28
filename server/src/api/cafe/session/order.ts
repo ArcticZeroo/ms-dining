@@ -1,11 +1,11 @@
-import { ICartItem } from '@msdining/common/dist/models/cart.js';
+import { ICartItem, SubmitOrderStage } from '@msdining/common/dist/models/cart.js';
 import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { IAddToOrderResponse } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
-import { ICardData, IOrderingContext } from '../../../models/cart.js';
+import { ICardData, IOrderingContext, ISubmitOrderParams } from '../../../models/cart.js';
 import { OrderingClient } from '../../storage/clients/ordering.js';
 import { StringUtil } from '../../../util/string.js';
 import { fixed } from '../../../util/math.js';
@@ -13,6 +13,7 @@ import { makeRequestWithRetries } from '../../../util/request.js';
 import fetch from 'node-fetch';
 
 export class CafeOrderSession extends CafeDiscoverySession {
+    #orderingContext: IOrderingContext;
     #cartGuid = hat();
     #orderNumber: string | null = null;
     #orderTotalWithoutTax: number = 0;
@@ -66,6 +67,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
 
         const itemId = hat();
 
+        const instructions = cartItem.specialInstructions ? [
+            {
+                label: '',
+                text:  cartItem.specialInstructions
+            }
+        ] : [];
+
         const response = await this._requestAsync(`/order/${this.config.tenantId}/${this.config.contextId}/orders`,
             {
                 method:  'POST',
@@ -77,16 +85,11 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         displayText:          menuItem.name,
                         properties:           {
                             cartGuid:     this.#cartGuid,
-                            priceLevelId: '71'
+                            priceLevelId: this.#orderingContext.storePriceLevel
                         },
-                        amount:               '6.99',
-                        options:              [],
-                        lineItemInstructions: cartItem.specialInstructions ? [
-                            {
-                                label: '',
-                                text:  cartItem.specialInstructions
-                            }
-                        ] : [],
+                        amount:               menuItem.price.toFixed(2),
+                        options:              [], // TODO: modifiers
+                        lineItemInstructions: instructions,
                         cartItemId:           itemId
                     },
                     scheduledDay:    0,
@@ -111,7 +114,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
         }
 
         if (this.#orderNumber != null && this.#orderNumber !== json.orderDetails.orderNumber) {
-            throw new Error('Order number mismatch! Timeout?');
+            throw new Error('Order number mismatch!');
         }
 
         this.#orderNumber = json.orderDetails.orderNumber;
@@ -122,14 +125,14 @@ export class CafeOrderSession extends CafeDiscoverySession {
         this.#orderTotalWithTax += Number(json.orderDetails.totalDueAmount.amount);
     }
 
-    private async _populateCart(context: IOrderingContext, cart: ICartItem[]) {
+    private async _populateCart(cart: ICartItem[]) {
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
         for (const cartItem of cart) {
             await this._addItemToCart(cartItem);
         }
     }
 
-    private async _getCardProcessorSiteToken(context: IOrderingContext) {
+    private async _getCardProcessorSiteToken() {
         if (StringUtil.isNullOrWhitespace(this.#orderNumber)) {
             throw new Error('Order number is not set');
         }
@@ -162,9 +165,9 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     language:             'en',
                     contextId:            this.config.contextId,
                     profileId:            this.config.displayProfileId,
-                    profitCenterId:       context.profitCenterId,
+                    profitCenterId:       this.#orderingContext.profitCenterId,
                     processButtonText:    'PROCESS',
-                    terminalId:           context.onDemandTerminalId
+                    terminalId:           this.#orderingContext.onDemandTerminalId
                 }
             });
         const json = await response.json();
@@ -178,7 +181,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return json.cardProcessorSiteToken;
     }
 
-    private async _submitOrder(token: string, cardData: ICardData) {
+    private async _submitOrderToCardProcessor(token: string, cardData: ICardData) {
         const response = await makeRequestWithRetries({
             makeRequest: () => fetch(
                 `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3`,
@@ -221,7 +224,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
         }
     }
 
-    private async _sendPhoneConfirmation() {
+    private async _sendPhoneConfirmation(phoneNumberWithCountryCode: string) {
         await this._requestAsync(`/communication/sendSMSReceipt`,
             {
                 method:  'POST',
@@ -229,11 +232,11 @@ export class CafeOrderSession extends CafeDiscoverySession {
                 body:    JSON.stringify({
                     contextId:         this.config.contextId,
                     orderId:           this.#orderNumber,
-                    sendOrderTo:       '+1number',
+                    sendOrderTo:       phoneNumberWithCountryCode,
                     storeInfo:         {
                         businessContextId:       this.config.contextId,
                         tenantId:                this.config.tenantId,
-                        storeInfoId:             '1376',
+                        storeInfoId:             this.config.storeId,
                         storeName:               this.cafe.name,
                         timezone:                'PST8PDT',
                         properties:              {
@@ -265,13 +268,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     },
                     smsConfig:         {
                         overrideFromStoreConfig: true,
-                        introText:               'Thank you for placing your order with {{N}}',
+                        introText:               '🐧 Thank you for placing your order on with {{N}}',
                         isItemizedListEnabled:   true,
                         isTotalsEnabled:         true,
                         isIntroEnabled:          true,
                         showCompleteCheckNumber: true,
                         appReceipt:              {
-                            introText:  'Thank you for placing your order with {{N}}. Your order number is {{O}}',
+                            introText:  '🐧 Thank you for placing your order with {{N}}. Your order number is {{O}}',
                             fromNumber: ''
                         }
                     },
@@ -286,12 +289,66 @@ export class CafeOrderSession extends CafeDiscoverySession {
             });
     }
 
+    private async _closeOrderAsync(context: IOrderingContext, phoneNumberWithCountryCode: string) {
+        const taxAmountObject = {
+            currencyUnit: 'USD',
+            amount:       this.#orderTotalTax.toFixed(2)
+        };
+
+        const totalWithoutTaxAmountObject = {
+            currencyUnit: 'USD',
+            amount:       this.#orderTotalWithoutTax.toFixed(2)
+        };
+
+        const totalAmountObject = {
+            currencyUnit: 'USD',
+            amount:       this.#orderTotalWithTax.toFixed(2)
+        };
+
+        const emptyAmountObject = {
+            currencyUnit: 'USD',
+            amount:       '0.00'
+        };
+
+        await this._requestAsync(
+            '',
+            {
+                // TODO
+            }
+        )
+    }
+
     // TODO: Figure out a way to break this up into two separate actions to reduce user-perceived latency.
-    public async submitOrder(cart: ICartItem[]) {
-        const orderingContext = await this._retrieveOrderingContextAsync();
+    /**
+     * @param cardData
+     * @param phoneNumberWithCountryCode
+     * @param items
+     * @returns The latest stage which was successfully completed.
+     */
+    public async submitOrder({
+                                 cardData,
+                                 phoneNumberWithCountryCode,
+                                 items
+                             }: ISubmitOrderParams): Promise<SubmitOrderStage> {
+        this.#orderingContext = await this._retrieveOrderingContextAsync();
 
-        await this._populateCart(orderingContext, cart);
+        let lastCompletedStage = SubmitOrderStage.notStarted;
+        try {
+            await this._populateCart(items);
 
-        const cardProcessorToken = await this._getCardProcessorSiteToken(orderingContext);
+            lastCompletedStage = SubmitOrderStage.addToCart;
+
+            const cardProcessorToken = await this._getCardProcessorSiteToken();
+
+            lastCompletedStage = SubmitOrderStage.payment;
+
+            const result = await this._submitOrderToCardProcessor(cardProcessorToken, cardData);
+        } catch (err) {
+            console.error(`Failed to submit order after stage ${lastCompletedStage}:`, err);
+            return lastCompletedStage;
+        }
+
+        // WTF do we do if it fails in this stage?
+        await this._sendPhoneConfirmation(phoneNumberWithCountryCode);
     }
 }
