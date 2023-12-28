@@ -177,8 +177,6 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                 setCopyButtonBackground(backgroundColor);
                 setTimeout(() => setCopyButtonBackground(undefined), 1000);
             });
-
-        navigate(viewPath);
     };
 
     return (
