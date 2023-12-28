@@ -1,5 +1,5 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem, IViewListResponse } from '../models/cafe.ts';
+import { CafeMenu, CafeView, ICafe, ICafeStation, ICoreResponse, IMenuItem } from '../models/cafe.ts';
 import {
     ICheapItemSearchResult,
     IQuerySearchResult,
@@ -30,7 +30,7 @@ interface IMakeRequestParams {
 }
 
 export abstract class DiningClient {
-    private static _viewListPromise: Promise<IViewListResponse> | undefined = undefined;
+    private static _viewListPromise: Promise<ICoreResponse> | undefined = undefined;
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
 
     private static _getRequestOptions(sendVisitorId: boolean) {
@@ -62,14 +62,14 @@ export abstract class DiningClient {
         return response.json();
     }
 
-    private static async _retrieveViewListInner(): Promise<IViewListResponse> {
+    private static async _retrieveViewListInner(): Promise<ICoreResponse> {
         return DiningClient._makeRequest({
             path:          '/api/dining/',
             sendVisitorId: true
         });
     }
 
-    public static retrieveViewList(): Promise<IViewListResponse> {
+    public static retrieveViewList(): Promise<ICoreResponse> {
         if (!DiningClient._viewListPromise) {
             DiningClient._viewListPromise = DiningClient._retrieveViewListInner();
         }

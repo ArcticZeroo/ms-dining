@@ -16,3 +16,7 @@
 #analytics-page .days-ago-option:hover, #analytics-page .days-ago-option.active {
     background: #1976D2;
 }
+
+#analytics-page .body {
+    max-height: 100vh;
+}
