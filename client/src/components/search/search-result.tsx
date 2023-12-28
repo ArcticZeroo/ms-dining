@@ -1,8 +1,10 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
+import { isSameDate } from '@msdining/common/dist/util/date-util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
+import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
@@ -13,8 +15,6 @@ import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
 import './search.css';
-import { SelectedDateContext } from '../../context/time.ts';
-import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 
 interface IEntityDisplayData {
@@ -23,97 +23,97 @@ interface IEntityDisplayData {
 }
 
 const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
-	[SearchTypes.SearchEntityType.menuItem]: {
-		className: 'entity-menu-item',
-		iconName:  'lunch_dining'
-	},
-	[SearchTypes.SearchEntityType.station]:  {
-		className: 'entity-station',
-		iconName:  'restaurant'
-	}
+    [SearchTypes.SearchEntityType.menuItem]: {
+        className: 'entity-menu-item',
+        iconName:  'lunch_dining'
+    },
+    [SearchTypes.SearchEntityType.station]:  {
+        className: 'entity-station',
+        iconName:  'restaurant'
+    }
 };
 
 const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
-	const locationEntries = Array.from(locationDatesByCafeId.entries());
+    const locationEntries = Array.from(locationDatesByCafeId.entries());
 
-	if (!onlyShowLocationsOnDate) {
-		return locationEntries;
-	}
+    if (!onlyShowLocationsOnDate) {
+        return locationEntries;
+    }
 
-	const resultEntries: Array<[string, Array<Date>]> = [];
-	for (const [cafeId, dates] of locationEntries) {
-		const filteredDates = dates.filter(date => DateUtil.isSameDate(date, onlyShowLocationsOnDate));
-		if (filteredDates.length > 0) {
-			resultEntries.push([cafeId, filteredDates]);
-		}
-	}
+    const resultEntries: Array<[string, Array<Date>]> = [];
+    for (const [cafeId, dates] of locationEntries) {
+        const filteredDates = dates.filter(date => DateUtil.isSameDate(date, onlyShowLocationsOnDate));
+        if (filteredDates.length > 0) {
+            resultEntries.push([cafeId, filteredDates]);
+        }
+    }
 
-	return resultEntries;
+    return resultEntries;
 };
 
 const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined) => {
-	return useMemo(
-		() => {
-			const locationEntries = getLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
+    return useMemo(
+        () => {
+            const locationEntries = getLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
 
-			if (onlyShowLocationsOnDate != null) {
-				return locationEntries.sort(([cafeA], [cafeB]) => {
-					const viewA = viewsById.get(cafeA);
-					const viewB = viewsById.get(cafeB);
+            if (onlyShowLocationsOnDate != null) {
+                return locationEntries.sort(([cafeA], [cafeB]) => {
+                    const viewA = viewsById.get(cafeA);
+                    const viewB = viewsById.get(cafeB);
 
-					if (!viewA || !viewB) {
-						console.error('Cannot sort views due to missing entry in map');
-						return 0;
-					}
+                    if (!viewA || !viewB) {
+                        console.error('Cannot sort views due to missing entry in map');
+                        return 0;
+                    }
 
-					return compareViewNames(viewA.value.name, viewB.value.name);
-				});
-			}
+                    return compareViewNames(viewA.value.name, viewB.value.name);
+                });
+            }
 
-			return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
-				const firstDateA = datesA[0];
-				const firstDateB = datesB[0];
+            return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
+                const firstDateA = datesA[0];
+                const firstDateB = datesB[0];
 
-				if (DateUtil.isDateBefore(firstDateA, firstDateB)) {
-					return -1;
-				}
+                if (DateUtil.isDateBefore(firstDateA, firstDateB)) {
+                    return -1;
+                }
 
-				if (DateUtil.isDateAfter(firstDateA, firstDateB)) {
-					return 1;
-				}
+                if (DateUtil.isDateAfter(firstDateA, firstDateB)) {
+                    return 1;
+                }
 
-				// The more "limited time only" locations get to go first
-				const lastDateA = datesA[datesA.length - 1];
-				const lastDateB = datesB[datesB.length - 1];
+                // The more "limited time only" locations get to go first
+                const lastDateA = datesA[datesA.length - 1];
+                const lastDateB = datesB[datesB.length - 1];
 
-				if (DateUtil.isDateBefore(lastDateA, lastDateB)) {
-					return -1;
-				}
+                if (DateUtil.isDateBefore(lastDateA, lastDateB)) {
+                    return -1;
+                }
 
-				if (DateUtil.isDateAfter(lastDateA, lastDateB)) {
-					return 1;
-				}
+                if (DateUtil.isDateAfter(lastDateA, lastDateB)) {
+                    return 1;
+                }
 
-				const viewA = viewsById.get(cafeA);
-				const viewB = viewsById.get(cafeB);
+                const viewA = viewsById.get(cafeA);
+                const viewB = viewsById.get(cafeB);
 
-				if (!viewA || !viewB) {
-					return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
-				} else {
-					return compareViewNames(viewA.value.name, viewB.value.name);
-				}
-			});
-		},
-		[viewsById, locationDatesByCafeId, onlyShowLocationsOnDate]
-	);
+                if (!viewA || !viewB) {
+                    return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
+                } else {
+                    return compareViewNames(viewA.value.name, viewB.value.name);
+                }
+            });
+        },
+        [viewsById, locationDatesByCafeId, onlyShowLocationsOnDate]
+    );
 };
 
 const getViewNameForSearchResult = (view: CafeView) => {
-	if (view.type === CafeViewType.group) {
-		return view.value.name;
-	}
+    if (view.type === CafeViewType.group) {
+        return view.value.name;
+    }
 
-	return getCafeName(view.value, true /*showGroupName*/);
+    return getCafeName(view.value, true /*showGroupName*/);
 };
 
 interface ISearchResultField {
@@ -149,138 +149,138 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 															   showFavoriteButton = !isCompact,
 															   shouldColorForFavorites = true,
 														   }) => {
-	const { viewsById } = useContext(ApplicationContext);
-	const showImages = useValueNotifier(ApplicationSettings.showImages);
-	const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-	const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const { viewsById } = useContext(ApplicationContext);
+    const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-	const isFavoriteItem = useIsFavoriteItem(name, entityType);
+    const isFavoriteItem = useIsFavoriteItem(name, entityType);
 
-	const entityDisplayData = entityDisplayDataByType[entityType];
+    const entityDisplayData = entityDisplayDataByType[entityType];
 
-	const shouldShowLocationDates = onlyShowLocationsOnDate != null
-									? !isSameDate(selectedDate, onlyShowLocationsOnDate)
-									: allowFutureMenus;
+    const shouldShowLocationDates = onlyShowLocationsOnDate != null
+        ? !isSameDate(selectedDate, onlyShowLocationsOnDate)
+        : allowFutureMenus;
 
-	if (onlyShowLocationsOnDate == null && !allowFutureMenus) {
-		onlyShowLocationsOnDate = selectedDate;
-	}
+    if (onlyShowLocationsOnDate == null && !allowFutureMenus) {
+        onlyShowLocationsOnDate = selectedDate;
+    }
 
-	const locationEntriesInOrder = useLocationEntries(viewsById, locationDatesByCafeId, onlyShowLocationsOnDate);
+    const locationEntriesInOrder = useLocationEntries(viewsById, locationDatesByCafeId, onlyShowLocationsOnDate);
 
-	if (locationEntriesInOrder.length === 0) {
-		return null;
-	}
+    if (locationEntriesInOrder.length === 0) {
+        return null;
+    }
 
-	const imageElement = (imageUrl && showImages) && (
-		<img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
-	);
+    const imageElement = (imageUrl && showImages) && (
+        <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
+    );
 
-	return (
-		<div className={classNames(
-			'search-result',
-			isVisible && 'visible',
-			isCompact && 'compact',
-			shouldColorForFavorites && isFavoriteItem && 'is-favorite'
-		)}>
-			<div className={classNames('search-result-type', entityDisplayData.className)}>
-				<span className="material-symbols-outlined">
-					{entityDisplayData.iconName}
-				</span>
-			</div>
-			<div className="search-result-info">
-				<div className="search-result-info-header">
-					<div className="flex">
-						{
-							showFavoriteButton
+    return (
+        <div className={classNames(
+            'search-result',
+            isVisible && 'visible',
+            isCompact && 'compact',
+            shouldColorForFavorites && isFavoriteItem && 'is-favorite'
+        )}>
+            <div className={classNames('search-result-type', entityDisplayData.className)}>
+                <span className="material-symbols-outlined">
+                    {entityDisplayData.iconName}
+                </span>
+            </div>
+            <div className="search-result-info">
+                <div className="search-result-info-header">
+                    <div className="flex">
+                        {
+                            showFavoriteButton
 							&& (
-								<div>
-									<FavoriteItemButton
-										name={name}
-										type={entityType}
-									/>
-								</div>
+							    <div>
+							        <FavoriteItemButton
+							            name={name}
+							            type={entityType}
+							        />
+							    </div>
 							)
-						}
-						<div className="search-result-name">
-							{name}
-							{
-								description && <div className="search-result-description">{description}</div>
-							}
-						</div>
-					</div>
-					{
-						extraFields && (
-										<div className="search-result-fields">
-											{
-												extraFields.map(({ iconName, value, key }) => (
-													value &&
+                        }
+                        <div className="search-result-name">
+                            {name}
+                            {
+                                description && <div className="search-result-description">{description}</div>
+                            }
+                        </div>
+                    </div>
+                    {
+                        extraFields && (
+                            <div className="search-result-fields">
+                                {
+                                    extraFields.map(({ iconName, value, key }) => (
+                                        value &&
 													<div className="search-result-field" key={key}>
-                                            <span className="material-symbols-outlined icon">
-                                                {iconName}
-                                            </span>
-														<span className="value">
-                                                {value}
-                                            </span>
+													    <span className="material-symbols-outlined icon">
+													        {iconName}
+													    </span>
+													    <span className="value">
+													        {value}
+													    </span>
 													</div>
-												))
-											}
-										</div>
-									)
-					}
-					{
-						isCompact && imageElement
-					}
-					<div className="search-result-hits">
-						{
-							locationEntriesInOrder.map(([cafeId, locationDates]) => {
-								const view = viewsById.get(cafeId);
+                                    ))
+                                }
+                            </div>
+                        )
+                    }
+                    {
+                        isCompact && imageElement
+                    }
+                    <div className="search-result-hits">
+                        {
+                            locationEntriesInOrder.map(([cafeId, locationDates]) => {
+                                const view = viewsById.get(cafeId);
 
-								if (!view) {
-									return false;
-								}
+                                if (!view) {
+                                    return false;
+                                }
 
-								const parentView = getParentView(viewsById, view);
+                                const parentView = getParentView(viewsById, view);
 
-								return (
-									<Link to={getViewMenuUrlWithJump(parentView, view)}
+                                return (
+                                    <Link to={getViewMenuUrlWithJump(parentView, view)}
 										  className="search-result-chip"
 										  key={view.value.id}>
-										<div className="chip-data">
-											{
-												!isCompact
+                                        <div className="chip-data">
+                                            {
+                                                !isCompact
 												&& (
-													<span className="material-symbols-outlined icon">
+												    <span className="material-symbols-outlined icon">
                                                         location_on
-                                                    </span>
+												    </span>
 												)
-											}
-											<span className="value">
+                                            }
+                                            <span className="value">
                                                 {getViewNameForSearchResult(view)}
                                             </span>
-										</div>
-										{
-											shouldShowLocationDates && (
-																		<div className="chip-data">
-													<span className="material-symbols-outlined icon">
+                                        </div>
+                                        {
+                                            shouldShowLocationDates && (
+                                                <div className="chip-data">
+                                                    <span className="material-symbols-outlined icon">
 														timer
-													</span>
-																			<span className="value">
-														{getLocationDatesDisplay(locationDates)}
-													</span>
-																		</div>
-																	)
-										}
-									</Link>
-								);
-							})
-						}
-					</div>
-				</div>
-				{
-					!isCompact && imageElement
-				}
-			</div>
-		</div>
-	);
+                                                    </span>
+                                                    <span className="value">
+                                                        {getLocationDatesDisplay(locationDates)}
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
+                                    </Link>
+                                );
+                            })
+                        }
+                    </div>
+                </div>
+                {
+                    !isCompact && imageElement
+                }
+            </div>
+        </div>
+    );
 };
