@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
+import { StaticContextProviders } from './components/context/static-context-providers.tsx';
 import { ApplicationContext } from './context/app.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
-import { CafeView, ICafe, IViewListResponse } from './models/cafe.ts';
-import { ICancellationToken } from './util/async';
-import { StaticContextProviders } from './components/context/static-context-providers.tsx';
+import { CafeView, ICafe, ICoreResponse } from './models/cafe.ts';
 import { Root } from './root.tsx';
+import { ICancellationToken } from './util/async';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -33,7 +33,7 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 const App = () => {
-    const { groups } = useLoaderData() as IViewListResponse;
+    const { groups, isTrackingEnabled } = useLoaderData() as ICoreResponse;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
@@ -49,9 +49,10 @@ const App = () => {
             viewsById,
             viewsInOrder,
             cafes,
-            groups
+            groups,
+            isTrackingEnabled
         }),
-        [viewsById, viewsInOrder, cafes, groups]
+        [viewsById, viewsInOrder, cafes, groups, isTrackingEnabled]
     );
 
     const navExpansionContext = useMemo(

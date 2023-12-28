@@ -73,6 +73,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         }
 
         ctx.body = jsonStringifyWithoutNull({
+            isTrackingEnabled: ApplicationContext.hasCreatedTrackingApplication,
             groups: responseGroups
         });
     });

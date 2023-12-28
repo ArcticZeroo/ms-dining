@@ -1,10 +1,12 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
-import React, { useEffect, useRef, useState } from 'react';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation } from '../../../models/cafe.ts';
+import { idPrefixByEntityType } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
@@ -71,17 +73,23 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
             updateExpansionState(isExpandedOnBoot);
         }
     }, []);
+    
+    const normalizedName = useMemo(
+        () => normalizeNameForSearch(station.name),
+        [station.name]
+    );
 
     return (
         <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
+            <a className="scroll-anchor" href={`#${idPrefixByEntityType[SearchEntityType.station]}-${normalizedName}`}/>
             <div className="station-header flex-row">
                 <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                 <button className="title" onClick={onTitleClick}>
                     {
                         station.logoUrl && (
-                                            <img src={station.logoUrl}
-                                                 alt={`Logo for station ${station.name}`}/>
-                                        )
+                            <img src={station.logoUrl}
+                                alt={`Logo for station ${station.name}`}/>
+                        )
                     }
                     {station.name}
                     <ExpandIcon isExpanded={isExpanded}/>

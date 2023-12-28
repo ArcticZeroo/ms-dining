@@ -24,8 +24,13 @@
 
 .station .station-header {
     display: flex;
-    gap: var(--default-padding);
     align-items: center;
+}
+
+.station .station-header .favorite-item-button {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin: var(--default-padding) var(--default-padding) var(--default-padding) 0;
 }
 
 .station .station-header .title {
@@ -39,6 +44,7 @@
     border-top-left-radius: 0.5rem;
     flex-grow: 1;
     transition: background-color 0.25s ease;
+    height: 100%; /*sometimes the favorite button is larger than the title when the margin is included*/
 }
 
 .station.is-favorite .station-header .title {
@@ -99,6 +105,12 @@
     padding: var(--table-padding) var(--table-padding) var(--table-padding) 0;
 }
 
+.station table .scroll-anchor-row td {
+    height: 0;
+    padding: 0;
+    margin: 0;
+}
+
 .station table td:first-child {
     border-bottom-left-radius: var(--default-padding);
     border-top-left-radius: var(--default-padding);
@@ -133,10 +145,6 @@
 .collapsible-cafe .cafe-header {
     display: flex;
     gap: 0.5rem;
-}
-
-.collapsible-cafe .cafe-header a {
-    scroll-margin: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-name .logo {

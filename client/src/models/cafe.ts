@@ -17,7 +17,8 @@ export interface ICafeGroup {
     members: ICafe[];
 }
 
-export interface IViewListResponse {
+export interface ICoreResponse {
+    isTrackingEnabled: boolean;
     groups: Array<ICafeGroup>;
 }
 
