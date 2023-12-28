@@ -1,9 +1,10 @@
 import { DateUtil } from '@msdining/common';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
+import { getDateStringsForWeek } from '../../../util/date.js';
+import { logError } from '../../../util/log.js';
+import { LockedMap } from '../../../util/map.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
-import { logError } from '../../../util/log.js';
-import { getDateStringsForWeek } from '../../../util/date.js';
 
 const {
     getMaximumDateForMenuRequest,
@@ -19,13 +20,11 @@ interface ICreateDailyStationMenuParams {
     station: ICafeStation;
 }
 
-type DailyMenuByCafeId = Map<string, ICafeStation[]>;
-
 // TODO: Clean this up so that it doesn't rely on the MenuItemStorageClient directly.
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
 export abstract class DailyMenuStorageClient {
-    private static readonly _cafeMenusByDateString = new Map<string, DailyMenuByCafeId>();
+    private static readonly _cafeMenusByDateString = new Map<string, LockedMap<string, Array<ICafeStation>>>();
 
     public static resetCache() {
         // todo: maybe only reset the cache for today? what about when we reset fully on weekends?
@@ -59,6 +58,14 @@ export abstract class DailyMenuStorageClient {
         return createItems;
     }
 
+    private static _getCachedMenusByCafeIdForDateString(dateString: string) {
+        if (!this._cafeMenusByDateString.has(dateString)) {
+            this._cafeMenusByDateString.set(dateString, new LockedMap());
+        }
+
+        return this._cafeMenusByDateString.get(dateString)!;
+    }
+
     public static async createDailyStationMenuAsync({ cafeId, dateString, station }: ICreateDailyStationMenuParams) {
         await usePrismaClient(async (prismaClient) => prismaClient.dailyStation.create({
             data: {
@@ -76,16 +83,12 @@ export abstract class DailyMenuStorageClient {
             }
         }));
 
-        if (!this._cafeMenusByDateString.has(dateString)) {
-            this._cafeMenusByDateString.set(dateString, new Map<string, ICafeStation[]>());
-        }
+        const dailyMenuByCafeId = this._getCachedMenusByCafeIdForDateString(dateString);
 
-        const dailyMenuByCafeId = this._cafeMenusByDateString.get(dateString)!;
-        if (!dailyMenuByCafeId.has(cafeId)) {
-            dailyMenuByCafeId.set(cafeId, []);
-        }
-
-        dailyMenuByCafeId.get(cafeId)!.push(station);
+        await dailyMenuByCafeId.update(cafeId, async (dailyMenu = []) => {
+            dailyMenu.push(station);
+            return dailyMenu;
+        });
     }
 
     public static async _doRetrieveDailyMenuAsync(cafeId: string, dateString: string) {
@@ -158,16 +161,8 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async retrieveDailyMenuAsync(cafeId: string, dateString: string): Promise<ICafeStation[]> {
-        if (!this._cafeMenusByDateString.has(dateString)) {
-            this._cafeMenusByDateString.set(dateString, new Map<string, ICafeStation[]>());
-        }
-
-        const dailyMenuByCafeId = this._cafeMenusByDateString.get(dateString)!;
-        if (!dailyMenuByCafeId.has(cafeId)) {
-            dailyMenuByCafeId.set(cafeId, await this._doRetrieveDailyMenuAsync(cafeId, dateString));
-        }
-
-        return dailyMenuByCafeId.get(cafeId)!;
+        const dailyMenuByCafeId = this._getCachedMenusByCafeIdForDateString(dateString);
+        return dailyMenuByCafeId.update(cafeId, () => this._doRetrieveDailyMenuAsync(cafeId, dateString));
     }
 
     public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {
