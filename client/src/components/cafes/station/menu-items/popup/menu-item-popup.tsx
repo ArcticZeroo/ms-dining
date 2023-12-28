@@ -169,7 +169,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
             entityType: SearchEntityType.menuItem
         });
 
-        copyToClipboard(`${window.location.origin}/${viewPath}`)
+        copyToClipboard(`${window.location.origin}${viewPath}`)
             .then((didSucceed) => {
                 const backgroundColor = didSucceed 
                     ? '#66BB6A'

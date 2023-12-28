@@ -75,11 +75,14 @@ const useAnchorScroll = (...dependencies: unknown[]) => {
             return;
         }
 
-        const anchorElement = document.querySelector(`[href='${hash}']`);
+        // This is a hack to allow the element to be rendered before scrolling to it
+        setTimeout(() => {
+            const anchorElement = document.querySelector(`[href='${hash}']`);
 
-        anchorElement?.scrollIntoView({
-            behavior: 'smooth'
-        });
+            anchorElement?.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }, 0);
     }, [
         location.hash,
         // eslint-disable-next-line react-hooks/exhaustive-deps
