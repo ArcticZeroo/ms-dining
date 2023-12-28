@@ -18,6 +18,8 @@ model Cafe {
   logoName         String?
   contextId        String
   displayProfileId String
+  storeId          String @default("")
+  externalName     String @default("")
 
   dailyStations         DailyStation[]
   dailyOrderingContexts DailyCafeOrderingContext[]

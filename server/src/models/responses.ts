@@ -1,12 +1,20 @@
+interface ICafeConfigStoreInfo {
+    storeInfoId: string;
+    storeName: string;
+}
+
+interface ICafeConfigStoreListItem {
+    storeInfo: ICafeConfigStoreInfo;
+    displayProfileId: string[];
+}
+
 export interface ICafeConfigResponse {
     tenantID: string;
     contextID: string;
     theme: {
         logoImage: string;
-    },
-    storeList: Array<{
-        displayProfileId: string[]
-    }>
+    };
+    storeList: ICafeConfigStoreListItem[];
 }
 
 export interface ICafeStationCategory {

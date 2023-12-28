@@ -179,7 +179,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _submitOrder(token: string, cardData: ICardData) {
-       const response = await makeRequestWithRetries({
+        const response = await makeRequestWithRetries({
             makeRequest: () => fetch(
                 `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3`,
                 {
@@ -216,9 +216,74 @@ export class CafeOrderSession extends CafeDiscoverySession {
             )
         });
 
-       if (!response.ok) {
-           throw new Error(`Failed to submit order: ${response.statusText}`);
-       }
+        if (!response.ok) {
+            throw new Error(`Failed to submit order: ${response.statusText}`);
+        }
+    }
+
+    private async _sendPhoneConfirmation() {
+        await this._requestAsync(`/communication/sendSMSReceipt`,
+            {
+                method:  'POST',
+                headers: JSON_HEADERS,
+                body:    JSON.stringify({
+                    contextId:         this.config.contextId,
+                    orderId:           this.#orderNumber,
+                    sendOrderTo:       '+1number',
+                    storeInfo:         {
+                        businessContextId:       this.config.contextId,
+                        tenantId:                this.config.tenantId,
+                        storeInfoId:             '1376',
+                        storeName:               this.cafe.name,
+                        timezone:                'PST8PDT',
+                        properties:              {
+                            selectedLanguage:        'en_US',
+                            taxIdentificationNumber: ''
+                        },
+                        storeInfoOptions:        {
+                            calories:  {
+                                abbreviation: 'Cal',
+                                fullName:     'Calories'
+                            },
+                            birConfig: {
+                                displayText:                       'OR#',
+                                acknowledgementReceiptDisplayText: 'AR#',
+                                acknowledgementReceiptIndicator:   'Acknowledgement Receipt#',
+                                officialReceiptIndicator:          'Official Receipt#'
+                            }
+                        },
+                        receiptConfigProperties: {
+                            smsBody:                      'true',
+                            smsHeader:                    'true',
+                            smsFooter:                    'true',
+                            showCompleteCheckNumberInSms: 'true'
+                        },
+                        address:                 [
+                            ' ',
+                            '  '
+                        ]
+                    },
+                    smsConfig:         {
+                        overrideFromStoreConfig: true,
+                        introText:               'Thank you for placing your order with {{N}}',
+                        isItemizedListEnabled:   true,
+                        isTotalsEnabled:         true,
+                        isIntroEnabled:          true,
+                        showCompleteCheckNumber: true,
+                        appReceipt:              {
+                            introText:  'Thank you for placing your order with {{N}}. Your order number is {{O}}',
+                            fromNumber: ''
+                        }
+                    },
+                    isCateringEnabled: false,
+                    textReceiptConfig: {
+                        featureEnabled:  true,
+                        headerText:      'Text receipt',
+                        instructionText: 'Enter your phone number. Message & data rates may apply.',
+                        autoSendEnabled: true
+                    }
+                })
+            });
     }
 
     // TODO: Figure out a way to break this up into two separate actions to reduce user-perceived latency.

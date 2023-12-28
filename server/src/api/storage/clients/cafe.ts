@@ -33,20 +33,29 @@ export abstract class CafeStorageClient {
     }
 
     public static async createCafeAsync(cafe: ICafe, config: ICafeConfig): Promise<void> {
-        const cafeWithConfig: Cafe = {
-            id:               cafe.id,
+        const cafeWithConfig: Omit<Cafe, 'id'> = {
             name:             cafe.name,
             logoName:         config.logoName,
             contextId:        config.contextId,
             tenantId:         config.tenantId,
-            displayProfileId: config.displayProfileId
+            displayProfileId: config.displayProfileId,
+            storeId:          config.storeId,
+            externalName:     config.externalName
         };
 
-        await usePrismaClient(prismaClient => prismaClient.cafe.create({
-            data: cafeWithConfig
+        await usePrismaClient(prismaClient => prismaClient.cafe.upsert({
+            where:  { id: cafe.id },
+            update: cafeWithConfig,
+            create: {
+                ...cafeWithConfig,
+                id: cafe.id
+            }
         }));
 
-        this._cafeDataById.set(cafe.id, cafeWithConfig);
+        this._cafeDataById.set(cafe.id, {
+            ...cafeWithConfig,
+            id: cafe.id
+        });
     }
 
     public static async deleteCafe(cafeId: string): Promise<void> {

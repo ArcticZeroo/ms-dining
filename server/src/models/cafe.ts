@@ -23,6 +23,8 @@ export interface ICafeConfig {
     contextId: string;
     displayProfileId: string;
     logoName?: string;
+    storeId: string;
+    externalName: string;
 }
 
 export interface ICafeStation {
