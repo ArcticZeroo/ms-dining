@@ -25,8 +25,11 @@ nav.expanded .expandable-nav-list {
     display: block;
 }
 
-nav .visibility-toggle {
-    display: none;
+nav a.link-button.visibility-toggle {
+    background: #DDD;
+    height: min-content;
+    padding: var(--default-padding);
+    position: sticky;
 }
 
 nav a.link-button {
@@ -121,7 +124,7 @@ nav form {
     flex-grow: 1;
 }
 
-@media (max-height: 800px) {
+@media screen and (max-height: 800px) {
     #site-header {
         padding: 0.5rem 0.5rem 0 0.5rem;
     }
@@ -146,10 +149,5 @@ nav form {
         position: fixed;
         overflow-y: scroll;
         z-index: 10;
-    }
-
-    nav .visibility-toggle {
-        display: initial;
-        width: 100%;
     }
 }
