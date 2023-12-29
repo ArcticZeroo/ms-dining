@@ -35,52 +35,6 @@ const repairMissingWeeklyMenusAsync = async () => {
     }
 };
 
-// Doesn't fully work because we might not have menus for this week while we have menus for another week
-const repairCafesWithoutMenusAsync = async () => {
-    logInfo('Checking for cafes without menus...');
-
-    let isRepairNeeded = false;
-    for (const cafe of cafeList) {
-        if (!isCafeAvailable(cafe)) {
-            continue;
-        }
-
-        const isAnyAllowedMenuAvailable = await DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
-
-        if (isAnyAllowedMenuAvailable) {
-            continue;
-        }
-
-        isRepairNeeded = true;
-
-        logInfo(cafe.id, 'is missing allowed menus, attempting to repair...');
-
-        // Clear the cafe from storage in case we have a bad config
-        await CafeStorageClient.deleteCafe(cafe.id);
-
-        for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
-            try {
-                const updateSession = new DailyCafeUpdateSession(i);
-                await updateSession.populateAsync([cafe]);
-            } catch (err) {
-                logError(`Failed to repair ${cafe.id} on ${DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i))}: ${err}`);
-                break;
-            }
-        }
-
-        const isAnyAllowedMenuAvailableAfterRepair = await DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafe.id);
-        if (!isAnyAllowedMenuAvailableAfterRepair) {
-            logError(`Still no menus available for cafe ${cafe.id}. Removing it from the list for now...`);
-            // The update session may have re-added the cafe to storage. Remove it again just in case.
-            await CafeStorageClient.deleteCafe(cafe.id);
-        }
-    }
-
-    if (!isRepairNeeded) {
-        logInfo('All cafes have at least one allowed menu!');
-    }
-}
-
 const repairTodaySessionsAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipDailyRepair) {
         return;
@@ -91,13 +45,13 @@ const repairTodaySessionsAsync = async () => {
     // Don't bother repairing today after 5pm if there is already a daily menu;
     // In case I'm making server changes and need to restart the server, I don't
     // want to clear history.
-    // if (now.getHours() > 17 || now.getHours() < 6) {
-    //     const isAnyMenuAvailableToday = await CafeStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(now));
-    //     if (isAnyMenuAvailableToday) {
-	// 		logInfo('Skipping repair of today\'s sessions because it is after 5pm and there is already a menu for today');
-    //         return;
-    //     }
-    // }
+    if (now.getHours() > 17 || now.getHours() < 6) {
+        const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(now));
+        if (isAnyMenuAvailableToday) {
+			logInfo('Skipping repair of today\'s sessions because it is after 5pm and there is already a menu for today');
+            return;
+        }
+    }
 
 	await populateDailySessionsAsync();
 };

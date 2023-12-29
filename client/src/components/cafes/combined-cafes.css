@@ -144,7 +144,12 @@
 
 .collapsible-cafe .cafe-header {
     display: flex;
-    gap: 0.5rem;
+}
+
+.collapsible-cafe .cafe-header .scroll-anchor {
+    width: var(--default-padding);
+    margin: 0;
+    padding: 0;
 }
 
 .collapsible-cafe .cafe-name .logo {
