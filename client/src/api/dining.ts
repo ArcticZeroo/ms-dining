@@ -295,8 +295,6 @@ export abstract class DiningClient {
     }
 
     public static async retrieveFavoriteSearchResults(queries: Array<SearchTypes.ISearchQuery>): Promise<Array<IQuerySearchResult>> {
-        console.log(queries, JSON.stringify(queries));
-
         const response = await DiningClient._makeRequest({
             path:    `/api/dining/search/favorites`,
             options: {
