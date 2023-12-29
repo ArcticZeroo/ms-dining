@@ -9,6 +9,8 @@ import {
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
+import { FavoritesCache } from './cache/favorites.ts';
+import { ISearchQuery } from '@msdining/common/dist/models/search.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();
@@ -18,20 +20,21 @@ const JSON_HEADERS = {
 };
 
 interface IRetrieveCafeMenuParams {
-	id: string;
-	date?: Date;
-	shouldCountTowardsLastUsed?: boolean;
+    id: string;
+    date?: Date;
+    shouldCountTowardsLastUsed?: boolean;
 }
 
 interface IMakeRequestParams {
-	path: string;
-	sendVisitorId?: boolean;
-	options?: RequestInit;
+    path: string;
+    sendVisitorId?: boolean;
+    options?: RequestInit;
 }
 
 export abstract class DiningClient {
     private static _viewListPromise: Promise<ICoreResponse> | undefined = undefined;
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
+    private static readonly _favoritesCache = new FavoritesCache();
 
     private static _getRequestOptions(sendVisitorId: boolean) {
         if (!sendVisitorId) {
@@ -46,10 +49,10 @@ export abstract class DiningClient {
     }
 
     private static async _makeRequest<T>({
-											 path,
-											 sendVisitorId = false,
-											 options = {}
-										 }: IMakeRequestParams): Promise<T> {
+        path,
+        sendVisitorId = false,
+        options = {}
+    }: IMakeRequestParams): Promise<T> {
         const response = await fetch(path, {
             ...DiningClient._getRequestOptions(sendVisitorId),
             ...options
@@ -144,10 +147,10 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCafeMenu({
-											 id,
-											 shouldCountTowardsLastUsed,
-											 date,
-										 }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+        id,
+        shouldCountTowardsLastUsed,
+        date,
+    }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
 
         try {
@@ -273,8 +276,8 @@ export abstract class DiningClient {
         for (const serverResult of serverResults) {
             results.push({
                 entityType:            serverResult.type === 'menuItem'
-									   ? SearchTypes.SearchEntityType.menuItem
-									   : SearchTypes.SearchEntityType.station,
+                    ? SearchTypes.SearchEntityType.menuItem
+                    : SearchTypes.SearchEntityType.station,
                 name:                  serverResult.name,
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
@@ -295,16 +298,33 @@ export abstract class DiningClient {
     }
 
     public static async retrieveFavoriteSearchResults(queries: Array<SearchTypes.ISearchQuery>): Promise<Array<IQuerySearchResult>> {
+        const results: IQuerySearchResult[] = [];
+        const remoteQueries: ISearchQuery[] = [];
+
+        for (const query of queries) {
+            const localResult = DiningClient._favoritesCache.get(query);
+            if (localResult != null) {
+                results.push(localResult);
+            } else {
+                remoteQueries.push(query);
+            }
+        }
+
         const response = await DiningClient._makeRequest({
             path:    `/api/dining/search/favorites`,
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify(queries)
+                body:    JSON.stringify(remoteQueries)
             }
         });
 
-        return DiningClient._deserializeSearchResults(response);
+        for (const result of DiningClient._deserializeSearchResults(response)) {
+            DiningClient._favoritesCache.addToCache(result);
+            results.push(result);
+        }
+
+        return results;
     }
 
     public static async retrieveCheapItems(): Promise<Array<ICheapItemSearchResult>> {
