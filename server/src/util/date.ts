@@ -39,3 +39,19 @@ export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {
 export const getDateStringsForWeek = (): string[] => {
     return Array.from(DateUtil.yieldDaysInFutureForThisWeek()).map(i => DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i)));
 }
+
+export const isDateValid = (date: Date | null | undefined) => date != null && !Number.isNaN(date.getTime());
+
+export const needsUpdate = (serverLastUpdateTime: Date, storedLastUpdateTime: Date | undefined | null) => {
+    // Shrug, lean towards keeping us up-to-date if we messed something up when parsing the response
+    if (!isDateValid(serverLastUpdateTime)) {
+        return true;
+    }
+
+    // If we've never stored the last update time, we don't know when the last update was... so just update again
+    if (!isDateValid(storedLastUpdateTime)) {
+        return true;
+    }
+
+    return serverLastUpdateTime.getTime() > storedLastUpdateTime.getTime();
+}

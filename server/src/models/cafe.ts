@@ -34,7 +34,7 @@ export interface ICafeStation {
     logoUrl: string;
     menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IMenuItem>;
-    lastUpdateTime?: Date;
+    menuLastUpdateTime?: Date;
 }
 
 export interface IMenuItemTag {

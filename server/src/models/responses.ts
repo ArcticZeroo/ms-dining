@@ -27,6 +27,7 @@ export interface ICafeStationMenu {
     id: string;
     name: string;
     categories: Array<ICafeStationCategory>;
+    lastUpdateTime: string;
 }
 
 export interface ICafeStationListItem {
@@ -37,7 +38,6 @@ export interface ICafeStationListItem {
         menuId: string;
     };
     menus: Array<ICafeStationMenu>;
-    lastUpdateTime: string;
 }
 
 export interface ICafeMenuItemDetailsResponseModifierOption {

@@ -1,7 +1,8 @@
 import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
 import {
     ICafeMenuItemDetailsResponse,
-    ICafeMenuItemListResponseItem, ICafeStationDetailsResponseItem,
+    ICafeMenuItemListResponseItem,
+    ICafeStationDetailsResponseItem,
     ICafeStationListItem
 } from '../../../models/responses.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
@@ -29,19 +30,21 @@ export class CafeMenuSession extends CafeDiscoverySession {
             name:                      stationJson.name,
             logoUrl:                   stationJson.image,
             menuId:                    stationJson.priceLevelConfig.menuId,
-            lastUpdateTime:            new Date(stationJson.lastUpdateTime),
+            menuLastUpdateTime:        new Date(0),
             menuItemIdsByCategoryName: new Map(),
             menuItemsById:             new Map()
         };
 
-        for (const menu of stationJson.menus) {
-            if (menu.id !== station.menuId) {
-                continue;
-            }
+        const menu = stationJson.menus.find(menu => menu.id === station.menuId);
 
-            for (const category of menu.categories) {
-                station.menuItemIdsByCategoryName.set(category.name, category.items);
-            }
+        if (menu == null) {
+            throw new Error(`Unable to find menu with id ${station.menuId} in station ${station.name} (${station.id})`);
+        }
+
+        station.menuLastUpdateTime = new Date(menu.lastUpdateTime);
+
+        for (const category of menu.categories) {
+            station.menuItemIdsByCategoryName.set(category.name, category.items);
         }
 
         return station;
@@ -396,7 +399,9 @@ export class CafeMenuSession extends CafeDiscoverySession {
 
     private async _populateMenuItemsForStationAsync(station: ICafeStation, alwaysGetServerItems: boolean) {
         const itemIds = Array.from(station.menuItemIdsByCategoryName.values()).flat();
+
         const menuItems = await this.retrieveMenuItemDetailsAsync(station, itemIds, alwaysGetServerItems);
+
         for (const menuItem of menuItems) {
             station.menuItemsById.set(menuItem.id, menuItem);
         }

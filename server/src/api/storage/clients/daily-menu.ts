@@ -148,11 +148,11 @@ export abstract class DailyMenuStorageClient {
             }
 
             stations.push({
-                id:             dailyStation.stationId,
-                menuId:         stationData.menuId,
-                logoUrl:        stationData.logoUrl,
-                name:           stationData.name,
-                lastUpdateTime: new Date(dailyStation.externalLastUpdateTime),
+                id:                 dailyStation.stationId,
+                menuId:             stationData.menuId,
+                logoUrl:            stationData.logoUrl,
+                name:               stationData.name,
+                menuLastUpdateTime: new Date(dailyStation.externalLastUpdateTime),
                 menuItemsById,
                 menuItemIdsByCategoryName
             });
