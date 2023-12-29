@@ -63,7 +63,7 @@
     align-items: center;
     justify-content: center;
     max-width: 100%;
-    overflow-x: scroll;
+    overflow-x: auto;
     box-sizing: border-box;
     border-top-left-radius: var(--default-padding);
 }
