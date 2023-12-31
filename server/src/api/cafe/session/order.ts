@@ -11,6 +11,30 @@ import { StringUtil } from '../../../util/string.js';
 import { fixed } from '../../../util/math.js';
 import { makeRequestWithRetries } from '../../../util/request.js';
 import fetch from 'node-fetch';
+import { IMenuItem } from '../../../models/cafe.js';
+
+interface ISerializedModifier {
+    // ID of selected option
+    id: string;
+    // ID of the modifier
+    parentGroupId: string;
+    description: string;
+    selected: true;
+    baseAmount: string;
+    amount: string;
+    childPriceLevelId: string;
+    currencyUnit: 'USD';
+    tagNames: [];
+    tagIds: [];
+    isModifierAvailableToGuests: true;
+    // TODO: Support multiple of one thing
+    //   I don't know of any menu items that support this, though
+    quantity: 1;
+    count: 1;
+    properties: {
+        applicableTargetMenuFilter: 'All'
+    }
+}
 
 export class CafeOrderSession extends CafeDiscoverySession {
     #orderingContext: IOrderingContext;
@@ -58,6 +82,51 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return orderingContext;
     }
 
+    private _serializeModifiers(cartItem: ICartItem, localMenuItem: IMenuItem): Array<ISerializedModifier> {
+        const modifiersById = new Map(localMenuItem.modifiers.map(modifier => [modifier.id, modifier]));
+
+        const modifiers: ISerializedModifier[] = [];
+
+        for (const [modifierId, choiceIds] of cartItem.choicesByModifierId) {
+            const modifier = modifiersById.get(modifierId);
+
+            if (modifier == null) {
+                throw new Error(`Failed to find modifier with id "${modifierId}"`);
+            }
+
+            for (const choiceId of choiceIds) {
+                const choice = modifier.choices.find(choice => choice.id === choiceId);
+
+                if (choice == null) {
+                    throw new Error(`Failed to find choice with id "${choiceId}" for modifier "${modifierId}"`);
+                }
+
+                const price = choice.price.toFixed(2);
+
+                modifiers.push({
+                    id:                          choiceId,
+                    parentGroupId:               modifierId,
+                    description:                 choice.description,
+                    selected:                    true,
+                    baseAmount:                  price,
+                    amount:                      price,
+                    childPriceLevelId:           this.#orderingContext.storePriceLevel,
+                    currencyUnit:                'USD',
+                    tagNames:                    [],
+                    tagIds:                      [],
+                    isModifierAvailableToGuests: true,
+                    quantity:                    1,
+                    count:                       1,
+                    properties:                  {
+                        applicableTargetMenuFilter: 'All'
+                    }
+                });
+            }
+        }
+
+        return modifiers;
+    }
+
     private async _addItemToCart(cartItem: ICartItem) {
         const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(cartItem.itemId);
 
@@ -65,7 +134,9 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error(`Failed to find menu item with id "${cartItem.itemId}"`);
         }
 
-        const itemId = hat();
+        const serializedModifiers = this._serializeModifiers(cartItem, menuItem);
+
+        const cartItemId = hat();
 
         const instructions = cartItem.specialInstructions ? [
             {
@@ -90,7 +161,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         amount:               menuItem.price.toFixed(2),
                         options:              [], // TODO: modifiers
                         lineItemInstructions: instructions,
-                        cartItemId:           itemId
+                        cartItemId:           cartItemId,
+                        count:                1,
+                        quantity:             1,
+                        selectedModifiers:    serializedModifiers
                     },
                     scheduledDay:    0,
                     scheduleTime:    {
