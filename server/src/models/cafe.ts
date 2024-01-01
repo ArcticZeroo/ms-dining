@@ -46,6 +46,7 @@ export interface IMenuItem {
     id: string;
     price: number;
     name: string;
+    receiptText?: string;
     calories: number;
     maxCalories: number;
     hasThumbnail: boolean;

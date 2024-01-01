@@ -75,6 +75,7 @@ export interface ICafeMenuItemListResponseItem {
     lastUpdateTime: string;
     isItemCustomizationEnabled: boolean;
     tagIds?: string[];
+    receiptText: string;
 }
 
 export interface ICafeStationTag {

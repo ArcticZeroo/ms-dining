@@ -18,8 +18,8 @@ model Cafe {
   logoName         String?
   contextId        String
   displayProfileId String
-  storeId          String @default("")
-  externalName     String @default("")
+  storeId          String  @default("")
+  externalName     String  @default("")
 
   dailyStations         DailyStation[]
   dailyOrderingContexts DailyCafeOrderingContext[]
@@ -27,14 +27,16 @@ model Cafe {
 
 model MenuItem {
   // string id from buy-ondemand
-  id                     String    @id
-  name                   String
-  calories               Int
-  maxCalories            Int
-  description            String?
-  imageUrl               String?
-  price                  Float
-  externalLastUpdateTime DateTime?
+  id          String  @id
+  name        String
+  calories    Int
+  maxCalories Int
+  description String?
+  imageUrl    String?
+  price       Float
+
+  externalLastUpdateTime     DateTime?
+  externalReceiptText        String?
 
   dailyMenuItems DailyMenuItem[]
   modifiers      MenuItemModifier[]

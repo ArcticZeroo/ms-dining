@@ -308,6 +308,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
             hasThumbnail:   jsonItem.image != null,
             imageUrl:       jsonItem.image,
             description:    jsonItem.description,
+            receiptText:    jsonItem.receiptText,
             lastUpdateTime: new Date(jsonItem.lastUpdateTime),
             tags:           Array.from(tags),
             modifiers,

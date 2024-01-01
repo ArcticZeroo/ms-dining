@@ -145,6 +145,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
             }
         ] : [];
 
+        const receiptText = menuItem.receiptText || menuItem.name;
+
         const response = await this._requestAsync(`/order/${this.config.tenantId}/${this.config.contextId}/orders`,
             {
                 method:  'POST',
@@ -159,12 +161,15 @@ export class CafeOrderSession extends CafeDiscoverySession {
                             priceLevelId: this.#orderingContext.storePriceLevel
                         },
                         amount:               menuItem.price.toFixed(2),
-                        options:              [], // TODO: modifiers
+                        options:              [],
                         lineItemInstructions: instructions,
                         cartItemId:           cartItemId,
                         count:                1,
                         quantity:             1,
-                        selectedModifiers:    serializedModifiers
+                        selectedModifiers:    serializedModifiers,
+                        kpText:               receiptText,
+                        receiptText:          receiptText,
+                        kitchenDisplayText:   receiptText
                     },
                     scheduledDay:    0,
                     scheduleTime:    {
