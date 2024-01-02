@@ -4,7 +4,7 @@ import {
     ICafeMenuItemListResponseItem,
     ICafeStationDetailsResponseItem,
     ICafeStationListItem
-} from '../../../models/responses.js';
+} from '../../../models/buyondemand/responses.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { logError } from '../../../util/log.js';

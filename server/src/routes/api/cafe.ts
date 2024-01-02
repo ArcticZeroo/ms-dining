@@ -6,7 +6,7 @@ import { sendVisitAsync } from '../../api/tracking/visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
 import { getLogoUrl, getBetterLogoUrl } from '../../util/cafe.js';
-import { ICafeStation } from '../../models/cafe.js';
+import { ICafeStation, IMenuItem } from '../../models/cafe.js';
 import { NumberUtil } from '@msdining/common';
 import { jsonStringifyWithoutNull } from '../../util/serde.js';
 import { CafeStorageClient } from '../../api/storage/clients/cafe.js';
@@ -17,6 +17,13 @@ import Koa from 'koa';
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { stat } from 'fs';
+import {
+    IDiningCoreGroup,
+    IDiningCoreResponse,
+    MenuResponse,
+    IMenuResponseStation,
+    AllMenusResponse
+} from '../../models/routes.js';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
 const DEFAULT_MAX_PRICE = 15;
@@ -35,11 +42,15 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
         }
 
+        const response: IDiningCoreResponse = {
+            isTrackingEnabled: ApplicationContext.hasCreatedTrackingApplication,
+            groups:            []
+        };
+
         const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
-        const responseGroups = [];
         for (const group of diningConfig.groupList) {
-            const responseGroup = {
+            const responseGroup: IDiningCoreGroup = {
                 name:         group.name,
                 id:           group.id,
                 number:       group.number,
@@ -70,22 +81,19 @@ export const registerDiningHallRoutes = (parent: Router) => {
                 });
             }
 
-            responseGroups.push(responseGroup);
+            response.groups.push(responseGroup);
         }
 
-        ctx.body = jsonStringifyWithoutNull({
-            isTrackingEnabled: ApplicationContext.hasCreatedTrackingApplication,
-            groups: responseGroups
-        });
+        ctx.body = jsonStringifyWithoutNull(response);
     });
 
-    const convertMenuToSerializable = (menuStations: ICafeStation[]) => {
-        const menusByStation = [];
+    const convertMenuToSerializable = (menuStations: ICafeStation[]): MenuResponse => {
+        const menusByStation: MenuResponse = [];
         for (const station of menuStations) {
-            const itemsByCategory = {};
+            const itemsByCategory: Record<string, Array<IMenuItem>> = {};
 
             for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
-                const itemsForCategory = [];
+                const itemsForCategory: IMenuItem[] = [];
 
                 for (const itemId of categoryItemIds) {
                     // Expected; Some items are 86-ed
@@ -93,7 +101,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
                         continue;
                     }
 
-                    itemsForCategory.push(station.menuItemsById.get(itemId));
+                    itemsForCategory.push(station.menuItemsById.get(itemId)!);
                 }
 
                 if (itemsForCategory.length === 0) {
@@ -131,7 +139,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
 
         if (id === 'all') {
             const cafes = await CafeStorageClient.retrieveCafesAsync();
-            const menusByCafeId = {};
+            const menusByCafeId: AllMenusResponse = {};
             for (const cafeId of cafes.keys()) {
                 const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, dateString);
                 menusByCafeId[cafeId] = convertMenuToSerializable(menuStations);
@@ -151,7 +159,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
     });
 
     const serializeLocationDatesByCafeId = (locationDatesByCafeId: Map<string, Set<string>>) => {
-        const serialized = {};
+        const serialized: Record<string /*cafeId*/, Array<string>> = {};
         for (const [cafeId, dates] of locationDatesByCafeId.entries()) {
             serialized[cafeId] = Array.from(dates);
         }

@@ -35,7 +35,7 @@ export abstract class CafeStorageClient {
     public static async createCafeAsync(cafe: ICafe, config: ICafeConfig): Promise<void> {
         const cafeWithConfig: Omit<Cafe, 'id'> = {
             name:             cafe.name,
-            logoName:         config.logoName,
+            logoName:         config.logoName || null,
             contextId:        config.contextId,
             tenantId:         config.tenantId,
             displayProfileId: config.displayProfileId,

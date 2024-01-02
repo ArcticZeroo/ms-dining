@@ -1,4 +1,5 @@
 import { CafeTypes } from '@msdining/common';
+import { Nullable } from './util.js';
 
 export interface ICafe {
     name: string;
@@ -22,16 +23,16 @@ export interface ICafeConfig {
     tenantId: string;
     contextId: string;
     displayProfileId: string;
-    logoName?: string;
     storeId: string;
     externalName: string;
+    logoName?: Nullable<string>;
 }
 
 export interface ICafeStation {
     id: string;
     menuId: string;
     name: string;
-    logoUrl: string;
+    logoUrl?: string;
     menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IMenuItem>;
     menuLastUpdateTime?: Date;

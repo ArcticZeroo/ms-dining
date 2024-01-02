@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../../constants/cafes.js';
 import { requestRetryCount } from '../../../constants/config.js';
 import { ICafe, ICafeConfig } from '../../../models/cafe.js';
-import { ICafeConfigResponse } from '../../../models/responses.js';
+import { ICafeConfigResponse } from '../../../models/buyondemand/responses.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError } from '../../../util/log.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../util/request.js';

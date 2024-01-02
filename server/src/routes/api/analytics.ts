@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { attachRouter } from '../../util/koa.js';
-import { RouteBuilder } from '../../models/routes.js';
+import { RouteBuilder } from '../../models/koa.js';
 import { getVisitsAsync } from '../../api/tracking/visitors.js';
 
 export const registerAnalyticsRoutes: RouteBuilder = (parent) => {

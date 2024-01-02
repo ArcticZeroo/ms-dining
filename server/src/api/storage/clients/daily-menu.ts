@@ -1,7 +1,7 @@
 import { DateUtil } from '@msdining/common';
 import { ApplicationContext } from '../../../constants/context.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { getDateStringsForWeek } from '../../../util/date.js';
+import { getDateStringsForWeek, isDateValid } from '../../../util/date.js';
 import { logError } from '../../../util/log.js';
 import { LockedMap } from '../../../util/map.js';
 import { usePrismaClient } from '../client.js';
@@ -150,9 +150,11 @@ export abstract class DailyMenuStorageClient {
             stations.push({
                 id:                 dailyStation.stationId,
                 menuId:             stationData.menuId,
-                logoUrl:            stationData.logoUrl,
+                logoUrl:            stationData.logoUrl || undefined,
                 name:               stationData.name,
-                menuLastUpdateTime: new Date(dailyStation.externalLastUpdateTime),
+                menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
+                                        ? dailyStation.externalLastUpdateTime
+                                        : undefined,
                 menuItemsById,
                 menuItemIdsByCategoryName
             });
