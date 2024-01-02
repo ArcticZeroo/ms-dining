@@ -2,7 +2,11 @@ import { ICartItem, SubmitOrderStage } from '@msdining/common/dist/models/cart.j
 import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
-import { IAddToOrderResponse } from '../../../models/buyondemand/cart.js';
+import {
+    IAddToOrderResponse,
+    ICardProcessorPaymentResponse, ICloseOrderRequest,
+    IRetrieveCardProcessorTokenResponse
+} from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
 import { ICardData, IOrderingContext, ISubmitOrderParams } from '../../../models/cart.js';
@@ -12,6 +16,10 @@ import { fixed } from '../../../util/math.js';
 import { makeRequestWithRetries } from '../../../util/request.js';
 import fetch from 'node-fetch';
 import { IMenuItem } from '../../../models/cafe.js';
+
+const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+type="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
+
+// TODO: Maybe just directly call get-items for each item instead of dealing with a bunch of extra data storage?
 
 interface ISerializedModifier {
     // ID of selected option
@@ -271,9 +279,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     terminalId:           this.#orderingContext.onDemandTerminalId
                 }
             });
+
         const json = await response.json();
 
-        if (!isDuckType<{ cardProcessorSiteToken: string }>(json, {
+        if (!isDuckType<IRetrieveCardProcessorTokenResponse>(json, {
             cardProcessorSiteToken: 'string'
         })) {
             throw new Error('Data is not in the correct format');
@@ -282,59 +291,99 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return json.cardProcessorSiteToken;
     }
 
-    private async _submitPaymentToCardProcessor(token: string, cardData: ICardData) {
+    private _getCardProcessorUrl(token: string) {
         if (!this.config) {
-            throw new Error('Config is required to submit order to card processor!');
+            throw new Error('Config is required to get card processor url!');
         }
 
-        const config = this.config;
+        // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
+        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`;
+    }
 
+    private async _makeCardProcessorRequest(token: string, url: string, method: 'POST' | 'GET', body?: object) {
         const response = await makeRequestWithRetries({
             makeRequest: () => fetch(
-                `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3`,
+                url,
                 {
-                    method:  'POST',
+                    method,
                     headers: {
                         ...JSON_HEADERS,
                         'Api-Key-Token': token,
-                        // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
-                        'Referer': `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`
+                        'Referer': this._getCardProcessorUrl(token)
                     },
-                    body:    JSON.stringify({
-                        cardholderName:  cardData.name,
-                        cardNumber:      cardData.cardNumber,
-                        expirationMonth: cardData.expirationMonth,
-                        expirationYear:  cardData.expirationYear,
-                        cvv:             cardData.securityCode,
-                        postalCode:      cardData.postalCode,
-                        addressLine1:    null,
-                        addressLine2:    null,
-                        city:            null,
-                        state1:          null,
-                        state2:          null,
-                        postalCode1:     null,
-                        doVerify:        false,
-                        enableCaptcha:   false,
-                        dateTimeZone:    (new Date()).toISOString(),
-                        customerId:      '',
-                        browserInfo:     {
-                            userAgent: cardData.userAgent
-                        },
-                        // Captcha token is not being sent because enableCaptcha is false
-                        // token: '',
-                    })
+                    body: body ? JSON.stringify(body) : undefined
                 }
             )
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to submit order: ${response.statusText}`);
+            throw new Error(`Failed to make card processor request: ${response.statusText}`);
         }
 
-        // not sure what is returned here. some token?
-        const json = await response.json();
+        return response;
+    }
 
-        return json;
+    private async _retrieveCardProcessorXssToken(token: string) {
+        const response = await this._makeCardProcessorRequest(
+            token,
+            this._getCardProcessorUrl(token),
+            'GET'
+        );
+
+        const text = await response.text();
+
+        const xssToken = text.match(CARD_PROCESSOR_XSS_TOKEN_REGEX)?.groups?.['xssToken'];
+
+        if (xssToken == null) {
+            throw new Error('Failed to find XSS token in response');
+        }
+
+        return xssToken;
+    }
+
+    private async _submitPaymentToCardProcessor(token: string, cardData: ICardData) {
+        if (!this.config) {
+            throw new Error('Config is required to submit order to card processor!');
+        }
+
+        const response = await this._makeCardProcessorRequest(
+            token,
+            'https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3',
+            'POST',
+            {
+                cardholderName:  cardData.name,
+                cardNumber:      cardData.cardNumber,
+                expirationMonth: cardData.expirationMonth,
+                expirationYear:  cardData.expirationYear,
+                cvv:             cardData.securityCode,
+                postalCode:      cardData.postalCode,
+                addressLine1:    null,
+                addressLine2:    null,
+                city:            null,
+                state1:          null,
+                state2:          null,
+                postalCode1:     null,
+                doVerify:        false,
+                enableCaptcha:   false,
+                dateTimeZone:    (new Date()).toISOString(),
+                customerId:      '',
+                browserInfo:     {
+                    userAgent: cardData.userAgent
+                },
+                // Captcha token is not being sent because enableCaptcha is false
+                // token: '',
+            }
+        );
+
+        const json = await response.json() as ICardProcessorPaymentResponse;
+
+        const submittedPaymentToken = json.token || json.transactionReferenceData?.token;
+
+        if (!submittedPaymentToken) {
+            throw new Error('TODO: Handle this by enabling the captcha and trying again');
+        }
+
+        return submittedPaymentToken;
     }
 
     private async _sendPhoneConfirmation(phoneNumberWithCountryCode: string) {
@@ -456,6 +505,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
             lastCompletedStage = SubmitOrderStage.addToCart;
 
             const cardProcessorToken = await this._getCardProcessorSiteToken();
+
+            const xssToken = await this._retrieveCardProcessorXssToken(cardProcessorToken);
 
             const result = await this._submitPaymentToCardProcessor(cardProcessorToken, cardData);
 

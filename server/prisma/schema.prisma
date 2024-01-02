@@ -35,6 +35,7 @@ model MenuItem {
   imageUrl    String?
   price       Float
 
+  // externalItemId String?
   externalLastUpdateTime     DateTime?
   externalReceiptText        String?
 
@@ -120,6 +121,7 @@ model DailyMenuItem {
 
 model DailyCafeOrderingContext {
   dateString         String
+  onDemandEmployeeId String
   onDemandTerminalId String
   profitCenterId     String
   storePriceLevel    String
