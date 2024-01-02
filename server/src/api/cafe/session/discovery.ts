@@ -84,7 +84,7 @@ export class CafeDiscoverySession {
             throw new Error(`Access token is missing from headers. Available headers: ${Array.from(response.headers.keys()).join(', ')}`);
         }
 
-        this.#token = response.headers.get('access-token');
+        this.#token = response.headers.get('access-token')!;
     }
 
     private async retrieveConfigDataAsync() {
@@ -121,7 +121,16 @@ export class CafeDiscoverySession {
         }
 
         const [store] = json.storeList;
+
+        if (store == null) {
+            throw new Error('Store list is empty!');
+        }
+
         const [displayProfileId] = store.displayProfileId;
+
+        if (!displayProfileId) {
+            throw new Error('Display profile ID is missing/empty!');
+        }
 
         this.config = {
             tenantId:     json.tenantID,

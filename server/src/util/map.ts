@@ -2,7 +2,7 @@ import Semaphore from 'semaphore-async-await';
 
 interface ILockedMapEntry<V> {
     lock: Semaphore.Lock;
-    value: V;
+    value: V | undefined;
 }
 
 export class LockedMap<K, V> {

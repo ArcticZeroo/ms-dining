@@ -37,7 +37,11 @@ interface ISerializedModifier {
 }
 
 export class CafeOrderSession extends CafeDiscoverySession {
-    #orderingContext: IOrderingContext;
+    #orderingContext: IOrderingContext = {
+        onDemandTerminalId: '',
+        profitCenterId:     '',
+        storePriceLevel:    ''
+    };
     #cartGuid = hat();
     #orderNumber: string | null = null;
     #orderTotalWithoutTax: number = 0;
@@ -45,6 +49,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
     #orderTotalWithTax: number = 0;
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
+        if (!this.config) {
+            throw new Error('Config is not set!');
+        }
+
         const response = await this._requestAsync(`/sites/${this.config.contextId}`,
             {
                 method:  'GET',
@@ -61,6 +69,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
         }
 
         const [siteData] = json;
+
+        if (!siteData) {
+            throw new Error('Site data is empty!');
+        }
 
         return {
             profitCenterId:     siteData.displayOptions['profit-center-id'],
@@ -128,6 +140,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _addItemToCart(cartItem: ICartItem) {
+        if (!this.config) {
+            throw new Error('Config is required to add items to the cart!');
+        }
+
         const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(cartItem.itemId);
 
         if (menuItem == null) {
@@ -220,6 +236,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Order totals cannot be zero');
         }
 
+        if (!this.config) {
+            throw new Error('Config is required to get card processor site token!');
+        }
+
         const nowString = (new Date()).toISOString();
 
         const response = await this._requestAsync(`/iFrame/token/${this.config.tenantId}`,
@@ -260,7 +280,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return json.cardProcessorSiteToken;
     }
 
-    private async _submitOrderToCardProcessor(token: string, cardData: ICardData) {
+    private async _submitPaymentToCardProcessor(token: string, cardData: ICardData) {
+        if (!this.config) {
+            throw new Error('Config is required to submit order to card processor!');
+        }
+
+        const config = this.config;
+
         const response = await makeRequestWithRetries({
             makeRequest: () => fetch(
                 `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3`,
@@ -269,7 +295,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     headers: {
                         ...JSON_HEADERS,
                         'Api-Key-Token': token,
-                        'Referer':       `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`
+                        // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
+                        'Referer':       `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`
                     },
                     body:    JSON.stringify({
                         cardholderName:  cardData.name,
@@ -309,6 +336,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _sendPhoneConfirmation(phoneNumberWithCountryCode: string) {
+        if (!this.config) {
+            throw new Error('Config is required to send phone confirmation!');
+        }
+
         await this._requestAsync(`/communication/sendSMSReceipt`,
             {
                 method:  'POST',
@@ -424,15 +455,19 @@ export class CafeOrderSession extends CafeDiscoverySession {
 
             const cardProcessorToken = await this._getCardProcessorSiteToken();
 
+            const result = await this._submitPaymentToCardProcessor(cardProcessorToken, cardData);
+
             lastCompletedStage = SubmitOrderStage.payment;
 
-            const result = await this._submitOrderToCardProcessor(cardProcessorToken, cardData);
+            // WTF do we do if it fails in this stage?
+            await this._sendPhoneConfirmation(phoneNumberWithCountryCode);
+
+            lastCompletedStage = SubmitOrderStage.closeOrder;
         } catch (err) {
             console.error(`Failed to submit order after stage ${lastCompletedStage}:`, err);
             return lastCompletedStage;
         }
 
-        // WTF do we do if it fails in this stage?
-        await this._sendPhoneConfirmation(phoneNumberWithCountryCode);
+        return SubmitOrderStage.complete;
     }
 }

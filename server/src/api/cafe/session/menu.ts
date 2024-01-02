@@ -6,7 +6,7 @@ import {
     ICafeStationListItem
 } from '../../../models/buyondemand/responses.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { isDuckTypeArray } from '@arcticzeroo/typeguard';
+import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { logError } from '../../../util/log.js';
 import { normalizeTagName } from '../../../util/cafe.js';
 import { TagStorageClient } from '../../storage/clients/tags.js';
@@ -51,6 +51,10 @@ export class CafeMenuSession extends CafeDiscoverySession {
     }
 
     private async retrieveStationListAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
+        if (!this.config) {
+            throw new Error('Config is required to retrieve station list!');
+        }
+
         const response = await this._requestAsync(
             `/sites/${this.config.tenantId}/${this.config.contextId}/concepts/${this.config.displayProfileId}`,
             {
@@ -96,7 +100,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
     }
 
     private _mapModifiersFromDetails(jsonItem: ICafeMenuItemDetailsResponse): Array<IMenuItemModifier> {
-        return jsonItem.modifiers.modifiers.map(jsonModifier => ({
+        const modifiers = jsonItem.modifiers?.modifiers?.map(jsonModifier => ({
             id:          jsonModifier.id,
             description: jsonModifier.description,
             minimum:     jsonModifier.minimum,
@@ -108,9 +112,15 @@ export class CafeMenuSession extends CafeDiscoverySession {
                 price:       Number(jsonOption.amount || 0)
             }))
         }));
+
+        return modifiers ?? [];
     }
 
     private async _requestModifierDetailsAsync(itemId: string): Promise<Array<IMenuItemModifier>> {
+        if (!this.config) {
+            throw new Error('Config is required to retrieve modifier details!');
+        }
+
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/${itemId}`, {
             method: 'POST',
             body:   JSON.stringify({
@@ -123,7 +133,13 @@ export class CafeMenuSession extends CafeDiscoverySession {
             throw new Error(`Unable to retrieve modifier details for item ${itemId}: ${response.status}`);
         }
 
-        const json: ICafeMenuItemDetailsResponse = await response.json();
+        const json = await response.json();
+
+        // Empty object just checks that it is an object, which is good enough for our purposes.
+        // We do null checks anyway later.
+        if (!isDuckType<ICafeMenuItemDetailsResponse>(json, {})) {
+            throw new Error('Error in processing modifier details response: Invalid object type');
+        }
 
         if (json.modifiers?.modifiers == null) {
             return [];
@@ -191,6 +207,10 @@ export class CafeMenuSession extends CafeDiscoverySession {
     }
 
     private async _requestTagDefinitionsAsync(stationId: string, menuId: string): Promise<Map<string, string>> {
+        if (!this.config) {
+            throw new Error('Config is required to retrieve tag definitions!');
+        }
+
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/concepts/${this.config.displayProfileId}/menus/${stationId}`, {
             method:  'POST',
             headers: JSON_HEADERS,
@@ -240,7 +260,12 @@ export class CafeMenuSession extends CafeDiscoverySession {
             throw new Error('Invalid number of stations in response!');
         }
 
-        const station = json[0];
+        const [station] = json;
+
+        if (!station) {
+            throw new Error('Station is missing from json!');
+        }
+
         return new Map(
             Object.values(station.customLabels)
                 .map(labelData => [labelData.tagId, normalizeTagName(labelData.tagName)])
@@ -316,6 +341,10 @@ export class CafeMenuSession extends CafeDiscoverySession {
     }
 
     private async _requestMenuItemDetails(station: ICafeStation, localItemsById: Map<string, IMenuItem>, itemIds: string[]): Promise<Array<IMenuItem>> {
+        if (!this.config) {
+            throw new Error('Config is required to retrieve menu item details!');
+        }
+
         const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
             {
                 method:  'POST',
