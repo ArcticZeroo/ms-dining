@@ -47,15 +47,15 @@ export interface IMenuItem {
     id: string;
     price: number;
     name: string;
-    receiptText?: string;
+    receiptText?: Nullable<string>;
     calories: number;
     maxCalories: number;
     hasThumbnail: boolean;
+    modifiers: CafeTypes.IMenuItemModifier[];
     thumbnailWidth?: number;
     thumbnailHeight?: number;
-    imageUrl?: string;
-    description?: string;
-    modifiers: CafeTypes.IMenuItemModifier[];
-    lastUpdateTime?: Date;
+    imageUrl?: Nullable<string>;
+    description?: Nullable<string>;
+    lastUpdateTime?: Nullable<Date>;
     tags: string[];
 }

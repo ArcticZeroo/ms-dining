@@ -4,6 +4,7 @@ import { MenuItemStorageClient } from './clients/menu-item.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { Nullable } from '../../models/util.js';
 
 const CHEAP_ITEM_IGNORE_TERMS = [
     'side',
@@ -48,8 +49,8 @@ export abstract class SearchManager {
             cafeId: string;
             matchReasons: Iterable<SearchMatchReason>;
             name: string;
-            description?: string;
-            imageUrl?: string;
+            description?: Nullable<string>;
+            imageUrl?: Nullable<string>;
         }
 
         const addResult = ({
@@ -100,7 +101,7 @@ export abstract class SearchManager {
             } as const;
         });
 
-        const isMatch = (text: string | undefined, entityType: SearchEntityType) => {
+        const isMatch = (text: Nullable<string>, entityType: SearchEntityType) => {
             if (!text) {
                 return false;
             }
@@ -212,7 +213,11 @@ export abstract class SearchManager {
                         continue;
                     }
 
-                    if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name) || CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
+                    if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name)) {
+                        continue;
+                    }
+
+                    if (menuItem.description && CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
                         continue;
                     }
 

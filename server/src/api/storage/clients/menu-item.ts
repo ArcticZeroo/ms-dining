@@ -110,14 +110,14 @@ export abstract class MenuItemStorageClient {
             modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput
         } = {
             name:                   menuItem.name.trim(),
-            imageUrl:               menuItem.imageUrl,
-            description:            menuItem.description?.trim(),
+            imageUrl:               menuItem.imageUrl || null,
+            description:            menuItem.description?.trim() || null,
             price:                  Number(menuItem.price || 0),
             calories:               Number(menuItem.calories || 0),
             maxCalories:            Number(menuItem.maxCalories || 0),
             tags:                   menuItem.tags.length === 0 ? null : menuItem.tags.join(';'),
             externalLastUpdateTime: lastUpdateTime,
-            externalReceiptText:    menuItem.receiptText,
+            externalReceiptText:    menuItem.receiptText || null,
             modifiers:              {
                 connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
             },

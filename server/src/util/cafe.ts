@@ -12,7 +12,7 @@ export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
     return `${getBaseApiUrlWithoutTrailingSlash(cafe)}/image/${config.tenantId}/${config.contextId}/${config.logoName}`;
 }
 
-export const getThumbnailUrl = (menuItem: IMenuItem): string | undefined => {
+export const getThumbnailUrl = (menuItem: IMenuItem): Nullable<string> => {
     if (!menuItem.hasThumbnail) {
         return menuItem.imageUrl;
     }

@@ -75,7 +75,16 @@ export const retrieveExistingThumbnailData = async (id: string, existingThumbnai
     }
 
     try {
-        const { width, height } = await getImageSizeAsync(thumbnailPath);
+        const imageSizeResult = await getImageSizeAsync(thumbnailPath);
+
+        if (imageSizeResult == null) {
+            return {
+                hasThumbnail: false
+            };
+        }
+
+        const { width, height } = imageSizeResult;
+
         return {
             hasThumbnail:    true,
             thumbnailWidth:  width,
