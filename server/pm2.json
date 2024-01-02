@@ -3,7 +3,7 @@
         {
             "name": "MSDining",
             "script": "npm",
-            "args": ["run", "start"],
+            "args": ["run", "deploy"],
             "watch": false,
             "ignore_watch": ["node_modules"]
         }
