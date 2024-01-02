@@ -3,8 +3,8 @@ import { createTrackingApplicationAsync } from './api/tracking/visitors.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
 import { ApplicationContext } from './constants/context.js';
-import { logInfo } from './util/log.js';
-import { ENVIRONMENT_SETTINGS, isDev } from './util/env.js';
+import { logError, logInfo } from './util/log.js';
+import { ENVIRONMENT_SETTINGS } from './util/env.js';
 
 logInfo('Starting server on port', webserverPort);
 app.listen(webserverPort);
@@ -18,8 +18,8 @@ createTrackingApplicationAsync()
             return;
         }
 
-        console.error('Could not create tracking application:', err);
+        logError('Could not create tracking application:', err);
     });
 
 performBootTasks()
-    .catch(err => console.error('Could not perform boot tasks:', err));
+    .catch(err => logError('Could not perform boot tasks:', err));

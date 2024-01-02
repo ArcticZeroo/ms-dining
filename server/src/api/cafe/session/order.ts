@@ -39,6 +39,7 @@ interface ISerializedModifier {
 export class CafeOrderSession extends CafeDiscoverySession {
     #orderingContext: IOrderingContext = {
         onDemandTerminalId: '',
+        onDemandEmployeeId: '',
         profitCenterId:     '',
         storePriceLevel:    ''
     };
@@ -75,8 +76,9 @@ export class CafeOrderSession extends CafeDiscoverySession {
         }
 
         return {
-            profitCenterId:     siteData.displayOptions['profit-center-id'],
             onDemandTerminalId: siteData.displayOptions.onDemandTerminalId,
+            onDemandEmployeeId: siteData.displayOptions.onDemandEmployeeId,
+            profitCenterId:     siteData.displayOptions['profit-center-id'],
             storePriceLevel:    siteData.storePriceLevel,
         };
     }
@@ -296,7 +298,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         ...JSON_HEADERS,
                         'Api-Key-Token': token,
                         // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
-                        'Referer':       `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`
+                        'Referer': `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`
                     },
                     body:    JSON.stringify({
                         cardholderName:  cardData.name,

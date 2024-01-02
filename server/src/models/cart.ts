@@ -2,6 +2,7 @@ import { ICartItem } from "@msdining/common/dist/models/cart.js";
 
 export interface IOrderingContext {
     onDemandTerminalId: string;
+    onDemandEmployeeId: string;
     profitCenterId: string;
     storePriceLevel: string;
 }
