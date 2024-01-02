@@ -5,6 +5,7 @@ export interface EnvironmentSettings {
     skipWeeklyRepair: boolean;
     maxConcurrentRequests?: number;
     maxConcurrentCafes: number;
+    ignoreTrackingFailures?: boolean;
 }
 
 export const isDev = process.env.NODE_ENV?.toLowerCase() === 'dev';
@@ -16,6 +17,7 @@ const devEnvironmentSettings: EnvironmentSettings = {
     skipWeeklyRepair:          true,
     maxConcurrentRequests:     5,
     maxConcurrentCafes:        5,
+    ignoreTrackingFailures:    true
 };
 
 const prodEnvironmentSettings: EnvironmentSettings = {
