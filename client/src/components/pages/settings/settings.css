@@ -137,8 +137,12 @@
     opacity: 0.5;
 }
 
+#setting-price-filters .number-setting.invalid {
+    background: #be6363;
+}
+
 #setting-price-filters .number-setting.at-limit {
-    background: #dca7a1;
+    background: #6382be;
 }
 
 @media screen and (max-width: 800px) {
