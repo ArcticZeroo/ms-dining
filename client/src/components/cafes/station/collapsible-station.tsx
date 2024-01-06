@@ -2,7 +2,7 @@ import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
+import { useFilteredMenu, useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation } from '../../../models/cafe.ts';
@@ -79,6 +79,12 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         [station.name]
     );
 
+    const menu = useFilteredMenu(station);
+
+    if (!menu) {
+        return null;
+    }
+
     return (
         <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
             <a className="scroll-anchor" href={`#${idPrefixByEntityType[SearchEntityType.station]}-${normalizedName}`}/>
@@ -95,7 +101,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                     <ExpandIcon isExpanded={isExpanded}/>
                 </button>
             </div>
-            <StationMenu menuItemsByCategoryName={station.menu} ref={menuBodyRef}/>
+            <StationMenu menuItemsByCategoryName={menu} ref={menuBodyRef}/>
         </div>
     );
 };
