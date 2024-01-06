@@ -12,12 +12,12 @@ interface IBooleanSettingInputProps {
 }
 
 export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({
-                                                                             icon,
-                                                                             name,
-                                                                             description,
-                                                                             setting,
-                                                                             isChip = false
-                                                                         }) => {
+    icon,
+    name,
+    description,
+    setting,
+    isChip = false
+}) => {
     const currentValue = useValueNotifier(setting);
 
     const toggleSetting = () => {
@@ -28,15 +28,15 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({
 
     const iconComponent = icon && (
         <span className="material-symbols-outlined">
-			{icon}
-		</span>
+            {icon}
+        </span>
     );
 
     const inputComponent = (
         <input type="checkbox"
-               id={htmlId}
-               checked={currentValue}
-               onChange={toggleSetting}/>
+            id={htmlId}
+            checked={currentValue}
+            onChange={toggleSetting}/>
     );
 
     if (isChip) {

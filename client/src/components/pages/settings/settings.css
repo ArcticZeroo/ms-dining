@@ -7,6 +7,7 @@
 .setting {
     display: flex;
     justify-content: space-between;
+    gap: var(--default-padding);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     background: #EEE;
@@ -120,4 +121,28 @@
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
+}
+
+#setting-price-filters .number-setting {
+    background: #85a4de;
+    transition: background-color 0.25s ease, opacity 0.25s ease;
+}
+
+#setting-price-filters .number-setting input {
+    border: 0;
+}
+
+#setting-price-filters .number-setting.disabled {
+    background: #DDD;
+    opacity: 0.5;
+}
+
+#setting-price-filters .number-setting.at-limit {
+    background: #dca7a1;
+}
+
+@media screen and (max-width: 800px) {
+    .setting {
+        flex-direction: column;
+    }
 }

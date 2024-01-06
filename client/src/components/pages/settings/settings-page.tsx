@@ -6,29 +6,29 @@ import { MenuSettings } from '../../settings/menu-settings.tsx';
 import './settings.css';
 
 export const SettingsPage = () => {
-	return (
-		<div id="settings">
-			<MenuSettings/>
-			<HomepageSettings requireButtonToCommitHomepageViews={false}/>
-			<div className="card settings-group">
-				<div className="title">
+    return (
+        <div id="settings">
+            <MenuSettings/>
+            <HomepageSettings requireButtonToCommitHomepageViews={false}/>
+            <div className="card settings-group">
+                <div className="title">
 					Other Settings
-				</div>
-				<div className="body">
-					<BooleanSettingInput
-						icon="tag"
-						setting={ApplicationSettings.shouldCondenseNumbers}
-						name="Condense Numbered Cafes"
-						description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
-					/>
-					<BooleanSettingInput
-						icon="expand_content"
-						setting={ApplicationSettings.rememberCollapseState}
-						name="Remember Collapse/Expand State"
-					/>
-					<CustomKeySetting/>
-				</div>
-			</div>
-		</div>
-	);
+                </div>
+                <div className="body">
+                    <BooleanSettingInput
+                        icon="tag"
+                        setting={ApplicationSettings.shouldCondenseNumbers}
+                        name="Condense Numbered Cafes"
+                        description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
+                    />
+                    <BooleanSettingInput
+                        icon="expand_content"
+                        setting={ApplicationSettings.rememberCollapseState}
+                        name="Remember Collapse/Expand State"
+                    />
+                    <CustomKeySetting/>
+                </div>
+            </div>
+        </div>
+    );
 };

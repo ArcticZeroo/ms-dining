@@ -57,8 +57,8 @@ export abstract class Setting<T> extends ValueNotifier<T> {
     private _shouldPersist: boolean = true;
 
     protected constructor(
-		public readonly name: string,
-		initialValue: T
+        public readonly name: string,
+        initialValue: T
     ) {
         super(initialValue);
     }
@@ -85,7 +85,7 @@ export abstract class Setting<T> extends ValueNotifier<T> {
         super.value = value;
     }
 
-	protected abstract serialize(value: T): void;
+    protected abstract serialize(value: T): void;
 }
 
 export class BooleanSetting extends Setting<boolean> {
@@ -154,6 +154,36 @@ export class StringSetting extends Setting<string> {
     }
 }
 
+export class NumberSetting extends Setting<number> {
+    constructor(name: string, defaultValue: number) {
+        super(name, NumberSetting.deserialize(name, defaultValue));
+    }
+
+    private static deserialize(name: string, defaultValue: number) {
+        try {
+            const valueRaw = localStorage.getItem(name);
+
+            if (!valueRaw) {
+                return defaultValue;
+            }
+
+            const value = Number(valueRaw);
+
+            if (Number.isNaN(value)) {
+                return defaultValue;
+            }
+
+            return value;
+        } catch {
+            return defaultValue;
+        }
+    }
+
+    protected serialize(value: number) {
+        localStorage.setItem(this.name, value.toString());
+    }
+}
+
 export const ApplicationSettings = {
     shouldCondenseNumbers: new BooleanSetting('shouldCondenseNumbers', true /*defaultValue*/),
     showImages:            new BooleanSetting('showImages', true /*defaultValue*/),
@@ -164,6 +194,7 @@ export const ApplicationSettings = {
     rememberCollapseState: new BooleanSetting('rememberCollapseState', false /*defaultValue*/),
     allowFutureMenus:      new BooleanSetting('allowFutureMenus', false /*defaultValue*/),
     allowOnlineOrdering:   new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),
+    enablePriceFilters:   new BooleanSetting('enablePriceFilters', false /*defaultValue*/),
     lastUsedCafeIds:       new StringArraySetting('lastUsedDiningHalls'),
     homepageViews:         new StringSetSetting('homepageDiningHalls'),
     highlightTagNames:     new StringSetSetting('highlightTagNames'),
@@ -172,7 +203,9 @@ export const ApplicationSettings = {
     collapsedStations:     new StringSetSetting('collapsedStations'),
     collapsedCafeIds:      new StringSetSetting('collapsedCafeIds'),
     collapsedStationNames: new StringSetSetting('collapsedStationNames', false /*shouldPersist*/),
-    visitorId:             new StringSetting('visitorId')
+    visitorId:             new StringSetting('visitorId'),
+    minimumPrice:          new NumberSetting('minimumPrice', 0),
+    maximumPrice:          new NumberSetting('maximumPrice', 10),
 } as const;
 
 export const getVisitorId = () => {

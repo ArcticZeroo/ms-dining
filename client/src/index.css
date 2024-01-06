@@ -178,6 +178,10 @@ html, body, #root, .App {
     gap: var(--default-padding);
 }
 
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
 .collapsible-content .collapse-toggle {
     font-size: 1.4em;
     text-align: center;
