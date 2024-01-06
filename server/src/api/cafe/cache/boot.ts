@@ -1,13 +1,10 @@
 import { DateUtil } from '@msdining/common';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-import { logError, logInfo } from '../../../util/log.js';
-import { CafeStorageClient } from '../../storage/clients/cafe.js';
+import { logInfo } from '../../../util/log.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
-import { cafeList } from '../../../constants/cafes.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
-import { isCafeAvailable } from '../../../util/date.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
