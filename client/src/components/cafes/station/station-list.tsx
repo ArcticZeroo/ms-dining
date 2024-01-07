@@ -38,12 +38,19 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
         [stations, enablePriceFilters, minPrice, maxPrice]
     );
 
+    const emptyMessage = useMemo(() => {
+        if (stations.length === 0) {
+            return `There's nothing here! This cafe is probably closed during this time.`;
+        }
+
+        if (filteredStationData.length === 0) {
+            return `There's nothing here! Your filters are hiding all the menu items.`;
+        }
+    }, [filteredStationData, stations]);
+
     return (
         <div className={classNames('stations', !isVisible && 'hidden')}>
-            {
-                filteredStationData.length === 0
-                && 'There\'s nothing here! This cafe is probably closed during this time, or you have a filter enabled that is hiding all the stations.'
-            }
+            { emptyMessage }
             {
                 filteredStationData.map(([station, menu]) => (
                     <CollapsibleStation
