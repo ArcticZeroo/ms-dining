@@ -2,10 +2,10 @@ import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { useFilteredMenu, useIsFavoriteItem } from '../../../hooks/cafe.ts';
+import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
-import { ICafeStation } from '../../../models/cafe.ts';
+import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { idPrefixByEntityType } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
@@ -27,9 +27,10 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
 
 export interface ICollapsibleStationProps {
     station: ICafeStation;
+    menu: IMenuItemsByCategoryName;
 }
 
-export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station }) => {
+export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
     const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
     const collapsedStationNames = useValueNotifier(ApplicationSettings.collapsedStationNames);
 
@@ -78,12 +79,6 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         () => normalizeNameForSearch(station.name),
         [station.name]
     );
-
-    const menu = useFilteredMenu(station);
-
-    if (!menu) {
-        return null;
-    }
 
     return (
         <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>

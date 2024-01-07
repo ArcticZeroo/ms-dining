@@ -132,17 +132,17 @@
     border: 0;
 }
 
-#setting-price-filters .number-setting.disabled {
-    background: #DDD;
-    opacity: 0.5;
-}
-
 #setting-price-filters .number-setting.invalid {
     background: #be6363;
 }
 
 #setting-price-filters .number-setting.at-limit {
     background: #6382be;
+}
+
+#setting-price-filters .number-setting.disabled {
+    background: #DDD;
+    opacity: 0.5;
 }
 
 @media screen and (max-width: 800px) {

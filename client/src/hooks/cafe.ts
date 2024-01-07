@@ -45,35 +45,24 @@ export const useIsFavoriteItem = (name: string, type: SearchEntityType) => {
     );
 };
 
-export const useFilteredMenu = (station: ICafeStation) => {
-    const enablePriceFiltering = useValueNotifier(ApplicationSettings.enablePriceFilters);
+export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPrice: number) => {
+    const menu: IMenuItemsByCategoryName = {};
+    let isMenuEmpty = true;
 
-    const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
-    const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
+    for (const [categoryName, items] of Object.entries(station.menu)) {
+        const filteredItems = items.filter(item => {
+            return item.price >= minPrice && item.price <= maxPrice;
+        });
 
-    return useMemo(() => {
-        if (!enablePriceFiltering) {
-            return station.menu;
+        if (filteredItems.length > 0) {
+            menu[categoryName] = filteredItems;
+            isMenuEmpty = false;
         }
+    }
 
-        const menu: IMenuItemsByCategoryName = {};
-        let isMenuEmpty = true;
+    if (isMenuEmpty) {
+        return null;
+    }
 
-        for (const [categoryName, items] of Object.entries(station.menu)) {
-            const filteredItems = items.filter(item => {
-                return item.price >= minPrice && item.price <= maxPrice;
-            });
-
-            if (filteredItems.length > 0) {
-                menu[categoryName] = filteredItems;
-                isMenuEmpty = false;
-            }
-        }
-
-        if (isMenuEmpty) {
-            return null;
-        }
-
-        return menu;
-    }, [station.menu, enablePriceFiltering, minPrice, maxPrice]);
-};
+    return menu;
+}
