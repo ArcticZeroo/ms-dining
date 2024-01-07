@@ -8,8 +8,8 @@ import './settings.css';
 export const SettingsPage = () => {
     return (
         <div id="settings">
-            <MenuSettings/>
             <HomepageSettings requireButtonToCommitHomepageViews={false}/>
+            <MenuSettings/>
             <div className="card settings-group">
                 <div className="title">
 					Other Settings
