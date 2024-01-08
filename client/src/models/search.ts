@@ -23,6 +23,7 @@ export interface IQuerySearchResult {
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
     matchReasons: Set<SearchMatchReason>;
+    prices: Set<number>;
 }
 
 export interface ICheapItemSearchResult {
@@ -42,6 +43,7 @@ export interface IServerSearchResult {
     imageUrl?: string;
     locations: Record<string, Array<string>>;
     matchReasons: Array<SearchMatchReason>;
+    prices: Array<number>;
 }
 
 export interface IServerCheapItemSearchResult {

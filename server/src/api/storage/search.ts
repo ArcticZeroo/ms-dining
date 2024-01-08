@@ -49,6 +49,7 @@ export abstract class SearchManager {
             cafeId: string;
             matchReasons: Iterable<SearchMatchReason>;
             name: string;
+            price?: number;
             description?: Nullable<string>;
             imageUrl?: Nullable<string>;
         }
@@ -60,7 +61,8 @@ export abstract class SearchManager {
                                imageUrl,
                                dateString,
                                cafeId,
-                               matchReasons
+                               matchReasons,
+                               price
                            }: IAddResultParams) => {
             ensureEntityTypeExists(type);
 
@@ -75,6 +77,7 @@ export abstract class SearchManager {
                     imageUrl:              imageUrl,
                     locationDatesByCafeId: new Map<string, Set<string>>(),
                     matchReasons:          new Set<SearchMatchReason>(),
+                    prices:                new Set<number>()
                 });
             }
 
@@ -88,6 +91,10 @@ export abstract class SearchManager {
                 searchResult.locationDatesByCafeId.set(cafeId, new Set());
             }
             searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
+
+            if (price != null) {
+                searchResult.prices.add(price);
+            }
 
             // The first item to make it into the map might not be the one with all the info.
             searchResult.description = searchResult.description || description;
@@ -163,6 +170,7 @@ export abstract class SearchManager {
                             cafeId:      dailyStation.cafeId,
                             name:        menuItem.name,
                             description: menuItem.description,
+                            price:       menuItem.price,
                             imageUrl:    getThumbnailUrl(menuItem),
                             matchReasons,
                         });

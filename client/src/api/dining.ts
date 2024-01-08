@@ -283,6 +283,7 @@ export abstract class DiningClient {
                 imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
                 matchReasons:          new Set(serverResult.matchReasons),
+                prices:                new Set(serverResult.prices),
             });
         }
 

@@ -173,6 +173,7 @@ export const registerDiningHallRoutes = (parent: Router) => {
         imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl),
         locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
         matchReasons: Array.from(searchResult.matchReasons),
+        prices:       Array.from(searchResult.prices),
     });
 
     const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, ISearchResult>>) => {

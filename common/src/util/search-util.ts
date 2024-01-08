@@ -146,12 +146,6 @@ const computeScore = (cafePriorityOrder: string[] | undefined, searchResult: ISe
 	}
 };
 
-interface ISortSearchResultsParams {
-	searchResults: ISearchResult[];
-	queryText: string;
-	cafePriorityOrder?: string[];
-}
-
 enum MatchType {
 	perfect = 3,
 	substring = 2,
@@ -193,6 +187,12 @@ const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMat
 
 	return matchType;
 };
+
+interface ISortSearchResultsParams {
+	searchResults: ISearchResult[];
+	queryText: string;
+	cafePriorityOrder?: string[];
+}
 
 export const sortSearchResults = ({
 									  searchResults,

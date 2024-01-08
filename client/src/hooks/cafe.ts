@@ -1,6 +1,6 @@
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ApplicationSettings, StringSetSetting } from '../api/settings.ts';
 import { getTargetSettingForFavorite } from '../util/cafe.ts';
 import { useValueNotifier } from './events.ts';
@@ -65,4 +65,15 @@ export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPric
     }
 
     return menu;
+}
+
+export const useIsPriceAllowed = () => {
+    const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
+    const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
+    const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
+
+    return useCallback(
+        (value: number) => !enablePriceFilters || (value >= minPrice && value <= maxPrice),
+        [enablePriceFilters, maxPrice, minPrice]
+    );
 }

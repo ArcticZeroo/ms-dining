@@ -8,6 +8,7 @@ export interface ISearchResult {
     imageUrl?: Nullable<string>;
     name: string;
     description?: Nullable<string>;
+    prices: Set<number>;
 }
 
 export interface ICheapItemSearchResult {
