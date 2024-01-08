@@ -4,15 +4,15 @@ import { SearchEntityFilterType } from '../models/search.ts';
 
 export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: SearchTypes.SearchEntityType) => {
     switch (filter) {
-        case SearchEntityFilterType.all:
-            return true;
-        case SearchEntityFilterType.menuItem:
-            return entryType === SearchTypes.SearchEntityType.menuItem;
-        case SearchEntityFilterType.station:
-            return entryType === SearchTypes.SearchEntityType.station;
-        default:
-            console.error('Unknown filter type', filter);
-            return false;
+    case SearchEntityFilterType.all:
+        return true;
+    case SearchEntityFilterType.menuItem:
+        return entryType === SearchTypes.SearchEntityType.menuItem;
+    case SearchEntityFilterType.station:
+        return entryType === SearchTypes.SearchEntityType.station;
+    default:
+        console.error('Unknown filter type', filter);
+        return false;
     }
 };
 
@@ -48,6 +48,6 @@ export const isAnyDateToday = (locationEntriesByCafeId: Map<string, Date[]>, tod
     return false;
 }
 
-export const isSearchResultVisible = (locationEntriesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean) => {
-    return allowFutureMenus || isAnyDateToday(locationEntriesByCafeId);
+export const isSearchResultVisible = (locationEntriesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean, selectedDate: Date) => {
+    return allowFutureMenus || isAnyDateToday(locationEntriesByCafeId, selectedDate);
 }
