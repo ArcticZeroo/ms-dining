@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { CartContext } from '../../../../../../../context/cart.ts';
 import { PopupContext } from '../../../../../../../context/modal.ts';
-import { useValueNotifierAsState } from '../../../../../../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierAsState } from '../../../../../../../hooks/events.ts';
 import { ICartItemWithMetadata } from '../../../../../../../models/cart.ts';
 
 import { classNames } from '../../../../../../../util/react.ts';
@@ -14,6 +14,7 @@ import { getParentView } from '../../../../../../../util/view.ts';
 import { ApplicationContext } from '../../../../../../../context/app.ts';
 import { CafeView } from '../../../../../../../models/cafe.ts';
 import { sortViews } from '../../../../../../../util/sorting.ts';
+import { ApplicationSettings } from '../../../../../../../api/settings.ts';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
@@ -22,6 +23,7 @@ export const CartPopup = () => {
     const modalNotifier = useContext(PopupContext);
     const cartItemsNotifier = useContext(CartContext);
     const [cart, setCart] = useValueNotifierAsState(cartItemsNotifier);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     const onRemove = useCallback((item: ICartItemWithMetadata) => {
         const newCart = shallowCloneCart(cart);
@@ -37,11 +39,11 @@ export const CartPopup = () => {
         modalNotifier.value = {
             id:   editCartItemSymbol,
             body: <MenuItemPopup
-                      cafeId={item.cafeId}
-                      menuItem={item.associatedItem}
-                      modalSymbol={editCartItemSymbol}
-                      fromCartItem={item}
-                  />
+                cafeId={item.cafeId}
+                menuItem={item.associatedItem}
+                modalSymbol={editCartItemSymbol}
+                fromCartItem={item}
+            />
         };
     }, [modalNotifier]);
 
@@ -77,7 +79,7 @@ export const CartPopup = () => {
                     continue;
                 }
 
-                const parentView = getParentView(viewsById, cafeView);
+                const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
 
                 const cartItemsById = cartItemsByView.get(parentView) ?? new Map<string, ICartItemWithMetadata>();
 
@@ -133,7 +135,7 @@ export const CartPopup = () => {
             </div>
             <table className="cart-contents">
                 <tbody>
-                {cartItemsView}
+                    {cartItemsView}
                 </tbody>
             </table>
         </div>

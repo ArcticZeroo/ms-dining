@@ -3,6 +3,8 @@ import { ApplicationContext } from '../context/app.ts';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { sortViews } from '../util/sorting.ts';
 import { isViewVisible } from '../util/view.ts';
+import { useValueNotifier } from './events.ts';
+import { ApplicationSettings } from '../api/settings.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     return useMemo(() => {
@@ -11,20 +13,16 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
         const cafes: ICafe[] = [];
 
         for (const group of groups) {
-            if (!group.alwaysExpand) {
-                const groupView = {
-                    type:  CafeViewType.group,
-                    value: group
-                } as const;
+            const groupView = {
+                type:  CafeViewType.group,
+                value: group
+            } as const;
 
-                viewsById.set(group.id, groupView);
-                viewsInOrder.push(groupView);
-            }
+            viewsById.set(group.id, groupView);
+            viewsInOrder.push(groupView);
 
             for (const cafe of group.members) {
-                if (!group.alwaysExpand) {
-                    cafe.group = group;
-                }
+                cafe.group = group;
 
                 const cafeView = {
                     type:  CafeViewType.single,
@@ -43,16 +41,17 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
 
 export const useViewsForNav = () => {
     const { viewsInOrder } = useContext(ApplicationContext);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     return useMemo(() => {
         const visibleViews: CafeView[] = [];
 
         for (const view of viewsInOrder) {
-            if (isViewVisible(view)) {
+            if (isViewVisible(view, shouldUseGroups)) {
                 visibleViews.push(view);
             }
         }
 
         return sortViews(visibleViews);
-    }, [viewsInOrder]);
+    }, [viewsInOrder, shouldUseGroups]);
 };

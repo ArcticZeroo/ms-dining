@@ -16,6 +16,12 @@ export const SettingsPage = () => {
                 </div>
                 <div className="body">
                     <BooleanSettingInput
+                        icon="group"
+                        setting={ApplicationSettings.shouldUseGroups}
+                        name="Group Cafes"
+                        description="When enabled, cafes in the nav and search will be grouped by location."
+                    />
+                    <BooleanSettingInput
                         icon="tag"
                         setting={ApplicationSettings.shouldCondenseNumbers}
                         name="Condense Numbered Cafes"

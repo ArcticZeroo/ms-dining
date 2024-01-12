@@ -11,6 +11,7 @@ export const HomeViews = () => {
     const { viewsById } = useContext(ApplicationContext);
 
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     // Users may have added cafes to their home set which are currently unavailable
     const availableViews = useMemo(() => {
@@ -21,14 +22,14 @@ export const HomeViews = () => {
                 const view = viewsById.get(viewId)!;
 
                 // If the user selected a single view that should be a group, don't show it
-                if (isViewVisible(view)) {
+                if (isViewVisible(view, shouldUseGroups)) {
                     newAvailableViews.push(view);
                 }
             }
         }
 
         return sortViews(newAvailableViews);
-    }, [viewsById, homepageViewIds]);
+    }, [viewsById, homepageViewIds, shouldUseGroups]);
 
     if (availableViews.length === 0) {
         return null;

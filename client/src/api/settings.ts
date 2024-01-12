@@ -185,6 +185,7 @@ export class NumberSetting extends Setting<number> {
 }
 
 export const ApplicationSettings = {
+    shouldUseGroups:       new BooleanSetting('shouldUseGroups', true /*defaultValue*/),
     shouldCondenseNumbers: new BooleanSetting('shouldCondenseNumbers', true /*defaultValue*/),
     showImages:            new BooleanSetting('showImages', true /*defaultValue*/),
     showCalories:          new BooleanSetting('showCalories', true /*defaultValue*/),
@@ -194,7 +195,7 @@ export const ApplicationSettings = {
     rememberCollapseState: new BooleanSetting('rememberCollapseState', false /*defaultValue*/),
     allowFutureMenus:      new BooleanSetting('allowFutureMenus', false /*defaultValue*/),
     allowOnlineOrdering:   new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),
-    enablePriceFilters:   new BooleanSetting('enablePriceFilters', false /*defaultValue*/),
+    enablePriceFilters:    new BooleanSetting('enablePriceFilters', false /*defaultValue*/),
     lastUsedCafeIds:       new StringArraySetting('lastUsedDiningHalls'),
     homepageViews:         new StringSetSetting('homepageDiningHalls'),
     highlightTagNames:     new StringSetSetting('highlightTagNames'),

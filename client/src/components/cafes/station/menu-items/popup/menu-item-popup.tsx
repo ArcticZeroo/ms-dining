@@ -18,6 +18,8 @@ import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
+import { useValueNotifier } from '../../../../../hooks/events.ts';
+import { ApplicationSettings } from '../../../../../api/settings.ts';
 
 const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
     let price = menuItem.price;
@@ -80,6 +82,8 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 
     const cartItemsNotifier = useContext(CartContext);
     const modalNotifier = useContext(PopupContext);
+
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     const closeModal = () => {
         if (modalNotifier.value?.id === modalSymbol) {
@@ -161,7 +165,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
             return;
         }
 
-        const parentView = getParentView(viewsById, cafeView);
+        const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
 
         const viewPath = getViewMenuUrlWithJump({
             view:       parentView,

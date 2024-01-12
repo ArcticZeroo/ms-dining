@@ -152,6 +152,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const isFavoriteItem = useIsFavoriteItem(name, entityType);
@@ -240,7 +241,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                     return false;
                                 }
 
-                                const parentView = getParentView(viewsById, view);
+                                const parentView = getParentView(viewsById, view, shouldUseGroups);
 
                                 return (
                                     <Link to={getViewMenuUrlWithJump({ view: parentView, name, entityType })}
