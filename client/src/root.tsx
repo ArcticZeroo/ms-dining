@@ -36,10 +36,13 @@ const useScrollTracker = (shouldStopScroll: boolean) => {
     useScrollSaver(scrollTopRef, shouldStopScroll);
 
     useEffect(() => {
-        if (pageBodyDivRef.current) {
-            pageBodyDivRef.current.scrollTop = 0;
-        }
-        document.documentElement.scrollTop = 0;
+        // Hack to let react render things before we scroll
+        setTimeout(() => {
+            if (pageBodyDivRef.current) {
+                pageBodyDivRef.current.scrollTop = 0;
+            }
+            document.documentElement.scrollTop = 0;
+        }, 0);
     }, [location.pathname, location.search]);
 
     return pageBodyDivRef;
