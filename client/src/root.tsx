@@ -8,6 +8,8 @@ import { useValueNotifierContext } from './hooks/events.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { classNames } from './util/react.ts';
 import { ScrollTopButton } from './components/button/scroll-top-button.tsx';
+import { addDateToUrl } from './util/url.ts';
+import { SelectedDateContext } from './context/time.ts';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -54,10 +56,15 @@ export const Root = () => {
     const deviceType = useDeviceType();
 
     const currentModal = useValueNotifierContext(PopupContext);
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const shouldStopScroll = (isNavExpanded && deviceType === DeviceType.Mobile) || currentModal != null;
 
     const pageBodyDivRef = useScrollTracker(shouldStopScroll);
+
+    useEffect(() => {
+        addDateToUrl(selectedDate);
+    }, [selectedDate]);
 
     return (
         <>

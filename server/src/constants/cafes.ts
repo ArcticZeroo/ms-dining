@@ -176,13 +176,12 @@ export const groupList: ICafeGroup[] = [
                 name: 'Jack\'s BBQ 🍖',
                 id:   'fh4jacksbbq',
             },
-            // {
-            //     name:    'Joe\'s Burgers',
-            //     id:      'joesburgers',
-            //     groupId: groupIds.building4,
-            // },
             {
-                name: 'Just Poke',
+                name:    'Joe\'s Burgers 🍔',
+                id:      'fh4joesburger',
+            },
+            {
+                name: 'Just Poke 🐟',
                 id:   'fh4justpoke',
             },
             {

@@ -3,10 +3,11 @@ import React, { useContext, useMemo } from 'react';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DiningClient } from '../../../api/dining.ts';
 
-import './date-picker.css';
 import { FutureMenuOutOfDateNotice } from '../../notice/future-menu-out-of-date-notice.tsx';
 import { DateUtil } from '@msdining/common';
 import { getDateDisplay } from '../../../util/date.ts';
+
+import './date-picker.css';
 
 const getPreviousDate = (date: Date) => {
     const newDate = new Date(date.getTime());
@@ -97,7 +98,7 @@ export const CafeDatePicker: React.FC = () => {
         <div className="date-picker">
             <div className="date-picker-buttons">
                 <button onClick={goBackwards} className="date-picker-button" disabled={!canGoBackwards}
-                        title={`Go to ${previousDateDisplay}`}>
+                    title={`Go to ${previousDateDisplay}`}>
                     <span className="material-symbols-outlined">
                         arrow_back
                     </span>
@@ -108,7 +109,7 @@ export const CafeDatePicker: React.FC = () => {
                     </span>
                 </button>
                 <button onClick={goForwards} className="date-picker-button" disabled={!canGoForwards}
-                        title={`Go to ${nextDateDisplay}`}>
+                    title={`Go to ${nextDateDisplay}`}>
                     <span className="material-symbols-outlined">
                         arrow_forward
                     </span>

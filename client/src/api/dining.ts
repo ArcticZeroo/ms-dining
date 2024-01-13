@@ -139,6 +139,7 @@ export abstract class DiningClient {
 
             date.setDate(date.getDate() + daysUntilMonday);
         }
+
         return date;
     }
 

@@ -100,12 +100,20 @@ export const getMaximumDateForMenuRequest = (): Date => {
     return now;
 }
 
+const shouldUseNextWeek = (date: Date) => {
+    if (date.getDay() === nativeDayOfWeek.Saturday) {
+        return true;
+    }
+
+    return date.getDay() === nativeDayOfWeek.Friday && date.getHours() >= 17; // after 5pm on Fridays
+}
+
 export function* yieldDaysInFutureForThisWeek() {
     const now = new Date();
     const nowWeekday = now.getDay();
 
     // If it's Saturday, we want to start on Monday of next week
-    const dateOffset = nowWeekday === nativeDayOfWeek.Saturday
+    const dateOffset = shouldUseNextWeek(now)
         ? 7
         : 0;
 

@@ -6,7 +6,7 @@ import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
@@ -153,7 +153,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDateNotifier = useContext(SelectedDateContext);
+    const selectedDate = useValueNotifier(selectedDateNotifier);
 
     const isFavoriteItem = useIsFavoriteItem(name, entityType);
 
@@ -216,14 +217,14 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                 {
                                     extraFields.map(({ iconName, value, key }) => (
                                         value &&
-													<div className="search-result-field" key={key}>
+                                        <div className="search-result-field" key={key}>
 													    <span className="material-symbols-outlined icon">
 													        {iconName}
 													    </span>
-													    <span className="value">
+                                            <span className="value">
 													        {value}
 													    </span>
-													</div>
+                                        </div>
                                     ))
                                 }
                             </div>
@@ -243,10 +244,22 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
                                 const parentView = getParentView(viewsById, view, shouldUseGroups);
 
+                                const onLinkClick = () => {
+                                    selectedDateNotifier.value = locationDates[0];
+                                }
+
                                 return (
-                                    <Link to={getViewMenuUrlWithJump({ view: parentView, name, entityType })}
+                                    <Link
+                                        to={getViewMenuUrlWithJump({
+                                            view: parentView,
+                                            name,
+                                            entityType,
+                                            date: locationDates[0]
+                                        })}
                                         className="search-result-chip"
-                                        key={view.value.id}>
+                                        key={view.value.id}
+                                        onClick={onLinkClick}
+                                    >
                                         <div className="chip-data">
                                             {
                                                 !isCompact
