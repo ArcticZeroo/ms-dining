@@ -13,7 +13,7 @@ export const SearchBar = () => {
     const onFormSubmitted = (event: React.FormEvent) => {
         event.preventDefault();
 
-        const trimmedQuery = searchQuery.trim();
+        const trimmedQuery = searchQuery.trim().toLowerCase();
 
         if (trimmedQuery.length === 0) {
             inputRef?.current?.focus();
