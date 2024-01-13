@@ -7,6 +7,7 @@ import { classNames } from '../../../util/react.ts';
 import { pluralize } from '../../../util/string.ts';
 
 import './analytics-page.css';
+import { setPageSubtitle } from '../../../util/title.ts';
 
 const VisitorChart = React.lazy(() => import('./visitor-chart.tsx'));
 
@@ -25,6 +26,10 @@ export const AnalyticsPage = () => {
     const retrieveVisitsCallback = useCallback(() => AnalyticsClient.retrieveHourlyVisitCountAsync(currentDaysAgo), [currentDaysAgo]);
 
     const { stage: visitLoadingStage, run: loadVisits, value: visits } = useDelayedPromiseState(retrieveVisitsCallback, true /*keepLastValue*/);
+
+    useEffect(() => {
+        setPageSubtitle('User Analytics');
+    }, []);
 
     useEffect(() => {
         // Parent page

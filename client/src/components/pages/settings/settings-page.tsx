@@ -4,8 +4,14 @@ import { CustomKeySetting } from '../../settings/custom-key-setting.tsx';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
 import { MenuSettings } from '../../settings/menu-settings.tsx';
 import './settings.css';
+import { useEffect } from 'react';
+import { setPageSubtitle } from '../../../util/title.ts';
 
 export const SettingsPage = () => {
+    useEffect(() => {
+        setPageSubtitle('Settings');
+    }, []);
+
     return (
         <div id="settings">
             <HomepageSettings requireButtonToCommitHomepageViews={false}/>

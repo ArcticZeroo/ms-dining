@@ -6,10 +6,16 @@ import { HomeFavorites } from './favorites/home-favorites.tsx';
 import { HomeViews } from './home-views.tsx';
 
 import './home.css';
+import { useEffect } from 'react';
+import { setPageSubtitle } from '../../../util/title.ts';
 
 export const HomePage = () => {
     const shouldShowFavorites = useValueNotifier(ApplicationSettings.showFavoritesOnHome);
     const datePicker = useDatePicker();
+
+    useEffect(() => {
+        setPageSubtitle('Home');
+    }, []);
 
     return (
         <>

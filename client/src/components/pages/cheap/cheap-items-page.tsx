@@ -1,5 +1,5 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
@@ -8,6 +8,7 @@ import { isSearchResultVisible } from '../../../util/search.ts';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
 import { SelectedDateContext } from '../../../context/time.ts';
+import { setPageSubtitle } from '../../../util/title.ts';
 
 const useCheapItems = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -74,6 +75,10 @@ const useCheapItems = () => {
 
 export const CheapItemsPage: React.FC = () => {
     const { stage, results, error } = useCheapItems();
+
+    useEffect(() => {
+        setPageSubtitle('Cheap Items');
+    }, []);
 
     if (stage === PromiseStage.error) {
         return (
