@@ -20,6 +20,7 @@ import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 import './menu-item-popup.css';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../../../api/settings.ts';
+import { SelectedDateContext } from '../../../../../context/time.ts';
 
 const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
     let price = menuItem.price;
@@ -71,6 +72,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
     const navigate = useNavigate();
 
     const { viewsById } = useContext(ApplicationContext);
+    const selectedDateNotifier = useContext(SelectedDateContext);
 
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
         return fromCartItem?.choicesByModifierId ?? new Map<string, Set<string>>();
@@ -170,12 +172,13 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
         const viewPath = getViewMenuUrlWithJump({
             view:       parentView,
             name:       menuItem.name,
-            entityType: SearchEntityType.menuItem
+            entityType: SearchEntityType.menuItem,
+            date:       selectedDateNotifier.value
         });
 
         copyToClipboard(`${window.location.origin}${viewPath}`)
             .then((didSucceed) => {
-                const backgroundColor = didSucceed 
+                const backgroundColor = didSucceed
                     ? '#66BB6A'
                     : '#EF5350';
                 setCopyButtonBackground(backgroundColor);
