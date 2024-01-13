@@ -66,7 +66,7 @@ export const Root = () => {
             <div className={classNames('content', shouldStopScroll && 'noscroll')}
                 ref={pageBodyDivRef}>
                 <Outlet/>
-                <ScrollTopButton containerRef={pageBodyDivRef}/>
+                { !shouldStopScroll && <ScrollTopButton containerRef={pageBodyDivRef}/> }
             </div>
         </>
     );

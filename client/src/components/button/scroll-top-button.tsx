@@ -35,6 +35,7 @@ export const ScrollTopButton: React.FC<IScrollTopButtonProps> = ({ containerRef 
             : window;
 
         eventTarget.addEventListener('scroll', onScroll);
+        onScroll();
 
         return () => {
             eventTarget.removeEventListener('scroll', onScroll);
