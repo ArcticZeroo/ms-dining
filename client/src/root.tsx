@@ -7,6 +7,7 @@ import { NavExpansionContext } from './context/nav.ts';
 import { useValueNotifierContext } from './hooks/events.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { classNames } from './util/react.ts';
+import { ScrollTopButton } from './components/button/scroll-top-button.tsx';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -65,6 +66,7 @@ export const Root = () => {
             <div className={classNames('content', shouldStopScroll && 'noscroll')}
                 ref={pageBodyDivRef}>
                 <Outlet/>
+                <ScrollTopButton containerRef={pageBodyDivRef}/>
             </div>
         </>
     );

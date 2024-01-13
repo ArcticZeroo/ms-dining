@@ -41,6 +41,8 @@
     display: flex;
     gap: var(--default-padding);
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .modal .title #modal-buttons button {

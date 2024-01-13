@@ -10,7 +10,7 @@
     z-index: 10;
     right: 1rem;
     bottom: 0;
-    border-top-left-radius: var(--default-padding);
+    border-radius: var(--default-padding);
 }
 
 .date-picker-buttons {

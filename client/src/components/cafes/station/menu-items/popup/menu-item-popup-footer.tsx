@@ -14,14 +14,14 @@ interface IMenuItemPopupFooterProps {
 }
 
 export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
-                                                                       isUpdate,
-                                                                       totalPrice,
-                                                                       quantity,
-                                                                       isOrderValid,
-                                                                       onAddToCartClicked,
-                                                                       onAddQuantityClicked,
-                                                                       onRemoveQuantityClicked
-                                                                   }) => {
+    isUpdate,
+    totalPrice,
+    quantity,
+    isOrderValid,
+    onAddToCartClicked,
+    onAddQuantityClicked,
+    onRemoveQuantityClicked
+}) => {
     const isOnlineOrderingAllowed = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
 
     if (!isOnlineOrderingAllowed) {
@@ -34,12 +34,12 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
         <div className="menu-item-order-footer">
             <div className="controls">
                 <button className="material-symbols-outlined"
-                        disabled={!canDecreaseQuantity}
-                        onClick={onRemoveQuantityClicked}>
+                    disabled={!canDecreaseQuantity}
+                    onClick={onRemoveQuantityClicked}>
                     remove
                 </button>
                 <button className="material-symbols-outlined"
-                        onClick={onAddQuantityClicked}>
+                    onClick={onAddQuantityClicked}>
                     add
                 </button>
                 <div className="quantity">
@@ -51,9 +51,9 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
                     {getPriceDisplay(totalPrice * quantity)}
                 </div>
                 <button className="add-to-cart"
-                        disabled={!isOrderValid}
-                        title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
-                        onClick={onAddToCartClicked}
+                    disabled={!isOrderValid}
+                    title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
+                    onClick={onAddToCartClicked}
                 >
                     {
                         isUpdate

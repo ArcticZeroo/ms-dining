@@ -60,12 +60,15 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--default-padding);
+    flex-wrap: wrap;
 }
 
 .menu-item-order-footer .info, .menu-item-order-footer .controls {
     display: flex;
     gap: var(--default-padding);
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .menu-item-order-footer .controls button {
@@ -114,6 +117,6 @@
 }
 
 .menu-item-order-body .menu-item-image {
-    height: 25rem;
+    max-height: 25rem;
     max-width: 100%;
 }
