@@ -7,6 +7,7 @@ import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { StationList } from './station/station-list.tsx';
+import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
@@ -65,7 +66,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                 open_in_new
                         </span>
                     </a>
-                    <a className="scroll-anchor" href={`#${cafe.id}`}/>
+                    <ScrollAnchor id={cafe.id}/>
                     <button className="collapse-toggle cafe-name" onClick={toggleIsExpanded}>
                         {
                             showCafeLogo && (

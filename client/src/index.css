@@ -17,6 +17,10 @@ button {
     padding: 0;
 }
 
+image {
+    object-fit: contain;
+}
+
 .error-card {
     background: #B71C1C;
     color: white;

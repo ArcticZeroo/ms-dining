@@ -22,9 +22,9 @@ export const Modal: React.FC<IModalProps> = ({ title, buttons, body, footer }) =
                 <div id="modal-buttons">
                     {buttons}
                     <button onClick={onCloseClicked}>
-                            <span className="material-symbols-outlined">
-                                close
-                            </span>
+                        <span className="material-symbols-outlined">
+                            close
+                        </span>
                     </button>
                 </div>
             </div>

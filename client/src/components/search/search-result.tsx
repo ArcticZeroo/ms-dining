@@ -243,9 +243,12 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                 }
 
                                 const parentView = getParentView(viewsById, view, shouldUseGroups);
+                                const targetDate = allowFutureMenus ? locationDates[0] : undefined;
 
                                 const onLinkClick = () => {
-                                    selectedDateNotifier.value = locationDates[0];
+                                    if (targetDate != null) {
+                                        selectedDateNotifier.value = targetDate;
+                                    }
                                 }
 
                                 return (
@@ -254,7 +257,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                             view: parentView,
                                             name,
                                             entityType,
-                                            date: locationDates[0]
+                                            date: targetDate
                                         })}
                                         className="search-result-chip"
                                         key={view.value.id}

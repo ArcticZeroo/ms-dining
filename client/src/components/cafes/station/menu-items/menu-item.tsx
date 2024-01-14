@@ -14,6 +14,7 @@ import { classNames } from '../../../../util/react.ts';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
+import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -88,7 +89,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             {/* This is a hack because the anchor needs to scroll the user to the top of the item, but td elements are horizontal. */}
             <tr className="scroll-anchor-row">
                 <td>
-                    <a className="scroll-anchor" href={`#${idPrefixByEntityType[SearchEntityType.menuItem]}-${normalizedName}`}/>
+                    <ScrollAnchor id={`${idPrefixByEntityType[SearchEntityType.menuItem]}-${normalizedName}`}/>
                 </td>
             </tr>
             <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')}

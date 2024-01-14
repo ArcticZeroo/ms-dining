@@ -23,5 +23,5 @@ export const getViewMenuUrlWithJump = ({ entityType, name, view, date }: ISearch
     const dateString = date && !DateUtil.isSameDate(date, DiningClient.getTodayDateForMenu())
         ? `?date=${DateUtil.toDateString(date)}`
         : '';
-    return `${getViewMenuUrl(view)}#${targetAnchor}${dateString}`;
+    return `${getViewMenuUrl(view)}${dateString}#${targetAnchor}`;
 };

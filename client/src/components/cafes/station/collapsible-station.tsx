@@ -11,6 +11,7 @@ import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
+import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -82,7 +83,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
 
     return (
         <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
-            <a className="scroll-anchor" href={`#${idPrefixByEntityType[SearchEntityType.station]}-${normalizedName}`}/>
+            <ScrollAnchor id={`${idPrefixByEntityType[SearchEntityType.station]}-${normalizedName}`}/>
             <div className="station-header flex-row">
                 <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                 <button className="title" onClick={onTitleClick}>

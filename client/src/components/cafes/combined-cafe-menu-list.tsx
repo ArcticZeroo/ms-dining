@@ -1,6 +1,5 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
@@ -65,31 +64,6 @@ const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>
     return [stage, menuData] as const;
 };
 
-const useAnchorScroll = (...dependencies: unknown[]) => {
-    const location = useLocation();
-
-    useEffect(() => {
-        const hash = location.hash.trim();
-
-        if (!hash) {
-            return;
-        }
-
-        // This is a hack to allow the element to be rendered before scrolling to it
-        setTimeout(() => {
-            const anchorElement = document.querySelector(`[href='${hash}']`);
-
-            anchorElement?.scrollIntoView({
-                behavior: 'smooth'
-            });
-        }, 0);
-    }, [
-        location.hash,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        ...dependencies
-    ]);
-};
-
 interface ICombinedCafeMenuListProps {
     views: Iterable<CafeView>;
     countTowardsLastUsed: boolean;
@@ -104,8 +78,6 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
     const { viewsById } = useContext(ApplicationContext);
     const [menuDataStage, menuData] = useMenuData(views, viewsById, countTowardsLastUsed);
     const isLoading = menuDataStage === PromiseStage.running;
-
-    useAnchorScroll(isLoading);
 
     return (
         <div className="collapsible-menu-list">
