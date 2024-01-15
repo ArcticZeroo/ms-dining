@@ -30,6 +30,6 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
     }, [id, element, location.hash]);
 
     return (
-        <a href={`#${id}`} ref={setElement}/>
+        <a className="scroll-anchor" href={`#${id}`} ref={setElement}/>
     );
 }
