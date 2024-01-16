@@ -4,10 +4,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
+import { SearchWaiting } from '../../search/search-waiting.tsx';
+import { PriceFiltersSetting } from '../../settings/price-filters-setting.tsx';
 import { EntityButton } from './entity-button.tsx';
 
 import './search-page.css';
-import { SearchWaiting } from '../../search/search-waiting.tsx';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -70,36 +71,37 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
 
     return (
         <div className="search-page">
-            <div className="search-info">
-                <div>
+            <div className="search-page-header">
+                <div className="search-info">
                     <div className="page-title">Search Results for "{queryText}"</div>
                     <div className="search-result-count">
                         Total Results: {results.length}
                     </div>
+                    <div className="search-filter-selector">
+                        <EntityButton name="Menu Items and Stations"
+                            type={SearchEntityFilterType.all}
+                            onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
+                            {...sharedEntityButtonProps}
+                        />
+                        <EntityButton name="Menu Items Only"
+                            type={SearchEntityFilterType.menuItem}
+                            onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
+                            {...sharedEntityButtonProps}
+                        />
+                        <EntityButton name="Stations Only"
+                            type={SearchEntityFilterType.station}
+                            onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
+                            {...sharedEntityButtonProps}
+                        />
+                    </div>
                 </div>
                 <SearchWaiting stage={stage}/>
             </div>
-            <div className="search-filter-selector">
-                <EntityButton name="Menu Items and Stations"
-                    type={SearchEntityFilterType.all}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
-                    {...sharedEntityButtonProps}
-                />
-                <EntityButton name="Menu Items Only"
-                    type={SearchEntityFilterType.menuItem}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
-                    {...sharedEntityButtonProps}
-                />
-                <EntityButton name="Stations Only"
-                    type={SearchEntityFilterType.station}
-                    onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
-                    {...sharedEntityButtonProps}
-                />
-            </div>
+            <PriceFiltersSetting isOwnCard={true}/>
             {
                 stage === PromiseStage.error && (
                     <div className="error-card">
-                        Error loading search results!
+                              Error loading search results!
                         {/*TODO: Try again*/}
                     </div>
                 )

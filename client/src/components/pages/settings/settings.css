@@ -123,6 +123,11 @@
     gap: var(--default-padding);
 }
 
+/* Override card behavior if isOwnCard=True */
+#setting-price-filters {
+    flex-direction: row;
+}
+
 #setting-price-filters .number-setting {
     background: #85a4de;
     transition: background-color 0.25s ease, opacity 0.25s ease;

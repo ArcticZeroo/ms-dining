@@ -1,23 +1,21 @@
-import { BooleanSettingInput } from './boolean-setting-input.tsx';
+import React, { useRef } from 'react';
 import { ApplicationSettings } from '../../api/settings.ts';
-import { NumberSettingInput } from './number-setting-input.tsx';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { useEffect, useRef } from 'react';
+import { classNames } from '../../util/react.ts';
+import { BooleanSettingInput } from './boolean-setting-input.tsx';
+import { NumberSettingInput } from './number-setting-input.tsx';
 
-export const PriceFiltersSetting = () => {
-    const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
+interface IPriceFiltersSettingProps {
+    isOwnCard?: boolean;
+}
+
+export const PriceFiltersSetting: React.FC<IPriceFiltersSettingProps> = ({ isOwnCard = false }) => {
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
     const settingRef = useRef<HTMLDivElement>(null);
 
-    // Changing price filter settings can cause a huge amount of scroll jumping due to added/removed rows in tables.
-    // We should scroll to the price filter setting each time we change any of the price filter settings.
-    useEffect(() => {
-        settingRef.current?.scrollIntoView({ behavior: 'instant' });
-    }, [enablePriceFilters, minPrice, maxPrice]);
-
     return (
-        <div className="setting" id="setting-price-filters" ref={settingRef}>
+        <div className={classNames('setting', isOwnCard && 'card')} id="setting-price-filters" ref={settingRef}>
             <div className="setting-info">
                 <div className="setting-name">
                     <span className="material-symbols-outlined">

@@ -21,7 +21,7 @@ image {
     object-fit: contain;
 }
 
-.error-card {
+.card.error, .error-card {
     background: #B71C1C;
     color: white;
     border-radius: var(--default-padding);
@@ -31,7 +31,7 @@ image {
     flex-direction: column;
 }
 
-.error-card a, .error-card button {
+.card.error a, .card.error button, .error-card a, .error-card button {
     padding: 0.5rem;
     border-radius: 0.5rem;
     border: 0.125rem solid white;

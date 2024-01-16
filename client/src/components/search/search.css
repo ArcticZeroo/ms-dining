@@ -13,11 +13,17 @@
     opacity: 0.8;
 }
 
-.search-info {
+.search-page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--default-padding);
+}
+
+.search-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .search-results {
@@ -154,6 +160,16 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.hidden-results {
+    background: #3678a1;
+    color: white;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    display: flex;
+    justify-content: center;
+    align-content: center;
 }
 
 @media screen and (max-height: 800px) {
