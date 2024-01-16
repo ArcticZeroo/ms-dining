@@ -50,6 +50,12 @@ export const MenuSettings = () => (
             <HighlightTagsSetting/>
             <PriceFiltersSetting/>
             <BooleanSettingInput
+                icon="expand_content"
+                setting={ApplicationSettings.collapseCafesByDefault}
+                name="Collapse Cafes by Default"
+                description="When enabled, cafes will be collapsed by default in the menu."
+            />
+            <BooleanSettingInput
                 icon="schedule"
                 setting={ApplicationSettings.allowFutureMenus}
                 name="(Experimental) Allow Future Menus"

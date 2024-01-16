@@ -1,11 +1,11 @@
+import { useEffect } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
+import { setPageSubtitle } from '../../../util/title.ts';
 import { BooleanSettingInput } from '../../settings/boolean-setting-input.tsx';
 import { CustomKeySetting } from '../../settings/custom-key-setting.tsx';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
 import { MenuSettings } from '../../settings/menu-settings.tsx';
 import './settings.css';
-import { useEffect } from 'react';
-import { setPageSubtitle } from '../../../util/title.ts';
 
 export const SettingsPage = () => {
     useEffect(() => {
@@ -32,11 +32,6 @@ export const SettingsPage = () => {
                         setting={ApplicationSettings.shouldCondenseNumbers}
                         name="Condense Numbered Cafes"
                         description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
-                    />
-                    <BooleanSettingInput
-                        icon="expand_content"
-                        setting={ApplicationSettings.rememberCollapseState}
-                        name="Remember Collapse/Expand State"
                     />
                     <CustomKeySetting/>
                 </div>

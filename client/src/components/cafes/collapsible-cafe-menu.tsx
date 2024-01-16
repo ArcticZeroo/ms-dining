@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ApplicationSettings } from '../../api/settings.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
+import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { StationList } from './station/station-list.tsx';
-import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
@@ -28,30 +28,13 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
         isLoading = false
     }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
-    const rememberCollapseState = useValueNotifier(ApplicationSettings.rememberCollapseState);
-    const collapsedCafeIds = useValueNotifier(ApplicationSettings.collapsedCafeIds);
-    const [isExpanded, setIsExpanded] = useState(true);
+
+    const [isExpanded, setIsExpanded] = useState(() => !ApplicationSettings.collapseCafesByDefault.value);
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
 
-    // Collapse memory is a boot setting. Also allows one render for width consistency of stations.
-    useEffect(() => {
-        if (rememberCollapseState) {
-            const isCollapsed = collapsedCafeIds.has(cafe.id);
-            setIsExpanded(!isCollapsed);
-        }
-    }, []);
-
     const toggleIsExpanded = () => {
-        const isNowExpanded = !isExpanded;
-
-        if (isNowExpanded) {
-            ApplicationSettings.collapsedCafeIds.delete(cafe.id);
-        } else {
-            ApplicationSettings.collapsedCafeIds.add(cafe.id);
-        }
-
-        setIsExpanded(isNowExpanded);
+        setIsExpanded(!isExpanded);
     };
 
     return (
