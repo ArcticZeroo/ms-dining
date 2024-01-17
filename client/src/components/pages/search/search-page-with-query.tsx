@@ -15,17 +15,25 @@ interface ISearchPageWithQueryProps {
 }
 
 interface ISearchResultsState {
+    actualStage: PromiseStage;
     stage: PromiseStage;
     results: IQuerySearchResult[];
     tabCounts: Map<SearchTypes.SearchEntityType, number>;
+    lastQuery: string;
 }
 
 const useSearchResultsState = (query: string): ISearchResultsState => {
-    const doSearchCallback = useCallback(() => DiningClient.retrieveSearchResults(query), [query]);
+    const [lastQueryText, setLastQueryText] = useState(query);
+    const doSearchCallback = useCallback(
+        () => DiningClient.retrieveSearchResults(query).finally(() => setLastQueryText(query)),
+        [query]
+    );
+
     const {
-        stage: searchResultStage,
-        value: searchResults,
-        run:   retrieveSearchResults
+        actualStage: actualSearchResultStage,
+        stage:       searchResultStage,
+        value:       searchResults,
+        run:         retrieveSearchResults
     } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
     const allSearchResults = useMemo(
@@ -49,15 +57,17 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
     }, [retrieveSearchResults]);
 
     return {
-        stage:     searchResultStage,
-        results:   allSearchResults,
-        tabCounts: resultCountByEntityType
+        actualStage: actualSearchResultStage,
+        stage:       searchResultStage,
+        results:     allSearchResults,
+        tabCounts:   resultCountByEntityType,
+        lastQuery:       lastQueryText
     };
 };
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
-    const { stage, results, tabCounts } = useSearchResultsState(queryText);
+    const { actualStage, stage, results, tabCounts, lastQuery } = useSearchResultsState(queryText);
 
     const sharedEntityButtonProps = {
         currentFilter:    entityFilterType,
@@ -73,7 +83,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         <div className="search-page">
             <div className="search-page-header">
                 <div className="search-info">
-                    <div className="page-title">Search Results for "{queryText}"</div>
+                    <div className="page-title">Search Results for "{lastQuery}"</div>
                     <div className="search-result-count">
                         Total Results: {results.length}
                     </div>
@@ -95,13 +105,15 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                         />
                     </div>
                 </div>
-                <SearchWaiting stage={stage}/>
+                {/* use actualStage here to show the loading icon when doing a new search after one already exists */}
+                <SearchWaiting stage={actualStage}/>
             </div>
             <PriceFiltersSetting isOwnCard={true}/>
+            {/* use stage here to show the last completed search results */}
             {
                 stage === PromiseStage.error && (
                     <div className="error-card">
-                              Error loading search results!
+                        Error loading search results!
                         {/*TODO: Try again*/}
                     </div>
                 )
