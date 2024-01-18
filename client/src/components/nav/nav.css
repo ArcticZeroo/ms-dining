@@ -1,7 +1,8 @@
 nav {
     overflow-y: auto;
     flex-shrink: 0;
-    position: relative;
+    position: sticky;
+    top: 0;
     width: 18rem;
 }
 
@@ -140,12 +141,11 @@ nav form {
 
 @media screen and (max-width: 800px) {
     nav {
-        width: unset;
+        width: 100%;
     }
 
     nav.expanded {
         height: 100%;
-        width: 100%;
         position: fixed;
         overflow-y: scroll;
         z-index: 10;
