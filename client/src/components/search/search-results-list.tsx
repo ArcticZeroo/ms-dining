@@ -75,6 +75,11 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                 )
             }
             {searchResultElements}
+            {entriesInOrder.length > 0 && (
+                <div className="centered-content">
+                    End of Results
+                </div>
+            )}
         </div>
     );
 };
