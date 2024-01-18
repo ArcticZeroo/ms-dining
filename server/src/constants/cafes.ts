@@ -7,6 +7,7 @@ export const groupIds = {
     commons:               'commons',
     localFlavorsBuilding6: 'local-flavors',
     building4:             'building4',
+    building9:             'building9',
     individual:            'individual',
     restaurants:           'restaurants',
     espresso:              'espresso'
@@ -25,11 +26,6 @@ export const groupList: ICafeGroup[] = [
                       name:   'Food Hall 6',
                       id:     'foodhall6',
                       number: 6,
-                  },
-                  {
-                      name:   'Food Hall 9',
-                      id:     'foodhall9',
-                      number: 9
                   },
                   {
                       name:   'Café 16',
@@ -177,8 +173,8 @@ export const groupList: ICafeGroup[] = [
                 id:   'fh4jacksbbq',
             },
             {
-                name:    'Joe\'s Burgers 🍔',
-                id:      'fh4joesburger',
+                name: 'Joe\'s Burgers 🍔',
+                id:   'fh4joesburger',
             },
             {
                 name: 'Just Poke 🐟',
@@ -196,6 +192,22 @@ export const groupList: ICafeGroup[] = [
             {
                 name: 'Boon Boona ☕',
                 id:   'fh4boonboona',
+            }
+        ]
+    },
+    {
+        name:    'Food Hall 9',
+        id:      groupIds.building9,
+        number:  9,
+        members: [
+            {
+                name:   'Food Hall 9',
+                id:     'foodhall9',
+                number: 9
+            },
+            {
+                name: 'Big Chicken 🐔',
+                id:   'fh9bigchicken',
             }
         ]
     },
