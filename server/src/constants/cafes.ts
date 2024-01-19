@@ -15,114 +15,112 @@ export const groupIds = {
 
 export const groupList: ICafeGroup[] = [
     {
-        name: 'Individual Cafés',
-        id:
-              groupIds.individual,
-        alwaysExpand:
-              true,
+        name:         'Individual Cafés',
+        id:           groupIds.individual,
+        alwaysExpand: true,
         members:
-              [
-                  {
-                      name:   'Food Hall 6',
-                      id:     'foodhall6',
-                      number: 6,
-                  },
-                  {
-                      name:   'Café 16',
-                      id:     'cafe16',
-                      number: 16
-                  },
-                  {
-                      name:   'Café 25',
-                      id:     'cafe25',
-                      number: 25
-                  },
-                  {
-                      name:   'Café 31',
-                      id:     'cafe31',
-                      number: 31
-                  },
-                  {
-                      name:   'Café 34',
-                      id:     'cafe34',
-                      number: 34
-                  },
-                  {
-                      name:   'Café 36',
-                      id:     'cafe36',
-                      number: 36
-                  },
-                  {
-                      name:   'Café 37',
-                      id:     'cafe37',
-                      number: 37
-                  },
-                  {
-                      name:   'Café 40/41',
-                      id:     'cafe40-41',
-                      number: 40
-                  },
-                  {
-                      name:   'Café 43',
-                      id:     'cafe43',
-                      number: 43
-                  },
-                  {
-                      name:   'Café 50',
-                      id:     'cafe50',
-                      number: 50
-                  },
-                  {
-                      name:   'Café 83',
-                      id:     'cafe83',
-                      number: 83
-                  },
-                  {
-                      name:   'Café 86',
-                      id:     'cafe86',
-                      number: 86
-                  },
-                  {
-                      name:   'Café 99',
-                      id:     'cafe99',
-                      number: 99
-                  },
-                  {
-                      name:   'Café 109',
-                      id:     'cafe109',
-                      number: 109
-                  },
-                  {
-                      name:   'Café 112',
-                      id:     'cafe112',
-                      number: 112
-                  },
-                  {
-                      name:   'Café 121',
-                      id:     'cafe121',
-                      number: 121
-                  },
-                  {
-                      name: 'Café RedWest',
-                      id:   'caferedwest',
-                  },
-                  {
-                      name: 'Café RTC',
-                      id:   'cafertc5',
-                  },
-                  {
-                      name: 'Café Studio H',
-                      id:   'cafestudioh',
-                  },
-                  {
-                      name: 'One Esterra Food Hall',
-                      id:   'one-esterra',
-                  },
-                  {
-                      name: 'General Store (Building 8)',
-                      id:   'generalstore',
-                  },
-              ]
+                      [
+                          {
+                              name:   'Food Hall 6',
+                              id:     'foodhall6',
+                              number: 6,
+                          },
+                          {
+                              name:   'Café 16',
+                              id:     'cafe16',
+                              number: 16
+                          },
+                          {
+                              name:   'Café 25',
+                              id:     'cafe25',
+                              number: 25
+                          },
+                          {
+                              name:   'Café 31',
+                              id:     'cafe31',
+                              number: 31
+                          },
+                          {
+                              name:   'Café 34',
+                              id:     'cafe34',
+                              number: 34
+                          },
+                          {
+                              name:   'Café 36',
+                              id:     'cafe36',
+                              number: 36
+                          },
+                          {
+                              name:   'Café 37',
+                              id:     'cafe37',
+                              number: 37
+                          },
+                          {
+                              name:   'Café 40/41',
+                              id:     'cafe40-41',
+                              number: 40
+                          },
+                          {
+                              name:   'Café 43',
+                              id:     'cafe43',
+                              number: 43
+                          },
+                          {
+                              name:   'Café 50',
+                              id:     'cafe50',
+                              number: 50
+                          },
+                          {
+                              name:   'Café 83',
+                              id:     'cafe83',
+                              number: 83
+                          },
+                          {
+                              name:   'Café 86',
+                              id:     'cafe86',
+                              number: 86
+                          },
+                          {
+                              name:   'Café 99',
+                              id:     'cafe99',
+                              number: 99
+                          },
+                          {
+                              name:   'Café 109',
+                              id:     'cafe109',
+                              number: 109
+                          },
+                          {
+                              name:   'Café 112',
+                              id:     'cafe112',
+                              number: 112
+                          },
+                          {
+                              name:   'Café 121',
+                              id:     'cafe121',
+                              number: 121
+                          },
+                          {
+                              name: 'Café RedWest',
+                              id:   'caferedwest',
+                          },
+                          {
+                              name: 'Café RTC',
+                              id:   'cafertc5',
+                          },
+                          {
+                              name: 'Café Studio H',
+                              id:   'cafestudioh',
+                          },
+                          {
+                              name: 'One Esterra Food Hall',
+                              id:   'one-esterra',
+                          },
+                          {
+                              name: 'General Store (Building 8)',
+                              id:   'generalstore',
+                          },
+                      ]
     },
     {
         name:    'Commons',
@@ -183,7 +181,6 @@ export const groupList: ICafeGroup[] = [
             {
                 name:           'MiLa',
                 id:             'fh4mila',
-                firstAvailable: new Date(2024, DateUtil.nativeMonth.January, 2)
             },
             {
                 name: 'Paparepas',
