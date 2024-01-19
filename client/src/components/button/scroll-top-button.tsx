@@ -1,15 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { classNames } from '../../util/react.ts';
 
 import './scroll-top-button.css';
-import { classNames } from '../../util/react.ts';
-import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 
 export interface IScrollTopButtonProps {
     containerRef: React.RefObject<HTMLElement>;
 }
 
 export const ScrollTopButton: React.FC<IScrollTopButtonProps> = ({ containerRef }) => {
-    const deviceType = useDeviceType();
     const [isNearTop, setIsNearTop] = useState(true);
 
     const onScroll = useCallback(() => {
@@ -30,28 +28,20 @@ export const ScrollTopButton: React.FC<IScrollTopButtonProps> = ({ containerRef 
             return;
         }
 
-        const eventTarget = deviceType === DeviceType.Desktop
-            ? container
-            : window;
-
-        eventTarget.addEventListener('scroll', onScroll);
+        container.addEventListener('scroll', onScroll);
         onScroll();
 
         return () => {
-            eventTarget.removeEventListener('scroll', onScroll);
+            container.removeEventListener('scroll', onScroll);
         };
-    }, [deviceType, containerRef, onScroll]);
+    }, [containerRef, onScroll]);
 
     const onScrollTopClicked = () => {
         if (isNearTop) {
             return;
         }
 
-        const targetElement = deviceType === DeviceType.Desktop
-            ? containerRef.current
-            : document.documentElement;
-
-        targetElement?.scrollTo({ top: 0, behavior: 'smooth' });
+        containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     return (

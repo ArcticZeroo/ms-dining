@@ -253,10 +253,6 @@ html, body, #root, .App {
         flex-direction: column;
     }
 
-    .expandable-nav-list, .content {
-        overflow-y: initial;
-    }
-
     .stations {
         padding: 0;
     }
