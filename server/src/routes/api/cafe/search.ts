@@ -57,7 +57,7 @@ export const registerSearchRoutes = (parent: Router) => {
         ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
     });
 
-    router.get('/search', requireMenusNotUpdating, async ctx => {
+    router.get('/', requireMenusNotUpdating, async ctx => {
         const searchQuery = getTrimmedQueryParam(ctx, 'q');
 
         if (!searchQuery) {

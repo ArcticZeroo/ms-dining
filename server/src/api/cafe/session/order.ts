@@ -1,4 +1,4 @@
-import { ICartItem, SubmitOrderStage } from '@msdining/common/dist/models/cart.js';
+import { ICardData, ICartItem, ISubmitOrderParams, SubmitOrderStage } from '@msdining/common/dist/models/cart.js';
 import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
@@ -9,7 +9,7 @@ import {
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
-import { ICardData, IOrderingContext, ISubmitOrderParams } from '../../../models/cart.js';
+import { IOrderingContext } from '../../../models/cart.js';
 import { OrderingClient } from '../../storage/clients/ordering.js';
 import { StringUtil } from '../../../util/string.js';
 import { fixed } from '../../../util/math.js';
@@ -43,6 +43,8 @@ interface ISerializedModifier {
         applicableTargetMenuFilter: 'All'
     }
 }
+
+type SubmitOrderParams = ISubmitOrderParams<ICartItem>;
 
 export class CafeOrderSession extends CafeDiscoverySession {
     #orderingContext: IOrderingContext = {
@@ -495,7 +497,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                                  cardData,
                                  phoneNumberWithCountryCode,
                                  items
-                             }: ISubmitOrderParams): Promise<SubmitOrderStage> {
+                             }: SubmitOrderParams): Promise<SubmitOrderStage> {
         this.#orderingContext = await this._retrieveOrderingContextAsync();
 
         let lastCompletedStage = SubmitOrderStage.notStarted;
