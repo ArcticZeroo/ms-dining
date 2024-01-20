@@ -1,0 +1,7 @@
+.cart-contents td {
+    text-align: center;
+}
+
+.cart-item .quantity, .cart-item .price {
+    white-space: pre;
+}

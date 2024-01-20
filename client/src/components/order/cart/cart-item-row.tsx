@@ -55,7 +55,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                     </button>
                 </div>
             </td>
-            <td>
+            <td className="quantity">
                 {item.quantity}x
             </td>
             <td className="name">

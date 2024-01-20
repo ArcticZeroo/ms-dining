@@ -14,6 +14,8 @@ import { PopupContext } from '../../../context/modal.ts';
 import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../util/link.ts';
 
+import './cart-contents-table.css';
+
 const editCartItemSymbol = Symbol('edit-cart-item');
 
 export const CartContentsTable = () => {
