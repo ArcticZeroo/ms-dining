@@ -3,3 +3,7 @@
     padding: var(--default-padding);
     border-radius: var(--default-padding);
 }
+
+#order-checkout .cart-item-buttons {
+    width: min-content;
+}

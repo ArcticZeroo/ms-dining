@@ -11,6 +11,8 @@ import { ApplicationSettings } from '../../../api/settings.ts';
 import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../util/cart.ts';
 import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
 import { PopupContext } from '../../../context/modal.ts';
+import { Link } from 'react-router-dom';
+import { getViewMenuUrl } from '../../../util/link.ts';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
@@ -94,7 +96,9 @@ export const CartContentsTable = () => {
                 <React.Fragment key={view.value.id}>
                     <tr>
                         <th colSpan={4}>
-                            {view.value.name}
+                            <Link to={getViewMenuUrl(view)} className="cart-cafe-url">
+                                {view.value.name}
+                            </Link>
                         </th>
                     </tr>
                     {

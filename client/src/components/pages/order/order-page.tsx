@@ -3,7 +3,7 @@ import { CartContext } from '../../../context/cart.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { useNavigate } from 'react-router-dom';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
-
+import { MultiCafeOrderWarning } from '../../order/multi-cafe-order-warning.tsx';
 import './order-page.css';
 
 export const OrderPage = () => {
@@ -21,7 +21,8 @@ export const OrderPage = () => {
             <div className="title">
                 Online Ordering Checkout
             </div>
-            <div className="body">
+            <div className="body flex-col">
+                { cart.size > 1 && <MultiCafeOrderWarning/> }
                 <CartContentsTable/>
             </div>
         </div>

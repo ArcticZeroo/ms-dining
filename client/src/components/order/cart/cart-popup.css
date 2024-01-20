@@ -66,3 +66,8 @@
 .cart-item-buttons button:disabled {
     opacity: 0.25;
 }
+
+.cart-cafe-url {
+    text-decoration: none;
+    color: unset;
+}

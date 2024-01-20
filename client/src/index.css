@@ -211,6 +211,10 @@ html, body, #root, .App {
     scroll-margin: var(--default-padding);
 }
 
+.left-align {
+    text-align: left;
+}
+
 @media screen and (min-width: 801px) {
     :root {
         --default-padding: 1rem;
