@@ -10,7 +10,7 @@ import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
 
 import './combined-cafes.css';
-import { CartPopup } from './station/menu-items/popup/order/cart/cart-popup.tsx';
+import { CartPopup } from '../order/cart/cart-popup.tsx';
 
 interface IMenuWithCafe {
     cafe: ICafe;

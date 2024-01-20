@@ -1,7 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getChoiceHtmlId, getPriceDisplay } from '../../../../../../../util/cart.ts';
-import { classNames } from '../../../../../../../util/react.ts';
+import { getChoiceHtmlId, getPriceDisplay } from '../../../util/cart.ts';
+import { classNames } from '../../../util/react.ts';
 
 interface IModifierCheckboxesProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -11,10 +11,10 @@ interface IModifierCheckboxesProps {
 }
 
 export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
-                                                                           modifier,
-                                                                           selectedChoiceIds,
-                                                                           onSelectedChoiceIdsChanged
-                                                                       }) => {
+    modifier,
+    selectedChoiceIds,
+    onSelectedChoiceIdsChanged
+}) => {
     const isAtMaximum = selectedChoiceIds.size >= modifier.maximum;
 
     const handleChoiceChange = (choiceId: string) => {
@@ -45,8 +45,8 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
 
                 return (
                     <label key={choice.id}
-                           htmlFor={htmlId}
-                           className={classNames('modifier-choice-option', isDisabled && 'disabled')}>
+                        htmlFor={htmlId}
+                        className={classNames('modifier-choice-option', isDisabled && 'disabled')}>
                         <input
                             type="checkbox"
                             id={htmlId}

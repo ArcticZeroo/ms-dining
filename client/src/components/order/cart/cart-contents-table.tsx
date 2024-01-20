@@ -1,30 +1,26 @@
 import React, { useCallback, useContext, useMemo } from 'react';
-import { CartContext } from '../../../../../../../context/cart.ts';
-import { PopupContext } from '../../../../../../../context/modal.ts';
-import { useValueNotifier, useValueNotifierAsState } from '../../../../../../../hooks/events.ts';
-import { ICartItemWithMetadata } from '../../../../../../../models/cart.ts';
-
-import { classNames } from '../../../../../../../util/react.ts';
-import { MenuItemPopup } from '../../menu-item-popup.tsx';
+import { CafeView } from '../../../models/cafe.ts';
+import { ICartItemWithMetadata } from '../../../models/cart.ts';
+import { getParentView } from '../../../util/view.ts';
+import { sortViews } from '../../../util/sorting.ts';
 import { CartItemRow } from './cart-item-row.tsx';
-
-import './cart-popup.css';
-import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../../../../../util/cart.ts';
-import { getParentView } from '../../../../../../../util/view.ts';
-import { ApplicationContext } from '../../../../../../../context/app.ts';
-import { CafeView } from '../../../../../../../models/cafe.ts';
-import { sortViews } from '../../../../../../../util/sorting.ts';
-import { ApplicationSettings } from '../../../../../../../api/settings.ts';
+import { useValueNotifier, useValueNotifierAsState } from '../../../hooks/events.ts';
+import { CartContext } from '../../../context/cart.ts';
+import { ApplicationContext } from '../../../context/app.ts';
+import { ApplicationSettings } from '../../../api/settings.ts';
+import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../util/cart.ts';
+import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
+import { PopupContext } from '../../../context/modal.ts';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
-export const CartPopup = () => {
+export const CartContentsTable = () => {
     const { viewsById } = useContext(ApplicationContext);
-    const modalNotifier = useContext(PopupContext);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsNotifier = useContext(CartContext);
     const [cart, setCart] = useValueNotifierAsState(cartItemsNotifier);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-
+    const modalNotifier = useContext(PopupContext);
+    
     const onRemove = useCallback((item: ICartItemWithMetadata) => {
         const newCart = shallowCloneCart(cart);
         removeFromCart(newCart, item);
@@ -62,11 +58,6 @@ export const CartPopup = () => {
         setCart(newCart);
     }, [cart, setCart]);
 
-    const totalItemCount = useMemo(
-        () => Array.from(cart.values()).reduce((total, itemsById) => total + itemsById.size, 0),
-        [cart]
-    );
-
     const cartItemsByView = useMemo(
         () => {
             const cartItemsByView = new Map<CafeView, Map<string, ICartItemWithMetadata>>();
@@ -92,7 +83,7 @@ export const CartPopup = () => {
 
             return cartItemsByView;
         },
-        [cart, viewsById]
+        [cart, shouldUseGroups, viewsById]
     );
 
     const cartItemsView = useMemo(
@@ -124,20 +115,10 @@ export const CartPopup = () => {
     );
 
     return (
-        <div className={classNames('cart-popup', totalItemCount === 0 && 'empty')}>
-            <div className="cart-info">
-                <span className="material-symbols-outlined">
-                    shopping_cart
-                </span>
-                <span className="cart-count">
-                    {totalItemCount}
-                </span>
-            </div>
-            <table className="cart-contents">
-                <tbody>
-                    {cartItemsView}
-                </tbody>
-            </table>
-        </div>
+        <table className="cart-contents">
+            <tbody>
+                {cartItemsView}
+            </tbody>
+        </table>
     );
 };
