@@ -29,7 +29,7 @@ export const CartPopup = () => {
             </div>
             <div className="cart-body">
                 <CartContentsTable/>
-                <Link to="/order">
+                <Link to="/order" className="checkout-button">
                     Checkout
                 </Link>
             </div>

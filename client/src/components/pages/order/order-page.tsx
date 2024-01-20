@@ -17,12 +17,12 @@ export const OrderPage = () => {
     }
 
     return (
-        <div className="card" id="order-checkout">
-            <div className="title">
-                Online Ordering Checkout
-            </div>
-            <div className="body flex-col">
-                { cart.size > 1 && <MultiCafeOrderWarning/> }
+        <div id="order-checkout" className="flex-col">
+            { cart.size > 1 && <MultiCafeOrderWarning/> }
+            <div className="card" id="cart">
+                <div className="title">
+                    Your Order
+                </div>
                 <CartContentsTable/>
             </div>
         </div>

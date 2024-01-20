@@ -71,3 +71,14 @@
     text-decoration: none;
     color: unset;
 }
+
+.cart-popup .checkout-button {
+    background: #3F51B5;
+    color: white;
+    text-decoration: none;
+    margin: var(--default-padding);
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+    cursor: pointer;
+    text-align: center;
+}
