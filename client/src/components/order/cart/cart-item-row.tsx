@@ -35,13 +35,14 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                         className="material-symbols-outlined"
                         disabled={!canDecreaseQuantity}
                         onClick={onDecreaseQuantity}
-                        title={canDecreaseQuantity ? 'Remove one' : 'Use the trash can to remove this item'}
+                        title={canDecreaseQuantity ? 'Remove one more' : 'Use the trash can to remove this item'}
                     >
                         remove
                     </button>
                     <button
                         className="material-symbols-outlined"
                         onClick={() => onChangeQuantity(item.quantity + 1)}
+                        title="Add one more"
                     >
                         add
                     </button>

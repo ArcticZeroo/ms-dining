@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
-import './index.css';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
 import { CafeViewPage } from './components/pages/menu/cafe-view-page.tsx';
@@ -13,6 +12,9 @@ import { InfoPage } from './components/pages/info/info-page.tsx';
 import { AnalyticsPage } from './components/pages/analytics/analytics-page.tsx';
 import { ErrorPage } from './components/pages/error/error-page.tsx';
 import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
+import { OrderPage } from './components/pages/order/order-page.tsx';
+
+import './index.css';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -22,6 +24,7 @@ const router = createBrowserRouter(
             <Route path="/search" element={<SearchPage/>}/>
             <Route path="/cheap" element={<CheapItemsPage/>}/>
             <Route path="/info" element={<InfoPage/>}/>
+            <Route path="/order" element={<OrderPage/>}/>
             <Route path="/analytics" element={<AnalyticsPage/>}/>
             <Route index={true} element={<HomePage/>}/>
             <Route path="*" element={<NotFoundPage/>}/>

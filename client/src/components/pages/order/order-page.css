@@ -1,0 +1,5 @@
+#order-checkout .body {
+    background: #DDD;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+}
