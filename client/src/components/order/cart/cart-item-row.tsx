@@ -2,6 +2,8 @@ import React from 'react';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
 import { getPriceDisplay } from '../../../util/cart.ts';
 
+const MAX_QUANTITY = 99;
+
 interface ICartItemProps {
     item: ICartItemWithMetadata;
     onRemove: () => void;
@@ -11,6 +13,7 @@ interface ICartItemProps {
 
 export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, onChangeQuantity }) => {
     const canDecreaseQuantity = item.quantity > 1;
+    const canIncreaseQuantity = item.quantity < MAX_QUANTITY;
 
     const onDecreaseQuantity = () => {
         if (!canDecreaseQuantity) {
@@ -18,6 +21,14 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
         }
 
         onChangeQuantity(item.quantity - 1);
+    }
+
+    const onIncreaseQuantity = () => {
+        if (!canIncreaseQuantity) {
+            return;
+        }
+
+        onChangeQuantity(item.quantity + 1);
     }
 
     return (
@@ -41,8 +52,9 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                     </button>
                     <button
                         className="material-symbols-outlined"
-                        onClick={() => onChangeQuantity(item.quantity + 1)}
-                        title="Add one more"
+                        disabled={!canIncreaseQuantity}
+                        onClick={onIncreaseQuantity}
+                        title={canIncreaseQuantity ? 'Add one more' : 'You can only order up to 99 of each item'}
                     >
                         add
                     </button>

@@ -4,4 +4,16 @@
 
 .cart-item .quantity, .cart-item .price {
     white-space: pre;
+    font-family: monospace;
+    font-size: 1.3em;
+}
+
+.cart-item .quantity {
+    /* 99x plus padding */
+    width: 5em;
+}
+
+.cart-item .price {
+    /* $9999.99 plus padding */
+    width: 10em;
 }

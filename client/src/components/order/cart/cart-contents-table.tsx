@@ -48,17 +48,17 @@ export const CartContentsTable = () => {
     }, [modalNotifier]);
 
     const onChangeQuantity = useCallback((item: ICartItemWithMetadata, quantity: number) => {
-        // Remove must be pressed to change quantity to zero
         if (quantity < 1) {
-            console.log('canceling quantity change since it is zero');
             return;
         }
 
         const newCart = shallowCloneCart(cart);
+
         addOrEditCartItem(newCart, {
             ...item,
             quantity
         });
+
         setCart(newCart);
     }, [cart, setCart]);
 

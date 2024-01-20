@@ -41,6 +41,11 @@ image {
     cursor: pointer;
 }
 
+.card.yellow {
+    background: #d3973c;
+    color: #212121;
+}
+
 .App {
     display: flex;
 }
@@ -213,6 +218,11 @@ html, body, #root, .App {
 
 .left-align {
     text-align: left;
+}
+
+.default-container {
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
 }
 
 @media screen and (min-width: 801px) {

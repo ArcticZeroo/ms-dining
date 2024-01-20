@@ -3,8 +3,9 @@ import { CartContext } from '../../../context/cart.ts';
 import { ApplicationSettings } from '../../../api/settings.ts';
 import { Link } from 'react-router-dom';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
-import { MultiCafeOrderWarning } from '../../order/multi-cafe-order-warning.tsx';
+import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import './order-page.css';
+import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
@@ -25,13 +26,14 @@ export const OrderPage = () => {
 
     return (
         <div id="order-checkout" className="flex-col">
-            { cart.size > 1 && <MultiCafeOrderWarning/> }
+            <OnlineOrderingExperimental/>
             <div className="card" id="cart">
                 <div className="title">
                     Your Order
                 </div>
                 <CartContentsTable/>
             </div>
+            { cart.size > 1 && <MultiCafeOrderWarning/> }
         </div>
     );
 };
