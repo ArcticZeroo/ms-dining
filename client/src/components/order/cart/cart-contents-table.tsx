@@ -18,7 +18,11 @@ import './cart-contents-table.css';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
-export const CartContentsTable = () => {
+interface ICartContentsTableProps {
+    showModifiers?: boolean;
+}
+
+export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModifiers = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsNotifier = useContext(CartContext);
@@ -107,6 +111,7 @@ export const CartContentsTable = () => {
                         Array.from(cartItemsByView.get(view)!.values()).map((item) => (
                             <CartItemRow
                                 key={item.id}
+                                showModifiers={showModifiers}
                                 item={item}
                                 onRemove={() => onRemove(item)}
                                 onEdit={() => onEdit(item)}
@@ -117,7 +122,7 @@ export const CartContentsTable = () => {
                 </React.Fragment>
             ))
         },
-        [cartItemsByView, onChangeQuantity, onEdit, onRemove]
+        [cartItemsByView, showModifiers, onChangeQuantity, onEdit, onRemove]
     );
 
     return (

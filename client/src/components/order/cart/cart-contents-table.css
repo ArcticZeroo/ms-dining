@@ -17,3 +17,25 @@
     /* $9999.99 plus padding */
     width: 10em;
 }
+
+.cart-contents .name {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-contents .modifier {
+    font-size: 0.9em;
+}
+
+.cart-contents .modifier td.modifier-name {
+    text-align: right;
+}
+
+.cart-contents .modifier td.modifier-choices {
+    text-align: left;
+    font-style: italic;
+    opacity: 0.7;
+}

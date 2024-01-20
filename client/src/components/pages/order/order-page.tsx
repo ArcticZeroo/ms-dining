@@ -31,7 +31,7 @@ export const OrderPage = () => {
                 <div className="title">
                     Your Order
                 </div>
-                <CartContentsTable/>
+                <CartContentsTable showModifiers={true}/>
             </div>
             { cart.size > 1 && <MultiCafeOrderWarning/> }
         </div>
