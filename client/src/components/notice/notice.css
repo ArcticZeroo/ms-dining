@@ -13,6 +13,24 @@
     opacity: 1;
 }
 
+.notice.flash {
+    animation: flash 1.5s ease-in-out infinite;
+}
+
+@keyframes flash {
+    0% {
+        background: #FAFAFA;
+    }
+
+    50% {
+        background: #88bbd9;
+    }
+
+    100% {
+        background: #FAFAFA;
+    }
+}
+
 @media screen and (max-height: 800px) {
     .notice {
         display: none;

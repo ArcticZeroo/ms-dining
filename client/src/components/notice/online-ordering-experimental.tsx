@@ -1,6 +1,6 @@
 export const OnlineOrderingExperimental = () => {
     return (
-        <div className="error-card notice visible">
+        <div className="card notice visible flash">
             <p>
                 Warning: Online ordering is extremely experimental. Any or all of the following might occur:
                 <ul className="left-align">
