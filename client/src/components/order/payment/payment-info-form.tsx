@@ -48,61 +48,63 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
 
     return (
         <form onSubmit={onFormSubmitted} id="payment-info" className="card">
-            <PaymentField
-                id="phoneNumberWithCountryCode"
-                icon="phone"
-                name="Phone Number"
-                description="Order updates will be sent via text to this number."
-                inputType="tel"
-                value={phoneNumberWithCountryCode}
-                onValueChanged={setPhoneNumberWithCountryCode}
-            />
-            <PaymentField
-                id="alias"
-                icon="person"
-                name="Alias"
-                value={alias}
-                onValueChanged={setAlias}
-            />
-            <div className="title">
-                Card Info
+            <div className="payment-section">
+                <PaymentField
+                    id="phoneNumberWithCountryCode"
+                    icon="phone"
+                    name="Phone Number"
+                    description="Order updates will be sent via text to this number."
+                    inputType="tel"
+                    value={phoneNumberWithCountryCode}
+                    onValueChanged={setPhoneNumberWithCountryCode}
+                />
+                <PaymentField
+                    id="alias"
+                    icon="alternate_email"
+                    name="Alias"
+                    description="Your alias will appear on your receipt."
+                    value={alias}
+                    onValueChanged={setAlias}
+                />
             </div>
-            <PaymentField
-                id="name"
-                icon="person"
-                name="Name on Card"
-                value={name}
-                onValueChanged={setName}
-            />
-            <PaymentField
-                id="cardNumber"
-                icon="credit_card"
-                name="Card Number"
-                value={cardNumber}
-                onValueChanged={setCardNumber}
-            />
-            <PaymentField
-                id="expiration"
-                icon="event"
-                name="Expiration"
-                inputType="month"
-                value={expiration}
-                onValueChanged={setExpiration}
-            />
-            <PaymentField
-                id="securityCode"
-                icon="lock"
-                name="Security Code"
-                value={securityCode}
-                onValueChanged={setSecurityCode}
-            />
-            <PaymentField
-                id="postalCode"
-                icon="location_on"
-                name="Postal Code"
-                value={postalCode}
-                onValueChanged={setPostalCode}
-            />
+            <div className="payment-section">
+                <PaymentField
+                    id="name"
+                    icon="person"
+                    name="Name on Card"
+                    value={name}
+                    onValueChanged={setName}
+                />
+                <PaymentField
+                    id="cardNumber"
+                    icon="credit_card"
+                    name="Card Number"
+                    value={cardNumber}
+                    onValueChanged={setCardNumber}
+                />
+                <PaymentField
+                    id="expiration"
+                    icon="event"
+                    name="Expiration"
+                    inputType="month"
+                    value={expiration}
+                    onValueChanged={setExpiration}
+                />
+                <PaymentField
+                    id="securityCode"
+                    icon="lock"
+                    name="Security Code"
+                    value={securityCode}
+                    onValueChanged={setSecurityCode}
+                />
+                <PaymentField
+                    id="postalCode"
+                    icon="location_on"
+                    name="Postal Code"
+                    value={postalCode}
+                    onValueChanged={setPostalCode}
+                />
+            </div>
             <button type="submit" className="default-container">
                 Submit
             </button>

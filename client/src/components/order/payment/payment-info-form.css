@@ -3,10 +3,20 @@
 }
 
 #payment-info .field {
-    display: flex;
+    align-self: stretch;
     justify-content: space-between;
 }
 
-#payment-info .field-title {
+#payment-info .payment-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+    align-items: center;
+    justify-content: center;
+}
 
+@media screen and (max-width: 800px) {
+    #payment-info .field {
+        flex-grow: 1;
+    }
 }

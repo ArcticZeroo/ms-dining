@@ -13,7 +13,7 @@ interface IPaymentFieldProps {
 
 export const PaymentField: React.FC<IPaymentFieldProps> = ({ id, inputType = 'text', icon, name, description, value, onValueChanged }) => {
     return (
-        <div className="field">
+        <div className="field flex-col flex-grow">
             <label htmlFor={id}>
                 <div className="field-title flex">
                     <span className="material-symbols-outlined">
