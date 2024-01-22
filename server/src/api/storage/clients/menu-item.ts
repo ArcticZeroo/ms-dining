@@ -106,9 +106,7 @@ export abstract class MenuItemStorageClient {
             ? null
             : menuItem.lastUpdateTime;
 
-        const dataWithoutId: Omit<MenuItem, 'id'> & {
-            modifiers: Prisma.MenuItemModifierUpdateManyWithoutMenuItemsNestedInput
-        } = {
+        const dataWithoutId = {
             name:                   menuItem.name.trim(),
             imageUrl:               menuItem.imageUrl || null,
             description:            menuItem.description?.trim() || null,
@@ -121,11 +119,11 @@ export abstract class MenuItemStorageClient {
             modifiers:              {
                 connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
             },
-        };
+        } as const;
 
-        const data: Prisma.MenuItemCreateInput = {
+        const data = {
             id: menuItem.id,
-            ...dataWithoutId,
+            ...dataWithoutId
         };
 
         await usePrismaClient(async prismaClient => {
@@ -141,15 +139,36 @@ export abstract class MenuItemStorageClient {
             }
 
             if (allowUpdateIfExisting) {
-                const existingItem = await prismaClient.menuItem.findUnique({ where: { id: menuItem.id } });
-                const doesExist = existingItem != null;
+                const existingItem = await prismaClient.menuItem.findUnique({
+                    where: {
+                        id: menuItem.id
+                    },
+                    select: {
+                        modifiers: {
+                            select: {
+                                id: true
+                            }
+                        }
+                    }
+                });
 
-                if (doesExist) {
+                if (existingItem != null) {
+                    // Menu items should have only a few modifiers, this complexity is fine.
+                    const modifiersToRemove = existingItem.modifiers.filter(existingModifier => {
+                        return menuItem.modifiers.every(modifier => modifier.id !== existingModifier.id);
+                    });
+
                     await prismaClient.menuItem.update({
                         where: {
                             id: menuItem.id
                         },
-                        data:  dataWithoutId
+                        data:  {
+                            ...dataWithoutId,
+                            modifiers: {
+                                ...dataWithoutId.modifiers,
+                                disconnect: modifiersToRemove.map(modifier => ({ id: modifier.id }))
+                            }
+                        }
                     });
                 } else {
                     await prismaClient.menuItem.create({

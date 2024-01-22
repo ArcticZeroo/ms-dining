@@ -73,7 +73,7 @@ export interface ICafeMenuItemListResponseItem {
     image?: string;
     description?: string;
     lastUpdateTime: string;
-    isItemCustomizationEnabled: boolean;
+    isItemCustomizationEnabled?: boolean;
     tagIds?: string[];
     receiptText: string;
 }
