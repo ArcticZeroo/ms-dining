@@ -10,7 +10,9 @@ export const OnlineOrderingExperimental = () => {
                 </ul>
                 You probably shouldn't even use this feature while this warning exists!
                 <br/>
-                That said... please let me know whether your order went well (or not) so I can improve this feature.
+                If you ignore this warning, you are ordering at your own risk.
+                <br/>
+                If you have any questions or feedback, please contact me.
             </p>
             <div className="flex">
                 <a href="mailto:spnovick@microsoft.com" target="_blank">Email Me</a>

@@ -95,7 +95,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                         onClick={onRemove}
                         title="Remove this item"
                     >
-                            delete
+                        delete
                     </button>
                     <button
                         className="material-symbols-outlined"
@@ -103,7 +103,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                         onClick={onDecreaseQuantity}
                         title={canDecreaseQuantity ? 'Remove one more' : 'Use the trash can to remove this item'}
                     >
-                            remove
+                        remove
                     </button>
                     <button
                         className="material-symbols-outlined"
@@ -111,14 +111,14 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                         onClick={onIncreaseQuantity}
                         title={canIncreaseQuantity ? 'Add one more' : 'You can only order up to 99 of each item'}
                     >
-                            add
+                        add
                     </button>
                     <button
                         className="material-symbols-outlined"
                         onClick={onEdit}
                         title="Edit this item"
                     >
-                            edit
+                        edit
                     </button>
                 </div>
             </td>
@@ -126,8 +126,16 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                 {item.quantity}x
             </td>
             <td className="name">
-                {item.associatedItem.name}
-                {modifiersDisplay}
+                {
+                    showModifiers
+                        ? (
+                            <div className="name-and-modifiers">
+                                {item.associatedItem.name}
+                                {modifiersDisplay}
+                            </div>
+                        )
+                        : item.associatedItem.name
+                }
             </td>
             <td className="price">
                 {getPriceDisplay(item.price * item.quantity)}

@@ -18,7 +18,7 @@
     width: 10em;
 }
 
-.cart-contents .name {
+.cart-contents .name-and-modifiers {
     display: flex;
     gap: 0.5rem;
     flex-direction: column;
