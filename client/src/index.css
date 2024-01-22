@@ -117,6 +117,12 @@ html, body, #root, .App {
     text-align: center;
 }
 
+.card .subtitle {
+    font-size: 0.9em;
+    opacity: 0.75;
+    font-style: italic;
+}
+
 .card.blue {
     background: #2196F3;
     color: white;
