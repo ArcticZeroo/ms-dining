@@ -108,12 +108,12 @@ const shouldUseNextWeek = (date: Date) => {
     return date.getDay() === nativeDayOfWeek.Friday && date.getHours() >= 17; // after 5pm on Fridays
 }
 
-export function* yieldDaysInFutureForThisWeek() {
+export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false) {
     const now = new Date();
     const nowWeekday = now.getDay();
 
     // If it's Saturday, we want to start on Monday of next week
-    const dateOffset = shouldUseNextWeek(now)
+    const dateOffset = forceUseNextWeek || shouldUseNextWeek(now)
         ? 7
         : 0;
 
