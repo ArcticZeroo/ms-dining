@@ -6,6 +6,7 @@ import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import './order-page.css';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
+import { PaymentInfoForm } from '../../order/payment-info-form.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
@@ -34,6 +35,7 @@ export const OrderPage = () => {
                 <CartContentsTable showModifiers={true}/>
             </div>
             { cart.size > 1 && <MultiCafeOrderWarning/> }
+            <PaymentInfoForm onSubmit={() => {}}/>
         </div>
     );
 };

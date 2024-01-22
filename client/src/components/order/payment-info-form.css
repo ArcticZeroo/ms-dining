@@ -1,0 +1,8 @@
+#payment-info {
+
+}
+
+#payment-info .field {
+    display: flex;
+    justify-content: space-between;
+}
