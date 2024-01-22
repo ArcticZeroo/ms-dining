@@ -11,6 +11,8 @@ import { expandAndFlattenView } from '../util/view';
 import { ApplicationSettings, getVisitorId } from './settings.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { ISearchQuery } from '@msdining/common/dist/models/search.ts';
+import { ERROR_BODIES } from '@msdining/common/dist/responses';
+import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();
@@ -59,6 +61,13 @@ export abstract class DiningClient {
         });
 
         if (!response.ok) {
+            if (response.status === 503) {
+                const body = await response.text();
+                if (body === ERROR_BODIES.menusCurrentlyUpdating) {
+                    throw new MenusCurrentlyUpdatingException();
+                }
+            }
+
             throw new Error(`Response failed with status: ${response.status}`);
         }
 
