@@ -35,7 +35,7 @@ export const OrderPage = () => {
                 <CartContentsTable showModifiers={true}/>
             </div>
             { cart.size > 1 && <MultiCafeOrderWarning/> }
-            <PaymentInfoForm onSubmit={() => {}}/>
+            <PaymentInfoForm onSubmit={() => alert('This does nothing yet!')}/>
         </div>
     );
 };
