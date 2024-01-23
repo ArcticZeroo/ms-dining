@@ -1,14 +1,15 @@
-import { CafeView } from '../../../models/cafe.ts';
 import { IOrderCompletionData, SubmitOrderStage } from '@msdining/common/dist/models/cart';
 import React from 'react';
+import { CafeView } from '../../../models/cafe.ts';
 import { classNames } from '../../../util/react.ts';
 
 const LAST_COMPLETED_STAGE_NICE_TEXT = {
     [SubmitOrderStage.notStarted]: 'Not Started',
-    [SubmitOrderStage.addToCart]: 'Adding to cart (Step 1/4)',
-    [SubmitOrderStage.payment]: 'Payment (Step 2/4)',
-    [SubmitOrderStage.closeOrder]: 'Sending order to kitchen after payment (Step 3/4)',
-    [SubmitOrderStage.sendTextReceipt]: 'Sending SMS receipt after payment (Step 4/4)',
+    [SubmitOrderStage.addToCart]: 'Adding to cart (Step 1/5)',
+    [SubmitOrderStage.initializeCardProcessor]: 'Initializing Card Processor (Step 2/5)',
+    [SubmitOrderStage.payment]: 'Payment (Step 3/5)',
+    [SubmitOrderStage.closeOrder]: 'Sending order to kitchen after payment (Step 4/5)',
+    [SubmitOrderStage.sendTextReceipt]: 'Sending SMS receipt after payment (Step 5/5)',
     [SubmitOrderStage.complete]: 'Complete',
 }
 
