@@ -15,6 +15,10 @@
     background: #ffbbbb;
 }
 
+#payment-info .field .field-info {
+    gap: 0.5rem;
+}
+
 #payment-info .payment-section {
     display: flex;
     flex-wrap: wrap;

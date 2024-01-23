@@ -45,11 +45,12 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
     const shouldShowInvalid = rawValue.length > 0 && !validationState.isValid;
 
     return (
-        <div
+        <label
+            htmlFor={id}
             className={classNames('field flex-col flex-grow', shouldShowInvalid && 'invalid')}
             title={validationState.isValid ? undefined : validationState.errorMessage}
         >
-            <label htmlFor={id}>
+            <div className="flex-col field-info">
                 <div className="field-title flex">
                     <span className="material-symbols-outlined">
                         {icon}
@@ -65,7 +66,7 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
                         </div>
                     )
                 }
-            </label>
+            </div>
             <input
                 id={id}
                 type={inputType}
@@ -73,6 +74,6 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
                 onChange={event => onValueChanged(event.target.value)}
                 required
             />
-        </div>
+        </label>
     );
 }
