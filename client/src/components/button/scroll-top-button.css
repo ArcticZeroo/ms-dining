@@ -9,6 +9,8 @@
     transition: opacity 0.5s ease;
     color: white;
     transform: translateX(var(--default-padding));
+    width: 4rem;
+    height: 4rem;
 }
 
 #scroll-top.visible {
