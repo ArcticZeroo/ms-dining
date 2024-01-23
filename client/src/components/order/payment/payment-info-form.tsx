@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 
 import './payment-info-form.css';
 import { PaymentField } from './payment-field.tsx';
+import { useFieldWithValidator } from '../../../hooks/order.ts';
+import { expectValid, validateExpirationMonth, validatePhoneNumber } from '../../../util/validation.ts';
 
 export interface IPaymentInfo {
     phoneNumberWithCountryCode: string;
@@ -15,30 +17,46 @@ interface IPaymentInfoFormProps {
 }
 
 export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) => {
-    const [phoneNumberWithCountryCode, setPhoneNumberWithCountryCode] = useState('');
+    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber);
     const [alias, setAlias] = useState('');
 
     const [name, setName] = useState('');
     const [cardNumber, setCardNumber] = useState('');
-    const [expiration, setExpiration] = useState('');
+    const [expiration, setExpiration] = useFieldWithValidator(validateExpirationMonth);
     const [securityCode, setSecurityCode] = useState('');
     const [postalCode, setPostalCode] = useState('');
 
     const onFormSubmitted = (event: React.FormEvent) => {
         event.preventDefault();
 
-        const [expirationYear, expirationMonth] = expiration.split('-');
+        const fields = [
+            phoneNumber,
+            alias,
+            name,
+            cardNumber,
+            expiration,
+            securityCode,
+            postalCode
+        ];
+
+        const allFieldsValid = fields.every(field => typeof field === 'string' || field.isValid);
+
+        if (!allFieldsValid) {
+            return;
+        }
+
+        const { month, year } = expectValid(expiration);
 
         const paymentInfo: IPaymentInfo = {
-            phoneNumberWithCountryCode,
+            phoneNumberWithCountryCode: expectValid(phoneNumber),
             alias,
-            cardData: {
+            cardData:                   {
                 name,
                 cardNumber,
-                expirationMonth,
-                expirationYear,
                 securityCode,
                 postalCode,
+                expirationMonth: month.toString(),
+                expirationYear:  year.toString(),
                 userAgent:       JSON.stringify({ userAgent: navigator.userAgent })
             }
         };
@@ -55,8 +73,8 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                     name="Phone Number"
                     description="Order updates will be sent via text to this number."
                     inputType="tel"
-                    value={phoneNumberWithCountryCode}
-                    onValueChanged={setPhoneNumberWithCountryCode}
+                    validationState={phoneNumber}
+                    onValueChanged={setPhoneNumber}
                 />
                 <PaymentField
                     id="alias"
@@ -87,7 +105,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                     icon="event"
                     name="Expiration"
                     inputType="month"
-                    value={expiration}
+                    validationState={expiration}
                     onValueChanged={setExpiration}
                 />
                 <PaymentField

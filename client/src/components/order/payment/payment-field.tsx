@@ -1,19 +1,42 @@
 import React from 'react';
 import { HtmlInputType } from '../../../models/html.ts';
+import { ValidationState } from '../../../models/validation.ts';
+import { classNames } from '../../../util/react.ts';
 
-interface IPaymentFieldProps {
+interface IBasePaymentFieldProps {
     id: string;
     icon: string;
     name: string;
     inputType?: HtmlInputType;
     description?: string;
-    value: string;
     onValueChanged(value: string): void;
 }
 
-export const PaymentField: React.FC<IPaymentFieldProps> = ({ id, inputType = 'text', icon, name, description, value, onValueChanged }) => {
+interface IPaymentFieldWithoutValidationProps extends IBasePaymentFieldProps {
+    value: string;
+    validationState?: undefined;
+}
+
+interface IPaymentFieldWithValidationProps extends IBasePaymentFieldProps {
+    validationState: ValidationState<unknown>;
+    value?: undefined;
+}
+
+export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentFieldWithoutValidationProps> = ({
+    id, 
+    inputType = 'text', 
+    icon, 
+    name, 
+    description,
+    value,
+    validationState, 
+    onValueChanged }) => {
+    const rawValue = value ?? validationState.rawValue;
+    const isValid = validationState?.isValid ?? true;
+    const shouldShowInvalid = rawValue.length > 0 && !isValid;
+
     return (
-        <div className="field flex-col flex-grow">
+        <div className={classNames('field flex-col flex-grow', shouldShowInvalid && 'invalid')}>
             <label htmlFor={id}>
                 <div className="field-title flex">
                     <span className="material-symbols-outlined">
@@ -34,7 +57,7 @@ export const PaymentField: React.FC<IPaymentFieldProps> = ({ id, inputType = 'te
             <input
                 id={id}
                 type={inputType}
-                value={value}
+                value={rawValue}
                 onChange={event => onValueChanged(event.target.value)}
                 required
             />
