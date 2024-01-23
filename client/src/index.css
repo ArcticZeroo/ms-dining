@@ -15,6 +15,11 @@ button {
     outline: none;
     margin: 0;
     padding: 0;
+    user-select: none;
+}
+
+button:disabled {
+    cursor: not-allowed;
 }
 
 image {
@@ -130,6 +135,10 @@ html, body, #root, .App {
 
 .default-gap {
     gap: var(--default-padding);
+}
+
+.material-symbols-outlined {
+    user-select: none;
 }
 
 @keyframes loading-spinner {

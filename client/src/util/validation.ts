@@ -9,6 +9,14 @@ export const expectValid = <T>(validationState: ValidationState<T>): T => {
     return validationState.parsedValue;
 }
 
+export const expectError = (validationState: ValidationState<unknown>) => {
+    if (validationState.isValid) {
+        throw new Error('Expected error but got success');
+    }
+
+    return validationState.errorMessage;
+}
+
 export const validatePhoneNumber: Validator<string> = (rawValue: string) => {
     const result = phone(rawValue);
 
@@ -92,3 +100,24 @@ export const validateExpirationMonth: Validator<IExpirationMonth> = (rawValue: s
         rawValue
     };
 }
+
+export const getRegexValidator = (regex: RegExp, errorMessage: string): Validator<string> => {
+    return (rawValue: string) => {
+        if (!regex.test(rawValue)) {
+            return {
+                isValid: false,
+                errorMessage,
+                rawValue
+            };
+        }
+
+        return {
+            isValid: true,
+            parsedValue: rawValue,
+            rawValue
+        };
+    };
+}
+
+// This should be based on card type, but for now it's fine
+export const validateCvv = getRegexValidator(/^\d{3,4}$/, 'Invalid CVV');

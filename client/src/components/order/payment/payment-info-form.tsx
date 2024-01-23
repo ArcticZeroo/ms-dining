@@ -1,10 +1,12 @@
 import { ICardData } from '@msdining/common/dist/models/cart.ts';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import './payment-info-form.css';
 import { PaymentField } from './payment-field.tsx';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
-import { expectValid, validateExpirationMonth, validatePhoneNumber } from '../../../util/validation.ts';
+import { expectValid, validateCvv, validateExpirationMonth, validatePhoneNumber } from '../../../util/validation.ts';
+import { classNames } from '../../../util/react.ts';
+
+import './payment-info-form.css';
 
 export interface IPaymentInfo {
     phoneNumberWithCountryCode: string;
@@ -23,25 +25,36 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
     const [name, setName] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [expiration, setExpiration] = useFieldWithValidator(validateExpirationMonth);
-    const [securityCode, setSecurityCode] = useState('');
+    const [securityCode, setSecurityCode] = useFieldWithValidator(validateCvv);
     const [postalCode, setPostalCode] = useState('');
+
+    const isFormValid = useMemo(
+        () => {
+            const fields = [
+                phoneNumber,
+                alias,
+                name,
+                cardNumber,
+                expiration,
+                securityCode,
+                postalCode
+            ];
+
+            return fields.every(field => {
+                if (typeof field === 'string') {
+                    return field.length > 0;
+                }
+
+                return field.isValid;
+            });
+        },
+        [phoneNumber, alias, name, cardNumber, expiration, securityCode, postalCode]
+    );
 
     const onFormSubmitted = (event: React.FormEvent) => {
         event.preventDefault();
 
-        const fields = [
-            phoneNumber,
-            alias,
-            name,
-            cardNumber,
-            expiration,
-            securityCode,
-            postalCode
-        ];
-
-        const allFieldsValid = fields.every(field => typeof field === 'string' || field.isValid);
-
-        if (!allFieldsValid) {
+        if (!isFormValid) {
             return;
         }
 
@@ -53,8 +66,8 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
             cardData:                   {
                 name,
                 cardNumber,
-                securityCode,
                 postalCode,
+                securityCode:    expectValid(securityCode),
                 expirationMonth: month.toString(),
                 expirationYear:  year.toString(),
                 userAgent:       JSON.stringify({ userAgent: navigator.userAgent })
@@ -112,7 +125,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                     id="securityCode"
                     icon="lock"
                     name="Security Code"
-                    value={securityCode}
+                    validationState={securityCode}
                     onValueChanged={setSecurityCode}
                 />
                 <PaymentField
@@ -123,7 +136,13 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                     onValueChanged={setPostalCode}
                 />
             </div>
-            <button type="submit" className="default-container">
+            <button
+                type="submit"
+                id="payment-submit"
+                className={classNames('default-container', !isFormValid && 'invalid')}
+                title={isFormValid ? 'Click to submit your order' : 'Please fill out all fields and check for validation errors.'}
+                disabled={!isFormValid}
+            >
                 Submit
             </button>
         </form>

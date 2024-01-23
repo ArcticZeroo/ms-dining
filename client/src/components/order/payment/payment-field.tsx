@@ -9,6 +9,7 @@ interface IBasePaymentFieldProps {
     name: string;
     inputType?: HtmlInputType;
     description?: string;
+
     onValueChanged(value: string): void;
 }
 
@@ -23,20 +24,31 @@ interface IPaymentFieldWithValidationProps extends IBasePaymentFieldProps {
 }
 
 export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentFieldWithoutValidationProps> = ({
-    id, 
-    inputType = 'text', 
-    icon, 
-    name, 
+    id,
+    inputType = 'text',
+    icon,
+    name,
     description,
     value,
-    validationState, 
-    onValueChanged }) => {
-    const rawValue = value ?? validationState.rawValue;
-    const isValid = validationState?.isValid ?? true;
-    const shouldShowInvalid = rawValue.length > 0 && !isValid;
+    validationState,
+    onValueChanged
+}) => {
+    if (validationState == null) {
+        validationState = {
+            isValid:     true,
+            rawValue:    value,
+            parsedValue: value
+        };
+    }
+
+    const rawValue = validationState.rawValue;
+    const shouldShowInvalid = rawValue.length > 0 && !validationState.isValid;
 
     return (
-        <div className={classNames('field flex-col flex-grow', shouldShowInvalid && 'invalid')}>
+        <div
+            className={classNames('field flex-col flex-grow', shouldShowInvalid && 'invalid')}
+            title={validationState.isValid ? undefined : validationState.errorMessage}
+        >
             <label htmlFor={id}>
                 <div className="field-title flex">
                     <span className="material-symbols-outlined">
