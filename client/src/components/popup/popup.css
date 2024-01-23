@@ -31,6 +31,7 @@
     justify-content: space-between;
     align-items: center;
     position: sticky;
+    gap: var(--default-padding);
 }
 
 .modal .title #modal-title {
@@ -61,6 +62,10 @@
 .modal .body {
     overflow: auto;
     flex-grow: 1;
+}
+
+.modal .title:empty, .modal .body:empty, .modal .footer:empty {
+    display: none;
 }
 
 .modal .footer {

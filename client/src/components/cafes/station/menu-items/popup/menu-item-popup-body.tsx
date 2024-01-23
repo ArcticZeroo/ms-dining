@@ -22,9 +22,21 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
 }) => {
     const isOnlineOrderingAllowed = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
 
+    const shouldSkipBody = !menuItem.description
+                           && menuItem.imageUrl == null
+                           && (!isOnlineOrderingAllowed || menuItem.modifiers.length === 0);
+
+    if (shouldSkipBody) {
+        return null;
+    }
+
     return (
         <div className="menu-item-order-body">
-            <div className="menu-item-description">{menuItem.description}</div>
+            {
+                menuItem.description && (
+                    <div className="menu-item-description">{menuItem.description}</div>
+                )
+            }
             {
                 menuItem.imageUrl != null && (
                     <div className="menu-item-image-container">
@@ -50,13 +62,13 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                         <div className="menu-item-notes">
                             <label htmlFor="notes">Special Requests & Preparation Notes</label>
                             <textarea id="notes"
-									  placeholder="Enter Special Requests & Preparation Notes Here"
-									  value={notes}
-									  onChange={event => onNotesChanged(event.target.value)}/>
+                                placeholder="Enter Special Requests & Preparation Notes Here"
+                                value={notes}
+                                onChange={event => onNotesChanged(event.target.value)}/>
                         </div>
                     </div>
                 )
             }
         </div>
     );
-}
+};
