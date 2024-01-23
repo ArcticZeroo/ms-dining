@@ -44,8 +44,6 @@ interface ISerializedModifier {
     }
 }
 
-type SubmitOrderParams = ISubmitOrderParams<ICartItem>;
-
 export class CafeOrderSession extends CafeDiscoverySession {
     #orderingContext: IOrderingContext = {
         onDemandTerminalId: '',
@@ -54,10 +52,22 @@ export class CafeOrderSession extends CafeDiscoverySession {
         storePriceLevel:    ''
     };
     #cartGuid = hat();
+    #orderId: string | null = null;
     #orderNumber: string | null = null;
     #orderTotalWithoutTax: number = 0;
     #orderTotalTax: number = 0;
     #orderTotalWithTax: number = 0;
+    #lastCompletedStage: SubmitOrderStage = SubmitOrderStage.notStarted;
+    #cardProcessorToken: string = '';
+    #xssToken: string = '';
+
+    public get isReadyForSubmit() {
+        return this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
+    }
+
+    public get orderNumber() {
+        return this.#orderNumber;
+    }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
         if (!this.config) {
@@ -151,6 +161,12 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return modifiers;
     }
 
+    private _assertMatch(errorMessage: string, existingValue: string | null, newValue: string) {
+        if (existingValue != null && existingValue !== newValue) {
+            throw new Error(errorMessage);
+        }
+    }
+
     private async _addItemToCart(cartItem: ICartItem) {
         if (!this.config) {
             throw new Error('Config is required to add items to the cart!');
@@ -220,11 +236,11 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Data is not in the correct format');
         }
 
-        if (this.#orderNumber != null && this.#orderNumber !== json.orderDetails.orderNumber) {
-            throw new Error('Order number mismatch!');
-        }
-
+        this._assertMatch('Order number mismatch!', this.#orderNumber, json.orderDetails.orderNumber);
         this.#orderNumber = json.orderDetails.orderNumber;
+
+        this._assertMatch('Order ID mismatch!', this.#orderId, json.orderDetails.orderId);
+        this.#orderId = json.orderDetails.orderId;
 
         // These seem to be incremental for some reason, despite the naming and structure of the response. /shrug
         this.#orderTotalTax += Number(json.orderDetails.taxTotalAmount.amount);
@@ -311,9 +327,9 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     headers: {
                         ...JSON_HEADERS,
                         'Api-Key-Token': token,
-                        'Referer': this._getCardProcessorUrl(token)
+                        'Referer':       this._getCardProcessorUrl(token)
                     },
-                    body: body ? JSON.stringify(body) : undefined
+                    body:    body ? JSON.stringify(body) : undefined
                 }
             )
         });
@@ -325,10 +341,14 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return response;
     }
 
-    private async _retrieveCardProcessorXssToken(token: string) {
+    private async _retrieveCardProcessorXssToken() {
+        if (this.#cardProcessorToken.length === 0) {
+            throw new Error('Card processor token is not set!');
+        }
+
         const response = await this._makeCardProcessorRequest(
-            token,
-            this._getCardProcessorUrl(token),
+            this.#cardProcessorToken,
+            this._getCardProcessorUrl(this.#cardProcessorToken),
             'GET'
         );
 
@@ -457,33 +477,39 @@ export class CafeOrderSession extends CafeDiscoverySession {
             });
     }
 
-    private async _closeOrderAsync(context: IOrderingContext, phoneNumberWithCountryCode: string) {
-        const taxAmountObject = {
-            currencyUnit: 'USD',
-            amount:       this.#orderTotalTax.toFixed(2)
-        };
-
-        const totalWithoutTaxAmountObject = {
-            currencyUnit: 'USD',
-            amount:       this.#orderTotalWithoutTax.toFixed(2)
-        };
-
-        const totalAmountObject = {
-            currencyUnit: 'USD',
-            amount:       this.#orderTotalWithTax.toFixed(2)
-        };
-
-        const emptyAmountObject = {
-            currencyUnit: 'USD',
-            amount:       '0.00'
-        };
+    private async _closeOrderAsync(alias: string, phoneNumberWithCountryCode: string) {
+        if (this.#orderId == null) {
+            throw new Error('Order ID is not set!');
+        }
 
         await this._requestAsync(
-            '',
+            `/order/${this.#orderId}/processPaymentAndClosedOrder`,
             {
-                // TODO
+                method: 'POST',
+                body: JSON.stringify({})
             }
         )
+    }
+
+    public async prepareOrder(items: ICartItem[]): Promise<void> {
+        if (this.#lastCompletedStage !== SubmitOrderStage.notStarted) {
+            throw new Error('Order has already been started!');
+        }
+
+        this.#orderingContext = await this._retrieveOrderingContextAsync();
+
+        try {
+            await this._populateCart(items);
+
+            this.#lastCompletedStage = SubmitOrderStage.addToCart;
+
+            this.#cardProcessorToken = await this._getCardProcessorSiteToken();
+            this.#xssToken = await this._retrieveCardProcessorXssToken();
+
+            this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
+        } catch (err) {
+            console.error(`Failed to prepare order after stage ${this.#lastCompletedStage}:`, err);
+        }
     }
 
     // TODO: Figure out a way to break this up into two separate actions to reduce user-perceived latency.
@@ -494,35 +520,31 @@ export class CafeOrderSession extends CafeDiscoverySession {
      * @returns The latest stage which was successfully completed.
      */
     public async submitOrder({
+                                 alias,
                                  cardData,
                                  phoneNumberWithCountryCode,
-                                 items
-                             }: SubmitOrderParams): Promise<SubmitOrderStage> {
+                             }: ISubmitOrderParams): Promise<void> {
+        if (!this.isReadyForSubmit) {
+            throw new Error('Order is not ready to submit!');
+        }
+
         this.#orderingContext = await this._retrieveOrderingContextAsync();
 
-        let lastCompletedStage = SubmitOrderStage.notStarted;
         try {
-            await this._populateCart(items);
+            const result = await this._submitPaymentToCardProcessor(this.#cardProcessorToken, cardData);
 
-            lastCompletedStage = SubmitOrderStage.addToCart;
+            this.#lastCompletedStage = SubmitOrderStage.payment;
 
-            const cardProcessorToken = await this._getCardProcessorSiteToken();
+            await this._closeOrderAsync(alias, phoneNumberWithCountryCode);
 
-            const xssToken = await this._retrieveCardProcessorXssToken(cardProcessorToken);
-
-            const result = await this._submitPaymentToCardProcessor(cardProcessorToken, cardData);
-
-            lastCompletedStage = SubmitOrderStage.payment;
+            this.#lastCompletedStage = SubmitOrderStage.closeOrder;
 
             // WTF do we do if it fails in this stage?
             await this._sendPhoneConfirmation(phoneNumberWithCountryCode);
-
-            lastCompletedStage = SubmitOrderStage.closeOrder;
         } catch (err) {
-            console.error(`Failed to submit order after stage ${lastCompletedStage}:`, err);
-            return lastCompletedStage;
+            console.error(`Failed to submit order after stage ${this.#lastCompletedStage}:`, err);
         }
 
-        return SubmitOrderStage.complete;
+        this.#lastCompletedStage = SubmitOrderStage.complete;
     }
 }

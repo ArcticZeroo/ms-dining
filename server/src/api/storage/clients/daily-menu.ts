@@ -92,7 +92,7 @@ export abstract class DailyMenuStorageClient {
         });
     }
 
-    public static async _doRetrieveDailyMenuAsync(cafeId: string, dateString: string) {
+    private static async _doRetrieveDailyMenuAsync(cafeId: string, dateString: string) {
         const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 cafeId,
@@ -202,6 +202,7 @@ export abstract class DailyMenuStorageClient {
 
     public static getAllMenusForWeek() {
         const dateStringsForWeek = getDateStringsForWeek();
+
         return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 dateString: {
@@ -232,5 +233,4 @@ export abstract class DailyMenuStorageClient {
             }
         }));
     }
-
 }

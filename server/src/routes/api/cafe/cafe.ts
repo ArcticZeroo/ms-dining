@@ -10,6 +10,7 @@ import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerSearchRoutes } from './search.js';
+import { registerOrderingRoutes } from './ordering.js';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
 
@@ -20,6 +21,7 @@ export const registerCafeRoutes = (parent: Router) => {
 
     registerMenuRoutes(router);
     registerSearchRoutes(router);
+    registerOrderingRoutes(router);
 
     router.get('/', async ctx => {
         const visitorId = ctx.get(VISITOR_ID_HEADER);

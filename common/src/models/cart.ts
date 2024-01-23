@@ -5,15 +5,6 @@ export interface ICartItem {
     specialInstructions?: string;
 }
 
-export enum SubmitOrderStage {
-    notStarted = 'notStarted',
-    addToCart = 'addToCart',
-    payment = 'payment',
-    closeOrder = 'closeOrder',
-    sendTextReceipt = 'sendTextReceipt',
-    complete = 'complete'
-}
-
 export interface ISerializedModifier {
     modifierId: string;
     choiceIds: Array<string>;
@@ -36,9 +27,35 @@ export interface ICardData {
     userAgent: string;
 }
 
-export interface ISubmitOrderParams<TCartItem> {
-    items: Array<TCartItem>;
+export interface ISubmitOrderParams {
     phoneNumberWithCountryCode: string;
     alias: string;
     cardData: ICardData;
+}
+
+export interface ISubmitOrderRequest extends ISubmitOrderParams {
+    itemsByCafeId: {
+        [cafeId: string]: ISerializedCartItem[]
+    }
+}
+
+export enum SubmitOrderStage {
+    notStarted = 'notStarted',
+    addToCart = 'addToCart',
+    initializeCardProcessor = 'initializeCardProcessor',
+    payment = 'payment',
+    closeOrder = 'closeOrder',
+    sendTextReceipt = 'sendTextReceipt',
+    complete = 'complete'
+}
+
+export interface IOrderCompletionData {
+    lastCompletedStage: SubmitOrderStage;
+    orderNumber: string;
+    waitTimeMin: string;
+    waitTimeMax: string;
+}
+
+export interface IOrderCompletionResponse {
+    [cafeId: string]: IOrderCompletionData;
 }
