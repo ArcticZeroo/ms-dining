@@ -44,10 +44,6 @@ export const getChoiceHtmlId = (modifier: CafeTypes.IMenuItemModifier, choice: C
 
 export const addOrEditCartItem = (cart: CartItemsByCafeId, item: ICartItemWithMetadata) => {
     const cafeItems = cart.get(item.cafeId) ?? new Map<string, ICartItemWithMetadata>();
-
-    const existingItem = cafeItems.get(item.id);
-    console.log(item, existingItem, existingItem === item);
-
     cafeItems.set(item.id, item);
     cart.set(item.cafeId, cafeItems);
 }

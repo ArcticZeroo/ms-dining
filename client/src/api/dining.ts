@@ -8,11 +8,10 @@ import {
 } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
-import { ApplicationSettings, getVisitorId } from './settings.ts';
+import { ApplicationSettings } from './settings.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { ISearchQuery } from '@msdining/common/dist/models/search.ts';
-import { ERROR_BODIES } from '@msdining/common/dist/responses';
-import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
+import { makeRequest } from './request.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();
@@ -27,55 +26,13 @@ interface IRetrieveCafeMenuParams {
     shouldCountTowardsLastUsed?: boolean;
 }
 
-interface IMakeRequestParams {
-    path: string;
-    sendVisitorId?: boolean;
-    options?: RequestInit;
-}
-
 export abstract class DiningClient {
     private static _viewListPromise: Promise<ICoreResponse> | undefined = undefined;
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
     private static readonly _favoritesCache = new FavoritesCache();
 
-    private static _getRequestOptions(sendVisitorId: boolean) {
-        if (!sendVisitorId) {
-            return undefined;
-        }
-
-        return {
-            headers: {
-                'X-Visitor-Id': getVisitorId()
-            }
-        };
-    }
-
-    private static async _makeRequest<T>({
-        path,
-        sendVisitorId = false,
-        options = {}
-    }: IMakeRequestParams): Promise<T> {
-        const response = await fetch(path, {
-            ...DiningClient._getRequestOptions(sendVisitorId),
-            ...options
-        });
-
-        if (!response.ok) {
-            if (response.status === 503) {
-                const body = await response.text();
-                if (body === ERROR_BODIES.menusCurrentlyUpdating) {
-                    throw new MenusCurrentlyUpdatingException();
-                }
-            }
-
-            throw new Error(`Response failed with status: ${response.status}`);
-        }
-
-        return response.json();
-    }
-
     private static async _retrieveViewListInner(): Promise<ICoreResponse> {
-        return DiningClient._makeRequest({
+        return makeRequest({
             path:          '/api/dining/',
             sendVisitorId: true
         });
@@ -90,7 +47,7 @@ export abstract class DiningClient {
     }
 
     private static _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
-        return DiningClient._makeRequest({
+        return makeRequest({
             path: `/api/dining/menu/${id}?date=${dateString}`
         });
     }
@@ -301,7 +258,7 @@ export abstract class DiningClient {
     }
 
     public static async retrieveSearchResults(query: string): Promise<Array<IQuerySearchResult>> {
-        const response = await DiningClient._makeRequest({
+        const response = await makeRequest({
             path: `/api/dining/search?q=${encodeURIComponent(query)}`
         });
 
@@ -321,7 +278,7 @@ export abstract class DiningClient {
             }
         }
 
-        const response = await DiningClient._makeRequest({
+        const response = await makeRequest({
             path:    `/api/dining/search/favorites`,
             options: {
                 method:  'POST',
@@ -339,7 +296,7 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCheapItems(): Promise<Array<ICheapItemSearchResult>> {
-        const response = await DiningClient._makeRequest({
+        const response = await makeRequest({
             path: `/api/dining/search/cheap`
         });
 

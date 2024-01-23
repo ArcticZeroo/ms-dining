@@ -8,28 +8,54 @@ import { PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
 
 import './order-page.css';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useCallback } from 'react';
+import { OrderingClient } from '../../../api/order.ts';
+import { OrderStatus } from '../../order/status/order-status.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
     const cart = useValueNotifierContext(CartContext);
 
-    const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
-
-    if (!isCheckoutAllowed) {
-        return <EmptyCartNotice/>;
-    }
-
-    return (
-        <div id="order-checkout" className="flex-col">
-            <OnlineOrderingExperimental/>
-            <div className="card dark-blue">
-                <div className="title">
-                    Your Order
-                </div>
-                <CartContentsTable showModifiers={true}/>
-            </div>
-            {cart.size > 1 && <MultiCafeOrderWarning/>}
-            <PaymentInfoForm onSubmit={() => alert('This does nothing yet!')}/>
-        </div>
+    const doOrderCallback = useCallback(
+        () => OrderingClient.submitOrder(cart),
+        [cart]
     );
+    const { stage, run, value, error } = useDelayedPromiseState(doOrderCallback, false /*keepLastValue*/);
+
+    const onFormSubmitted = () => {
+        if (stage !== PromiseStage.notRun) {
+            return;
+        }
+
+        run();
+    };
+
+    if (stage === PromiseStage.notRun) {
+        const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
+
+        if (!isCheckoutAllowed) {
+            return <EmptyCartNotice/>;
+        }
+
+        return (
+            <div id="order-checkout" className="flex-col">
+                <OnlineOrderingExperimental/>
+                <div className="card dark-blue">
+                    <div className="title">
+                        Your Order
+                    </div>
+                    <CartContentsTable showModifiers={true}/>
+                </div>
+                {cart.size > 1 && <MultiCafeOrderWarning/>}
+                <PaymentInfoForm onSubmit={onFormSubmitted}/>
+            </div>
+        );
+    } else {
+        return <OrderStatus
+            stage={stage}
+            value={value}
+            error={error}
+        />
+    }
 };
