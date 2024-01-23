@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface IScrollAnchorProps {
     id: string;
@@ -8,6 +8,7 @@ interface IScrollAnchorProps {
 export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
     const [element, setElement] = useState<HTMLAnchorElement | null>();
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (element == null) {
@@ -25,9 +26,10 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
             // Remove hash from URL after jumping
             const url = new URL(window.location.href);
             url.hash = '';
-            window.history.pushState({}, '', url.toString());
+
+            navigate(url.pathname);
         }, 0);
-    }, [id, element, location.hash]);
+    }, [navigate, id, element, location.hash]);
 
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement}/>
