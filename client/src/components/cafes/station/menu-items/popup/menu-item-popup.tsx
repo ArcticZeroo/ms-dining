@@ -2,9 +2,12 @@ import { CafeTypes } from '@msdining/common';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApplicationSettings } from '../../../../../api/settings.ts';
 import { ApplicationContext } from '../../../../../context/app.ts';
 import { CartContext } from '../../../../../context/cart.ts';
 import { PopupContext } from '../../../../../context/modal.ts';
+import { SelectedDateContext } from '../../../../../context/time.ts';
+import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 import { addOrEditCartItem, shallowCloneCart } from '../../../../../util/cart.ts';
@@ -18,9 +21,6 @@ import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
-import { useValueNotifier } from '../../../../../hooks/events.ts';
-import { ApplicationSettings } from '../../../../../api/settings.ts';
-import { SelectedDateContext } from '../../../../../context/time.ts';
 
 const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
     let price = menuItem.price;
@@ -170,6 +170,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
         const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
 
         const viewPath = getViewMenuUrlWithJump({
+            cafeId,
             view:       parentView,
             name:       menuItem.name,
             entityType: SearchEntityType.menuItem,
