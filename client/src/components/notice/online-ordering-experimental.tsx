@@ -1,4 +1,13 @@
+import { ApplicationSettings } from '../../api/settings.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
+
 export const OnlineOrderingExperimental = () => {
+    const isSuppressed = useValueNotifier(ApplicationSettings.suppressExperimentalOnlineOrderingWarning);
+
+    if (isSuppressed) {
+        return null;
+    }
+
     return (
         <div className="card notice visible flash">
             <p>

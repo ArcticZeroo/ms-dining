@@ -4,7 +4,8 @@ import { ValueNotifier } from '../../util/events.ts';
 import { classNames } from '../../util/react.ts';
 
 const ALLOWED_SETTINGS: BooleanSetting[] = [
-    ApplicationSettings.allowOnlineOrdering
+    ApplicationSettings.allowOnlineOrdering,
+    ApplicationSettings.suppressExperimentalOnlineOrderingWarning
 ];
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {
@@ -66,17 +67,17 @@ export const CustomKeySetting: React.FC = () => {
             </div>
             <div className="setting-input">
                 <input type="text"
-                       placeholder="Setting Key"
-                       value={key}
-                       onChange={event => setKey(event.target.value)}
+                    placeholder="Setting Key"
+                    value={key}
+                    onChange={event => setKey(event.target.value)}
                 />
                 <label htmlFor="custom-key-should-enable" id="custom-key-checkbox" className={classNames(!isKeyValid && 'disabled')}>
                     Enable Key
                     <input type="checkbox"
-                           id="custom-key-should-enable"
-                           checked={isKeyEnabled}
-                           disabled={!isKeyValid}
-                           onChange={event => onChange(event.target.checked)}
+                        id="custom-key-should-enable"
+                        checked={isKeyEnabled}
+                        disabled={!isKeyValid}
+                        onChange={event => onChange(event.target.checked)}
                     />
                 </label>
             </div>
