@@ -1,8 +1,3 @@
 #order-checkout .cart-item-buttons {
     width: min-content;
 }
-
-#order-checkout #cart {
-    background: #254569;
-    color: white;
-}

@@ -133,12 +133,23 @@ html, body, #root, .App {
     color: white;
 }
 
+.card.dark-blue {
+    background: #254569;
+    color: white;
+}
+
 .default-gap {
     gap: var(--default-padding);
 }
 
 .material-symbols-outlined {
     user-select: none;
+}
+
+.default-button {
+    background: #2196F3;
+    color: white;
+    text-decoration: none;
 }
 
 @keyframes loading-spinner {
