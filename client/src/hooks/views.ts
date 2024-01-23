@@ -1,10 +1,10 @@
 import { useContext, useMemo } from 'react';
+import { ApplicationSettings } from '../api/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { sortViews } from '../util/sorting.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
-import { ApplicationSettings } from '../api/settings.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     return useMemo(() => {
@@ -55,3 +55,28 @@ export const useViewsForNav = () => {
         return sortViews(visibleViews);
     }, [viewsInOrder, shouldUseGroups]);
 };
+
+export const useHomepageViews = () => {
+    const { viewsById } = useContext(ApplicationContext);
+
+    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+
+    // Users may have added cafes to their home set which are currently unavailable
+    return useMemo(() => {
+        const availableViews: CafeView[] = [];
+
+        for (const viewId of homepageViewIds) {
+            if (viewsById.has(viewId)) {
+                const view = viewsById.get(viewId)!;
+
+                // If the user selected a single view that should be a group, don't show it
+                if (isViewVisible(view, shouldUseGroups)) {
+                    availableViews.push(view);
+                }
+            }
+        }
+
+        return sortViews(availableViews);
+    }, [viewsById, homepageViewIds, shouldUseGroups]);
+}

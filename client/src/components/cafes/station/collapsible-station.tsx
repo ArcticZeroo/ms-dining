@@ -1,10 +1,11 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
+import { CurrentCafeContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
-import { idPrefixByEntityType } from '../../../util/link.ts';
+import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
@@ -30,6 +31,8 @@ export interface ICollapsibleStationProps {
 }
 
 export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
+    const cafe = useContext(CurrentCafeContext);
+
     const [isExpanded, setIsExpanded] = useState(true);
     const menuBodyRef = useRef<HTMLDivElement>(null);
     const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
@@ -58,9 +61,14 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         [station.name]
     );
 
+    const scrollAnchorId = useMemo(
+        () => getScrollAnchorId({ cafeId: cafe.id, entityType: SearchEntityType.station, name: normalizedName }),
+        [cafe.id, normalizedName]
+    );
+
     return (
         <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
-            <ScrollAnchor id={`${idPrefixByEntityType[SearchEntityType.station]}-${normalizedName}`}/>
+            <ScrollAnchor id={scrollAnchorId}/>
             <div className="station-header flex-row">
                 <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                 <button className="title" onClick={onTitleClick}>

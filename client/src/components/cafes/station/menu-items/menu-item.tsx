@@ -9,12 +9,12 @@ import { useIsFavoriteItem } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../models/cafe.ts';
 import { getPriceDisplay } from '../../../../util/cart.ts';
-import { idPrefixByEntityType } from '../../../../util/link.ts';
+import { getScrollAnchorId } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';
+import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
-import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -80,6 +80,11 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         [menuItem.name]
     );
 
+    const scrollAnchorId = useMemo(
+        () => getScrollAnchorId({ cafeId: cafe.id, name: normalizedName, entityType: SearchEntityType.menuItem }),
+        [cafe.id, normalizedName]
+    );
+
     const title = allowOnlineOrdering
         ? `Click to open item details (online ordering enabled)`
         : 'Click to open item details';
@@ -89,7 +94,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             {/* This is a hack because the anchor needs to scroll the user to the top of the item, but td elements are horizontal. */}
             <tr className="scroll-anchor-row">
                 <td>
-                    <ScrollAnchor id={`${idPrefixByEntityType[SearchEntityType.menuItem]}-${normalizedName}`}/>
+                    <ScrollAnchor id={scrollAnchorId}/>
                 </td>
             </tr>
             <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')}

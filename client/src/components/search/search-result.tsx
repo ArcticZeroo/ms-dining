@@ -10,7 +10,7 @@ import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { getLocationDatesDisplay } from '../../util/date.ts';
-import { getViewMenuUrlWithJump } from '../../util/link.ts';
+import { getJumpUrlOnSamePage, getViewMenuUrlWithJump } from '../../util/link.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import { getParentView } from '../../util/view';
@@ -134,6 +134,7 @@ interface ISearchResultProps {
     isCompact?: boolean;
     showFavoriteButton?: boolean;
     shouldColorForFavorites?: boolean;
+    cafeIdsOnPage?: Set<string>;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -148,6 +149,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     isCompact = false,
     showFavoriteButton = !isCompact,
     shouldColorForFavorites = true,
+    cafeIdsOnPage,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -217,14 +219,14 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                 {
                                     extraFields.map(({ iconName, value, key }) => (
                                         value &&
-                                        <div className="search-result-field" key={key}>
+													<div className="search-result-field" key={key}>
 													    <span className="material-symbols-outlined icon">
 													        {iconName}
 													    </span>
-                                            <span className="value">
+													    <span className="value">
 													        {value}
 													    </span>
-                                        </div>
+													</div>
                                     ))
                                 }
                             </div>
@@ -249,16 +251,21 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                     if (targetDate != null) {
                                         selectedDateNotifier.value = targetDate;
                                     }
-                                }
+                                };
+
+                                const url = cafeIdsOnPage != null && cafeIdsOnPage.has(cafeId)
+                                    ? getJumpUrlOnSamePage({ entityType, name, cafeId })
+                                    : getViewMenuUrlWithJump({
+                                        cafeId,
+                                        name,
+                                        entityType,
+                                        view: parentView,
+                                        date: targetDate
+                                    });
 
                                 return (
                                     <Link
-                                        to={getViewMenuUrlWithJump({
-                                            view: parentView,
-                                            name,
-                                            entityType,
-                                            date: targetDate
-                                        })}
+                                        to={url}
                                         className="search-result-chip"
                                         key={view.value.id}
                                         onClick={onLinkClick}
