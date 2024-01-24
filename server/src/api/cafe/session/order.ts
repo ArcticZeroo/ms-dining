@@ -301,12 +301,12 @@ export class CafeOrderSession extends CafeDiscoverySession {
         const json = await response.json();
 
         if (!isDuckType<IRetrieveCardProcessorTokenResponse>(json, {
-            cardProcessorSiteToken: 'string'
+            token: 'string'
         })) {
             throw new Error('Data is not in the correct format');
         }
 
-        return json.cardProcessorSiteToken;
+        return json.token;
     }
 
     private _getCardProcessorUrl(token: string) {
@@ -392,13 +392,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
                 browserInfo:     {
                     userAgent: cardData.userAgent
                 },
-                // Captcha token is not being sent because enableCaptcha is false
-                // token: '',
+                token: this.#xssToken,
             }
         );
 
         const json = await response.json() as ICardProcessorPaymentResponse;
 
+        // This is how the actual JS does it
         const submittedPaymentToken = json.token || json.transactionReferenceData?.token;
 
         if (!submittedPaymentToken) {
@@ -531,7 +531,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
         this.#orderingContext = await this._retrieveOrderingContextAsync();
 
         try {
-            const result = await this._submitPaymentToCardProcessor(this.#cardProcessorToken, cardData);
+            const submittedPaymentToken = await this._submitPaymentToCardProcessor(this.#cardProcessorToken, cardData);
 
             this.#lastCompletedStage = SubmitOrderStage.payment;
 

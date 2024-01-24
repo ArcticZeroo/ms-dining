@@ -15,7 +15,7 @@ export interface IAddToOrderResponse {
 }
 
 export interface IRetrieveCardProcessorTokenResponse {
-    cardProcessorSiteToken: string
+    token: string
 }
 
 export interface ICardProcessorPaymentResponse {
