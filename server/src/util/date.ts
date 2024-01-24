@@ -36,10 +36,6 @@ export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {
     return !DateUtil.isDateBefore(date, cafe.firstAvailable);
 };
 
-export const getDateStringsForWeek = (): string[] => {
-    return Array.from(DateUtil.yieldDaysInFutureForThisWeek()).map(i => DateUtil.toDateString(DateUtil.getNowWithDaysInFuture(i)));
-}
-
 export const isDateValid = (date: Date | null | undefined): date is Date => date != null && !Number.isNaN(date.getTime());
 
 export const needsUpdate = (serverLastUpdateTime: Date, storedLastUpdateTime: Date | undefined | null) => {

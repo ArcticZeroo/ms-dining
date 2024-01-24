@@ -11,6 +11,7 @@ import { isAnyDateToday } from '../../../../util/search.ts';
 import { expandAndFlattenView } from '../../../../util/view.ts';
 import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
+import { getNowWithDaysInFuture, isSameDate, yieldDaysInFutureForThisWeek } from '@msdining/common/dist/date-util';
 
 const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
@@ -68,6 +69,20 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
 
     const { stage, results } = useFavoriteSearchResults(queries);
 
+    const shouldHideFavorites = useMemo(
+        () => {
+            // favorites search only allows you to search for items this week
+            for (const daysInFuture of yieldDaysInFutureForThisWeek()) {
+                if (isSameDate(getNowWithDaysInFuture(daysInFuture), selectedDate)) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        [selectedDate]
+    );
+
     const bodyView = useMemo(() => {
         if (stage === PromiseStage.running) {
             return (
@@ -108,7 +123,11 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                 }
             </div>
         );
-    }, [stage, results, selectedDate]);
+    }, [stage, results, selectedDate, cafeIdsOnPage]);
+
+    if (shouldHideFavorites) {
+        return null;
+    }
 
     return (
         <div className={classNames('collapsible-content flex-col', isCollapsed && 'collapsed')} id="home-favorites">

@@ -1,7 +1,6 @@
 import { DateUtil } from '@msdining/common';
-import { ApplicationContext } from '../../../constants/context.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { getDateStringsForWeek, isDateValid } from '../../../util/date.js';
+import { isDateValid } from '../../../util/date.js';
 import { logError } from '../../../util/log.js';
 import { LockedMap } from '../../../util/map.js';
 import { usePrismaClient } from '../client.js';
@@ -201,7 +200,7 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static getAllMenusForWeek() {
-        const dateStringsForWeek = getDateStringsForWeek();
+        const dateStringsForWeek = DateUtil.getDateStringsForWeek();
 
         return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {

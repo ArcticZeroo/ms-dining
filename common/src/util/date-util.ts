@@ -125,3 +125,7 @@ export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false)
         yield ((i - nowWeekday) + dateOffset);
     }
 }
+
+export const getDateStringsForWeek = (): string[] => {
+    return Array.from(yieldDaysInFutureForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
+}
