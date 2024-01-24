@@ -45,7 +45,10 @@ export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({ view, r
                 Estimated wait time: {result.waitTimeMin} - {result.waitTimeMax} minutes
             </div>
             <div>
-                {result.lastCompletedStage === SubmitOrderStage.complete && `Order #${result.orderNumber}`}
+                {result.orderNumber && `Order #${result.orderNumber}`}
+            </div>
+            <div>
+                {result.orderNumber && !isSuccess && `Your order may have been received by the cafeteria. Please contact ${view.value.name}.`}
             </div>
         </div>
     );
