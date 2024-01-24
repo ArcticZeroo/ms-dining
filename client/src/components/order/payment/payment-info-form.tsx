@@ -7,6 +7,7 @@ import { expectValid, validateCvv, validateExpirationMonth, validatePhoneNumber 
 import { classNames } from '../../../util/react.ts';
 
 import './payment-info-form.css';
+import { ApplicationSettings } from '../../../api/settings.ts';
 
 export interface IPaymentInfo {
     phoneNumberWithCountryCode: string;
@@ -19,14 +20,14 @@ interface IPaymentInfoFormProps {
 }
 
 export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) => {
-    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber);
-    const [alias, setAlias] = useState('');
+    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, ApplicationSettings.phoneNumber.value /*initialValue*/);
+    const [alias, setAlias] = useState(ApplicationSettings.alias.value);
 
-    const [name, setName] = useState('');
+    const [name, setName] = useState(ApplicationSettings.nameOnCard.value);
     const [cardNumber, setCardNumber] = useState('');
     const [expiration, setExpiration] = useFieldWithValidator(validateExpirationMonth);
     const [securityCode, setSecurityCode] = useFieldWithValidator(validateCvv);
-    const [postalCode, setPostalCode] = useState('');
+    const [postalCode, setPostalCode] = useState(ApplicationSettings.postalCode.value);
 
     const isFormValid = useMemo(
         () => {
@@ -59,9 +60,10 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
         }
 
         const { month, year } = expectValid(expiration);
+        const phoneNumberWithCountryCode = expectValid(phoneNumber);
 
         const paymentInfo: IPaymentInfo = {
-            phoneNumberWithCountryCode: expectValid(phoneNumber),
+            phoneNumberWithCountryCode,
             alias,
             cardData:                   {
                 name,
@@ -73,6 +75,11 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                 userAgent:       JSON.stringify({ userAgent: navigator.userAgent })
             }
         };
+
+        ApplicationSettings.phoneNumber.value = phoneNumberWithCountryCode;
+        ApplicationSettings.alias.value = alias;
+        ApplicationSettings.nameOnCard.value = name;
+        ApplicationSettings.postalCode.value = postalCode;
 
         onSubmit(paymentInfo);
     };

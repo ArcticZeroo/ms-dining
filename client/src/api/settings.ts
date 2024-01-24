@@ -205,6 +205,10 @@ export const ApplicationSettings = {
     favoriteStationNames:                      new StringSetSetting('favoriteStationNames'),
     collapsedStations:                         new StringSetSetting('collapsedStations'),
     visitorId:                                 new StringSetting('visitorId'),
+    alias:                                     new StringSetting('alias'),
+    phoneNumber:                               new StringSetting('phoneNumber'),
+    nameOnCard:                                new StringSetting('nameOnCard'),
+    postalCode:                                new StringSetting('postalCode'),
     minimumPrice:                              new NumberSetting('minimumPrice', 0),
     maximumPrice:                              new NumberSetting('maximumPrice', 10),
 } as const;

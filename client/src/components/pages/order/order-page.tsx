@@ -12,6 +12,7 @@ import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise
 import { useCallback } from 'react';
 import { OrderingClient } from '../../../api/order.ts';
 import { OrderStatus } from '../../order/status/order-status.tsx';
+import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
@@ -49,6 +50,7 @@ export const OrderPage = () => {
                 </div>
                 {cart.size > 1 && <MultiCafeOrderWarning/>}
                 <PaymentInfoForm onSubmit={onFormSubmitted}/>
+                <OrderPrivacyPolicy/>
             </div>
         );
     } else {
