@@ -32,10 +32,7 @@ export abstract class DiningClient {
     private static readonly _favoritesCache = new FavoritesCache();
 
     private static async _retrieveViewListInner(): Promise<ICoreResponse> {
-        return makeRequest({
-            path:          '/api/dining/',
-            sendVisitorId: true
-        });
+        return makeRequest({ path: '/api/dining/' });
     }
 
     public static retrieveViewList(): Promise<ICoreResponse> {

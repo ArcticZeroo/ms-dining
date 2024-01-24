@@ -1,5 +1,5 @@
 export const ApplicationContext = {
-    bootTime: new Date(),
-    hasCreatedTrackingApplication: false,
+    bootTime:               new Date(),
+    isReadyForTracking:     false,
     isMenuUpdateInProgress: false,
 };

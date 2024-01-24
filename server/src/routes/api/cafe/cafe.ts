@@ -1,6 +1,5 @@
 import Router from '@koa/router';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
-import { sendVisitAsync } from '../../../api/tracking/visitors.js';
 import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';
 import { IDiningCoreGroup, IDiningCoreResponse } from '../../../models/routes.js';
@@ -12,8 +11,6 @@ import { registerMenuRoutes } from './menu.js';
 import { registerSearchRoutes } from './search.js';
 import { registerOrderingRoutes } from './ordering.js';
 
-const VISITOR_ID_HEADER = 'X-Visitor-Id';
-
 export const registerCafeRoutes = (parent: Router) => {
     const router = new Router({
         prefix: '/dining'
@@ -24,15 +21,8 @@ export const registerCafeRoutes = (parent: Router) => {
     registerOrderingRoutes(router);
 
     router.get('/', async ctx => {
-        const visitorId = ctx.get(VISITOR_ID_HEADER);
-        if (ApplicationContext.hasCreatedTrackingApplication && visitorId) {
-            // Fire and forget, don't block the rest of the request
-            sendVisitAsync(visitorId)
-                .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
-        }
-
         const response: IDiningCoreResponse = {
-            isTrackingEnabled: ApplicationContext.hasCreatedTrackingApplication,
+            isTrackingEnabled: ApplicationContext.isReadyForTracking,
             groups:            []
         };
 

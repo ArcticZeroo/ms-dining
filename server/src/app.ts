@@ -8,11 +8,13 @@ import bodyParser from 'koa-bodyparser';
 import * as fs from 'fs';
 import * as fsPromises from 'fs/promises';
 import { createStaticRoutingApp } from './routes/static.js';
+import { sendVisitorAnalytics } from './middleware/tracking.js';
 
 const app = new Koa();
 
 app.use(json());
 app.use(bodyParser());
+app.use(sendVisitorAnalytics);
 
 registerRoutes(app);
 

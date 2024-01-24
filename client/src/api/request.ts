@@ -2,32 +2,23 @@ import { ERROR_BODIES } from '@msdining/common/dist/responses';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
 import { getVisitorId } from './settings.ts';
 
-const getRequestOptions = (sendVisitorId: boolean) => {
-    if (!sendVisitorId) {
-        return undefined;
-    }
-
-    return {
-        headers: {
-            'X-Visitor-Id': getVisitorId()
-        }
-    };
-}
-
 interface IMakeRequestParams {
     path: string;
-    sendVisitorId?: boolean;
     options?: RequestInit;
 }
 
 export const makeRequest = async <T>({
     path,
-    sendVisitorId = false,
     options = {}
 }: IMakeRequestParams): Promise<T> => {
+    const headers = options.headers ?? {};
+
     const response = await fetch(path, {
-        ...getRequestOptions(sendVisitorId),
-        ...options
+        ...options,
+        headers: {
+            'X-Visitor-Id': getVisitorId(),
+            ...headers
+        },
     });
 
     if (!response.ok) {

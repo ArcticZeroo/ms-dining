@@ -11,7 +11,8 @@ app.listen(webserverPort);
 
 createTrackingApplicationAsync()
     .then(() => {
-        ApplicationContext.hasCreatedTrackingApplication = true;
+        logInfo('User tracking is enabled!');
+        ApplicationContext.isReadyForTracking = true;
     })
     .catch(err => {
         if (ENVIRONMENT_SETTINGS.ignoreTrackingFailures) {
