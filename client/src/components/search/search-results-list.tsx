@@ -1,4 +1,3 @@
-import { SearchUtil } from '@msdining/common';
 import React, { useContext, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
 import { ApplicationSettings } from '../../api/settings.ts';
@@ -6,7 +5,7 @@ import { ApplicationContext } from '../../context/app.ts';
 import { useIsPriceAllowed } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.ts';
-import { matchesEntityFilter } from '../../util/search.ts';
+import { matchesEntityFilter, sortSearchResults } from '../../util/search.ts';
 import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
 
@@ -26,7 +25,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
         () => {
             const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById);
 
-            return SearchUtil.sortSearchResults({
+            return sortSearchResults({
                 queryText,
                 searchResults,
                 cafePriorityOrder: cafePriorityOrder.map(cafe => cafe.id)
