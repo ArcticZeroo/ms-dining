@@ -1,5 +1,6 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { ISearchQuery } from '@msdining/common/dist/models/search.js';
+import { ISearchQuery } from '@msdining/common/dist/models/search';
+import { getNowWithDaysInFuture, isSameDate, yieldDaysInFutureForThisWeek } from '@msdining/common/dist/util/date-util';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { ApplicationContext } from '../../../../context/app.ts';
@@ -11,7 +12,6 @@ import { isAnyDateToday } from '../../../../util/search.ts';
 import { expandAndFlattenView } from '../../../../util/view.ts';
 import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
-import { getNowWithDaysInFuture, isSameDate, yieldDaysInFutureForThisWeek } from '@msdining/common/dist/date-util';
 
 const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);

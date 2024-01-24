@@ -198,6 +198,7 @@ export const ApplicationSettings = {
     suppressExperimentalOnlineOrderingWarning: new BooleanSetting('SUPPRESS_EXPERIMENTAL_ONLINE_ORDERING_WARNING_DO_NOT_USE', false /*defaultValue*/),
     enablePriceFilters:                        new BooleanSetting('enablePriceFilters', false /*defaultValue*/),
     suppressMultiCafeOrderWarning:             new BooleanSetting('suppressMultiCafeOrderWarning', false /*defaultValue*/),
+    allowLocation:                             new BooleanSetting('allowLocation', true /*defaultValue*/),
     lastUsedCafeIds:                           new StringArraySetting('lastUsedDiningHalls'),
     homepageViews:                             new StringSetSetting('homepageDiningHalls'),
     highlightTagNames:                         new StringSetSetting('highlightTagNames'),

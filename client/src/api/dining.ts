@@ -1,4 +1,5 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
+import { ISearchQuery } from '@msdining/common/dist/models/search';
 import { CafeMenu, CafeView, ICafe, ICafeStation, ICoreResponse, IMenuItem } from '../models/cafe.ts';
 import {
     ICheapItemSearchResult,
@@ -8,10 +9,9 @@ import {
 } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { expandAndFlattenView } from '../util/view';
-import { ApplicationSettings } from './settings.ts';
 import { FavoritesCache } from './cache/favorites.ts';
-import { ISearchQuery } from '@msdining/common/dist/models/search.ts';
 import { makeRequest } from './request.ts';
+import { ApplicationSettings } from './settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();

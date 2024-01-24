@@ -18,7 +18,7 @@ export const SettingsPage = () => {
             <MenuSettings/>
             <div className="card settings-group">
                 <div className="title">
-					Other Settings
+                    Other Settings
                 </div>
                 <div className="body">
                     <BooleanSettingInput
@@ -32,6 +32,18 @@ export const SettingsPage = () => {
                         setting={ApplicationSettings.shouldCondenseNumbers}
                         name="Condense Numbered Cafes"
                         description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
+                    />
+                    <BooleanSettingInput
+                        icon="location_on"
+                        setting={ApplicationSettings.allowLocation}
+                        name="Allow Location"
+                        description={
+                            <>
+                            When enabled, your location will be retrieved for more intelligent features.
+                                <br/>
+                            Your location data will never be sent to the server.
+                            </>
+                        }
                     />
                     <CustomKeySetting/>
                 </div>

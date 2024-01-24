@@ -5,7 +5,7 @@ export interface ILocationCoordinates {
     longitude: number;
 }
 
-class GelocationProvider extends ValueNotifier<ILocationCoordinates | null> {
+class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     private _watchId?: number;
     private _isFetchingInitialPosition: boolean = false;
 
@@ -43,6 +43,10 @@ class GelocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     }
 
     private _updatePosition(position: GeolocationPosition) {
+        if (position.coords.latitude === 0 && position.coords.longitude === 0) {
+            return;
+        }
+
         this.value = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
@@ -81,4 +85,4 @@ class GelocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     }
 }
 
-export const UserLocationNotifier = new GelocationProvider();
+export const UserLocationNotifier = new UserLocationProvider();
