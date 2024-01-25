@@ -1,6 +1,11 @@
 import { CafeTypes } from '@msdining/common';
 import { Nullable } from './util.js';
 
+export interface ILocationCoordinates {
+    lat: number;
+    long: number;
+}
+
 export interface ICafe {
     name: string;
     id: string;
@@ -9,15 +14,29 @@ export interface ICafe {
     url?: string;
 }
 
-export interface ICafeGroup {
+export interface ICafeWithLocation extends ICafe {
+    location: ILocationCoordinates;
+}
+
+interface IBaseCafeGroup {
     id: string;
     name: string;
     number?: number;
     // Some groups are just there for categorization when we don't group (e.g. restaurants, individual cafes)
     // and we don't actually want to group them in the nav bar.
     alwaysExpand?: boolean;
+}
+
+interface ICafeGroupWithLocationOnMembers extends IBaseCafeGroup {
+    members: ICafeWithLocation[];
+}
+
+export interface ICafeGroupWithLocationOnGroup extends IBaseCafeGroup {
+    location: ILocationCoordinates;
     members: ICafe[];
 }
+
+export type CafeGroup = ICafeGroupWithLocationOnMembers | ICafeGroupWithLocationOnGroup;
 
 export interface ICafeConfig {
     tenantId: string;
