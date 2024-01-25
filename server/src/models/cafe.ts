@@ -1,12 +1,8 @@
 import { CafeTypes } from '@msdining/common';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util.js';
 import { Nullable } from './util.js';
 
-export interface ILocationCoordinates {
-    lat: number;
-    long: number;
-}
-
-export interface ICafe {
+interface ICafeBase {
     name: string;
     id: string;
     number?: number;
@@ -14,9 +10,15 @@ export interface ICafe {
     url?: string;
 }
 
-export interface ICafeWithLocation extends ICafe {
+interface ICafeWithoutLocation extends ICafeBase {
+    location?: undefined;
+}
+
+interface ICafeWithLocation extends ICafeBase {
     location: ILocationCoordinates;
 }
+
+export type ICafe = ICafeWithoutLocation | ICafeWithLocation;
 
 interface IBaseCafeGroup {
     id: string;
@@ -28,6 +30,7 @@ interface IBaseCafeGroup {
 }
 
 interface ICafeGroupWithLocationOnMembers extends IBaseCafeGroup {
+    location?: undefined;
     members: ICafeWithLocation[];
 }
 

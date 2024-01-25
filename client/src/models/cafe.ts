@@ -1,26 +1,12 @@
 import { CafeTypes } from '@msdining/common';
+import {
+    IDiningCoreGroup,
+    IDiningCoreGroupMember,
+    IDiningCoreGroupMemberWithLocation
+} from '@msdining/common/dist/models/http';
 
-export interface ICafe {
-    name: string;
-    id: string;
-    logoUrl: string;
-    number?: number;
-    url?: string;
-    group?: ICafeGroup;
-}
-
-export interface ICafeGroup {
-    id: string;
-    name: string;
-    number?: number;
-    alwaysExpand: boolean;
-    members: ICafe[];
-}
-
-export interface ICoreResponse {
-    isTrackingEnabled: boolean;
-    groups: Array<ICafeGroup>;
-}
+export type ICafe = IDiningCoreGroupMember | IDiningCoreGroupMemberWithLocation;
+export type ICafeGroup = IDiningCoreGroup;
 
 export enum CafeViewType {
     single,

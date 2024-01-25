@@ -1,3 +1,4 @@
+import { IDiningCoreResponse } from '@msdining/common/dist/models/http';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { DiningClient } from './api/dining.ts';
@@ -6,7 +7,7 @@ import { ApplicationContext } from './context/app.ts';
 import { NavExpansionContext } from './context/nav.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { useViewDataFromResponse } from './hooks/views';
-import { CafeView, ICafe, ICoreResponse } from './models/cafe.ts';
+import { CafeView, ICafe } from './models/cafe.ts';
 import { Root } from './root.tsx';
 import { ICancellationToken } from './util/async';
 
@@ -33,7 +34,7 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 const App = () => {
-    const { groups, isTrackingEnabled } = useLoaderData() as ICoreResponse;
+    const { groups, isTrackingEnabled } = useLoaderData() as IDiningCoreResponse;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);

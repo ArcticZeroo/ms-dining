@@ -1,28 +1,6 @@
 import { IMenuItem } from './cafe.js';
 import { Nullable } from './util.js';
 
-export interface IDiningCoreGroupMember {
-    name: string;
-    id: string;
-    number?: number;
-    url?: string;
-    logoUrl?: string
-}
-
-export interface IDiningCoreGroup {
-    name: string;
-    id: string;
-    number?: number;
-    alwaysExpand: boolean;
-    members: IDiningCoreGroupMember[];
-}
-
-// GET /api/dining/
-export interface IDiningCoreResponse {
-    isTrackingEnabled: boolean;
-    groups: IDiningCoreGroup[];
-}
-
 export interface IMenuResponseStation {
     name: string;
     // Not all stations have a logo URL apparently?
