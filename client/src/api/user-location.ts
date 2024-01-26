@@ -1,9 +1,5 @@
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { ValueNotifier } from '../util/events.ts';
-
-export interface ILocationCoordinates {
-    latitude: number;
-    longitude: number;
-}
 
 class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     private _watchId?: number;
@@ -48,8 +44,8 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
         }
 
         this.value = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            lat: position.coords.latitude,
+            long: position.coords.longitude
         };
     }
 
