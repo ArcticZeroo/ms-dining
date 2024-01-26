@@ -1,3 +1,3 @@
-export const PERMISSION_NAMES: Record<string, PermissionName> = {
+export const PERMISSION_NAMES = {
     userLocation: 'geolocation',
-}
+} as const;

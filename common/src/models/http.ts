@@ -1,6 +1,6 @@
 import { ILocationCoordinates } from './util.js';
 
-export interface IDiningCoreGroupMember {
+export interface IDiningCoreGroupMemberBase {
     name: string;
     id: string;
     number?: number;
@@ -8,9 +8,15 @@ export interface IDiningCoreGroupMember {
     logoUrl?: string
 }
 
-export interface IDiningCoreGroupMemberWithLocation extends IDiningCoreGroupMember {
+interface IDiningCoreGroupMemberWithoutLocation extends IDiningCoreGroupMemberBase {
+    location?: undefined;
+}
+
+interface IDiningCoreGroupMemberWithLocation extends IDiningCoreGroupMemberBase {
     location: ILocationCoordinates;
 }
+
+export type IDiningCoreGroupMember = IDiningCoreGroupMemberWithoutLocation | IDiningCoreGroupMemberWithLocation;
 
 interface IDiningCoreGroupBase {
     name: string;
@@ -20,12 +26,13 @@ interface IDiningCoreGroupBase {
 }
 
 interface IDiningCoreGroupWithLocationOnMembers extends IDiningCoreGroupBase {
+    location?: undefined;
     members: IDiningCoreGroupMemberWithLocation[];
 }
 
 interface IDiningCoreGroupWithLocationOnGroup extends IDiningCoreGroupBase {
     location: ILocationCoordinates;
-    members: IDiningCoreGroupMember[];
+    members: IDiningCoreGroupMemberWithoutLocation[];
 }
 
 export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCoreGroupWithLocationOnGroup;

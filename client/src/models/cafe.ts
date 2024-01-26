@@ -1,12 +1,10 @@
 import { CafeTypes } from '@msdining/common';
 import {
-    IDiningCoreGroup,
-    IDiningCoreGroupMember,
-    IDiningCoreGroupMemberWithLocation
+    IDiningCoreGroup, IDiningCoreGroupMember,
 } from '@msdining/common/dist/models/http';
 
-export type ICafe = IDiningCoreGroupMember | IDiningCoreGroupMemberWithLocation;
 export type ICafeGroup = IDiningCoreGroup;
+export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };
 
 export enum CafeViewType {
     single,

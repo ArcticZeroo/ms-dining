@@ -3,7 +3,9 @@ import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 const EARTH_RADIUS_KM = 6371.137;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
-export const getDistanceBetweenCoordinatesInKm = (start: ILocationCoordinates, end: ILocationCoordinates): number => {
+export const convertKmToMiles = (km: number): number => km * 0.621371;
+
+export const getDistanceBetweenCoordinates = (start: ILocationCoordinates, end: ILocationCoordinates, inMiles: boolean = false): number => {
     const deltaLongitude = (end.long - start.long) * DEGREES_TO_RADIANS;
     const deltaLatitude = (end.lat - start.lat) * DEGREES_TO_RADIANS;
 
@@ -19,7 +21,6 @@ export const getDistanceBetweenCoordinatesInKm = (start: ILocationCoordinates, e
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return EARTH_RADIUS_KM * c;
+    const distanceInKm = EARTH_RADIUS_KM * c;
+    return inMiles ? convertKmToMiles(distanceInKm) : distanceInKm;
 };
-
-export const convertKmToMiles = (km: number): number => km * 0.621371;

@@ -15,6 +15,7 @@ import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
 import { OrderPage } from './components/pages/order/order-page.tsx';
 
 import './index.css';
+import { LocationTestPage } from './components/pages/location-test/location-test-page.tsx';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -26,6 +27,7 @@ const router = createBrowserRouter(
             <Route path="/info" element={<InfoPage/>}/>
             <Route path="/order" element={<OrderPage/>}/>
             <Route path="/analytics" element={<AnalyticsPage/>}/>
+            <Route path="/location-test" element={<LocationTestPage/>}/>
             <Route index={true} element={<HomePage/>}/>
             <Route path="*" element={<NotFoundPage/>}/>
         </Route>

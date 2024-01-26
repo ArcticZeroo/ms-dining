@@ -1,5 +1,6 @@
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { ValueNotifier } from '../util/events.ts';
+import { ApplicationSettings } from './settings.ts';
 
 class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     private _watchId?: number;
@@ -7,10 +8,18 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
 
     public constructor() {
         super(null);
+
+        ApplicationSettings.allowLocation.addListener(isAllowed => {
+            if (isAllowed) {
+                this._trySetupListeners();
+            } else {
+                this._stopWatching();
+                this.value = null;
+            }
+        });
     }
 
-
-    private set value(value: ILocationCoordinates) {
+    private set value(value: ILocationCoordinates | null) {
         super.value = value;
     }
 
@@ -49,8 +58,14 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
         };
     }
 
-    private _ensureWatching() {
-        if (this._watchId) {
+    private _trySetupListeners() {
+        if (this._listeners.length === 0 || !ApplicationSettings.allowLocation.value) {
+            return;
+        }
+
+        this._setupInitialPosition();
+
+        if (this._watchId != null) {
             return;
         }
 
@@ -68,8 +83,7 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
 
     addListener(listener: (value: ILocationCoordinates | null, oldValue: ILocationCoordinates | null) => void) {
         super.addListener(listener);
-        this._setupInitialPosition();
-        this._ensureWatching();
+        this._trySetupListeners();
     }
 
     removeListener(listener: (value: ILocationCoordinates | null, oldValue: ILocationCoordinates | null) => void) {
