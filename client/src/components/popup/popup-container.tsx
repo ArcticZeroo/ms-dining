@@ -42,8 +42,8 @@ export const PopupContainer = () => {
     return (
         <div id="top-overlay"
             // On mobile things jump around when the popup is shown, so we don't fade it in
-             className={classNames(deviceType === DeviceType.Desktop && 'fade-in')}
-             onClick={onOverlayClicked}
+            className={classNames(deviceType === DeviceType.Desktop && 'fade-in')}
+            onClick={onOverlayClicked}
         >
             {
                 deviceType === DeviceType.Mobile && (

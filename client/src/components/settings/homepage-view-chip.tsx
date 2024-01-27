@@ -9,11 +9,11 @@ interface IHomepageViewChipProps {
 }
 
 export const HomepageViewChip: React.FC<IHomepageViewChipProps> = ({
-                                                                       viewName,
-                                                                       viewId,
-                                                                       homepageViewIds,
-                                                                       onToggleClicked
-                                                                   }) => {
+    viewName,
+    viewId,
+    homepageViewIds,
+    onToggleClicked
+}) => {
     const htmlId = `setting-homepage-option-${viewId}`;
     const isChecked = homepageViewIds.has(viewId);
 
@@ -21,9 +21,9 @@ export const HomepageViewChip: React.FC<IHomepageViewChipProps> = ({
         <label htmlFor={htmlId} className="setting-chip" key={viewId}>
             {viewName}
             <input type="checkbox"
-                   id={htmlId}
-                   checked={isChecked}
-                   onChange={onToggleClicked}/>
+                id={htmlId}
+                checked={isChecked}
+                onChange={onToggleClicked}/>
         </label>
     );
 };
