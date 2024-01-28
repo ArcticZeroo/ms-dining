@@ -1,5 +1,6 @@
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { ApplicationSettings } from '../../api/settings.ts';
+import { LocationPermissionStatus } from './location-permission-status.tsx';
 
 export const LocationSetting = () => (
     <BooleanSettingInput
@@ -8,9 +9,13 @@ export const LocationSetting = () => (
         name="Allow Location"
         description={
             <>
-                When enabled, your location will be retrieved for more intelligent features.
-                <br/>
-                Your location data will never be sent to the server.
+                <p>
+                    When enabled, your location will be retrieved for more intelligent features, such as ranking
+                    search results based on how close they are to you.
+                    <br/>
+                    Your location data will never be sent to the server.
+                </p>
+                <LocationPermissionStatus/>
             </>
         }
     />
