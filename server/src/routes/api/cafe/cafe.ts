@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';
-import { IDiningCoreGroup, IDiningCoreResponse } from '@msdining/common/dist/models/http.js';
+import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/dist/models/http.js';
 import { getLogoUrl } from '../../../util/cafe.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
@@ -52,15 +52,17 @@ export const registerCafeRoutes = (parent: Router) => {
                     continue;
                 }
 
-                responseGroup.members.push({
+                const member: IDiningCoreGroupMember = {
                     name:     cafe.name,
                     id:       cafe.id,
                     number:   cafe.number,
                     url:      cafe.url,
                     logoUrl:  getLogoUrl(cafe, cafeData),
-                    // @ts-expect-error: We know that either the group or its members must have a location based on the typings, but TS doesn't
                     location: cafe.location
-                });
+                };
+
+                // @ts-expect-error: TS doesn't know that we have already enforced the location requirement
+                responseGroup.members.push(member);
             }
 
             response.groups.push(responseGroup);
