@@ -22,6 +22,8 @@ export const memoizeResponseBodyByQueryParams = (cacheExpirationTime: Duration =
         return queryParamsKeys.map(key => `${key}=${queryParams[key]}`).join('&');
     }
 
+    const getCacheKey = (ctx: Koa.Context) => `${ctx.path}?${serializeQueryParams(ctx)}`;
+
     setInterval(() => {
         const now = Date.now();
         for (const [key, cacheEntry] of cacheByQueryParams.entries()) {
@@ -32,8 +34,8 @@ export const memoizeResponseBodyByQueryParams = (cacheExpirationTime: Duration =
     }, cacheExpirationTime.inMilliseconds * 2);
 
     return async (ctx, next) => {
-        const queryParams = serializeQueryParams(ctx);
-        const cacheEntry = cacheByQueryParams.get(queryParams);
+        const cacheKey = getCacheKey(ctx);
+        const cacheEntry = cacheByQueryParams.get(cacheKey);
 
         const now = Date.now();
 
@@ -45,7 +47,7 @@ export const memoizeResponseBodyByQueryParams = (cacheExpirationTime: Duration =
         await next();
 
         if (ctx.body && ctx.status === 200) {
-            cacheByQueryParams.set(queryParams, {
+            cacheByQueryParams.set(cacheKey, {
                 expirationTime: now + cacheExpirationTime.inMilliseconds,
                 value: ctx.body
             });
