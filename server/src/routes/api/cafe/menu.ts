@@ -8,6 +8,7 @@ import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
+import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 export const registerMenuRoutes = (parent: Router) => {
     const router = new Router();
 
@@ -48,7 +49,10 @@ export const registerMenuRoutes = (parent: Router) => {
         return menusByStation;
     }
 
-    router.get('/menu/:id', requireMenusNotUpdating, async ctx => {
+    router.get('/menu/:id',
+        requireMenusNotUpdating,
+        memoizeResponseBodyByQueryParams(),
+        async ctx => {
         const id = ctx.params.id?.toLowerCase();
         if (!id) {
             ctx.throw(400, 'Missing cafe id');

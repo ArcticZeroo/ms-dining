@@ -8,6 +8,7 @@ import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { attachRouter, getTrimmedQueryParam } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { NumberUtil } from '@msdining/common';
+import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -45,62 +46,70 @@ export const registerSearchRoutes = (parent: Router) => {
         return jsonStringifyWithoutNull(searchResults);
     }
 
-    router.post('/favorites', requireMenusNotUpdating, async ctx => {
-        const queries = ctx.request.body;
+    router.post('/favorites',
+        requireMenusNotUpdating,
+        async ctx => {
+            const queries = ctx.request.body;
 
-        if (!isDuckTypeArray<ISearchQuery>(queries, { text: 'string', type: 'string' })) {
-            ctx.throw(400, 'Invalid request body');
-            return;
-        }
+            if (!isDuckTypeArray<ISearchQuery>(queries, { text: 'string', type: 'string' })) {
+                ctx.throw(400, 'Invalid request body');
+                return;
+            }
 
-        const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries);
-        ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
-    });
+            const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries);
+            ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+        });
 
-    router.get('/', requireMenusNotUpdating, async ctx => {
-        const searchQuery = getTrimmedQueryParam(ctx, 'q');
+    router.get('/',
+        requireMenusNotUpdating,
+        memoizeResponseBodyByQueryParams(),
+        async ctx => {
+            const searchQuery = getTrimmedQueryParam(ctx, 'q');
 
-        if (!searchQuery) {
-            ctx.body = [];
-            return;
-        }
+            if (!searchQuery) {
+                ctx.body = [];
+                return;
+            }
 
-        const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery);
-        ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
-    });
+            const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery);
+            ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+        });
 
-    router.get('/cheap', requireMenusNotUpdating, async ctx => {
-        const maxPriceRaw = ctx.query.max;
-        const minPriceRaw = ctx.query.min;
+    router.get('/cheap',
+        requireMenusNotUpdating,
+        memoizeResponseBodyByQueryParams(),
+        async ctx => {
+            const maxPriceRaw = ctx.query.max;
+            const minPriceRaw = ctx.query.min;
 
-        const maxPrice = typeof maxPriceRaw === 'string'
-                         ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
-                         : DEFAULT_MAX_PRICE;
+            const maxPrice = typeof maxPriceRaw === 'string'
+                ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
+                : DEFAULT_MAX_PRICE;
 
-        const minPrice = typeof minPriceRaw === 'string'
-                         ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
-                         : DEFAULT_MIN_PRICE;
+            const minPrice = typeof minPriceRaw === 'string'
+                ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
+                : DEFAULT_MIN_PRICE;
 
-        const cheapItems = await SearchManager.searchForCheapItems(
-            minPrice,
-            maxPrice
-        );
+            const cheapItems = await SearchManager.searchForCheapItems(
+                minPrice,
+                maxPrice
+            );
 
-        const searchResults = [];
-        for (const searchResult of cheapItems) {
-            searchResults.push({
-                name:        searchResult.name,
-                description: searchResult.description,
-                imageUrl:    searchResult.imageUrl,
-                locations:   serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
-                price:       searchResult.price,
-                minCalories: searchResult.minCalories,
-                maxCalories: searchResult.maxCalories,
-            });
-        }
+            const searchResults = [];
+            for (const searchResult of cheapItems) {
+                searchResults.push({
+                    name:        searchResult.name,
+                    description: searchResult.description,
+                    imageUrl:    searchResult.imageUrl,
+                    locations:   serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+                    price:       searchResult.price,
+                    minCalories: searchResult.minCalories,
+                    maxCalories: searchResult.maxCalories,
+                });
+            }
 
-        ctx.body = jsonStringifyWithoutNull(searchResults);
-    });
+            ctx.body = jsonStringifyWithoutNull(searchResults);
+        });
 
     attachRouter(parent, router);
 };
