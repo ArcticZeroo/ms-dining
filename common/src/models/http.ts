@@ -6,6 +6,7 @@ export interface IDiningCoreGroupMemberBase {
     number?: number;
     url?: string;
     logoUrl?: string
+    group?: IDiningCoreGroup;
 }
 
 interface IDiningCoreGroupMemberWithoutLocation extends IDiningCoreGroupMemberBase {
