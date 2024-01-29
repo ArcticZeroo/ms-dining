@@ -50,6 +50,18 @@ export const MenuSettings = () => (
             <HighlightTagsSetting/>
             <PriceFiltersSetting/>
             <BooleanSettingInput
+                icon="lightbulb"
+                setting={ApplicationSettings.intelligentStationSort}
+                name="Intelligent Station Sorting"
+                description="When enabled, stations will be sorted intelligently, based on factors like uniqueness."
+            />
+            <BooleanSettingInput
+                icon="list"
+                setting={ApplicationSettings.hideEveryDayStations}
+                name="Hide Every-Day Stations"
+                description="When enabled, stations which appear on the menu at this cafe every day of the week will be hidden."
+            />
+            <BooleanSettingInput
                 icon="expand_content"
                 setting={ApplicationSettings.collapseCafesByDefault}
                 name="Collapse Cafes by Default"

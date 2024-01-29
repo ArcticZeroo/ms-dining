@@ -2,6 +2,7 @@ import { CafeTypes } from '@msdining/common';
 import {
     IDiningCoreGroup, IDiningCoreGroupMember,
 } from '@msdining/common/dist/models/http';
+import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
 
 export type ICafeGroup = IDiningCoreGroup;
 export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };
@@ -46,6 +47,7 @@ export interface ICafeStation {
     name: string;
     logoUrl: string;
     menu: IMenuItemsByCategoryName;
+    uniqueness: IStationUniquenessData;
 }
 
 export type CafeMenu = ICafeStation[];

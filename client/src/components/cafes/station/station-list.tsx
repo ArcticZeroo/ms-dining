@@ -15,27 +15,57 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
+    const shouldHideEveryDayStations = useValueNotifier(ApplicationSettings.hideEveryDayStations);
+    const shouldDoIntelligentOrdering = useValueNotifier(ApplicationSettings.intelligentStationSort);
 
     const filteredStationData: Array<[ICafeStation, IMenuItemsByCategoryName]> = useMemo(
         () => {
             const filteredStations: Array<[ICafeStation, IMenuItemsByCategoryName]> = [];
 
             for (const station of stations) {
-                if (!enablePriceFilters) {
-                    filteredStations.push([station, station.menu]);
+                if (shouldHideEveryDayStations && station.uniqueness?.daysThisWeek === 5) {
                     continue;
                 }
 
-                const filteredMenu = getFilteredMenu(station, minPrice, maxPrice);
+                let menu: IMenuItemsByCategoryName | null = station.menu;
 
-                if (filteredMenu != null) {
-                    filteredStations.push([station, filteredMenu]);
+                if (enablePriceFilters) {
+                    menu = getFilteredMenu(station, minPrice, maxPrice)
+                    continue;
                 }
+
+                if (menu != null) {
+                    filteredStations.push([station, menu]);
+                }
+            }
+
+            if (shouldDoIntelligentOrdering) {
+                filteredStations.sort(([stationA], [stationB]) => {
+                    const uniquenessA = stationA.uniqueness;
+                    const uniquenessB = stationB.uniqueness;
+
+                    if (uniquenessA.daysThisWeek !== uniquenessB.daysThisWeek) {
+                        // Stations which are rarer should be first.
+                        return uniquenessA.daysThisWeek - uniquenessB.daysThisWeek;
+                    }
+
+                    // Stations with more unique items should be first.
+                    for (let i = 1; i <= 5; i++) {
+                        const uniqueItemsA = uniquenessA.itemDays[i] || 0;
+                        const uniqueItemsB = uniquenessB.itemDays[i] || 0;
+
+                        if (uniqueItemsA !== uniqueItemsB) {
+                            return uniqueItemsB - uniqueItemsA;
+                        }
+                    }
+                    
+                    return stationA.name.localeCompare(stationB.name);
+                });
             }
 
             return filteredStations;
         },
-        [stations, enablePriceFilters, minPrice, maxPrice]
+        [shouldDoIntelligentOrdering, stations, shouldHideEveryDayStations, enablePriceFilters, minPrice, maxPrice]
     );
 
     const emptyMessage = useMemo(() => {

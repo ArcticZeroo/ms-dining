@@ -199,6 +199,8 @@ export const ApplicationSettings = {
     enablePriceFilters:                        new BooleanSetting('enablePriceFilters', false /*defaultValue*/),
     suppressMultiCafeOrderWarning:             new BooleanSetting('suppressMultiCafeOrderWarning', false /*defaultValue*/),
     allowLocation:                             new BooleanSetting('allowLocation', true /*defaultValue*/),
+    hideEveryDayStations:                      new BooleanSetting('hideEveryDayStations', false /*defaultValue*/),
+    intelligentStationSort:                    new BooleanSetting('intelligentStationSort', true /*defaultValue*/),
     lastUsedCafeIds:                           new StringArraySetting('lastUsedDiningHalls'),
     homepageViews:                             new StringSetSetting('homepageDiningHalls'),
     highlightTagNames:                         new StringSetSetting('highlightTagNames'),
