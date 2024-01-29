@@ -1,10 +1,14 @@
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { ValueNotifier } from '../util/events.ts';
 import { ApplicationSettings } from './settings.ts';
+import Duration from '@arcticzeroo/duration';
+
+const RETRIEVE_LOCATION_INTERVAL = new Duration({ minutes: 1 });
 
 class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     private _watchId?: number;
-    private _isFetchingInitialPosition: boolean = false;
+    private _interval?: ReturnType<typeof setInterval>;
+    private _isFetchingCurrentLocation: boolean = false;
 
     public constructor() {
         super(null);
@@ -27,22 +31,22 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
         return super.value;
     }
 
-    private _setupInitialPosition() {
-        if (this.value != null || this._isFetchingInitialPosition) {
+    private _retrieveCurrentLocation() {
+        if (this._isFetchingCurrentLocation) {
             return;
         }
 
-        this._isFetchingInitialPosition = true;
+        this._isFetchingCurrentLocation = true;
 
         navigator.geolocation.getCurrentPosition(
             position => {
                 this._updatePosition(position);
-                this._isFetchingInitialPosition = false;
+                this._isFetchingCurrentLocation = false;
             },
             (error) => {
                 // TODO: Maybe retry?
                 console.error('Could not get initial position:', error);
-                this._isFetchingInitialPosition = false;
+                this._isFetchingCurrentLocation = false;
             }
         );
     }
@@ -63,7 +67,7 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
             return;
         }
 
-        this._setupInitialPosition();
+        this._retrieveCurrentLocation();
 
         if (this._watchId != null) {
             return;
@@ -73,11 +77,20 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
             position => this._updatePosition(position),
             (error) => console.error('Could not watch position:', error)
         );
+
+        this._interval = setInterval(
+            () => this._retrieveCurrentLocation(),
+            RETRIEVE_LOCATION_INTERVAL.inMilliseconds
+        );
     }
 
     private _stopWatching() {
-        if (this._watchId) {
+        if (this._watchId != null) {
             navigator.geolocation.clearWatch(this._watchId);
+        }
+
+        if (this._interval != null) {
+            clearInterval(this._interval);
         }
     }
 
