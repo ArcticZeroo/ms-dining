@@ -193,6 +193,7 @@ export const ApplicationSettings = {
     showTags:                                  new BooleanSetting('showTags', true /*defaultValue*/),
     showFavoritesOnHome:                       new BooleanSetting('showFavoritesOnHome', true /*defaultValue*/),
     collapseCafesByDefault:                    new BooleanSetting('collapseCafesByDefault', false /*defaultValue*/),
+    collapseStationsByDefault:                 new BooleanSetting('collapseStationsByDefault', false /*defaultValue*/),
     allowFutureMenus:                          new BooleanSetting('allowFutureMenus', false /*defaultValue*/),
     allowOnlineOrdering:                       new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),
     suppressExperimentalOnlineOrderingWarning: new BooleanSetting('SUPPRESS_EXPERIMENTAL_ONLINE_ORDERING_WARNING_DO_NOT_USE', false /*defaultValue*/),

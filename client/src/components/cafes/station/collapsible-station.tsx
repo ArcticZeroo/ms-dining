@@ -1,6 +1,6 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import React, { useContext, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CurrentCafeContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
@@ -11,6 +11,7 @@ import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
+import { ApplicationSettings } from '../../../api/settings.ts';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -21,7 +22,8 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     }
 
     return {
-        width: `${widthPx}px`
+        width:    `${widthPx}px`,
+        flexGrow: '1'
     };
 };
 
@@ -41,9 +43,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
 
     const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
 
-    const onTitleClick = () => {
-        const isNowExpanded = !isExpanded;
-
+    const handleExpansionUpdate = (isNowExpanded: boolean) => {
         const menuBodyElement = menuBodyRef.current;
 
         if (menuBodyElement && !isNowExpanded) {
@@ -54,7 +54,17 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         }
 
         setIsExpanded(isNowExpanded);
+    }
+
+    const onTitleClick = () => {
+        handleExpansionUpdate(!isExpanded);
     };
+
+    useEffect(() => {
+        if (ApplicationSettings.collapseStationsByDefault.value) {
+            handleExpansionUpdate(false);
+        }
+    }, []);
 
     const normalizedName = useMemo(
         () => normalizeNameForSearch(station.name),
@@ -67,7 +77,8 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     );
 
     return (
-        <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')} style={stationStyle}>
+        <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
+            style={stationStyle}>
             <ScrollAnchor id={scrollAnchorId}/>
             <div className="station-header flex-row">
                 <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>

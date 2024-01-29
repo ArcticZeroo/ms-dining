@@ -68,6 +68,12 @@ export const MenuSettings = () => (
                 description="When enabled, cafes will be collapsed by default in the menu."
             />
             <BooleanSettingInput
+                icon="expand_content"
+                setting={ApplicationSettings.collapseStationsByDefault}
+                name="Collapse Stations by Default"
+                description="When enabled, stations within cafes will be collapsed by default in the menu."
+            />
+            <BooleanSettingInput
                 icon="schedule"
                 setting={ApplicationSettings.allowFutureMenus}
                 name="(Experimental) Allow Future Menus"
