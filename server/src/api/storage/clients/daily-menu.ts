@@ -257,6 +257,9 @@ export abstract class DailyMenuStorageClient {
 
         for (const dailyMenu of dailyMenus) {
             for (const station of dailyMenu) {
+                // In some cases (e.g. half vs whole sandwich) there are multiple items with the same name at one station
+                const seenItemNames = new Set<string>();
+
                 const stationName = station.name;
 
                 const currentStationCount = stationCountByName.get(stationName) ?? 0;
@@ -269,6 +272,12 @@ export abstract class DailyMenuStorageClient {
                 const itemCountsForStation = itemCountsByStationName.get(stationName)!;
                 for (const menuItem of station.menuItemsById.values()) {
                     const itemNameNormalized = normalizeNameForSearch(menuItem.name);
+
+                    if (seenItemNames.has(itemNameNormalized)) {
+                        continue;
+                    }
+
+                    seenItemNames.add(itemNameNormalized);
 
                     const currentItemCount = itemCountsForStation.get(itemNameNormalized) ?? 0;
                     itemCountsForStation.set(itemNameNormalized, currentItemCount + 1);
@@ -306,7 +315,7 @@ export abstract class DailyMenuStorageClient {
 
                     if (itemCount <= 0 || itemCount > 5) {
                         // Something weird happened.
-                        logError(`Item ${menuItem.name} has erroneous data for date ${currentDateString}`);
+                        logError(`Item ${menuItem.name} has erroneous data for date ${currentDateString}: ${itemCount}`);
                         continue;
                     }
 
@@ -330,6 +339,7 @@ export abstract class DailyMenuStorageClient {
             return null;
         }
 
+        // Lock the whole date-string map for each cafe since we update multiple date strings at once.
         const cafeUniquenessData = await this._uniquenessData.update(cafeId, async (cafeUniquenessData = new Map()) => {
             if (!cafeUniquenessData.has(targetDateString)) {
                 const calculatedUniquenessData = await this._calculateUniquenessDataForCafe(cafeId, targetDateString);
