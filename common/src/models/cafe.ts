@@ -21,4 +21,11 @@ export interface IMenuItemModifier {
 	choices: IMenuItemModifierChoice[];
 }
 
+export interface IStationUniquenessData {
+	daysThisWeek: number;
+	// keys are the number of days, values are the number of items that were in the station for that many days.
+	// e.g. 2: 5 means that five items were in the station for two different days.
+	itemDays: Record<number, number>;
+}
+
 export * from './cart.js';

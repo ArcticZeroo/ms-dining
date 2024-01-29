@@ -129,3 +129,27 @@ export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false)
 export const getDateStringsForWeek = (): string[] => {
     return Array.from(yieldDaysInFutureForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
 }
+
+export const getMondayForWeek = (date: Date): Date => {
+    const result = new Date(date.getTime());
+    result.setDate((result.getDate() - result.getDay()) + nativeDayOfWeek.Monday);
+    return getDateWithoutTime(result);
+}
+
+export const getFridayForWeek = (date: Date): Date => {
+    const result = new Date(date.getTime());
+
+    const offset = result.getDay() === nativeDayOfWeek.Saturday ? 7 : 0;
+    result.setDate(result.getDate() + (nativeDayOfWeek.Friday - result.getDay()) + offset);
+
+    return getDateWithoutTime(result);
+}
+
+export function* yieldDaysInRange(start: Date, end: Date) {
+    const currentDate = new Date(start.getTime());
+
+    while (!isDateAfter(currentDate, end)) {
+        yield new Date(currentDate.getTime());
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+}

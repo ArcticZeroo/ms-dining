@@ -5,6 +5,14 @@ import { logError } from '../../../util/log.js';
 import { LockedMap } from '../../../util/map.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
+import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import {
+    fromDateString,
+    getFridayForWeek,
+    getMondayForWeek,
+    yieldDaysInRange
+} from '@msdining/common/dist/util/date-util.js';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 const {
     getMaximumDateForMenuRequest,
@@ -24,11 +32,13 @@ interface ICreateDailyStationMenuParams {
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
 export abstract class DailyMenuStorageClient {
-    private static readonly _cafeMenusByDateString = new Map<string, LockedMap<string, Array<ICafeStation>>>();
+    private static readonly _cafeMenusByDateString = new Map<string /*dateString*/, LockedMap<string /*cafeId*/, Array<ICafeStation>>>();
+    private static readonly _uniquenessData = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>>();
 
     public static resetCache() {
         // todo: maybe only reset the cache for today? what about when we reset fully on weekends?
         this._cafeMenusByDateString.clear();
+        this._uniquenessData.clear();
     }
 
     public static async deleteDailyMenusAsync(dateString: string, cafeId: string) {
@@ -231,5 +241,114 @@ export abstract class DailyMenuStorageClient {
                 }
             }
         }));
+    }
+
+    private static async _calculateUniquenessDataForCafe(cafeId: string, targetDateString: string) {
+        const targetDate = fromDateString(targetDateString);
+
+        const mondayDate = getMondayForWeek(targetDate);
+        const fridayDate = getFridayForWeek(targetDate);
+
+        const stationCountByName = new Map<string /*stationName*/, number>();
+        const itemCountsByStationName = new Map<string /*stationName*/, Map<string /*itemNameNormalized*/, number>>();
+
+        const dates = Array.from(yieldDaysInRange(mondayDate, fridayDate));
+        const dailyMenus = await Promise.all(dates.map(date => DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, toDateString(date))));
+
+        for (const dailyMenu of dailyMenus) {
+            for (const station of dailyMenu) {
+                const stationName = station.name;
+
+                const currentStationCount = stationCountByName.get(stationName) ?? 0;
+                stationCountByName.set(stationName, currentStationCount + 1);
+
+                if (!itemCountsByStationName.has(stationName)) {
+                    itemCountsByStationName.set(stationName, new Map());
+                }
+
+                const itemCountsForStation = itemCountsByStationName.get(stationName)!;
+                for (const menuItem of station.menuItemsById.values()) {
+                    const itemNameNormalized = normalizeNameForSearch(menuItem.name);
+
+                    const currentItemCount = itemCountsForStation.get(itemNameNormalized) ?? 0;
+                    itemCountsForStation.set(itemNameNormalized, currentItemCount + 1);
+                }
+            }
+        }
+
+        const uniquenessData = new Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>();
+
+        for (let i = 0; i < dates.length; i++) {
+            const currentDate = dates[i]!;
+            const dailyMenu = dailyMenus[i]!;
+
+            const currentDateString = toDateString(currentDate);
+
+            const currentUniquenessData = new Map<string /*stationName*/, IStationUniquenessData>();
+            uniquenessData.set(currentDateString, currentUniquenessData);
+
+            for (const station of dailyMenu) {
+                const stationCount = stationCountByName.get(station.name) ?? 0;
+                const itemCountsForStation = itemCountsByStationName.get(station.name);
+
+                if (stationCount <= 0 || stationCount > 5 || itemCountsForStation == null) {
+                    // Something weird happened.
+                    logError(`Station ${station.name} has erroneous data for date ${currentDateString}`);
+                    continue;
+                }
+
+                const itemCounts: Record<number, number> = {};
+
+                for (const menuItem of station.menuItemsById.values()) {
+                    const itemNameNormalized = normalizeNameForSearch(menuItem.name);
+
+                    const itemCount = itemCountsForStation.get(itemNameNormalized) ?? 0;
+
+                    if (itemCount <= 0 || itemCount > 5) {
+                        // Something weird happened.
+                        logError(`Item ${menuItem.name} has erroneous data for date ${currentDateString}`);
+                        continue;
+                    }
+
+                    itemCounts[itemCount] = (itemCounts[itemCount] ?? 0) + 1;
+                }
+
+                currentUniquenessData.set(station.name, {
+                    daysThisWeek: stationCount,
+                    itemDays:     itemCounts
+                });
+            }
+        }
+
+        return uniquenessData;
+    }
+
+    public static async retrieveUniquenessDataForCafe(cafeId: string, targetDateString: string) {
+        const targetDate = fromDateString(targetDateString);
+
+        if (isDateOnWeekend(targetDate)) {
+            return null;
+        }
+
+        const cafeUniquenessData = await this._uniquenessData.update(cafeId, async (cafeUniquenessData = new Map()) => {
+            if (!cafeUniquenessData.has(targetDateString)) {
+                const calculatedUniquenessData = await this._calculateUniquenessDataForCafe(cafeId, targetDateString);
+                for (const [dateString, data] of calculatedUniquenessData.entries()) {
+                    cafeUniquenessData.set(dateString, data);
+                }
+            }
+
+            return cafeUniquenessData;
+        });
+
+        // Map<stationName, IStationUniquenessData>
+        const uniquenessDataForDate = cafeUniquenessData.get(targetDateString);
+        if (uniquenessDataForDate == null) {
+            // Probably shouldn't ever happen. Could happen if we don't have menus for the given date.
+            logError(`Unable to find uniqueness data for date ${targetDateString} in cafe id ${cafeId}`);
+            return null;
+        }
+
+        return uniquenessDataForDate;
     }
 }
