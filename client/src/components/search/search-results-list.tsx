@@ -72,8 +72,6 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                 );
             });
 
-            console.log('search result elements:', searchResultElements);
-
             return [priceFilterHiddenResultCount, searchResultElements];
         },
         [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed]
