@@ -16,7 +16,18 @@ export const registerMenuRoutes = (parent: Router) => {
 
     const convertMenuToSerializable = (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): MenuResponse => {
         const menusByStation: MenuResponse = [];
+
         for (const station of menuStations) {
+            if (uniquenessData == null) {
+                throw new Error('Expected uniqueness data to be non-null when menu stations are present');
+            }
+
+            if (!uniquenessData.has(station.name)) {
+                throw new Error(`Expected uniqueness data to have entry for station ${station.name}`);
+            }
+
+            const uniquenessDataForStation = uniquenessData.get(station.name)!;
+
             const itemsByCategory: Record<string, Array<IMenuItem>> = {};
 
             for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
@@ -46,9 +57,10 @@ export const registerMenuRoutes = (parent: Router) => {
                 name:       station.name,
                 logoUrl:    getBetterLogoUrl(station.name, station.logoUrl),
                 menu:       itemsByCategory,
-                uniqueness: uniquenessData?.get(station.name) ?? null
+                uniqueness: uniquenessDataForStation
             });
         }
+
         return menusByStation;
     }
 
@@ -74,10 +86,12 @@ export const registerMenuRoutes = (parent: Router) => {
                 return;
             }
 
-            const [menuStations, uniquenessData] = await Promise.all([
-                DailyMenuStorageClient.retrieveDailyMenuAsync(id, dateString),
-                DailyMenuStorageClient.retrieveUniquenessDataForCafe(id, dateString)
-            ]);
+            const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(id, dateString);
+
+            let uniquenessData: Map<string, IStationUniquenessData> | null = null;
+            if (menuStations.length > 0) {
+                uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(id, dateString);
+            }
 
             ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
         });

@@ -336,7 +336,7 @@ export abstract class DailyMenuStorageClient {
         const targetDate = fromDateString(targetDateString);
 
         if (isDateOnWeekend(targetDate)) {
-            return null;
+            throw new Error('Cannot retrieve uniqueness data for a weekend date');
         }
 
         // Lock the whole date-string map for each cafe since we update multiple date strings at once.
@@ -355,8 +355,7 @@ export abstract class DailyMenuStorageClient {
         const uniquenessDataForDate = cafeUniquenessData.get(targetDateString);
         if (uniquenessDataForDate == null) {
             // Probably shouldn't ever happen. Could happen if we don't have menus for the given date.
-            logError(`Unable to find uniqueness data for date ${targetDateString} in cafe id ${cafeId}`);
-            return null;
+            throw new Error(`Unable to find uniqueness data for date ${targetDateString} in cafe id ${cafeId}`);
         }
 
         return uniquenessDataForDate;

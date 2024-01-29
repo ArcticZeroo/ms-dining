@@ -7,7 +7,7 @@ export interface IMenuResponseStation {
     // Not all stations have a logo URL apparently?
     logoUrl?: Nullable<string>;
     menu: Record<string /*categoryName*/, Array<IMenuItem>>;
-    uniqueness: IStationUniquenessData | null;
+    uniqueness: IStationUniquenessData;
 }
 
 // GET /api/dining/menu/:cafeId
