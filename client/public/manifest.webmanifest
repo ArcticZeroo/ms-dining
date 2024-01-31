@@ -10,10 +10,10 @@
   ],
   "id": "/",
   "start_url": "/",
-  "background_color": "#2196F3",
+  "background_color": "#3488e0ff",
   "display": "minimal-ui",
   "scope": "/",
-  "theme_color": "#2196F3",
+  "theme_color": "#3488e0ff",
   "shortcuts": [
     {
       "name": "Your homepage",

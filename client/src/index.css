@@ -1,3 +1,7 @@
+:root {
+    --theme-color: #3488e0ff;
+}
+
 body, html {
     padding: 0;
     margin: 0;
@@ -49,6 +53,11 @@ image {
 .card.yellow {
     background: #d3973c;
     color: #212121;
+}
+
+.card.theme {
+    background: var(--theme-color);
+    color: #FAFAFA;
 }
 
 .App {

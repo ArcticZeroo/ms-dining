@@ -91,7 +91,7 @@ nav a.active {
 
 
 #site-header {
-    background: #3488e0ff;
+    background: var(--theme-color);
     display: flex;
     justify-content: space-around;
     align-items: center;

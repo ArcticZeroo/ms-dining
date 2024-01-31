@@ -8,10 +8,19 @@ import { HomeViews } from './home-views.tsx';
 import './home.css';
 import { useEffect } from 'react';
 import { setPageSubtitle } from '../../../util/title.ts';
+import { HomeWelcomeMessage } from './home-welcome-message.tsx';
+
+const useShouldShowWelcomeMessage = () => {
+    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
+    const favoriteItemNames = useValueNotifier(ApplicationSettings.favoriteItemNames);
+
+    return homepageViewIds.size === 0 && favoriteItemNames.size === 0;
+}
 
 export const HomePage = () => {
     const shouldShowFavorites = useValueNotifier(ApplicationSettings.showFavoritesOnHome);
     const datePicker = useDatePicker();
+    const shouldShowWelcomeMessage = useShouldShowWelcomeMessage();
 
     useEffect(() => {
         setPageSubtitle('Home');
@@ -19,6 +28,9 @@ export const HomePage = () => {
 
     return (
         <>
+            {
+                shouldShowWelcomeMessage && <HomeWelcomeMessage/>
+            }
             {
                 datePicker
             }
