@@ -1,4 +1,4 @@
-import { performBootTasks } from './api/cafe/cache/boot.js';
+import { performMenuBootTasks } from './api/cafe/cache/boot.js';
 import { createTrackingApplicationAsync } from './api/tracking/visitors.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
@@ -22,5 +22,5 @@ createTrackingApplicationAsync()
         logError('Could not create tracking application:', err);
     });
 
-performBootTasks()
+performMenuBootTasks()
     .catch(err => logError('Could not perform boot tasks:', err));

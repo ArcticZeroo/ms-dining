@@ -1,6 +1,8 @@
 import path from 'path';
 import { getDirname } from '../util/node.js';
 
+export const webserverHost = 'https://msdining.frozor.io';
+
 export const webserverPort = 3002;
 
 export const serverFolderPath = path.resolve(getDirname(import.meta.url), '../../');
