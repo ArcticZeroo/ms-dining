@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchQueryContext } from '../../../context/search.ts';
 import { SearchPageWithQuery } from './search-page-with-query.tsx';
-import { setPageSubtitle } from '../../../util/title.ts';
+import { setPageData } from '../../../util/title.ts';
 
 export const SearchPage = () => {
     const [searchParams] = useSearchParams();
@@ -19,7 +19,7 @@ export const SearchPage = () => {
     }, [searchQueryNotifier, query]);
 
     useEffect(() => {
-        setPageSubtitle(`Search for "${query}"`);
+        setPageData(`Search for "${query}"`, `Search results for menu items and stations across Microsoft Redmond Campus for "${query}"`);
     }, [query]);
 
     if (query == null) {

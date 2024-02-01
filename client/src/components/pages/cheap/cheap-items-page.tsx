@@ -8,7 +8,7 @@ import { isSearchResultVisible } from '../../../util/search.ts';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
 import { SelectedDateContext } from '../../../context/time.ts';
-import { setPageSubtitle } from '../../../util/title.ts';
+import { setPageData } from '../../../util/title.ts';
 
 const useCheapItems = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -77,7 +77,7 @@ export const CheapItemsPage: React.FC = () => {
     const { stage, results, error } = useCheapItems();
 
     useEffect(() => {
-        setPageSubtitle('Cheap Items');
+        setPageData('Cheap Items', 'View a leaderboard of all menu items offered today at the Microsoft Redmond Campus by calories per dollar');
     }, []);
 
     if (stage === PromiseStage.error) {

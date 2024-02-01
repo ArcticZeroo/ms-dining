@@ -7,7 +7,7 @@ import { HomeViews } from './home-views.tsx';
 
 import './home.css';
 import { useEffect } from 'react';
-import { setPageSubtitle } from '../../../util/title.ts';
+import { setPageData } from '../../../util/title.ts';
 import { HomeWelcomeMessage } from './home-welcome-message.tsx';
 
 const useShouldShowWelcomeMessage = () => {
@@ -23,7 +23,7 @@ export const HomePage = () => {
     const shouldShowWelcomeMessage = useShouldShowWelcomeMessage();
 
     useEffect(() => {
-        setPageSubtitle('Home');
+        setPageData('Home', 'View the home page - a customizable dashboard for your favorite items and cafes.');
     }, []);
 
     return (

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { ApplicationSettings } from '../../../api/settings.ts';
-import { setPageSubtitle } from '../../../util/title.ts';
+import { setPageData } from '../../../util/title.ts';
 import { BooleanSettingInput } from '../../settings/boolean-setting-input.tsx';
 import { CustomKeySetting } from '../../settings/custom-key-setting.tsx';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
@@ -10,7 +10,7 @@ import { LocationSetting } from '../../settings/location-setting.tsx';
 
 export const SettingsPage = () => {
     useEffect(() => {
-        setPageSubtitle('Settings');
+        setPageData('Settings', 'Customize your settings for the app');
     }, []);
 
     return (

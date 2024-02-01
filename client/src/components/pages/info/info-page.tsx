@@ -1,14 +1,14 @@
 import { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../../context/app.ts';
-import { setPageSubtitle } from '../../../util/title.ts';
+import { setPageData } from '../../../util/title.ts';
 
 export const InfoPage = () => {
     const { isTrackingEnabled } = useContext(ApplicationContext);
 
 
     useEffect(() => {
-        setPageSubtitle('Info');
+        setPageData('Info', 'View information about the app and privacy information.');
     }, []);
 
     return (

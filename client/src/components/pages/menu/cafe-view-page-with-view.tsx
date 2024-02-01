@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useDatePicker } from '../../../hooks/date-picker.tsx';
 import { CafeView } from '../../../models/cafe.ts';
 import { CombinedCafeMenuList } from '../../cafes/combined-cafe-menu-list.tsx';
-import { setPageSubtitle } from '../../../util/title.ts';
+import { setPageData } from '../../../util/title.ts';
 
 interface ICafePageWithViewProps {
     view: CafeView;
@@ -14,7 +14,7 @@ export const CafeViewPageWithView: React.FC<ICafePageWithViewProps> = ({ view })
     const datePicker = useDatePicker();
 
     useEffect(() => {
-        setPageSubtitle(view.value.name);
+        setPageData(view.value.name, `View the cafe menu for ${view.value.name} on Microsoft Redmond Campus.`);
     }, [view]);
 
     return (
