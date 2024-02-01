@@ -13,6 +13,7 @@ export const OnlineOrderingExperimental = () => {
             <p>
                 Warning: Online ordering is extremely experimental. Any or all of the following might occur:
                 <ul className="left-align">
+                    <li>The cafe might be closed when you arrive (this app does not use cafe schedules)</li>
                     <li>Your credit card might be charged multiple times</li>
                     <li>Your credit card might be charged but the order might not make it to the cafe</li>
                     <li>The cafe receives incorrect order information (or none at all)</li>

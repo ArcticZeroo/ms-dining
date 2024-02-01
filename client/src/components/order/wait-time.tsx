@@ -3,7 +3,7 @@ import { useValueNotifierContext } from '../../hooks/events.ts';
 import { useCallback, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
 import { IWaitTimeResponse } from '@msdining/common/dist/models/http';
-import { PromiseStage, useDelayedPromiseState, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 
 export const WaitTime = () => {
     const cartItemsByCafeId = useValueNotifierContext(CartContext);

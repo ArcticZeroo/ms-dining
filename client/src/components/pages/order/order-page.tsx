@@ -13,6 +13,7 @@ import { useCallback } from 'react';
 import { OrderingClient } from '../../../api/order.ts';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
+import { WaitTime } from '../../order/wait-time.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
@@ -47,6 +48,7 @@ export const OrderPage = () => {
                         Your Order
                     </div>
                     <CartContentsTable showModifiers={true}/>
+                    <WaitTime/>
                 </div>
                 {cart.size > 1 && <MultiCafeOrderWarning/>}
                 <PaymentInfoForm onSubmit={onFormSubmitted}/>
