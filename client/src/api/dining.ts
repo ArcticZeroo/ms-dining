@@ -1,5 +1,5 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { IDiningCoreResponse } from '@msdining/common/dist/models/http';
+import { IDiningCoreResponse, IWaitTimeResponse } from '@msdining/common/dist/models/http';
 import { ISearchQuery } from '@msdining/common/dist/models/search';
 import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem } from '../models/cafe.ts';
 import {
@@ -13,6 +13,7 @@ import { expandAndFlattenView } from '../util/view';
 import { FavoritesCache } from './cache/favorites.ts';
 import { makeRequest } from './request.ts';
 import { ApplicationSettings } from './settings.ts';
+import { isDuckType } from '@arcticzeroo/typeguard';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();
@@ -318,5 +319,17 @@ export abstract class DiningClient {
         }
 
         return results;
+    }
+
+    public static async retrieveWaitTimeForItems(cafeId: string, itemCount: number): Promise<IWaitTimeResponse> {
+        const response = await makeRequest({
+            path:    `/api/dining/order/wait/${cafeId}?items=${itemCount}`
+        });
+
+        if (!isDuckType<IWaitTimeResponse>(response, { minTime: 'number', maxTime: 'number' })) {
+            throw new Error('Invalid response format: missing min/maxTime or in wrong format');
+        }
+
+        return response;
     }
 }

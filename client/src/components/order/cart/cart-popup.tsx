@@ -7,6 +7,7 @@ import { classNames } from '../../../util/react.ts';
 import './cart-popup.css';
 import { Link } from 'react-router-dom';
 import { CartContentsTable } from './cart-contents-table.tsx';
+import { WaitTime } from '../wait-time.tsx';
 
 
 export const CartPopup = () => {
@@ -29,6 +30,7 @@ export const CartPopup = () => {
             </div>
             <div className="cart-body">
                 <CartContentsTable/>
+                <WaitTime/>
                 <Link to="/order" className="checkout-button">
                     Checkout
                 </Link>

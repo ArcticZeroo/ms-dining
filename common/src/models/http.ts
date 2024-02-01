@@ -43,3 +43,9 @@ export interface IDiningCoreResponse {
     isTrackingEnabled: boolean;
     groups: IDiningCoreGroup[];
 }
+
+// GET /api/dining/order/wait/:cafeId?items=$number
+export interface IWaitTimeResponse {
+    minTime: number;
+    maxTime: number;
+}

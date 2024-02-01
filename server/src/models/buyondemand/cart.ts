@@ -1,3 +1,29 @@
+export interface IBuyOnDemandWaitTimeSection {
+    minutes: number
+}
+
+export interface IBuyOnDemandWaitTimeResponse {
+    minTime: IBuyOnDemandWaitTimeSection,
+    maxTime: IBuyOnDemandWaitTimeSection
+}
+
+export interface IRequestCartItem {
+    allowPriceOverride: true,
+    amount: string,
+    cartItemId: string,
+    conceptId: string,
+    conceptName: string,
+    contextId: string,
+    defaultPriceLevelId: string,
+    holdAndFire: false,
+    id: string,
+    menuId: string,
+    menuPriceLevelId: string,
+    modifierTotal: 0,
+    quantity: number,
+    options: []
+}
+
 export interface IAddToOrderResponse {
     orderDetails: {
         orderId: string,
@@ -42,99 +68,99 @@ export interface ICloseOrderRequest {
         created: string,
         // ISO string
         lastUpdated: string,
-        orderState: "OPEN",
+        orderState: 'OPEN',
         orderNumber: string,
-        currencyUnit: "USD",
+        currencyUnit: 'USD',
         lineItems: [
             {
                 // buy-ondemand id
                 itemId: string,
                 // buy-ondemand itemId
                 igItemId: string,
-                itemType: "ITEM",
+                itemType: 'ITEM',
                 // not sure where this is from
-                "lineItemId": "dde089a7-a405-4222-b29e-cdfb3eabfdc4",
-                "soldByWeight": false,
-                "lineItemState": "NORMAL",
-                "quantity": 1,
-                "ancestorQuantityMultipliers": [],
-                "totalQuantity": 1,
-                "price": {
-                    "currencyUnit": "USD",
+                'lineItemId': 'dde089a7-a405-4222-b29e-cdfb3eabfdc4',
+                'soldByWeight': false,
+                'lineItemState': 'NORMAL',
+                'quantity': 1,
+                'ancestorQuantityMultipliers': [],
+                'totalQuantity': 1,
+                'price': {
+                    'currencyUnit': 'USD',
                     // e.g. "6.99"
-                    "amount": string
+                    'amount': string
                 },
-                "properties": {
+                'properties': {
                     // special instructions! leave empty if none?
-                    "splInstruction": string,
-                    "orderSourceSystem": "onDemand",
-                    "mealPeriodId": "2",
-                    "priceLevelId": string,
+                    'splInstruction': string,
+                    'orderSourceSystem': 'onDemand',
+                    'mealPeriodId': '2',
+                    'priceLevelId': string,
                     // no kp text here? weird.
-                    "displayText": "Meatball Grinder",
-                    "menuId": string,
+                    'displayText': 'Meatball Grinder',
+                    'menuId': string,
                     // e.g. "6.99"
-                    "amount": string,
-                    "conceptId": string,
-                    "conceptName": string,
-                    "tagNames": "[]",
-                    "tagIds": "[]",
-                    "count": "1",
-                    "quantity": "1",
+                    'amount': string,
+                    'conceptId': string,
+                    'conceptName': string,
+                    'tagNames': '[]',
+                    'tagIds': '[]',
+                    'count': '1',
+                    'quantity': '1',
                     // item id-epoch time
-                    "cartGuid": string,
+                    'cartGuid': string,
                     // item id-epoch time
-                    "uniqueId": string,
-                    "holdForItems": "false",
+                    'uniqueId': string,
+                    'holdForItems': 'false',
                     // Both available in get-items
                     // "productClassId": "81",
                     // "revenueCategoryId": "12"
                 },
-                "lineItemInstructions": [
+                'lineItemInstructions': [
                     {
-                        "label": "",
-                        "text": string
+                        'label': '',
+                        'text': string
                     }
                 ] | []
             }
         ],
         properties: {
-            orderNumberSequenceLength: "4",
+            orderNumberSequenceLength: '4',
             profitCenterId: string,
             displayProfileId: string,
             // terminal id
             orderNumberNameSpace: string,
-            closeScheduleExpression: "0 0 23 * * *",
+            closeScheduleExpression: '0 0 23 * * *',
             openTerminalId: string,
             priceLevelId: string,
             employeeId: string,
             // 2 = lunch
-            mealPeriodId: "2",
+            mealPeriodId: '2',
             closedTerminalId: string,
-            orderSourceSystem: "onDemand",
-            openScheduleExpression: "0 0 0 * * *",
-            useIgOrderApi: "true"
+            orderSourceSystem: 'onDemand',
+            openScheduleExpression: '0 0 0 * * *',
+            useIgOrderApi: 'true'
         }
     },
-    "displayProfileId": string,
-    "mobileNumberCountryCode": "1",
-    "conceptId": string,
-    "mealPeriodId": "2",
+    'displayProfileId': string,
+    'mobileNumberCountryCode': '1',
+    'conceptId': string,
+    'mealPeriodId': '2',
     // context id
-    "siteId": string,
+    'siteId': string,
     // displayProfileId
-    "profileId": string,
-    "scheduledDay": 0,
-    "shouldRefundOnFailure": false,
-    "notifyGuestOnFailure": false,
-    "useIgPosApi": false,
-    "storePriceLevel": string,
-    "profitCenterName": string,
+    'profileId': string,
+    'scheduledDay': 0,
+    'shouldRefundOnFailure': false,
+    'notifyGuestOnFailure': false,
+    'useIgPosApi': false,
+    'storePriceLevel': string,
+    'profitCenterName': string,
     // MSFT alias
-    "firstName": string,
-    "lastName": "",
-    "tokenizedData": {
-        "paymentDetails": {
+    'firstName': string,
+    'lastName': '',
+    'tokenizedData': {
+        'paymentDetails': {
             // e.g. "0.71"
             taxAmount: string,
             // order id
@@ -143,7 +169,7 @@ export interface ICloseOrderRequest {
             billDate: string,
             // ISO string
             userCurrentDate: string,
-            currencyUnit: "USD",
+            currencyUnit: 'USD',
             // $`Order {orderId}`
             description: string,
             // e.g. "7.70"
@@ -153,19 +179,19 @@ export interface ICloseOrderRequest {
             isWindCave: false,
             isCyberSource: false,
             isCyberSourceWallets: false,
-            language: "en",
+            language: 'en',
             // XSS token
             apiToken: string,
             // tenant id
-            "payTenantId": string,
+            'payTenantId': string,
             // "123456xxxxxx1234"
             accountNumberMasked: string,
             // e.g. "visa". not sure what to pass for other card types
             cardIssuer: string,
             // year + month without a space, e.g. 202301
-            "expirationYearMonth": string,
-            "cardHolderName": string,
-            "postalCode": string
+            'expirationYearMonth': string,
+            'cardHolderName': string,
+            'postalCode': string
         },
         saveCardFlag: false,
         // Token returned by the card processor site
@@ -186,160 +212,160 @@ export interface ICloseOrderRequest {
             created: string,
             // ISO string
             lastUpdated: string,
-            orderState: "OPEN",
+            orderState: 'OPEN',
             // order ID string
             orderNumber: string,
-            currencyUnit: "USD",
-            "lineItems": [
+            currencyUnit: 'USD',
+            'lineItems': [
                 {
                     // buy-ondemand id
-                    "itemId": string,
+                    'itemId': string,
                     // buy-ondemand itemId
-                    "igItemId": string,
-                    "itemType": "ITEM",
-                    "lineItemId": "dde089a7-a405-4222-b29e-cdfb3eabfdc4",
-                    "soldByWeight": false,
-                    "lineItemState": "NORMAL",
-                    "quantity": 1,
-                    "totalQuantity": 1,
-                    "price": {
-                        "currencyUnit": "USD",
+                    'igItemId': string,
+                    'itemType': 'ITEM',
+                    'lineItemId': 'dde089a7-a405-4222-b29e-cdfb3eabfdc4',
+                    'soldByWeight': false,
+                    'lineItemState': 'NORMAL',
+                    'quantity': 1,
+                    'totalQuantity': 1,
+                    'price': {
+                        'currencyUnit': 'USD',
                         // e.g. "6.99"
-                        "amount": string
+                        'amount': string
                     },
-                    "properties": {
-                        "splInstruction": string,
-                        "orderSourceSystem": "onDemand",
-                        "mealPeriodId": "2",
-                        "priceLevelId": string,
-                        "displayText": string,
-                        "menuId": string,
+                    'properties': {
+                        'splInstruction': string,
+                        'orderSourceSystem': 'onDemand',
+                        'mealPeriodId': '2',
+                        'priceLevelId': string,
+                        'displayText': string,
+                        'menuId': string,
                         // e.g. "6.99"
-                        "amount": string,
-                        "conceptId": string,
-                        "count": "1",
-                        "quantity": "1",
+                        'amount': string,
+                        'conceptId': string,
+                        'count': '1',
+                        'quantity': '1',
                         // "calories": "950",
                         // item id-epoch time
-                        "cartGuid": string,
+                        'cartGuid': string,
                         // item id-epoch time
-                        "uniqueId": string,
-                        "holdForItems": "false",
+                        'uniqueId': string,
+                        'holdForItems': 'false',
                         // "productClassId": "81",
                         // "revenueCategoryId": "12"
                     },
-                    "lineItemInstructions": [
+                    'lineItemInstructions': [
                         {
-                            "label": "",
-                            "text": string
+                            'label': '',
+                            'text': string
                         }
                     ] | []
                 }
             ],
-            "properties": {
-                "orderNumberSequenceLength": "4",
-                "profitCenterId": string,
-                "displayProfileId": string,
+            'properties': {
+                'orderNumberSequenceLength': '4',
+                'profitCenterId': string,
+                'displayProfileId': string,
                 // terminal id
-                "orderNumberNameSpace": string,
-                "closeScheduleExpression": "0 0 23 * * *",
-                "openTerminalId": string,
-                "priceLevelId": string,
-                "employeeId": string,
-                "mealPeriodId": "2",
-                "closedTerminalId": string,
-                "orderSourceSystem": "onDemand",
-                "openScheduleExpression": "0 0 0 * * *",
-                "useIgOrderApi": "true"
+                'orderNumberNameSpace': string,
+                'closeScheduleExpression': '0 0 23 * * *',
+                'openTerminalId': string,
+                'priceLevelId': string,
+                'employeeId': string,
+                'mealPeriodId': '2',
+                'closedTerminalId': string,
+                'orderSourceSystem': 'onDemand',
+                'openScheduleExpression': '0 0 0 * * *',
+                'useIgOrderApi': 'true'
             },
-            "internalProperties": {},
-            "configuredBuyFeatures": []
+            'internalProperties': {},
+            'configuredBuyFeatures': []
         },
-        "showConceptNameInEmailReceipt": false,
-        "showConceptNameInTextReceipt": false,
-        "showConceptNameInPrintReceipt": false,
-        "items": [
+        'showConceptNameInEmailReceipt': false,
+        'showConceptNameInTextReceipt': false,
+        'showConceptNameInPrintReceipt': false,
+        'items': [
             {
-                "id": "653ff13d0b49d13808845215",
-                "contextId": string,
-                "tenantId": string,
+                'id': '653ff13d0b49d13808845215',
+                'contextId': string,
+                'tenantId': string,
                 // "itemId": "1111014",
                 // "name": "GRNDR-REV-Meatball Grinder",
-                "isDeleted": false,
-                "isActive": false,
+                'isDeleted': false,
+                'isActive': false,
                 // from get-items
                 // "revenueCategoryId": "12",
                 // "productClassId": "81",
-                "kpText": string,
-                "kitchenDisplayText": string,
-                "receiptText": string,
-                "price": {
-                    "currencyUnit": "USD",
+                'kpText': string,
+                'kitchenDisplayText': string,
+                'receiptText': string,
+                'price': {
+                    'currencyUnit': 'USD',
                     // e.g. "6.99"
-                    "amount": string
+                    'amount': string
                 },
-                "defaultPriceLevelId": string,
-                "isSoldByWeight": false,
-                "tareWeight": 0,
-                "isDiscountable": false,
-                "allowPriceOverride": true,
-                "isTaxIncluded": false,
-                "itemType": "ITEM",
-                "displayText": string,
-                "isAvailableToGuests": true,
-                "isPreselectedToGuests": false,
-                "tagNames": [],
-                "tagIds": [],
-                "substituteItemId": "",
-                "isSubstituteItem": false,
-                "properties": {
-                    "cartGuid": string,
-                    "scannedItem": false,
-                    "priceLevelId": string
+                'defaultPriceLevelId': string,
+                'isSoldByWeight': false,
+                'tareWeight': 0,
+                'isDiscountable': false,
+                'allowPriceOverride': true,
+                'isTaxIncluded': false,
+                'itemType': 'ITEM',
+                'displayText': string,
+                'isAvailableToGuests': true,
+                'isPreselectedToGuests': false,
+                'tagNames': [],
+                'tagIds': [],
+                'substituteItemId': '',
+                'isSubstituteItem': false,
+                'properties': {
+                    'cartGuid': string,
+                    'scannedItem': false,
+                    'priceLevelId': string
                 },
-                "amount": "6.99",
-                "menuPriceLevelId": string,
-                "menuId": "16650",
-                "menuPriceLevelApplied": false,
-                "options": [],
-                "attributes": [],
-                "conceptId": "10927",
-                "isItemCustomizationEnabled": false,
-                "holdAndFire": false,
-                "count": 1,
-                "quantity": 1,
-                "lineItemInstructions": [
+                'amount': '6.99',
+                'menuPriceLevelId': string,
+                'menuId': '16650',
+                'menuPriceLevelApplied': false,
+                'options': [],
+                'attributes': [],
+                'conceptId': '10927',
+                'isItemCustomizationEnabled': false,
+                'holdAndFire': false,
+                'count': 1,
+                'quantity': 1,
+                'lineItemInstructions': [
                     {
-                        "label": "",
-                        "text": "N/A"
+                        'label': '',
+                        'text': 'N/A'
                     }
                 ],
-                "conceptName": "Parlor",
-                "modifierTotal": 0,
-                "mealPeriodId": null,
+                'conceptName': 'Parlor',
+                'modifierTotal': 0,
+                'mealPeriodId': null,
                 // The real buy-ondemand site takes the item id, and adds the added-to-cart time to it.
                 // e.g. $`{itemId}-${Date.now()}`
-                "uniqueId": string,
-                "cartItemId": "24f8ba07-b865-424f-8acd-8e879200b7ae",
-                "lineItemId": "dde089a7-a405-4222-b29e-cdfb3eabfdc4"
+                'uniqueId': string,
+                'cartItemId': '24f8ba07-b865-424f-8acd-8e879200b7ae',
+                'lineItemId': 'dde089a7-a405-4222-b29e-cdfb3eabfdc4'
             }
         ],
         // ISO string
-        "orderPlacedTime": string,
+        'orderPlacedTime': string,
         // e.g. "Dec 13, 2023"
-        "receiptDate": string,
+        'receiptDate': string,
         // e.g. "12:47 PM"
-        "receiptTime": string,
-        "timeZone": "PST8PDT",
+        'receiptTime': string,
+        'timeZone': 'PST8PDT',
         terminalId: string,
         // order number string
         checkNumber: string,
-        "scheduledDay": 0,
-        "birConfig": {
-            "displayText": "OR#",
-            "acknowledgementReceiptDisplayText": "AR#",
-            "acknowledgementReceiptIndicator": "Acknowledgement Receipt#",
-            "officialReceiptIndicator": "Official Receipt#"
+        'scheduledDay': 0,
+        'birConfig': {
+            'displayText': 'OR#',
+            'acknowledgementReceiptDisplayText': 'AR#',
+            'acknowledgementReceiptIndicator': 'Acknowledgement Receipt#',
+            'officialReceiptIndicator': 'Official Receipt#'
         },
         multiPassEnabled: false,
         // Intentional typo

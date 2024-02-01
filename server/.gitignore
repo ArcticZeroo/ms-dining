@@ -3,3 +3,4 @@ dist
 static/menu-items/thumbnail
 *.db
 *.db-journal
+.env

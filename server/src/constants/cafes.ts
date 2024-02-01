@@ -432,3 +432,5 @@ export const groupList: CafeGroup[] = [
 ];
 
 export const cafeList = groupList.flatMap(group => group.members);
+
+export const cafesById = new Map(cafeList.map(cafe => [cafe.id, cafe]));
