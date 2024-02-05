@@ -36,7 +36,7 @@ const padDateValue = (value: number) => value.toString().padStart(2, '0');
 export const toDateString = (date: Date) => `${date.getFullYear()}-${padDateValue(date.getMonth() + 1)}-${padDateValue(date.getDate())}`;
 export const fromDateString = (dateString: string) => new Date(`${dateString}T00:00`);
 
-const firstWeeklyMenusTime = fromDateString('2023-10-31').getTime();
+const FIRST_WEEKLY_MENUS_TIME = fromDateString('2023-10-31').getTime();
 
 export const isDateOnWeekend = (date: Date) => {
     const dayOfWeek = date.getDay();
@@ -67,7 +67,7 @@ export const getNowWithDaysInFuture = (daysInFuture: number) => {
     return now;
 }
 
-export const getMinimumDateForMenuRequest = (): Date => {
+export const getMinimumDateForMenu = (): Date => {
     const now = new Date();
     const currentDayOfWeek = now.getDay();
 
@@ -78,7 +78,7 @@ export const getMinimumDateForMenuRequest = (): Date => {
 
     now.setDate(now.getDate() - daysSinceMonday);
 
-    const firstWeeklyMenusDate = new Date(firstWeeklyMenusTime);
+    const firstWeeklyMenusDate = new Date(FIRST_WEEKLY_MENUS_TIME);
     if (isDateBefore(now, firstWeeklyMenusDate)) {
         return firstWeeklyMenusDate;
     }
@@ -86,7 +86,7 @@ export const getMinimumDateForMenuRequest = (): Date => {
     return now;
 }
 
-export const getMaximumDateForMenuRequest = (): Date => {
+export const getMaximumDateForMenu = (): Date => {
     const now = new Date();
     const currentDayOfWeek = now.getDay();
 
@@ -98,6 +98,21 @@ export const getMaximumDateForMenuRequest = (): Date => {
     now.setDate(now.getDate() + daysUntilFriday);
 
     return now;
+}
+
+export const ensureDateIsNotWeekendForMenu = (date: Date): Date => {
+    const dayOfWeek = date.getDay();
+
+    if ([nativeDayOfWeek.Saturday, nativeDayOfWeek.Sunday].includes(dayOfWeek)) {
+        let daysUntilMonday = nativeDayOfWeek.Monday - dayOfWeek;
+        if (daysUntilMonday <= 0) {
+            daysUntilMonday += 7;
+        }
+
+        date.setDate(date.getDate() + daysUntilMonday);
+    }
+
+    return date;
 }
 
 const shouldUseNextWeek = (date: Date) => {

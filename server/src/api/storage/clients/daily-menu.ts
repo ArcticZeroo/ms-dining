@@ -14,14 +14,6 @@ import {
 } from '@msdining/common/dist/util/date-util.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
-const {
-    getMaximumDateForMenuRequest,
-    getMinimumDateForMenuRequest,
-    isDateAfter,
-    isDateOnWeekend,
-    toDateString,
-} = DateUtil;
-
 interface ICreateDailyStationMenuParams {
     cafeId: string;
     dateString: string;
@@ -187,12 +179,12 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async isAnyAllowedMenuAvailableForCafe(cafeId: string): Promise<boolean> {
-        const currentDate = getMinimumDateForMenuRequest();
-        const maximumDate = getMaximumDateForMenuRequest();
+        const currentDate = DateUtil.getMinimumDateForMenu();
+        const maximumDate = DateUtil.getMaximumDateForMenu();
         const allowedDateStrings: string[] = [];
-        while (!isDateAfter(currentDate, maximumDate)) {
-            if (!isDateOnWeekend(currentDate)) {
-                allowedDateStrings.push(toDateString(currentDate));
+        while (!DateUtil.isDateAfter(currentDate, maximumDate)) {
+            if (!DateUtil.isDateOnWeekend(currentDate)) {
+                allowedDateStrings.push(DateUtil.toDateString(currentDate));
             }
             currentDate.setDate(currentDate.getDate() + 1);
         }
@@ -253,7 +245,7 @@ export abstract class DailyMenuStorageClient {
         const itemCountsByStationName = new Map<string /*stationName*/, Map<string /*itemNameNormalized*/, number>>();
 
         const dates = Array.from(yieldDaysInRange(mondayDate, fridayDate));
-        const dailyMenus = await Promise.all(dates.map(date => DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, toDateString(date))));
+        const dailyMenus = await Promise.all(dates.map(date => DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, DateUtil.toDateString(date))));
 
         for (const dailyMenu of dailyMenus) {
             for (const station of dailyMenu) {
@@ -291,7 +283,7 @@ export abstract class DailyMenuStorageClient {
             const currentDate = dates[i]!;
             const dailyMenu = dailyMenus[i]!;
 
-            const currentDateString = toDateString(currentDate);
+            const currentDateString = DateUtil.toDateString(currentDate);
 
             const currentUniquenessData = new Map<string /*stationName*/, IStationUniquenessData>();
             uniquenessData.set(currentDateString, currentUniquenessData);
@@ -335,7 +327,7 @@ export abstract class DailyMenuStorageClient {
     public static async retrieveUniquenessDataForCafe(cafeId: string, targetDateString: string) {
         const targetDate = fromDateString(targetDateString);
 
-        if (isDateOnWeekend(targetDate)) {
+        if (DateUtil.isDateOnWeekend(targetDate)) {
             throw new Error('Cannot retrieve uniqueness data for a weekend date');
         }
 

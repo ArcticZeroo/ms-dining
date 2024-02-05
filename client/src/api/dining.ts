@@ -9,14 +9,13 @@ import {
     IServerSearchResult
 } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
-import { expandAndFlattenView } from '../util/view';
 import { FavoritesCache } from './cache/favorites.ts';
 import { makeRequest } from './request.ts';
 import { ApplicationSettings } from './settings.ts';
 import { isDuckType } from '@arcticzeroo/typeguard';
+import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
-const FIRST_WEEKLY_MENUS_TIME = DateUtil.fromDateString('2023-10-31').getTime();
 
 const JSON_HEADERS = {
     'Content-Type': 'application/json'
@@ -59,57 +58,8 @@ export abstract class DiningClient {
         ];
     }
 
-    public static getMinimumDateForMenu(): Date {
-        const now = new Date();
-        const currentDayOfWeek = now.getDay();
-
-        let daysSinceMonday = currentDayOfWeek - DateUtil.nativeDayOfWeek.Monday;
-        if (daysSinceMonday <= 0) {
-            daysSinceMonday += 7;
-        }
-
-        now.setDate(now.getDate() - daysSinceMonday);
-
-        // Clone to avoid problems with modifying it down the line
-        const firstWeeklyMenusDate = new Date(FIRST_WEEKLY_MENUS_TIME);
-        if (DateUtil.isDateBefore(now, firstWeeklyMenusDate)) {
-            return firstWeeklyMenusDate;
-        }
-
-        return now;
-    }
-
-    public static getMaximumDateForMenu(): Date {
-        const now = new Date();
-        const currentDayOfWeek = now.getDay();
-
-        let daysUntilFriday = DateUtil.nativeDayOfWeek.Friday - currentDayOfWeek;
-        if (daysUntilFriday <= 0) {
-            daysUntilFriday += 7;
-        }
-
-        now.setDate(now.getDate() + daysUntilFriday);
-
-        return now;
-    }
-
-    public static ensureDateIsNotWeekendForMenu(date: Date): Date {
-        const dayOfWeek = date.getDay();
-
-        if ([DateUtil.nativeDayOfWeek.Saturday, DateUtil.nativeDayOfWeek.Sunday].includes(dayOfWeek)) {
-            let daysUntilMonday = DateUtil.nativeDayOfWeek.Monday - dayOfWeek;
-            if (daysUntilMonday <= 0) {
-                daysUntilMonday += 7;
-            }
-
-            date.setDate(date.getDate() + daysUntilMonday);
-        }
-
-        return date;
-    }
-
     public static getTodayDateForMenu() {
-        return DiningClient.ensureDateIsNotWeekendForMenu(new Date());
+        return DateUtil.ensureDateIsNotWeekendForMenu(new Date());
     }
 
     public static async retrieveCafeMenu({
@@ -143,50 +93,9 @@ export abstract class DiningClient {
         }
     }
 
-    public static getCafePriorityOrder(cafes: ICafe[], viewsById: Map<string, CafeView>) {
-        const homepageViewIds = ApplicationSettings.homepageViews.value;
-        const homepageCafeIds = new Set(
-            Array.from(homepageViewIds)
-                .filter(viewId => viewsById.has(viewId))
-                .flatMap(viewId => expandAndFlattenView(viewId, viewsById))
-                .map(cafe => cafe.id)
-        );
-
-        const lastUsedCafeIds = ApplicationSettings.lastUsedCafeIds.value;
-
-        return cafes.sort((a, b) => {
-            const aIndex = lastUsedCafeIds.indexOf(a.id);
-            const bIndex = lastUsedCafeIds.indexOf(b.id);
-            const isAHomepage = homepageCafeIds.has(a.id);
-            const isBHomepage = homepageCafeIds.has(b.id);
-
-            if (isAHomepage && !isBHomepage) {
-                return -1;
-            }
-
-            if (!isAHomepage && isBHomepage) {
-                return 1;
-            }
-
-            if (aIndex === -1 && bIndex === -1) {
-                return 0;
-            }
-
-            if (aIndex === -1) {
-                return 1;
-            }
-
-            if (bIndex === -1) {
-                return -1;
-            }
-
-            return bIndex - aIndex;
-        });
-    }
-
     public static async retrieveRecentMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
         console.log('Retrieving cafe menus...');
-        const priorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById);
+        const priorityOrder = sortCafesInPriorityOrder(cafes, viewsById);
 
         for (const cafe of priorityOrder.slice(0, 5)) {
             await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);

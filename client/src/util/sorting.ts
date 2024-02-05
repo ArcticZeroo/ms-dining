@@ -1,4 +1,6 @@
-import { CafeView } from '../models/cafe.ts';
+import { CafeView, ICafe } from '../models/cafe.ts';
+import { ApplicationSettings } from '../api/settings.ts';
+import { expandAndFlattenView } from './view.ts';
 
 export const normalizeCafeId = (id: string) => {
     return id
@@ -63,3 +65,45 @@ export const sortViews = (views: Iterable<CafeView>) => {
         .from(views)
         .sort((a, b) => compareViewNames(a.value.name, b.value.name));
 }
+
+export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, CafeView>) => {
+    const homepageViewIds = ApplicationSettings.homepageViews.value;
+    const homepageCafeIds = new Set(
+        Array.from(homepageViewIds)
+            .filter(viewId => viewsById.has(viewId))
+            .flatMap(viewId => expandAndFlattenView(viewId, viewsById))
+            .map(cafe => cafe.id)
+    );
+
+    const lastUsedCafeIds = ApplicationSettings.lastUsedCafeIds.value;
+
+    return cafes.sort((a, b) => {
+        const aIndex = lastUsedCafeIds.indexOf(a.id);
+        const bIndex = lastUsedCafeIds.indexOf(b.id);
+        const isAHomepage = homepageCafeIds.has(a.id);
+        const isBHomepage = homepageCafeIds.has(b.id);
+
+        if (isAHomepage && !isBHomepage) {
+            return -1;
+        }
+
+        if (!isAHomepage && isBHomepage) {
+            return 1;
+        }
+
+        if (aIndex === -1 && bIndex === -1) {
+            return 0;
+        }
+
+        if (aIndex === -1) {
+            return 1;
+        }
+
+        if (bIndex === -1) {
+            return -1;
+        }
+
+        return bIndex - aIndex;
+    });
+}
+

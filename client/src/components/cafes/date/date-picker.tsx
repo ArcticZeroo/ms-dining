@@ -31,8 +31,8 @@ const getNextDate = (date: Date) => {
     return newDate;
 };
 
-const MINIMUM_DATE = DiningClient.getMinimumDateForMenu();
-const MAXIMUM_DATE = DiningClient.getMaximumDateForMenu();
+const MINIMUM_DATE = DateUtil.getMinimumDateForMenu();
+const MAXIMUM_DATE = DateUtil.getMaximumDateForMenu();
 
 export const CafeDatePicker: React.FC = () => {
     const selectedDateNotifier = useContext(SelectedDateContext);
