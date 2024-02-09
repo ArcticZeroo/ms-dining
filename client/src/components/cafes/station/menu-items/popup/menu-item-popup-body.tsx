@@ -1,9 +1,9 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { ApplicationSettings } from '../../../../../api/settings.ts';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../../models/cafe.ts';
 import { MenuItemModifierPicker } from '../../../../order/menu-item-modifier-picker.tsx';
+import { DebugSettings } from '../../../../../constants/settings.ts';
 
 interface IMenuItemPopupBodyProps {
     menuItem: IMenuItem;
@@ -20,7 +20,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     onSelectedChoiceIdsChanged,
     onNotesChanged
 }) => {
-    const isOnlineOrderingAllowed = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
+    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
 
     const shouldSkipBody = !menuItem.description
                            && menuItem.imageUrl == null

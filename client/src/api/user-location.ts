@@ -1,7 +1,7 @@
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { ValueNotifier } from '../util/events.ts';
-import { ApplicationSettings } from './settings.ts';
 import Duration from '@arcticzeroo/duration';
+import { ApplicationSettings } from '../constants/settings.ts';
 
 const RETRIEVE_LOCATION_INTERVAL = new Duration({ minutes: 1 });
 

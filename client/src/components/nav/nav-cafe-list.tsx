@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 
 import { NavLink } from 'react-router-dom';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { useViewsForNav } from '../../hooks/views.ts';
 import { CafeView, CafeViewType, ICafeGroup } from '../../models/cafe.ts';
 import { getViewMenuUrl } from '../../util/link.ts';
 import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
 import { classNames } from '../../util/react.ts';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface INavViewLinkProps {
     view: CafeView;

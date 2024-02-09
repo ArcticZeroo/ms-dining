@@ -1,8 +1,8 @@
-import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { DebugSettings } from '../../constants/settings.ts';
 
 export const OnlineOrderingExperimental = () => {
-    const isSuppressed = useValueNotifier(ApplicationSettings.suppressExperimentalOnlineOrderingWarning);
+    const isSuppressed = useValueNotifier(DebugSettings.suppressExperimentalOnlineOrderingWarning);
 
     if (isSuppressed) {
         return null;

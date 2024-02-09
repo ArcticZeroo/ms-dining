@@ -1,7 +1,7 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { ApplicationSettings } from '../api/settings.ts';
 import { ICafe } from '../models/cafe.ts';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { ApplicationSettings } from '../constants/settings.ts';
 
 export const getCafeName = (cafe: ICafe, showGroupName: boolean) => {
     if (!showGroupName || !cafe.group || cafe.group.alwaysExpand) {

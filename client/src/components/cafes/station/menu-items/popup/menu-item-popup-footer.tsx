@@ -1,7 +1,7 @@
 import React from 'react';
-import { ApplicationSettings } from '../../../../../api/settings.ts';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { getPriceDisplay } from '../../../../../util/cart.ts';
+import { DebugSettings } from '../../../../../constants/settings.ts';
 
 interface IMenuItemPopupFooterProps {
     isUpdate: boolean;
@@ -22,7 +22,7 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
     onAddQuantityClicked,
     onRemoveQuantityClicked
 }) => {
-    const isOnlineOrderingAllowed = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
+    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
 
     if (!isOnlineOrderingAllowed) {
         return null;

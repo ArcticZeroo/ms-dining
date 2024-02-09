@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { setPageData } from '../../../util/title.ts';
 import { BooleanSettingInput } from '../../settings/boolean-setting-input.tsx';
 import { CustomKeySetting } from '../../settings/custom-key-setting.tsx';
@@ -7,6 +6,7 @@ import { HomepageSettings } from '../../settings/homepage-settings.tsx';
 import { MenuSettings } from '../../settings/menu-settings.tsx';
 import './settings.css';
 import { LocationSetting } from '../../settings/location-setting.tsx';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 
 export const SettingsPage = () => {
     useEffect(() => {

@@ -1,6 +1,6 @@
 import { useValueNotifier } from '../../hooks/events.ts';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { useState } from 'react';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 export const MultiCafeOrderWarning = () => {
     const isPermanentlySuppressed = useValueNotifier(ApplicationSettings.suppressMultiCafeOrderWarning);

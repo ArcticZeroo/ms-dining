@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
@@ -8,6 +7,7 @@ import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { StationList } from './station/station-list.tsx';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);

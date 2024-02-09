@@ -3,8 +3,8 @@ import React, { useMemo } from 'react';
 import { CollapsibleStation } from './collapsible-station.tsx';
 import { classNames } from '../../../util/react.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 
 interface IStationListProps {
     stations: CafeMenu;

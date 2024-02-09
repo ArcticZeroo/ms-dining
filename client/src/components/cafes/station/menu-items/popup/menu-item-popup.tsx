@@ -2,7 +2,6 @@ import { CafeTypes } from '@msdining/common';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApplicationSettings } from '../../../../../api/settings.ts';
 import { ApplicationContext } from '../../../../../context/app.ts';
 import { CartContext } from '../../../../../context/cart.ts';
 import { PopupContext } from '../../../../../context/modal.ts';
@@ -21,6 +20,7 @@ import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
+import { ApplicationSettings } from '../../../../../constants/settings.ts';
 
 const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
     let price = menuItem.price;

@@ -1,6 +1,5 @@
 import { ICardData } from '@msdining/common/dist/models/cart';
 import React, { useMemo, useState } from 'react';
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
 import { classNames } from '../../../util/react.ts';
 
@@ -8,6 +7,7 @@ import './payment-info-form.css';
 import { expectValid, validateCvv, validateExpirationMonth, validatePhoneNumber } from '../../../util/validation.ts';
 
 import { PaymentField } from './payment-field.tsx';
+import { InternalSettings } from '../../../constants/settings.ts';
 
 export interface IPaymentInfo {
     phoneNumberWithCountryCode: string;
@@ -20,14 +20,14 @@ interface IPaymentInfoFormProps {
 }
 
 export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) => {
-    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, ApplicationSettings.phoneNumber.value /*initialValue*/);
-    const [alias, setAlias] = useState(ApplicationSettings.alias.value);
+    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
+    const [alias, setAlias] = useState(InternalSettings.alias.value);
 
-    const [name, setName] = useState(ApplicationSettings.nameOnCard.value);
+    const [name, setName] = useState(InternalSettings.nameOnCard.value);
     const [cardNumber, setCardNumber] = useState('');
     const [expiration, setExpiration] = useFieldWithValidator(validateExpirationMonth);
     const [securityCode, setSecurityCode] = useFieldWithValidator(validateCvv);
-    const [postalCode, setPostalCode] = useState(ApplicationSettings.postalCode.value);
+    const [postalCode, setPostalCode] = useState(InternalSettings.postalCode.value);
 
     const isFormValid = useMemo(
         () => {
@@ -76,10 +76,10 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
             }
         };
 
-        ApplicationSettings.phoneNumber.value = phoneNumberWithCountryCode;
-        ApplicationSettings.alias.value = alias;
-        ApplicationSettings.nameOnCard.value = name;
-        ApplicationSettings.postalCode.value = postalCode;
+        InternalSettings.phoneNumber.value = phoneNumberWithCountryCode;
+        InternalSettings.alias.value = alias;
+        InternalSettings.nameOnCard.value = name;
+        InternalSettings.postalCode.value = postalCode;
 
         onSubmit(paymentInfo);
     };

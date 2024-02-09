@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ApplicationSettings, BooleanSetting } from '../../api/settings.ts';
+import { BooleanSetting } from '../../api/settings.ts';
 import { ValueNotifier } from '../../util/events.ts';
 import { classNames } from '../../util/react.ts';
+import { DebugSettings } from '../../constants/settings.ts';
 
 const ALLOWED_SETTINGS: BooleanSetting[] = [
-    ApplicationSettings.allowOnlineOrdering,
-    ApplicationSettings.suppressExperimentalOnlineOrderingWarning
+    DebugSettings.allowOnlineOrdering,
+    DebugSettings.suppressExperimentalOnlineOrderingWarning,
+    DebugSettings.verboseLogging
 ];
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {
@@ -71,7 +73,8 @@ export const CustomKeySetting: React.FC = () => {
                     value={key}
                     onChange={event => setKey(event.target.value)}
                 />
-                <label htmlFor="custom-key-should-enable" id="custom-key-checkbox" className={classNames(!isKeyValid && 'disabled')}>
+                <label htmlFor="custom-key-should-enable" id="custom-key-checkbox"
+                    className={classNames(!isKeyValid && 'disabled')}>
                     Enable Key
                     <input type="checkbox"
                         id="custom-key-should-enable"

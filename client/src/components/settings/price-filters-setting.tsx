@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { classNames } from '../../util/react.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { NumberSettingInput } from './number-setting-input.tsx';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface IPriceFiltersSettingProps {
     isOwnCard?: boolean;

@@ -1,7 +1,6 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useContext, useMemo } from 'react';
-import { ApplicationSettings } from '../../../../api/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 import { PopupContext } from '../../../../context/modal.ts';
@@ -15,6 +14,7 @@ import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
+import { ApplicationSettings, DebugSettings } from '../../../../constants/settings.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -37,7 +37,7 @@ const menuItemModalSymbol = Symbol('menuItem');
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const cafe = useContext(CurrentCafeContext);
-    const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
+    const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);

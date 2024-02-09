@@ -1,6 +1,7 @@
 import { ERROR_BODIES } from '@msdining/common/dist/responses';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
-import { getVisitorId } from './settings.ts';
+
+import { getVisitorId } from '../constants/settings.ts';
 
 interface IMakeRequestParams {
     path: string;

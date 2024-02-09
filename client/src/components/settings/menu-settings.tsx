@@ -1,7 +1,7 @@
-import { ApplicationSettings } from '../../api/settings.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { HighlightTagsSetting } from './highlight-tags-setting.tsx';
 import { PriceFiltersSetting } from './price-filters-setting.tsx';
+import { ApplicationSettings } from '../../constants/settings.ts';
 export const MenuSettings = () => (
     <div className="card settings-group">
         <div className="title">

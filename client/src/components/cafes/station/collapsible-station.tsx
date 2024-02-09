@@ -11,7 +11,8 @@ import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
-import { ApplicationSettings } from '../../../api/settings.ts';
+
+import { ApplicationSettings } from '../../../constants/settings.ts';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();

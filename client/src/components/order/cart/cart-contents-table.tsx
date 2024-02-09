@@ -7,7 +7,6 @@ import { CartItemRow } from './cart-item-row.tsx';
 import { useValueNotifier, useValueNotifierAsState } from '../../../hooks/events.ts';
 import { CartContext } from '../../../context/cart.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../util/cart.ts';
 import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
 import { PopupContext } from '../../../context/modal.ts';
@@ -15,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../util/link.ts';
 
 import './cart-contents-table.css';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 

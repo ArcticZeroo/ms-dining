@@ -1,6 +1,6 @@
 import { CafeView, ICafe } from '../models/cafe.ts';
-import { ApplicationSettings } from '../api/settings.ts';
 import { expandAndFlattenView } from './view.ts';
+import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 
 export const normalizeCafeId = (id: string) => {
     return id
@@ -75,7 +75,7 @@ export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, 
             .map(cafe => cafe.id)
     );
 
-    const lastUsedCafeIds = ApplicationSettings.lastUsedCafeIds.value;
+    const lastUsedCafeIds = InternalSettings.lastUsedCafeIds.value;
 
     return cafes.sort((a, b) => {
         const aIndex = lastUsedCafeIds.indexOf(a.id);

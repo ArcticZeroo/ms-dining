@@ -1,7 +1,7 @@
 import React from 'react';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { HomepageViewsSetting } from './homepage-views-setting.tsx';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface IHomepageSettingsProps {
 	requireButtonToCommitHomepageViews: boolean;

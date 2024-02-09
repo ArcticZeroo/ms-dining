@@ -11,9 +11,9 @@ import {
 import { ICancellationToken, pause } from '../util/async.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { makeRequest } from './request.ts';
-import { ApplicationSettings } from './settings.ts';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
+import { InternalSettings } from '../constants/settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -52,8 +52,8 @@ export abstract class DiningClient {
 
     private static _addToLastUsedCafeIds(id: string) {
         // Most recently used IDs are at the end of the list.
-        ApplicationSettings.lastUsedCafeIds.value = [
-            ...ApplicationSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id),
+        InternalSettings.lastUsedCafeIds.value = [
+            ...InternalSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id),
             id
         ];
     }

@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react';
-import { ApplicationSettings } from '../api/settings.ts';
 import { CafeDatePicker } from '../components/cafes/date/date-picker.tsx';
 import { useValueNotifier, useValueNotifierContext } from './events.ts';
 import { SelectedDateContext } from '../context/time.ts';
 import { addDateToUrl } from '../util/url.ts';
+import { ApplicationSettings } from '../constants/settings.ts';
 
 export const useDatePicker = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);

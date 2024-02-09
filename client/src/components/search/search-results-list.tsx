@@ -1,6 +1,5 @@
 import React, { useContext, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useIsPriceAllowed } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
@@ -10,6 +9,7 @@ import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
 import { sortSearchResults } from '../../util/search-sorting.ts';
 import { UserLocationNotifier } from '../../api/user-location.ts';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface ISearchResultsListProps {
     queryText: string;

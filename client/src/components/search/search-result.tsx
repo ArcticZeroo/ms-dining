@@ -2,7 +2,6 @@ import { DateUtil, SearchTypes } from '@msdining/common';
 import { isSameDate } from '@msdining/common/dist/util/date-util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
@@ -16,6 +15,7 @@ import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../
 import { getParentView } from '../../util/view';
 import './search.css';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface IEntityDisplayData {
     className: string;

@@ -1,4 +1,3 @@
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { useDatePicker } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
@@ -9,6 +8,7 @@ import './home.css';
 import { useEffect } from 'react';
 import { setPageData } from '../../../util/title.ts';
 import { HomeWelcomeMessage } from './home-welcome-message.tsx';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 
 const useShouldShowWelcomeMessage = () => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);

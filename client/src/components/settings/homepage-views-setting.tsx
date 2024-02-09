@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { useViewsForNav } from '../../hooks/views.ts';
 import { HomepageViewChip } from './homepage-view-chip.tsx';
 
 import '../pages/settings/settings.css';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface IHomepageViewsSettingProps {
 	requireButtonToCommit?: boolean;

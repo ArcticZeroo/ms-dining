@@ -1,6 +1,5 @@
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { CartContext } from '../../../context/cart.ts';
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
@@ -14,9 +13,10 @@ import { OrderingClient } from '../../../api/order.ts';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
+import { DebugSettings } from '../../../constants/settings.ts';
 
 export const OrderPage = () => {
-    const allowOnlineOrdering = useValueNotifier(ApplicationSettings.allowOnlineOrdering);
+    const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
     const cart = useValueNotifierContext(CartContext);
 
     const doOrderCallback = useCallback(

@@ -5,8 +5,8 @@ import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { CartContext, CartItemsByCafeId } from '../../context/cart.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { getInitialDateFromUrl } from '../../util/url.ts';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 interface IStaticContextProvidersProps {
     children: React.ReactNode;

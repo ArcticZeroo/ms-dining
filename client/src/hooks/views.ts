@@ -1,10 +1,10 @@
 import { useContext, useMemo } from 'react';
-import { ApplicationSettings } from '../api/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { sortViews } from '../util/sorting.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
+import { ApplicationSettings } from '../constants/settings.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     return useMemo(() => {

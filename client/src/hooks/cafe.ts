@@ -1,10 +1,11 @@
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import { useCallback, useMemo } from 'react';
-import { ApplicationSettings, StringSetSetting } from '../api/settings.ts';
+import { StringSetSetting } from '../api/settings.ts';
 import { getTargetSettingForFavorite } from '../util/cafe.ts';
 import { useValueNotifier } from './events.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../models/cafe.ts';
+import { ApplicationSettings } from '../constants/settings.ts';
 
 const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
     const names = useValueNotifier(setting);

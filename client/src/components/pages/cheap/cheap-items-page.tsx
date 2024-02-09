@@ -1,7 +1,6 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useEffect, useMemo } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
-import { ApplicationSettings } from '../../../api/settings.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { ICheapItemSearchResult } from '../../../models/search.ts';
 import { isSearchResultVisible } from '../../../util/search.ts';
@@ -9,6 +8,7 @@ import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
 import { SelectedDateContext } from '../../../context/time.ts';
 import { setPageData } from '../../../util/title.ts';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 
 const useCheapItems = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);

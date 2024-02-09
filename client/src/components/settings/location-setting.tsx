@@ -1,6 +1,6 @@
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
-import { ApplicationSettings } from '../../api/settings.ts';
 import { LocationPermissionStatus } from './location-permission-status.tsx';
+import { ApplicationSettings } from '../../constants/settings.ts';
 
 export const LocationSetting = () => (
     <BooleanSettingInput
