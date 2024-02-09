@@ -6,7 +6,6 @@ import { getTargetSettingForFavorite } from '../util/cafe.ts';
 import { useValueNotifier } from './events.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../models/cafe.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
-import { verboseLog } from '../util/logging.ts';
 
 const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
     const names = useValueNotifier(setting);
@@ -48,8 +47,6 @@ export const useIsFavoriteItem = (name: string, type: SearchEntityType) => {
 };
 
 export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPrice: number) => {
-    verboseLog(`Filtering menu for station ${station.name} with min price ${minPrice} and max price ${maxPrice}`);
-
     const menu: IMenuItemsByCategoryName = {};
 
     for (const [categoryName, items] of Object.entries(station.menu)) {
@@ -63,8 +60,6 @@ export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPric
     }
 
     if (Object.keys(menu).length === 0) {
-        verboseLog('No items found in menu, returning null');
-        verboseLog('Menu:', station.menu);
         return null;
     }
 

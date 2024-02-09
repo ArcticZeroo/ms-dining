@@ -28,10 +28,8 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
                 }
 
                 let menu: IMenuItemsByCategoryName | null = station.menu;
-
                 if (enablePriceFilters) {
                     menu = getFilteredMenu(station, minPrice, maxPrice)
-                    continue;
                 }
 
                 if (menu != null) {
