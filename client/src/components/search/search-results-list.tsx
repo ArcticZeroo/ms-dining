@@ -1,5 +1,4 @@
 import React, { useContext, useMemo } from 'react';
-import { DiningClient } from '../../api/dining.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useIsPriceAllowed } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
@@ -10,6 +9,7 @@ import { SearchResult } from './search-result.tsx';
 import { sortSearchResults } from '../../util/search-sorting.ts';
 import { UserLocationNotifier } from '../../api/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
+import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 
 interface ISearchResultsListProps {
     queryText: string;
@@ -28,7 +28,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
 
     const entriesInOrder = useMemo(
         () => {
-            const cafePriorityOrder = DiningClient.getCafePriorityOrder(cafes, viewsById);
+            const cafePriorityOrder = sortCafesInPriorityOrder(cafes, viewsById);
 
             const sortedSearchResults = [...searchResults];
 
