@@ -16,6 +16,8 @@ export const nativeDayOfWeek = {
     Saturday:  6
 };
 
+export const nativeDayOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export const nativeMonth = {
     January:   0,
     February:  1,
@@ -123,16 +125,31 @@ const shouldUseNextWeek = (date: Date) => {
     return date.getDay() === nativeDayOfWeek.Friday && date.getHours() >= 17; // after 5pm on Fridays
 }
 
-export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false) {
+const getDaysUntilNextWeekday = (date: Date, targetDay: number) => {
+    let daysUntilTargetDay = targetDay - date.getDay();
+
+    if (daysUntilTargetDay <= 0) {
+        daysUntilTargetDay += 7;
+    }
+
+    return daysUntilTargetDay;
+}
+
+
+// On Monday morning, this should yield 0, 1, 2, 3, 4
+// On Friday afternoon, this should yield the next week's days, e.g. 3, 4, 5, 6, 7
+// On Sunday morning, this should yield 1, 2, 3, 4, 5
+export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false): Iterable<number> {
     const now = new Date();
     const nowWeekday = now.getDay();
 
-    // If it's Saturday, we want to start on Monday of next week
-    const dateOffset = forceUseNextWeek || shouldUseNextWeek(now)
-        ? 7
+    const useNextWeek = forceUseNextWeek || shouldUseNextWeek(now);
+
+    const dateOffset = useNextWeek
+        ? getDaysUntilNextWeekday(now, nativeDayOfWeek.Monday)
         : 0;
 
-    const startWeekdayIndex = isDateOnWeekend(now)
+    const startWeekdayIndex = useNextWeek || isDateOnWeekend(now)
         ? nativeDayOfWeek.Monday
         : Math.max(nowWeekday, nativeDayOfWeek.Monday);
 
