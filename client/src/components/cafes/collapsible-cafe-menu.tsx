@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { CafeMenu, ICafe } from '../../models/cafe.ts';
+import { ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
-import { StationList } from './station/station-list.tsx';
+import { CollapsibleCafeMenuBody } from './collapsible-cafe-menu-body.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
@@ -15,17 +15,15 @@ const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
 
 interface ICollapsibleCafeMenuProps {
     cafe: ICafe;
-    menu: CafeMenu;
     showGroupName: boolean;
-    isLoading?: boolean;
+    shouldCountTowardsLastUsed: boolean;
 }
 
 export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     {
         cafe,
-        menu,
         showGroupName,
-        isLoading = false
+        shouldCountTowardsLastUsed
     }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
 
@@ -63,18 +61,10 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                         <ExpandIcon isExpanded={isExpanded}/>
                     </button>
                 </div>
-                {
-                    isLoading
-                    && (
-                        <div className="centered-content collapse-body">
-                            <div className="loading-spinner"/>
-                            Loading menu...
-                        </div>
-                    )
-                }
-                {
-                    !isLoading && <StationList stations={menu} isVisible={isExpanded}/>
-                }
+                <CollapsibleCafeMenuBody
+                    isExpanded={isExpanded}
+                    shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
+                />
             </div>
         </CurrentCafeContext.Provider>
     );

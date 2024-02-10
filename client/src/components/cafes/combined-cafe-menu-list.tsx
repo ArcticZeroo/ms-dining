@@ -1,68 +1,11 @@
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../api/dining.ts';
+import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
-import { SelectedDateContext } from '../../context/time.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
-import { CafeMenu, CafeView, ICafe } from '../../models/cafe.ts';
+import { CafeView } from '../../models/cafe.ts';
 import { expandAndFlattenView } from '../../util/view.ts';
 import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
-
-import './combined-cafes.css';
 import { CartPopup } from '../order/cart/cart-popup.tsx';
-
-interface IMenuWithCafe {
-    cafe: ICafe;
-    menu: CafeMenu;
-}
-
-const useMenuData = (views: Iterable<CafeView>, viewsById: Map<string, CafeView>, countTowardsLastUsed: boolean) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-
-    const loadMenuAsync = useCallback(async (cafe: ICafe): Promise<IMenuWithCafe> => {
-        const menu = await DiningClient.retrieveCafeMenu({
-            id:                         cafe.id,
-            date:                       selectedDate,
-            shouldCountTowardsLastUsed: countTowardsLastUsed
-        });
-        return { cafe, menu };
-    }, [selectedDate, countTowardsLastUsed]);
-
-    const cafes = useMemo(
-        () => Array.from(views).flatMap(view => expandAndFlattenView(view, viewsById)),
-        [views, viewsById]
-    );
-
-    const loadMenusAsync = useCallback(() => {
-        const menuPromises: Array<Promise<IMenuWithCafe>> = [];
-
-        for (const cafe of cafes) {
-            menuPromises.push(loadMenuAsync(cafe));
-        }
-
-        return Promise.all(menuPromises);
-    }, [cafes, loadMenuAsync]);
-
-    const { stage, run, value } = useDelayedPromiseState(loadMenusAsync, true /*keepLastValue*/);
-
-    useEffect(() => {
-        run();
-    }, [run]);
-
-    const menuData: IMenuWithCafe[] = useMemo(
-        () => {
-            if (!value) {
-                return cafes.map(cafe => ({ cafe, menu: [] }));
-            }
-
-            return value;
-        },
-        [value, cafes]
-    );
-
-    return [stage, menuData] as const;
-};
+import './combined-cafes.css';
 
 interface ICombinedCafeMenuListProps {
     views: Iterable<CafeView>;
@@ -76,19 +19,21 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
     showGroupNames
 }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const [menuDataStage, menuData] = useMenuData(views, viewsById, countTowardsLastUsed);
-    const isLoading = menuDataStage === PromiseStage.running;
+
+    const cafes = useMemo(
+        () => Array.from(views).flatMap(view => expandAndFlattenView(view, viewsById)),
+        [views, viewsById]
+    );
 
     return (
         <div className="collapsible-menu-list">
             {
-                menuData.map(({ cafe, menu }) => (
+                cafes.map(cafe => (
                     <CollapsibleCafeMenu
                         key={cafe.id}
                         cafe={cafe}
-                        menu={menu}
                         showGroupName={showGroupNames}
-                        isLoading={isLoading}
+                        shouldCountTowardsLastUsed={countTowardsLastUsed}
                     />
                 ))
             }
