@@ -1,15 +1,38 @@
 import Router from '@koa/router';
+import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
+import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireMenusNotUpdating } from '../../../middleware/menu.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { AllMenusResponse, MenuResponse } from '../../../models/routes.js';
+import { MenuResponse } from '../../../models/routes.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+
+const getDefaultUniquenessDataForStation = (station: ICafeStation): IStationUniquenessData => {
+    return {
+        daysThisWeek: 1,
+        itemDays: {
+            1: station.menuItemsById.size
+        }
+    };
+}
+
+const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
+    if (uniquenessData == null) {
+        console.error('Expected uniqueness data to be non-null when menu stations are present');
+        return getDefaultUniquenessDataForStation(station);
+    }
+
+    if (!uniquenessData.has(station.name)) {
+        console.error(`Expected uniqueness data to have entry for station ${station.name}`);
+        return getDefaultUniquenessDataForStation(station);
+    }
+
+    return uniquenessData.get(station.name)!;
+}
 
 export const registerMenuRoutes = (parent: Router) => {
     const router = new Router();
@@ -18,15 +41,7 @@ export const registerMenuRoutes = (parent: Router) => {
         const menusByStation: MenuResponse = [];
 
         for (const station of menuStations) {
-            if (uniquenessData == null) {
-                throw new Error('Expected uniqueness data to be non-null when menu stations are present');
-            }
-
-            if (!uniquenessData.has(station.name)) {
-                throw new Error(`Expected uniqueness data to have entry for station ${station.name}`);
-            }
-
-            const uniquenessDataForStation = uniquenessData.get(station.name)!;
+            const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
 
             const itemsByCategory: Record<string, Array<IMenuItem>> = {};
 
