@@ -226,6 +226,10 @@ html, body, #root, .App {
     flex-wrap: wrap;
 }
 
+.flex-end {
+    justify-content: flex-end;
+}
+
 .collapsible-content .collapse-toggle {
     font-size: 1.4em;
     text-align: center;

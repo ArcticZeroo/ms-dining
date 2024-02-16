@@ -33,10 +33,12 @@ export interface ISubmitOrderParams {
     cardData: ICardData;
 }
 
+export interface ISubmitOrderItems {
+    [cafeId: string]: ISerializedCartItem[];
+}
+
 export interface ISubmitOrderRequest extends ISubmitOrderParams {
-    itemsByCafeId: {
-        [cafeId: string]: ISerializedCartItem[]
-    }
+    itemsByCafeId: ISubmitOrderItems;
 }
 
 export enum SubmitOrderStage {

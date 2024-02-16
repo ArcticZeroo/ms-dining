@@ -11,5 +11,10 @@ export const registerApiRoutes = (parent: Router) => {
     registerCafeRoutes(router);
     registerAnalyticsRoutes(router);
 
+    // Bad routes under /api should not hit the catch-all for the SPA
+    router.use((ctx) => {
+        ctx.throw(404, 'Resource not found');
+    });
+
     attachRouter(parent, router);
 };

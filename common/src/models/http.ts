@@ -49,3 +49,9 @@ export interface IWaitTimeResponse {
     minTime: number;
     maxTime: number;
 }
+
+export interface IPriceResponse {
+    totalPriceWithTax: number;
+    totalPriceWithoutTax: number;
+    totalTax: number;
+}

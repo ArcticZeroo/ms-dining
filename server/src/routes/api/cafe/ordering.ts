@@ -1,11 +1,14 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import {
-    ICardData, ICartItem, IOrderCompletionResponse,
+    ICardData,
+    ICartItem,
+    IOrderCompletionResponse,
     ISerializedCartItem,
     ISerializedModifier,
-    ISubmitOrderParams,
-    ISubmitOrderRequest, SubmitOrderStage
+    ISubmitOrderItems,
+    ISubmitOrderRequest,
+    SubmitOrderStage
 } from '@msdining/common/dist/models/cart.js';
 import { attachRouter } from '../../../util/koa.js';
 import { CafeOrderSession } from '../../../api/cafe/session/order.js';
@@ -15,11 +18,11 @@ import { DateUtil } from '@msdining/common';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.js';
-import Koa from 'koa';
 import { WaitTimeSession } from '../../../api/cafe/session/wait-time.js';
 import { cafesById } from '../../../constants/cafes.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import Duration from '@arcticzeroo/duration';
+import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 
 const isDuckTypeModifier = (data: unknown): data is ISerializedModifier => {
     if (!isDuckType<ISerializedModifier>(data, { modifierId: 'string', choiceIds: 'object' })) {
@@ -48,6 +51,28 @@ const isDuckTypeSerializedCartItem = (data: unknown): data is ISerializedCartIte
 
     if (!data.modifiers.every(isDuckTypeModifier)) {
         return false;
+    }
+
+    return true;
+}
+
+const isDuckTypeJsonObject = (data: unknown): data is Record<string, unknown> => {
+    return data != null && typeof data === 'object' && !Array.isArray(data);
+}
+
+const isValidItemsByCafeId = (data: unknown): data is ISubmitOrderItems => {
+    if (!isDuckTypeJsonObject(data)) {
+        return false;
+    }
+
+    for (const items of Object.values(data)) {
+        if (!Array.isArray(items)) {
+            return false;
+        }
+
+        if (!items.every(isDuckTypeSerializedCartItem)) {
+            return false;
+        }
     }
 
     return true;
@@ -101,12 +126,12 @@ interface ICafeCartData {
     cartItems: Array<ICartItem>;
 }
 
-const validateCartData = async (ctx: Koa.Context, data: ISubmitOrderRequest): Promise<Map<string, ICafeCartData>> => {
+const validateCartData = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderItems): Promise<Map<string, ICafeCartData>> => {
     const cartDataByCafeId = new Map<string, ICafeCartData>();
 
     const nowDateString = DateUtil.toDateString(new Date());
 
-    for (const [cafeId, serializedItems] of Object.entries(data.itemsByCafeId)) {
+    for (const [cafeId, serializedItems] of Object.entries(itemsByCafeId)) {
         const cafe = await CafeStorageClient.retrieveCafeAsync(cafeId);
         if (cafe == null) {
             return ctx.throw(400, `Cafe with id ${cafeId} does not exist`);
@@ -117,7 +142,7 @@ const validateCartData = async (ctx: Koa.Context, data: ISubmitOrderRequest): Pr
             cartItems: []
         };
 
-        const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(nowDateString, cafeId);
+        const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowDateString);
 
         for (const serializedItem of serializedItems) {
             const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(serializedItem.itemId);
@@ -149,6 +174,8 @@ const validateCartData = async (ctx: Koa.Context, data: ISubmitOrderRequest): Pr
                     return ctx.throw(400, `Invalid choice(s) for modifier ${modifier.description}`);
                 }
             }
+
+            cartData.cartItems.push(cartItem);
         }
 
         cartDataByCafeId.set(cafeId, cartData);
@@ -195,6 +222,66 @@ export const registerOrderingRoutes = (parent: Router) => {
         }
     );
 
+    const validateAndPrepareOrderSessions = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderItems, prepareBeforeOrder: boolean) => {
+        const cartItemsByCafeId = await validateCartData(ctx, itemsByCafeId);
+
+        const orderSessionsByCafeId = new Map<string, CafeOrderSession>();
+        const preparePromises: Array<Promise<void>> = [];
+
+        const prepareSession = async (cafeId: string, cartData: ICafeCartData) => {
+            const session = new CafeOrderSession(cartData.cafe, cartData.cartItems);
+            orderSessionsByCafeId.set(cafeId, session);
+            await session.initialize();
+            await session.populateCart();
+
+            if (prepareBeforeOrder) {
+                await session.prepareBeforeOrder();
+            }
+        }
+
+        for (const [cafeId, cartData] of cartItemsByCafeId) {
+            preparePromises.push(prepareSession(cafeId, cartData));
+        }
+
+        await Promise.all(preparePromises);
+
+        if (prepareBeforeOrder) {
+            for (const [cafeId, session] of orderSessionsByCafeId.entries()) {
+                if (!session.isReadyForSubmit) {
+                    return ctx.throw(503, `Cafe ${cafeId} is not ready to submit order`);
+                }
+            }
+        }
+
+        return orderSessionsByCafeId;
+    }
+
+    router.post('/price', async ctx => {
+        const itemsByCafeId = ctx.request.body;
+
+        if (!isValidItemsByCafeId(itemsByCafeId)) {
+            return ctx.throw(400, 'Invalid request body');
+        }
+
+        const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, itemsByCafeId, false /*prepareBeforeOrder*/);
+
+        let totalPriceWithTax = 0;
+        let totalPriceWithoutTax = 0;
+        let totalTax = 0;
+
+        for (const session of orderSessionsByCafeId.values()) {
+            totalPriceWithTax += session.orderTotalWithTax;
+            totalPriceWithoutTax += session.orderTotalWithoutTax;
+            totalTax += session.orderTotalTax;
+        }
+
+        ctx.body = jsonStringifyWithoutNull({
+            totalPriceWithTax,
+            totalPriceWithoutTax,
+            totalTax
+        });
+    });
+
     // If you happen to be reading this code on github, don't try requesting to this endpoint right now!
     // It's probably not going to work, and you might get charged for an order you didn't place.
     router.post('/', async ctx => {
@@ -204,29 +291,7 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
-        const cartItemsByCafeId = await validateCartData(ctx, data);
-
-        const orderSessionsByCafeId = new Map<string, CafeOrderSession>();
-        const preparePromises: Array<Promise<void>> = [];
-
-        const prepareSession = async (cafeId: string, cartData: ICafeCartData) => {
-            const session = new CafeOrderSession(cartData.cafe);
-            orderSessionsByCafeId.set(cafeId, session);
-            await session.initialize();
-            await session.prepareOrder(cartData.cartItems);
-        }
-
-        for (const [cafeId, cartData] of cartItemsByCafeId) {
-            preparePromises.push(prepareSession(cafeId, cartData));
-        }
-
-        await Promise.all(preparePromises);
-
-        for (const [cafeId, session] of orderSessionsByCafeId.entries()) {
-            if (!session.isReadyForSubmit) {
-                return ctx.throw(503, `Cafe ${cafeId} is not ready to submit order`);
-            }
-        }
+        const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, data.itemsByCafeId, true /*prepareBeforeOrder*/);
 
         const orderPromises: Array<Promise<void>> = [];
 

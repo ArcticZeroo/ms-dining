@@ -2,7 +2,7 @@
     text-align: center;
 }
 
-.cart-item .quantity, .cart-item .price {
+.cart-item .quantity, .cart-contents .price {
     white-space: pre;
     font-family: monospace;
     font-size: 1.3em;
@@ -13,7 +13,7 @@
     width: 5em;
 }
 
-.cart-item .price {
+.cart-contents .price {
     /* $9999.99 plus padding */
     width: 10em;
 }

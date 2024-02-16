@@ -11,9 +11,9 @@ export interface EnvironmentSettings {
 export const isDev = process.env.NODE_ENV?.toLowerCase() === 'dev';
 
 const devEnvironmentSettings: EnvironmentSettings = {
-    shouldFetchOnlyOneCafe:    true,
-    shouldFetchOnlyOneStation: true,
-    skipDailyRepair:           false,
+    shouldFetchOnlyOneCafe:    false,
+    shouldFetchOnlyOneStation: false,
+    skipDailyRepair:           true,
     skipWeeklyRepair:          true,
     maxConcurrentRequests:     5,
     maxConcurrentCafes:        5,

@@ -10,16 +10,12 @@ import {
 } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { FavoritesCache } from './cache/favorites.ts';
-import { makeRequest } from './request.ts';
+import { JSON_HEADERS, makeJsonRequest } from './request.ts';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { InternalSettings } from '../constants/settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
-
-const JSON_HEADERS = {
-    'Content-Type': 'application/json'
-};
 
 interface IRetrieveCafeMenuParams {
     id: string;
@@ -33,7 +29,7 @@ export abstract class DiningClient {
     private static readonly _favoritesCache = new FavoritesCache();
 
     private static async _retrieveViewListInner(): Promise<IDiningCoreResponse> {
-        return makeRequest({ path: '/api/dining/' });
+        return makeJsonRequest({ path: '/api/dining/' });
     }
 
     public static retrieveViewList(): Promise<IDiningCoreResponse> {
@@ -45,7 +41,7 @@ export abstract class DiningClient {
     }
 
     private static _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
-        return makeRequest({
+        return makeJsonRequest({
             path: `/api/dining/menu/${id}?date=${dateString}`
         });
     }
@@ -166,7 +162,7 @@ export abstract class DiningClient {
     }
 
     public static async retrieveSearchResults(query: string): Promise<Array<IQuerySearchResult>> {
-        const response = await makeRequest({
+        const response = await makeJsonRequest({
             path: `/api/dining/search?q=${encodeURIComponent(query)}`
         });
 
@@ -186,7 +182,7 @@ export abstract class DiningClient {
             }
         }
 
-        const response = await makeRequest({
+        const response = await makeJsonRequest({
             path:    `/api/dining/search/favorites`,
             options: {
                 method:  'POST',
@@ -204,7 +200,7 @@ export abstract class DiningClient {
     }
 
     public static async retrieveCheapItems(): Promise<Array<ICheapItemSearchResult>> {
-        const response = await makeRequest({
+        const response = await makeJsonRequest({
             path: `/api/dining/search/cheap`
         });
 
@@ -231,7 +227,7 @@ export abstract class DiningClient {
     }
 
     public static async retrieveWaitTimeForItems(cafeId: string, itemCount: number): Promise<IWaitTimeResponse> {
-        const response = await makeRequest({
+        const response = await makeJsonRequest({
             path:    `/api/dining/order/wait/${cafeId}?items=${itemCount}`
         });
 

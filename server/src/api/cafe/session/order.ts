@@ -15,7 +15,7 @@ import { StringUtil } from '../../../util/string.js';
 import { fixed } from '../../../util/math.js';
 import { makeRequestWithRetries } from '../../../util/request.js';
 import fetch from 'node-fetch';
-import { IMenuItem } from '../../../models/cafe.js';
+import { ICafe, IMenuItem } from '../../../models/cafe.js';
 
 const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+type="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
 
@@ -60,6 +60,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
     #lastCompletedStage: SubmitOrderStage = SubmitOrderStage.notStarted;
     #cardProcessorToken: string = '';
     #xssToken: string = '';
+    readonly #cartItems: ICartItem[];
+    readonly #serializedCartItems: Array<object> = [];
+
+    constructor(cafe: ICafe, cartItems: ICartItem[]) {
+        super(cafe);
+        this.#cartItems = cartItems;
+    }
 
     public get isReadyForSubmit() {
         return this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
@@ -67,6 +74,18 @@ export class CafeOrderSession extends CafeDiscoverySession {
 
     public get orderNumber() {
         return this.#orderNumber;
+    }
+
+    public get orderTotalWithoutTax() {
+        return this.#orderTotalWithoutTax;
+    }
+
+    public get orderTotalTax() {
+        return this.#orderTotalTax;
+    }
+
+    public get orderTotalWithTax() {
+        return this.#orderTotalWithTax;
     }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
@@ -191,30 +210,32 @@ export class CafeOrderSession extends CafeDiscoverySession {
 
         const receiptText = menuItem.receiptText || menuItem.name;
 
+        const serializedItem = {
+            id:                   menuItem.id,
+            allowPriceOverride:   true,
+            displayText:          menuItem.name,
+            properties:           {
+                cartGuid:     this.#cartGuid,
+                priceLevelId: this.#orderingContext.storePriceLevel
+            },
+            amount:               menuItem.price.toFixed(2),
+            options:              [],
+            lineItemInstructions: instructions,
+            cartItemId:           cartItemId,
+            count:                cartItem.quantity,
+            quantity:             cartItem.quantity,
+            selectedModifiers:    serializedModifiers,
+            kpText:               receiptText,
+            receiptText:          receiptText,
+            kitchenDisplayText:   receiptText
+        };
+
         const response = await this._requestAsync(`/order/${this.config.tenantId}/${this.config.contextId}/orders`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    item:            {
-                        id:                   menuItem.id,
-                        allowPriceOverride:   true,
-                        displayText:          menuItem.name,
-                        properties:           {
-                            cartGuid:     this.#cartGuid,
-                            priceLevelId: this.#orderingContext.storePriceLevel
-                        },
-                        amount:               menuItem.price.toFixed(2),
-                        options:              [],
-                        lineItemInstructions: instructions,
-                        cartItemId:           cartItemId,
-                        count:                1,
-                        quantity:             1,
-                        selectedModifiers:    serializedModifiers,
-                        kpText:               receiptText,
-                        receiptText:          receiptText,
-                        kitchenDisplayText:   receiptText
-                    },
+                    item:            serializedItem,
                     scheduledDay:    0,
                     scheduleTime:    {
                         'startTime': '11:15 AM',
@@ -246,11 +267,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
         this.#orderTotalTax += Number(json.orderDetails.taxTotalAmount.amount);
         this.#orderTotalWithoutTax += Number(json.orderDetails.taxExcludedTotalAmount.amount);
         this.#orderTotalWithTax += Number(json.orderDetails.totalDueAmount.amount);
+
+        this.#serializedCartItems.push(serializedItem);
     }
 
-    private async _populateCart(cart: ICartItem[]) {
+    private async _populateCart() {
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
-        for (const cartItem of cart) {
+        for (const cartItem of this.#cartItems) {
             await this._addItemToCart(cartItem);
         }
     }
@@ -274,7 +297,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    {
+                body:    JSON.stringify({
                     taxAmount:            this.#orderTotalTax,
                     invoiceId:            this.#orderNumber,
                     billDate:             nowString,
@@ -295,7 +318,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     profitCenterId:       this.#orderingContext.profitCenterId,
                     processButtonText:    'PROCESS',
                     terminalId:           this.#orderingContext.onDemandTerminalId
-                }
+                })
             });
 
         const json = await response.json();
@@ -491,25 +514,34 @@ export class CafeOrderSession extends CafeDiscoverySession {
         )
     }
 
-    public async prepareOrder(items: ICartItem[]): Promise<void> {
-        if (this.#lastCompletedStage !== SubmitOrderStage.notStarted) {
-            throw new Error('Order has already been started!');
+    private async _runStages(requiredStage: SubmitOrderStage, callback: () => Promise<void>): Promise<void> {
+        if (this.#lastCompletedStage !== requiredStage) {
+            throw new Error(`Order is in the wrong stage! Expected: ${requiredStage}, actual: ${this.#lastCompletedStage}`);
         }
 
         this.#orderingContext = await this._retrieveOrderingContextAsync();
 
         try {
-            await this._populateCart(items);
+            await callback();
+        } catch (err) {
+            console.error(`Failed to after stage ${this.#lastCompletedStage}:`, err);
+        }
+    }
 
+    public async populateCart(): Promise<void> {
+        await this._runStages(SubmitOrderStage.notStarted, async () => {
+            await this._populateCart();
             this.#lastCompletedStage = SubmitOrderStage.addToCart;
+        });
+    }
 
+    public async prepareBeforeOrder(): Promise<void> {
+        await this._runStages(SubmitOrderStage.addToCart, async () => {
             this.#cardProcessorToken = await this._getCardProcessorSiteToken();
             this.#xssToken = await this._retrieveCardProcessorXssToken();
 
             this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
-        } catch (err) {
-            console.error(`Failed to prepare order after stage ${this.#lastCompletedStage}:`, err);
-        }
+        });
     }
 
     // TODO: Figure out a way to break this up into two separate actions to reduce user-perceived latency.
@@ -524,13 +556,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                                  cardData,
                                  phoneNumberWithCountryCode,
                              }: ISubmitOrderParams): Promise<void> {
-        if (!this.isReadyForSubmit) {
-            throw new Error('Order is not ready to submit!');
-        }
-
-        this.#orderingContext = await this._retrieveOrderingContextAsync();
-
-        try {
+        await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
             const submittedPaymentToken = await this._submitPaymentToCardProcessor(this.#cardProcessorToken, cardData);
 
             this.#lastCompletedStage = SubmitOrderStage.payment;
@@ -541,10 +567,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
 
             // WTF do we do if it fails in this stage?
             await this._sendPhoneConfirmation(phoneNumberWithCountryCode);
-        } catch (err) {
-            console.error(`Failed to submit order after stage ${this.#lastCompletedStage}:`, err);
-        }
 
-        this.#lastCompletedStage = SubmitOrderStage.complete;
+            this.#lastCompletedStage = SubmitOrderStage.complete;
+        });
     }
 }

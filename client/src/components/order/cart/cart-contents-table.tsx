@@ -15,14 +15,16 @@ import { getViewMenuUrl } from '../../../util/link.ts';
 
 import './cart-contents-table.css';
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
 interface ICartContentsTableProps {
     showModifiers?: boolean;
+    showTotalPrice?: boolean;
 }
 
-export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModifiers = false }) => {
+export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModifiers = false, showTotalPrice = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsNotifier = useContext(CartContext);
@@ -129,6 +131,9 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModif
         <table className="cart-contents">
             <tbody>
                 {cartItemsView}
+                {
+                    showTotalPrice && <OrderPriceInlineTable/>
+                }
             </tbody>
         </table>
     );

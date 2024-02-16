@@ -1,6 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { ICartItemWithMetadata } from '../models/cart.ts';
+import { IMenuItem } from '../models/cafe.ts';
 
 export const getPriceDisplay = (price: number, addCurrencySign: boolean = true) => {
     if (price === 0) {
@@ -75,3 +76,19 @@ export const shallowCloneCart = (cart: CartItemsByCafeId) => {
 
     return newCart;
 }
+
+export const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
+    let price = menuItem.price;
+
+    for (const modifier of menuItem.modifiers) {
+        const selectedChoiceIds = selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
+
+        for (const choice of modifier.choices) {
+            if (selectedChoiceIds.has(choice.id)) {
+                price += choice.price;
+            }
+        }
+    }
+
+    return price;
+};

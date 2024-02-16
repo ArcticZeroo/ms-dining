@@ -1,8 +1,10 @@
 import { Response } from 'node-fetch';
 import { runPromiseWithRetries } from './async.js';
+import { logDebug } from './log.js';
 
 export const validateSuccessResponse = (response: Response) => {
 	if (!response.ok) {
+		response.text().then(logDebug);
 		throw new Error(`Response failed with status: ${response.status}`);
 	}
 };

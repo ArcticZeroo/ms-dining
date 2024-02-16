@@ -14,6 +14,7 @@ import { OrderStatus } from '../../order/status/order-status.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 import { DebugSettings } from '../../../constants/settings.ts';
+import { OrderPriceInlineTable } from '../../order/order-price-inline-table.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
@@ -47,7 +48,7 @@ export const OrderPage = () => {
                     <div className="title">
                         Your Order
                     </div>
-                    <CartContentsTable showModifiers={true}/>
+                    <CartContentsTable showModifiers={true} showTotalPrice={true}/>
                     <WaitTime/>
                 </div>
                 {cart.size > 1 && <MultiCafeOrderWarning/>}

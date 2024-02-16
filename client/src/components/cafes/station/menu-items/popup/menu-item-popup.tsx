@@ -9,7 +9,7 @@ import { SelectedDateContext } from '../../../../../context/time.ts';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
-import { addOrEditCartItem, shallowCloneCart } from '../../../../../util/cart.ts';
+import { addOrEditCartItem, calculatePrice, shallowCloneCart } from '../../../../../util/cart.ts';
 import { getRandomId } from '../../../../../util/id.ts';
 import { getViewMenuUrlWithJump } from '../../../../../util/link.ts';
 import { navigateToSearch } from '../../../../../util/search.ts';
@@ -21,22 +21,6 @@ import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
 import { ApplicationSettings } from '../../../../../constants/settings.ts';
-
-const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
-    let price = menuItem.price;
-
-    for (const modifier of menuItem.modifiers) {
-        const selectedChoiceIds = selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
-
-        for (const choice of modifier.choices) {
-            if (selectedChoiceIds.has(choice.id)) {
-                price += choice.price;
-            }
-        }
-    }
-
-    return price;
-};
 
 const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
     return useMemo(

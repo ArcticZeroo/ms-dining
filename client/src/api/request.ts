@@ -8,7 +8,11 @@ interface IMakeRequestParams {
     options?: RequestInit;
 }
 
-export const makeRequest = async <T>({
+export const JSON_HEADERS = {
+    'Content-Type': 'application/json'
+};
+
+export const makeJsonRequest = async <T>({
     path,
     options = {}
 }: IMakeRequestParams): Promise<T> => {
