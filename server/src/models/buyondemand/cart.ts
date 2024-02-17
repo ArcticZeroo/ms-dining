@@ -24,6 +24,11 @@ export interface IRequestCartItem {
     options: []
 }
 
+export interface IOrderLineItem {
+    lineItemId: string;
+    // other stuff that I don't really care to capture here
+}
+
 export interface IAddToOrderResponse {
     orderDetails: {
         orderId: string,
@@ -37,6 +42,7 @@ export interface IAddToOrderResponse {
         totalDueAmount: {
             amount: string
         },
+        lineItems: IOrderLineItem[]
     },
 }
 
@@ -48,6 +54,16 @@ export interface ICardProcessorPaymentResponse {
     token?: string;
     transactionReferenceData?: {
         token: string;
+    }
+    cardInfo: {
+        cardIssuer: string;
+        accountNumberMasked: string;
+        expirationYearMonth: string;
+        cardHolderName: string;
+        postalCode: string;
+    },
+    gatewayResponseData: {
+        decision: 'ACCEPT' | string;
     }
 }
 

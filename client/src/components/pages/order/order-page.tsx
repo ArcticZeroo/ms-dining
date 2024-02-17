@@ -14,7 +14,6 @@ import { OrderStatus } from '../../order/status/order-status.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 import { DebugSettings } from '../../../constants/settings.ts';
-import { OrderPriceInlineTable } from '../../order/order-price-inline-table.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);

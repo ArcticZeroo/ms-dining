@@ -14,6 +14,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@arcticzeroo/duration": "^2.0.2"
+    "@arcticzeroo/duration": "^2.0.2",
+    "credit-card-type": "^10.0.0"
   }
 }

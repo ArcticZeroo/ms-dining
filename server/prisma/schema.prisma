@@ -36,8 +36,8 @@ model MenuItem {
   price       Float
 
   // externalItemId String?
-  externalLastUpdateTime     DateTime?
-  externalReceiptText        String?
+  externalLastUpdateTime DateTime?
+  externalReceiptText    String?
 
   dailyMenuItems DailyMenuItem[]
   modifiers      MenuItemModifier[]
@@ -124,6 +124,7 @@ model DailyCafeOrderingContext {
   onDemandEmployeeId String
   onDemandTerminalId String
   profitCenterId     String
+  profitCenterName   String
   storePriceLevel    String
 
   cafeId String

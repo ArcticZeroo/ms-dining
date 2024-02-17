@@ -23,6 +23,7 @@ import { cafesById } from '../../../constants/cafes.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import Duration from '@arcticzeroo/duration';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
+import { phone } from 'phone';
 
 const isDuckTypeModifier = (data: unknown): data is ISerializedModifier => {
     if (!isDuckType<ISerializedModifier>(data, { modifierId: 'string', choiceIds: 'object' })) {
@@ -291,6 +292,12 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
+        const phoneData = phone(data.phoneNumberWithCountryCode);
+
+        if (!phoneData.isValid) {
+            return ctx.throw(400, 'Invalid phone number');
+        }
+
         const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, data.itemsByCafeId, true /*prepareBeforeOrder*/);
 
         const orderPromises: Array<Promise<void>> = [];
@@ -299,7 +306,7 @@ export const registerOrderingRoutes = (parent: Router) => {
             orderPromises.push(session.submitOrder({
                 alias:                      data.alias,
                 cardData:                   data.cardData,
-                phoneNumberWithCountryCode: data.phoneNumberWithCountryCode
+                phoneData
             }));
         }
 
