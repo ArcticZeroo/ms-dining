@@ -574,7 +574,6 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         maxCalorie:  0
                     },
                     capacitySuggestionPerformed:     false,
-                    conceptId:                       '', // todo, maybe not needed since we can order at multiple at once
                     contextId:                       this.config.contextId,
                     currencyDetails:                 {
                         currencyCode:          'USD',
@@ -663,7 +662,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         storeInfo:           {
                             businessContextId:       this.config.contextId,
                             tenantId:                this.config.tenantId,
-                            storeInfoId:             '1376', // todo?
+                            storeInfoId:             this.config.storeId,
                             storeName:               this.cafe.name,
                             timezone:                'PST8PDT',
                             properties:              {

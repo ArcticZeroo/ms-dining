@@ -4,5 +4,8 @@ export interface ISiteDataResponseItem {
         onDemandTerminalId: string;
         onDemandEmployeeId: string;
         'profit-center-id': string;
+    };
+    siteStoreInfo: {
+        storeInfoId: string
     }
 }
