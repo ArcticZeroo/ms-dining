@@ -19,6 +19,24 @@ export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcu
 const cafeDiscoveryRetryCount = 3;
 const cafeDiscoveryRetryDelayMs = 1000;
 
+const dateStringsCurrentlyUpdatingByCafeId = new Map<string /*cafeId*/, Set<string /*dateString*/>>();
+
+const retrieveUpdatingDateStringsForCafe = (cafe: ICafe) => {
+    if (!dateStringsCurrentlyUpdatingByCafeId.has(cafe.id)) {
+        dateStringsCurrentlyUpdatingByCafeId.set(cafe.id, new Set());
+    }
+
+    return dateStringsCurrentlyUpdatingByCafeId.get(cafe.id)!;
+}
+
+export const isCafeCurrentlyUpdating = (dateString: string, cafe: ICafe) => {
+    return dateStringsCurrentlyUpdatingByCafeId.get(cafe.id)?.has(dateString) ?? false;
+}
+
+export const isAnyCafeCurrentlyUpdating = () => {
+    return dateStringsCurrentlyUpdatingByCafeId.size > 0;
+}
+
 export class DailyCafeUpdateSession {
     public readonly cafeSessionsById = new Map<string, CafeMenuSession>();
 
@@ -59,36 +77,41 @@ export class DailyCafeUpdateSession {
     }
 
     private async discoverCafeAsync(cafe: ICafe) {
-        await DailyMenuStorageClient.deleteDailyMenusAsync(this.dateString, cafe.id);
-
-        const stations = await runPromiseWithRetries(
-            (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),
-            cafeDiscoveryRetryCount,
-            cafeDiscoveryRetryDelayMs
-        );
-
         try {
-            await writeThumbnailsForCafe(cafe, stations);
-        } catch (e) {
-            logError('Unhandled error while populating thumbnails for cafe', cafe.name, 'with error:', e);
-        }
+            retrieveUpdatingDateStringsForCafe(cafe).add(this.dateString);
 
-        await saveSessionAsync({
-            cafe,
-            stations,
-            dateString: this.dateString,
-            shouldUpdateExistingItems: true
-        });
+            await DailyMenuStorageClient.deleteDailyMenusAsync(this.dateString, cafe.id);
+
+            const stations = await runPromiseWithRetries(
+                (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),
+                cafeDiscoveryRetryCount,
+                cafeDiscoveryRetryDelayMs
+            );
+
+            try {
+                await writeThumbnailsForCafe(cafe, stations);
+            } catch (e) {
+                logError('Unhandled error while populating thumbnails for cafe', cafe.name, 'with error:', e);
+            }
+
+            await saveSessionAsync({
+                cafe,
+                stations,
+                dateString: this.dateString,
+                shouldUpdateExistingItems: true
+            });
+        } finally {
+            const updatingDateStrings = retrieveUpdatingDateStringsForCafe(cafe);
+
+            updatingDateStrings.delete(this.dateString);
+
+            if (updatingDateStrings.size === 0) {
+                dateStringsCurrentlyUpdatingByCafeId.delete(cafe.id);
+            }
+        }
     }
 
     public async populateAsync() {
-        if (ApplicationContext.isMenuUpdateInProgress) {
-            logError(`{${this.dateString}} Menu update already in progress, skipping...`);
-            return;
-        }
-
-        ApplicationContext.isMenuUpdateInProgress = true;
-
         await this.resetDailyState();
 
         logInfo(`{${this.dateString}} Populating cafe sessions...`);
@@ -118,7 +141,5 @@ export class DailyCafeUpdateSession {
         const elapsedSeconds = (endTime - startTime) / 1000;
 
         logInfo(`{${this.dateString}} Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
-
-        ApplicationContext.isMenuUpdateInProgress = false;
     };
 }

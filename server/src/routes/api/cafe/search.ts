@@ -2,13 +2,13 @@ import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { SearchManager } from '../../../api/storage/search.js';
-import { requireMenusNotUpdating } from '../../../middleware/menu.js';
 import { ISearchResult } from '../../../models/search.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { attachRouter, getTrimmedQueryParam } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
+import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -47,7 +47,7 @@ export const registerSearchRoutes = (parent: Router) => {
     }
 
     router.post('/favorites',
-        requireMenusNotUpdating,
+        requireNoMenusUpdating,
         async ctx => {
             const queries = ctx.request.body;
 
@@ -61,7 +61,7 @@ export const registerSearchRoutes = (parent: Router) => {
         });
 
     router.get('/',
-        requireMenusNotUpdating,
+        requireNoMenusUpdating,
         memoizeResponseBodyByQueryParams(),
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');
@@ -76,7 +76,7 @@ export const registerSearchRoutes = (parent: Router) => {
         });
 
     router.get('/cheap',
-        requireMenusNotUpdating,
+        requireNoMenusUpdating,
         memoizeResponseBodyByQueryParams(),
         async ctx => {
             const maxPriceRaw = ctx.query.max;
