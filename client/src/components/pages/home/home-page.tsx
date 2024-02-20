@@ -1,14 +1,15 @@
+import { useEffect } from 'react';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useDatePicker } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
+import { setPageData } from '../../../util/title.ts';
+import { MoreSettingsButton } from '../../button/more-settings-button.tsx';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
 import { HomeFavorites } from './favorites/home-favorites.tsx';
 import { HomeViews } from './home-views.tsx';
 
 import './home.css';
-import { useEffect } from 'react';
-import { setPageData } from '../../../util/title.ts';
 import { HomeWelcomeMessage } from './home-welcome-message.tsx';
-import { ApplicationSettings } from '../../../constants/settings.ts';
 
 const useShouldShowWelcomeMessage = () => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
@@ -41,6 +42,7 @@ export const HomePage = () => {
             }
             <HomeViews/>
             <HomepageSettings requireButtonToCommitHomepageViews={true}/>
+            <MoreSettingsButton/>
         </>
     );
 };

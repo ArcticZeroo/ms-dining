@@ -2,9 +2,9 @@ import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { expandAndFlattenView } from '../../util/view.ts';
+import { CartPopup } from '../order/cart/cart-popup.tsx';
 import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
-import { CartPopup } from '../order/cart/cart-popup.tsx';
 import './combined-cafes.css';
 
 interface ICombinedCafeMenuListProps {
@@ -38,16 +38,6 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                 ))
             }
             <MenuSettings/>
-            <div className="centered-content">
-                <button className="default-container flex default-button">
-                    <span className="material-symbols-outlined">
-                        settings
-                    </span>
-                    <span>
-                        More Settings
-                    </span>
-                </button>
-            </div>
             <CartPopup/>
         </div>
     );
