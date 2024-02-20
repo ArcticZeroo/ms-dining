@@ -1,5 +1,7 @@
 :root {
     --theme-color: #3488e0ff;
+    --card-background: #FAFAFA;
+    --card-foreground: #212121;
 }
 
 body, html {
@@ -30,9 +32,14 @@ image {
     object-fit: contain;
 }
 
+.card, .error-card {
+    background: var(--card-background);
+    color: var(--card-foreground);
+}
+
 .card.error, .error-card {
-    background: #B71C1C;
-    color: white;
+    --card-background: #B71C1C;
+    --card-foreground: white;
     border-radius: var(--default-padding);
     padding: var(--default-padding);
     text-align: center;

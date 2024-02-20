@@ -12,8 +12,19 @@ import { isAnyDateToday } from '../../../../util/search.ts';
 import { expandAndFlattenView } from '../../../../util/view.ts';
 import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
+import { RetryButton } from '../../../button/retry-button.tsx';
+import { MenusCurrentlyUpdatingException } from '../../../../util/exception.ts';
+import { IQuerySearchResult } from '../../../../models/search.ts';
 
-const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
+interface IFavoriteSearchResultsData {
+    stage: PromiseStage;
+    results: IQuerySearchResult[];
+    error?: unknown;
+    actualStage: PromiseStage;
+    retry: () => void;
+}
+
+const useFavoriteSearchResults = (queries: ISearchQuery[]): IFavoriteSearchResultsData => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const retrieveFavoriteSearchResults = useCallback(async () => {
@@ -24,7 +35,7 @@ const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
         return DiningClient.retrieveFavoriteSearchResults(queries);
     }, [queries]);
 
-    const { stage, value, run } = useDelayedPromiseState(
+    const { stage, value, actualStage, error, run } = useDelayedPromiseState(
         retrieveFavoriteSearchResults,
         true /*keepLastValue*/
     );
@@ -41,7 +52,7 @@ const useFavoriteSearchResults = (queries: ISearchQuery[]) => {
         [value, selectedDate]
     );
 
-    return { stage, results: filteredResults } as const;
+    return { stage, results: filteredResults, actualStage, error, retry: run };
 };
 
 interface IHomeFavoritesViewProps {
@@ -67,7 +78,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
         setIsCollapsed(!isCollapsed);
     };
 
-    const { stage, results } = useFavoriteSearchResults(queries);
+    const { stage, results, actualStage, error, retry } = useFavoriteSearchResults(queries);
 
     const shouldHideFavorites = useMemo(
         () => {
@@ -96,7 +107,17 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
         if (stage === PromiseStage.error) {
             return (
                 <div className="error-card">
-                    Could not load favorites.
+                    <span>
+                        Could not load favorites.
+                        {
+                            error instanceof MenusCurrentlyUpdatingException && (
+                                ' Menus are currently updating. Please try again soon!'
+                            )
+                        }
+                    </span>
+                    <span className="centered-content">
+                        <RetryButton onClick={retry} isDisabled={actualStage !== PromiseStage.error}/>
+                    </span>
                 </div>
             );
         }
@@ -123,7 +144,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                 }
             </div>
         );
-    }, [stage, results, selectedDate, cafeIdsOnPage]);
+    }, [stage, results, error, actualStage, retry, selectedDate, cafeIdsOnPage]);
 
     if (shouldHideFavorites) {
         return null;

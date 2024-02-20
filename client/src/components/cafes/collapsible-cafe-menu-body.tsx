@@ -58,6 +58,12 @@ export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = 
         return (
             <div className="centered-content collapse-body">
                 Failed to load menu.
+                <br/>
+                {
+                    actualStage === PromiseStage.error && (
+                        <RetryButton onClick={retrieveMenu}/>
+                    )
+                }
             </div>
         );
     }
