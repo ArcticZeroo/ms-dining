@@ -84,7 +84,7 @@ export abstract class DiningClient {
 
             return menu;
         } catch (err) {
-            DiningClient._cafeMenusByIdPerDateString.delete(id);
+            DiningClient._cafeMenusByIdPerDateString.get(dateString)?.delete(id);
             throw err;
         }
     }

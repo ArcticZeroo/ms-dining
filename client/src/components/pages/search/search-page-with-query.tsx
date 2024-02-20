@@ -9,6 +9,8 @@ import { PriceFiltersSetting } from '../../settings/price-filters-setting.tsx';
 import { EntityButton } from './entity-button.tsx';
 
 import './search-page.css';
+import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
+import { RetryButton } from '../../button/retry-button.tsx';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -20,6 +22,8 @@ interface ISearchResultsState {
     results: IQuerySearchResult[];
     tabCounts: Map<SearchTypes.SearchEntityType, number>;
     lastQuery: string;
+    areMenusCurrentlyUpdating: boolean;
+    retrieveSearchResults: () => void;
 }
 
 const useSearchResultsState = (query: string): ISearchResultsState => {
@@ -33,6 +37,7 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
         actualStage: actualSearchResultStage,
         stage:       searchResultStage,
         value:       searchResults,
+        error:       searchResultsError,
         run:         retrieveSearchResults
     } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
@@ -57,17 +62,27 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
     }, [retrieveSearchResults]);
 
     return {
-        actualStage: actualSearchResultStage,
-        stage:       searchResultStage,
-        results:     allSearchResults,
-        tabCounts:   resultCountByEntityType,
-        lastQuery:       lastQueryText
+        actualStage:               actualSearchResultStage,
+        stage:                     searchResultStage,
+        results:                   allSearchResults,
+        tabCounts:                 resultCountByEntityType,
+        lastQuery:                 lastQueryText,
+        areMenusCurrentlyUpdating: searchResultsError != null && searchResultsError instanceof MenusCurrentlyUpdatingException,
+        retrieveSearchResults
     };
 };
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
-    const { actualStage, stage, results, tabCounts, lastQuery } = useSearchResultsState(queryText);
+    const {
+        actualStage,
+        stage,
+        results,
+        tabCounts,
+        lastQuery,
+        areMenusCurrentlyUpdating,
+        retrieveSearchResults
+    } = useSearchResultsState(queryText);
 
     const sharedEntityButtonProps = {
         currentFilter:    entityFilterType,
@@ -109,12 +124,27 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                 <SearchWaiting stage={actualStage}/>
             </div>
             <PriceFiltersSetting isOwnCard={true}/>
-            {/* use stage here to show the last completed search results */}
             {
                 stage === PromiseStage.error && (
                     <div className="error-card">
-                        Error loading search results!
-                        {/*TODO: Try again*/}
+                        <p>
+                            Error loading search results!
+                        </p>
+                        {
+                            areMenusCurrentlyUpdating && (
+                                <p>
+                                    Menus are currently updating. Please try again soon!
+                                </p>
+                            )
+                        }
+                        {
+                            // If we hit retry, actualStage will change but stage will stay error
+                            actualStage === PromiseStage.error && (
+                                <p>
+                                    <RetryButton onClick={retrieveSearchResults}/>
+                                </p>
+                            )
+                        }
                     </div>
                 )
             }

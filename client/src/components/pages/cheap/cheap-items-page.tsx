@@ -9,15 +9,24 @@ import { CheapItemResult } from './cheap-item-result.tsx';
 import { SelectedDateContext } from '../../../context/time.ts';
 import { setPageData } from '../../../util/title.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
+import { RetryButton } from '../../button/retry-button.tsx';
 
-const useCheapItems = () => {
+interface ICheapItemsResults {
+    stage: PromiseStage;
+    error?: unknown;
+    results: ICheapItemSearchResult[];
+    retry: () => void;
+}
+
+const useCheapItems = (): ICheapItemsResults => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
 
-    const { stage, value: results, error } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
+    const { stage, value: results, error, run } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
 
     const filteredResults = useMemo(
         () => {
@@ -70,11 +79,12 @@ const useCheapItems = () => {
         stage,
         error,
         results: sortedResults,
+        retry: run
     };
 }
 
 export const CheapItemsPage: React.FC = () => {
-    const { stage, results, error } = useCheapItems();
+    const { stage, results, error, retry } = useCheapItems();
 
     useEffect(() => {
         setPageData('Cheap Items', 'View a leaderboard of all menu items offered today at the Microsoft Redmond Campus by calories per dollar');
@@ -86,18 +96,26 @@ export const CheapItemsPage: React.FC = () => {
                 Could not load cheap items.
                 <br/>
                 {String(error)}
+                {
+                    (error != null && error instanceof MenusCurrentlyUpdatingException) && (
+                        <>
+                            <br/>
+                            Menus are currently updating. Please try again soon!
+                            <br/>
+                            <RetryButton onClick={retry}/>
+                        </>
+                    )
+                }
             </div>
         );
     }
-
-    const items = results ?? [];
 
     return (
         <div className="search-page">
             <div className="search-info">
                 <div>
                     <div className="search-result-count">
-                        Total Results: {items.length}
+                        Total Results: {results.length}
                     </div>
                     <div>
                         Sorted by Calories per Dollar (Descending)
@@ -107,8 +125,8 @@ export const CheapItemsPage: React.FC = () => {
             </div>
             <div className="search-results">
                 {
-                    items.map(item => (
-                        <CheapItemResult key={`${item.name} ${item.price}`} item={item}/>
+                    results.map(result => (
+                        <CheapItemResult key={`${result.name} ${result.price}`} item={result}/>
                     ))
                 }
             </div>

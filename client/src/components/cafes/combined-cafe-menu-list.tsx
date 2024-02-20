@@ -38,6 +38,16 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                 ))
             }
             <MenuSettings/>
+            <div className="centered-content">
+                <button className="default-container flex default-button">
+                    <span className="material-symbols-outlined">
+                        settings
+                    </span>
+                    <span>
+                        More Settings
+                    </span>
+                </button>
+            </div>
             <CartPopup/>
         </div>
     );

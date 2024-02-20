@@ -8,6 +8,7 @@ import { pluralize } from '../../../util/string.ts';
 
 import './analytics-page.css';
 import { setPageData } from '../../../util/title.ts';
+import { RetryButton } from '../../button/retry-button.tsx';
 
 const VisitorChart = React.lazy(() => import('./visitor-chart.tsx'));
 
@@ -59,9 +60,7 @@ export const AnalyticsPage = () => {
                 <div>
                     Could not load visit data!
                 </div>
-                <button onClick={loadVisits}>
-                    Retry
-                </button>
+                <RetryButton onClick={loadVisits}/>
             </div>
         );
     }
