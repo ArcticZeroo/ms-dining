@@ -9,7 +9,7 @@ import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { isCafeCurrentlyUpdating } from '../../../api/cafe/cache/update.js';
+import { isAnyCafeCurrentlyUpdating, isCafeCurrentlyUpdating } from '../../../api/cafe/cache/update.js';
 import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
 
 const getDefaultUniquenessDataForStation = (station: ICafeStation): IStationUniquenessData => {
@@ -23,12 +23,10 @@ const getDefaultUniquenessDataForStation = (station: ICafeStation): IStationUniq
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null) {
-        console.error('Expected uniqueness data to be non-null when menu stations are present');
         return getDefaultUniquenessDataForStation(station);
     }
 
     if (!uniquenessData.has(station.name)) {
-        console.error(`Expected uniqueness data to have entry for station ${station.name}`);
         return getDefaultUniquenessDataForStation(station);
     }
 
@@ -110,7 +108,7 @@ export const registerMenuRoutes = (parent: Router) => {
             const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(id, dateString);
 
             let uniquenessData: Map<string, IStationUniquenessData> | null = null;
-            if (menuStations.length > 0) {
+            if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
                 uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(id, dateString);
             }
 
