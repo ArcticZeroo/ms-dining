@@ -20,12 +20,12 @@ export const WaitTime = () => {
             const waitTimes = await Promise.all(waitTimePromises);
 
             const waitTime: IWaitTimeResponse = {
-                minTime: Number.MAX_SAFE_INTEGER,
+                minTime: 0,
                 maxTime: 0,
             };
 
             for (const wait of waitTimes) {
-                waitTime.minTime = Math.min(waitTime.minTime, wait.minTime);
+                waitTime.minTime = Math.max(waitTime.minTime, wait.minTime);
                 waitTime.maxTime = Math.max(waitTime.maxTime, wait.maxTime);
             }
 
