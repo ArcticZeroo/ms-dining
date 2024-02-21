@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { CafeView } from '../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
-import { getParentView } from '../../../util/view.ts';
 import { sortViews } from '../../../util/sorting.ts';
 import { CartItemRow } from './cart-item-row.tsx';
 import { useValueNotifier, useValueNotifierAsState } from '../../../hooks/events.ts';
@@ -16,6 +15,8 @@ import { getViewMenuUrl } from '../../../util/link.ts';
 import './cart-contents-table.css';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
+import { getParentView } from '../../../util/view.ts';
+import { getViewName } from '../../../util/cafe.ts';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
@@ -80,20 +81,18 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModif
                     continue;
                 }
 
-                const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
-
-                const cartItemsById = cartItemsByView.get(parentView) ?? new Map<string, ICartItemWithMetadata>();
+                const cartItemsById = cartItemsByView.get(cafeView) ?? new Map<string, ICartItemWithMetadata>();
 
                 for (const item of itemsById.values()) {
                     cartItemsById.set(item.id, item);
                 }
 
-                cartItemsByView.set(parentView, cartItemsById);
+                cartItemsByView.set(cafeView, cartItemsById);
             }
 
             return cartItemsByView;
         },
-        [cart, shouldUseGroups, viewsById]
+        [cart, viewsById]
     );
 
     const cartItemsView = useMemo(
@@ -104,8 +103,8 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModif
                 <React.Fragment key={view.value.id}>
                     <tr>
                         <th colSpan={4}>
-                            <Link to={getViewMenuUrl(view)} className="cart-cafe-url">
-                                {view.value.name}
+                            <Link to={getViewMenuUrl(getParentView(viewsById, view, shouldUseGroups))} className="cart-cafe-url">
+                                {getViewName(view, true /*showGroupName*/)}
                             </Link>
                         </th>
                     </tr>

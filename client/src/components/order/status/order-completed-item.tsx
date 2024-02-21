@@ -2,6 +2,7 @@ import { IOrderCompletionData, SubmitOrderStage } from '@msdining/common/dist/mo
 import React from 'react';
 import { CafeView } from '../../../models/cafe.ts';
 import { classNames } from '../../../util/react.ts';
+import { getViewName } from '../../../util/cafe.ts';
 
 const LAST_COMPLETED_STAGE_NICE_TEXT = {
     [SubmitOrderStage.notStarted]: 'Not Started',
@@ -24,7 +25,7 @@ export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({ view, r
     return (
         <div key={view.value.id} className={classNames('card', isSuccess ? 'dark-blue' : 'error')}>
             <div className="title">
-                {view.value.name}
+                {getViewName(view, true /*showGroupName*/)}
             </div>
             {
                 !isSuccess && (
