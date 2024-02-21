@@ -1,9 +1,9 @@
-import { CartContext } from '../../context/cart.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { IWaitTimeResponse } from '@msdining/common/dist/models/http';
 import { useCallback, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../api/dining.ts';
-import { IWaitTimeResponse } from '@msdining/common/dist/models/http';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { CartContext } from '../../context/cart.ts';
+import { useValueNotifierContext } from '../../hooks/events.ts';
 
 export const WaitTime = () => {
     const cartItemsByCafeId = useValueNotifierContext(CartContext);
@@ -47,12 +47,12 @@ export const WaitTime = () => {
 
     const waitTimeView = useMemo(
         () => {
-            if (waitTimeState.stage === PromiseStage.success && waitTimeState.value != null) {
-                return `Estimated wait time: ${waitTimeState.value.minTime} - ${waitTimeState.value.maxTime} minutes`;
-            }
-
             if (waitTimeState.stage === PromiseStage.running) {
                 return 'Loading wait time...';
+            }
+
+            if (waitTimeState.value != null) {
+                return `Estimated wait time: ${waitTimeState.value.minTime} - ${waitTimeState.value.maxTime} minutes`;
             }
 
             return 'Error retrieving wait time';
