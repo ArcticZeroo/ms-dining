@@ -1,6 +1,6 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CurrentCafeContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
@@ -13,6 +13,8 @@ import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
 
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { StationCollapseContext } from '../../../context/collapse.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -28,6 +30,59 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     };
 };
 
+const useStationExpansion = (stationName: string) => {
+    const collapsedStationsNotifier = useContext(StationCollapseContext);
+    const collapsedStations = useValueNotifier(collapsedStationsNotifier);
+    const menuBodyRef = useRef<HTMLDivElement>(null);
+    const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
+
+    const isExpanded = useMemo(
+        () => !collapsedStations.has(stationName),
+        [collapsedStations, stationName]
+    );
+
+    const stationStyle = useStationStyle(isExpanded, menuWidthPx);
+
+    const updateExpansionContext = useCallback(
+        (isNowExpanded: boolean) => {
+            console.log(stationName, isNowExpanded);
+            
+            const menuBodyElement = menuBodyRef.current;
+
+            if (menuBodyElement && !isNowExpanded) {
+                // Apparently the browser sometimes renders with partial pixels. Why?
+                setMenuWidthPx(Math.ceil(menuBodyElement.offsetWidth));
+            } else {
+                setMenuWidthPx(undefined);
+            }
+
+            if (isNowExpanded) {
+                collapsedStationsNotifier.delete(stationName);
+            } else {
+                collapsedStationsNotifier.add(stationName);
+            }
+        },
+        [collapsedStationsNotifier, stationName]
+    );
+
+    const onTitleClick = () => {
+        updateExpansionContext(!isExpanded);
+    };
+
+    useEffect(() => {
+        if (ApplicationSettings.collapseStationsByDefault.value) {
+            updateExpansionContext(false);
+        }
+    }, [updateExpansionContext]);
+
+    return {
+        isExpanded,
+        menuBodyRef,
+        stationStyle,
+        onTitleClick
+    };
+}
+
 export interface ICollapsibleStationProps {
     station: ICafeStation;
     menu: IMenuItemsByCategoryName;
@@ -35,37 +90,8 @@ export interface ICollapsibleStationProps {
 
 export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
     const cafe = useContext(CurrentCafeContext);
-
-    const [isExpanded, setIsExpanded] = useState(true);
-    const menuBodyRef = useRef<HTMLDivElement>(null);
-    const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
-
-    const stationStyle = useStationStyle(isExpanded, menuWidthPx);
-
+    const { isExpanded, menuBodyRef, stationStyle, onTitleClick } = useStationExpansion(station.name);
     const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
-
-    const handleExpansionUpdate = (isNowExpanded: boolean) => {
-        const menuBodyElement = menuBodyRef.current;
-
-        if (menuBodyElement && !isNowExpanded) {
-            // Apparently the browser sometimes renders with partial pixels. Why?
-            setMenuWidthPx(Math.ceil(menuBodyElement.offsetWidth));
-        } else {
-            setMenuWidthPx(undefined);
-        }
-
-        setIsExpanded(isNowExpanded);
-    }
-
-    const onTitleClick = () => {
-        handleExpansionUpdate(!isExpanded);
-    };
-
-    useEffect(() => {
-        if (ApplicationSettings.collapseStationsByDefault.value) {
-            handleExpansionUpdate(false);
-        }
-    }, []);
 
     const normalizedName = useMemo(
         () => normalizeNameForSearch(station.name),
@@ -78,8 +104,10 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     );
 
     return (
-        <div className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
-            style={stationStyle}>
+        <div 
+            className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
+            style={stationStyle}
+        >
             <ScrollAnchor id={scrollAnchorId}/>
             <div className="station-header flex-row">
                 <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>

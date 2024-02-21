@@ -17,3 +17,7 @@ export const runPromiseWithRetries = async <T>(promise: (retryIndex: number) => 
 
     throw new Error('Request failed! Should be unreachable');
 }
+
+export interface ICancellationToken {
+    isCancelled: boolean;
+}

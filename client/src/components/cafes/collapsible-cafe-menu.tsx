@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ICafe } from '../../models/cafe.ts';
@@ -8,6 +8,7 @@ import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { CollapsibleCafeMenuBody } from './collapsible-cafe-menu-body.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
+import { CafeCollapseContext } from '../../context/collapse.ts';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
@@ -27,12 +28,29 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
 
-    const [isExpanded, setIsExpanded] = useState(() => !ApplicationSettings.collapseCafesByDefault.value);
+    const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
+    const collapsedCafeIds = useValueNotifier(collapsedCafeIdsNotifier);
+
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
 
+    const isExpanded = useMemo(
+        () => !collapsedCafeIds.has(cafe.id),
+        [collapsedCafeIds, cafe.id]
+    );
+
+    useEffect(() => {
+        if (ApplicationSettings.collapseCafesByDefault.value) {
+            collapsedCafeIdsNotifier.add(cafe.id);
+        }
+    }, [collapsedCafeIdsNotifier, cafe.id]);
+
     const toggleIsExpanded = () => {
-        setIsExpanded(!isExpanded);
+        if (collapsedCafeIds.has(cafe.id)) {
+            collapsedCafeIdsNotifier.delete(cafe.id);
+        } else {
+            collapsedCafeIdsNotifier.add(cafe.id);
+        }
     };
 
     return (

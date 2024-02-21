@@ -249,11 +249,11 @@ export const registerOrderingRoutes = (parent: Router) => {
         for (const [cafeId, session] of orderSessionsByCafeId.entries()) {
             if (prepareBeforeOrder) {
                 if (!session.isReadyForSubmit) {
-                    return ctx.throw(503, `Cafe ${cafeId} is not ready to submit order`);
+                    return ctx.throw(500, `Cafe ${cafeId} is not ready to submit order`);
                 }
             } else {
                 if (session.lastCompletedStage !== SubmitOrderStage.addToCart) {
-                    return ctx.throw(503, `Cafe ${cafeId} did not successfully populate the cart!`);
+                    return ctx.throw(500, `Cafe ${cafeId} did not successfully populate the cart!`);
                 }
             }
         }
