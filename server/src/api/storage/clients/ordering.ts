@@ -6,14 +6,24 @@ import { Nullable } from '../../../models/util.js';
 
 const orderingContextLock = new Semaphore.Lock();
 
-export abstract class OrderingClient {
-    static #lastRetrievedDate: Date = new Date(0);
-    static #orderingContextByCafeIdForToday: Map<string, IOrderingContext> = new Map();
+interface IOrderingContextEntry {
+    context: IOrderingContext;
+    lastRetrievedDate: Date;
+}
 
-    private static _ensureCacheIsRecent() {
+export abstract class OrderingClient {
+    static #orderingContextByCafeIdForToday: Map<string, IOrderingContextEntry> = new Map();
+
+    private static _ensureCacheIsRecent(cafeId: string) {
+        if (!this.#orderingContextByCafeIdForToday.has(cafeId)) {
+            return;
+        }
+
+        const entry = this.#orderingContextByCafeIdForToday.get(cafeId)!;
+
         // We don't ever deal with future/past menus for online ordering, only today.
-        if (!isSameDate(this.#lastRetrievedDate, new Date())) {
-            this.#orderingContextByCafeIdForToday.clear();
+        if (!isSameDate(entry.lastRetrievedDate, new Date())) {
+            this.#orderingContextByCafeIdForToday.delete(cafeId);
         }
     }
 
@@ -21,7 +31,7 @@ export abstract class OrderingClient {
         try {
             await orderingContextLock.acquire();
 
-            this._ensureCacheIsRecent();
+            this._ensureCacheIsRecent(cafeId);
 
             if (!this.#orderingContextByCafeIdForToday.has(cafeId)) {
                 const dateString = toDateString(new Date());
@@ -36,34 +46,48 @@ export abstract class OrderingClient {
                 );
 
                 if (context != null) {
-                    this.#orderingContextByCafeIdForToday.set(cafeId, context);
+                    this.#orderingContextByCafeIdForToday.set(cafeId, {
+                        lastRetrievedDate: new Date(),
+                        context
+                    });
                 }
             }
 
-            return this.#orderingContextByCafeIdForToday.get(cafeId);
+            return this.#orderingContextByCafeIdForToday.get(cafeId)?.context;
         } finally {
             orderingContextLock.release();
         }
     }
 
-    public static async createOrderingContextAsync(cafeId: string, orderingContext: IOrderingContext): Promise<void> {
+    public static async createOrderingContextAsync(cafeId: string, context: IOrderingContext): Promise<void> {
         try {
             await orderingContextLock.acquire();
-
-            this._ensureCacheIsRecent();
 
             const dateString = toDateString(new Date());
 
             await usePrismaClient(
-                prismaClient => prismaClient.dailyCafeOrderingContext.create({
-                    data: {
-                        ...orderingContext,
-                        dateString, cafeId
-                    }
-                })
+                async prismaClient => {
+                    await prismaClient.dailyCafeOrderingContext.upsert({
+                        where: {
+                            dateString_cafeId: {
+                                dateString,
+                                cafeId
+                            }
+                        },
+                        update: context,
+                        create: {
+                            ...context,
+                            dateString,
+                            cafeId
+                        }
+                    })
+                }
             );
 
-            this.#orderingContextByCafeIdForToday.set(cafeId, orderingContext);
+            this.#orderingContextByCafeIdForToday.set(cafeId, {
+                lastRetrievedDate: new Date(),
+                context,
+            });
         } finally {
             orderingContextLock.release();
         }
