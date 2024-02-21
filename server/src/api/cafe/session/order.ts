@@ -113,9 +113,6 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Config is not set!');
         }
 
-        // Start retrieving in the background while we get the rest.
-        const profitCenterNamePromise = this._retrieveProfitCenterName();
-
         const response = await this._requestAsync(`/sites/${this.config.contextId}`,
             {
                 method:  'GET',
@@ -137,13 +134,17 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Site data is empty!');
         }
 
-        return {
+        const orderingContext = {
             onDemandTerminalId: siteData.displayOptions.onDemandTerminalId,
             onDemandEmployeeId: siteData.displayOptions.onDemandEmployeeId,
             profitCenterId:     siteData.displayOptions['profit-center-id'],
             storePriceLevel:    siteData.storePriceLevel,
-            profitCenterName:   await profitCenterNamePromise
+            profitCenterName:   ''
         };
+
+        orderingContext.profitCenterName = await this._retrieveProfitCenterName(orderingContext.profitCenterId);
+
+        return orderingContext;
     }
 
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
@@ -530,12 +531,12 @@ export class CafeOrderSession extends CafeDiscoverySession {
             });
     }
 
-    private async _retrieveProfitCenterName(): Promise<string> {
+    private async _retrieveProfitCenterName(profitCenterId: string): Promise<string> {
         if (!this.config) {
             throw new Error('Config is required to retrieve profit center name!');
         }
 
-        const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/profitCenter/${this.#orderingContext.profitCenterId}`,
+        const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/profitCenter/${profitCenterId}`,
             {
                 method: 'GET'
             });
