@@ -1,6 +1,6 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getChoiceHtmlId, getPriceDisplay } from '../../../util/cart.ts';
+import { getChoiceHtmlId, maybeFormatPrice } from '../../../util/cart.ts';
 
 interface IModifierRadioProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -41,7 +41,7 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({
                         checked={selectedChoiceId === choice.id}
                         onChange={() => onSelectedChoiceIdChanged(choice.id)}
                     />
-                    <span>{choice.description} {getPriceDisplay(choice.price)}</span>
+                    <span>{choice.description} {maybeFormatPrice(choice.price)}</span>
                 </label>
             ))}
         </div>

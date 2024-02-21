@@ -2,7 +2,7 @@ import { ICheapItemSearchResult } from '../../../models/search.ts';
 import React from 'react';
 import { SearchResult } from '../../search/search-result.tsx';
 import { SearchTypes } from '@msdining/common';
-import { getPriceDisplay } from '../../../util/cart.ts';
+import { formatPrice } from '../../../util/cart.ts';
 
 const getAverageCalories = (item: ICheapItemSearchResult) => {
     if (item.minCalories === 0 && item.maxCalories === 0) {
@@ -39,7 +39,7 @@ export const CheapItemResult: React.FC<ICheapItemResultProps> = ({ item }) => {
                 {
                     key:      'price',
                     iconName: 'attach_money',
-                    value:    item.price && getPriceDisplay(item.price, false /*addCurrencySign*/),
+                    value:    item.price && formatPrice(item.price, false /*addCurrencySign*/),
                 },
                 {
                     key:      'calories',

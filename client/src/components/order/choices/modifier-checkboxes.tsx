@@ -1,6 +1,6 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getChoiceHtmlId, getPriceDisplay } from '../../../util/cart.ts';
+import { getChoiceHtmlId, maybeFormatPrice } from '../../../util/cart.ts';
 import { classNames } from '../../../util/react.ts';
 
 interface IModifierCheckboxesProps {
@@ -56,7 +56,7 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
                             checked={isSelected}
                             disabled={isDisabled}
                         />
-                        <span>{choice.description} {getPriceDisplay(choice.price)}</span>
+                        <span>{choice.description} {maybeFormatPrice(choice.price)}</span>
                     </label>
                 );
             })}

@@ -7,7 +7,7 @@ import { PopupContext } from '../../../../context/modal.ts';
 import { useIsFavoriteItem } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../models/cafe.ts';
-import { getPriceDisplay } from '../../../../util/cart.ts';
+import { formatPrice } from '../../../../util/cart.ts';
 import { getScrollAnchorId } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';
 import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
@@ -120,7 +120,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     )
                 }
                 <td>
-                    {getPriceDisplay(menuItem.price)}
+                    {formatPrice(menuItem.price)}
                 </td>
                 {
                     showCalories && (

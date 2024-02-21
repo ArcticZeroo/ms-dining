@@ -3,12 +3,21 @@ import { CartItemsByCafeId } from '../context/cart.ts';
 import { ICartItemWithMetadata } from '../models/cart.ts';
 import { IMenuItem } from '../models/cafe.ts';
 
-export const getPriceDisplay = (price: number, addCurrencySign: boolean = true) => {
+export const formatPrice = (price: number, addCurrencySign: boolean = true) => {
+    return `${addCurrencySign ? '$' : ''}${price.toFixed(2)}`;
+}
+
+/**
+ * Like formatPrice, but returns an empty string if it's free. Intended to be used for things like modifiers.
+ * @param price
+ * @param addCurrencySign
+ */
+export const maybeFormatPrice = (price: number, addCurrencySign: boolean = true) => {
     if (price === 0) {
         return '';
     }
 
-    return `${addCurrencySign ? '$' : ''}${price.toFixed(2)}`;
+    return formatPrice(price, addCurrencySign);
 }
 
 const getModifierMax = (modifier: CafeTypes.IMenuItemModifier): number => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
-import { getPriceDisplay } from '../../../../../util/cart.ts';
+import { formatPrice } from '../../../../../util/cart.ts';
 import { DebugSettings } from '../../../../../constants/settings.ts';
 
 interface IMenuItemPopupFooterProps {
@@ -48,7 +48,7 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
             </div>
             <div className="info">
                 <div className="price">
-                    {getPriceDisplay(totalPrice * quantity)}
+                    {formatPrice(totalPrice * quantity)}
                 </div>
                 <button className="add-to-cart"
                     disabled={!isOrderValid}

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
-import { getPriceDisplay } from '../../../util/cart.ts';
+import { formatPrice } from '../../../util/cart.ts';
 import { IMenuItemModifier } from '@msdining/common/dist/models/cafe';
 
 const MAX_QUANTITY = 99;
@@ -138,7 +138,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                 }
             </td>
             <td className="price">
-                {getPriceDisplay(item.price * item.quantity)}
+                {formatPrice(item.price * item.quantity)}
             </td>
         </tr>
     );

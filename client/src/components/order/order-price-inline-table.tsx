@@ -3,7 +3,7 @@ import { useValueNotifierContext } from '../../hooks/events.ts';
 import { useCallback, useEffect, useMemo } from 'react';
 import { OrderingClient } from '../../api/order.ts';
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { calculatePrice, getPriceDisplay } from '../../util/cart.ts';
+import { calculatePrice, formatPrice } from '../../util/cart.ts';
 import { IPriceResponse } from '@msdining/common/dist/models/http';
 
 export const OrderPriceInlineTable = () => {
@@ -48,7 +48,7 @@ export const OrderPriceInlineTable = () => {
     );
 
     const taxDisplay = price.totalTax >= 0
-        ? getPriceDisplay(price.totalTax)
+        ? formatPrice(price.totalTax)
         : error != null
             ? 'Failed to load'
             : 'Loading...';
@@ -61,7 +61,7 @@ export const OrderPriceInlineTable = () => {
                     Subtotal
                 </td>
                 <td className="price">
-                    {getPriceDisplay(price.totalPriceWithoutTax)}
+                    {formatPrice(price.totalPriceWithoutTax)}
                 </td>
             </tr>
             <tr>
@@ -79,7 +79,7 @@ export const OrderPriceInlineTable = () => {
                     Total
                 </td>
                 <td className="price">
-                    {getPriceDisplay(price.totalPriceWithTax)}
+                    {formatPrice(price.totalPriceWithTax)}
                 </td>
             </tr>
         </>
