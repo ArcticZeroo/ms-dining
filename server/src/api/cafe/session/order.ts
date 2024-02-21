@@ -4,7 +4,8 @@ import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
     IAddToOrderResponse,
-    ICardProcessorPaymentResponse, IOrderLineItem,
+    ICardProcessorPaymentResponse,
+    IOrderLineItem,
     IRetrieveCardProcessorTokenResponse
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
@@ -18,7 +19,6 @@ import fetch from 'node-fetch';
 import { ICafe, IMenuItem } from '../../../models/cafe.js';
 import { phone, PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
-import { getCardType } from '@msdining/common/dist/util/credit-card.js';
 
 const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+type="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
 
@@ -86,6 +86,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
     constructor(cafe: ICafe, cartItems: ICartItem[]) {
         super(cafe);
         this.#cartItems = cartItems;
+    }
+
+    get lastCompletedStage() {
+        return this.#lastCompletedStage;
     }
 
     public get isReadyForSubmit() {
