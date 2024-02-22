@@ -148,6 +148,6 @@ nav form {
         height: 100%;
         position: fixed;
         overflow-y: scroll;
-        z-index: 10;
+        z-index: var(--z-index-everything-but-top);
     }
 }

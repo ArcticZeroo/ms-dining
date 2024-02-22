@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ICafe } from '../../models/cafe.ts';
@@ -27,9 +27,9 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
         shouldCountTowardsLastUsed
     }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
-
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const collapsedCafeIds = useValueNotifier(collapsedCafeIdsNotifier);
+    const cafeHeaderRef = useRef<HTMLDivElement>(null);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
@@ -46,17 +46,23 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     }, [collapsedCafeIdsNotifier, cafe.id]);
 
     const toggleIsExpanded = () => {
-        if (collapsedCafeIds.has(cafe.id)) {
+        const isNowExpanded = !isExpanded;
+
+        if (isNowExpanded) {
             collapsedCafeIdsNotifier.delete(cafe.id);
         } else {
             collapsedCafeIdsNotifier.add(cafe.id);
+            cafeHeaderRef.current?.scrollIntoView({ behavior: 'instant' });
         }
     };
 
     return (
         <CurrentCafeContext.Provider value={cafe}>
-            <div className={classNames('collapsible-content collapsible-cafe flex-col', !isExpanded && 'collapsed')}
-                key={cafe.id}>
+            <div
+                className={classNames('collapsible-content collapsible-cafe flex-col', !isExpanded && 'collapsed')}
+                ref={cafeHeaderRef}
+                key={cafe.id}
+            >
                 <div className="cafe-header">
                     <a className="cafe-order-link"
                         href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}

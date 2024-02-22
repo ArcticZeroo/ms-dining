@@ -2,6 +2,9 @@
     --theme-color: #3488e0ff;
     --card-background: #FAFAFA;
     --card-foreground: #212121;
+    --z-index-top-popup: 100;
+    --z-index-everything-but-top: 10;
+    --z-index-above-content: 5;
 }
 
 body, html {
