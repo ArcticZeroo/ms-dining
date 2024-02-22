@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { CurrentCafeContext, CurrentStationContext } from '../../context/menu-item.ts';
+import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
 
 interface IScrollAnchorProps {
     id: string;
@@ -10,6 +12,11 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
+    const collapsedStationNamesNotifier = useContext(StationCollapseContext);
+    const cafe = useContext(CurrentCafeContext);
+    const stationName = useContext(CurrentStationContext);
+
     useEffect(() => {
         if (element == null) {
             return;
@@ -18,6 +25,10 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
         if (location.hash !== `#${id}`) {
             return;
         }
+
+        // It's OK if these are empty. Nothing will happen.
+        collapsedCafeIdsNotifier.delete(cafe.id);
+        collapsedStationNamesNotifier.delete(stationName);
 
         // Jump to hash after render
         setTimeout(() => {
@@ -29,7 +40,7 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
 
             navigate(url.pathname);
         }, 0);
-    }, [navigate, id, element, location.hash]);
+    }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationName]);
 
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement}/>

@@ -1,7 +1,7 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { CurrentCafeContext } from '../../../context/menu-item.ts';
+import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
@@ -46,7 +46,7 @@ const useStationExpansion = (stationName: string) => {
     const updateExpansionContext = useCallback(
         (isNowExpanded: boolean) => {
             console.log(stationName, isNowExpanded);
-            
+
             const menuBodyElement = menuBodyRef.current;
 
             if (menuBodyElement && !isNowExpanded) {
@@ -104,25 +104,29 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     );
 
     return (
-        <div 
-            className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
-            style={stationStyle}
-        >
-            <ScrollAnchor id={scrollAnchorId}/>
-            <div className="station-header flex-row">
-                <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
-                <button className="title" onClick={onTitleClick}>
-                    {
-                        station.logoUrl && (
-                            <img src={station.logoUrl}
-                                alt={`Logo for station ${station.name}`}/>
-                        )
-                    }
-                    {station.name}
-                    <ExpandIcon isExpanded={isExpanded}/>
-                </button>
+        <CurrentStationContext.Provider value={station.name}>
+            <div
+                className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
+                style={stationStyle}
+            >
+                <ScrollAnchor id={scrollAnchorId}/>
+                <div className="station-header flex-row">
+                    <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
+                    <button className="title" onClick={onTitleClick}>
+                        {
+                            station.logoUrl && (
+                                <img
+                                    src={station.logoUrl}
+                                    alt={`Logo for station ${station.name}`}
+                                />
+                            )
+                        }
+                        {station.name}
+                        <ExpandIcon isExpanded={isExpanded}/>
+                    </button>
+                </div>
+                <StationMenu menuItemsByCategoryName={menu} ref={menuBodyRef}/>
             </div>
-            <StationMenu menuItemsByCategoryName={menu} ref={menuBodyRef}/>
-        </div>
+        </CurrentStationContext.Provider>
     );
 };
