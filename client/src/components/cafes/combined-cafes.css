@@ -7,6 +7,7 @@
     flex-wrap: wrap;
     gap: var(--default-padding);
     justify-content: center;
+    padding-bottom: var(--default-padding);
 }
 
 .stations.hidden {
@@ -25,6 +26,9 @@
 .station .station-header {
     display: flex;
     align-items: center;
+    position: sticky;
+    z-index: var(--z-index-above-content);
+    background: var(--background-color);
 }
 
 .station .station-header .favorite-item-button {
@@ -139,14 +143,21 @@
 .collapsible-menu-list {
     display: flex;
     flex-direction: column;
-    gap: var(--default-padding);
+}
+
+.collapsible-cafe {
+    display: flex;
+    flex-direction: column;
 }
 
 .collapsible-cafe .cafe-header {
     display: flex;
     position: sticky;
     top: calc(var(--default-padding) * -1);
-    z-index: var(--z-index-above-content);
+    z-index: var(--z-index-above-content-2);
+    gap: var(--default-padding);
+    background: var(--background-color);
+    padding-bottom: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-header .scroll-anchor {

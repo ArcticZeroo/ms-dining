@@ -2,9 +2,13 @@
     --theme-color: #3488e0ff;
     --card-background: #FAFAFA;
     --card-foreground: #212121;
-    --z-index-top-popup: 100;
-    --z-index-everything-but-top: 10;
+    --z-index-content: 1;
     --z-index-above-content: 5;
+    --z-index-above-content-2: 10;
+    --z-index-above-content-3: 15;
+    --z-index-everything-but-top: 50;
+    --z-index-top-popup: 100;
+    --background-color: #212121;
 }
 
 body, html {
@@ -13,7 +17,7 @@ body, html {
 }
 
 html {
-    background: #212121;
+    background: var(--background-color);
     color: white;
     font-family: sans-serif;
 }
@@ -62,7 +66,7 @@ image {
 
 .card.yellow {
     background: #d3973c;
-    color: #212121;
+    color: var(--card-foreground);
 }
 
 .card.theme {
@@ -117,8 +121,8 @@ html, body, #root, .App {
 
 .card {
     padding: var(--default-padding);
-    background: #FAFAFA;
-    color: #212121;
+    background: var(--card-background);
+    color: var(--card-foreground);
     border-radius: var(--default-padding);
     display: flex;
     flex-direction: column;

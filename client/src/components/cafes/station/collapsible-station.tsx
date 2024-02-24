@@ -15,6 +15,8 @@ import { StationMenu } from './menu-items/station-menu.tsx';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { StationCollapseContext } from '../../../context/collapse.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
+import { CafeHeaderHeightContext } from '../../../context/html.ts';
+import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../../util/html.ts';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -30,9 +32,11 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     };
 };
 
-const useStationExpansion = (stationName: string) => {
+const useStationExpansion = (stationName: string, scrollAnchorId: string) => {
+    const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
     const collapsedStationsNotifier = useContext(StationCollapseContext);
     const collapsedStations = useValueNotifier(collapsedStationsNotifier);
+    const stationHeaderRef = useRef<HTMLDivElement>(null);
     const menuBodyRef = useRef<HTMLDivElement>(null);
     const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
 
@@ -43,10 +47,13 @@ const useStationExpansion = (stationName: string) => {
 
     const stationStyle = useStationStyle(isExpanded, menuWidthPx);
 
+    const stationHeaderStyle = useMemo(
+        () => ({ top: `calc(${cafeHeaderHeight}px - var(--default-padding))` }),
+        [cafeHeaderHeight]
+    );
+
     const updateExpansionContext = useCallback(
         (isNowExpanded: boolean) => {
-            console.log(stationName, isNowExpanded);
-
             const menuBodyElement = menuBodyRef.current;
 
             if (menuBodyElement && !isNowExpanded) {
@@ -60,9 +67,10 @@ const useStationExpansion = (stationName: string) => {
                 collapsedStationsNotifier.delete(stationName);
             } else {
                 collapsedStationsNotifier.add(stationName);
+                scrollIntoViewIfNeeded(queryForScrollAnchor(scrollAnchorId));
             }
         },
-        [collapsedStationsNotifier, stationName]
+        [collapsedStationsNotifier, scrollAnchorId, stationName]
     );
 
     const onTitleClick = () => {
@@ -78,7 +86,9 @@ const useStationExpansion = (stationName: string) => {
     return {
         isExpanded,
         menuBodyRef,
+        stationHeaderRef,
         stationStyle,
+        stationHeaderStyle,
         onTitleClick
     };
 }
@@ -90,8 +100,7 @@ export interface ICollapsibleStationProps {
 
 export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
     const cafe = useContext(CurrentCafeContext);
-    const { isExpanded, menuBodyRef, stationStyle, onTitleClick } = useStationExpansion(station.name);
-    const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
+    const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
 
     const normalizedName = useMemo(
         () => normalizeNameForSearch(station.name),
@@ -103,14 +112,17 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         [cafe.id, normalizedName]
     );
 
+    const { isExpanded, menuBodyRef, stationHeaderRef, stationStyle, stationHeaderStyle, onTitleClick } = useStationExpansion(station.name, scrollAnchorId);
+    const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
+
     return (
         <CurrentStationContext.Provider value={station.name}>
             <div
                 className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
                 style={stationStyle}
             >
-                <ScrollAnchor id={scrollAnchorId}/>
-                <div className="station-header flex-row">
+                <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding) * 2)`}/>
+                <div className="station-header flex-row" style={stationHeaderStyle} ref={stationHeaderRef}>
                     <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                     <button className="title" onClick={onTitleClick}>
                         {

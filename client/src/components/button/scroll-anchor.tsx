@@ -5,9 +5,10 @@ import { CafeCollapseContext, StationCollapseContext } from '../../context/colla
 
 interface IScrollAnchorProps {
     id: string;
+    margin?: string;
 }
 
-export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
+export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
     const [element, setElement] = useState<HTMLAnchorElement | null>();
     const location = useLocation();
     const navigate = useNavigate();
@@ -43,6 +44,6 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id }) => {
     }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationName]);
 
     return (
-        <a className="scroll-anchor" href={`#${id}`} ref={setElement}/>
+        <a className="scroll-anchor" href={`#${id}`} ref={setElement} style={{ scrollMargin: margin }}/>
     );
 }

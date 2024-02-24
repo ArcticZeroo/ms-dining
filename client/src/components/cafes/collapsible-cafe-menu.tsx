@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ICafe } from '../../models/cafe.ts';
@@ -9,10 +9,36 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CollapsibleCafeMenuBody } from './collapsible-cafe-menu-body.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
+import { CafeHeaderHeightContext } from '../../context/html.ts';
+import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../util/html.ts';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
 };
+
+const useElementHeight = (headerElement: HTMLDivElement | null) => {
+    const [height, setHeight] = useState(0);
+
+    useEffect(() => {
+        if (!headerElement) {
+            setHeight(0);
+            return;
+        }
+
+        const updateHeight = () => {
+            setHeight(headerElement.clientHeight);
+        }
+
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(headerElement);
+
+        updateHeight();
+
+        return () => observer.disconnect();
+    }, [headerElement]);
+
+    return height;
+}
 
 interface ICollapsibleCafeMenuProps {
     cafe: ICafe;
@@ -29,7 +55,8 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const collapsedCafeIds = useValueNotifier(collapsedCafeIdsNotifier);
-    const cafeHeaderRef = useRef<HTMLDivElement>(null);
+    const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
+    const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
@@ -52,44 +79,45 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
             collapsedCafeIdsNotifier.delete(cafe.id);
         } else {
             collapsedCafeIdsNotifier.add(cafe.id);
-            cafeHeaderRef.current?.scrollIntoView({ behavior: 'instant' });
+            scrollIntoViewIfNeeded(queryForScrollAnchor(cafe.id));
         }
     };
 
     return (
         <CurrentCafeContext.Provider value={cafe}>
-            <div
-                className={classNames('collapsible-content collapsible-cafe flex-col', !isExpanded && 'collapsed')}
-                ref={cafeHeaderRef}
-                key={cafe.id}
-            >
-                <div className="cafe-header">
-                    <a className="cafe-order-link"
-                        href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
-                        target="_blank">
-                        <span className="material-symbols-outlined">
+            <CafeHeaderHeightContext.Provider value={cafeHeaderHeight}>
+                <ScrollAnchor id={cafe.id}/>
+                <div
+                    className={classNames('collapsible-content collapsible-cafe', !isExpanded && 'collapsed')}
+                    key={cafe.id}
+                >
+                    <div className="cafe-header" ref={setCafeHeaderElement}>
+                        <a className="cafe-order-link"
+                            href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
+                            target="_blank">
+                            <span className="material-symbols-outlined">
                                 open_in_new
-                        </span>
-                    </a>
-                    <ScrollAnchor id={cafe.id}/>
-                    <button className="collapse-toggle cafe-name" onClick={toggleIsExpanded}>
-                        {
-                            showCafeLogo && (
-                                <img src={cafe.logoUrl}
-                                    alt={`${cafe.name} logo`}
-                                    className="logo"
-                                />
-                            )
-                        }
-                        {cafeName}
-                        <ExpandIcon isExpanded={isExpanded}/>
-                    </button>
+                            </span>
+                        </a>
+                        <button className="collapse-toggle cafe-name" onClick={toggleIsExpanded}>
+                            {
+                                showCafeLogo && (
+                                    <img src={cafe.logoUrl}
+                                        alt={`${cafe.name} logo`}
+                                        className="logo"
+                                    />
+                                )
+                            }
+                            {cafeName}
+                            <ExpandIcon isExpanded={isExpanded}/>
+                        </button>
+                    </div>
+                    <CollapsibleCafeMenuBody
+                        isExpanded={isExpanded}
+                        shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
+                    />
                 </div>
-                <CollapsibleCafeMenuBody
-                    isExpanded={isExpanded}
-                    shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
-                />
-            </div>
+            </CafeHeaderHeightContext.Provider>
         </CurrentCafeContext.Provider>
     );
 };
