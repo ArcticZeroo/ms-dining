@@ -1,13 +1,15 @@
-import { CartItemsByCafeId } from '../context/cart.ts';
-import {
-    IOrderCompletionData,
-    IOrderCompletionResponse, ISerializedCartItem, ISerializedModifier,
-    ISubmitOrderItems,
-    SubmitOrderStage
-} from '@msdining/common/dist/models/cart';
-import { JSON_HEADERS, makeJsonRequest } from './request.ts';
 import { isDuckType } from '@arcticzeroo/typeguard';
+import {
+    IOrderCompletionResponse,
+    ISerializedCartItem,
+    ISerializedModifier,
+    ISubmitOrderItems,
+    ISubmitOrderParams
+} from '@msdining/common/dist/models/cart';
 import { IPriceResponse } from '@msdining/common/dist/models/http.ts';
+import { CartItemsByCafeId } from '../context/cart.ts';
+import { isValidOrderCompletionResponse } from '../util/order.ts';
+import { JSON_HEADERS, makeJsonRequest } from './request.ts';
 
 export abstract class OrderingClient {
     private static _serializeCart(cart: CartItemsByCafeId): ISubmitOrderItems {
@@ -38,22 +40,28 @@ export abstract class OrderingClient {
         return serializedItemsByCafeId;
     }
 
-    public static async submitOrder(cart: CartItemsByCafeId): Promise<IOrderCompletionResponse> {
+    public static async submitOrder(cart: CartItemsByCafeId, { phoneNumberWithCountryCode, alias, cardData }: ISubmitOrderParams): Promise<IOrderCompletionResponse> {
         console.log('Submitting order...', cart);
 
-        const response: Array<[string, IOrderCompletionData]> = Array.from(cart.keys()).map(cafeId => {
-            return [
-                cafeId,
-                {
-                    lastCompletedStage: SubmitOrderStage.complete,
-                    waitTimeMin:        Math.floor(Math.random() * 10).toString(),
-                    waitTimeMax:        Math.floor((Math.random() * 10) + 10).toString(),
-                    orderNumber:        Math.floor(Math.random() * 1000000).toString(),
-                }
-            ]
+        const response = await makeJsonRequest({
+            path: '/api/dining/order',
+            options: {
+                method: 'POST',
+                headers: JSON_HEADERS,
+                body: JSON.stringify({
+                    itemsByCafeId: this._serializeCart(cart),
+                    phoneNumberWithCountryCode,
+                    alias,
+                    cardData
+                })
+            }
         });
 
-        return Object.fromEntries(response);
+        if (!isValidOrderCompletionResponse(new Set(cart.keys()), response)) {
+            throw new Error('Invalid response format');
+        }
+
+        return response;
     }
 
     public static async retrievePrice(cart: CartItemsByCafeId) {
