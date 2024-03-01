@@ -313,7 +313,7 @@ html, body, #root, .App {
     }
 
     html, body, #root, .App, .collapsible-menu-list, .collapsible-cafe, .stations, .station {
-        width: 100%;
+        /*width: 100%;*/
     }
 
     .App {
@@ -321,15 +321,11 @@ html, body, #root, .App {
     }
 
     .station table {
-        border-spacing: 0.75rem;
-    }
-
-    .station {
-        overflow-x: hidden;
+        /*border-spacing: 0.75rem;*/
     }
 
     .station .menu-body {
-        width: 100%;
+        /*width: 100%;*/
         overflow-x: auto;
     }
 }

@@ -48,7 +48,7 @@ const useStationExpansion = (stationName: string, scrollAnchorId: string) => {
     const stationStyle = useStationStyle(isExpanded, menuWidthPx);
 
     const stationHeaderStyle = useMemo(
-        () => ({ top: `calc(${cafeHeaderHeight}px` }),
+        () => ({ top: `${cafeHeaderHeight}px` }),
         [cafeHeaderHeight]
     );
 

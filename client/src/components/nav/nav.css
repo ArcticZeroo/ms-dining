@@ -4,6 +4,7 @@ nav {
     position: sticky;
     top: 0;
     width: 18rem;
+    z-index: var(--z-index-everything-but-top);
 }
 
 nav #sticky-header-list {
@@ -148,6 +149,5 @@ nav form {
         height: 100%;
         position: fixed;
         overflow-y: scroll;
-        z-index: var(--z-index-everything-but-top);
     }
 }
