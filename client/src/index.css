@@ -320,10 +320,6 @@ html, body, #root, .App {
         flex-direction: column;
     }
 
-    .stations {
-        padding: 0;
-    }
-
     .station table {
         border-spacing: 0.75rem;
     }

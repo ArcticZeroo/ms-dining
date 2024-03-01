@@ -48,7 +48,7 @@ const useStationExpansion = (stationName: string, scrollAnchorId: string) => {
     const stationStyle = useStationStyle(isExpanded, menuWidthPx);
 
     const stationHeaderStyle = useMemo(
-        () => ({ top: `calc(${cafeHeaderHeight}px - var(--default-padding))` }),
+        () => ({ top: `calc(${cafeHeaderHeight}px` }),
         [cafeHeaderHeight]
     );
 
@@ -121,7 +121,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                 className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
                 style={stationStyle}
             >
-                <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding) * 2)`}/>
+                <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding))`}/>
                 <div className="station-header flex-row" style={stationHeaderStyle} ref={stationHeaderRef}>
                     <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                     <button className="title" onClick={onTitleClick}>

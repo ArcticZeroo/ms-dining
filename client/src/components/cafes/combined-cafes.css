@@ -2,6 +2,15 @@
     --table-padding: var(--default-padding);
 }
 
+.fixed-header-floating-block {
+    height: var(--default-padding);
+    background: var(--background-color);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: var(--z-index-above-content-2); /*be above station header*/
+}
+
 .stations {
     display: flex;
     flex-wrap: wrap;
@@ -153,7 +162,7 @@
 .collapsible-cafe .cafe-header {
     display: flex;
     position: sticky;
-    top: calc(var(--default-padding) * -1);
+    top: 0;
     z-index: var(--z-index-above-content-2);
     gap: var(--default-padding);
     background: var(--background-color);
@@ -261,6 +270,11 @@
     .station .menu-body {
         align-items: flex-start;
         justify-content: flex-start;
+    }
+
+    .station .station-header {
+        /* turn off sticky until I figure it out on smaller screen sizes, it adds some random extra vertical spacing */
+        position: initial;
     }
 }
 

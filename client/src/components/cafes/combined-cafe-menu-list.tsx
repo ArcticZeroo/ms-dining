@@ -27,6 +27,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
 
     return (
         <div className="collapsible-menu-list">
+            <div className="fixed-header-floating-block"/>
             {
                 cafes.map(cafe => (
                     <CollapsibleCafeMenu
