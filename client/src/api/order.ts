@@ -3,13 +3,13 @@ import {
     IOrderCompletionResponse,
     ISerializedCartItem,
     ISerializedModifier,
-    ISubmitOrderItems,
-    ISubmitOrderParams
+    ISubmitOrderItems
 } from '@msdining/common/dist/models/cart';
 import { IPriceResponse } from '@msdining/common/dist/models/http.ts';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { isValidOrderCompletionResponse } from '../util/order.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
+import { IPaymentInfo } from '../components/order/payment/payment-info-form.tsx';
 
 export abstract class OrderingClient {
     private static _serializeCart(cart: CartItemsByCafeId): ISubmitOrderItems {
@@ -40,7 +40,7 @@ export abstract class OrderingClient {
         return serializedItemsByCafeId;
     }
 
-    public static async submitOrder(cart: CartItemsByCafeId, { phoneNumberWithCountryCode, alias, cardData }: ISubmitOrderParams): Promise<IOrderCompletionResponse> {
+    public static async submitOrder(cart: CartItemsByCafeId, { phoneNumberWithCountryCode, alias, cardData }: IPaymentInfo): Promise<IOrderCompletionResponse> {
         console.log('Submitting order...', cart);
 
         const response = await makeJsonRequest({

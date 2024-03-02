@@ -271,10 +271,6 @@
         align-items: flex-start;
         justify-content: flex-start;
     }
-
-    .station .station-header {
-        /* turn off sticky until I figure it out on smaller screen sizes, it adds some random extra vertical spacing */
-    }
 }
 
 @media screen and (max-width: 500px) {
@@ -301,7 +297,6 @@
     .station .menu-body table tr {
         border-radius: 1rem;
         padding: var(--default-padding);
-        /*width: 100%;*/
     }
 
     .collapsible-cafe .cafe-name .logo {

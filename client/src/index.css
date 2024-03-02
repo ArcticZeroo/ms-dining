@@ -312,20 +312,11 @@ html, body, #root, .App {
         --cafe-logo-height: 2rem;
     }
 
-    html, body, #root, .App, .collapsible-menu-list, .collapsible-cafe, .stations, .station {
-        /*width: 100%;*/
-    }
-
     .App {
         flex-direction: column;
     }
 
-    .station table {
-        /*border-spacing: 0.75rem;*/
-    }
-
     .station .menu-body {
-        /*width: 100%;*/
         overflow-x: auto;
     }
 }

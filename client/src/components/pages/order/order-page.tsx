@@ -3,34 +3,32 @@ import { CartContext } from '../../../context/cart.ts';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
-import { PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
+import { IPaymentInfo, PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
 
 import './order-page.css';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { useCallback } from 'react';
+import { PromiseStage, useMaybeExistingPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useState } from 'react';
 import { OrderingClient } from '../../../api/order.ts';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 import { DebugSettings } from '../../../constants/settings.ts';
+import { IOrderCompletionResponse } from '@msdining/common/dist/models/cart';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
     const cart = useValueNotifierContext(CartContext);
 
-    const doOrderCallback = useCallback(
-        () => OrderingClient.submitOrder(cart),
-        [cart]
-    );
-    const { stage, run, value, error } = useDelayedPromiseState(doOrderCallback, false /*keepLastValue*/);
+    const [orderPromise, setOrderPromise] = useState<Promise<IOrderCompletionResponse> | undefined>(undefined);
+    const { stage, value, error } = useMaybeExistingPromiseState(orderPromise);
 
-    const onFormSubmitted = () => {
+    const onFormSubmitted = (paymentInfo: IPaymentInfo) => {
         if (stage !== PromiseStage.notRun) {
             return;
         }
 
-        run();
+        setOrderPromise(OrderingClient.submitOrder(cart, paymentInfo));
     };
 
     if (stage === PromiseStage.notRun) {
