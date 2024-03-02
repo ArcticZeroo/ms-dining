@@ -3,7 +3,7 @@
     bottom: var(--default-padding);
     padding: 1rem;
     border-radius: 100%;
-    background: #2c3041;
+    background: rgba(44, 48, 65, 0.5);
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -15,5 +15,5 @@
 
 #scroll-top.visible {
     visibility: visible;
-    opacity: 0.5;
+    opacity: 1;
 }
