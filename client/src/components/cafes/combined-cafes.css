@@ -79,6 +79,8 @@
     overflow-x: auto;
     box-sizing: border-box;
     border-top-left-radius: var(--default-padding);
+    border-bottom-left-radius: var(--default-padding);
+    border-bottom-right-radius: var(--default-padding);
 }
 
 .category-name {
@@ -265,6 +267,10 @@
 @media screen and (max-width: 1000px) {
     :root {
         --table-padding: 0.5rem;
+    }
+
+    .station {
+        width: 100%;
     }
 
     .station .menu-body {

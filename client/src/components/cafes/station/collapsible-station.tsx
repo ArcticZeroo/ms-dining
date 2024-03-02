@@ -28,7 +28,6 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
 
     return {
         width:    `${widthPx}px`,
-        flexGrow: '1'
     };
 };
 
