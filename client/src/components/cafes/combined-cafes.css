@@ -193,6 +193,10 @@
     text-decoration: none;
 }
 
+.collapsible-cafe .cafe-error {
+    padding-bottom: var(--default-padding);
+}
+
 .station .title {
     transition-property: border-top-left-radius, border-top-right-radius;
     transition-duration: 0.25s;

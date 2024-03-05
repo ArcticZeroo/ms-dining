@@ -41,29 +41,16 @@ export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = 
     }, [retrieveMenu]);
 
     if (error != null) {
-        if (error instanceof MenusCurrentlyUpdatingException) {
-            return (
-                <div className="centered-content collapse-body">
-                    The menu for this cafe is currently updating. Please check back soon!
-                    <br/>
-                    {
-                        actualStage === PromiseStage.error && (
-                            <RetryButton onClick={retrieveMenu}/>
-                        )
-                    }
-                </div>
-            );
-        }
+        const isMenusCurrentlyUpdating = error instanceof MenusCurrentlyUpdatingException;
+        const errorText = isMenusCurrentlyUpdating
+            ? 'The menu for this cafe is currently updating. Please check back soon!'
+            : 'Failed to load menu.';
 
         return (
-            <div className="centered-content collapse-body">
-                Failed to load menu.
+            <div className="cafe-error centered-content collapse-body">
+                {errorText}
                 <br/>
-                {
-                    actualStage === PromiseStage.error && (
-                        <RetryButton onClick={retrieveMenu}/>
-                    )
-                }
+                <RetryButton onClick={retrieveMenu} isDisabled={actualStage !== PromiseStage.error}/>
             </div>
         );
     }
