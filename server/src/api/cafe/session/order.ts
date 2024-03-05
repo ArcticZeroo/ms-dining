@@ -286,10 +286,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Data is not in the correct format');
         }
 
-        this._assertMatch('Order number mismatch!', this.#orderNumber, json.orderDetails.orderNumber);
+        // Seems like the cart might be fake. We appear to get a new order number every time we add an item?
         this.#orderNumber = json.orderDetails.orderNumber;
-
-        this._assertMatch('Order ID mismatch!', this.#orderId, json.orderDetails.orderId);
         this.#orderId = json.orderDetails.orderId;
 
         // These seem to be incremental for some reason, despite the naming and structure of the response. /shrug
@@ -329,13 +327,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    taxAmount:            this.#orderTotalTax,
+                    taxAmount:            this.#orderTotalTax.toFixed(2),
                     invoiceId:            this.#orderNumber,
                     billDate:             nowString,
                     userCurrentDate:      nowString,
                     currencyUnit:         'USD',
                     description:          `Order ${this.#orderNumber}`,
-                    transactionAmount:    this.#orderTotalWithTax,
+                    transactionAmount:    this.#orderTotalWithTax.toFixed(2),
                     remainingTipAmount:   '0.00',
                     tipAmount:            '0.00',
                     style:                `https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false`,
