@@ -324,7 +324,7 @@ export const registerOrderingRoutes = (parent: Router) => {
             }
 
             response[cafeId] = {
-                lastCompletedStage: SubmitOrderStage.complete,
+                lastCompletedStage: session.lastCompletedStage,
                 orderNumber:        orderNumber ?? 'Unknown',
                 waitTimeMin:        '0',
                 waitTimeMax:        '0'

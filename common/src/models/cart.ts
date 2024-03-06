@@ -51,6 +51,15 @@ export enum SubmitOrderStage {
     complete = 'complete'
 }
 
+export const SUBMIT_ORDER_STAGES_IN_ORDER = [
+    SubmitOrderStage.addToCart,
+    SubmitOrderStage.initializeCardProcessor,
+    SubmitOrderStage.payment,
+    SubmitOrderStage.closeOrder,
+    SubmitOrderStage.sendTextReceipt,
+    SubmitOrderStage.complete
+];
+
 export interface IOrderCompletionData {
     lastCompletedStage: SubmitOrderStage;
     orderNumber: string;

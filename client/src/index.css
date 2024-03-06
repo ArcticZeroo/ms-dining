@@ -1,14 +1,15 @@
 :root {
-    --theme-color: #3488e0ff;
-    --card-background: #FAFAFA;
-    --card-foreground: #212121;
+    --color-theme: #3488e0ff;
+    --color-card-background: #FAFAFA;
+    --color-card-foreground: #212121;
     --z-index-content: 1;
     --z-index-above-content: 5;
     --z-index-above-content-2: 10;
     --z-index-above-content-3: 15;
     --z-index-everything-but-top: 50;
     --z-index-top-popup: 100;
-    --background-color: #212121;
+    --color-background: #212121;
+    --color-foreground: #FAFAFA;
 }
 
 body, html {
@@ -17,8 +18,8 @@ body, html {
 }
 
 html {
-    background: var(--background-color);
-    color: white;
+    background: var(--color-background);
+    color: var(--color-foreground);
     font-family: sans-serif;
 }
 
@@ -40,13 +41,13 @@ image {
 }
 
 .card, .error-card {
-    background: var(--card-background);
-    color: var(--card-foreground);
+    background: var(--color-card-background);
+    color: var(--color-card-foreground);
 }
 
 .card.error, .error-card {
-    --card-background: #B71C1C;
-    --card-foreground: white;
+    --color-card-background: #9d5353;
+    --color-card-foreground: white;
     border-radius: var(--default-padding);
     padding: var(--default-padding);
     text-align: center;
@@ -59,18 +60,23 @@ image {
     border-radius: 0.5rem;
     border: 0.125rem solid white;
     margin-top: var(--default-padding);
-    background: white;
-    color: #B71C1C;
+    background: var(--color-card-foreground);
+    color: var(--color-card-background);
     cursor: pointer;
+}
+
+.card.error .chip {
+    background: var(--color-card-foreground);
+    color: var(--color-card-background);
 }
 
 .card.yellow {
     background: #d3973c;
-    color: var(--card-foreground);
+    color: var(--color-card-foreground);
 }
 
 .card.theme {
-    background: var(--theme-color);
+    background: var(--color-theme);
     color: #FAFAFA;
 }
 
@@ -121,8 +127,8 @@ html, body, #root, .App {
 
 .card {
     padding: var(--default-padding);
-    background: var(--card-background);
-    color: var(--card-foreground);
+    background: var(--color-card-background);
+    color: var(--color-card-foreground);
     border-radius: var(--default-padding);
     display: flex;
     flex-direction: column;
@@ -240,8 +246,24 @@ html, body, #root, .App {
     flex-wrap: wrap;
 }
 
+.flex-center {
+    justify-content: center;
+}
+
+.flex-between {
+    justify-content: space-between;
+}
+
+.flex-around {
+    justify-content: space-around;
+}
+
 .flex-end {
     justify-content: flex-end;
+}
+
+.text-left {
+    text-align: left;
 }
 
 .collapsible-content .collapse-toggle {
@@ -276,6 +298,10 @@ html, body, #root, .App {
 .default-container {
     padding: var(--default-padding);
     border-radius: var(--default-padding);
+}
+
+.chip {
+    background: var(--color-theme);
 }
 
 @media screen and (min-width: 801px) {

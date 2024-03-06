@@ -4,7 +4,7 @@
 
 .fixed-header-floating-block {
     height: var(--default-padding);
-    background: var(--background-color);
+    background: var(--color-background);
     position: absolute;
     top: calc(var(--default-padding) * -1);
     z-index: var(--z-index-above-content-2); /*be above station header*/
@@ -37,7 +37,7 @@
     align-items: center;
     position: sticky;
     z-index: var(--z-index-above-content);
-    background: var(--background-color);
+    background: var(--color-background);
 }
 
 .station .station-header .favorite-item-button {
@@ -167,7 +167,7 @@
     top: 0;
     z-index: var(--z-index-above-content-2);
     gap: var(--default-padding);
-    background: var(--background-color);
+    background: var(--color-background);
     padding-bottom: var(--default-padding);
 }
 

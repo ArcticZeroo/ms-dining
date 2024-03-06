@@ -1,18 +1,13 @@
-import { IOrderCompletionData, SubmitOrderStage } from '@msdining/common/dist/models/cart';
-import React from 'react';
+import {
+    IOrderCompletionData,
+    SUBMIT_ORDER_STAGES_IN_ORDER,
+    SubmitOrderStage
+} from '@msdining/common/dist/models/cart';
+import React, { useMemo } from 'react';
 import { CafeView } from '../../../models/cafe.ts';
 import { classNames } from '../../../util/react.ts';
 import { getViewName } from '../../../util/cafe.ts';
-
-const LAST_COMPLETED_STAGE_NICE_TEXT = {
-    [SubmitOrderStage.notStarted]: 'Not Started',
-    [SubmitOrderStage.addToCart]: 'Adding to cart (Step 1/5)',
-    [SubmitOrderStage.initializeCardProcessor]: 'Initializing Card Processor (Step 2/5)',
-    [SubmitOrderStage.payment]: 'Payment (Step 3/5)',
-    [SubmitOrderStage.closeOrder]: 'Sending order to kitchen after payment (Step 4/5)',
-    [SubmitOrderStage.sendTextReceipt]: 'Sending SMS receipt after payment (Step 5/5)',
-    [SubmitOrderStage.complete]: 'Complete',
-}
+import { SubmitOrderStageView } from './submit-order-stage-view.tsx';
 
 interface IOrderCompletedItemProps {
     view: CafeView;
@@ -22,35 +17,50 @@ interface IOrderCompletedItemProps {
 export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({ view, result }) => {
     const isSuccess = result.lastCompletedStage === SubmitOrderStage.complete;
 
+    // If the order reached payment stage, we might have failed in the MSDining service but the kitchen could have
+    // received the order. In this case, we want to show a message to the user to contact the cafe.
+    const isMaybeReceivedByKitchen = useMemo(
+        () => {
+            const lastCompletedStageIndex = SUBMIT_ORDER_STAGES_IN_ORDER.indexOf(result.lastCompletedStage);
+            const paymentStageIndex = SUBMIT_ORDER_STAGES_IN_ORDER.indexOf(SubmitOrderStage.payment);
+            return lastCompletedStageIndex >= paymentStageIndex;
+        },
+        [result]
+    );
+
     return (
         <div key={view.value.id} className={classNames('card', isSuccess ? 'dark-blue' : 'error')}>
             <div className="title">
                 {getViewName(view, true /*showGroupName*/)}
+                {(isSuccess || isMaybeReceivedByKitchen) && ` - Order #${result.orderNumber}`}
             </div>
             {
                 !isSuccess && (
-                    <div>
-                        Your order was not successfully completed. The last step that was completed was:
-                        {LAST_COMPLETED_STAGE_NICE_TEXT[result.lastCompletedStage]}
-                    </div>
+                    <>
+                        <SubmitOrderStageView lastCompletedStage={result.lastCompletedStage}/>
+                        {
+                            isMaybeReceivedByKitchen && (
+                                <div>
+                                    Even though your order was not successfully completed, it may have been received by the
+                                    kitchen. Please contact {view.value.name} for more information.
+                                </div>
+                            )
+                        }
+                    </>
                 )
             }
             {
                 isSuccess && (
-                    <div>
-                        Your order was successfully submitted! You should receive a text message with order updates.
-                    </div>
+                    <>
+                        <div>
+                            Your order was successfully submitted! You should receive a text message with order updates.
+                        </div>
+                        <div>
+                            Estimated wait time: {result.waitTimeMin} - {result.waitTimeMax} minutes
+                        </div>
+                    </>
                 )
             }
-            <div>
-                Estimated wait time: {result.waitTimeMin} - {result.waitTimeMax} minutes
-            </div>
-            <div>
-                {result.orderNumber && `Order #${result.orderNumber}`}
-            </div>
-            <div>
-                {result.orderNumber && !isSuccess && `Your order may have been received by the cafeteria. Please contact ${view.value.name}.`}
-            </div>
         </div>
     );
 };
