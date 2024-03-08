@@ -10,6 +10,8 @@
     --z-index-top-popup: 100;
     --color-background: #212121;
     --color-foreground: #FAFAFA;
+    --color-error: #9d5353;
+    --color-error-accent: #7e4141;
 }
 
 body, html {
@@ -46,7 +48,7 @@ image {
 }
 
 .card.error, .error-card {
-    --color-card-background: #9d5353;
+    --color-card-background: var(--color-error);
     --color-card-foreground: white;
     border-radius: var(--default-padding);
     padding: var(--default-padding);
@@ -179,6 +181,10 @@ html, body, #root, .App {
     background: #2196F3;
     color: white;
     text-decoration: none;
+}
+
+.mono {
+    font-family: monospace;
 }
 
 @keyframes loading-spinner {

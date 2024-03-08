@@ -1,14 +1,22 @@
 import { randomUserId } from '../util/random.ts';
-import { BooleanSetting, NumberSetting, StringArraySetting, StringSetSetting, StringSetting } from '../api/settings.ts';
+import {
+    BooleanSetting,
+    CartSetting,
+    NumberSetting,
+    StringArraySetting,
+    StringSetSetting,
+    StringSetting
+} from '../api/settings.ts';
 
 export const InternalSettings = {
-    lastUsedCafeIds:               new StringArraySetting('lastUsedDiningHalls'),
-    collapsedStations:             new StringSetSetting('collapsedStations'),
-    visitorId:                     new StringSetting('visitorId'),
-    alias:                         new StringSetting('alias'),
-    phoneNumber:                   new StringSetting('phoneNumber'),
-    nameOnCard:                    new StringSetting('nameOnCard'),
-    postalCode:                    new StringSetting('postalCode'),
+    lastUsedCafeIds:   new StringArraySetting('lastUsedDiningHalls'),
+    collapsedStations: new StringSetSetting('collapsedStations'),
+    visitorId:         new StringSetting('visitorId'),
+    alias:             new StringSetting('alias'),
+    phoneNumber:       new StringSetting('phoneNumber'),
+    nameOnCard:        new StringSetting('nameOnCard'),
+    postalCode:        new StringSetting('postalCode'),
+    cart:              new CartSetting('cart'),
 } as const;
 
 export const ApplicationSettings = {

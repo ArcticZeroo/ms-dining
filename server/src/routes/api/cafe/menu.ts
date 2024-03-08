@@ -15,7 +15,7 @@ import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
 const getDefaultUniquenessDataForStation = (station: ICafeStation): IStationUniquenessData => {
     return {
         daysThisWeek: 1,
-        itemDays: {
+        itemDays:     {
             1: station.menuItemsById.size
         }
     };
@@ -113,48 +113,6 @@ export const registerMenuRoutes = (parent: Router) => {
             }
 
             ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
-        });
-
-    router.get('/menu/:cafeId/:itemId',
-        async ctx => {
-            const cafeId = ctx.params.cafeId?.toLowerCase();
-            if (!cafeId) {
-                ctx.throw(400, 'Missing cafe id');
-                return;
-            }
-
-            const itemId = ctx.params.itemId?.toLowerCase();
-            if (!itemId) {
-                ctx.throw(400, 'Missing item id');
-                return;
-            }
-
-            const dateString = getDateStringForMenuRequest(ctx);
-            if (dateString == null) {
-                ctx.throw(404, 'Invalid date');
-                return;
-            }
-
-            const cafe = await CafeStorageClient.retrieveCafeAsync(cafeId);
-            if (!cafe) {
-                ctx.throw(404, 'Cafe not found or data is missing');
-                return;
-            }
-
-            if (isCafeCurrentlyUpdating(dateString, cafe)) {
-                ctx.status = 503;
-                ctx.body = ERROR_BODIES.menusCurrentlyUpdating;
-                return;
-            }
-
-            const item = await DailyMenuStorageClient.retrieveItemAsync({ cafeId, itemId, dateString });
-
-            if (!item) {
-                ctx.throw(404, 'Item not found');
-                return;
-            }
-
-            ctx.body = JSON.stringify(item);
         });
 
     attachRouter(parent, router);

@@ -19,6 +19,10 @@
     border-bottom-left-radius: var(--default-padding);
 }
 
+.cart-popup.has-missing-items .cart-info {
+    background: var(--color-error-accent);
+}
+
 .cart-popup.empty {
     transform: scaleY(0) translateX(100%) translateY(-100%);
 }
@@ -87,4 +91,19 @@
     padding: var(--default-padding);
     cursor: pointer;
     text-align: center;
+}
+
+.cart-popup .cart-hydration-error {
+    background: var(--color-error);
+    padding: var(--default-padding);
+    border-bottom-left-radius: var(--default-padding);
+}
+
+.cart-popup .cart-warning {
+    position: absolute;
+    padding: 0.25rem;
+    left: 0;
+    bottom: 0;
+    background: #5b3049;
+    border-radius: 100%;
 }

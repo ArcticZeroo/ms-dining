@@ -123,7 +123,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModif
                 </React.Fragment>
             ))
         },
-        [cartItemsByView, showModifiers, onChangeQuantity, onEdit, onRemove]
+        [cartItemsByView, viewsById, shouldUseGroups, showModifiers, onRemove, onEdit, onChangeQuantity]
     );
 
     return (

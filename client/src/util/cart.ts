@@ -86,7 +86,7 @@ export const shallowCloneCart = (cart: CartItemsByCafeId) => {
     return newCart;
 }
 
-export const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>): number => {
+export const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>, quantity: number = 1): number => {
     let price = menuItem.price;
 
     for (const modifier of menuItem.modifiers) {
@@ -99,5 +99,5 @@ export const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierI
         }
     }
 
-    return price;
+    return price * quantity;
 };

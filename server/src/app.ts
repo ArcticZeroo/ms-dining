@@ -21,6 +21,7 @@ registerRoutes(app);
 app.use(mount('/static', createStaticRoutingApp()));
 app.use(mount('/', serve(clientFolderDistPath)));
 
+// TODO: Disallow non-get here
 app.use(async (ctx) => {
     const stats = await fsPromises.stat(clientIndexHtmlPath);
     ctx.type = 'html';

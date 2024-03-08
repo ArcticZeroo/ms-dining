@@ -20,12 +20,6 @@ interface ICreateDailyStationMenuParams {
     station: ICafeStation;
 }
 
-interface IRetrieveItemParams {
-    cafeId: string;
-    itemId: string;
-    dateString: string;
-}
-
 // TODO: Clean this up so that it doesn't rely on the MenuItemStorageClient directly.
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
@@ -173,20 +167,6 @@ export abstract class DailyMenuStorageClient {
     public static async retrieveDailyMenuAsync(cafeId: string, dateString: string): Promise<ICafeStation[]> {
         const dailyMenuByCafeId = this._getCachedMenusByCafeIdForDateString(dateString);
         return dailyMenuByCafeId.update(cafeId, () => this._doRetrieveDailyMenuAsync(cafeId, dateString));
-    }
-
-    public static async retrieveItemAsync({ cafeId, itemId, dateString }: IRetrieveItemParams): Promise<IMenuItem | null> {
-        // This is unfortunately the best way to do it, since we have a bunch of logic around rehydrating db entries
-        // within the retrieveDailyMenuAsync flow.
-        const dailyMenu = await this.retrieveDailyMenuAsync(cafeId, dateString);
-
-        for (const station of dailyMenu) {
-            if (station.menuItemsById.has(itemId)) {
-                return station.menuItemsById.get(itemId)!;
-            }
-        }
-
-        return null;
     }
 
     public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {

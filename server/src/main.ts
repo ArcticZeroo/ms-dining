@@ -3,9 +3,10 @@ import { createTrackingApplicationAsync } from './api/tracking/visitors.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
 import { ApplicationContext } from './constants/context.js';
-import { logError, logInfo } from './util/log.js';
+import { logDebug, logError, logInfo } from './util/log.js';
 import { ENVIRONMENT_SETTINGS } from './util/env.js';
 
+logDebug('Starting in debug mode');
 logInfo('Starting server on port', webserverPort);
 app.listen(webserverPort);
 

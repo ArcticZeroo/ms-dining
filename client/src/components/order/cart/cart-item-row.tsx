@@ -1,17 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
 import { formatPrice } from '../../../util/cart.ts';
-import { IMenuItemModifier } from '@msdining/common/dist/models/cafe';
+import { CartItemModifiers } from './cart-item-modifiers.tsx';
 
 const MAX_QUANTITY = 99;
-
-const getModifierNameDisplay = (modifier: IMenuItemModifier) => {
-    if (modifier.description.endsWith(':')) {
-        return modifier.description;
-    }
-
-    return `${modifier.description}:`;
-}
 
 interface ICartItemProps {
     showModifiers: boolean;
@@ -40,51 +32,6 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
 
         onChangeQuantity(item.quantity + 1);
     }
-
-    const modifiersDisplay = useMemo(
-        () => {
-            if (!showModifiers || item.choicesByModifierId.size === 0) {
-                return null;
-            }
-
-            const modifiers = item.associatedItem.modifiers;
-            const modifiersById = new Map(modifiers.map(modifier => [modifier.id, modifier]));
-
-            return (
-                <table className="modifiers">
-                    <tbody>
-                        {
-                            Array.from(item.choicesByModifierId.entries())
-                                .map(([modifierId, choice]) => {
-                                    const modifier = modifiersById.get(modifierId);
-
-                                    if (modifier == null) {
-                                        return null;
-                                    }
-
-                                    const choicesById = new Map(modifier.choices.map(choice => [choice.id, choice]));
-                                    const choiceDisplay = Array.from(choice.values())
-                                        .map(choiceId => choicesById.get(choiceId)?.description ?? 'Unknown')
-                                        .join(', ');
-
-                                    return (
-                                        <tr className="modifier">
-                                            <td className="modifier-name">
-                                                {getModifierNameDisplay(modifier)}
-                                            </td>
-                                            <td className="modifier-choices">
-                                                {choiceDisplay}
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                        }
-                    </tbody>
-                </table>
-            );
-        },
-        [showModifiers, item]
-    );
 
     return (
         <tr className="cart-item">
@@ -131,7 +78,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
                         ? (
                             <div className="name-and-modifiers">
                                 {item.associatedItem.name}
-                                {modifiersDisplay}
+                                <CartItemModifiers item={item}/>
                             </div>
                         )
                         : item.associatedItem.name

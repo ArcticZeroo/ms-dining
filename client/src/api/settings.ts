@@ -1,4 +1,6 @@
 import { ValueNotifier } from '../util/events.ts';
+import { ISerializedCartItemsByCafeId } from '../models/cart.ts';
+import { isDuckTypeSerializedCartItem } from '../util/typeguard.ts';
 
 const getBooleanSetting = (key: string, defaultValue: boolean) => {
     try {
@@ -183,3 +185,42 @@ export class NumberSetting extends Setting<number> {
     }
 }
 
+export class CartSetting extends Setting<ISerializedCartItemsByCafeId | null> {
+    constructor(name: string) {
+        super(name, CartSetting.deserialize(name));
+    }
+
+    static deserialize(name: string): ISerializedCartItemsByCafeId | null {
+        try {
+            const value = localStorage.getItem(name);
+
+            if (!value) {
+                return null;
+            }
+
+            const data = JSON.parse(value);
+
+            if (!data || typeof data !== 'object') {
+                throw new Error('Data is not an object');
+            }
+
+            for (const serializedItems of Object.values(data)) {
+                if (!Array.isArray(serializedItems)) {
+                    throw new Error('Serialized items is not an array');
+                }
+
+                if (!serializedItems.every(isDuckTypeSerializedCartItem)) {
+                    throw new Error('Serialized items contains invalid items');
+                }
+            }
+
+            return data;
+        } catch {
+            return null;
+        }
+    }
+
+    protected serialize(value: ISerializedCartItemsByCafeId) {
+        localStorage.setItem(this.name, JSON.stringify(value));
+    }
+}

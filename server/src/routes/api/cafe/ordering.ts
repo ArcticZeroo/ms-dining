@@ -4,15 +4,13 @@ import {
     ICardData,
     ICartItem,
     IOrderCompletionResponse,
-    ISerializedCartItem,
-    ISerializedModifier,
     ISubmitOrderItems,
     ISubmitOrderRequest,
     SubmitOrderStage
 } from '@msdining/common/dist/models/cart.js';
 import { attachRouter } from '../../../util/koa.js';
 import { CafeOrderSession } from '../../../api/cafe/session/order.js';
-import { ICafe } from '../../../models/cafe.js';
+import { ICafe, IMenuItem } from '../../../models/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { DateUtil } from '@msdining/common';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
@@ -24,60 +22,9 @@ import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import Duration from '@arcticzeroo/duration';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { phone } from 'phone';
-
-const isDuckTypeModifier = (data: unknown): data is ISerializedModifier => {
-    if (!isDuckType<ISerializedModifier>(data, { modifierId: 'string', choiceIds: 'object' })) {
-        return false;
-    }
-
-    if (!Array.isArray(data.choiceIds)) {
-        return false;
-    }
-
-    return data.choiceIds.every(choiceId => typeof choiceId === 'string');
-}
-
-const isDuckTypeSerializedCartItem = (data: unknown): data is ISerializedCartItem => {
-    if (!isDuckType<ISerializedCartItem>(data, {
-        itemId:    'string',
-        quantity:  'number',
-        modifiers: 'object',
-    })) {
-        return false;
-    }
-
-    if (data.specialInstructions != null && typeof data.specialInstructions !== 'string') {
-        return false;
-    }
-
-    if (!data.modifiers.every(isDuckTypeModifier)) {
-        return false;
-    }
-
-    return true;
-}
-
-const isDuckTypeJsonObject = (data: unknown): data is Record<string, unknown> => {
-    return data != null && typeof data === 'object' && !Array.isArray(data);
-}
-
-const isValidItemsByCafeId = (data: unknown): data is ISubmitOrderItems => {
-    if (!isDuckTypeJsonObject(data)) {
-        return false;
-    }
-
-    for (const items of Object.values(data)) {
-        if (!Array.isArray(items)) {
-            return false;
-        }
-
-        if (!items.every(isDuckTypeSerializedCartItem)) {
-            return false;
-        }
-    }
-
-    return true;
-}
+import { isDuckTypeSerializedCartItem, isValidItemIdsByCafeId, isValidItemsByCafeId } from '../../../util/typeguard.js';
+import { logDebug } from '../../../util/log.js';
+import { toDateString } from '@msdining/common/dist/util/date-util.js';
 
 const isValidSubmitOrderParams = (data: unknown): data is ISubmitOrderRequest => {
     if (!isDuckType<ISubmitOrderRequest>(data, {
@@ -333,6 +280,43 @@ export const registerOrderingRoutes = (parent: Router) => {
 
         ctx.body = JSON.stringify(response);
     });
+
+    router.post('/hydrate',
+        async ctx => {
+            const itemIdsByCafeId = ctx.request.body;
+
+            if (!isValidItemIdsByCafeId(itemIdsByCafeId)) {
+                ctx.body = JSON.stringify([]);
+                return;
+            }
+
+            const nowString = toDateString(new Date());
+
+            const retrieveItemsForCafe = async (cafeId: string, itemIds: string[]) => {
+                const remainingItemIds = new Set(itemIds);
+                const items: IMenuItem[] = [];
+
+                const stations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowString);
+
+                for (const station of stations) {
+                    for (const itemId of remainingItemIds) {
+                        if (station.menuItemsById.has(itemId)) {
+                            remainingItemIds.delete(itemId);
+                            items.push(station.menuItemsById.get(itemId)!);
+                        }
+                    }
+                }
+
+                return [cafeId, items] as const;
+            }
+
+            const hydrateResults = await Promise.all(
+                Object.entries(itemIdsByCafeId)
+                    .map(([cafeId, itemIds]) => retrieveItemsForCafe(cafeId, itemIds))
+            );
+
+            ctx.body = jsonStringifyWithoutNull(Object.fromEntries(hydrateResults));
+        });
 
     attachRouter(parent, router);
 }
