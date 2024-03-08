@@ -10,6 +10,19 @@ export const CartHydrationView = () => {
     const cartHydration = useValueNotifier(cartHydrationNotifier);
     const missingItems: Map<string, Array<ISerializedCartItemWithName>> = cartHydration.missingItemsByCafeId ?? new Map<string, Array<ISerializedCartItemWithName>>();
 
+    if (cartHydration.stage === PromiseStage.running) {
+        return (
+            <div className="flex flex-center default-margin-bottom">
+                <span className="material-symbols-outlined loading-spinner-custom">
+                    hourglass_empty
+                </span>
+                <span>
+                    Loading items from your last session...
+                </span>
+            </div>
+        );
+    }
+
     if (missingItems.size === 0) {
         return;
     }

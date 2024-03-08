@@ -6,17 +6,22 @@
     gap: var(--default-padding);
     transition: transform 0.2s ease;
     padding: 0 0 1rem 1rem;
+    --color-cart-popup: #3F51B5;
 }
 
-.cart-popup .cart-info {
-    cursor: pointer;
+.cart-popup .cart-header {
+    background: var(--color-cart-popup);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--default-padding);
     padding: var(--default-padding);
-    background: #3F51B5;
+    background: var(--color-cart-popup);
     border-bottom-left-radius: var(--default-padding);
+}
+
+.cart-popup .cart-info {
+    cursor: pointer;
 }
 
 .cart-popup.has-missing-items .cart-info {

@@ -204,6 +204,10 @@ html, body, #root, .App {
     animation: loading-spinner 1s ease infinite;
 }
 
+.loading-spinner-custom {
+    animation: loading-spinner 1s ease infinite;
+}
+
 .centered-content {
     display: flex;
     justify-content: center;
@@ -308,6 +312,10 @@ html, body, #root, .App {
 
 .chip {
     background: var(--color-theme);
+}
+
+.default-margin-bottom {
+    margin-bottom: var(--default-padding);
 }
 
 @media screen and (min-width: 801px) {
