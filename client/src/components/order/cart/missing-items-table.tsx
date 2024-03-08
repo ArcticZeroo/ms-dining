@@ -17,8 +17,9 @@ export const MissingItemsTable = () => {
     const cartHydration = useValueNotifierContext(CartHydrationContext);
     const missingItems = cartHydration.missingItemsByCafeId ?? new Map<string, Array<ISerializedCartItemWithName>>();
 
+    // TODO: Consider folding this table into the main one
     return (
-        <table className="cart-missing-items">
+        <table className="cart-contents cart-missing-items">
             <tbody>
                 {
                     Array.from(missingItems.entries())

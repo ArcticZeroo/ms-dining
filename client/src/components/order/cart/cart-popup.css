@@ -28,7 +28,7 @@
     background: var(--color-error-accent);
 }
 
-.cart-popup.empty {
+.cart-popup.hidden {
     transform: scaleY(0) translateX(100%) translateY(-100%);
 }
 
@@ -102,6 +102,9 @@
     background: var(--color-error);
     padding: var(--default-padding);
     border-bottom-left-radius: var(--default-padding);
+    display: flex;
+    flex-direction: column;
+    /* no gap because the table has border-spacing */
 }
 
 .cart-popup .cart-warning {
@@ -111,4 +114,14 @@
     bottom: 0;
     background: #5b3049;
     border-radius: 100%;
+}
+
+/* The table above the loading div has border-spacing which provides a default-padding size gap above and below it. */
+/* We want to have default-padding amounts of padding regardless of whether the table is there. */
+.cart-popup .cart-loading {
+    padding: 0 var(--default-padding) var(--default-padding) var(--default-padding);
+}
+
+.cart-popup .cart-loading:only-child {
+    padding-top: var(--default-padding);
 }

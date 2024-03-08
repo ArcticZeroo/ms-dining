@@ -12,7 +12,7 @@ export const CartHydrationView = () => {
 
     if (cartHydration.stage === PromiseStage.running) {
         return (
-            <div className="flex flex-center default-margin-bottom">
+            <div className="flex flex-center cart-loading">
                 <span className="material-symbols-outlined loading-spinner-custom">
                     hourglass_empty
                 </span>
@@ -32,7 +32,7 @@ export const CartHydrationView = () => {
     }
 
     return (
-        <div className="cart-hydration-error flex flex-col">
+        <div className="cart-hydration-error">
             <span>
                 Found the following items in your cart history, but they are no longer available:
             </span>

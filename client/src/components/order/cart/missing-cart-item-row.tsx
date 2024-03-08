@@ -24,18 +24,21 @@ export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId,
 
     return (
         <tr className="cart-item">
-            <td className="cart-item-buttons">
-                <button
-                    className="material-symbols-outlined"
-                    onClick={onRemove}
-                    title="Remove this item"
-                >
-                    delete
-                </button>
+            <td>
+                <div className="cart-item-buttons">
+                    <button
+                        className="material-symbols-outlined"
+                        onClick={onRemove}
+                        title="Remove this item"
+                    >
+                        delete
+                    </button>
+                </div>
             </td>
             <td className="quantity">{item.quantity}x</td>
             <td className="name">{item.name}</td>
-            <td className="mono">
+            {/*Just to avoid needing a new class name to match up with the table. /shrug*/}
+            <td className="price">
                 {
                     modifierCount > 0 && `${modifierCount} modifier(s)`
                 }

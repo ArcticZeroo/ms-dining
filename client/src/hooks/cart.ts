@@ -16,9 +16,9 @@ const serializeCart = (cart: CartItemsByCafeId, cartHydrationNotifier: ValueNoti
     for (const [cafeId, itemsById] of cart.entries()) {
         const serializedItems: ISerializedCartItemWithName[] = [];
 
-        for (const [itemId, item] of itemsById.entries()) {
+        for (const item of itemsById.values()) {
             serializedItems.push({
-                itemId,
+                itemId:              item.itemId,
                 name:                item.associatedItem.name,
                 quantity:            item.quantity,
                 modifiers:           Array.from(item.choicesByModifierId.entries()).map(([modifierId, choiceIds]) => ({
@@ -59,23 +59,23 @@ export const useCartHydration = (cartNotifier: ValueNotifier<CartItemsByCafeId>)
 
             const hydratedCartData: IHydratedCartData = await OrderingClient.hydrateCart(bootCartData);
 
-            console.log('hydrated cart data:', hydratedCartData);
-
             cartHydrationNotifier.value = {
-                stage: PromiseStage.success,
+                stage:                PromiseStage.success,
                 missingItemsByCafeId: hydratedCartData.missingItemsByCafeId
             };
+
+            cartNotifier.value = hydratedCartData.foundItemsByCafeId;
         } catch (err) {
             console.error('Could not hydrate cart:', err);
             cartHydrationNotifier.value = {
-                stage: PromiseStage.error,
+                stage:                PromiseStage.error,
                 missingItemsByCafeId: new Map(Object.entries(bootCartData))
             };
         }
 
         // Ok, this is pretty hacky, but prevents us from losing cart data on initial boot.
         InternalSettings.cart.value = bootCartData;
-    }, [cartHydrationNotifier]);
+    }, [cartHydrationNotifier, cartNotifier]);
 
     useEffect(() => {
         if (!BOOT_CART_DATA || Object.keys(BOOT_CART_DATA).length === 0) {

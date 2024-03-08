@@ -19,26 +19,11 @@ export const CartPopup = () => {
         [cart]
     );
 
-    if (totalItemCount === 0 && cartHydration.stage === PromiseStage.running) {
-        return (
-            <div className="cart-popup loading">
-                <span className="cart-header">
-                    <span className="material-symbols-outlined">
-                        shopping_cart
-                    </span>
-                    <span>
-                        Loading...
-                    </span>
-                </span>
-            </div>
-        );
-    }
-
-    const hasMissingItems = cartHydration.stage !== PromiseStage.running && cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
-    const isEmpty = cartHydration.missingItemsByCafeId?.size === 0 && totalItemCount === 0;
+    const hasMissingItems = cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
+    const shouldShow = totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running;
 
     return (
-        <div className={classNames('cart-popup', isEmpty && 'empty', hasMissingItems && 'has-missing-items')}>
+        <div className={classNames('cart-popup', !shouldShow && 'hidden', hasMissingItems && 'has-missing-items')}>
             <div className="cart-header cart-info">
                 {
                     hasMissingItems && (
@@ -51,7 +36,11 @@ export const CartPopup = () => {
                     shopping_cart
                 </span>
                 <span className="cart-count">
-                    {totalItemCount}
+                    {
+                        cartHydration.stage === PromiseStage.running
+                            ? 'Loading...'
+                            : totalItemCount
+                    }
                 </span>
             </div>
             <div className="cart-body">
