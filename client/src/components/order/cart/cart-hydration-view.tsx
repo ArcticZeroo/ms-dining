@@ -34,7 +34,7 @@ export const CartHydrationView = () => {
     return (
         <div className="cart-hydration-error">
             <span>
-                Found the following items in your cart history, but they are no longer available:
+                Found the following items in your cart history, but they are not currently available:
             </span>
             <MissingItemsTable/>
             <button className="default-container" onClick={onClearMissingItems}>

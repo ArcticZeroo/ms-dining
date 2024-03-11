@@ -16,8 +16,8 @@
     justify-content: center;
     gap: var(--default-padding);
     padding: var(--default-padding);
-    background: var(--color-cart-popup);
     border-bottom-left-radius: var(--default-padding);
+    transition: background-color 0.25s ease
 }
 
 .cart-popup .cart-info {
@@ -25,11 +25,11 @@
 }
 
 .cart-popup.has-missing-items .cart-info {
-    background: var(--color-error-accent);
+    --color-cart-popup: var(--color-error-accent);
 }
 
 .cart-popup.hidden {
-    transform: scaleY(0) translateX(100%) translateY(-100%);
+    transform: translateY(-100%);
 }
 
 .cart-popup:hover .cart-info {

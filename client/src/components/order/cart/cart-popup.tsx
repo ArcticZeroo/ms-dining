@@ -9,10 +9,12 @@ import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { CartHydrationView } from './cart-hydration-view.tsx';
 
 import './cart-popup.css';
+import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
 
 export const CartPopup = () => {
     const cart = useValueNotifierContext(CartContext);
     const cartHydration = useValueNotifierContext(CartHydrationContext);
+    const isTodaySelected = useIsTodaySelected();
 
     const totalItemCount = useMemo(
         () => Array.from(cart.values()).reduce((total, itemsById) => total + itemsById.size, 0),
@@ -20,10 +22,14 @@ export const CartPopup = () => {
     );
 
     const hasMissingItems = cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
-    const shouldShow = totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running;
+    const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
 
     return (
-        <div className={classNames('cart-popup', !shouldShow && 'hidden', hasMissingItems && 'has-missing-items')}>
+        <div className={classNames(
+            'cart-popup',
+            !shouldShow && 'hidden',
+            hasMissingItems && 'has-missing-items'
+        )}>
             <div className="cart-header cart-info">
                 {
                     hasMissingItems && (

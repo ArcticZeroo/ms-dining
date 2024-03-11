@@ -4,6 +4,7 @@ import { useValueNotifier, useValueNotifierContext } from './events.ts';
 import { SelectedDateContext } from '../context/time.ts';
 import { addDateToUrl } from '../util/url.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
+import { isSameDate } from '@msdining/common/dist/util/date-util';
 
 export const useDatePicker = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -25,3 +26,8 @@ export const useSelectedDateInUrl = () => {
         addDateToUrl(selectedDate);
     }, [selectedDate]);
 };
+
+export const useIsTodaySelected = () => {
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    return isSameDate(selectedDate, new Date());
+}
