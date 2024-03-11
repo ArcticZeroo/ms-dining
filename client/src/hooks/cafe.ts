@@ -3,9 +3,11 @@ import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import { useCallback, useMemo } from 'react';
 import { StringSetSetting } from '../api/settings.ts';
 import { getTargetSettingForFavorite } from '../util/cafe.ts';
-import { useValueNotifier } from './events.ts';
+import { useValueNotifier, useValueNotifierContext } from './events.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../models/cafe.ts';
-import { ApplicationSettings } from '../constants/settings.ts';
+import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
+import { SelectedDateContext } from '../context/time.ts';
+import { isSameDate } from '@msdining/common/dist/util/date-util';
 
 const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
     const names = useValueNotifier(setting);
@@ -76,3 +78,13 @@ export const useIsPriceAllowed = () => {
         [enablePriceFilters, maxPrice, minPrice]
     );
 }
+
+export const useIsOnlineOrderingAllowedForSelectedDate = () => {
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
+
+    return useMemo(
+        () => isOnlineOrderingEnabled && isSameDate(new Date(), selectedDate),
+        [isOnlineOrderingEnabled, selectedDate]
+    );
+};

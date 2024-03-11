@@ -21,6 +21,7 @@ import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
 import { ApplicationSettings } from '../../../../../constants/settings.ts';
+import { useIsOnlineOrderingAllowedForSelectedDate } from '../../../../../hooks/cafe.ts';
 
 const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
     return useMemo(
@@ -70,6 +71,8 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
     const modalNotifier = useContext(PopupContext);
 
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const isOnlineOrderingAllowedForSelectedDate = useIsOnlineOrderingAllowedForSelectedDate();
+    const isOnlineOrderingAllowed = fromCartItem != null || isOnlineOrderingAllowedForSelectedDate;
 
     const closeModal = () => {
         if (modalNotifier.value?.id === modalSymbol) {
@@ -196,6 +199,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     getSelectedChoiceIdsForModifier={getSelectedChoiceIdsForModifier}
                     onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
                     onNotesChanged={setNotes}
+                    isOnlineOrderingAllowed={isOnlineOrderingAllowed}
                 />
             )}
             footer={(
@@ -204,6 +208,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     totalPrice={totalPrice}
                     quantity={quantity}
                     isOrderValid={isOrderValid}
+                    isOnlineOrderingAllowed={isOnlineOrderingAllowed}
                     onAddToCartClicked={onAddToCartClicked}
                     onAddQuantityClicked={onAddQuantityClicked}
                     onRemoveQuantityClicked={onRemoveQuantityClicked}

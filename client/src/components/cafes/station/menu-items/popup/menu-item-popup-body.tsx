@@ -1,9 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../../models/cafe.ts';
 import { MenuItemModifierPicker } from '../../../../order/menu-item-modifier-picker.tsx';
-import { DebugSettings } from '../../../../../constants/settings.ts';
 
 interface IMenuItemPopupBodyProps {
     menuItem: IMenuItem;
@@ -11,6 +9,7 @@ interface IMenuItemPopupBodyProps {
     getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>;
     onSelectedChoiceIdsChanged: (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => void;
     onNotesChanged: (notes: string) => void;
+    isOnlineOrderingAllowed: boolean;
 }
 
 export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
@@ -18,10 +17,9 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     notes,
     getSelectedChoiceIdsForModifier,
     onSelectedChoiceIdsChanged,
-    onNotesChanged
+    onNotesChanged,
+    isOnlineOrderingAllowed
 }) => {
-    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
-
     const shouldSkipBody = !menuItem.description
                            && menuItem.imageUrl == null
                            && (!isOnlineOrderingAllowed || menuItem.modifiers.length === 0);
