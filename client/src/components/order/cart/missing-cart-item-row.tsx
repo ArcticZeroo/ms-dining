@@ -1,6 +1,7 @@
 import { ISerializedCartItemWithName } from '../../../models/cart.ts';
 import React, { useContext } from 'react';
 import { CartHydrationContext } from '../../../context/cart.ts';
+import { pluralize } from '../../../util/string.ts';
 
 interface IMissingCartItemRowProps {
     cafeId: string;
@@ -40,7 +41,7 @@ export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId,
             {/*Just to avoid needing a new class name to match up with the table. /shrug*/}
             <td className="price">
                 {
-                    modifierCount > 0 && `${modifierCount} modifier(s)`
+                    modifierCount > 0 && `${modifierCount} ${pluralize('modifier', modifierCount)}`
                 }
             </td>
         </tr>
