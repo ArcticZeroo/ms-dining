@@ -1,13 +1,20 @@
 import { ICardData } from '@msdining/common/dist/models/cart';
-import React, { useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
+import { InternalSettings } from '../../../constants/settings.ts';
+import { CardNumberContext } from '../../../context/payment.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
 import { classNames } from '../../../util/react.ts';
 
 import './payment-info-form.css';
-import { expectValid, validateCvv, validateExpirationMonth, validatePhoneNumber } from '../../../util/validation.ts';
+import {
+    expectValid,
+    validateExpirationMonth,
+    validatePhoneNumber,
+    validateSecurityCode
+} from '../../../util/validation.ts';
 
 import { PaymentField } from './payment-field.tsx';
-import { InternalSettings } from '../../../constants/settings.ts';
 
 export interface IPaymentInfo {
     phoneNumberWithCountryCode: string;
@@ -24,9 +31,12 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
     const [alias, setAlias] = useState(InternalSettings.alias.value);
 
     const [name, setName] = useState(InternalSettings.nameOnCard.value);
-    const [cardNumber, setCardNumber] = useState('');
+
+    const cardNumberNotifier = useContext(CardNumberContext);
+    const cardNumber = useValueNotifier(cardNumberNotifier);
+
     const [expiration, setExpiration] = useFieldWithValidator(validateExpirationMonth);
-    const [securityCode, setSecurityCode] = useFieldWithValidator(validateCvv);
+    const [securityCode, setSecurityCode] = useFieldWithValidator(validateSecurityCode);
     const [postalCode, setPostalCode] = useState(InternalSettings.postalCode.value);
 
     const isFormValid = useMemo(
@@ -72,7 +82,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                 securityCode:    expectValid(securityCode),
                 expirationMonth: month.toString(),
                 expirationYear:  year.toString(),
-                userAgent:       JSON.stringify({ userAgent: navigator.userAgent })
+                userAgent:       navigator.userAgent
             }
         };
 
@@ -83,6 +93,10 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
 
         onSubmit(paymentInfo);
     };
+
+    const onCardNumberChanged = (cardNumber: string) => {
+        cardNumberNotifier.value = cardNumber;
+    }
 
     return (
         <form onSubmit={onFormSubmitted} id="payment-info" className="card">
@@ -118,7 +132,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                     icon="credit_card"
                     name="Card Number"
                     value={cardNumber}
-                    onValueChanged={setCardNumber}
+                    onValueChanged={onCardNumberChanged}
                 />
                 <PaymentField
                     id="expiration"

@@ -193,6 +193,10 @@
     text-decoration: none;
 }
 
+.collapsible-cafe .collapse-body.above-floating {
+    z-index: var(--z-index-everything-but-top);
+}
+
 .collapsible-cafe .cafe-error {
     padding-bottom: var(--default-padding);
 }

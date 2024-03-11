@@ -18,12 +18,18 @@
     width: 10em;
 }
 
-.cart-contents .name-and-modifiers {
+.cart-contents .full-details {
     display: flex;
     gap: 0.5rem;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.cart-contents .full-details .special-instructions {
+    font-size: 0.9em;
+    font-style: italic;
+    opacity: 0.7;
 }
 
 .cart-contents .modifier {

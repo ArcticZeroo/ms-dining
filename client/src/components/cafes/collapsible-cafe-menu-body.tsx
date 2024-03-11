@@ -1,13 +1,13 @@
+import { IDelayedPromiseState, PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useContext, useEffect } from 'react';
-import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { CafeMenu } from '../../models/cafe.ts';
 import { DiningClient } from '../../api/dining.ts';
+import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
-import { StationList } from './station/station-list.tsx';
-import { IDelayedPromiseState, PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { CafeMenu } from '../../models/cafe.ts';
 import { MenusCurrentlyUpdatingException } from '../../util/exception.ts';
 import { RetryButton } from '../button/retry-button.tsx';
+import { StationList } from './station/station-list.tsx';
 
 const useMenuData = (shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
     const cafe = useContext(CurrentCafeContext);
@@ -47,7 +47,7 @@ export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = 
             : 'Failed to load menu.';
 
         return (
-            <div className="cafe-error centered-content collapse-body">
+            <div className="cafe-error centered-content collapse-body above-floating">
                 {errorText}
                 <br/>
                 <RetryButton onClick={retrieveMenu} isDisabled={actualStage !== PromiseStage.error}/>
@@ -60,7 +60,7 @@ export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = 
     }
 
     return (
-        <div className="centered-content collapse-body">
+        <div className="centered-content collapse-body above-floating">
             <div className="loading-spinner"/>
             Loading menu...
         </div>

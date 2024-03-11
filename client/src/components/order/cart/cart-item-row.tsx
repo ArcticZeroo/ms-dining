@@ -6,14 +6,20 @@ import { CartItemModifiers } from './cart-item-modifiers.tsx';
 const MAX_QUANTITY = 99;
 
 interface ICartItemProps {
-    showModifiers: boolean;
+    showFullDetails: boolean;
     item: ICartItemWithMetadata;
     onRemove: () => void;
     onEdit: () => void;
     onChangeQuantity: (quantity: number) => void;
 }
 
-export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, onChangeQuantity, showModifiers }) => {
+export const CartItemRow: React.FC<ICartItemProps> = ({
+    item,
+    onRemove,
+    onEdit,
+    onChangeQuantity,
+    showFullDetails
+}) => {
     const canDecreaseQuantity = item.quantity > 1;
     const canIncreaseQuantity = item.quantity < MAX_QUANTITY;
 
@@ -23,7 +29,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
         }
 
         onChangeQuantity(item.quantity - 1);
-    }
+    };
 
     const onIncreaseQuantity = () => {
         if (!canIncreaseQuantity) {
@@ -31,7 +37,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
         }
 
         onChangeQuantity(item.quantity + 1);
-    }
+    };
 
     return (
         <tr className="cart-item">
@@ -74,10 +80,12 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
             </td>
             <td className="name">
                 {
-                    showModifiers
+                    showFullDetails
                         ? (
-                            <div className="name-and-modifiers">
-                                {item.associatedItem.name}
+                            <div className="full-details">
+                                <span>
+                                    {item.associatedItem.name}
+                                </span>
                                 <CartItemModifiers item={item}/>
                             </div>
                         )
@@ -89,4 +97,4 @@ export const CartItemRow: React.FC<ICartItemProps> = ({ item, onRemove, onEdit, 
             </td>
         </tr>
     );
-}
+};

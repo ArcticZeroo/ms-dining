@@ -1,5 +1,5 @@
-import { ValidationState, Validator } from '../models/validation.ts';
 import phone from 'phone';
+import { ValidationState, Validator } from '../models/validation.ts';
 
 export const expectValid = <T>(validationState: ValidationState<T>): T => {
     if (!validationState.isValid) {
@@ -120,4 +120,4 @@ export const getRegexValidator = (regex: RegExp, errorMessage: string): Validato
 }
 
 // This should be based on card type, but for now it's fine
-export const validateCvv = getRegexValidator(/^\d{3,4}$/, 'Invalid CVV');
+export const validateSecurityCode = getRegexValidator(/^\d{3,4}$/, 'Invalid CVV');

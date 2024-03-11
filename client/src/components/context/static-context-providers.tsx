@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo } from 'react';
-import { ValueNotifier, ValueNotifierSet } from '../../util/events.ts';
 import { DiningClient } from '../../api/dining.ts';
+import { ApplicationSettings } from '../../constants/settings.ts';
+import { CartContext, CartHydrationContext, CartItemsByCafeId } from '../../context/cart.ts';
+import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
+import { CardNumberContext } from '../../context/payment.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
-import { CartContext, CartHydrationContext, CartItemsByCafeId } from '../../context/cart.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
-import { getInitialDateFromUrl } from '../../util/url.ts';
-import { ApplicationSettings } from '../../constants/settings.ts';
-import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
 import { useCartHydration } from '../../hooks/cart.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
+import { ValueNotifier, ValueNotifierSet } from '../../util/events.ts';
+import { getInitialDateFromUrl } from '../../util/url.ts';
 
 interface IStaticContextProvidersProps {
     children: React.ReactNode;
@@ -28,6 +29,7 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
 
     const searchQueryNotifier = useMemo(() => new ValueNotifier<string>(''), []);
     const cafeCollapseNotifier = useMemo(() => new ValueNotifierSet<string>(new Set()), []);
+    const cardNumberNotifier = useMemo(() => new ValueNotifier<string>(''), []);
     const stationCollapseNotifier = useMemo(() => new ValueNotifierSet<string>(new Set()), []);
 
     const cartItemNotifier = useMemo(() => new ValueNotifier<CartItemsByCafeId>(new Map()), []);
@@ -46,7 +48,9 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
                     <CartHydrationContext.Provider value={cartHydrationNotifier}>
                         <CafeCollapseContext.Provider value={cafeCollapseNotifier}>
                             <StationCollapseContext.Provider value={stationCollapseNotifier}>
-                                {children}
+                                <CardNumberContext.Provider value={cardNumberNotifier}>
+                                    {children}
+                                </CardNumberContext.Provider>
                             </StationCollapseContext.Provider>
                         </CafeCollapseContext.Provider>
                     </CartHydrationContext.Provider>

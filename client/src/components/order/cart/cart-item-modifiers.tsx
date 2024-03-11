@@ -1,6 +1,6 @@
+import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.ts';
 import React from 'react';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
-import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.ts';
 
 const getModifierNameDisplay = (modifier: IMenuItemModifier) => {
     if (modifier.description.endsWith(':')) {
@@ -21,6 +21,18 @@ export const CartItemModifiers: React.FC<ICartItemModifiersProps> = ({ item }) =
     return (
         <table className="modifiers">
             <tbody>
+                {
+                    item.specialInstructions && (
+                        <tr className="modifier">
+                            <td className="modifier-name">
+                            Special Instructions:
+                            </td>
+                            <td className="modifier-choices">
+                                {item.specialInstructions}
+                            </td>
+                        </tr>
+                    )
+                }
                 {
                     Array.from(item.choicesByModifierId.entries())
                         .map(([modifierId, choice]) => {

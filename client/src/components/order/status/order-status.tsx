@@ -1,6 +1,6 @@
-import React from 'react';
 import { IPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { IOrderCompletionResponse } from '@msdining/common/dist/models/cart';
+import React from 'react';
 import { OrderCompletedList } from './order-completed-list.tsx';
 
 export const OrderStatus: React.FC<IPromiseState<IOrderCompletionResponse>> = ({ stage, value, error }) => {
@@ -16,7 +16,7 @@ export const OrderStatus: React.FC<IPromiseState<IOrderCompletionResponse>> = ({
     } else if (stage === PromiseStage.error) {
         return (
             <div className="card error">
-                Something went wrong when submitting your order: {error || ''}
+                Something went wrong when submitting your order: {String(error) || ''}
                 <br/>
                 The server didn't report back how far your order got.
             </div>

@@ -1,31 +1,31 @@
 import React, { useCallback, useContext, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { ApplicationSettings } from '../../../constants/settings.ts';
+import { ApplicationContext } from '../../../context/app.ts';
+import { CartContext } from '../../../context/cart.ts';
+import { PopupContext } from '../../../context/modal.ts';
+import { useValueNotifier, useValueNotifierAsState } from '../../../hooks/events.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
-import { sortViews } from '../../../util/sorting.ts';
-import { CartItemRow } from './cart-item-row.tsx';
-import { useValueNotifier, useValueNotifierAsState } from '../../../hooks/events.ts';
-import { CartContext } from '../../../context/cart.ts';
-import { ApplicationContext } from '../../../context/app.ts';
+import { getViewName } from '../../../util/cafe.ts';
 import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../util/cart.ts';
-import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
-import { PopupContext } from '../../../context/modal.ts';
-import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../util/link.ts';
 
 import './cart-contents-table.css';
-import { ApplicationSettings } from '../../../constants/settings.ts';
-import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
+import { sortViews } from '../../../util/sorting.ts';
 import { getParentView } from '../../../util/view.ts';
-import { getViewName } from '../../../util/cafe.ts';
+import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
+import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
+import { CartItemRow } from './cart-item-row.tsx';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
 interface ICartContentsTableProps {
-    showModifiers?: boolean;
+    showFullDetails?: boolean;
     showTotalPrice?: boolean;
 }
 
-export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModifiers = false, showTotalPrice = false }) => {
+export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsNotifier = useContext(CartContext);
@@ -112,7 +112,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModif
                         Array.from(cartItemsByView.get(view)!.values()).map((item) => (
                             <CartItemRow
                                 key={item.id}
-                                showModifiers={showModifiers}
+                                showFullDetails={showFullDetails}
                                 item={item}
                                 onRemove={() => onRemove(item)}
                                 onEdit={() => onEdit(item)}
@@ -123,7 +123,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showModif
                 </React.Fragment>
             ))
         },
-        [cartItemsByView, viewsById, shouldUseGroups, showModifiers, onRemove, onEdit, onChangeQuantity]
+        [cartItemsByView, viewsById, shouldUseGroups, showFullDetails, onRemove, onEdit, onChangeQuantity]
     );
 
     return (

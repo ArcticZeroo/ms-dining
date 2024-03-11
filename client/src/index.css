@@ -310,8 +310,13 @@ html, body, #root, .App {
     border-radius: var(--default-padding);
 }
 
+.default-table {
+    border-spacing: var(--default-padding);
+}
+
 .chip {
     background: var(--color-theme);
+    border-radius: var(--default-padding);
 }
 
 .default-margin-bottom {
