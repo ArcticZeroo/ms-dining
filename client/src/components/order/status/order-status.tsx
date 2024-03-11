@@ -13,7 +13,9 @@ export const OrderStatus: React.FC<IPromiseState<IOrderCompletionResponse>> = ({
                 </span>
             </div>
         );
-    } else if (stage === PromiseStage.error) {
+    }
+
+    if (stage === PromiseStage.error) {
         return (
             <div className="card error">
                 Something went wrong when submitting your order: {String(error) || ''}
@@ -21,7 +23,9 @@ export const OrderStatus: React.FC<IPromiseState<IOrderCompletionResponse>> = ({
                 The server didn't report back how far your order got.
             </div>
         );
-    } else if (stage === PromiseStage.success) {
+    }
+
+    if (stage === PromiseStage.success) {
         if (value == null) {
             return (
                 <div className="card error">
