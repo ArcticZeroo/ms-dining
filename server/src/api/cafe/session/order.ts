@@ -1,12 +1,14 @@
 import { ICardData, ICartItem, SubmitOrderStage } from '@msdining/common/dist/models/cart.js';
+import { getPaymentProcessorTimezoneOffset } from '../../../util/date.js';
+import { logDebug, logError } from '../../../util/log.js';
 import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
-    IAddToOrderResponse,
-    ICardProcessorPaymentResponse,
+    IAddToOrderResponse, ICardProcessorPaymentFailureResponse,
+    ICardProcessorPaymentSuccessResponse,
     IOrderLineItem,
-    IRetrieveCardProcessorTokenResponse
+    IRetrieveCardProcessorTokenResponse, isCardProcessorPaymentFailureResponse
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
@@ -44,7 +46,7 @@ interface ISerializedModifier {
     count: 1;
     properties: {
         applicableTargetMenuFilter: 'All'
-    }
+    };
 }
 
 interface ISubmitOrderProcessedParams {
@@ -259,23 +261,328 @@ export class CafeOrderSession extends CafeDiscoverySession {
             kitchenDisplayText:   receiptText
         };
 
+        const requestBody = {
+            item:               serializedItem,
+            conceptSchedule:    {
+                openScheduleExpression:  '0 0 0 * * *',
+                closeScheduleExpression: '0 0 24 * * *'
+            },
+            scheduledDay:       0,
+            scheduleTime:       {
+                'startTime': '11:15 AM',
+                'endTime':   '11:30 AM'
+            },
+            isMultiItem:        false,
+            onDemandTerminalId: this.#orderingContext.onDemandTerminalId,
+            orderTimeZone:      'PST8PDT',
+            properties:         {
+                displayProfileId:          this.config.displayProfileId,
+                employeeId:                this.#orderingContext.onDemandEmployeeId,
+                orderNumberNameSpace:      '941', // todo
+                orderNumberSequenceLength: 4,
+                orderSourceSystem:         'onDemand',
+                profitCenterId:            this.#orderingContext.profitCenterId,
+                priceLevelId:              this.#orderingContext.storePriceLevel,
+            },
+            schedule:           [
+                {
+                    '@c':                '.DisplayProfileTask',
+                    displayProfileState: {
+                        // do we need to populate this?
+                        conceptStates: [
+                            {
+                                'conceptId': '10975',
+                                'menuId':    '16795'
+                            },
+                            {
+                                'conceptId': '10972',
+                                'menuId':    '16787'
+                            },
+                            {
+                                'conceptId': '10927',
+                                'menuId':    '16650'
+                            },
+                            {
+                                'conceptId': '11002',
+                                'menuId':    '16822'
+                            },
+                            {
+                                'conceptId': '10995',
+                                'menuId':    '16819'
+                            },
+                            {
+                                'conceptId': '10937',
+                                'menuId':    '16730'
+                            },
+                            {
+                                'conceptId': '11213',
+                                'menuId':    '16728'
+                            },
+                            {
+                                'conceptId': '11064',
+                                'menuId':    '16904'
+                            },
+                            {
+                                'conceptId': '10818',
+                                'menuId':    '16492'
+                            }
+                        ]
+                    },
+                    properties:          {
+                        'meal-period-id': MEAL_PERIOD.lunch.toString(),
+                    },
+                    scheduledExpression: '0 0 0 * * *',
+                }
+            ],
+            storePriceLevel:    this.#orderingContext.storePriceLevel,
+            useIgOrderApi:      true,
+        };
+
         const response = await this._requestAsync(`/order/${this.config.tenantId}/${this.config.contextId}/orders`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify({
-                    item:            serializedItem,
-                    scheduledDay:    0,
-                    scheduleTime:    {
-                        'startTime': '11:15 AM',
-                        'endTime':   '11:30 AM'
-                    },
-                    useIgOrderApi:   true,
-                    conceptSchedule: {
-                        openScheduleExpression:  '0 0 0 * * *',
-                        closeScheduleExpression: '0 0 24 * * *'
+                body:    JSON.stringify(
+                    {
+                        'item':                              {
+                            'id':                         menuItem.id,
+                            'contextId':                  this.config.contextId,
+                            'tenantId':                   this.config.tenantId,
+                            'itemId':                     '1013121',
+                            'name':                       'DELI-SIDE-Pear',
+                            'isDeleted':                  false,
+                            'isActive':                   false,
+                            'lastUpdateTime':             '2024-02-02T19:28:47.758Z',
+                            'revenueCategoryId':          '12',
+                            'productClassId':             '370',
+                            'kpText':                     'Pear',
+                            'kitchenDisplayText':         'Pear',
+                            'receiptText':                'Pear',
+                            'price':                      {
+                                'currencyUnit': 'USD',
+                                'amount':       '0.99'
+                            },
+                            'defaultPriceLevelId':        this.#orderingContext.storePriceLevel,
+                            'priceLevels':                {
+                                '1':  {
+                                    'priceLevelId': '1',
+                                    'name':         'Base Price',
+                                    'price':        {
+                                        'currencyUnit': 'USD',
+                                        'amount':       '0.00'
+                                    }
+                                },
+                                '70': {
+                                    'priceLevelId': '70',
+                                    'name':         'MS_2019',
+                                    'price':        {
+                                        'currencyUnit': 'USD',
+                                        'amount':       '0.80'
+                                    }
+                                },
+                                '71': {
+                                    'priceLevelId': '71',
+                                    'name':         'MS_2023',
+                                    'price':        {
+                                        'currencyUnit': 'USD',
+                                        'amount':       '0.99'
+                                    }
+                                }
+                            },
+                            'isSoldByWeight':             false,
+                            'tareWeight':                 0,
+                            'isDiscountable':             true,
+                            'allowPriceOverride':         true,
+                            'isTaxIncluded':              false,
+                            'taxClasses':                 [
+                                'WA Cafe Tax EXMT'
+                            ],
+                            'kitchenVideoLabel':          'Pear',
+                            'kitchenVideoId':             '653fed25d400b16272b82edd',
+                            'kitchenVideoCategoryId':     0,
+                            'kitchenCookTimeSeconds':     0,
+                            'skus':                       [],
+                            'itemType':                   'ITEM',
+                            'displayText':                'Pear',
+                            'itemImages':                 [
+                                {
+                                    'businessContextId': '8cf3ef7a-4781-40c0-a40e-49d765bd0967',
+                                    'imageId':           '6672744',
+                                    'name':              'Deli - Pear Glamour__00',
+                                    'fileNames':         [
+                                        'Deli - Pear Glamour_xs__00.JPG',
+                                        'Deli - Pear Glamour_sm__00.JPG',
+                                        'Deli - Pear Glamour_md__00.JPG',
+                                        'Deli - Pear Glamour_lg__00.JPG',
+                                        'Deli - Pear Glamour_xl__00.JPG',
+                                        'Deli - Pear Glamour__00.JPG'
+                                    ],
+                                    'tags':              [
+                                        'ITEM'
+                                    ]
+                                }
+                            ],
+                            'isAvailableToGuests':        true,
+                            'isPreselectedToGuests':      false,
+                            'tagNames':                   [],
+                            'tagIds':                     [
+                                '656774cf0b49d1380884d196'
+                            ],
+                            'substituteItemId':           '',
+                            'isSubstituteItem':           false,
+                            'properties':                 {
+                                'cartGuid':     '653ff343ce31d740113b91e6-1710269657477',
+                                'scannedItem':  false,
+                                'calories':     '80',
+                                'maxCalories':  '130',
+                                'priceLevelId': '71'
+                            },
+                            'amount':                     '0.99',
+                            'menuPriceLevelId':           this.#orderingContext.storePriceLevel,
+                            'menuId':                     '16787',
+                            'menuPriceLevelApplied':      false,
+                            'image':                      'https://ondemand-cdn-static-asset-prod-westus.rguest.com//api/image/107/8cf3ef7a-4781-40c0-a40e-49d765bd0967/Deli - Pear Glamour__00.JPG',
+                            'thumbnail':                  'https://ondemand-cdn-static-asset-prod-westus.rguest.com//api/image/107/8cf3ef7a-4781-40c0-a40e-49d765bd0967/Deli - Pear Glamour__00.JPG',
+                            'options':                    [],
+                            'attributes':                 [],
+                            'conceptId':                  '10972',
+                            'isItemCustomizationEnabled': false,
+                            'holdAndFire':                false,
+                            'count':                      1,
+                            'quantity':                   1,
+                            'lineItemInstructions':       [
+                                {
+                                    'label': '',
+                                    'text':  'test'
+                                }
+                            ],
+                            'conceptName':                'Delicatessen',
+                            'modifierTotal':              0,
+                            'mealPeriodId':               null,
+                            'uniqueId':                   '653ff343ce31d740113b91e6-1710269657477',
+                            'cartItemId':                 cartItemId
+                        },
+                        'currencyDetails':                   {
+                            'currencyDecimalDigits': '2',
+                            'currencyCultureName':   'en-US',
+                            'currencyCode':          'USD',
+                            'currencySymbol':        '$'
+                        },
+                        'schedule':                          [
+                            {
+                                '@c':                  '.DisplayProfileTask',
+                                'scheduledExpression': '0 0 8 * * TUE',
+                                'properties':          {
+                                    'meal-period-id': '1'
+                                },
+                                'displayProfileState': {
+                                    'displayProfileId': '5341',
+                                    'conceptStates':    [
+                                        {
+                                            'conceptId': '10975',
+                                            'menuId':    '16795'
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                '@c':                  '.DisplayProfileTask',
+                                'scheduledExpression': '0 0 10 * * TUE',
+                                'properties':          {
+                                    'meal-period-id': '1'
+                                },
+                                'displayProfileState': {
+                                    'displayProfileId': '5341',
+                                    'conceptStates':    [
+                                        {
+                                            'conceptId': '10975',
+                                            'menuId':    '16795'
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                '@c':                  '.DisplayProfileTask',
+                                'scheduledExpression': '0 0 11 * * TUE',
+                                'properties':          {
+                                    'meal-period-id': '2'
+                                },
+                                'displayProfileState': {
+                                    'displayProfileId': '5341',
+                                    'conceptStates':    [
+                                        {
+                                            'conceptId': '10975',
+                                            'menuId':    '16795'
+                                        },
+                                        {
+                                            'conceptId': '10972',
+                                            'menuId':    '16787'
+                                        },
+                                        {
+                                            'conceptId': '10927',
+                                            'menuId':    '16650'
+                                        },
+                                        {
+                                            'conceptId': '11002',
+                                            'menuId':    '16822'
+                                        },
+                                        {
+                                            'conceptId': '10995',
+                                            'menuId':    '16819'
+                                        },
+                                        {
+                                            'conceptId': '10937',
+                                            'menuId':    '16732'
+                                        },
+                                        {
+                                            'conceptId': '11213',
+                                            'menuId':    '16727'
+                                        },
+                                        {
+                                            'conceptId': '10979',
+                                            'menuId':    '16797'
+                                        },
+                                        {
+                                            'conceptId': '10819',
+                                            'menuId':    '16486'
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                '@c':                  '.TransitionTask',
+                                'scheduledExpression': '0 0 14 * * TUE',
+                                'properties':          {
+                                    'TRANSITION_MESSAGE': ''
+                                }
+                            }
+                        ],
+                        'orderTimeZone':                     'PST8PDT',
+                        'scheduleTime':                      {
+                            'startTime': '1:30 PM',
+                            'endTime':   '1:45 PM'
+                        },
+                        'storePriceLevel':                   '71',
+                        'scheduledDay':                      0,
+                        'useIgOrderApi':                     true,
+                        'onDemandTerminalId':                '941',
+                        'properties':                        {
+                            'employeeId':                '265',
+                            'profitCenterId':            '338',
+                            'orderSourceSystem':         'onDemand',
+                            'orderNumberSequenceLength': 4,
+                            'orderNumberNameSpace':      '941',
+                            'displayProfileId':          '5341',
+                            'priceLevelId':              '71'
+                        },
+                        'scheduledOrderCompletionTimeStamp': '2024-03-12T19:45:00Z',
+                        'conceptSchedule':                   {
+                            'openScheduleExpression':  '0 0 11 * * TUE',
+                            'closeScheduleExpression': '0 0 14 * * TUE'
+                        },
+                        'isMultiItem':                       false
                     }
-                })
+                )
             });
 
         const json = await response.json();
@@ -312,7 +619,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Order number is not set');
         }
 
-        if (this.#orderTotalTax === 0 || this.#orderTotalWithoutTax === 0 || this.#orderTotalWithTax === 0) {
+        if (this.#orderTotalWithoutTax === 0 || this.#orderTotalWithTax === 0) {
             throw new Error('Order totals cannot be zero');
         }
 
@@ -370,27 +677,44 @@ export class CafeOrderSession extends CafeDiscoverySession {
         return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`;
     }
 
-    private async _makeCardProcessorRequest(token: string, url: string, method: 'POST' | 'GET', body?: object) {
-        const response = await makeRequestWithRetries({
-            makeRequest: () => fetch(
-                url,
-                {
-                    method,
-                    headers: {
-                        ...JSON_HEADERS,
-                        'Api-Key-Token': token,
-                        'Referer':       this._getCardProcessorUrl(token)
-                    },
-                    body:    body ? JSON.stringify(body) : undefined
-                }
-            )
-        });
+    private async _parseCreditProcessorResponse<T>(response: Awaited<ReturnType<typeof fetch>>): Promise<T> {
+        const text = await response.text();
 
-        if (!response.ok) {
-            throw new Error(`Failed to make card processor request: ${response.statusText}`);
+        try {
+            return JSON.parse(text);
+        } catch (err) {
+            if (!response.ok) {
+                throw new Error(`Card processor response failed with code ${response.statusText}: ${text}`);
+            } else {
+                throw new Error(`Failed to parse card processor response: ${text}`);
+            }
         }
+    }
 
-        return response;
+    private async _makeCardProcessorRequest(token: string, url: string, method: 'POST' | 'GET', body?: object) {
+        return await makeRequestWithRetries({
+            makeRequest: (retry) => {
+                logDebug('Making card processor request');
+                logDebug(`${method ?? 'GET'} ${url} (Attempt ${retry})`);
+                logDebug(`Token: "${token}"`);
+                if (body) {
+                    logDebug(JSON.stringify(body));
+                }
+
+                return fetch(
+                    url,
+                    {
+                        method,
+                        headers: {
+                            ...JSON_HEADERS,
+                            'Api-Key-Token': token,
+                            'Referer':       this._getCardProcessorUrl(token)
+                        },
+                        body:    body ? JSON.stringify(body) : undefined
+                    }
+                );
+            }
+        });
     }
 
     private async _retrieveCardProcessorXssToken() {
@@ -403,6 +727,10 @@ export class CafeOrderSession extends CafeDiscoverySession {
             this._getCardProcessorUrl(this.#cardProcessorToken),
             'GET'
         );
+
+        if (!response.ok) {
+            throw new Error(`Card processor response failed with code ${response.statusText}`);
+        }
 
         const text = await response.text();
 
@@ -427,33 +755,43 @@ export class CafeOrderSession extends CafeDiscoverySession {
             {
                 cardholderName:  cardData.name,
                 cardNumber:      cardData.cardNumber,
-                expirationMonth: cardData.expirationMonth,
+                expirationMonth: cardData.expirationMonth.padStart(2, '0'),
                 expirationYear:  cardData.expirationYear,
                 cvv:             cardData.securityCode,
                 postalCode:      cardData.postalCode,
+                dateTimeZone:    getPaymentProcessorTimezoneOffset(),
                 addressLine1:    null,
                 addressLine2:    null,
                 city:            null,
                 state1:          null,
                 state2:          null,
                 postalCode1:     null,
-                doVerify:        false,
+                doVerify:        'false',
                 enableCaptcha:   false,
-                dateTimeZone:    (new Date()).toISOString(),
-                customerId:      '',
-                browserInfo:     {
+                // doVerify:        'true',
+                // enableCaptcha:   true,
+                // 'g-recaptcha-response': '03AFcWeA6NbAxkZklfmkgiYS-skISqqNeGkQV4Ygim33N_lxmS9uKW6qd6FvLVKEFEDa8NVJ9DnLOWiKi_cmozUpEE94VyZ6TN-LCAnejRU4r49-YF-273oWXy9_1cYtQYRbNG3jYvqpYUTPsb2SkFL40beSsoLl_4WuD1GVM02SxAjmUMAZ6F7ZnU0VrKBLeEDaXfIZP6VvjKxJ0QXmtgJnGS0AaHHyOSZQzwu4jDE5GRQ6xTbP6ofnjnhlvS7krlG4Cn8nf06DEygh2QUkqnxKLy6jtGFZc56WE0R9UBPn6BnW0G6PINBFGMkEKW_-mL24MsaASS8aGqmg0NUSBVxmJNflwGlCfn_vnxMi93FAB0s0bYPzo-JC0id2tqtUsEQNLHktYYHIhgVgMIFmo8eda2aGj53Ush5aSbL9E1J9RbCmlvbMtd-MK2p8ykfNbqnH_qtaEqdsW07b_BHZqJGSDkjTNDkG5EltHMp6299_7z0MS-y4CsZWsjfnOmJtfFN9rd0DWfQKMkLkZF-rNywI0bj_7aiXo4hjiRnNIL9BJGq-wsV3HqtY79bCGShidV1NF-9DfG9hMzI1pJnVYPCFhs6hX_tC8tXc0VJ7RfAtVUjRyWpsJdIOPkVLhsMwsJ15uoe7BOe87YIp4Ez5wni18LOF9dupTqoyiGTm2nVqChgE26viw_wbK5VhzVGcDkhDaXa4B8Cwrz0uA7vJcOu7hkj1qKO3m6G4rlBiWi7fCxCkbjH-3syGM2h45h4MD70Lcjrt5DgHp1OFoCJErhvbAf8NAh-BKOk85HkKoaGEa1SR4WzUb-hpIn2UsyMtO40UO0tujC60pQLK7IWTFhXfkyg1NvThb8_4xygmphdT54ZqKDKOF3fkruBJOc6fTFiZZZFljhfXEneDGuqtnI2_8tXwS0JA7_knjOExW-JCZfnTXsrmTX1r4QzzDvSgvyoFukmMyZVxKmwifL-PZmTJVf5nOxaLggpIXRB-kdSQYKDFvBptFK4HHJ0hLjiKFYp0AEtddALBDI7A5C3Mac79FavXvq6a2QP8PAEeKP-nGPffjBMwpTJuzkXnz3AHa5j4hP0edNXziyT-E2sdXD6jgOS1dAYUvOWOHuTzEWl3ps9q3yjaI07ymBIbOYarGZJQAzm8YSZnsXgFi9PD4zkSO0p4y7AUWVSk8oSHjCorz-vxtd_f5ly_bZ8J6EGf-1hkzYszKSZd1H_5T_OodXtHaleclcFSiz1U4DB2urNE09JzE8nkRRzVS7USUqiB6IKDirZP-HeP-u61gU2IEzecXRLEZZ-RjImKNthp1eVUrVifn9BM2WiaY4MqcAlLitXAHYanMQBAxUPghNKSoqxyab-SH01F1TFPijZdVP7Xz3dKCTMTb_4kZzsFRZC2bLx-bNvNnU4fBisewU-AMLDJpnCF7elxwhmKke0eqhgZDNVzU0BvU1xAgFm0De403R41ttBG8wwkgAIUvzMqsoOvrtULYbrW-FAEkHOfoC6-V8h1wdeN692ukkzXjtImfzByTskxUrjkilc5DodvZ3eYMhojsBagMhrqZ-HM4QVvX7KRS3ZWeoy3zBL_EjklXOnFiAIhWPXcONwnNQY3mqWSPxlulPexlBQhhX0pVe7g1BTRw5adw5Uzi3pkAnO3pwTNzEMXrAs-gWK7SBz7sQVi1Zym2mxzD8BohrmKWqIJPQiJvEOTFeXre4FnhOCWKzL7w0v0DffvGOpDKwze-FC5_sL5euEuPV_eVR0N5_f4_AVQSQc4kVFsI',
+                // googleCaptcha: '03AFcWeA6NbAxkZklfmkgiYS-skISqqNeGkQV4Ygim33N_lxmS9uKW6qd6FvLVKEFEDa8NVJ9DnLOWiKi_cmozUpEE94VyZ6TN-LCAnejRU4r49-YF-273oWXy9_1cYtQYRbNG3jYvqpYUTPsb2SkFL40beSsoLl_4WuD1GVM02SxAjmUMAZ6F7ZnU0VrKBLeEDaXfIZP6VvjKxJ0QXmtgJnGS0AaHHyOSZQzwu4jDE5GRQ6xTbP6ofnjnhlvS7krlG4Cn8nf06DEygh2QUkqnxKLy6jtGFZc56WE0R9UBPn6BnW0G6PINBFGMkEKW_-mL24MsaASS8aGqmg0NUSBVxmJNflwGlCfn_vnxMi93FAB0s0bYPzo-JC0id2tqtUsEQNLHktYYHIhgVgMIFmo8eda2aGj53Ush5aSbL9E1J9RbCmlvbMtd-MK2p8ykfNbqnH_qtaEqdsW07b_BHZqJGSDkjTNDkG5EltHMp6299_7z0MS-y4CsZWsjfnOmJtfFN9rd0DWfQKMkLkZF-rNywI0bj_7aiXo4hjiRnNIL9BJGq-wsV3HqtY79bCGShidV1NF-9DfG9hMzI1pJnVYPCFhs6hX_tC8tXc0VJ7RfAtVUjRyWpsJdIOPkVLhsMwsJ15uoe7BOe87YIp4Ez5wni18LOF9dupTqoyiGTm2nVqChgE26viw_wbK5VhzVGcDkhDaXa4B8Cwrz0uA7vJcOu7hkj1qKO3m6G4rlBiWi7fCxCkbjH-3syGM2h45h4MD70Lcjrt5DgHp1OFoCJErhvbAf8NAh-BKOk85HkKoaGEa1SR4WzUb-hpIn2UsyMtO40UO0tujC60pQLK7IWTFhXfkyg1NvThb8_4xygmphdT54ZqKDKOF3fkruBJOc6fTFiZZZFljhfXEneDGuqtnI2_8tXwS0JA7_knjOExW-JCZfnTXsrmTX1r4QzzDvSgvyoFukmMyZVxKmwifL-PZmTJVf5nOxaLggpIXRB-kdSQYKDFvBptFK4HHJ0hLjiKFYp0AEtddALBDI7A5C3Mac79FavXvq6a2QP8PAEeKP-nGPffjBMwpTJuzkXnz3AHa5j4hP0edNXziyT-E2sdXD6jgOS1dAYUvOWOHuTzEWl3ps9q3yjaI07ymBIbOYarGZJQAzm8YSZnsXgFi9PD4zkSO0p4y7AUWVSk8oSHjCorz-vxtd_f5ly_bZ8J6EGf-1hkzYszKSZd1H_5T_OodXtHaleclcFSiz1U4DB2urNE09JzE8nkRRzVS7USUqiB6IKDirZP-HeP-u61gU2IEzecXRLEZZ-RjImKNthp1eVUrVifn9BM2WiaY4MqcAlLitXAHYanMQBAxUPghNKSoqxyab-SH01F1TFPijZdVP7Xz3dKCTMTb_4kZzsFRZC2bLx-bNvNnU4fBisewU-AMLDJpnCF7elxwhmKke0eqhgZDNVzU0BvU1xAgFm0De403R41ttBG8wwkgAIUvzMqsoOvrtULYbrW-FAEkHOfoC6-V8h1wdeN692ukkzXjtImfzByTskxUrjkilc5DodvZ3eYMhojsBagMhrqZ-HM4QVvX7KRS3ZWeoy3zBL_EjklXOnFiAIhWPXcONwnNQY3mqWSPxlulPexlBQhhX0pVe7g1BTRw5adw5Uzi3pkAnO3pwTNzEMXrAs-gWK7SBz7sQVi1Zym2mxzD8BohrmKWqIJPQiJvEOTFeXre4FnhOCWKzL7w0v0DffvGOpDKwze-FC5_sL5euEuPV_eVR0N5_f4_AVQSQc4kVFsI',
+                customerId: '',
+                // Intentional that we're double-stringifying here. The actual request sends this object as an encoded string.
+                browserInfo: JSON.stringify({
                     userAgent: cardData.userAgent
-                },
-                token:           this.#xssToken,
+                }),
+                token:       this.#xssToken,
             }
         );
 
-        const json = await response.json() as ICardProcessorPaymentResponse;
+        const json = await this._parseCreditProcessorResponse<ICardProcessorPaymentSuccessResponse | ICardProcessorPaymentFailureResponse>(response);
+
+        if (isCardProcessorPaymentFailureResponse(json)) {
+            throw new Error(`Card processor response failed (${response.statusText}): ${json.message}`);
+        }
 
         // This is how the actual JS does it
         const submittedPaymentToken = json.token || json.transactionReferenceData?.token;
 
         if (!submittedPaymentToken) {
+            logDebug('Card processor response is missing payment token:', json);
             throw new Error('TODO: Handle this by enabling the captcha and trying again');
         }
 
@@ -833,7 +1171,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     walletSaleTransactionData:       null
                 })
             }
-        )
+        );
     }
 
     private async _runStages(requiredStage: SubmitOrderStage, callback: () => Promise<void>): Promise<void> {
@@ -846,7 +1184,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
         try {
             await callback();
         } catch (err) {
-            console.error(`Failed to after stage ${this.#lastCompletedStage}:`, err);
+            logError(`{${this.cafe.name}} Failed after stage ${this.#lastCompletedStage}:`, err);
         }
     }
 

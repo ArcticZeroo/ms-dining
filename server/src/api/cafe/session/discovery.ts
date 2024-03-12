@@ -57,6 +57,7 @@ export class CafeDiscoverySession {
                 {
                     makeRequest: (retry) => {
                         logDebug(`${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
+                        logDebug(optionsWithToken.body);
                         return fetch(url, optionsWithToken);
                     },
                     retryCount:  requestRetryCount,

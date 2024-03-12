@@ -1,5 +1,8 @@
+import Duration from '@arcticzeroo/duration';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import Router, { RouterContext } from '@koa/router';
+import { DateUtil } from '@msdining/common';
+import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.js';
 import {
     ICardData,
     ICartItem,
@@ -8,23 +11,19 @@ import {
     ISubmitOrderRequest,
     SubmitOrderStage
 } from '@msdining/common/dist/models/cart.js';
-import { attachRouter } from '../../../util/koa.js';
+import { toDateString } from '@msdining/common/dist/util/date-util.js';
+import { phone } from 'phone';
 import { CafeOrderSession } from '../../../api/cafe/session/order.js';
-import { ICafe, IMenuItem } from '../../../models/cafe.js';
-import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
-import { DateUtil } from '@msdining/common';
-import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
-import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
-import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.js';
 import { WaitTimeSession } from '../../../api/cafe/session/wait-time.js';
+import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
+import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
+import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { cafesById } from '../../../constants/cafes.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import Duration from '@arcticzeroo/duration';
+import { ICafe, IMenuItem } from '../../../models/cafe.js';
+import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { phone } from 'phone';
 import { isDuckTypeSerializedCartItem, isValidItemIdsByCafeId, isValidItemsByCafeId } from '../../../util/typeguard.js';
-import { logDebug } from '../../../util/log.js';
-import { toDateString } from '@msdining/common/dist/util/date-util.js';
 
 const isValidSubmitOrderParams = (data: unknown): data is ISubmitOrderRequest => {
     if (!isDuckType<ISubmitOrderRequest>(data, {
@@ -193,18 +192,6 @@ export const registerOrderingRoutes = (parent: Router) => {
 
         await Promise.all(preparePromises);
 
-        for (const [cafeId, session] of orderSessionsByCafeId.entries()) {
-            if (prepareBeforeOrder) {
-                if (!session.isReadyForSubmit) {
-                    return ctx.throw(500, `Cafe ${cafeId} is not ready to submit order`);
-                }
-            } else {
-                if (session.lastCompletedStage !== SubmitOrderStage.addToCart) {
-                    return ctx.throw(500, `Cafe ${cafeId} did not successfully populate the cart!`);
-                }
-            }
-        }
-
         return orderSessionsByCafeId;
     }
 
@@ -216,6 +203,11 @@ export const registerOrderingRoutes = (parent: Router) => {
         }
 
         const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, itemsByCafeId, false /*prepareBeforeOrder*/);
+
+        const areAllSessionsReady = Array.from(orderSessionsByCafeId.values()).every(session => session.lastCompletedStage === SubmitOrderStage.addToCart);
+        if (!areAllSessionsReady) {
+            return ctx.throw(500, 'Not all sessions are ready for price retrieval');
+        }
 
         let totalPriceWithTax = 0;
         let totalPriceWithoutTax = 0;
@@ -251,17 +243,21 @@ export const registerOrderingRoutes = (parent: Router) => {
 
         const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, data.itemsByCafeId, true /*prepareBeforeOrder*/);
 
-        const orderPromises: Array<Promise<void>> = [];
+        const areAllSessionsReady = Array.from(orderSessionsByCafeId.values()).every(session => session.isReadyForSubmit);
 
-        for (const session of orderSessionsByCafeId.values()) {
-            orderPromises.push(session.submitOrder({
-                alias:                      data.alias,
-                cardData:                   data.cardData,
-                phoneData
-            }));
+        if (areAllSessionsReady) {
+            const orderPromises: Array<Promise<void>> = [];
+
+            for (const session of orderSessionsByCafeId.values()) {
+                orderPromises.push(session.submitOrder({
+                    alias:                      data.alias,
+                    cardData:                   data.cardData,
+                    phoneData
+                }));
+            }
+
+            await Promise.all(orderPromises);
         }
-
-        await Promise.all(orderPromises);
 
         const response: IOrderCompletionResponse = {};
         for (const [cafeId, session] of orderSessionsByCafeId.entries()) {

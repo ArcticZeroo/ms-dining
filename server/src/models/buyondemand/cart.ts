@@ -1,5 +1,7 @@
+import { isDuckType } from '@arcticzeroo/typeguard';
+
 export interface IBuyOnDemandWaitTimeSection {
-    minutes: number
+    minutes: number;
 }
 
 export interface IBuyOnDemandWaitTimeResponse {
@@ -47,10 +49,24 @@ export interface IAddToOrderResponse {
 }
 
 export interface IRetrieveCardProcessorTokenResponse {
-    token: string
+    token: string;
 }
 
-export interface ICardProcessorPaymentResponse {
+export interface ICardProcessorPaymentFailureResponse {
+    code: number;
+    reason: string;
+    message: string;
+}
+
+export const isCardProcessorPaymentFailureResponse = (response: unknown): response is ICardProcessorPaymentFailureResponse => {
+    return isDuckType<ICardProcessorPaymentFailureResponse>(response, {
+        code:    'number',
+        reason:  'string',
+        message: 'string'
+    });
+};
+
+export interface ICardProcessorPaymentSuccessResponse {
     token?: string;
     transactionReferenceData?: {
         token: string;

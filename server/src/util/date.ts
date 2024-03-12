@@ -67,3 +67,29 @@ export const parseDateFromLastUpdateHeader: ParseDateWithNull | ParseDateWithout
 
     return date;
 }
+
+export const getPaymentProcessorTimezoneOffset = () => {
+    const now = new Date();
+    const timezoneOffset = -now.getTimezoneOffset();
+    const differencePrefix = timezoneOffset >= 0 ? '+' : '-'
+
+    const pad = function(num: number) {
+        const norm = Math.floor(Math.abs(num));
+        return norm.toString().padStart(2, '0');
+    };
+
+    const zeroConcat = function(num: number) {
+        const norm = Math.floor(Math.abs(num));
+        return norm.toString().padStart(3, '0');
+    };
+
+    return now.getFullYear() +
+                '-' + pad(now.getMonth() + 1) +
+                '-' + pad(now.getDate()) +
+                'T' + pad(now.getHours()) +
+                ':' + pad(now.getMinutes()) +
+                ':' + pad(now.getSeconds()) +
+                '.' + zeroConcat(now.getMilliseconds()) +
+                differencePrefix + pad(timezoneOffset / 60) +
+                ':' + pad(timezoneOffset % 60);
+}
