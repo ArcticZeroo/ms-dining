@@ -1,5 +1,5 @@
-import { IMenuItem } from '../../../../models/cafe.ts';
 import React, { useMemo } from 'react';
+import { IMenuItem } from '../../../../models/cafe.ts';
 import { MenuItem } from './menu-item.tsx';
 
 export interface IMenuCategoryProps {
@@ -23,11 +23,13 @@ export const MenuCategory: React.FC<IMenuCategoryProps> = ({
     );
 
     return (
-        <>
-            <tr>
-                <th colSpan={3}>{categoryName}</th>
-            </tr>
-            {menuItemList}
-        </>
+        <div className="flex-col menu-category">
+            <div className="category-name">
+                {categoryName}
+            </div>
+            <div className="menu-category-items">
+                {menuItemList}
+            </div>
+        </div>
     );
 };

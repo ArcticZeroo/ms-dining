@@ -101,53 +101,44 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         : 'Click to open item details';
 
     return (
-        <>
-            {/* This is a hack because the anchor needs to scroll the user to the top of the item, but td elements are horizontal. */}
-            <tr className="scroll-anchor-row">
-                <td>
-                    <ScrollAnchor id={scrollAnchorId} margin={scrollAnchorMargin}/>
-                </td>
-            </tr>
-            <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')}
-                onClick={onOpenModalClick}
-                title={title}
-                style={{ backgroundColor: currentHighlightTag?.color }}
-            >
-                <td colSpan={!canShowImage ? 2 : 1}>
-                    <div className="menu-item-head">
-                        <span className="menu-item-name">{menuItem.name}</span>
-                        {
-                            showDescriptions
-                            && menuItem.description
-                            && <span className="menu-item-description">{menuItem.description}</span>
-                        }
-                    </div>
-                </td>
+        <div className={classNames('flex-col menu-item pointer', isFavoriteItem && 'is-favorite')}
+            onClick={onOpenModalClick}
+            title={title}
+            style={{ backgroundColor: currentHighlightTag?.color }}
+        >
+            <ScrollAnchor id={scrollAnchorId} margin={scrollAnchorMargin}/>
+            <div className="menu-item-head">
+                <span className="menu-item-name">{menuItem.name}</span>
                 {
-                    canShowImage && (
-                        <td className="centered-content">
-                            <MenuItemImage menuItem={menuItem}/>
-                        </td>
-                    )
+                    showDescriptions
+                    && menuItem.description
+                    && <span className="menu-item-description">{menuItem.description}</span>
                 }
-                <td>
+            </div>
+            {
+                canShowImage && (
+                    <div className="centered-content">
+                        <MenuItemImage menuItem={menuItem}/>
+                    </div>
+                )
+            }
+            <div className="flex">
+                <span>
                     {formatPrice(menuItem.price)}
-                </td>
+                </span>
                 {
                     showCalories && (
-                        <td>
+                        <span>
                             {caloriesDisplay}
-                        </td>
+                        </span>
                     )
                 }
-                {
-                    showTags && (
-                        <td>
-                            <MenuItemTags tags={menuItem.tags}/>
-                        </td>
-                    )
-                }
-            </tr>
-        </>
+            </div>
+            {
+                showTags && (
+                    <MenuItemTags tags={menuItem.tags}/>
+                )
+            }
+        </div>
     );
 };

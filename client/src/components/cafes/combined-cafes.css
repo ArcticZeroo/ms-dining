@@ -13,6 +13,7 @@
 
 .stations {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: var(--default-padding);
     justify-content: center;
@@ -71,11 +72,11 @@
 
 .station .menu-body {
     padding: var(--default-padding);
+    gap: var(--default-padding);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    max-width: 100%;
-    overflow-x: auto;
     box-sizing: border-box;
     border-top-left-radius: var(--default-padding);
     border-bottom-left-radius: var(--default-padding);
@@ -83,60 +84,47 @@
 }
 
 .category-name {
-    font-weight: bold;
+    text-align: center;
+    background: #485470;
+    color: var(--color-foreground);
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
 }
 
-.station table {
-    border-spacing: 0;
+.station .menu-category {
+    align-self: stretch;
+    flex-grow: 1;
 }
 
-.station table tr {
+.station .menu-category .menu-category-items {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+    flex-grow: 1;
+}
+
+.station .menu-item {
     transition: background-color 0.25s ease;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    /*Max thumbnail size is 400px*/
+    max-width: calc(400px + 2 * var(--default-padding));
+    align-self: stretch;
+    justify-content: space-between;
+    flex-grow: 1;
 }
 
-.station table tr.menu-item:hover {
+.station .menu-item:hover {
     background: #EEE;
 }
 
-.station table tr.is-favorite {
+.station .menu-item.is-favorite {
     background: var(--favorite-color);
 }
 
-.station table tr.is-favorite:hover {
+.station .menu-item.is-favorite:hover {
     background: var(--favorite-color-dark);
-}
-
-.station table th, .station table td {
-    padding: 0;
-    margin: 0;
-}
-
-.station table th:first-child, .station table td:first-child {
-    padding: var(--table-padding);
-}
-
-.station table th:not(:first-child), .station table td:not(:first-child) {
-    padding: var(--table-padding) var(--table-padding) var(--table-padding) 0;
-}
-
-.station table .scroll-anchor-row td {
-    height: var(--default-padding);
-    padding: 0;
-    margin: 0;
-}
-
-.station table td:first-child {
-    border-bottom-left-radius: var(--default-padding);
-    border-top-left-radius: var(--default-padding);
-}
-
-.station table td:last-child {
-    border-bottom-right-radius: var(--default-padding);
-    border-top-right-radius: var(--default-padding);
-}
-
-.station table th {
-    text-align: left;
 }
 
 .menu-item-image {
@@ -221,8 +209,7 @@
 }
 
 .station.collapsed .menu-body {
-    height: 0;
-    visibility: hidden;
+    display: none;
 }
 
 .menu-item-head {
