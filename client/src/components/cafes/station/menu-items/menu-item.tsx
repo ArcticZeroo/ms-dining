@@ -40,7 +40,7 @@ const useScrollAnchorMargin = () => {
 
     return useMemo(
         // 1rem of padding vertically on cafe header, plus 1rem from the bottom of the station header
-        () => `calc(${cafeHeaderHeight + stationHeaderHeight}px + 3rem)`,
+        () => `calc(${cafeHeaderHeight + stationHeaderHeight}px + 1rem)`,
         [cafeHeaderHeight, stationHeaderHeight]
     );
 };
