@@ -1,6 +1,6 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { StationCollapseContext } from '../../../context/collapse.ts';
@@ -9,7 +9,6 @@ import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { useElementHeight } from '../../../hooks/html.ts';
-import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../../util/html.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
@@ -19,32 +18,15 @@ import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
 
-const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
-    const deviceType = useDeviceType();
-
-    // On Mobile, the station always has max width.
-    if (isExpanded || !widthPx || deviceType === DeviceType.Mobile) {
-        return {};
-    }
-
-    return {
-        width:    `${widthPx}px`,
-    };
-};
-
 const useStationExpansion = (scrollAnchorId: string) => {
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
     const collapsedStationsNotifier = useContext(StationCollapseContext);
     const collapsedStations = useValueNotifier(collapsedStationsNotifier);
-    const menuBodyRef = useRef<HTMLDivElement>(null);
-    const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
 
     const isExpanded = useMemo(
         () => !collapsedStations.has(scrollAnchorId),
         [collapsedStations, scrollAnchorId]
     );
-
-    const stationStyle = useStationStyle(isExpanded, menuWidthPx);
 
     const stationHeaderStyle = useMemo(
         () => ({ top: `${cafeHeaderHeight}px` }),
@@ -53,15 +35,6 @@ const useStationExpansion = (scrollAnchorId: string) => {
 
     const updateExpansionContext = useCallback(
         (isNowExpanded: boolean) => {
-            const menuBodyElement = menuBodyRef.current;
-
-            if (menuBodyElement && !isNowExpanded) {
-                // Apparently the browser sometimes renders with partial pixels. Why?
-                setMenuWidthPx(Math.ceil(menuBodyElement.offsetWidth));
-            } else {
-                setMenuWidthPx(undefined);
-            }
-
             if (isNowExpanded) {
                 collapsedStationsNotifier.delete(scrollAnchorId);
             } else {
@@ -84,8 +57,6 @@ const useStationExpansion = (scrollAnchorId: string) => {
 
     return {
         isExpanded,
-        menuBodyRef,
-        stationStyle,
         stationHeaderStyle,
         onTitleClick
     };
@@ -113,7 +84,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         [cafe.id, normalizedName]
     );
 
-    const { isExpanded, menuBodyRef, stationStyle, stationHeaderStyle, onTitleClick } = useStationExpansion(scrollAnchorId);
+    const { isExpanded, stationHeaderStyle, onTitleClick } = useStationExpansion(scrollAnchorId);
     const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
 
     return (
@@ -121,7 +92,6 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
             <StationHeaderHeightContext.Provider value={stationHeaderHeight}>
                 <div
                     className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
-                    style={stationStyle}
                 >
                     <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding))`}/>
                     <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
@@ -139,7 +109,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                             <ExpandIcon isExpanded={isExpanded}/>
                         </button>
                     </div>
-                    <StationMenu menuItemsByCategoryName={menu} ref={menuBodyRef}/>
+                    <StationMenu menuItemsByCategoryName={menu}/>
                 </div>
             </StationHeaderHeightContext.Provider>
         </CurrentStationContext.Provider>

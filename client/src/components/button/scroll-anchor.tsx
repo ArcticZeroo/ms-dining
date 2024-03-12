@@ -18,12 +18,14 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
     const cafe = useContext(CurrentCafeContext);
     const stationId = useContext(CurrentStationContext);
 
+    const anchorId = `#${id}`;
+
     useEffect(() => {
         if (element == null) {
             return;
         }
 
-        if (location.hash !== `#${id}`) {
+        if (location.hash !== anchorId) {
             return;
         }
 
@@ -46,6 +48,11 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
             navigate(url.pathname);
         }, 0);
     }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationId]);
+
+    // perf: Don't bother rendering the anchor if it's not needed
+    if (location.hash !== anchorId) {
+        return;
+    }
 
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement} style={{ scrollMargin: margin }}/>
