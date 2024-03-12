@@ -1,7 +1,9 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useContext, useMemo } from 'react';
+import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
+import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../../context/html.ts';
 import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 import { PopupContext } from '../../../../context/modal.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
@@ -14,7 +16,6 @@ import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
-import { ApplicationSettings } from '../../../../constants/settings.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -33,6 +34,17 @@ const getCaloriesDisplay = (menuItem: IMenuItem) => {
     return `${parts.join(' - ')} Calories`;
 };
 
+const useScrollAnchorMargin = () => {
+    const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
+    const stationHeaderHeight = useContext(StationHeaderHeightContext);
+
+    return useMemo(
+        // 1rem of padding vertically on cafe header, plus 1rem from the bottom of the station header
+        () => `calc(${cafeHeaderHeight + stationHeaderHeight}px + 3rem)`,
+        [cafeHeaderHeight, stationHeaderHeight]
+    );
+};
+
 const menuItemModalSymbol = Symbol('menuItem');
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
@@ -44,10 +56,9 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const showTags = useValueNotifier(ApplicationSettings.showTags);
     const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
-
     const isFavoriteItem = useIsFavoriteItem(menuItem.name, SearchEntityType.menuItem);
-
     const modalNotifier = useContext(PopupContext);
+    const scrollAnchorMargin = useScrollAnchorMargin();
 
     const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
@@ -94,7 +105,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             {/* This is a hack because the anchor needs to scroll the user to the top of the item, but td elements are horizontal. */}
             <tr className="scroll-anchor-row">
                 <td>
-                    <ScrollAnchor id={scrollAnchorId}/>
+                    <ScrollAnchor id={scrollAnchorId} margin={scrollAnchorMargin}/>
                 </td>
             </tr>
             <tr className={classNames('menu-item', 'pointer', isFavoriteItem && 'is-favorite')}

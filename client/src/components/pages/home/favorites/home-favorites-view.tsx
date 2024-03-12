@@ -7,14 +7,15 @@ import { ApplicationContext } from '../../../../context/app.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { useHomepageViews } from '../../../../hooks/views.ts';
+import { IQuerySearchResult } from '../../../../models/search.ts';
+import { MenusCurrentlyUpdatingException } from '../../../../util/exception.ts';
 import { classNames } from '../../../../util/react.ts';
 import { isAnyDateToday } from '../../../../util/search.ts';
 import { expandAndFlattenView } from '../../../../util/view.ts';
-import { ExpandIcon } from '../../../icon/expand.tsx';
-import { HomeFavoriteResult } from './home-favorite-result.tsx';
 import { RetryButton } from '../../../button/retry-button.tsx';
-import { MenusCurrentlyUpdatingException } from '../../../../util/exception.ts';
-import { IQuerySearchResult } from '../../../../models/search.ts';
+import { ExpandIcon } from '../../../icon/expand.tsx';
+import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
+import { HomeFavoriteResult } from './home-favorite-result.tsx';
 
 interface IFavoriteSearchResultsData {
     stage: PromiseStage;
@@ -98,7 +99,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
         if (stage === PromiseStage.running) {
             return (
                 <div className="centered-content">
-                    <span className="loading-spinner"/>
+                    <HourglassLoadingSpinner/>
                     Loading favorites...
                 </div>
             );

@@ -9,6 +9,7 @@ import { pluralize } from '../../../util/string.ts';
 import './analytics-page.css';
 import { setPageData } from '../../../util/title.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 
 const VisitorChart = React.lazy(() => import('./visitor-chart.tsx'));
 
@@ -46,10 +47,10 @@ export const AnalyticsPage = () => {
     if ([PromiseStage.notRun, PromiseStage.running].includes(visitLoadingStage)) {
         return (
             <div className="card">
-                <div className="loading-spinner"/>
-                <div>
+                <HourglassLoadingSpinner/>
+                <span>
                     Loading visit data...
-                </div>
+                </span>
             </div>
         );
     }

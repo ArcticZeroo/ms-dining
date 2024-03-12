@@ -5,6 +5,7 @@ import { OrderingClient } from '../../../api/order.ts';
 import { DebugSettings } from '../../../constants/settings.ts';
 import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
@@ -36,9 +37,7 @@ export const OrderPage = () => {
         if (cartHydrationState.stage === PromiseStage.running) {
             return (
                 <div className="flex">
-                    <span className="material-symbols-outlined loading-spinner-custom">
-                        hourglass_empty
-                    </span>
+                    <HourglassLoadingSpinner/>
                     Loading your saved cart...
                 </div>
             );

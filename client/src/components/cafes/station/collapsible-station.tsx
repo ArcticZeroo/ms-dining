@@ -1,22 +1,23 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+
+import { ApplicationSettings } from '../../../constants/settings.ts';
+import { StationCollapseContext } from '../../../context/collapse.ts';
+import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../context/html.ts';
 import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { useElementHeight } from '../../../hooks/html.ts';
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
+import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../../util/html.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
-
-import { ApplicationSettings } from '../../../constants/settings.ts';
-import { StationCollapseContext } from '../../../context/collapse.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { CafeHeaderHeightContext } from '../../../context/html.ts';
-import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../../util/html.ts';
 
 const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     const deviceType = useDeviceType();
@@ -31,17 +32,16 @@ const useStationStyle = (isExpanded: boolean, widthPx: number | undefined) => {
     };
 };
 
-const useStationExpansion = (stationName: string, scrollAnchorId: string) => {
+const useStationExpansion = (scrollAnchorId: string) => {
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
     const collapsedStationsNotifier = useContext(StationCollapseContext);
     const collapsedStations = useValueNotifier(collapsedStationsNotifier);
-    const stationHeaderRef = useRef<HTMLDivElement>(null);
     const menuBodyRef = useRef<HTMLDivElement>(null);
     const [menuWidthPx, setMenuWidthPx] = useState<number | undefined>(undefined);
 
     const isExpanded = useMemo(
-        () => !collapsedStations.has(stationName),
-        [collapsedStations, stationName]
+        () => !collapsedStations.has(scrollAnchorId),
+        [collapsedStations, scrollAnchorId]
     );
 
     const stationStyle = useStationStyle(isExpanded, menuWidthPx);
@@ -63,13 +63,13 @@ const useStationExpansion = (stationName: string, scrollAnchorId: string) => {
             }
 
             if (isNowExpanded) {
-                collapsedStationsNotifier.delete(stationName);
+                collapsedStationsNotifier.delete(scrollAnchorId);
             } else {
-                collapsedStationsNotifier.add(stationName);
+                collapsedStationsNotifier.add(scrollAnchorId);
                 scrollIntoViewIfNeeded(queryForScrollAnchor(scrollAnchorId));
             }
         },
-        [collapsedStationsNotifier, scrollAnchorId, stationName]
+        [collapsedStationsNotifier, scrollAnchorId, scrollAnchorId]
     );
 
     const onTitleClick = () => {
@@ -85,7 +85,6 @@ const useStationExpansion = (stationName: string, scrollAnchorId: string) => {
     return {
         isExpanded,
         menuBodyRef,
-        stationHeaderRef,
         stationStyle,
         stationHeaderStyle,
         onTitleClick
@@ -101,6 +100,9 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
     const cafe = useContext(CurrentCafeContext);
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
 
+    const [stationHeaderRef, setStationHeaderRef] = useState<HTMLDivElement | null>(null);
+    const stationHeaderHeight = useElementHeight(stationHeaderRef);
+
     const normalizedName = useMemo(
         () => normalizeNameForSearch(station.name),
         [station.name]
@@ -111,33 +113,35 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
         [cafe.id, normalizedName]
     );
 
-    const { isExpanded, menuBodyRef, stationHeaderRef, stationStyle, stationHeaderStyle, onTitleClick } = useStationExpansion(station.name, scrollAnchorId);
+    const { isExpanded, menuBodyRef, stationStyle, stationHeaderStyle, onTitleClick } = useStationExpansion(scrollAnchorId);
     const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
 
     return (
-        <CurrentStationContext.Provider value={station.name}>
-            <div
-                className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
-                style={stationStyle}
-            >
-                <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding))`}/>
-                <div className="station-header flex-row" style={stationHeaderStyle} ref={stationHeaderRef}>
-                    <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
-                    <button className="title" onClick={onTitleClick}>
-                        {
-                            station.logoUrl && (
-                                <img
-                                    src={station.logoUrl}
-                                    alt={`Logo for station ${station.name}`}
-                                />
-                            )
-                        }
-                        {station.name}
-                        <ExpandIcon isExpanded={isExpanded}/>
-                    </button>
+        <CurrentStationContext.Provider value={scrollAnchorId}>
+            <StationHeaderHeightContext.Provider value={stationHeaderHeight}>
+                <div
+                    className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
+                    style={stationStyle}
+                >
+                    <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding))`}/>
+                    <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
+                        <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
+                        <button className="title" onClick={onTitleClick}>
+                            {
+                                station.logoUrl && (
+                                    <img
+                                        src={station.logoUrl}
+                                        alt={`Logo for station ${station.name}`}
+                                    />
+                                )
+                            }
+                            {station.name}
+                            <ExpandIcon isExpanded={isExpanded}/>
+                        </button>
+                    </div>
+                    <StationMenu menuItemsByCategoryName={menu} ref={menuBodyRef}/>
                 </div>
-                <StationMenu menuItemsByCategoryName={menu} ref={menuBodyRef}/>
-            </div>
+            </StationHeaderHeightContext.Provider>
         </CurrentStationContext.Provider>
     );
 };

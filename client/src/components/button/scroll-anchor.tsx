@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CurrentCafeContext, CurrentStationContext } from '../../context/menu-item.ts';
 import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
+import { CurrentCafeContext, CurrentStationContext } from '../../context/menu-item.ts';
 
 interface IScrollAnchorProps {
     id: string;
@@ -16,7 +16,7 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const collapsedStationNamesNotifier = useContext(StationCollapseContext);
     const cafe = useContext(CurrentCafeContext);
-    const stationName = useContext(CurrentStationContext);
+    const stationId = useContext(CurrentStationContext);
 
     useEffect(() => {
         if (element == null) {
@@ -27,9 +27,13 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
             return;
         }
 
-        // It's OK if these are empty. Nothing will happen.
-        collapsedCafeIdsNotifier.delete(cafe.id);
-        collapsedStationNamesNotifier.delete(stationName);
+        if (cafe.id !== '') {
+            collapsedCafeIdsNotifier.delete(cafe.id);
+
+            if (stationId.length > 0) {
+                collapsedStationNamesNotifier.delete(stationId);
+            }
+        }
 
         // Jump to hash after render
         setTimeout(() => {
@@ -41,9 +45,9 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
 
             navigate(url.pathname);
         }, 0);
-    }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationName]);
+    }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationId]);
 
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement} style={{ scrollMargin: margin }}/>
     );
-}
+};

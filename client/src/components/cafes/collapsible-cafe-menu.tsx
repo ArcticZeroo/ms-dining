@@ -1,44 +1,21 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { ApplicationSettings } from '../../constants/settings.ts';
+import { CafeCollapseContext } from '../../context/collapse.ts';
+import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { useElementHeight } from '../../hooks/html.ts';
 import { ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
+import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../util/html.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { CollapsibleCafeMenuBody } from './collapsible-cafe-menu-body.tsx';
-import { ApplicationSettings } from '../../constants/settings.ts';
-import { CafeCollapseContext } from '../../context/collapse.ts';
-import { CafeHeaderHeightContext } from '../../context/html.ts';
-import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../util/html.ts';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
 };
-
-const useElementHeight = (headerElement: HTMLDivElement | null) => {
-    const [height, setHeight] = useState(0);
-
-    useEffect(() => {
-        if (!headerElement) {
-            setHeight(0);
-            return;
-        }
-
-        const updateHeight = () => {
-            setHeight(headerElement.clientHeight);
-        }
-
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(headerElement);
-
-        updateHeight();
-
-        return () => observer.disconnect();
-    }, [headerElement]);
-
-    return height;
-}
 
 interface ICollapsibleCafeMenuProps {
     cafe: ICafe;

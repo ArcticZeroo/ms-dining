@@ -1,8 +1,9 @@
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { CartHydrationContext } from '../../../context/cart.ts';
-import { ISerializedCartItemWithName } from '../../../models/cart.ts';
-import { useContext } from 'react';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
+import { useContext } from 'react';
+import { CartHydrationContext } from '../../../context/cart.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { ISerializedCartItemWithName } from '../../../models/cart.ts';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { MissingItemsTable } from './missing-items-table.tsx';
 
 export const CartHydrationView = () => {
@@ -13,9 +14,7 @@ export const CartHydrationView = () => {
     if (cartHydration.stage === PromiseStage.running) {
         return (
             <div className="flex flex-center cart-loading">
-                <span className="material-symbols-outlined loading-spinner-custom">
-                    hourglass_empty
-                </span>
+                <HourglassLoadingSpinner/>
                 <span>
                     Loading items from your last session...
                 </span>

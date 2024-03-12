@@ -25,3 +25,28 @@ export const useIsElementOnScreen = (element: HTMLElement | null, options?: Inte
 
     return isOnScreen;
 }
+
+export const useElementHeight = (headerElement: HTMLDivElement | null) => {
+    const [height, setHeight] = useState(0);
+
+    useEffect(() => {
+        if (!headerElement) {
+            setHeight(0);
+            return;
+        }
+
+        const updateHeight = () => {
+            setHeight(headerElement.clientHeight);
+        }
+
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(headerElement);
+
+        updateHeight();
+
+        return () => observer.disconnect();
+    }, [headerElement]);
+
+    return height;
+}
+

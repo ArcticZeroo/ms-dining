@@ -1,13 +1,14 @@
 import { IPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { IOrderCompletionResponse } from '@msdining/common/dist/models/cart';
 import React from 'react';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCompletedList } from './order-completed-list.tsx';
 
 export const OrderStatus: React.FC<IPromiseState<IOrderCompletionResponse>> = ({ stage, value, error }) => {
     if (stage === PromiseStage.running) {
         return (
             <div className="card dark-blue">
-                <span className="loading-spinner"/>
+                <HourglassLoadingSpinner/>
                 <span>
                     Submitting order...
                 </span>

@@ -1,6 +1,7 @@
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { classNames } from '../../util/react.ts';
 import React from 'react';
+import { classNames } from '../../util/react.ts';
+import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
 
 interface ISearchWaitingProps {
     stage: PromiseStage;
@@ -9,7 +10,7 @@ interface ISearchWaitingProps {
 export const SearchWaiting: React.FC<ISearchWaitingProps> = ({ stage }) => {
     return (
         <div className={classNames('search-waiting', stage === PromiseStage.running && 'visible')}>
-            <div className="loading-spinner"/>
+            <HourglassLoadingSpinner/>
             <div>
                 Loading search results...
             </div>
