@@ -109,7 +109,10 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                             <ExpandIcon isExpanded={isExpanded}/>
                         </button>
                     </div>
-                    <StationMenu menuItemsByCategoryName={menu}/>
+                    <StationMenu
+                        normalizedStationName={normalizedName}
+                        menuItemsByCategoryName={menu}
+                    />
                 </div>
             </StationHeaderHeightContext.Provider>
         </CurrentStationContext.Provider>
