@@ -55,3 +55,23 @@ export class ValueNotifierSet<T> extends ValueNotifier<Set<T>> {
         return this._value.size;
     }
 }
+
+export abstract class RefCountedValueNotifier<T> extends ValueNotifier<T> {
+    // Returns a tear-down function like useEffect
+    abstract setup(): () => void;
+    private _tearDownCallback: (() => void) | null = null;
+
+    addListener(listener: (value: T, oldValue: T) => void) {
+        super.addListener(listener);
+        if (this._listeners.length === 1) {
+            this._tearDownCallback = this.setup();
+        }
+    }
+
+    removeListener(listener: (value: T, oldValue: T) => void) {
+        super.removeListener(listener);
+        if (this._listeners.length === 0) {
+            this._tearDownCallback?.();
+        }
+    }
+}

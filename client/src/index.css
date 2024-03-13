@@ -7,7 +7,9 @@
     --z-index-above-content-2: 10;
     --z-index-above-content-3: 15;
     --z-index-everything-but-top: 50;
-    --z-index-top-popup: 100;
+    --z-index-top: 100;
+    /*above top*/
+    --z-index-modal: 200;
     --color-background: #212121;
     --color-foreground: #FAFAFA;
     --color-error: #9d5353;

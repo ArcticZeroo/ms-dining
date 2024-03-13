@@ -4,7 +4,11 @@ nav {
     position: sticky;
     top: 0;
     width: 18rem;
-    z-index: var(--z-index-everything-but-top);
+    z-index: var(--z-index-top);
+    display: flex;
+    flex-direction: column;
+    --color-cafe-list: #333;
+    --color-button-background: #FAFAFA;
 }
 
 nav #sticky-header-list {
@@ -16,6 +20,22 @@ nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
+    flex-shrink: 0;
+}
+
+nav ul.default-background {
+    background: var(--color-button-background);
+}
+
+nav #cafe-list {
+    flex-grow: 1;
+    background: var(--color-cafe-list);
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+nav.expanded #cafe-list {
+    display: flex;
 }
 
 .expandable-nav-list {
@@ -38,7 +58,7 @@ nav a.link-button {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #FAFAFA;
+    background: var(--color-button-background);
     transition: background-color 0.2s ease;
     color: black;
     text-decoration: none;
@@ -50,7 +70,7 @@ nav a.link-button.active {
 }
 
 .expandable-nav-list .cafe a, .nav-numbered-cafe-list, .nav-numbered-cafe-list-item {
-    background: #333;
+    background: var(--color-cafe-list);
 }
 
 .expandable-nav-list .cafe a, .nav-numbered-cafe-list-item {
@@ -64,7 +84,7 @@ nav a.link-button.active {
 
 .expandable-nav-list .cafe a.active {
     background: deepskyblue;
-    color: #333;
+    color: var(--color-cafe-list);
 }
 
 .expandable-nav-list.group {

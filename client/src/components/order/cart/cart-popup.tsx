@@ -1,20 +1,22 @@
-import { useMemo } from 'react';
-import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
-import { useValueNotifierContext } from '../../../hooks/events.ts';
-import { classNames } from '../../../util/react.ts';
-import { Link } from 'react-router-dom';
-import { CartContentsTable } from './cart-contents-table.tsx';
-import { WaitTime } from '../wait-time.tsx';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
+import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
+import { useValueNotifierContext } from '../../../hooks/events.ts';
+import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
+import { classNames } from '../../../util/react.ts';
+import { WaitTime } from '../wait-time.tsx';
+import { CartContentsTable } from './cart-contents-table.tsx';
 import { CartHydrationView } from './cart-hydration-view.tsx';
 
 import './cart-popup.css';
-import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
 
 export const CartPopup = () => {
     const cart = useValueNotifierContext(CartContext);
     const cartHydration = useValueNotifierContext(CartHydrationContext);
     const isTodaySelected = useIsTodaySelected();
+    const scrollbarWidth = useScrollbarWidth();
 
     const totalItemCount = useMemo(
         () => Array.from(cart.values()).reduce((total, itemsById) => total + itemsById.size, 0),
@@ -25,11 +27,16 @@ export const CartPopup = () => {
     const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
 
     return (
-        <div className={classNames(
-            'cart-popup',
-            !shouldShow && 'hidden',
-            hasMissingItems && 'has-missing-items'
-        )}>
+        <div
+            className={classNames(
+                'cart-popup',
+                !shouldShow && 'hidden',
+                hasMissingItems && 'has-missing-items'
+            )}
+            style={{
+                right: `${scrollbarWidth}px`
+            }}
+        >
             <div className="cart-header cart-info">
                 {
                     hasMissingItems && (
@@ -56,7 +63,7 @@ export const CartPopup = () => {
                             <CartContentsTable/>
                             <WaitTime/>
                             <Link to="/order" className="checkout-button">
-                                Checkout
+                                               Checkout
                             </Link>
                         </>
                     )
