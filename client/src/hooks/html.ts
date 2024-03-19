@@ -55,13 +55,9 @@ export const useScrollIntoViewIfNeeded = (anchorId: string) => {
     const [isScrollIntoViewPending, setIsScrollIntoViewPending] = useState(false);
 
     useLayoutEffect(() => {
-        console.log('useScrollIntoViewIfNeeded effect called');
-
         if (!isScrollIntoViewPending) {
             return;
         }
-
-        console.log('scrolling', anchorId, 'into view if needed');
 
         scrollIntoViewIfNeeded(queryForScrollAnchor(anchorId));
         setIsScrollIntoViewPending(false);
