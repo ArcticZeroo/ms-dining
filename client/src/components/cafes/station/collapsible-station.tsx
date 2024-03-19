@@ -8,9 +8,8 @@ import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../co
 import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { useElementHeight } from '../../../hooks/html.ts';
+import { useElementHeight, useScrollIntoViewIfNeeded } from '../../../hooks/html.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
-import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../../util/html.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
@@ -32,6 +31,8 @@ const useStationExpansion = (scrollAnchorId: string) => {
         () => ({ top: `${cafeHeaderHeight}px` }),
         [cafeHeaderHeight]
     );
+    
+    const scrollIntoViewIfNeeded = useScrollIntoViewIfNeeded(scrollAnchorId);
 
     const updateExpansionContext = useCallback(
         (isNowExpanded: boolean) => {
@@ -39,10 +40,10 @@ const useStationExpansion = (scrollAnchorId: string) => {
                 collapsedStationsNotifier.delete(scrollAnchorId);
             } else {
                 collapsedStationsNotifier.add(scrollAnchorId);
-                scrollIntoViewIfNeeded(queryForScrollAnchor(scrollAnchorId));
+                scrollIntoViewIfNeeded();
             }
         },
-        [collapsedStationsNotifier, scrollAnchorId, scrollAnchorId]
+        [collapsedStationsNotifier, scrollAnchorId, scrollIntoViewIfNeeded]
     );
 
     const onTitleClick = () => {

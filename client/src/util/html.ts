@@ -1,4 +1,4 @@
-export const queryForScrollAnchor = (id: string) => document.querySelector(`[href="#${id}"]`);
+export const getCssQueryForScrollAnchor = (id: string) => document.querySelector(`[href="#${id}"]`);
 
 export const scrollIntoViewIfNeeded = (element?: Element | null) => {
     if (!element) {

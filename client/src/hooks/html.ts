@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { getCssQueryForScrollAnchor, scrollIntoViewIfNeeded } from '../util/html.ts';
 
 export const useIsElementOnScreen = (element: HTMLElement | null, options?: IntersectionObserverInit) => {
     const [isOnScreen, setIsOnScreen] = useState(false);
@@ -50,3 +51,17 @@ export const useElementHeight = (headerElement: HTMLDivElement | null) => {
     return height;
 }
 
+export const useScrollIntoViewIfNeeded = (anchorId: string) => {
+    const [isScrollIntoViewPending, setIsScrollIntoViewPending] = useState(false);
+
+    useLayoutEffect(() => {
+        if (!isScrollIntoViewPending) {
+            return;
+        }
+
+        scrollIntoViewIfNeeded(getCssQueryForScrollAnchor(anchorId));
+        setIsScrollIntoViewPending(false);
+    }, [anchorId, isScrollIntoViewPending]);
+    
+    return () => setIsScrollIntoViewPending(true); 
+}

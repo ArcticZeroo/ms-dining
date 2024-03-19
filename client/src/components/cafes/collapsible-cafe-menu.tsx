@@ -4,10 +4,9 @@ import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { useElementHeight } from '../../hooks/html.ts';
+import { useElementHeight, useScrollIntoViewIfNeeded } from '../../hooks/html.ts';
 import { ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
-import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../util/html.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
@@ -42,6 +41,8 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
         () => !collapsedCafeIds.has(cafe.id),
         [collapsedCafeIds, cafe.id]
     );
+    
+    const scrollIntoViewIfNeeded = useScrollIntoViewIfNeeded(cafe.id);
 
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
@@ -56,7 +57,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
             collapsedCafeIdsNotifier.delete(cafe.id);
         } else {
             collapsedCafeIdsNotifier.add(cafe.id);
-            scrollIntoViewIfNeeded(queryForScrollAnchor(cafe.id));
+            scrollIntoViewIfNeeded();
         }
     };
 
