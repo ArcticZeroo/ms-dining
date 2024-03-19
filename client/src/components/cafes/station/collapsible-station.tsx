@@ -43,7 +43,7 @@ const useStationExpansion = (scrollAnchorId: string) => {
                 scrollIntoViewIfNeeded();
             }
         },
-        [collapsedStationsNotifier, scrollAnchorId, scrollIntoViewIfNeeded]
+        [collapsedStationsNotifier, scrollAnchorId]
     );
 
     const onTitleClick = () => {

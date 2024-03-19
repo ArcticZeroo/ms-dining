@@ -47,11 +47,6 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
         navigate(url.pathname);
     }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationId, anchorId]);
 
-    // perf: Don't bother rendering the anchor if it's not needed
-    if (location.hash !== anchorId) {
-        return;
-    }
-
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement} style={{ scrollMargin: margin }}/>
     );
