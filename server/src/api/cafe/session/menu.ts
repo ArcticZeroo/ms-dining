@@ -14,6 +14,7 @@ import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import Semaphore from 'semaphore-async-await';
 import { CafeTypes } from '@msdining/common';
+import { SEARCH_TAG_WORKER_QUEUE } from '../../worker/search-tags.js';
 
 type IMenuItemModifier = CafeTypes.IMenuItemModifier;
 type ModifierChoiceType = CafeTypes.ModifierChoiceType;
@@ -337,6 +338,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
             lastUpdateTime: new Date(jsonItem.lastUpdateTime),
             tags:           Array.from(tags),
             modifiers,
+            searchTags:     localItem?.searchTags ?? new Set<string>()
         };
     }
 
@@ -417,9 +419,17 @@ export class CafeMenuSession extends CafeDiscoverySession {
                 items.push(item);
 
                 try {
-                    await MenuItemStorageClient.createMenuItemAsync(item, true /*allowUpdateIfExisting*/);
+                    await MenuItemStorageClient.saveMenuItemAsync(item, true /*allowUpdateIfExisting*/);
                 } catch (err) {
                     logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
+                }
+
+                if (item.searchTags.size === 0) {
+                    SEARCH_TAG_WORKER_QUEUE.add({
+                        id:          item.id,
+                        name:        item.name,
+                        description: item.description
+                    });
                 }
             }
         }

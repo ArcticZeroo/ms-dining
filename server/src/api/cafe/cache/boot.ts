@@ -5,6 +5,8 @@ import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
+import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
+import { SEARCH_TAG_WORKER_QUEUE } from '../../worker/search-tags.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -33,18 +35,19 @@ const repairMissingWeeklyMenusAsync = async () => {
 };
 
 const repairTodaySessionsAsync = async () => {
-    if (ENVIRONMENT_SETTINGS.skipDailyRepair) {
-        return;
-    }
-
     const now = new Date();
 
     // Don't bother repairing today after 5pm if there is already a daily menu;
     // In case I'm making server changes and need to restart the server, I don't
     // want to clear history.
-    if (now.getHours() > 16 || now.getHours() < 6) {
+    if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists || now.getHours() > 16 || now.getHours() < 6) {
         const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(now));
         if (isAnyMenuAvailableToday) {
+            if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists) {
+                logInfo('Skipping repair of today\'s sessions because the menu already exists and environment settings disable update');
+                return;
+            }
+
 			logInfo('Skipping repair of today\'s sessions because it is after 5pm and there is already a menu for today');
             return;
         }
@@ -54,6 +57,9 @@ const repairTodaySessionsAsync = async () => {
 };
 
 export const performMenuBootTasks = async () => {
+    await MenuItemStorageClient.batchNormalizeMenuItemNamesAsync();
+    SEARCH_TAG_WORKER_QUEUE.start();
+
     await repairTodaySessionsAsync();
     await repairMissingWeeklyMenusAsync();
 

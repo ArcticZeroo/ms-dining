@@ -80,4 +80,5 @@ export interface IMenuItem {
     description?: Nullable<string>;
     lastUpdateTime?: Nullable<Date>;
     tags: string[];
+    searchTags: Set<string>;
 }

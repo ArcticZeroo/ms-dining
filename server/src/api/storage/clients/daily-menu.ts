@@ -201,7 +201,7 @@ export abstract class DailyMenuStorageClient {
         return result != null;
     }
 
-    public static getAllMenusForWeek() {
+    public static getAllMenusForWeekForSearch() {
         const dateStringsForWeek = DateUtil.getDateStringsForWeek();
 
         return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
@@ -226,11 +226,20 @@ export abstract class DailyMenuStorageClient {
                         name:      true,
                         menuItems: {
                             select: {
-                                menuItemId: true
-                            }
+                                menuItemId: true,
+                                menuItem: {
+                                    select: {
+                                        searchTags: {
+                                            select: {
+                                                name: true
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                         }
                     }
-                }
+                },
             }
         }));
     }

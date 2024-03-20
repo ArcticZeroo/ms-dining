@@ -33,7 +33,7 @@ const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`${CHEAP_ITEM_IGNORE_STRING}`, 'i'
 // which otherwise should not be interacting (to avoid circular dependencies).
 export abstract class SearchManager {
     private static async _performMultiQuerySearch(queries: Array<ISearchQuery>, shouldUseExactMatch: boolean): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
-        const dailyStations = await DailyMenuStorageClient.getAllMenusForWeek();
+        const dailyStations = await DailyMenuStorageClient.getAllMenusForWeekForSearch();
 
         const searchResultsByNameByEntityType = new Map<SearchEntityType, Map<string, ISearchResult>>();
 
@@ -191,7 +191,7 @@ export abstract class SearchManager {
     }
 
     public static async searchForCheapItems(minPrice: number, maxPrice: number): Promise<ICheapItemSearchResult[]> {
-        const dailyStations = await DailyMenuStorageClient.getAllMenusForWeek();
+        const dailyStations = await DailyMenuStorageClient.getAllMenusForWeekForSearch();
 
         const resultsByItemNameByPrice = new Map<string, Map<number, ICheapItemSearchResult>>();
 

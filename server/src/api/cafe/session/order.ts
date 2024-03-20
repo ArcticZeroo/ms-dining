@@ -21,6 +21,7 @@ import fetch from 'node-fetch';
 import { ICafe, IMenuItem } from '../../../models/cafe.js';
 import { phone, PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
+import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 
 const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+type="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
 
@@ -694,11 +695,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
     private async _makeCardProcessorRequest(token: string, url: string, method: 'POST' | 'GET', body?: object) {
         return await makeRequestWithRetries({
             makeRequest: (retry) => {
-                logDebug('Making card processor request');
-                logDebug(`${method ?? 'GET'} ${url} (Attempt ${retry})`);
-                logDebug(`Token: "${token}"`);
-                if (body) {
-                    logDebug(JSON.stringify(body));
+                if (ENVIRONMENT_SETTINGS.logRequests) {
+                    logDebug('Making card processor request');
+                    logDebug(`${method ?? 'GET'} ${url} (Attempt ${retry})`);
+                    logDebug(`Token: "${token}"`);
+                    if (body) {
+                        logDebug(JSON.stringify(body));
+                    }
                 }
 
                 return fetch(

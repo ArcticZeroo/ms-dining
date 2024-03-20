@@ -13,7 +13,9 @@ export const fuzzySearch = (source: string, search: string) => {
     return true;
 };
 
+// Normalization is intended to match two items which are the same to each other.
 // e.g. Chipotle Chicken + Bacon Sub should also match "Chipotle Chicken Bacon Sub" or "Chipotle Chicken and Bacon Sub"
+// We don't want to normalize numbers out of names because those indicate different items
 export const normalizeNameForSearch = (name: string) => name
     .toLowerCase()
     .trim()

@@ -4,6 +4,12 @@ import { usePrismaClient } from '../client.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
 import { retrieveExistingThumbnailData } from '../../cafe/image/thumbnail.js';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { logDebug } from '../../../util/log.js';
+import { ISearchTagQueueEntry } from '../../worker/search-tags.js';
+import { fromDateString } from '@msdining/common/dist/util/date-util.js';
+import Duration from '@arcticzeroo/duration';
+import { Nullable } from '../../../models/util.js';
 
 export abstract class MenuItemStorageClient {
     private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -101,13 +107,14 @@ export abstract class MenuItemStorageClient {
         }
     }
 
-    private static async _doCreateMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean): Promise<void> {
+    private static async _doSaveMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean): Promise<void> {
         const lastUpdateTime = menuItem.lastUpdateTime == null || Number.isNaN(menuItem.lastUpdateTime.getTime())
             ? null
             : menuItem.lastUpdateTime;
 
         const dataWithoutId = {
             name:                   menuItem.name.trim(),
+            normalizedName:         normalizeNameForSearch(menuItem.name),
             imageUrl:               menuItem.imageUrl || null,
             description:            menuItem.description?.trim() || null,
             price:                  Number(menuItem.price || 0),
@@ -118,7 +125,7 @@ export abstract class MenuItemStorageClient {
             externalReceiptText:    menuItem.receiptText || null,
             modifiers:              {
                 connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
-            },
+            }
         } as const;
 
         const data = {
@@ -140,7 +147,7 @@ export abstract class MenuItemStorageClient {
 
             if (allowUpdateIfExisting) {
                 const existingItem = await prismaClient.menuItem.findUnique({
-                    where: {
+                    where:  {
                         id: menuItem.id
                     },
                     select: {
@@ -190,23 +197,52 @@ export abstract class MenuItemStorageClient {
         });
     }
 
-    public static async createMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean = false): Promise<void> {
+    public static async saveMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean = false): Promise<void> {
         if (!allowUpdateIfExisting && MenuItemStorageClient._menuItemsById.has(menuItem.id)) {
             return;
         }
 
-        await MenuItemStorageClient._doCreateMenuItemAsync(menuItem, allowUpdateIfExisting);
+        await MenuItemStorageClient._doSaveMenuItemAsync(menuItem, allowUpdateIfExisting);
+
         // Require the operation to succeed before adding to cache
         this._menuItemsById.set(menuItem.id, menuItem);
+    }
+
+    public static async saveMenuItemSearchTagsAsync(menuItemId: string, searchTags: Set<string>): Promise<void> {
+        await usePrismaClient(async prismaClient => {
+            await prismaClient.menuItem.update({
+                where: {
+                    id: menuItemId
+                },
+                data:  {
+                    searchTags: {
+                        connectOrCreate: Array.from(searchTags).map(tag => ({
+                            where:  { name: tag },
+                            create: { name: tag }
+                        }))
+                    }
+                }
+            });
+        });
+
+        const localMenuItem = this._menuItemsById.get(menuItemId);
+        if (localMenuItem != null) {
+            localMenuItem.searchTags = searchTags;
+        }
     }
 
     private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
         const menuItem = await usePrismaClient(prismaClient => prismaClient.menuItem.findUnique({
             where:   { id },
             include: {
-                modifiers: {
+                modifiers:  {
                     include: {
                         choices: true
+                    }
+                },
+                searchTags: {
+                    select: {
+                        name: true
                     }
                 }
             }
@@ -248,7 +284,8 @@ export abstract class MenuItemStorageClient {
             hasThumbnail:    thumbnailData.hasThumbnail,
             thumbnailHeight: thumbnailData.thumbnailHeight,
             thumbnailWidth:  thumbnailData.thumbnailWidth,
-            tags:            (menuItem.tags && menuItem.tags.length > 0) ? menuItem.tags.split(';') : [],
+            tags:            menuItem.tags?.split(';') ?? [],
+            searchTags:      new Set(menuItem.searchTags.map(tag => tag.name)),
             modifiers
         };
     }
@@ -265,5 +302,87 @@ export abstract class MenuItemStorageClient {
         }
 
         return this._menuItemsById.get(id)!;
+    }
+
+    public static async batchNormalizeMenuItemNamesAsync(): Promise<void> {
+        const now = Date.now();
+
+        await usePrismaClient(async prismaClient => {
+            const pendingItems = await prismaClient.menuItem.findMany({
+                where: {
+                    normalizedName: ''
+                }
+            });
+
+            logDebug('Batch normalizing', pendingItems.length, 'menu item names');
+
+            for (const item of pendingItems) {
+                await prismaClient.menuItem.update({
+                    where: { id: item.id },
+                    data:  {
+                        normalizedName: normalizeNameForSearch(item.name)
+                    }
+                });
+            }
+        });
+
+        logDebug('Batch normalized menu item names in', Date.now() - now, 'ms');
+    }
+
+    public static async retrievePendingSearchTagQueueEntries(): Promise<Array<ISearchTagQueueEntry>> {
+        const items = await usePrismaClient(prismaClient => prismaClient.menuItem.findMany({
+            where:  {
+                searchTags: {
+                    none: {}
+                },
+            },
+            select: {
+                id:          true,
+                name:        true,
+                description: true
+            }
+        }));
+
+        logDebug(`Found ${items.length} items for search tags`);
+
+        const entries: ISearchTagQueueEntry[] = [];
+
+        for (const potentialItem of items) {
+            entries.push({
+                id:          potentialItem.id,
+                name:        potentialItem.name,
+                description: potentialItem.description
+            });
+        }
+
+        return entries;
+    }
+
+    public static async getExistingSearchTagsForName(name: string): Promise<Set<string>> {
+        return usePrismaClient(async prismaClient => {
+            const normalizedName = normalizeNameForSearch(name);
+
+            const menuItem = await prismaClient.menuItem.findFirst({
+                where: {
+                    normalizedName,
+                    searchTags: {
+                        some: {}
+                    }
+                },
+                select: {
+                    searchTags: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            });
+
+            if (menuItem == null) {
+                return new Set();
+            }
+
+            return new Set(menuItem.searchTags.map(tag => tag.name));
+        });
     }
 }
