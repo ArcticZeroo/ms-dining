@@ -9,6 +9,7 @@ export interface ISearchResult {
     name: string;
     description?: Nullable<string>;
     prices: Set<number>;
+    searchTags?: Set<string>;
 }
 
 export interface ICheapItemSearchResult {

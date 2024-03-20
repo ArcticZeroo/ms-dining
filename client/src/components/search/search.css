@@ -172,6 +172,20 @@
     align-content: center;
 }
 
+.search-result .search-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+    --color-search-tag: #58886d;
+}
+
+.search-result .search-tags .search-result-chip {
+    background: none;
+    border: 0.125rem solid var(--color-search-tag);
+    color: var(--color-search-tag);
+    padding: 0.5rem;
+}
+
 @media screen and (max-height: 800px) {
     .search-result-image {
         max-height: 8rem;

@@ -68,6 +68,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                         locationDatesByCafeId={searchResult.locationDatesByCafeId}
                         imageUrl={searchResult.imageUrl}
                         entityType={searchResult.entityType}
+                        searchTags={searchResult.searchTags}
                     />
                 );
             });

@@ -3,7 +3,7 @@ import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import { useCallback, useMemo } from 'react';
 import { StringSetSetting } from '../api/settings.ts';
 import { getTargetSettingForFavorite } from '../util/cafe.ts';
-import { useValueNotifier } from './events.ts';
+import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../models/cafe.ts';
 import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
 import { useIsTodaySelected } from './date-picker.tsx';
@@ -34,17 +34,12 @@ export const useFavoriteQueries = () => {
 export const useIsFavoriteItem = (name: string, type: SearchEntityType) => {
     const targetSetting = getTargetSettingForFavorite(type);
 
-    const favoriteNames = useValueNotifier(targetSetting);
-
     const normalizedItemName = useMemo(
         () => normalizeNameForSearch(name),
         [name]
     );
 
-    return useMemo(
-        () => favoriteNames.has(normalizedItemName),
-        [normalizedItemName, favoriteNames]
-    );
+    return useValueNotifierSetTarget(targetSetting, normalizedItemName);
 };
 
 export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPrice: number) => {

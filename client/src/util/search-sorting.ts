@@ -163,10 +163,37 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
 
 const MATCH_REASON_MULTIPLIERS: Record<SearchMatchReason, number> = {
     [SearchMatchReason.title]:       1,
-    [SearchMatchReason.description]: 0.75
+    [SearchMatchReason.description]: 0.75,
+    [SearchMatchReason.tags]:        0.7
 };
 
+const getSubstringScoreForTags = (queryText: string, searchResult: ISearchResult) => {
+    if (searchResult.searchTags == null) {
+        console.error('Search tags are null for search result with a tag hit:', searchResult);
+        return 0;
+    }
+
+    const queryWords = queryText.split(/\s+/);
+
+    let totalScore = 0;
+
+    // TODO: Will improve this eventually. Want to be able to give a better score for "whipped cream" as a tag when "whipped cream" is searched, compared to "whipped" or "cream" individually.
+    for (const tag of searchResult.searchTags) {
+        for (const word in queryWords) {
+            if (tag.includes(word)) {
+                totalScore += 1;
+            }
+        }
+    }
+
+    return totalScore / (queryWords.length * searchResult.searchTags.size);
+}
+
 const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearchResult, matchReason: SearchMatchReason) => {
+    if (matchReason === SearchMatchReason.tags) {
+        return getSubstringScoreForTags(queryText, searchResult);
+    }
+
     const targetText = matchReason === SearchMatchReason.title ? searchResult.name : searchResult.description;
     const matchingText = targetText?.trim().toLowerCase();
 
@@ -231,12 +258,14 @@ enum MatchType {
     fuzzy = 1
 }
 
-const getTargetText = (searchResult: ISearchResult, matchReason: SearchMatchReason) => {
+const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: SearchMatchReason): Iterable<string> => {
     switch (matchReason) {
     case SearchMatchReason.title:
-        return searchResult.name;
+        return [searchResult.name];
     case SearchMatchReason.description:
-        return searchResult.description;
+        return searchResult.description ? [searchResult.description] : [];
+    case SearchMatchReason.tags:
+        return Array.from(searchResult.searchTags || []);
     default:
         throw new Error(`Unexpected match reason: ${matchReason}`);
     }
@@ -246,20 +275,22 @@ const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMat
     let matchType = MatchType.fuzzy;
 
     for (const reason of searchResult.matchReasons) {
-        const targetText = getTargetText(searchResult, reason);
+        const targetTextItems = getTargetTextForMatchType(searchResult, reason);
 
-        // Expected in case search result merging isn't working properly
-        if (!targetText) {
-            continue;
-        }
+        for (const targetText of targetTextItems) {
+            // Expected in case search result merging isn't working properly
+            if (!targetText) {
+                continue;
+            }
 
-        if (targetText === queryText || perfectMatchRegex.test(targetText)) {
-            return MatchType.perfect;
-        }
+            if (targetText === queryText || perfectMatchRegex.test(targetText)) {
+                return MatchType.perfect;
+            }
 
-        // We might find a perfect match for another match reason later
-        if (targetText.includes(queryText)) {
-            matchType = MatchType.substring;
+            // We might find a perfect match for another match reason later
+            if (targetText.includes(queryText)) {
+                matchType = MatchType.substring;
+            }
         }
     }
 

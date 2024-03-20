@@ -31,6 +31,7 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
             searchTags = await retrieveMenuItemSearchTagsFromAiWithRetries(name, description);
         } else {
             logDebug('Search tags already exist for:', name);
+            return WorkerQueue.QUEUE_SKIP_ENTRY;
         }
 
         if (searchTags.size === 0) {

@@ -34,6 +34,7 @@ export const registerSearchRoutes = (parent: Router) => {
         locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
         matchReasons: Array.from(searchResult.matchReasons),
         prices:       Array.from(searchResult.prices),
+        searchTags:   searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined
     });
 
     const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, ISearchResult>>) => {

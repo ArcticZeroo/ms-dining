@@ -155,6 +155,7 @@ export abstract class DiningClient {
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
                 matchReasons:          new Set(serverResult.matchReasons),
                 prices:                new Set(serverResult.prices),
+                searchTags:            serverResult.searchTags ? new Set(serverResult.searchTags) : undefined
             });
         }
 
@@ -228,7 +229,7 @@ export abstract class DiningClient {
 
     public static async retrieveWaitTimeForItems(cafeId: string, itemCount: number): Promise<IWaitTimeResponse> {
         const response = await makeJsonRequest({
-            path:    `/api/dining/order/wait/${cafeId}?items=${itemCount}`
+            path: `/api/dining/order/wait/${cafeId}?items=${itemCount}`
         });
 
         if (!isDuckType<IWaitTimeResponse>(response, { minTime: 'number', maxTime: 'number' })) {

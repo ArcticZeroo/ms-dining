@@ -24,6 +24,7 @@ export interface IQuerySearchResult {
     locationDatesByCafeId: Map<string, Array<Date>>;
     matchReasons: Set<SearchMatchReason>;
     prices: Set<number>;
+    searchTags?: Set<string>;
 }
 
 export interface ICheapItemSearchResult {
@@ -44,6 +45,7 @@ export interface IServerSearchResult {
     locations: Record<string, Array<string>>;
     matchReasons: Array<SearchMatchReason>;
     prices: Array<number>;
+    searchTags?: Array<string>;
 }
 
 export interface IServerCheapItemSearchResult {

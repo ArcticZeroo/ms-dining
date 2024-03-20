@@ -6,6 +6,7 @@ import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { Nullable } from '../../models/util.js';
 
+// Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
     'side',
     'coffee',
@@ -43,6 +44,12 @@ export abstract class SearchManager {
             }
         };
 
+        const isResultAlreadyAdded = (type: SearchEntityType, name: string) => {
+            ensureEntityTypeExists(type);
+            const searchResultsById = searchResultsByNameByEntityType.get(type)!;
+            return searchResultsById.has(normalizeNameForSearch(name));
+        }
+
         interface IAddResultParams {
             type: SearchEntityType;
             dateString: string;
@@ -52,6 +59,7 @@ export abstract class SearchManager {
             price?: number;
             description?: Nullable<string>;
             imageUrl?: Nullable<string>;
+            searchTags?: Set<string>;
         }
 
         const addResult = ({
@@ -62,7 +70,8 @@ export abstract class SearchManager {
                                dateString,
                                cafeId,
                                matchReasons,
-                               price
+                               price,
+                               searchTags
                            }: IAddResultParams) => {
             ensureEntityTypeExists(type);
 
@@ -71,13 +80,14 @@ export abstract class SearchManager {
 
             if (!searchResultsById.has(normalizedName)) {
                 searchResultsById.set(normalizedName, {
-                    type:                  type,
-                    name:                  name,
-                    description:           description,
-                    imageUrl:              imageUrl,
+                    type,
+                    name,
+                    description,
+                    imageUrl,
+                    searchTags,
                     locationDatesByCafeId: new Map<string, Set<string>>(),
                     matchReasons:          new Set<SearchMatchReason>(),
-                    prices:                new Set<number>()
+                    prices:                new Set<number>(),
                 });
             }
 
@@ -94,6 +104,15 @@ export abstract class SearchManager {
 
             if (price != null) {
                 searchResult.prices.add(price);
+            }
+
+            if (searchTags) {
+                const combinedSearchTags = searchResult.searchTags || new Set<string>();
+                for (const tag of searchTags) {
+                    combinedSearchTags.add(tag);
+                }
+
+                searchResult.searchTags = combinedSearchTags;
             }
 
             // The first item to make it into the map might not be the one with all the info.
@@ -134,14 +153,19 @@ export abstract class SearchManager {
         for (const dailyStation of dailyStations) {
             const stationData = dailyStation.station;
 
+            const stationMatchReasons: SearchMatchReason[] = [];
             if (isMatch(stationData.name, SearchEntityType.station)) {
+                stationMatchReasons.push(SearchMatchReason.title);
+            }
+
+            if (stationMatchReasons.length > 0 || isResultAlreadyAdded(SearchEntityType.station, stationData.name)) {
                 addResult({
                     type:         SearchEntityType.station,
-                    matchReasons: [SearchMatchReason.title],
+                    matchReasons: stationMatchReasons,
                     dateString:   dailyStation.dateString,
                     cafeId:       dailyStation.cafeId,
                     name:         stationData.name,
-                    imageUrl:     stationData.logoUrl
+                    imageUrl:     stationData.logoUrl,
                 });
             }
 
@@ -163,7 +187,14 @@ export abstract class SearchManager {
                         matchReasons.push(SearchMatchReason.description);
                     }
 
-                    if (matchReasons.length > 0) {
+                    for (const searchTag of menuItem.searchTags) {
+                        if (isMatch(searchTag, SearchEntityType.menuItem)) {
+                            matchReasons.push(SearchMatchReason.tags);
+                            break;
+                        }
+                    }
+
+                    if (matchReasons.length > 0 || isResultAlreadyAdded(SearchEntityType.menuItem, menuItem.name)) {
                         addResult({
                             type:        SearchEntityType.menuItem,
                             dateString:  dailyStation.dateString,
@@ -171,6 +202,7 @@ export abstract class SearchManager {
                             name:        menuItem.name,
                             description: menuItem.description,
                             price:       menuItem.price,
+                            searchTags:  menuItem.searchTags,
                             imageUrl:    getThumbnailUrl(menuItem),
                             matchReasons,
                         });

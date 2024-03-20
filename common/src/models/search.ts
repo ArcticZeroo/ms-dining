@@ -5,7 +5,8 @@ export enum SearchEntityType {
 
 export enum SearchMatchReason {
     title = 'title',
-    description = 'description'
+    description = 'description',
+    tags = 'tags',
 }
 
 export const allSearchEntityTypes = [
@@ -26,6 +27,7 @@ export interface ISearchResult {
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
     matchReasons: Set<SearchMatchReason>;
+    searchTags?: Set<string>;
 }
 
 export interface ISearchQuery {

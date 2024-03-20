@@ -16,6 +16,7 @@ import { getParentView } from '../../util/view';
 import './search.css';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 
 interface IEntityDisplayData {
     className: string;
@@ -108,6 +109,30 @@ const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCaf
     );
 };
 
+// Some search tags are already in the name/description
+const useSearchTags = (name: string, description: string | undefined, searchTags: Set<string> | undefined) => {
+    return useMemo(
+        () => {
+            if (searchTags == null) {
+                return [];
+            }
+
+            const tags = Array.from(searchTags);
+
+            if (tags.length === 0) {
+                return [];
+            }
+
+            return tags.filter(tag => {
+                const normalizedTag = normalizeNameForSearch(tag);
+                return !normalizeNameForSearch(name).includes(normalizedTag)
+                    && (!description || !normalizeNameForSearch(description).includes(normalizedTag));
+            });
+        },
+        [searchTags, name, description]
+    );
+}
+
 const getViewNameForSearchResult = (view: CafeView) => {
     if (view.type === CafeViewType.group) {
         return view.value.name;
@@ -135,6 +160,7 @@ interface ISearchResultProps {
     showFavoriteButton?: boolean;
     shouldColorForFavorites?: boolean;
     cafeIdsOnPage?: Set<string>;
+    searchTags?: Set<string>;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -150,6 +176,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     showFavoriteButton = !isCompact,
     shouldColorForFavorites = true,
     cafeIdsOnPage,
+    searchTags
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -159,6 +186,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const selectedDate = useValueNotifier(selectedDateNotifier);
 
     const isFavoriteItem = useIsFavoriteItem(name, entityType);
+
+    const searchTagsToShow = useSearchTags(name, description, searchTags);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -213,20 +242,30 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             }
                         </div>
                     </div>
+                    {/*search-result-tags is reserved in case we add gluten free/vegan/vegetarian tags*/}
+                    <div className="search-tags">
+                        {
+                            searchTagsToShow.length > 0 && searchTagsToShow.map(tag => (
+                                <div className="search-result-chip" key={tag}>
+                                    {tag}
+                                </div>
+                            ))
+                        }
+                    </div>
                     {
                         extraFields && (
                             <div className="search-result-fields">
                                 {
                                     extraFields.map(({ iconName, value, key }) => (
                                         value &&
-													<div className="search-result-field" key={key}>
+                                        <div className="search-result-field" key={key}>
 													    <span className="material-symbols-outlined icon">
 													        {iconName}
 													    </span>
-													    <span className="value">
+                                            <span className="value">
 													        {value}
 													    </span>
-													</div>
+                                        </div>
                                     ))
                                 }
                             </div>
