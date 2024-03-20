@@ -8,7 +8,7 @@ import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../co
 import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
-import { useElementHeight, useScrollIntoViewIfNeeded } from '../../../hooks/html.ts';
+import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hooks/html.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
@@ -28,9 +28,9 @@ const useStationExpansion = (scrollAnchorId: string) => {
         [cafeHeaderHeight]
     );
     
-    const scrollIntoViewIfNeeded = useScrollIntoViewIfNeeded(scrollAnchorId);
+    const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(scrollAnchorId);
 
-    const updateExpansionContext = useCallback(
+    const updateIsCollapsed = useCallback(
         (isNowCollapsed: boolean) => {
             if (isNowCollapsed) {
                 collapsedStationsNotifier.add(scrollAnchorId);
@@ -43,14 +43,14 @@ const useStationExpansion = (scrollAnchorId: string) => {
     );
 
     const onTitleClick = () => {
-        updateExpansionContext(!isCollapsed);
+        updateIsCollapsed(!isCollapsed);
     };
 
     useEffect(() => {
         if (ApplicationSettings.collapseStationsByDefault.value) {
-            updateExpansionContext(false);
+            updateIsCollapsed(true);
         }
-    }, [updateExpansionContext]);
+    }, [updateIsCollapsed]);
 
     return {
         isExpanded: !isCollapsed,

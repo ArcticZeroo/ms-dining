@@ -4,7 +4,7 @@ import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
-import { useElementHeight, useScrollIntoViewIfNeeded } from '../../hooks/html.ts';
+import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
@@ -38,7 +38,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
 
     const isCollapsed = useValueNotifierSetTarget(collapsedCafeIdsNotifier, cafe.id);
 
-    const scrollIntoViewIfNeeded = useScrollIntoViewIfNeeded(cafe.id);
+    const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
 
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
