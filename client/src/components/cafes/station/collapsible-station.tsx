@@ -7,10 +7,9 @@ import { StationCollapseContext } from '../../../context/collapse.ts';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../context/html.ts';
 import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { useElementHeight } from '../../../hooks/html.ts';
+import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
+import { useElementHeight, useScrollIntoViewIfNeeded } from '../../../hooks/html.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
-import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../../util/html.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
@@ -21,32 +20,30 @@ import { StationMenu } from './menu-items/station-menu.tsx';
 const useStationExpansion = (scrollAnchorId: string) => {
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
     const collapsedStationsNotifier = useContext(StationCollapseContext);
-    const collapsedStations = useValueNotifier(collapsedStationsNotifier);
 
-    const isExpanded = useMemo(
-        () => !collapsedStations.has(scrollAnchorId),
-        [collapsedStations, scrollAnchorId]
-    );
+    const isCollapsed = useValueNotifierSetTarget(collapsedStationsNotifier, scrollAnchorId);
 
     const stationHeaderStyle = useMemo(
         () => ({ top: `${cafeHeaderHeight}px` }),
         [cafeHeaderHeight]
     );
+    
+    const scrollIntoViewIfNeeded = useScrollIntoViewIfNeeded(scrollAnchorId);
 
     const updateExpansionContext = useCallback(
-        (isNowExpanded: boolean) => {
-            if (isNowExpanded) {
-                collapsedStationsNotifier.delete(scrollAnchorId);
-            } else {
+        (isNowCollapsed: boolean) => {
+            if (isNowCollapsed) {
                 collapsedStationsNotifier.add(scrollAnchorId);
-                scrollIntoViewIfNeeded(queryForScrollAnchor(scrollAnchorId));
+                scrollIntoViewIfNeeded();
+            } else {
+                collapsedStationsNotifier.delete(scrollAnchorId);
             }
         },
-        [collapsedStationsNotifier, scrollAnchorId, scrollAnchorId]
+        [collapsedStationsNotifier, scrollAnchorId, scrollIntoViewIfNeeded]
     );
 
     const onTitleClick = () => {
-        updateExpansionContext(!isExpanded);
+        updateExpansionContext(!isCollapsed);
     };
 
     useEffect(() => {
@@ -56,7 +53,7 @@ const useStationExpansion = (scrollAnchorId: string) => {
     }, [updateExpansionContext]);
 
     return {
-        isExpanded,
+        isExpanded: !isCollapsed,
         stationHeaderStyle,
         onTitleClick
     };
@@ -109,7 +106,10 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                             <ExpandIcon isExpanded={isExpanded}/>
                         </button>
                     </div>
-                    <StationMenu menuItemsByCategoryName={menu}/>
+                    <StationMenu
+                        normalizedStationName={normalizedName}
+                        menuItemsByCategoryName={menu}
+                    />
                 </div>
             </StationHeaderHeightContext.Provider>
         </CurrentStationContext.Provider>

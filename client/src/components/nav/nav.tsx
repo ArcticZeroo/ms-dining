@@ -24,7 +24,10 @@ export const Nav: React.FC = () => {
             }
 
             return (
-                <a onClick={() => setIsExpanded(!isExpanded)} className="link-button visibility-toggle centered-content">
+                <a 
+                    onClick={() => setIsExpanded(!isExpanded)} 
+                    className="link-button visibility-toggle centered-content"
+                >
                     <span className="material-symbols-outlined">
                         menu
                     </span>
@@ -37,13 +40,13 @@ export const Nav: React.FC = () => {
     return (
         <nav className={classNames(isExpanded && 'expanded', deviceType === DeviceType.Mobile && !isExpanded && 'collapsed')}>
             {!isExpanded && visibilityToggleButton}
-            <ul id="sticky-header-list" className="expandable-nav-list">
+            <ul id="sticky-header-list" className="expandable-nav-list default-background">
                 {/* Move to here while expanded so that it is sticky with the rest of the nav */}
                 {isExpanded && visibilityToggleButton}
                 <NavListHeaderItems/>
             </ul>
             <NavCafeList/>
-            <ul className="expandable-nav-list">
+            <ul className="expandable-nav-list default-background">
                 <li>
                     <NavLink to="/cheap" className="link-button info" title="Cheap Items Page">
                         <span className="material-symbols-outlined">

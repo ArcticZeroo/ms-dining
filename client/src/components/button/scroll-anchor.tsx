@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useLayoutEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
 import { CurrentCafeContext, CurrentStationContext } from '../../context/menu-item.ts';
@@ -20,7 +20,7 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
 
     const anchorId = `#${id}`;
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (element == null) {
             return;
         }
@@ -38,21 +38,14 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
         }
 
         // Jump to hash after render
-        setTimeout(() => {
-            element.scrollIntoView({ behavior: 'smooth' });
+        element.scrollIntoView({ behavior: 'smooth' });
 
-            // Remove hash from URL after jumping
-            const url = new URL(window.location.href);
-            url.hash = '';
+        // Remove hash from URL after jumping
+        const url = new URL(window.location.href);
+        url.hash = '';
 
-            navigate(url.pathname);
-        }, 0);
-    }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationId]);
-
-    // perf: Don't bother rendering the anchor if it's not needed
-    if (location.hash !== anchorId) {
-        return;
-    }
+        navigate(url.pathname);
+    }, [navigate, id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationId, anchorId]);
 
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement} style={{ scrollMargin: margin }}/>

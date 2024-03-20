@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 
 import { NavLink } from 'react-router-dom';
+import { ApplicationSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { useViewsForNav } from '../../hooks/views.ts';
 import { CafeView, CafeViewType, ICafeGroup } from '../../models/cafe.ts';
 import { getViewMenuUrl } from '../../util/link.ts';
-import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
 import { classNames } from '../../util/react.ts';
-import { ApplicationSettings } from '../../constants/settings.ts';
+import { NavNumberedCafeList } from './nav-numbered-cafe-list.tsx';
 
 interface INavViewLinkProps {
     view: CafeView;
@@ -93,7 +93,7 @@ export const NavCafeList: React.FC = () => {
     );
 
     return (
-        <ul className="expandable-nav-list">
+        <ul className="expandable-nav-list" id="cafe-list">
             {
                 shouldCondenseNumbers && <NavNumberedCafeList viewNumbersById={viewNumbersById}/>
             }

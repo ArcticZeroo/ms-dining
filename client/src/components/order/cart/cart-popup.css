@@ -1,7 +1,6 @@
 .cart-popup {
     position: absolute;
     top: 0;
-    right: 1rem;
     z-index: var(--z-index-everything-but-top);
     gap: var(--default-padding);
     transition: transform 0.2s ease;

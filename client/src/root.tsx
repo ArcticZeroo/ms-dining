@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { ScrollTopButton } from './components/button/scroll-top-button.tsx';
 import { Nav } from './components/nav/nav.tsx';
 import { PopupContainer } from './components/popup/popup-container.tsx';
 import { PopupContext } from './context/modal.ts';
@@ -7,7 +8,6 @@ import { NavExpansionContext } from './context/nav.ts';
 import { useValueNotifierContext } from './hooks/events.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { classNames } from './util/react.ts';
-import { ScrollTopButton } from './components/button/scroll-top-button.tsx';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -36,14 +36,11 @@ const useScrollTracker = (shouldStopScroll: boolean) => {
 
     useScrollSaver(scrollTopRef, shouldStopScroll);
 
-    useEffect(() => {
-        // Hack to let react render things before we scroll
-        setTimeout(() => {
-            if (pageBodyDivRef.current) {
-                pageBodyDivRef.current.scrollTop = 0;
-            }
-            document.documentElement.scrollTop = 0;
-        }, 0);
+    useLayoutEffect(() => {
+        if (pageBodyDivRef.current) {
+            pageBodyDivRef.current.scrollTop = 0;
+        }
+        document.documentElement.scrollTop = 0;
     }, [location.pathname, location.search]);
 
     return pageBodyDivRef;

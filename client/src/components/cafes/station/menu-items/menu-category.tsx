@@ -3,7 +3,7 @@ import { IMenuItem } from '../../../../models/cafe.ts';
 import { MenuItem } from './menu-item.tsx';
 
 export interface IMenuCategoryProps {
-    categoryName: string;
+    categoryName?: string;
     menuItems: IMenuItem[];
 }
 
@@ -24,9 +24,13 @@ export const MenuCategory: React.FC<IMenuCategoryProps> = ({
 
     return (
         <div className="flex-col menu-category">
-            <div className="category-name">
-                {categoryName}
-            </div>
+            {
+                categoryName && (
+                    <div className="category-name">
+                        {categoryName}
+                    </div>
+                )
+            }
             <div className="menu-category-items">
                 {menuItemList}
             </div>

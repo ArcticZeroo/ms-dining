@@ -3,11 +3,10 @@ import { ApplicationSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
-import { useElementHeight } from '../../hooks/html.ts';
+import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
+import { useElementHeight, useScrollIntoViewIfNeeded } from '../../hooks/html.ts';
 import { ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
-import { queryForScrollAnchor, scrollIntoViewIfNeeded } from '../../util/html.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
@@ -31,17 +30,15 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
-    const collapsedCafeIds = useValueNotifier(collapsedCafeIdsNotifier);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
 
-    const isExpanded = useMemo(
-        () => !collapsedCafeIds.has(cafe.id),
-        [collapsedCafeIds, cafe.id]
-    );
+    const isCollapsed = useValueNotifierSetTarget(collapsedCafeIdsNotifier, cafe.id);
+
+    const scrollIntoViewIfNeeded = useScrollIntoViewIfNeeded(cafe.id);
 
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
@@ -50,13 +47,13 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     }, [collapsedCafeIdsNotifier, cafe.id]);
 
     const toggleIsExpanded = () => {
-        const isNowExpanded = !isExpanded;
+        const isNowCollapsed = !isCollapsed;
 
-        if (isNowExpanded) {
-            collapsedCafeIdsNotifier.delete(cafe.id);
-        } else {
+        if (isNowCollapsed) {
             collapsedCafeIdsNotifier.add(cafe.id);
-            scrollIntoViewIfNeeded(queryForScrollAnchor(cafe.id));
+            scrollIntoViewIfNeeded();
+        } else {
+            collapsedCafeIdsNotifier.delete(cafe.id);
         }
     };
 
@@ -65,7 +62,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
             <CafeHeaderHeightContext.Provider value={cafeHeaderHeight}>
                 <ScrollAnchor id={cafe.id}/>
                 <div
-                    className={classNames('collapsible-content collapsible-cafe', !isExpanded && 'collapsed')}
+                    className={classNames('collapsible-content collapsible-cafe', isCollapsed && 'collapsed')}
                     key={cafe.id}
                 >
                     <div className="cafe-header" ref={setCafeHeaderElement}>
@@ -87,11 +84,11 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                 )
                             }
                             {cafeName}
-                            <ExpandIcon isExpanded={isExpanded}/>
+                            <ExpandIcon isExpanded={!isCollapsed}/>
                         </button>
                     </div>
                     <CollapsibleCafeMenuBody
-                        isExpanded={isExpanded}
+                        isExpanded={!isCollapsed}
                         shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
                     />
                 </div>

@@ -6,6 +6,6 @@ export const scrollIntoViewIfNeeded = (element?: Element | null) => {
     }
 
     if (element.getBoundingClientRect().top < 0) {
-        element.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+        element.scrollIntoView({ behavior: 'instant', block: 'start' });
     }
 }
