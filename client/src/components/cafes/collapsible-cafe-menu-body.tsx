@@ -48,7 +48,7 @@ export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = 
             : 'Failed to load menu.';
 
         return (
-            <div className="cafe-error centered-content collapse-body above-floating">
+            <div className="cafe-error centered-content collapse-body">
                 {errorText}
                 <br/>
                 <RetryButton onClick={retrieveMenu} isDisabled={actualStage !== PromiseStage.error}/>
@@ -61,7 +61,7 @@ export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = 
     }
 
     return (
-        <div className="centered-content collapse-body above-floating">
+        <div className="centered-content collapse-body">
             <HourglassLoadingSpinner/>
             Loading menu...
         </div>
