@@ -22,6 +22,7 @@ export const SettingsPage = () => {
                     Other Settings
                 </div>
                 <div className="body">
+                    <LocationSetting/>
                     <BooleanSettingInput
                         icon="group"
                         setting={ApplicationSettings.shouldUseGroups}
@@ -34,7 +35,12 @@ export const SettingsPage = () => {
                         name="Condense Numbered Cafes"
                         description="When enabled, numbered cafes are condensed into tiles in the navigation menu."
                     />
-                    <LocationSetting/>
+                    <BooleanSettingInput
+                        icon="bookmark"
+                        setting={ApplicationSettings.showSearchTags}
+                        name="Show Search Tags"
+                        description="When enabled, AI-generated tags like 'beverage' may appear next to search results"
+                    />
                     <CustomKeySetting/>
                 </div>
             </div>

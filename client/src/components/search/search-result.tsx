@@ -180,6 +180,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const selectedDateNotifier = useContext(SelectedDateContext);
@@ -242,16 +243,19 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             }
                         </div>
                     </div>
-                    {/*search-result-tags is reserved in case we add gluten free/vegan/vegetarian tags*/}
-                    <div className="search-tags">
-                        {
-                            searchTagsToShow.length > 0 && searchTagsToShow.map(tag => (
-                                <div className="search-result-chip" key={tag}>
-                                    {tag}
-                                </div>
-                            ))
-                        }
-                    </div>
+                    {
+                        showSearchTags && (
+                            <div className="search-tags">
+                                {
+                                    searchTagsToShow.length > 0 && searchTagsToShow.map(tag => (
+                                        <div className="search-result-chip" key={tag}>
+                                            {tag}
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        )
+                    }
                     {
                         extraFields && (
                             <div className="search-result-fields">
