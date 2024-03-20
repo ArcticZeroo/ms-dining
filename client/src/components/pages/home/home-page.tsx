@@ -30,7 +30,11 @@ export const HomePage = () => {
     return (
         <>
             {
-                shouldShowWelcomeMessage && <HomeWelcomeMessage/>
+                shouldShowWelcomeMessage && (
+                    <>
+                        <HomeWelcomeMessage/>
+                    </>
+                )
             }
             {
                 datePicker

@@ -1,12 +1,15 @@
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { StringSetSetting } from '../api/settings.ts';
-import { getTargetSettingForFavorite } from '../util/cafe.ts';
+import { getCafeLocation, getTargetSettingForFavorite } from '../util/cafe.ts';
 import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
 import { ICafeStation, IMenuItemsByCategoryName } from '../models/cafe.ts';
 import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
 import { useIsTodaySelected } from './date-picker.tsx';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { ApplicationContext } from '../context/app.ts';
+import { getDistanceBetweenCoordinates } from '../util/user-location.ts';
 
 const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
     const names = useValueNotifier(setting);
@@ -78,3 +81,31 @@ export const useIsOnlineOrderingAllowedForSelectedDate = () => {
     const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
     return isTodaySelected && isOnlineOrderingEnabled;
 };
+
+export const useCafesSortedByDistance = (userLocation: ILocationCoordinates | null) => {
+    const { cafes } = useContext(ApplicationContext);
+
+    return useMemo(() => {
+        if (!userLocation) {
+            return [];
+        }
+
+        const cafeDistancesById = new Map<string, number>();
+        for (const cafe of cafes) {
+            const cafeLocation = getCafeLocation(cafe);
+            const distance = getDistanceBetweenCoordinates(userLocation, cafeLocation);
+            cafeDistancesById.set(cafe.id, distance);
+        }
+
+        return cafes.sort((a, b) => {
+            const distanceA = cafeDistancesById.get(a.id);
+            const distanceB = cafeDistancesById.get(b.id);
+
+            if (distanceA == null || distanceB == null) {
+                return 0;
+            }
+
+            return distanceA - distanceB;
+        });
+    }, [cafes, userLocation]);
+}

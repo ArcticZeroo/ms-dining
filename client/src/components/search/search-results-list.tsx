@@ -7,7 +7,7 @@ import { matchesEntityFilter } from '../../util/search.ts';
 import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
 import { sortSearchResults } from '../../util/search-sorting.ts';
-import { UserLocationNotifier } from '../../api/user-location.ts';
+import { PromptingUserLocationNotifier } from '../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 
@@ -20,7 +20,7 @@ interface ISearchResultsListProps {
 export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter }) => {
     const { cafes, viewsById } = useContext(ApplicationContext);
 
-    const userLocation = useValueNotifier(UserLocationNotifier);
+    const userLocation = useValueNotifier(PromptingUserLocationNotifier);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);

@@ -1,7 +1,8 @@
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
-import { ValueNotifier } from '../util/events.ts';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util.ts';
+import { ValueNotifier } from '../../util/events.ts';
 import Duration from '@arcticzeroo/duration';
-import { ApplicationSettings } from '../constants/settings.ts';
+import { ApplicationSettings } from '../../constants/settings.ts';
+import { PermissionGrantedNotifier } from '../permission-notifier.ts';
 
 const RETRIEVE_LOCATION_INTERVAL = new Duration({ minutes: 1 });
 
@@ -9,9 +10,16 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     private _watchId?: number;
     private _interval?: ReturnType<typeof setInterval>;
     private _isFetchingCurrentLocation: boolean = false;
+    private _isAllowedToRetrieveLocationNotifier: ValueNotifier<boolean>;
 
-    public constructor() {
+    public constructor(requirePermissionToBeGranted: boolean = false) {
         super(null);
+
+        if (requirePermissionToBeGranted) {
+            this._isAllowedToRetrieveLocationNotifier = new PermissionGrantedNotifier('geolocation');
+        } else {
+            this._isAllowedToRetrieveLocationNotifier = new ValueNotifier(true);
+        }
 
         ApplicationSettings.allowLocation.addListener(isAllowed => {
             if (isAllowed) {
@@ -19,6 +27,12 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
             } else {
                 this._stopWatching();
                 this.value = null;
+            }
+        });
+
+        this._isAllowedToRetrieveLocationNotifier.addListener(isGranted => {
+            if (isGranted) {
+                this._trySetupListeners();
             }
         });
     }
@@ -63,6 +77,10 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     }
 
     private _trySetupListeners() {
+        if (!this._isAllowedToRetrieveLocationNotifier.value) {
+            return;
+        }
+
         if (this._listeners.length === 0 || !ApplicationSettings.allowLocation.value) {
             return;
         }
@@ -108,4 +126,12 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     }
 }
 
-export const UserLocationNotifier = new UserLocationProvider();
+export const PromptingUserLocationNotifier = new UserLocationProvider();
+export const PassiveUserLocationNotifier = new UserLocationProvider(true /*requirePermissionToBeGranted*/);
+
+export const queryForLocationPermission = () => {
+    navigator.geolocation.getCurrentPosition(
+        () => null,
+        () => null
+    );
+}

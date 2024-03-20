@@ -128,9 +128,13 @@ export class StringSetSetting extends Setting<Set<string>> {
         setStringArraySetting(this.name, Array.from(value));
     }
 
-    add(value: string) {
+    add(...values: string[]) {
         const newValue = new Set(this.value);
-        newValue.add(value);
+
+        for (const value of values) {
+            newValue.add(value);
+        }
+
         this.value = newValue;
     }
 

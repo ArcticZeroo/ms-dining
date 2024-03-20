@@ -9,6 +9,7 @@ const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 5 });
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 15 });
 const QUEUE_FAILED_POLL_INTERVAL = new Duration({ seconds: 15 });
 
+// TODO: use category/station name to give a better hint to the AI
 export interface ISearchTagQueueEntry {
     id: string;
     name: string;

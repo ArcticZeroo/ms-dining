@@ -1,6 +1,6 @@
 import { useHasPermissionBeenGranted } from '../../../hooks/permission.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { UserLocationNotifier } from '../../../api/user-location.ts';
+import { PromptingUserLocationNotifier } from '../../../api/location/user-location.ts';
 import { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { getCafeLocation } from '../../../util/cafe.ts';
@@ -9,7 +9,7 @@ import { LocationSetting } from '../../settings/location-setting.tsx';
 
 export const LocationTestPage = () => {
     const isLocationPermissionGranted = useHasPermissionBeenGranted('geolocation');
-    const userLocation = useValueNotifier(UserLocationNotifier);
+    const userLocation = useValueNotifier(PromptingUserLocationNotifier);
     const { cafes } = useContext(ApplicationContext);
 
     const cafesInOrder = useMemo(
