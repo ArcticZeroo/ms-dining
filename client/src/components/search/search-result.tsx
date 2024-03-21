@@ -248,9 +248,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             <div className="search-tags">
                                 {
                                     searchTagsToShow.length > 0 && searchTagsToShow.map(tag => (
-                                        <div className="search-result-chip" key={tag}>
+                                        <Link to={`/search?q=${tag}`} className="search-result-chip" key={tag} title={`Click to search for "${tag}"`}>
                                             {tag}
-                                        </div>
+                                        </Link>
                                     ))
                                 }
                             </div>
