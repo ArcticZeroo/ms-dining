@@ -1,10 +1,15 @@
 import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
+import { NavExpansionContext } from '../../../context/nav.ts';
+import { useContext } from 'react';
 
 export const HomeWelcomeMessage = () => {
     const deviceType = useDeviceType();
+    const [, setIsNavExpanded] = useContext(NavExpansionContext);
+
+    const selectMenuText = `View today's lunch menu by selecting a cafe from ${deviceType === DeviceType.Mobile ? 'the bar above' : 'the sidebar on the left'}.`
 
     return (
-        <div className="card theme centered-content" id="home-welcome-message">
+        <div className="card centered-content" id="home-welcome-message">
             <div className="title">
                 Welcome to MSDining! 🎉
             </div>
@@ -15,12 +20,26 @@ export const HomeWelcomeMessage = () => {
                 <p>
                     How to get started:
                 </p>
-                <p className="flex">
-                    <span className="material-symbols-outlined">
-                        restaurant
-                    </span>
-                    View today's lunch menu by selecting a cafe from {deviceType === DeviceType.Mobile ? 'the bar above' : 'the sidebar on the left'}.
-                </p>
+                {
+                    deviceType === DeviceType.Mobile && (
+                        <button className="flex default-button default-container" onClick={() => setIsNavExpanded(true)}>
+                            <span className="material-symbols-outlined">
+                                menu
+                            </span>
+                            {selectMenuText}
+                        </button>
+                    )
+                }
+                {
+                    deviceType === DeviceType.Desktop && (
+                        <p className="flex">
+                            <span className="material-symbols-outlined">
+                                restaurant
+                            </span>
+                            {selectMenuText}
+                        </p>
+                    )
+                }
                 <p className="flex">
                     <span className="material-symbols-outlined">
                         home
