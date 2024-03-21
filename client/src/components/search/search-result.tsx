@@ -16,7 +16,6 @@ import { getParentView } from '../../util/view';
 import './search.css';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 
 interface IEntityDisplayData {
     className: string;
@@ -109,30 +108,6 @@ const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCaf
     );
 };
 
-// Some search tags are already in the name/description
-const useSearchTags = (name: string, description: string | undefined, searchTags: Set<string> | undefined) => {
-    return useMemo(
-        () => {
-            if (searchTags == null) {
-                return [];
-            }
-
-            const tags = Array.from(searchTags);
-
-            if (tags.length === 0) {
-                return [];
-            }
-
-            return tags.filter(tag => {
-                const normalizedTag = normalizeNameForSearch(tag);
-                return !normalizeNameForSearch(name).includes(normalizedTag)
-                    && (!description || !normalizeNameForSearch(description).includes(normalizedTag));
-            });
-        },
-        [searchTags, name, description]
-    );
-}
-
 const getViewNameForSearchResult = (view: CafeView) => {
     if (view.type === CafeViewType.group) {
         return view.value.name;
@@ -187,8 +162,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const selectedDate = useValueNotifier(selectedDateNotifier);
 
     const isFavoriteItem = useIsFavoriteItem(name, entityType);
-
-    const searchTagsToShow = useSearchTags(name, description, searchTags);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -247,7 +220,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         showSearchTags && (
                             <div className="search-tags">
                                 {
-                                    searchTagsToShow.length > 0 && searchTagsToShow.map(tag => (
+                                    (searchTags != null && searchTags.size > 0) && Array.from(searchTags).map(tag => (
                                         <Link to={`/search?q=${tag}`} className="search-result-chip" key={tag} title={`Click to search for "${tag}"`}>
                                             {tag}
                                         </Link>
