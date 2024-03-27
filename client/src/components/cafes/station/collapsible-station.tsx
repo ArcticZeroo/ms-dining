@@ -48,9 +48,9 @@ const useStationExpansion = (scrollAnchorId: string) => {
 
     useEffect(() => {
         if (ApplicationSettings.collapseStationsByDefault.value) {
-            updateIsCollapsed(true);
+            collapsedStationsNotifier.add(scrollAnchorId);
         }
-    }, [updateIsCollapsed]);
+    }, [collapsedStationsNotifier, scrollAnchorId]);
 
     return {
         isExpanded: !isCollapsed,
