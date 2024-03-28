@@ -7,7 +7,7 @@ const updateWeeklyCafeMenusAsync = async (forceUseNextWeek: boolean) => {
     logInfo('Updating weekly cafe menus...');
     for (const i of DateUtil.yieldDaysInFutureForThisWeek(forceUseNextWeek)) {
         const updateSession = new DailyCafeUpdateSession(i);
-        await updateSession.populateAsync();
+        await updateSession.populateAsync(true /*isSlowUpdate*/);
     }
 }
 

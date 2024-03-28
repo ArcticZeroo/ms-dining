@@ -97,9 +97,11 @@ export class DailyCafeUpdateSession {
             await saveSessionAsync({
                 cafe,
                 stations,
-                dateString: this.dateString,
+                dateString:                this.dateString,
                 shouldUpdateExistingItems: true
             });
+        } catch (err) {
+            logError(`{${this.dateString}}`, `Failed to populate cafe ${cafe.name}:`, err);
         } finally {
             const updatingDateStrings = retrieveUpdatingDateStringsForCafe(cafe);
 
@@ -111,7 +113,7 @@ export class DailyCafeUpdateSession {
         }
     }
 
-    public async populateAsync() {
+    public async populateAsync(isSlowUpdate: boolean = false) {
         await this.resetDailyState();
 
         logInfo(`{${this.dateString}} Populating cafe sessions...`);
@@ -124,7 +126,13 @@ export class DailyCafeUpdateSession {
                 continue;
             }
 
-            cafePromises.push(this.discoverCafeAsync(cafe));
+            const discoverPromise = this.discoverCafeAsync(cafe);
+
+            if (isSlowUpdate) {
+                await discoverPromise;
+            } else {
+                cafePromises.push(discoverPromise);
+            }
 
             if (ENVIRONMENT_SETTINGS.shouldFetchOnlyOneCafe) {
                 break;
@@ -134,7 +142,7 @@ export class DailyCafeUpdateSession {
         try {
             await Promise.all(cafePromises);
         } catch (err) {
-            logError(`{${this.dateString}}`, 'Failed to populate cafe sessions:', err);
+            logError(`{${this.dateString}}`, '(should not be hit)', 'Failed to populate cafe sessions:', err);
         }
 
         const endTime = Date.now();

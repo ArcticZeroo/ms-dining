@@ -11,7 +11,7 @@ export const populateDailySessionsAsync = async () => {
         return;
     }
 
-    await updateSession.populateAsync();
+    await updateSession.populateAsync(true /*isSlowUpdate*/);
 };
 
 const populateDailySessions = () => {
