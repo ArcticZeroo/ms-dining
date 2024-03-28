@@ -15,10 +15,14 @@ export const retrieveResponseText = async (question: string) => {
 
 const getMenuItemPrompt = (name: string, description: Nullable<string>) => (
     `Please provide a list of one-word tags that describe the following menu item, based on the name${description ? ' and description' : ''}.
-    Tags will be used for users to search for this item. Tags may only contain letters, they should not have numbers, punctuation, or special characters.
+    Tags will be used for users to search for this item. They should represent categories for the item rather than words directly in the item's name or description.
+    Tags may only contain letters, they should not have numbers, punctuation, or special characters.
     Please respond only with the tag names, separated by commas.
-    For instance, if the item is a "chocolate cake", you might respond with: chocolate, cake, dessert, sweets
-    
+
+    Some examples:
+    for "chocolate cake", you might respond with: dessert, sweets
+    for "green beans", you might respond with: vegetables, side
+
     Menu Item Name: ${name}
     ${description ? `Menu Item Description: ${description}` : ''}
     Tags:`.trim()
