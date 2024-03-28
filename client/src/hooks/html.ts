@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { queryForScrollAnchor, scrollHeaderIntoView } from '../util/html.ts';
 
 export const useIsElementOnScreen = (element: HTMLElement | null, options?: IntersectionObserverInit) => {
@@ -63,5 +63,5 @@ export const useScrollCollapsedHeaderIntoView = (anchorId: string) => {
         setIsScrollIntoViewPending(false);
     }, [anchorId, isScrollIntoViewPending]);
     
-    return () => setIsScrollIntoViewPending(true); 
+    return useCallback(() => setIsScrollIntoViewPending(true), []);
 }

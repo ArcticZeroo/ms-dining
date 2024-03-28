@@ -30,23 +30,22 @@ export class ValueNotifier<T> {
 
 export class ValueNotifierSet<T> extends ValueNotifier<Set<T>> {
     add(value: T) {
-        const newValue = new Set(this._value);
-
-        if (newValue.has(value)) {
+        if (this._value.has(value)) {
             return;
         }
+
+        const newValue = new Set(this._value);
 
         newValue.add(value);
         this.value = newValue;
     }
 
     delete(value: T) {
-        const newValue = new Set(this._value);
-
-        if (!newValue.has(value)) {
+        if (!this._value.has(value)) {
             return;
         }
 
+        const newValue = new Set(this._value);
         newValue.delete(value);
         this.value = newValue;
     }
