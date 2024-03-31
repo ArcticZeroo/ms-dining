@@ -15,7 +15,7 @@ export abstract class WorkerQueue<T> {
     readonly #emptyPollInterval: Duration;
     readonly #failedPollInterval: Duration;
     readonly #entries: T[] = [];
-    #isRunning: boolean = false;
+    #runningSymbol: symbol | undefined;
 
     protected constructor({ successPollInterval, emptyPollInterval, failedPollInterval }: IWorkerQueueParams) {
         this.#successPollInterval = successPollInterval;
@@ -30,13 +30,18 @@ export abstract class WorkerQueue<T> {
     }
 
     public start() {
-        if (this.#isRunning) {
+        if (this.#runningSymbol) {
             return;
         }
 
-        this.#isRunning = true;
+        const currentSymbol = Symbol();
+        this.#runningSymbol = currentSymbol;
 
         const doQueueIteration = () => {
+            if (this.#runningSymbol !== currentSymbol) {
+                return;
+            }
+
             if (this.#entries.length === 0) {
                 setTimeout(doQueueIteration, this.#emptyPollInterval.inMilliseconds);
                 return;
