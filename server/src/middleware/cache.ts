@@ -8,8 +8,45 @@ interface ICacheEntry {
 
 const DEFAULT_CACHE_EXPIRATION_TIME = new Duration({ minutes: 30 });
 
-export const memoizeResponseBodyByQueryParams = (cacheExpirationTime: Duration = DEFAULT_CACHE_EXPIRATION_TIME): Koa.Middleware => {
-    const cacheByQueryParams = new Map<string, ICacheEntry>();
+class ExpiringCache {
+    #cache = new Map<string, ICacheEntry>;
+    #expirationTime: Duration;
+
+    constructor(expirationTime = DEFAULT_CACHE_EXPIRATION_TIME) {
+        this.#expirationTime = expirationTime;
+        setInterval(() => this.#purgeExpiredEntries(), expirationTime.inMilliseconds * 2);
+    }
+
+    #purgeExpiredEntries() {
+        const now = Date.now();
+        for (const [key, cacheEntry] of this.#cache.entries()) {
+            if (cacheEntry.expirationTime < now) {
+                this.#cache.delete(key);
+            }
+        }
+    }
+
+    getValue(key: string) {
+        const entry = this.#cache.get(key);
+
+        if (entry == null || Date.now() > entry.expirationTime) {
+            this.#cache.delete(key);
+            return undefined;
+        }
+
+        return entry.value;
+    }
+
+    insertEntry(key: string, value: string) {
+        this.#cache.set(key, {
+            expirationTime: Date.now() + this.#expirationTime.inMilliseconds,
+            value
+        });
+    }
+}
+
+export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_EXPIRATION_TIME): Koa.Middleware => {
+    const cache = new ExpiringCache(expirationTime);
 
     const serializeQueryParams = (ctx: Koa.Context) => {
         const queryParams = ctx.query;
@@ -24,33 +61,19 @@ export const memoizeResponseBodyByQueryParams = (cacheExpirationTime: Duration =
 
     const getCacheKey = (ctx: Koa.Context) => `${ctx.path}?${serializeQueryParams(ctx)}`;
 
-    setInterval(() => {
-        const now = Date.now();
-        for (const [key, cacheEntry] of cacheByQueryParams.entries()) {
-            if (cacheEntry.expirationTime < now) {
-                cacheByQueryParams.delete(key);
-            }
-        }
-    }, cacheExpirationTime.inMilliseconds * 2);
-
     return async (ctx, next) => {
         const cacheKey = getCacheKey(ctx);
-        const cacheEntry = cacheByQueryParams.get(cacheKey);
+        const cachedBody = cache.getValue(cacheKey);
 
-        const now = Date.now();
-
-        if (cacheEntry != null && cacheEntry.expirationTime > now) {
-            ctx.body = cacheEntry.value;
+        if (cachedBody != null) {
+            ctx.body = cachedBody;
             return;
         }
 
         await next();
 
         if (ctx.body && ctx.status === 200) {
-            cacheByQueryParams.set(cacheKey, {
-                expirationTime: now + cacheExpirationTime.inMilliseconds,
-                value: ctx.body
-            });
+            cache.insertEntry(cacheKey, ctx.body);
         }
     }
 }
