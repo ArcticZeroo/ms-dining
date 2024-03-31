@@ -38,13 +38,14 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
     }
 
     public async doWorkAsync({ id, name, description }: ISearchTagQueueEntry) {
+        let workResult: symbol | undefined = undefined;
         let searchTags = await MenuItemStorageClient.getExistingSearchTagsForName(name);
 
         if (searchTags.size === 0) {
             searchTags = await retrieveMenuItemSearchTagsFromAiWithRetries(name, description);
         } else {
             logDebug('Search tags already exist for:', name);
-            return WorkerQueue.QUEUE_SKIP_ENTRY;
+            workResult = WorkerQueue.QUEUE_SKIP_ENTRY;
         }
 
         if (searchTags.size === 0) {
@@ -53,6 +54,7 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
         }
 
         await MenuItemStorageClient.saveMenuItemSearchTagsAsync(id, searchTags);
+        return workResult;
     }
 }
 
