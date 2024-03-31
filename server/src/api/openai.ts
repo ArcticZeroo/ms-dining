@@ -1,15 +1,17 @@
 import { ChatGPTAPI } from 'chatgpt';
-import { getChatGptKey } from '../constants/env.js';
-import { IMenuItem } from '../models/cafe.js';
+import { getChatGptKey, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../constants/env.js';
 import { Nullable } from '../models/util.js';
 import { logDebug, logError } from '../util/log.js';
+import { lazy } from '../util/lazy.js';
 
-const api = new ChatGPTAPI({
+export const IS_OPENAI_ENABLED = hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);
+
+const getClient = lazy(() => new ChatGPTAPI({
     apiKey: getChatGptKey(),
-});
+}));
 
-export const retrieveResponseText = async (question: string) => {
-    const response = await api.sendMessage(question);
+const retrieveResponseText = async (question: string) => {
+    const response = await getClient().sendMessage(question);
     return response.text;
 }
 

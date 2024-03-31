@@ -1,4 +1,4 @@
-const getEnvironmentVariable = (key: string): string => {
+const requireEnvironmentVariable = (key: string): string => {
     const value = process.env[key];
     if (!value) {
         throw new Error(`Missing environment variable: ${key}`);
@@ -6,4 +6,12 @@ const getEnvironmentVariable = (key: string): string => {
     return value;
 }
 
-export const getChatGptKey = () => getEnvironmentVariable('OPENAI_API_KEY');
+export const hasEnvironmentVariable = (key: string): boolean => {
+    return Boolean(process.env[key]);
+}
+
+export const WELL_KNOWN_ENVIRONMENT_VARIABLES = {
+    openAi: 'OPENAI_API_KEY'
+};
+
+export const getChatGptKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);

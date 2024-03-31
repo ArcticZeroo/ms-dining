@@ -1,7 +1,7 @@
-import { retrieveMenuItemSearchTagsFromAiWithRetries } from '../openai.js';
+import { IS_OPENAI_ENABLED, retrieveMenuItemSearchTagsFromAiWithRetries } from '../openai.js';
 import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
 import { Nullable } from '../../models/util.js';
-import { logDebug, logError } from '../../util/log.js';
+import { logDebug, logError, logInfo } from '../../util/log.js';
 import { WorkerQueue } from './queue.js';
 import Duration from '@arcticzeroo/duration';
 
@@ -23,6 +23,18 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
             emptyPollInterval:   QUEUE_EMPTY_POLL_INTERVAL,
             failedPollInterval:  QUEUE_FAILED_POLL_INTERVAL
         });
+    }
+
+    get isEnabled() {
+        return IS_OPENAI_ENABLED;
+    }
+
+    add(...entries: ISearchTagQueueEntry[]) {
+        if (!this.isEnabled) {
+            return;
+        }
+
+        super.add(...entries);
     }
 
     public async doWorkAsync({ id, name, description }: ISearchTagQueueEntry) {
@@ -47,6 +59,12 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
 export const SEARCH_TAG_WORKER_QUEUE = new SearchTagsWorkerQueue();
 
 const startQueue = () => {
+    // Don't bother starting the queue if OpenAI is disabled
+    if (!SEARCH_TAG_WORKER_QUEUE.isEnabled) {
+        logInfo('OpenAI is disabled due to missing env variable, search tag worker queue will not start');
+        return;
+    }
+
     // queue is currently started in boot in order to normalize names first
     // SEARCH_TAG_WORKER_QUEUE.start();
     MenuItemStorageClient.retrievePendingSearchTagQueueEntries()
