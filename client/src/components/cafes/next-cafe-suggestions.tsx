@@ -8,13 +8,13 @@ import { ApplicationContext } from '../../context/app.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { getParentView } from '../../util/view.ts';
 
-const VIEW_SUGGESTION_COUNT = 3;
+const VIEW_SUGGESTION_COUNT = 5;
 
 interface INextCafeSuggestionsProps {
-    cafes: ICafe[];
+    excludeCafes: ICafe[];
 }
 
-export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ cafes }) => {
+export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeCafes }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const userLocation = useValueNotifier(PassiveUserLocationNotifier);
@@ -26,7 +26,7 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ cafes
                 return [];
             }
 
-            const cafeIds = new Set(cafes.map(cafe => cafe.id));
+            const cafeIds = new Set(excludeCafes.map(cafe => cafe.id));
             const seenViewIds = new Set<string>();
             const viewsInOrder = [];
             
@@ -53,7 +53,7 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ cafes
 
             return viewsInOrder.slice(0, VIEW_SUGGESTION_COUNT);
         },
-        [cafes, cafesSortedByDistance, shouldUseGroups, userLocation, viewsById]
+        [excludeCafes, cafesSortedByDistance, shouldUseGroups, userLocation, viewsById]
     );
 
     if (cafesToShow.length === 0) {

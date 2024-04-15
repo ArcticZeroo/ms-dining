@@ -24,7 +24,7 @@ const useStationExpansion = (scrollAnchorId: string) => {
     const isCollapsed = useValueNotifierSetTarget(collapsedStationsNotifier, scrollAnchorId);
 
     const stationHeaderStyle = useMemo(
-        () => ({ top: `${cafeHeaderHeight}px` }),
+        () => ({ top: `calc(${cafeHeaderHeight}px - var(--default-padding))` }),
         [cafeHeaderHeight]
     );
     
@@ -90,7 +90,7 @@ export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station
                 <div
                     className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
                 >
-                    <ScrollAnchor id={scrollAnchorId} margin={`calc(${cafeHeaderHeight}px + var(--default-padding))`}/>
+                    <ScrollAnchor id={scrollAnchorId} margin={`${cafeHeaderHeight}px`}/>
                     <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
                         <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                         <button className="title" onClick={onTitleClick}>

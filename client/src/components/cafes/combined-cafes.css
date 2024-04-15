@@ -6,7 +6,7 @@
     height: var(--default-padding);
     background: var(--color-background);
     position: absolute;
-    top: calc(var(--default-padding) * -1);
+    top: 0;
     z-index: var(--z-index-above-content-2); /*be above station header*/
     width: 100%;
 }
@@ -17,6 +17,8 @@
     flex-wrap: wrap;
     gap: var(--default-padding);
     justify-content: center;
+    content-visibility: auto;
+    margin-bottom: var(--default-padding);
 }
 
 .stations.hidden {
@@ -150,11 +152,12 @@
 .collapsible-cafe .cafe-header {
     display: flex;
     position: sticky;
-    top: 0;
+    top: calc(var(--default-padding) * -1);
     z-index: var(--z-index-above-content-2);
     gap: var(--default-padding);
     background: var(--color-background);
     padding-bottom: var(--default-padding);
+    padding-top: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-header .scroll-anchor {

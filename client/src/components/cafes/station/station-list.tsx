@@ -1,7 +1,6 @@
 import { CafeMenu, ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
 import React, { useMemo } from 'react';
 import { CollapsibleStation } from './collapsible-station.tsx';
-import { classNames } from '../../../util/react.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
@@ -66,19 +65,28 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
         [shouldDoIntelligentOrdering, stations, shouldHideEveryDayStations, enablePriceFilters, minPrice, maxPrice]
     );
 
-    const emptyMessage = useMemo(() => {
-        if (stations.length === 0) {
-            return `There's nothing here! This cafe is probably closed during this time.`;
-        }
+    if (!isVisible) {
+        return null;
+    }
 
-        if (filteredStationData.length === 0) {
-            return `There's nothing here! Your filters are hiding all the menu items.`;
-        }
-    }, [filteredStationData, stations]);
+    if (stations.length === 0) {
+        return (
+            <div className="centered-content">
+                There's nothing here! This cafe is probably closed during this time.
+            </div>
+        );
+    }
+
+    if (filteredStationData.length === 0) {
+        return (
+            <div className="centered-content">
+                There's nothing here! Your filters are hiding all the menu items.
+            </div>
+        );
+    }
 
     return (
-        <div className={classNames('stations', !isVisible && 'hidden')}>
-            { emptyMessage }
+        <div className="stations">
             {
                 filteredStationData.map(([station, menu]) => (
                     <CollapsibleStation

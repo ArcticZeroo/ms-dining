@@ -66,7 +66,6 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                     key={cafe.id}
                 >
                     <div className="cafe-header" ref={setCafeHeaderElement}>
-                        <div className="fixed-header-floating-block"/>
                         <a className="cafe-order-link"
                             href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
                             target="_blank">

@@ -40,7 +40,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                     ))
                 }
             </div>
-            <NextCafeSuggestions cafes={cafes}/>
+            <NextCafeSuggestions excludeCafes={cafes}/>
             <MenuSettings/>
             <CartPopup/>
         </>
