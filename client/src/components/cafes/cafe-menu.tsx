@@ -10,7 +10,7 @@ import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
-import { CollapsibleCafeMenuBody } from './collapsible-cafe-menu-body.tsx';
+import { CafeMenuBody } from './cafe-menu-body.tsx';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
@@ -22,7 +22,7 @@ interface ICollapsibleCafeMenuProps {
     shouldCountTowardsLastUsed: boolean;
 }
 
-export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
+export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     {
         cafe,
         showGroupName,
@@ -86,7 +86,7 @@ export const CollapsibleCafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                             <ExpandIcon isExpanded={!isCollapsed}/>
                         </button>
                     </div>
-                    <CollapsibleCafeMenuBody
+                    <CafeMenuBody
                         isExpanded={!isCollapsed}
                         shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
                     />

@@ -31,7 +31,7 @@ interface ICollapsibleCafeMenuBodyProps {
     isExpanded: boolean;
 }
 
-export const CollapsibleCafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
+export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     shouldCountTowardsLastUsed,
     isExpanded
 }) => {

@@ -1,6 +1,6 @@
 import { CafeMenu, ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
 import React, { useMemo } from 'react';
-import { CollapsibleStation } from './collapsible-station.tsx';
+import { Station } from './station.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
@@ -89,7 +89,7 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
         <div className="stations">
             {
                 filteredStationData.map(([station, menu]) => (
-                    <CollapsibleStation
+                    <Station
                         key={station.name}
                         station={station}
                         menu={menu}

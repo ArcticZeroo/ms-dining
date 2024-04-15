@@ -4,7 +4,7 @@ import { CafeView } from '../../models/cafe.ts';
 import { expandAndFlattenView } from '../../util/view.ts';
 import { CartPopup } from '../order/cart/cart-popup.tsx';
 import { MenuSettings } from '../settings/menu-settings.tsx';
-import { CollapsibleCafeMenu } from './collapsible-cafe-menu.tsx';
+import { CafeMenu } from './cafe-menu.tsx';
 import { NextCafeSuggestions } from './next-cafe-suggestions.tsx';
 import './combined-cafes.css';
 
@@ -31,7 +31,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
             <div className="collapsible-menu-list">
                 {
                     cafes.map(cafe => (
-                        <CollapsibleCafeMenu
+                        <CafeMenu
                             key={cafe.id}
                             cafe={cafe}
                             showGroupName={showGroupNames}

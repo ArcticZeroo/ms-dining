@@ -64,7 +64,7 @@ export interface ICollapsibleStationProps {
     menu: IMenuItemsByCategoryName;
 }
 
-export const CollapsibleStation: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
+export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
     const cafe = useContext(CurrentCafeContext);
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
 
