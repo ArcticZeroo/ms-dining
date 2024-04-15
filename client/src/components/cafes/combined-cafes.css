@@ -166,9 +166,22 @@
     padding: 0;
 }
 
-.collapsible-cafe .cafe-name .logo {
+.collapsible-cafe .collapse-toggle .corner {
+    display: flex;
+    flex: 1;
+}
+
+.collapsible-cafe .collapse-toggle .cafe-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--default-padding);
+}
+
+.collapsible-cafe .collapse-toggle .logo {
     height: var(--cafe-logo-height);
     transition: height 0.125s ease;
+    border-radius: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-order-link {
@@ -302,7 +315,7 @@
         padding: var(--default-padding);
     }
 
-    .collapsible-cafe .cafe-name .logo {
+    .collapsible-cafe .collapse-toggle .logo {
         display: none;
     }
 }

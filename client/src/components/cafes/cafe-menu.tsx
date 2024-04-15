@@ -17,9 +17,9 @@ const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
 };
 
 interface ICollapsibleCafeMenuProps {
-    cafe: ICafe;
-    showGroupName: boolean;
-    shouldCountTowardsLastUsed: boolean;
+	cafe: ICafe;
+	showGroupName: boolean;
+	shouldCountTowardsLastUsed: boolean;
 }
 
 export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
@@ -67,23 +67,28 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                 >
                     <div className="cafe-header" ref={setCafeHeaderElement}>
                         <a className="cafe-order-link"
-                            href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
-                            target="_blank">
+						   href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
+						   target="_blank">
                             <span className="material-symbols-outlined">
                                 open_in_new
                             </span>
                         </a>
-                        <button className="collapse-toggle cafe-name" onClick={toggleIsExpanded}>
-                            {
-                                showCafeLogo && (
-                                    <img src={cafe.logoUrl}
-                                        alt={`${cafe.name} logo`}
-                                        className="logo"
-                                    />
-                                )
-                            }
-                            {cafeName}
-                            <ExpandIcon isExpanded={!isCollapsed}/>
+                        <button className="collapse-toggle" onClick={toggleIsExpanded}>
+                            <span className="corner logo-container">
+                                {
+                                    showCafeLogo && (
+                                        <img src={cafe.logoUrl}
+                                            alt={`${cafe.name} logo`}
+                                            className="logo"
+                                        />
+                                    )
+                                }
+                            </span>
+                            <span className="cafe-name">
+                                {cafeName}
+                                <ExpandIcon isExpanded={!isCollapsed}/>
+                            </span>
+                            <span className="corner"/>
                         </button>
                     </div>
                     <CafeMenuBody

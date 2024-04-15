@@ -7,8 +7,8 @@ import { useValueNotifierContext } from '../../hooks/events.ts';
 import { CafeMenu } from '../../models/cafe.ts';
 import { MenusCurrentlyUpdatingException } from '../../util/exception.ts';
 import { RetryButton } from '../button/retry-button.tsx';
-import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
 import { StationList } from './station/station-list.tsx';
+import { StationListSkeleton } from '../skeleton/station-list-skeleton.tsx';
 
 const useMenuData = (shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
     const cafe = useContext(CurrentCafeContext);
@@ -61,9 +61,6 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     }
 
     return (
-        <div className="centered-content collapse-body">
-            <HourglassLoadingSpinner/>
-            Loading menu...
-        </div>
+        <StationListSkeleton/>
     );
 }
