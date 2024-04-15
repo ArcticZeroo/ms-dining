@@ -132,6 +132,7 @@
     background: #CCC;
     border-radius: var(--default-padding);
     max-width: 20rem;
+    object-fit: contain;
 }
 
 .menu-item-image.fallback {
