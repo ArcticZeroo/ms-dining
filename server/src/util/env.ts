@@ -7,30 +7,33 @@ export interface EnvironmentSettings {
     maxConcurrentCafes: number;
     ignoreTrackingFailures?: boolean;
     logRequests: boolean;
+    alwaysSlowUpdate: boolean;
 }
 
 export const isDev = process.env.NODE_ENV?.toLowerCase() === 'dev';
 
-const defaultEnvironmentSettings: Readonly<EnvironmentSettings> = {
+const DEFAULT_ENVIRONMENT_SETTINGS: Readonly<EnvironmentSettings> = {
     shouldFetchOnlyOneCafe:      false,
     shouldFetchOnlyOneStation:   false,
     skipDailyRepairIfMenuExists: false,
     skipWeeklyRepair:            false,
     maxConcurrentCafes:          10,
-    logRequests:                 false
+    logRequests:                 false,
+    alwaysSlowUpdate:            false,
 };
 
-const devEnvironmentSettings: Partial<EnvironmentSettings> = {
+const DEV_ENVIRONMENT_SETTINGS: Partial<EnvironmentSettings> = {
     skipDailyRepairIfMenuExists: true,
     skipWeeklyRepair:            true,
     maxConcurrentRequests:       5,
     maxConcurrentCafes:          5,
-    ignoreTrackingFailures:      true
+    ignoreTrackingFailures:      true,
+    alwaysSlowUpdate:            true,
 };
 
 const getEnvironmentSettings = (): Readonly<EnvironmentSettings> => {
-    const overlay = isDev ? devEnvironmentSettings : {};
-    return { ...defaultEnvironmentSettings, ...overlay };
+    const overlay = isDev ? DEV_ENVIRONMENT_SETTINGS : {};
+    return { ...DEFAULT_ENVIRONMENT_SETTINGS, ...overlay };
 }
 
 export const ENVIRONMENT_SETTINGS = getEnvironmentSettings();

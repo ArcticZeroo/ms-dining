@@ -2,6 +2,7 @@ import Router from '@koa/router';
 import { registerApiRoutes } from './api/routes.js';
 import Koa from 'koa';
 import { registerSitemapRoutes } from './sitemap.js';
+import { attachRouter } from '../util/koa.js';
 
 export const registerRoutes = (app: Koa) => {
     const router = new Router();
@@ -9,6 +10,5 @@ export const registerRoutes = (app: Koa) => {
     registerSitemapRoutes(router);
     registerApiRoutes(router);
 
-    app.use(router.routes())
-        .use(router.allowedMethods());
+    attachRouter(app, router);
 };
