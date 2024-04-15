@@ -6,6 +6,9 @@
 .favorite-item-button {
     background: #EDEDED;
     transition: background-color 0.25s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .favorite-item-button.is-favorite {

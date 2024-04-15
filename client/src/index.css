@@ -321,8 +321,32 @@ html, body, #root, .App {
     border-radius: var(--default-padding);
 }
 
+.loading-skeleton {
+    animation: loading-skeleton 2s ease-in-out infinite;
+}
+
+@keyframes loading-skeleton {
+    0% {
+        opacity: 60%;
+    }
+
+    50% {
+        opacity: 40%;
+    }
+
+    100% {
+        opacity: 60%;
+    }
+}
+
 .default-margin-bottom {
     margin-bottom: var(--default-padding);
+}
+
+.material-symbols-outlined {
+    width: 24px;
+    height: 24px;
+    overflow: hidden;
 }
 
 @media screen and (min-width: 801px) {

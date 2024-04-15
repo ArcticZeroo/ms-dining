@@ -1,7 +1,7 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useMemo } from 'react';
-import filledStarIcon from '../../assets/star-filled.svg';
+import filledStarIcon from '../../assets/icons/filled/star.svg';
 import { useValueNotifierSetTarget } from '../../hooks/events.ts';
 import { getTargetSettingForFavorite } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
