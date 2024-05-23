@@ -29,7 +29,7 @@ const MAX_RESULT_COUNT = 10;
 export const SearchIdeas = () => {
     const [selectedIdea, setSelectedIdea] = useState(SEARCH_IDEAS[0]);
 
-    const retrieveSearchResultsCallback = useCallback(() => DiningClient.retrieveSearchResults(selectedIdea, true /*isExact*/), [selectedIdea]);
+    const retrieveSearchResultsCallback = useCallback(() => DiningClient.retrieveSearchResults(selectedIdea), [selectedIdea]);
     const {
         run: runRetrieveSearchResults,
         stage,
