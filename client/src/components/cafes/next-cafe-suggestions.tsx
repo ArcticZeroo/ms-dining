@@ -79,6 +79,13 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ exclu
                     ))
                 }
             </div>
+            {
+                location == null && userLocation == null && (
+                    <div>
+                        Grant access to your location for more relevant suggestions.
+                    </div>
+                )
+            }
         </div>
     );
 }
