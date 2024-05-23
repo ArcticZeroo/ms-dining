@@ -1,5 +1,5 @@
 .search-ideas {
-    background: #2f2f42;
+    background: #212121;
 }
 
 .search-idea {
@@ -12,5 +12,5 @@
 }
 
 .search-idea.selected {
-    background: var(--color-theme);
+    background: #2cce91;
 }

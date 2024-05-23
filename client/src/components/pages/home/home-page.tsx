@@ -34,7 +34,6 @@ export const HomePage = () => {
                 isNewUser && (
                     <>
                         <HomeWelcomeMessage/>
-                        <HomeExplore/>
                     </>
                 )
             }
@@ -46,6 +45,7 @@ export const HomePage = () => {
                     <HomeFavorites/>
                 )
             }
+            <HomeExplore/>
             <HomeViews/>
             <HomepageSettings requireButtonToCommitHomepageViews={true}/>
             <MoreSettingsButton/>

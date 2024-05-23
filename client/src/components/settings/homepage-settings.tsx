@@ -1,7 +1,7 @@
 import React from 'react';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { HomepageViewsSetting } from './homepage-views-setting.tsx';
-import { ApplicationSettings } from '../../constants/settings.ts';
+import { ApplicationSettings, SpecialSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 
 interface IHomepageSettingsProps {
@@ -29,6 +29,11 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
                 name="Show Favorites on Homepage"
                 description="When enabled, the home page will search for items that are in your favorites list."
                 setting={ApplicationSettings.showFavoritesOnHome}/>
+            <BooleanSettingInput
+                icon="restaurant_menu"
+                name="Show Explore on Homepage"
+                description="When enabled, the home page will show suggested searches for food on campus."
+                setting={SpecialSettings.showExploreOnHome}/>
             {
                 hasAnyHomepageViews && homepageViewsComponent
             }

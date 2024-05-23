@@ -139,10 +139,6 @@ html, body, #root, .App {
     gap: var(--default-padding);
 }
 
-.text-center {
-    text-align: center;
-}
-
 .card.horizontal {
     flex-direction: row;
 }
@@ -276,6 +272,18 @@ html, body, #root, .App {
 
 .text-left {
     text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.self-stretch {
+    align-self: stretch;
 }
 
 .collapsible-content .collapse-toggle {

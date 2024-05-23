@@ -17,9 +17,10 @@ const SEARCH_IDEAS = randomSortInPlace([
     'mango lassi',
     // 'milk tea', - not working right now for some reason
     'dessert',
-    'drink',
+    'pasta',
     'vegetarian',
     'sushi',
+    'burger',
 ]);
 
 const MAX_RESULT_COUNT = 10;
@@ -44,7 +45,7 @@ export const SearchIdeas = () => {
             <div className="flex">
                 {SEARCH_IDEAS.map(idea => (
                     <button
-                        className={classNames('search-idea default-button default-container', idea === selectedIdea && 'selected')}
+                        className={classNames('search-idea default-container', idea === selectedIdea && 'selected')}
                         onClick={() => setSelectedIdea(idea)}
                     >
                         {idea}
@@ -53,7 +54,9 @@ export const SearchIdeas = () => {
             </div>
             {
                 stage === PromiseStage.running && (
-                    <HourglassLoadingSpinner/>
+                    <div className="centered-content">
+                        <HourglassLoadingSpinner/>
+                    </div>
                 )
             }
             {
@@ -66,12 +69,13 @@ export const SearchIdeas = () => {
                         limit={MAX_RESULT_COUNT}
                         showEndOfResults={false}
                         showSearchButtonInsteadOfLocations={true}
+                        shouldStretchResults={true}
                     />
                 )
             }
             {
                 error && (
-                    <div>
+                    <div className="centered-content">
 						Could not load search results.
                         <RetryButton onClick={runRetrieveSearchResults}/>
                     </div>

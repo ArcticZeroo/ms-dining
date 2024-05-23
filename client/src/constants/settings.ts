@@ -50,6 +50,11 @@ export const DebugSettings = {
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),
 } as const;
 
+// idk, depends on other things? Maybe I need to make it easier to read previous settings within a group like ApplicationSettings
+export const SpecialSettings = {
+    showExploreOnHome: new BooleanSetting('showExploreOnHome', ApplicationSettings.homepageViews.value.size === 0 /*defaultValue*/)
+} as const;
+
 export const getVisitorId = () => {
     const visitorId = InternalSettings.visitorId.value;
     if (visitorId.length === 0) {

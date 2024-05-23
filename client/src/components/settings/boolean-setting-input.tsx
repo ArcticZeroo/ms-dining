@@ -18,7 +18,7 @@ export const BooleanSettingInput: React.FC<IBooleanSettingInputProps> = ({
     setting,
     isChip = false
 }) => {
-    const currentValue = useValueNotifier(setting);
+    const currentValue = useValueNotifier(setting) === true;
 
     const toggleSetting = () => {
         setting.value = !currentValue;

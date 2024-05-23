@@ -17,8 +17,8 @@ import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { pluralize } from '../../util/string.ts';
 
 interface IEntityDisplayData {
-    className: string;
-    iconName: string;
+	className: string;
+	iconName: string;
 }
 
 const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
@@ -108,44 +108,46 @@ const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCaf
 };
 
 interface ISearchResultField {
-    key: string;
-    iconName: string;
-    value: React.ReactNode;
+	key: string;
+	iconName: string;
+	value: React.ReactNode;
 }
 
 interface ISearchResultProps {
-    isVisible: boolean;
-    name: string;
-    description?: string;
-    locationDatesByCafeId: Map<string, Date[]>;
-    imageUrl?: string;
-    entityType: SearchTypes.SearchEntityType;
-    extraFields?: ISearchResultField[];
-    onlyShowLocationsOnDate?: Date;
-    isCompact?: boolean;
-    showFavoriteButton?: boolean;
-    shouldColorForFavorites?: boolean;
-    cafeIdsOnPage?: Set<string>;
-    searchTags?: Set<string>;
-    showSearchButtonInsteadOfLocations?: boolean;
+	isVisible: boolean;
+	name: string;
+	description?: string;
+	locationDatesByCafeId: Map<string, Date[]>;
+	imageUrl?: string;
+	entityType: SearchTypes.SearchEntityType;
+	extraFields?: ISearchResultField[];
+	onlyShowLocationsOnDate?: Date;
+	isCompact?: boolean;
+	showFavoriteButton?: boolean;
+	shouldColorForFavorites?: boolean;
+	cafeIdsOnPage?: Set<string>;
+	searchTags?: Set<string>;
+	showSearchButtonInsteadOfLocations?: boolean;
+	shouldStretch?: boolean;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
-    isVisible,
-    name,
-    description,
-    locationDatesByCafeId,
-    imageUrl,
-    entityType,
-    extraFields,
-    onlyShowLocationsOnDate,
-    isCompact = false,
-    showFavoriteButton = !isCompact,
-    shouldColorForFavorites = true,
-    cafeIdsOnPage,
-    searchTags,
-    showSearchButtonInsteadOfLocations = false
-}) => {
+															   isVisible,
+															   name,
+															   description,
+															   locationDatesByCafeId,
+															   imageUrl,
+															   entityType,
+															   extraFields,
+															   onlyShowLocationsOnDate,
+															   isCompact = false,
+															   showFavoriteButton = !isCompact,
+															   shouldColorForFavorites = true,
+															   cafeIdsOnPage,
+															   searchTags,
+															   showSearchButtonInsteadOfLocations = false,
+															   shouldStretch = false
+														   }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
@@ -175,14 +177,27 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
         <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
     );
 
+    const favoriteButton = showFavoriteButton && (
+        <div>
+            <FavoriteItemButton
+                name={name}
+                type={entityType}
+            />
+        </div>
+    );
+
     return (
         <div className={classNames(
             'search-result',
             isVisible && 'visible',
             isCompact && 'compact',
-            shouldColorForFavorites && isFavoriteItem && 'is-favorite'
+            shouldColorForFavorites && isFavoriteItem && 'is-favorite',
+            shouldStretch && 'self-stretch'
         )}>
-            <div className={classNames('search-result-type', entityDisplayData.className)}>
+            <div className={classNames('flex-col search-result-type', entityDisplayData.className)}>
+                {
+                    isCompact && favoriteButton
+                }
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}
                 </span>
@@ -190,17 +205,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
             <div className="search-result-info">
                 <div className="search-result-info-header">
                     <div className="flex">
-                        {
-                            showFavoriteButton
-                            && (
-                                <div>
-                                    <FavoriteItemButton
-                                        name={name}
-                                        type={entityType}
-                                    />
-                                </div>
-                            )
-                        }
+                        {!isCompact && favoriteButton}
                         <div className="search-result-name">
                             {name}
                             {
@@ -213,7 +218,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             <div className="search-tags">
                                 {
                                     (searchTags != null && searchTags.size > 0) && Array.from(searchTags).map(tag => (
-                                        <Link to={getSearchUrl(tag)} className="search-result-chip" key={tag} title={`Click to search for "${tag}"`}>
+                                        <Link to={getSearchUrl(tag)} className="search-result-chip" key={tag}
+											  title={`Click to search for "${tag}"`}>
                                             {tag}
                                         </Link>
                                     ))
@@ -258,8 +264,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     }
                     {
                         showSearchButtonInsteadOfLocations && (
-                            <Link to={getSearchUrl(name)} className="default-container default-button text-center">
-                                🔍 find in {locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
+                            <Link to={getSearchUrl(name)} className="default-container default-button text-center text-nowrap">
+								🔍 find in {locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
                             </Link>
                         )
                     }

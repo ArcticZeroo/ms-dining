@@ -19,9 +19,10 @@ interface ISearchResultsListProps {
     limit?: number;
     showEndOfResults?: boolean;
     showSearchButtonInsteadOfLocations?: boolean;
+    shouldStretchResults?: boolean;
 }
 
-export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false }) => {
+export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults }) => {
     const { cafes, viewsById } = useContext(ApplicationContext);
 
     const userLocation = useValueNotifier(PromptingUserLocationNotifier);
@@ -80,13 +81,14 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                         isCompact={isCompact}
                         showFavoriteButton={true}
                         showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
+                        shouldStretch={shouldStretchResults}
                     />
                 );
             });
 
             return [priceFilterHiddenResultCount, searchResultElements];
         },
-        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed, isCompact]
+        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showSearchButtonInsteadOfLocations]
     );
 
     return (
