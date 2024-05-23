@@ -162,19 +162,25 @@ export const getDateStringsForWeek = (): string[] => {
     return Array.from(yieldDaysInFutureForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
 }
 
-export const getMondayForWeek = (date: Date): Date => {
+const getSundayForWeek = (date: Date): Date => {
     const result = new Date(date.getTime());
-    result.setDate((result.getDate() - result.getDay()) + nativeDayOfWeek.Monday);
+    result.setDate(result.getDate() - result.getDay());
     return getDateWithoutTime(result);
 }
 
+export const getMondayForWeek = (date: Date): Date => {
+    const result = getSundayForWeek(date);
+    result.setDate(result.getDate() + nativeDayOfWeek.Monday);
+    return result;
+}
+
 export const getFridayForWeek = (date: Date): Date => {
-    const result = new Date(date.getTime());
+    const result = getSundayForWeek(date);
 
     const offset = result.getDay() === nativeDayOfWeek.Saturday ? 7 : 0;
-    result.setDate(result.getDate() + (nativeDayOfWeek.Friday - result.getDay()) + offset);
+    result.setDate(result.getDate() + nativeDayOfWeek.Friday + offset);
 
-    return getDateWithoutTime(result);
+    return result;
 }
 
 export function* yieldDaysInRange(start: Date, end: Date) {
