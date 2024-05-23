@@ -110,6 +110,8 @@ export class DailyCafeUpdateSession {
             if (updatingDateStrings.size === 0) {
                 dateStringsCurrentlyUpdatingByCafeId.delete(cafe.id);
             }
+
+            DailyMenuStorageClient.invalidateUniquenessData(cafe.id);
         }
     }
 

@@ -361,4 +361,8 @@ export abstract class DailyMenuStorageClient {
 
         return uniquenessDataForDate;
     }
+
+    public static invalidateUniquenessData(cafeId: string) {
+        this._uniquenessData.delete(cafeId);
+    }
 }

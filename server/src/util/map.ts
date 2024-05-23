@@ -14,7 +14,7 @@ export class LockedMap<K, V> {
     }
 
     async update(key: K, callback: (value: V | undefined) => Promise<V>): Promise<V> {
-        const currentSymbol = this.#symbol;
+        const currentMapSymbol = this.#symbol;
 
         if (!this.#map.has(key)) {
             this.#map.set(key, {
@@ -30,7 +30,7 @@ export class LockedMap<K, V> {
 
             const newValue = await callback(entry.value);
 
-            if (currentSymbol === this.#symbol) {
+            if (currentMapSymbol === this.#symbol) {
                 entry.value = newValue;
             }
 
@@ -38,6 +38,12 @@ export class LockedMap<K, V> {
         } finally {
             entry.lock.release();
         }
+    }
+
+    delete(key: K) {
+        // Anyone currently waiting on update will still be able to insert into the entry, the entry just will no longer
+        // be referenced here. Maybe in the future we'll throw an error so that update callers don't think it succeeded?
+        this.#map.delete(key);
     }
 
     clear() {
