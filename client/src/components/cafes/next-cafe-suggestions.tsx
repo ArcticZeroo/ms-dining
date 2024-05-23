@@ -7,22 +7,27 @@ import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../context/app.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { getParentView } from '../../util/view.ts';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 
 const VIEW_SUGGESTION_COUNT = 5;
 
 interface INextCafeSuggestionsProps {
     excludeCafes: ICafe[];
+    location?: ILocationCoordinates;
 }
 
-export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeCafes }) => {
+export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeCafes, location }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+
     const userLocation = useValueNotifier(PassiveUserLocationNotifier);
-    const cafesSortedByDistance = useCafesSortedByDistance(userLocation);
+    const targetLocation = location || userLocation;
+
+    const cafesSortedByDistance = useCafesSortedByDistance(targetLocation);
 
     const cafesToShow = useMemo(
         () => {
-            if (!userLocation) {
+            if (!targetLocation) {
                 return [];
             }
 
@@ -53,7 +58,7 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ exclu
 
             return viewsInOrder.slice(0, VIEW_SUGGESTION_COUNT);
         },
-        [excludeCafes, cafesSortedByDistance, shouldUseGroups, userLocation, viewsById]
+        [targetLocation, excludeCafes, cafesSortedByDistance, viewsById, shouldUseGroups]
     );
 
     if (cafesToShow.length === 0) {

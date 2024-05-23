@@ -26,8 +26,8 @@ export const getViewName = (view: CafeView, showGroupName: boolean) => {
 }
 
 export const getTargetSettingForFavorite = (type: SearchEntityType) => type === SearchEntityType.menuItem
-																	   ? ApplicationSettings.favoriteItemNames
-																	   : ApplicationSettings.favoriteStationNames;
+    ? ApplicationSettings.favoriteItemNames
+    : ApplicationSettings.favoriteStationNames;
 
 export const getCafeLocation = (cafe: ICafe): ILocationCoordinates => {
     const location = cafe.location ?? cafe.group?.location;
@@ -37,4 +37,27 @@ export const getCafeLocation = (cafe: ICafe): ILocationCoordinates => {
     }
 
     return location;
+}
+
+export const getViewLocation = (view: CafeView): ILocationCoordinates => {
+    if (view.type === CafeViewType.single) {
+        return getCafeLocation(view.value);
+    }
+
+    if (view.value.location) {
+        return view.value.location;
+    }
+
+    let totalLat = 0;
+    let totalLong = 0;
+    for (const member of view.value.members) {
+        const { lat, long } = getCafeLocation(member);
+        totalLat += lat;
+        totalLong += long;
+    }
+
+    return {
+        lat:  totalLat / view.value.members.length,
+        long: totalLong / view.value.members.length
+    }
 }
