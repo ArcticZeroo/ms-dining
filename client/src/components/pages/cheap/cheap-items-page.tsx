@@ -11,6 +11,7 @@ import { setPageData } from '../../../util/title.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
+import { SearchResultSkeleton } from '../../search/search-result-skeleton.tsx';
 
 interface ICheapItemsResults {
     stage: PromiseStage;
@@ -123,7 +124,12 @@ export const CheapItemsPage: React.FC = () => {
                 </div>
                 <SearchWaiting stage={stage}/>
             </div>
-            <div className="search-results">
+            <div className="flex-col">
+                {
+                    stage === PromiseStage.running && (
+                        <SearchResultSkeleton/>
+                    )
+                }
                 {
                     results.map(result => (
                         <CheapItemResult key={`${result.name} ${result.price}`} item={result}/>

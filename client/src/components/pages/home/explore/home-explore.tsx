@@ -1,6 +1,7 @@
 import { SearchIdeas } from './search-ideas.tsx';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { SpecialSettings } from '../../../../constants/settings.ts';
+import { HomeCollapse } from '../home-collapse.tsx';
 
 export const HomeExplore = () => {
     const showExploreOnHome = useValueNotifier(SpecialSettings.showExploreOnHome);
@@ -10,11 +11,8 @@ export const HomeExplore = () => {
     }
 
     return (
-        <div className="flex-col default-container">
-            <div className="default-container" id="explore-header">
-				Explore food on campus
-            </div>
+        <HomeCollapse title="Explore food on campus">
             <SearchIdeas/>
-        </div>
+        </HomeCollapse>
     );
 };

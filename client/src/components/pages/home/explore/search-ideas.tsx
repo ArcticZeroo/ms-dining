@@ -11,16 +11,17 @@ import './search-ideas.css';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
 
 const SEARCH_IDEAS = randomSortInPlace([
-    'latte',
-    'gyro',
+    'burger',
+    'burrito',
+    'dessert',
     'fried rice',
+    'gyro',
+    'latte',
     // 'mango lassi', - only one result
     // 'milk tea', - not working right now for some reason
-    'dessert',
     'pasta',
-    'vegetarian',
     'sushi',
-    'burger',
+    'vegetarian',
 ]);
 
 const MAX_RESULT_COUNT = 10;

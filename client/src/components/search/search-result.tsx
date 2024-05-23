@@ -225,7 +225,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         <div className="search-result-name">
                             {name}
                             {
-                                description && <div className="search-result-description">{description}</div>
+                                !isCompact && description && <div className="search-result-description">{description}</div>
                             }
                         </div>
                     </div>
@@ -248,15 +248,16 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             <div className="search-result-fields">
                                 {
                                     extraFields.map(({ iconName, value, key }) => (
-                                        value &&
-                                        <div className="search-result-field" key={key}>
-													    <span className="material-symbols-outlined icon">
-													        {iconName}
-													    </span>
-                                            <span className="value">
-													        {value}
-													    </span>
-                                        </div>
+                                        value && (
+                                            <div className="search-result-field" key={key}>
+                                                <span className="material-symbols-outlined icon">
+                                                    {iconName}
+                                                </span>
+                                                <span className="value">
+                                                    {value}
+                                                </span>
+                                            </div>
+                                        )
                                     ))
                                 }
                             </div>
