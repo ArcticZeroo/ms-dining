@@ -81,7 +81,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                         isCompact={isCompact}
                         showFavoriteButton={true}
                         showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
-                        shouldStretch={shouldStretchResults}
+                        shouldStretchResults={shouldStretchResults}
                     />
                 );
             });

@@ -187,6 +187,12 @@
     padding: 0.5rem;
 }
 
+.search-result.loading-skeleton .search-result-image {
+    width: 10rem;
+    height: 10rem;
+    background: #EEE;
+}
+
 @media screen and (max-height: 800px) {
     .search-result-image {
         max-height: 8rem;

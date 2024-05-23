@@ -113,11 +113,11 @@ interface ISearchResultField {
 	value: React.ReactNode;
 }
 
-interface ISearchResultProps {
+export interface ISearchResultProps {
 	isVisible: boolean;
 	name: string;
 	description?: string;
-	locationDatesByCafeId: Map<string, Date[]>;
+	locationDatesByCafeId?: Map<string, Date[]>;
 	imageUrl?: string;
 	entityType: SearchTypes.SearchEntityType;
 	extraFields?: ISearchResultField[];
@@ -128,14 +128,15 @@ interface ISearchResultProps {
 	cafeIdsOnPage?: Set<string>;
 	searchTags?: Set<string>;
 	showSearchButtonInsteadOfLocations?: boolean;
-	shouldStretch?: boolean;
+	shouldStretchResults?: boolean;
+	isSkeleton?: boolean;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
 															   isVisible,
 															   name,
 															   description,
-															   locationDatesByCafeId,
+															   locationDatesByCafeId = new Map<string, Date[]>(),
 															   imageUrl,
 															   entityType,
 															   extraFields,
@@ -146,7 +147,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 															   cafeIdsOnPage,
 															   searchTags,
 															   showSearchButtonInsteadOfLocations = false,
-															   shouldStretch = false
+															   shouldStretchResults = false,
+															   isSkeleton = false
 														   }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -169,12 +171,14 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
     const locationEntriesInOrder = useLocationEntries(viewsById, locationDatesByCafeId, onlyShowLocationsOnDate);
 
-    if (locationEntriesInOrder.length === 0) {
+    if (!isSkeleton && locationEntriesInOrder.length === 0) {
         return null;
     }
-
-    const imageElement = (imageUrl && showImages) && (
-        <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
+	
+    const imageElement = showImages && (
+        imageUrl 
+            ? <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
+            : isSkeleton && <div className="search-result-image"/>
     );
 
     const favoriteButton = showFavoriteButton && (
@@ -192,7 +196,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
             isVisible && 'visible',
             isCompact && 'compact',
             shouldColorForFavorites && isFavoriteItem && 'is-favorite',
-            shouldStretch && 'self-stretch'
+            shouldStretchResults && 'self-stretch',
+            isSkeleton && 'loading-skeleton'
         )}>
             <div className={classNames('flex-col search-result-type', entityDisplayData.className)}>
                 {
@@ -264,8 +269,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     }
                     {
                         showSearchButtonInsteadOfLocations && (
-                            <Link to={getSearchUrl(name)} className="default-container default-button text-center text-nowrap">
-								🔍 find in {locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
+                            <Link to={getSearchUrl(name)}
+								  className="default-container default-button text-center text-nowrap">
+								🔍 find in {isSkeleton ? '...' : locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
                             </Link>
                         )
                     }

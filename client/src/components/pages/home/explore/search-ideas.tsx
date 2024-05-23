@@ -2,13 +2,13 @@ import { randomSortInPlace } from '../../../../util/random.ts';
 import { useCallback, useEffect, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { SearchResultsList } from '../../../search/search-results-list.tsx';
 import { SearchEntityFilterType } from '../../../../models/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { classNames } from '../../../../util/react.ts';
 
 import './search-ideas.css';
+import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
 
 const SEARCH_IDEAS = randomSortInPlace([
     'latte',
@@ -54,9 +54,11 @@ export const SearchIdeas = () => {
             </div>
             {
                 stage === PromiseStage.running && (
-                    <div className="centered-content">
-                        <HourglassLoadingSpinner/>
-                    </div>
+                    <SearchResultSkeleton
+                        isCompact={true}
+                        shouldStretchResults={true}
+                        showSearchButtonInsteadOfLocations={true}
+                    />
                 )
             }
             {

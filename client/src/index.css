@@ -331,6 +331,7 @@ html, body, #root, .App {
 
 .loading-skeleton {
     animation: loading-skeleton 2s ease-in-out infinite;
+    cursor: wait;
 }
 
 @keyframes loading-skeleton {
