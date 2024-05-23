@@ -4,16 +4,18 @@ import React from 'react';
 
 type SearchResultSkeletonProps = Omit<Partial<ISearchResultProps>, 'isSkeleton'>;
 
-export const SearchResultSkeleton: React.FC<SearchResultSkeletonProps> = ({ shouldStretchResults, isCompact, showSearchButtonInsteadOfLocations }) => (
+export const SearchResultSkeleton: React.FC<SearchResultSkeletonProps> = ({ showFavoriteButton, shouldStretchResults, isCompact, showSearchButtonInsteadOfLocations }) => (
     <SearchResult
         name="..."
-        description="..."
         entityType={SearchEntityType.menuItem}
         isCompact={isCompact}
         isVisible={true}
         isSkeleton={true}
         shouldStretchResults={shouldStretchResults}
-        showFavoriteButton={false}
+        showFavoriteButton={showFavoriteButton}
         showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
+        locationDatesByCafeId={new Map([
+            ['...', [new Date()]]
+        ])}
     />
 )

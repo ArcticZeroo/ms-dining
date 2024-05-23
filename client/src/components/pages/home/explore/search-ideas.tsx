@@ -14,7 +14,7 @@ const SEARCH_IDEAS = randomSortInPlace([
     'latte',
     'gyro',
     'fried rice',
-    'mango lassi',
+    // 'mango lassi', - only one result
     // 'milk tea', - not working right now for some reason
     'dessert',
     'pasta',
@@ -54,11 +54,14 @@ export const SearchIdeas = () => {
             </div>
             {
                 stage === PromiseStage.running && (
-                    <SearchResultSkeleton
-                        isCompact={true}
-                        shouldStretchResults={true}
-                        showSearchButtonInsteadOfLocations={true}
-                    />
+                    <div>
+                        <SearchResultSkeleton
+                            isCompact={true}
+                            shouldStretchResults={true}
+                            showSearchButtonInsteadOfLocations={true}
+                            showFavoriteButton={true}
+                        />
+                    </div>
                 )
             }
             {

@@ -76,8 +76,8 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({ locationEnt
                                     !isCompact
 									&& (
 									    <span className="material-symbols-outlined icon">
-                                                        location_on
-												    </span>
+											location_on
+									    </span>
 									)
                                 }
                                 <span className="value">
@@ -88,7 +88,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({ locationEnt
                                 shouldShowLocationDates && (
                                     <div className="chip-data">
                                         <span className="material-symbols-outlined icon">
-														timer
+											timer
                                         </span>
                                         <span className="value">
                                             {getLocationDatesDisplay(locationDates)}

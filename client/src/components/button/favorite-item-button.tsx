@@ -11,9 +11,10 @@ import './favorite-item-button.css';
 interface IFavoriteItemButtonProps {
     name: string;
     type: SearchEntityType;
+    isDisabled?: boolean;
 }
 
-export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, type }) => {
+export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, type, isDisabled = false }) => {
     const targetSetting = getTargetSettingForFavorite(type);
 
     const normalizedItemName = useMemo(
@@ -24,6 +25,10 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, t
     const isItemFavorite = useValueNotifierSetTarget(targetSetting, normalizedItemName);
 
     const onFavoriteClicked = () => {
+        if (isDisabled) {
+            return;
+        }
+
         if (isItemFavorite) {
             targetSetting.delete(normalizedItemName);
         } else {
@@ -33,7 +38,7 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, t
 
     return (
         <button
-            className={classNames('favorite-item-button', isItemFavorite && 'is-favorite')}
+            className={classNames('favorite-item-button', isItemFavorite && 'is-favorite', isDisabled && 'disabled')}
             title={isItemFavorite ? 'Click to remove from favorites' : 'Favorite this item'}
             onClick={onFavoriteClicked}
         >

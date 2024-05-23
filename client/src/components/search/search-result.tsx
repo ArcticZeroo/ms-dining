@@ -15,6 +15,7 @@ import { SearchResultHits } from './search-result-hits.tsx';
 import { SelectedDateContext } from '../../context/time.ts';
 import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { pluralize } from '../../util/string.ts';
+import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
 
 interface IEntityDisplayData {
 	className: string;
@@ -50,7 +51,17 @@ const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShow
     return resultEntries;
 };
 
-const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined) => {
+interface IUseLocationEntriesParams {
+	viewsById: Map<string, CafeView>;
+	locationDatesByCafeId: Map<string, Date[]>;
+	onlyShowLocationsOnDate?: Date;
+}
+
+const useLocationEntries = ({
+    viewsById,
+    locationDatesByCafeId,
+    onlyShowLocationsOnDate
+}: IUseLocationEntriesParams): Array<[string, Array<Date>]> => {
     return useMemo(
         () => {
             const locationEntries = getLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
@@ -103,7 +114,7 @@ const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCaf
                 }
             });
         },
-        [viewsById, locationDatesByCafeId, onlyShowLocationsOnDate]
+        [locationDatesByCafeId, onlyShowLocationsOnDate, viewsById]
     );
 };
 
@@ -169,14 +180,14 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
         onlyShowLocationsOnDate = selectedDate;
     }
 
-    const locationEntriesInOrder = useLocationEntries(viewsById, locationDatesByCafeId, onlyShowLocationsOnDate);
+    const locationEntriesInOrder = useLocationEntries({ viewsById, locationDatesByCafeId, onlyShowLocationsOnDate });
 
     if (!isSkeleton && locationEntriesInOrder.length === 0) {
         return null;
     }
-	
+
     const imageElement = showImages && (
-        imageUrl 
+        imageUrl
             ? <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
             : isSkeleton && <div className="search-result-image"/>
     );
@@ -256,22 +267,27 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     }
                     {
                         !showSearchButtonInsteadOfLocations && (
-                            <SearchResultHits
-                                name={name}
-                                entityType={entityType}
-                                onlyShowLocationsOnDate={onlyShowLocationsOnDate}
-                                isCompact={isCompact}
-                                locationEntriesInOrder={locationEntriesInOrder}
-                                cafeIdsOnPage={cafeIdsOnPage}
-                                shouldShowLocationDates={shouldShowLocationDates}
-                            />
+                            isSkeleton
+                                ? <SearchResultHitsSkeleton/>
+                                : (
+                                    <SearchResultHits
+                                        name={name}
+                                        entityType={entityType}
+                                        onlyShowLocationsOnDate={onlyShowLocationsOnDate}
+                                        isCompact={isCompact}
+                                        locationEntriesInOrder={locationEntriesInOrder}
+                                        cafeIdsOnPage={cafeIdsOnPage}
+                                        shouldShowLocationDates={shouldShowLocationDates}
+                                    />
+                                )
                         )
                     }
                     {
                         showSearchButtonInsteadOfLocations && (
                             <Link to={getSearchUrl(name)}
 								  className="default-container default-button text-center text-nowrap">
-								🔍 find in {isSkeleton ? '...' : locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
+								🔍 find
+								in {isSkeleton ? '...' : locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
                             </Link>
                         )
                     }

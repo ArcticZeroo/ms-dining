@@ -14,8 +14,8 @@ import { isAnyDateToday } from '../../../../util/search.ts';
 import { expandAndFlattenView } from '../../../../util/view.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { ExpandIcon } from '../../../icon/expand.tsx';
-import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
+import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
 
 interface IFavoriteSearchResultsData {
     stage: PromiseStage;
@@ -98,9 +98,11 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     const bodyView = useMemo(() => {
         if (stage === PromiseStage.running) {
             return (
-                <div className="centered-content">
-                    <HourglassLoadingSpinner/>
-                    Loading favorites...
+                <div id="home-favorites-results">
+                    <SearchResultSkeleton
+                        isCompact={true}
+                        showFavoriteButton={true}
+                    />
                 </div>
             );
         }

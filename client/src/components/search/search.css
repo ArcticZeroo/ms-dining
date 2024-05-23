@@ -145,7 +145,7 @@
 
 .search-result-image {
     align-self: center;
-    max-height: 10rem;
+    height: 10rem;
     border-radius: var(--default-padding);
     transition: max-height 0.25s ease;
 }
