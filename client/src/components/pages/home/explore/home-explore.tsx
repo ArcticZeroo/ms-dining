@@ -11,7 +11,7 @@ export const HomeExplore = () => {
     }
 
     return (
-        <HomeCollapse title="Explore food on campus">
+        <HomeCollapse title="Explore Food on Campus">
             <SearchIdeas/>
         </HomeCollapse>
     );
