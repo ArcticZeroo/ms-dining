@@ -214,8 +214,8 @@ export abstract class SearchManager {
         return searchResultsByNameByEntityType;
     }
 
-    public static async search(query: string): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
-        return SearchManager._performMultiQuerySearch([{ text: query }], false /*shouldUseExactMatch*/);
+    public static async search(query: string, shouldUseExactMatch: boolean = false): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+        return SearchManager._performMultiQuerySearch([{ text: query }], shouldUseExactMatch);
     }
 
     public static async searchFavorites(queries: Array<ISearchQuery>): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {

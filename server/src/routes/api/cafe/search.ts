@@ -66,13 +66,14 @@ export const registerSearchRoutes = (parent: Router) => {
         memoizeResponseBodyByQueryParams(),
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');
+            const isExact = getTrimmedQueryParam(ctx, 'e') === 'true';
 
             if (!searchQuery) {
                 ctx.body = [];
                 return;
             }
 
-            const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery);
+            const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery, isExact);
             ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
         });
 

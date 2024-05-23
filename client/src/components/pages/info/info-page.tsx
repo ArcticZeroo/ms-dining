@@ -40,14 +40,14 @@ export const InfoPage = () => {
             </div>
             {
                 isTrackingEnabled && (
-									  <Link to="/analytics" className="card blue centered">
+									  <Link to="/analytics" className="card blue text-center">
 										  Visit User Analytics
 									  </Link>
 								  )
             }
             {
                 !isTrackingEnabled && (
-									   <div className="error-card centered">
+									   <div className="error-card text-center">
 										   Analytics graph is currently unavailable.
 									   </div>
 								   )

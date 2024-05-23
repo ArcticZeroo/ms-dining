@@ -8,6 +8,7 @@ import { ApplicationContext } from '../../context/app.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { getParentView } from '../../util/view.ts';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { LocationAllowButton } from '../button/location-allow-button.tsx';
 
 const VIEW_SUGGESTION_COUNT = 5;
 
@@ -80,10 +81,8 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ exclu
                 }
             </div>
             {
-                location == null && userLocation == null && (
-                    <div>
-                        Grant access to your location for more relevant suggestions.
-                    </div>
+                location == null && (
+                    <LocationAllowButton/>
                 )
             }
         </div>

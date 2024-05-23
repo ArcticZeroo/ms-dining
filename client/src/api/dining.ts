@@ -162,9 +162,9 @@ export abstract class DiningClient {
         return results;
     }
 
-    public static async retrieveSearchResults(query: string): Promise<Array<IQuerySearchResult>> {
+    public static async retrieveSearchResults(query: string, isExact: boolean = false): Promise<Array<IQuerySearchResult>> {
         const response = await makeJsonRequest({
-            path: `/api/dining/search?q=${encodeURIComponent(query)}`
+            path: `/api/dining/search?q=${encodeURIComponent(query)}${isExact ? '&e=true' : ''}`
         });
 
         return DiningClient._deserializeSearchResults(response);

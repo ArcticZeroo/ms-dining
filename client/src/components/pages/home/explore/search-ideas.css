@@ -1,0 +1,16 @@
+.search-ideas {
+    background: #2f2f42;
+}
+
+.search-idea {
+    background: #86bac7;
+    transition: background-color 0.25s ease;
+}
+
+.search-idea:hover {
+    background: #6da0a9;
+}
+
+.search-idea.selected {
+    background: var(--color-theme);
+}

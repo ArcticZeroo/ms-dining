@@ -1,21 +1,20 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { isSameDate } from '@msdining/common/dist/util/date-util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../context/app.ts';
-import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { CafeView, CafeViewType } from '../../models/cafe.ts';
-import { getCafeName } from '../../util/cafe.ts';
-import { getLocationDatesDisplay } from '../../util/date.ts';
-import { getJumpUrlOnSamePage, getViewMenuUrlWithJump } from '../../util/link.ts';
+import { CafeView } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
-import { getParentView } from '../../util/view';
 import './search.css';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
+import { getSearchUrl } from '../../util/url.ts';
+import { SearchResultHits } from './search-result-hits.tsx';
+import { SelectedDateContext } from '../../context/time.ts';
+import { isSameDate } from '@msdining/common/dist/util/date-util';
+import { pluralize } from '../../util/string.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -108,14 +107,6 @@ const useLocationEntries = (viewsById: Map<string, CafeView>, locationDatesByCaf
     );
 };
 
-const getViewNameForSearchResult = (view: CafeView) => {
-    if (view.type === CafeViewType.group) {
-        return view.value.name;
-    }
-
-    return getCafeName(view.value, true /*showGroupName*/);
-};
-
 interface ISearchResultField {
     key: string;
     iconName: string;
@@ -136,6 +127,7 @@ interface ISearchResultProps {
     shouldColorForFavorites?: boolean;
     cafeIdsOnPage?: Set<string>;
     searchTags?: Set<string>;
+    showSearchButtonInsteadOfLocations?: boolean;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -151,13 +143,13 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     showFavoriteButton = !isCompact,
     shouldColorForFavorites = true,
     cafeIdsOnPage,
-    searchTags
+    searchTags,
+    showSearchButtonInsteadOfLocations = false
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const selectedDateNotifier = useContext(SelectedDateContext);
     const selectedDate = useValueNotifier(selectedDateNotifier);
 
@@ -221,7 +213,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             <div className="search-tags">
                                 {
                                     (searchTags != null && searchTags.size > 0) && Array.from(searchTags).map(tag => (
-                                        <Link to={`/search?q=${tag}`} className="search-result-chip" key={tag} title={`Click to search for "${tag}"`}>
+                                        <Link to={getSearchUrl(tag)} className="search-result-chip" key={tag} title={`Click to search for "${tag}"`}>
                                             {tag}
                                         </Link>
                                     ))
@@ -251,71 +243,26 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     {
                         isCompact && imageElement
                     }
-                    <div className="search-result-hits">
-                        {
-                            locationEntriesInOrder.map(([cafeId, locationDates]) => {
-                                const view = viewsById.get(cafeId);
-
-                                if (!view) {
-                                    return false;
-                                }
-
-                                const parentView = getParentView(viewsById, view, shouldUseGroups);
-                                const targetDate = allowFutureMenus ? locationDates[0] : undefined;
-
-                                const onLinkClick = () => {
-                                    if (targetDate != null) {
-                                        selectedDateNotifier.value = targetDate;
-                                    }
-                                };
-
-                                const url = cafeIdsOnPage != null && cafeIdsOnPage.has(cafeId)
-                                    ? getJumpUrlOnSamePage({ entityType, name, cafeId })
-                                    : getViewMenuUrlWithJump({
-                                        cafeId,
-                                        name,
-                                        entityType,
-                                        view: parentView,
-                                        date: targetDate
-                                    });
-
-                                return (
-                                    <Link
-                                        to={url}
-                                        className="search-result-chip"
-                                        key={view.value.id}
-                                        onClick={onLinkClick}
-                                    >
-                                        <div className="chip-data">
-                                            {
-                                                !isCompact
-                                                && (
-                                                    <span className="material-symbols-outlined icon">
-                                                        location_on
-												    </span>
-                                                )
-                                            }
-                                            <span className="value">
-                                                {getViewNameForSearchResult(view)}
-                                            </span>
-                                        </div>
-                                        {
-                                            shouldShowLocationDates && (
-                                                <div className="chip-data">
-                                                    <span className="material-symbols-outlined icon">
-														timer
-                                                    </span>
-                                                    <span className="value">
-                                                        {getLocationDatesDisplay(locationDates)}
-                                                    </span>
-                                                </div>
-                                            )
-                                        }
-                                    </Link>
-                                );
-                            })
-                        }
-                    </div>
+                    {
+                        !showSearchButtonInsteadOfLocations && (
+                            <SearchResultHits
+                                name={name}
+                                entityType={entityType}
+                                onlyShowLocationsOnDate={onlyShowLocationsOnDate}
+                                isCompact={isCompact}
+                                locationEntriesInOrder={locationEntriesInOrder}
+                                cafeIdsOnPage={cafeIdsOnPage}
+                                shouldShowLocationDates={shouldShowLocationDates}
+                            />
+                        )
+                    }
+                    {
+                        showSearchButtonInsteadOfLocations && (
+                            <Link to={getSearchUrl(name)} className="default-container default-button text-center">
+                                🔍 find in {locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
+                            </Link>
+                        )
+                    }
                 </div>
                 {
                     !isCompact && imageElement

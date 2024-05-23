@@ -6,7 +6,7 @@ import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.
 import { matchesEntityFilter } from '../../util/search.ts';
 import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
-import { sortSearchResults } from '../../util/search-sorting.ts';
+import { sortSearchResultsInPlace } from '../../util/search-sorting.ts';
 import { PromptingUserLocationNotifier } from '../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
@@ -15,9 +15,13 @@ interface ISearchResultsListProps {
     queryText: string;
     searchResults: IQuerySearchResult[];
     filter: SearchEntityFilterType;
+    isCompact?: boolean;
+    limit?: number;
+    showEndOfResults?: boolean;
+    showSearchButtonInsteadOfLocations?: boolean;
 }
 
-export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter }) => {
+export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false }) => {
     const { cafes, viewsById } = useContext(ApplicationContext);
 
     const userLocation = useValueNotifier(PromptingUserLocationNotifier);
@@ -30,10 +34,8 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
         () => {
             const cafePriorityOrder = sortCafesInPriorityOrder(cafes, viewsById);
 
-            const sortedSearchResults = [...searchResults];
-
-            return sortSearchResults(
-                sortedSearchResults,
+            const sortedSearchResults = sortSearchResultsInPlace(
+                [...searchResults],
                 {
                     queryText,
                     viewsById,
@@ -43,9 +45,15 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                     cafePriorityOrder: cafePriorityOrder.map(cafe => cafe.id),
                 }
             );
+            
+            if (limit != null) {
+                return sortedSearchResults.slice(0, limit);
+            }
+
+            return sortedSearchResults;
         },
-        [cafes, viewsById, searchResults, queryText, userLocation, homepageViewIds, shouldUseGroups]
-        // TODO: Make sortSearchResults take a generic param
+        [cafes, viewsById, searchResults, queryText, userLocation, homepageViewIds, shouldUseGroups, limit]
+        // TODO: Make sortSearchResultsInPlace take a generic param
     );
 
     const [priceFilterHiddenResultCount, searchResultElements] = useMemo(
@@ -69,17 +77,20 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                         imageUrl={searchResult.imageUrl}
                         entityType={searchResult.entityType}
                         searchTags={searchResult.searchTags}
+                        isCompact={isCompact}
+                        showFavoriteButton={true}
+                        showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
                     />
                 );
             });
 
             return [priceFilterHiddenResultCount, searchResultElements];
         },
-        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed]
+        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed, isCompact]
     );
 
     return (
-        <div className="search-results">
+        <div className={isCompact ? 'flex flex-around search-results-compact' : 'flex-col'}>
             {
                 priceFilterHiddenResultCount > 0 && (
                     <div className="hidden-results">
@@ -89,7 +100,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                 )
             }
             {searchResultElements}
-            {entriesInOrder.length > 0 && (
+            {showEndOfResults && entriesInOrder.length > 0 && (
                 <div className="centered-content">
                     End of Results
                 </div>

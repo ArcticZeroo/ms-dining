@@ -303,7 +303,7 @@ interface ISearchSortMetadata {
     result: ISearchResult;
 }
 
-export const sortSearchResults = (searchResults: IQuerySearchResult[], context: ISearchResultSortingContext): IQuerySearchResult[] => {
+export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], context: ISearchResultSortingContext): IQuerySearchResult[] => {
     context.queryText = context.queryText.toLowerCase();
 
     const perfectMatchRegex = new RegExp(`\\b${context.queryText}\\b`, 'i');

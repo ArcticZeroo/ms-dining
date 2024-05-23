@@ -26,3 +26,5 @@ export const getInitialDateFromUrl = () => {
 
     return DiningClient.getTodayDateForMenu();
 }
+
+export const getSearchUrl = (query: string) => `/search?q=${encodeURIComponent(query)}`;

@@ -7,9 +7,10 @@ import { MoreSettingsButton } from '../../button/more-settings-button.tsx';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
 import { HomeFavorites } from './favorites/home-favorites.tsx';
 import { HomeViews } from './home-views.tsx';
+import { HomeWelcomeMessage } from './home-welcome-message.tsx';
+import { HomeExplore } from './explore/home-explore.tsx';
 
 import './home.css';
-import { HomeWelcomeMessage } from './home-welcome-message.tsx';
 
 const useShouldShowWelcomeMessage = () => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
@@ -21,7 +22,7 @@ const useShouldShowWelcomeMessage = () => {
 export const HomePage = () => {
     const shouldShowFavorites = useValueNotifier(ApplicationSettings.showFavoritesOnHome);
     const datePicker = useDatePicker();
-    const shouldShowWelcomeMessage = useShouldShowWelcomeMessage();
+    const isNewUser = useShouldShowWelcomeMessage();
 
     useEffect(() => {
         setPageData('Home', 'View the home page - a customizable dashboard for your favorite items and cafes.');
@@ -30,9 +31,10 @@ export const HomePage = () => {
     return (
         <>
             {
-                shouldShowWelcomeMessage && (
+                isNewUser && (
                     <>
                         <HomeWelcomeMessage/>
+                        <HomeExplore/>
                     </>
                 )
             }

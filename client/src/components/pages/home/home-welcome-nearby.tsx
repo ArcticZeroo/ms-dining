@@ -1,8 +1,9 @@
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { PassiveUserLocationNotifier, queryForLocationPermission } from '../../../api/location/user-location.ts';
+import { PassiveUserLocationNotifier } from '../../../api/location/user-location.ts';
 import { useCafesSortedByDistance } from '../../../hooks/cafe.ts';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { LocationAllowButton } from '../../button/location-allow-button.tsx';
 
 const NEARBY_CAFE_LIMIT = 3;
 
@@ -19,16 +20,7 @@ export const HomeWelcomeNearby = () => {
 
     return (
         <div className="flex-col flex-center">
-            {
-                !userLocation && (
-                    <button className="default-container flex flex-center" onClick={queryForLocationPermission}>
-                        <span className="material-symbols-outlined">
-                           location_on
-                        </span>
-                        Allow location permissions for nearby cafe recommendations
-                    </button>
-                )
-            }
+            <LocationAllowButton reason={'for nearby cafe recommendations'}/>
             {
                 nearbyCafesToShow.length > 0 && (
                     <div>

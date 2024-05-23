@@ -10,7 +10,7 @@ export const LocationSetting = () => (
         description={
             <>
                 <p>
-                    When enabled, your location will be retrieved for more intelligent features, such as ranking
+                    When enabled, your location may be retrieved for more intelligent features, such as ranking
                     search results based on how close they are to you, and suggesting nearby cafes.
                     <br/>
                     Your location data will never be sent to the server.

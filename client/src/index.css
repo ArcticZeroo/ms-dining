@@ -139,7 +139,7 @@ html, body, #root, .App {
     gap: var(--default-padding);
 }
 
-.card.centered {
+.text-center {
     text-align: center;
 }
 
@@ -151,7 +151,7 @@ html, body, #root, .App {
     font-size: var(--card-title-font-size);
 }
 
-.card .title.centered {
+.card .title.text-center {
     text-align: center;
 }
 

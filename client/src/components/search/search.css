@@ -26,10 +26,10 @@
     gap: 0.5rem;
 }
 
-.search-results {
-    display: flex;
-    flex-direction: column;
-    gap: var(--default-padding);
+.search-results-compact {
+    overflow-x: auto;
+    scrollbar-gutter: stable;
+    padding-bottom: 0.5rem;
 }
 
 .search-result {

@@ -1,6 +1,7 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { NavigateFunction } from 'react-router-dom';
 import { SearchEntityFilterType } from '../models/search.ts';
+import { getSearchUrl } from './url.ts';
 
 export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: SearchTypes.SearchEntityType) => {
     switch (filter) {
@@ -33,7 +34,7 @@ export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<S
 }
 
 export const navigateToSearch = (navigate: NavigateFunction, searchText: string) => {
-    navigate(`/search?q=${encodeURIComponent(searchText)}`);
+    navigate(getSearchUrl(searchText));
 }
 
 export const isAnyDateToday = (locationEntriesByCafeId: Map<string, Date[]>, today: Date = new Date()) => {
