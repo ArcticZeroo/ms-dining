@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { queryForScrollAnchor, scrollHeaderIntoView } from '../util/html.ts';
+import Duration from '@arcticzeroo/duration';
+
+const SCROLL_WAIT_TIMEOUT_MS = new Duration({ milliseconds: 50 }).inMilliseconds;
 
 export const useIsElementOnScreen = (element: HTMLElement | null, options?: IntersectionObserverInit) => {
     const [isOnScreen, setIsOnScreen] = useState(false);
@@ -22,7 +25,7 @@ export const useIsElementOnScreen = (element: HTMLElement | null, options?: Inte
         observer.observe(element);
 
         return () => observer.disconnect();
-    }, [element]);
+    }, [element, options]);
 
     return isOnScreen;
 }
@@ -59,8 +62,13 @@ export const useScrollCollapsedHeaderIntoView = (anchorId: string) => {
             return;
         }
 
-        scrollHeaderIntoView(queryForScrollAnchor(anchorId));
-        setIsScrollIntoViewPending(false);
+        setTimeout(
+            () => {
+                scrollHeaderIntoView(queryForScrollAnchor(anchorId));
+                setIsScrollIntoViewPending(false);
+            },
+            SCROLL_WAIT_TIMEOUT_MS
+        );
     }, [anchorId, isScrollIntoViewPending]);
     
     return useCallback(() => setIsScrollIntoViewPending(true), []);

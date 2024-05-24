@@ -183,14 +183,19 @@ export abstract class SearchManager {
                         matchReasons.push(SearchMatchReason.title);
                     }
 
-                    if (isMatch(menuItem.description, SearchEntityType.menuItem)) {
-                        matchReasons.push(SearchMatchReason.description);
-                    }
+                    // If we are using exact name matching, we don't want to get anything that just matches the tags
+                    // or description. Exact match is intended to be used for favorites, where you don't care about
+                    // similar items.
+                    if (!shouldUseExactMatch) {
+                        if (isMatch(menuItem.description, SearchEntityType.menuItem)) {
+                            matchReasons.push(SearchMatchReason.description);
+                        }
 
-                    for (const searchTag of menuItem.searchTags) {
-                        if (isMatch(searchTag, SearchEntityType.menuItem)) {
-                            matchReasons.push(SearchMatchReason.tags);
-                            break;
+                        for (const searchTag of menuItem.searchTags) {
+                            if (isMatch(searchTag, SearchEntityType.menuItem)) {
+                                matchReasons.push(SearchMatchReason.tags);
+                                break;
+                            }
                         }
                     }
 

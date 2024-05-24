@@ -33,7 +33,10 @@ export const MissingItemsTable = () => {
                                             view && (
                                                 <Link to={getViewMenuUrl(getParentView(viewsById, view, shouldUseGroups))}
                                                     className="cart-cafe-url">
-                                                    {getViewName(view, true /*showGroupName*/)}
+                                                    {getViewName({
+                                                        view,
+                                                        showGroupName: true
+                                                    })}
                                                 </Link>
                                             )
                                         }

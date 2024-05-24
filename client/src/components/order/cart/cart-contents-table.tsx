@@ -104,7 +104,10 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                     <tr>
                         <th colSpan={4}>
                             <Link to={getViewMenuUrl(getParentView(viewsById, view, shouldUseGroups))} className="cart-cafe-url">
-                                {getViewName(view, true /*showGroupName*/)}
+                                {getViewName({
+                                    view,
+                                    showGroupName: true
+                                })}
                             </Link>
                         </th>
                     </tr>

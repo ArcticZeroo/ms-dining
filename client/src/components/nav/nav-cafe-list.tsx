@@ -30,8 +30,8 @@ export const NavCafeList: React.FC = () => {
         const viewNumbersById = new Map<string, number>();
 
         for (const view of views) {
-            if (view.value.number != null) {
-                viewNumbersById.set(view.value.id, view.value.number);
+            if (typeof view.value.shortName === 'number') {
+                viewNumbersById.set(view.value.id, view.value.shortName);
             }
         }
 
@@ -44,7 +44,7 @@ export const NavCafeList: React.FC = () => {
                 return views;
             }
 
-            return views.filter(view => view.value.number == null);
+            return views.filter(view => typeof view.value.shortName !== 'number');
         },
         [views, shouldCondenseNumbers]
     );

@@ -13,7 +13,7 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
-    return useMemo(() => getCafeName(cafe, showGroupName), [cafe, showGroupName]);
+    return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
 };
 
 interface ICollapsibleCafeMenuProps {

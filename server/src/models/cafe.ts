@@ -5,7 +5,7 @@ import { Nullable } from './util.js';
 interface ICafeBase {
     name: string;
     id: string;
-    number?: number;
+    shortName?: number | string;
     firstAvailable?: Date;
     url?: string;
 }
@@ -23,7 +23,7 @@ export type ICafe = ICafeWithoutLocation | ICafeWithLocation;
 interface IBaseCafeGroup {
     id: string;
     name: string;
-    number?: number;
+    shortName?: number | string;
     // Some groups are just there for categorization when we don't group (e.g. restaurants, individual cafes)
     // and we don't actually want to group them in the nav bar.
     alwaysExpand?: boolean;

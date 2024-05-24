@@ -3,26 +3,44 @@ import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { ApplicationSettings } from '../constants/settings.ts';
 
-export const getCafeName = (cafe: ICafe, showGroupName: boolean) => {
+interface IGetCafeNameParams {
+    cafe: ICafe,
+    showGroupName: boolean;
+    useShortNames?: boolean;
+}
+
+export const getCafeName = ({ cafe, showGroupName, useShortNames = false }: IGetCafeNameParams) => {
+    const targetName = (useShortNames && cafe.shortName) || cafe.name;
+
     if (!showGroupName || !cafe.group || cafe.group.alwaysExpand) {
-        return cafe.name;
+        return targetName;
     }
 
-    const groupName = cafe.group.name;
+    const groupName = (useShortNames && cafe.group.shortName) || cafe.group.name;
 
-    if (cafe.name === groupName) {
-        return cafe.name;
+    if (targetName === groupName) {
+        return targetName;
     }
 
-    return `${cafe.name} (${groupName})`;
+    return `${targetName} (${groupName})`;
 };
 
-export const getViewName = (view: CafeView, showGroupName: boolean) => {
+interface IGetViewNameParams {
+    view: CafeView;
+    showGroupName: boolean;
+    useShortNames?: boolean;
+}
+
+export const getViewName = ({ view, showGroupName, useShortNames = false }: IGetViewNameParams) => {
     if (view.type === CafeViewType.single) {
-        return getCafeName(view.value, showGroupName);
+        return getCafeName({
+            cafe: view.value,
+            showGroupName,
+            useShortNames
+        });
     }
 
-    return view.value.name;
+    return (useShortNames && view.value.shortName) || view.value.name;
 }
 
 export const getTargetSettingForFavorite = (type: SearchEntityType) => type === SearchEntityType.menuItem

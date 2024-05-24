@@ -2,8 +2,7 @@ import { getParentView } from '../../util/view.ts';
 import { getJumpUrlOnSamePage, getViewMenuUrlWithJump } from '../../util/link.ts';
 import { Link } from 'react-router-dom';
 import { getLocationDatesDisplay } from '../../util/date.ts';
-import { CafeView, CafeViewType } from '../../models/cafe.ts';
-import { getCafeName } from '../../util/cafe.ts';
+import { getViewName } from '../../util/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import React, { useContext } from 'react';
@@ -11,13 +10,7 @@ import { SelectedDateContext } from '../../context/time.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 
-const getViewNameForSearchResult = (view: CafeView) => {
-    if (view.type === CafeViewType.group) {
-        return view.value.name;
-    }
-
-    return getCafeName(view.value, true /*showGroupName*/);
-};
+const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
 interface ISearchResultHitsProps {
 	name: string;
@@ -29,11 +22,19 @@ interface ISearchResultHitsProps {
 	locationEntriesInOrder: Array<[string, Array<Date>]>;
 }
 
-export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({ locationEntriesInOrder, name, entityType, cafeIdsOnPage, shouldShowLocationDates, isCompact }) => {
+export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
+																	   locationEntriesInOrder,
+																	   name,
+																	   entityType,
+																	   cafeIdsOnPage,
+																	   shouldShowLocationDates,
+																	   isCompact
+																   }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDateNotifier = useContext(SelectedDateContext);
+    const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
 
     return (
         <div className="search-result-hits">
@@ -81,7 +82,11 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({ locationEnt
 									)
                                 }
                                 <span className="value">
-                                    {getViewNameForSearchResult(view)}
+                                    {getViewName({
+                                        view,
+                                        showGroupName: true,
+                                        useShortNames: shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE
+                                    })}
                                 </span>
                             </div>
                             {

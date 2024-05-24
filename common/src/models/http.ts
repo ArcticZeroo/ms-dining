@@ -3,7 +3,7 @@ import { ILocationCoordinates } from './util.js';
 export interface IDiningCoreGroupMemberBase {
     name: string;
     id: string;
-    number?: number;
+    shortName?: number | string;
     url?: string;
     logoUrl?: string
     group?: IDiningCoreGroup;
@@ -22,7 +22,7 @@ export type IDiningCoreGroupMember = IDiningCoreGroupMemberWithoutLocation | IDi
 interface IDiningCoreGroupBase {
     name: string;
     id: string;
-    number?: number;
+    shortName?: number | string;
     alwaysExpand: boolean;
 }
 

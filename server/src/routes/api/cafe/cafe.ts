@@ -14,66 +14,66 @@ import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import Duration from '@arcticzeroo/duration';
 
 export const registerCafeRoutes = (parent: Router) => {
-    const router = new Router({
-        prefix: '/dining'
-    });
+	const router = new Router({
+		prefix: '/dining'
+	});
 
-    registerMenuRoutes(router);
-    registerSearchRoutes(router);
-    registerOrderingRoutes(router);
+	registerMenuRoutes(router);
+	registerSearchRoutes(router);
+	registerOrderingRoutes(router);
 
-    router.get('/',
-        memoizeResponseBodyByQueryParams(),
-        async ctx => {
-            const response: IDiningCoreResponse = {
-                isTrackingEnabled: ApplicationContext.isReadyForTracking,
-                groups:            []
-            };
+	router.get('/',
+		memoizeResponseBodyByQueryParams(),
+		async ctx => {
+			const response: IDiningCoreResponse = {
+				isTrackingEnabled: ApplicationContext.isReadyForTracking,
+				groups:            []
+			};
 
-            const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
+			const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
-            for (const group of diningConfig.groupList) {
-                const responseGroup: IDiningCoreGroup = {
-                    name:         group.name,
-                    id:           group.id,
-                    number:       group.number,
-                    alwaysExpand: group.alwaysExpand ?? false,
-                    members:      [],
-                    location:     group.location
-                };
+			for (const group of diningConfig.groupList) {
+				const responseGroup: IDiningCoreGroup = {
+					name:         group.name,
+					id:           group.id,
+					shortName:    group.shortName,
+					alwaysExpand: group.alwaysExpand ?? false,
+					members:      [],
+					location:     group.location
+				};
 
-                for (const cafe of group.members) {
-                    // Allows us to add cafes before they've officially opened, without polluting the menu list.
-                    // For instance, when Food Hall 4 was added, the online ordering menu became available more than
-                    // a week early.
-                    if (!isCafeAvailable(cafe)) {
-                        continue;
-                    }
+				for (const cafe of group.members) {
+					// Allows us to add cafes before they've officially opened, without polluting the menu list.
+					// For instance, when Food Hall 4 was added, the online ordering menu became available more than
+					// a week early.
+					if (!isCafeAvailable(cafe)) {
+						continue;
+					}
 
-                    const cafeData = cafeDataById.get(cafe.id);
-                    if (!cafeData) {
-                        // Expected in case we have a cafe in config which isn't available online for some reason
-                        continue;
-                    }
+					const cafeData = cafeDataById.get(cafe.id);
+					if (!cafeData) {
+						// Expected in case we have a cafe in config which isn't available online for some reason
+						continue;
+					}
 
-                    const member: IDiningCoreGroupMember = {
-                        name:     cafe.name,
-                        id:       cafe.id,
-                        number:   cafe.number,
-                        url:      cafe.url,
-                        logoUrl:  getLogoUrl(cafe, cafeData),
-                        location: cafe.location
-                    };
+					const member: IDiningCoreGroupMember = {
+						name:      cafe.name,
+						id:        cafe.id,
+						shortName: cafe.shortName,
+						url:       cafe.url,
+						logoUrl:   getLogoUrl(cafe, cafeData),
+						location:  cafe.location
+					};
 
-                    // @ts-expect-error: TS doesn't know that we have already enforced the location requirement
-                    responseGroup.members.push(member);
-                }
+					// @ts-expect-error: TS doesn't know that we have already enforced the location requirement
+					responseGroup.members.push(member);
+				}
 
-                response.groups.push(responseGroup);
-            }
+				response.groups.push(responseGroup);
+			}
 
-            ctx.body = jsonStringifyWithoutNull(response);
-        });
+			ctx.body = jsonStringifyWithoutNull(response);
+		});
 
-    attachRouter(parent, router);
+	attachRouter(parent, router);
 };

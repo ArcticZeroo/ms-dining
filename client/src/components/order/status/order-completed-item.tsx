@@ -31,7 +31,10 @@ export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({ view, r
     return (
         <div key={view.value.id} className={classNames('card', isSuccess ? 'dark-blue' : 'error')}>
             <div className="title">
-                {getViewName(view, true /*showGroupName*/)}
+                {getViewName({
+                    view,
+                    showGroupName: true
+                })}
                 {(isSuccess || isMaybeReceivedByKitchen) && ` - Order #${result.orderNumber}`}
             </div>
             {
