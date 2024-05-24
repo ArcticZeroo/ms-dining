@@ -1,10 +1,12 @@
 .search-ideas {
     background: #212121;
+    overflow-x: auto;
 }
 
 .search-idea {
     background: #86bac7;
     transition: background-color 0.25s ease;
+    white-space: nowrap;
 }
 
 .search-idea:hover {

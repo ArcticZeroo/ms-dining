@@ -43,7 +43,7 @@ export const SearchIdeas = () => {
 
     return (
         <div className="flex-col">
-            <div className="flex">
+            <div className="flex search-ideas">
                 {SEARCH_IDEAS.map(idea => (
                     <button
                         className={classNames('search-idea default-container', idea === selectedIdea && 'selected')}
