@@ -9,31 +9,34 @@ import { IQuerySearchResult } from '../models/search.ts';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { getCafeLocation } from './cafe.ts';
 import { getDistanceBetweenCoordinates } from './user-location.ts';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 
-interface ISearchResultSortingContext {
-    viewsById: Map<string, CafeView>;
-    queryText: string;
-    cafePriorityOrder: string[];
-    userLocation: ILocationCoordinates | null;
-    homepageViewIds: Set<string>;
-    isUsingGroups: boolean;
+export interface ISearchResultSortingContext {
+	viewsById: Map<string, CafeView>;
+	queryText: string;
+	cafePriorityOrder: string[];
+	userLocation: ILocationCoordinates | null;
+	homepageViewIds: Set<string>;
+	isUsingGroups: boolean;
+	favoriteItemNames: Set<string>;
+	favoriteStationNames: Set<string>;
 }
 
 interface ISubstringScoreParams {
-    matchingText: string;
-    queryText: string;
-    isSequential: boolean;
-    perfectMatchScore?: number;
-    perfectMatchWithoutBoundaryScore?: number;
+	matchingText: string;
+	queryText: string;
+	isSequential: boolean;
+	perfectMatchScore?: number;
+	perfectMatchWithoutBoundaryScore?: number;
 }
 
 const getSubstringScore = ({
-    matchingText,
-    queryText,
-    isSequential,
-    perfectMatchScore,
-    perfectMatchWithoutBoundaryScore
-}: ISubstringScoreParams) => {
+							   matchingText,
+							   queryText,
+							   isSequential,
+							   perfectMatchScore,
+							   perfectMatchWithoutBoundaryScore
+						   }: ISubstringScoreParams) => {
     const substringLength = isSequential
         ? findLongestSequentialSubstringLength(matchingText, queryText)
         : findLongestNonSequentialSubstringLength(matchingText, queryText);
@@ -163,8 +166,8 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
 
 const MATCH_REASON_MULTIPLIERS: Record<SearchMatchReason, number> = {
     [SearchMatchReason.title]:       1,
-    [SearchMatchReason.description]: 0.75,
-    [SearchMatchReason.tags]:        0.7
+    [SearchMatchReason.description]: 0.7,
+    [SearchMatchReason.tags]:        0.5
 };
 
 const getSubstringScoreForTags = (queryText: string, searchResult: ISearchResult) => {
@@ -217,15 +220,37 @@ const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearc
     });
 
     const baseScore = (longestSequentialSubstringLength * 20)
-        + (longestNonSequentialSubstringLength * 2);
+		+ (longestNonSequentialSubstringLength * 2);
 
     return baseScore * MATCH_REASON_MULTIPLIERS[matchReason];
 };
 
+const getTargetFavoriteSetForEntityType = (context: ISearchResultSortingContext, entityType: SearchEntityType) => {
+    if (entityType === SearchEntityType.menuItem) {
+        return context.favoriteItemNames;
+    }
+
+    if (entityType === SearchEntityType.station) {
+        return context.favoriteStationNames;
+    }
+
+    return null;
+}
+
+const FAVORITE_ITEM_MULTIPLIER = 2;
+
+const getFavoriteItemMultiplier = (context: ISearchResultSortingContext, searchResult: ISearchResult) => {
+    const targetSet = getTargetFavoriteSetForEntityType(context, searchResult.entityType);
+
+    return targetSet?.has(normalizeNameForSearch(searchResult.name)) === true
+        ? FAVORITE_ITEM_MULTIPLIER
+        : 1;
+}
+
 interface IComputeScoreParams {
-    searchResult: ISearchResult;
-    doSubstringScore: boolean;
-    context: ISearchResultSortingContext;
+	searchResult: ISearchResult;
+	doSubstringScore: boolean;
+	context: ISearchResultSortingContext;
 }
 
 const ENTITY_TYPE_MULTIPLIERS: Record<SearchEntityType, number> = {
@@ -246,16 +271,18 @@ const computeScore = ({ searchResult, doSubstringScore, context }: IComputeScore
     const dateRelevancyScore = getDateRelevancyScore(searchResult);
 
     const baseScore = totalSubstringScore
-        + cafeRelevancyScore
-        + dateRelevancyScore;
+		+ cafeRelevancyScore
+		+ dateRelevancyScore;
 
-    return baseScore * ENTITY_TYPE_MULTIPLIERS[searchResult.entityType];
+    return baseScore
+		* ENTITY_TYPE_MULTIPLIERS[searchResult.entityType]
+		* getFavoriteItemMultiplier(context, searchResult);
 };
 
 enum MatchType {
-    perfect = 3,
-    substring = 2,
-    fuzzy = 1
+	perfect = 3,
+	substring = 2,
+	fuzzy = 1
 }
 
 const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: SearchMatchReason): Iterable<string> => {
@@ -298,9 +325,9 @@ const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMat
 };
 
 interface ISearchSortMetadata {
-    matchType: MatchType;
-    score: number;
-    result: ISearchResult;
+	matchType: MatchType;
+	score: number;
+	result: ISearchResult;
 }
 
 export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], context: ISearchResultSortingContext): IQuerySearchResult[] => {

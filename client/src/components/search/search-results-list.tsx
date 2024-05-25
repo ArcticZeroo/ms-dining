@@ -6,10 +6,35 @@ import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.
 import { matchesEntityFilter } from '../../util/search.ts';
 import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
-import { sortSearchResultsInPlace } from '../../util/search-sorting.ts';
+import { ISearchResultSortingContext, sortSearchResultsInPlace } from '../../util/search-sorting.ts';
 import { PromptingUserLocationNotifier } from '../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
+
+const useSortContext = (queryText: string): ISearchResultSortingContext => {
+    const { cafes, viewsById } = useContext(ApplicationContext);
+
+    const userLocation = useValueNotifier(PromptingUserLocationNotifier);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
+    const favoriteItemNames = useValueNotifier(ApplicationSettings.favoriteItemNames);
+    const favoriteStationNames = useValueNotifier(ApplicationSettings.favoriteStationNames);
+
+    const cafePriorityOrder = useMemo(() => sortCafesInPriorityOrder(cafes, viewsById), [cafes, viewsById]);
+
+    return useMemo(() => {
+        return {
+            queryText,
+            viewsById,
+            userLocation,
+            homepageViewIds,
+            favoriteItemNames,
+            favoriteStationNames,
+            isUsingGroups: shouldUseGroups,
+            cafePriorityOrder: cafePriorityOrder.map(cafe => cafe.id),
+        };
+    }, [cafePriorityOrder, favoriteItemNames, favoriteStationNames, homepageViewIds, queryText, shouldUseGroups, userLocation, viewsById]);
+}
 
 interface ISearchResultsListProps {
     queryText: string;
@@ -23,28 +48,16 @@ interface ISearchResultsListProps {
 }
 
 export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults }) => {
-    const { cafes, viewsById } = useContext(ApplicationContext);
-
-    const userLocation = useValueNotifier(PromptingUserLocationNotifier);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
-    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const getIsPriceAllowed = useIsPriceAllowed();
+
+    const searchSortingContext = useSortContext(queryText);
 
     const entriesInOrder = useMemo(
         () => {
-            const cafePriorityOrder = sortCafesInPriorityOrder(cafes, viewsById);
-
             const sortedSearchResults = sortSearchResultsInPlace(
                 [...searchResults],
-                {
-                    queryText,
-                    viewsById,
-                    userLocation,
-                    homepageViewIds,
-                    isUsingGroups: shouldUseGroups,
-                    cafePriorityOrder: cafePriorityOrder.map(cafe => cafe.id),
-                }
+                searchSortingContext
             );
             
             if (limit != null) {
@@ -53,8 +66,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
 
             return sortedSearchResults;
         },
-        [cafes, viewsById, searchResults, queryText, userLocation, homepageViewIds, shouldUseGroups, limit]
-        // TODO: Make sortSearchResultsInPlace take a generic param
+        [searchResults, searchSortingContext, limit]
     );
 
     const [priceFilterHiddenResultCount, searchResultElements] = useMemo(
