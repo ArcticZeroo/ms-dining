@@ -26,7 +26,7 @@
 }
 
 .station {
-    border-radius: 0.5rem;
+    border-radius: var(--constant-padding);
     color: #212121;
     display: flex;
     flex-direction: column;
@@ -42,8 +42,8 @@
 }
 
 .station .station-header .favorite-item-button {
-    padding: 0.5rem;
-    border-radius: 0.5rem;
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
     margin: var(--default-padding) var(--default-padding) var(--default-padding) 0;
 }
 
@@ -54,8 +54,8 @@
     gap: var(--default-padding);
     background: #BBB;
     padding: var(--default-padding);
-    border-top-right-radius: 0.5rem;
-    border-top-left-radius: 0.5rem;
+    border-top-right-radius: var(--constant-padding);
+    border-top-left-radius: var(--constant-padding);
     flex-grow: 1;
     transition: background-color 0.25s ease;
     height: 100%; /*sometimes the favorite button is larger than the title when the margin is included*/

@@ -161,7 +161,7 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
         totalDateCount += dates.length;
     }
 
-    return (5 * totalRelevancyScore / totalDateCount) + totalDateCount;
+    return (5 /*days of the week*/ * totalRelevancyScore / totalDateCount) + totalDateCount;
 };
 
 const MATCH_REASON_MULTIPLIERS: Record<SearchMatchReason, number> = {

@@ -31,6 +31,12 @@ export const SettingsPage = () => {
                     />
                     <BooleanSettingInput
                         icon="tag"
+                        setting={ApplicationSettings.shouldUseCompactMode}
+                        name="Enable Compact View Mode"
+                        description="When enabled, padding will be smaller and some elements will be condensed."
+                    />
+                    <BooleanSettingInput
+                        icon="tag"
                         setting={ApplicationSettings.shouldCondenseNumbers}
                         name="Condense Numbered Cafes"
                         description="When enabled, numbered cafes are condensed into tiles in the navigation menu."

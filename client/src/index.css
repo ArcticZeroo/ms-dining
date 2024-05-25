@@ -14,6 +14,7 @@
     --color-foreground: #FAFAFA;
     --color-error: #9d5353;
     --color-error-accent: #7e4141;
+    --constant-padding: 0.5rem;
 }
 
 body, html {
@@ -60,8 +61,8 @@ image {
 }
 
 .card.error a, .card.error button, .error-card a, .error-card button {
-    padding: 0.5rem;
-    border-radius: 0.5rem;
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
     border: 0.125rem solid white;
     margin-top: var(--default-padding);
     background: var(--color-card-foreground);
@@ -117,7 +118,7 @@ html, body, #root, .App {
 
 .search-bar input[type=text] {
     border: none;
-    padding: 0.5rem;
+    padding: var(--constant-padding);
     background: none;
     flex-grow: 1;
 }
@@ -125,7 +126,7 @@ html, body, #root, .App {
 .search-bar button {
     background: none;
     border: none;
-    padding: 0.5rem;
+    padding: var(--constant-padding);
     cursor: pointer;
 }
 
@@ -296,7 +297,7 @@ html, body, #root, .App {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
     border: none;
     text-decoration: none;
     cursor: pointer;
@@ -358,13 +359,41 @@ html, body, #root, .App {
     overflow: hidden;
 }
 
+/* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {
         --default-padding: 1rem;
         --cafe-logo-height: 4rem;
     }
+
+    .compact {
+        --default-padding: 0.5rem;
+        --cafe-logo-height: 2rem;
+    }
 }
 
+/* narrow screens (phone) */
+@media screen and (max-width: 800px) {
+    :root {
+        --default-padding: 0.5rem;
+        --cafe-logo-height: 2rem;
+    }
+
+    .compact {
+        --default-padding: 0.25rem;
+        --cafe-logo-height: 1rem;
+    }
+
+    .App {
+        flex-direction: column;
+    }
+
+    .station .menu-body {
+        overflow-x: auto;
+    }
+}
+
+/* tall screens */
 @media screen and (min-height: 801px) {
     :root {
         --page-title-font-size: 1.8em;
@@ -372,8 +401,16 @@ html, body, #root, .App {
         --section-title-font-size: 1.4em;
         --card-title-font-size: 1.2em;
     }
+
+    .compact {
+        --page-title-font-size: 1.6em;
+        --page-subtitle-font-size: 1.4em;
+        --section-title-font-size: 1.2em;
+        --card-title-font-size: 1.1em;
+    }
 }
 
+/* short screens */
 @media screen and (max-height: 800px) {
     :root {
         --default-padding: 0.5rem;
@@ -384,20 +421,12 @@ html, body, #root, .App {
         --section-title-font-size: 1.2em;
         --card-title-font-size: 1.1em;
     }
-}
 
-@media screen and (max-width: 800px) {
-    :root {
-        --default-padding: 0.5rem;
-        --cafe-logo-height: 2rem;
-    }
-
-    .App {
-        flex-direction: column;
-    }
-
-    .station .menu-body {
-        overflow-x: auto;
+    .compact {
+        --page-title-font-size: 1.4em;
+        --page-subtitle-font-size: 1.2em;
+        --section-title-font-size: 1.1em;
+        --card-title-font-size: 1em;
     }
 }
 

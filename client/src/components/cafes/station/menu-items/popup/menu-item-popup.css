@@ -70,7 +70,7 @@
 }
 
 .menu-item-order-footer .controls button {
-    padding: 0.5rem;
+    padding: var(--constant-padding);
 }
 
 .menu-item-order-footer .add-to-cart {
@@ -92,14 +92,14 @@
 .menu-item-order-body .modifier-choice-option-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 .menu-item-order-body .modifier-choice-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: var(--constant-padding);
+    padding: var(--constant-padding);
     background: #DADADA;
     border-radius: var(--default-padding);
     transition: all 0.25s ease;

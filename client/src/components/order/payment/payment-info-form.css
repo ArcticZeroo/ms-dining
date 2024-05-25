@@ -16,7 +16,7 @@
 }
 
 #payment-info .field .field-info {
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 #payment-info .payment-section {

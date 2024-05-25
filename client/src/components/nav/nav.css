@@ -94,7 +94,7 @@ nav a.link-button.active {
 }
 
 .expandable-nav-list .view-group-name {
-    padding: 0.5rem;
+    padding: var(--constant-padding);
     text-align: center;
     background: #4e92c2;
 }
@@ -150,11 +150,11 @@ nav form {
 
 @media screen and (max-height: 800px) {
     #site-header {
-        padding: 0.5rem 0.5rem 0 0.5rem;
+        padding: var(--constant-padding) var(--constant-padding) 0 var(--constant-padding);
     }
 
     #site-header span {
-        padding-bottom: 0.5rem;
+        padding-bottom: var(--constant-padding);
     }
 
     #site-header img {

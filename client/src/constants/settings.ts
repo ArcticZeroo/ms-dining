@@ -22,6 +22,7 @@ export const InternalSettings = {
 export const ApplicationSettings = {
     shouldUseGroups:               new BooleanSetting('shouldUseGroups', true /*defaultValue*/),
     shouldCondenseNumbers:         new BooleanSetting('shouldCondenseNumbers', true /*defaultValue*/),
+    shouldUseCompactMode:          new BooleanSetting('shouldUseCompactMode', false /*defaultValue*/),
     showImages:                    new BooleanSetting('showImages', true /*defaultValue*/),
     showCalories:                  new BooleanSetting('showCalories', true /*defaultValue*/),
     showDescriptions:              new BooleanSetting('showDescription', true /*defaultValue*/),

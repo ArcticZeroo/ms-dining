@@ -23,13 +23,13 @@
 .search-info {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 .search-results-compact {
     overflow-x: auto;
     scrollbar-gutter: stable;
-    padding-bottom: 0.5rem;
+    padding-bottom: var(--constant-padding);
 }
 
 .search-result {
@@ -73,8 +73,8 @@
 }
 
 .search-result .favorite-item-button {
-    padding: 0.5rem;
-    border-radius: 0.5rem;
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
 }
 
 .search-result.is-favorite .search-result-info {
@@ -98,7 +98,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
     flex-grow: 1;
 }
 
@@ -116,19 +116,19 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 .chip-data {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 .search-result-hits {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 .search-waiting {
@@ -161,7 +161,7 @@
 .search-result-fields .search-result-field {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--constant-padding);
 }
 
 .hidden-results {
@@ -185,7 +185,7 @@
     background: none;
     border: 0.125rem solid var(--color-search-tag);
     color: var(--color-search-tag);
-    padding: 0.5rem;
+    padding: var(--constant-padding);
 }
 
 .search-result.loading-skeleton .search-result-image {

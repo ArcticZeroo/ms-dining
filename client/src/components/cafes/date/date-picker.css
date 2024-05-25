@@ -21,7 +21,7 @@
 }
 
 .date-picker-buttons button {
-    padding: 0.5rem;
+    padding: var(--constant-padding);
 }
 
 @media screen and (max-width: 800px) {

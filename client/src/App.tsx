@@ -10,6 +10,9 @@ import { useViewDataFromResponse } from './hooks/views';
 import { CafeView, ICafe } from './models/cafe.ts';
 import { Root } from './root.tsx';
 import { ICancellationToken } from './util/async';
+import { useValueNotifier } from './hooks/events.ts';
+import { ApplicationSettings } from './constants/settings.ts';
+import { classNames } from './util/react.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -41,6 +44,7 @@ const App = () => {
 
     useBackgroundMenuUpdate(viewsById, cafes);
 
+    const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const [isNavExpanded, setIsNavExpanded] = useState(false);
     const deviceType = useDeviceType();
     const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
@@ -62,7 +66,7 @@ const App = () => {
     );
 
     return (
-        <div className="App">
+        <div className={classNames('App', shouldUseCompactMode && 'compact')}>
             <ApplicationContext.Provider value={applicationContext}>
                 <NavExpansionContext.Provider value={navExpansionContext}>
                     <StaticContextProviders>
