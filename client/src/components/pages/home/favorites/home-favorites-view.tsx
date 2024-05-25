@@ -19,7 +19,7 @@ import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx
 
 interface IFavoriteSearchResultsData {
     stage: PromiseStage;
-    results: IQuerySearchResult[];
+    results?: IQuerySearchResult[];
     error?: unknown;
     actualStage: PromiseStage;
     retry: () => void;
@@ -47,8 +47,7 @@ const useFavoriteSearchResults = (queries: ISearchQuery[]): IFavoriteSearchResul
 
     const filteredResults = useMemo(
         () => {
-            const results = value ?? [];
-            return results.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate));
+            return value?.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate));
         },
         [value, selectedDate]
     );
@@ -96,7 +95,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     );
 
     const bodyView = useMemo(() => {
-        if (stage === PromiseStage.running) {
+        if (!results || stage === PromiseStage.running) {
             return (
                 <div id="home-favorites-results">
                     <SearchResultSkeleton
