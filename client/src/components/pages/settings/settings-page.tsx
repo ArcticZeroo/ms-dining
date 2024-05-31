@@ -33,7 +33,7 @@ export const SettingsPage = () => {
                         icon="tag"
                         setting={ApplicationSettings.shouldUseCompactMode}
                         name="Enable Compact View Mode"
-                        description="When enabled, padding will be smaller and some elements will be condensed."
+                        description="When enabled, padding & text will be smaller and some elements will be condensed."
                     />
                     <BooleanSettingInput
                         icon="tag"
@@ -45,7 +45,7 @@ export const SettingsPage = () => {
                         icon="bookmark"
                         setting={ApplicationSettings.showSearchTags}
                         name="Show Search Tags"
-                        description="When enabled, AI-generated tags like 'beverage' may appear next to search results"
+                        description="When enabled, AI-generated tags like 'beverage' may appear next to search results."
                     />
                     <CustomKeySetting/>
                 </div>

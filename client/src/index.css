@@ -153,7 +153,7 @@ html, body, #root, .App {
 }
 
 .card .subtitle {
-    font-size: 0.9em;
+    font-size: var(--card-subtitle-font-size);
     opacity: 0.75;
     font-style: italic;
 }
@@ -400,6 +400,7 @@ html, body, #root, .App {
         --page-subtitle-font-size: 1.6em;
         --section-title-font-size: 1.4em;
         --card-title-font-size: 1.2em;
+        --card-subtitle-font-size: 0.9em;
     }
 
     .compact-view-mode {
@@ -407,6 +408,7 @@ html, body, #root, .App {
         --page-subtitle-font-size: 1.4em;
         --section-title-font-size: 1.2em;
         --card-title-font-size: 1.1em;
+        --card-subtitle-font-size: 0.85em;
     }
 }
 
@@ -420,6 +422,7 @@ html, body, #root, .App {
         --page-subtitle-font-size: 1.4em;
         --section-title-font-size: 1.2em;
         --card-title-font-size: 1.1em;
+        --card-subtitle-font-size: 0.85em;
     }
 
     .compact-view-mode {
