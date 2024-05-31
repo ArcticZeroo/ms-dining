@@ -26,7 +26,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     {
         cafe,
         showGroupName,
-        shouldCountTowardsLastUsed
+        shouldCountTowardsLastUsed,
     }) => {
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
@@ -60,41 +60,48 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     return (
         <CurrentCafeContext.Provider value={cafe}>
             <CafeHeaderHeightContext.Provider value={cafeHeaderHeight}>
-                <ScrollAnchor id={cafe.id}/>
-                <div
-                    className={classNames('collapsible-content collapsible-cafe', isCollapsed && 'collapsed')}
-                    key={cafe.id}
-                >
-                    <div className="cafe-header" ref={setCafeHeaderElement}>
-                        <a className="cafe-order-link"
-						   href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
-						   target="_blank">
-                            <span className="material-symbols-outlined">
+                {/*Container to allow gap per-cafe since we have the scroll anchor at the top*/}
+                <div>
+                    <ScrollAnchor id={cafe.id}/>
+                    <div
+                        className={classNames(
+                            'collapsible-content collapsible-cafe',
+                            isCollapsed && 'collapsed',
+                            !isCollapsed && 'expanded'
+                        )}
+                        key={cafe.id}
+                    >
+                        <div className="cafe-header" ref={setCafeHeaderElement}>
+                            <a className="cafe-order-link"
+                                href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
+                                target="_blank">
+                                <span className="material-symbols-outlined">
                                 open_in_new
-                            </span>
-                        </a>
-                        <button className="collapse-toggle" onClick={toggleIsExpanded}>
-                            <span className="corner logo-container">
-                                {
-                                    showCafeLogo && (
-                                        <img src={cafe.logoUrl}
-                                            alt={`${cafe.name} logo`}
-                                            className="logo"
-                                        />
-                                    )
-                                }
-                            </span>
-                            <span className="cafe-name">
-                                {cafeName}
-                                <ExpandIcon isExpanded={!isCollapsed}/>
-                            </span>
-                            <span className="corner"/>
-                        </button>
+                                </span>
+                            </a>
+                            <button className="collapse-toggle" onClick={toggleIsExpanded}>
+                                <span className="corner logo-container">
+                                    {
+                                        showCafeLogo && (
+                                            <img src={cafe.logoUrl}
+                                                alt={`${cafe.name} logo`}
+                                                className="logo"
+                                            />
+                                        )
+                                    }
+                                </span>
+                                <span className="cafe-name">
+                                    {cafeName}
+                                    <ExpandIcon isExpanded={!isCollapsed}/>
+                                </span>
+                                <span className="corner"/>
+                            </button>
+                        </div>
+                        <CafeMenuBody
+                            isExpanded={!isCollapsed}
+                            shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
+                        />
                     </div>
-                    <CafeMenuBody
-                        isExpanded={!isCollapsed}
-                        shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
-                    />
                 </div>
             </CafeHeaderHeightContext.Provider>
         </CurrentCafeContext.Provider>

@@ -44,7 +44,7 @@
 .station .station-header .favorite-item-button {
     padding: var(--constant-padding);
     border-radius: var(--constant-padding);
-    margin: var(--default-padding) var(--default-padding) var(--default-padding) 0;
+    margin: 0 var(--default-padding);
 }
 
 .station .station-header .title {
@@ -143,6 +143,7 @@
 .collapsible-menu-list {
     display: flex;
     flex-direction: column;
+    gap: var(--default-padding);
 }
 
 .collapsible-cafe {
@@ -157,8 +158,10 @@
     z-index: var(--z-index-above-content-2);
     gap: var(--default-padding);
     background: var(--color-background);
+}
+
+.collapsible-cafe.expanded .cafe-header {
     padding-bottom: var(--default-padding);
-    padding-top: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-header .scroll-anchor {

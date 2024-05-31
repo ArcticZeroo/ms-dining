@@ -1,5 +1,6 @@
 import { CafeMenu, ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
 import React, { useMemo } from 'react';
+import { StationListEmpty } from './station-list-empty.tsx';
 import { Station } from './station.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
@@ -71,17 +72,13 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
 
     if (stations.length === 0) {
         return (
-            <div className="centered-content">
-                There's nothing here! This cafe is probably closed during this time.
-            </div>
+            <StationListEmpty/>
         );
     }
 
     if (filteredStationData.length === 0) {
         return (
-            <div className="centered-content">
-                There's nothing here! Your filters are hiding all the menu items.
-            </div>
+            <StationListEmpty message="Your filters are hiding all the menu items."/>
         );
     }
 
