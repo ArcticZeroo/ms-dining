@@ -18,7 +18,6 @@
     gap: var(--default-padding);
     justify-content: center;
     content-visibility: auto;
-    margin-bottom: var(--default-padding);
 }
 
 .stations.hidden {
