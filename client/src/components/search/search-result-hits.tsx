@@ -35,6 +35,10 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDateNotifier = useContext(SelectedDateContext);
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
+    const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
+
+    const useShortNames = shouldUseCompactMode
+		|| (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
 
     return (
         <div className="search-result-hits">
@@ -84,8 +88,8 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                 <span className="value">
                                     {getViewName({
                                         view,
+                                        useShortNames,
                                         showGroupName: true,
-                                        useShortNames: shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE
                                     })}
                                 </span>
                             </div>

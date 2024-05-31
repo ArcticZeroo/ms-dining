@@ -66,7 +66,7 @@ const App = () => {
     );
 
     return (
-        <div className={classNames('App', shouldUseCompactMode && 'compact')}>
+        <div className={classNames('App', shouldUseCompactMode && 'compact-view-mode')}>
             <ApplicationContext.Provider value={applicationContext}>
                 <NavExpansionContext.Provider value={navExpansionContext}>
                     <StaticContextProviders>

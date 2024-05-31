@@ -1,5 +1,11 @@
 import { SearchTypes } from '@msdining/common';
 
+export enum SearchResultsViewMode {
+    horizontalScroll,
+    horizontalWrap,
+    vertical
+}
+
 export enum SearchMatchReason {
     title,
     description

@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { useIsPriceAllowed } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { IQuerySearchResult, SearchEntityFilterType } from '../../models/search.ts';
+import { IQuerySearchResult, SearchEntityFilterType, SearchResultsViewMode } from '../../models/search.ts';
 import { matchesEntityFilter } from '../../util/search.ts';
 import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
@@ -36,6 +36,20 @@ const useSortContext = (queryText: string): ISearchResultSortingContext => {
     }, [cafePriorityOrder, favoriteItemNames, favoriteStationNames, homepageViewIds, queryText, shouldUseGroups, userLocation, viewsById]);
 }
 
+const getClassForViewMode = (viewMode: SearchResultsViewMode) => {
+    if (viewMode === SearchResultsViewMode.vertical) {
+        return 'flex-col';
+    }
+
+    if (viewMode === SearchResultsViewMode.horizontalWrap) {
+        return 'flex flex-around flex-wrap';
+    }
+
+    if (viewMode === SearchResultsViewMode.horizontalScroll) {
+        return 'flex flex-around search-results-horizontal';
+    }
+}
+
 interface ISearchResultsListProps {
     queryText: string;
     searchResults: IQuerySearchResult[];
@@ -45,11 +59,27 @@ interface ISearchResultsListProps {
     showEndOfResults?: boolean;
     showSearchButtonInsteadOfLocations?: boolean;
     shouldStretchResults?: boolean;
+    viewMode?: SearchResultsViewMode;
 }
 
-export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults }) => {
+export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults, viewMode }) => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
+    const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const getIsPriceAllowed = useIsPriceAllowed();
+
+    if (isCompact == null) {
+        isCompact = shouldUseCompactMode;
+    }
+
+    if (viewMode == null) {
+        viewMode = shouldUseCompactMode
+            ? SearchResultsViewMode.horizontalWrap
+            : SearchResultsViewMode.vertical;
+    }
+
+    if (shouldStretchResults == null) {
+        shouldStretchResults = shouldUseCompactMode;
+    }
 
     const searchSortingContext = useSortContext(queryText);
 
@@ -104,7 +134,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
     );
 
     return (
-        <div className={isCompact ? 'flex flex-around search-results-compact' : 'flex-col'}>
+        <div className={getClassForViewMode(viewMode)}>
             {
                 priceFilterHiddenResultCount > 0 && (
                     <div className="hidden-results">
@@ -115,7 +145,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
             }
             {searchResultElements}
             {showEndOfResults && entriesInOrder.length > 0 && (
-                <div className="centered-content">
+                <div className="text-center">
                     End of Results
                 </div>
             )}

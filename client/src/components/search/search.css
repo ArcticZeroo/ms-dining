@@ -26,7 +26,7 @@
     gap: var(--constant-padding);
 }
 
-.search-results-compact {
+.search-results-horizontal {
     overflow-x: auto;
     scrollbar-gutter: stable;
     padding-bottom: var(--constant-padding);
@@ -129,6 +129,14 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--constant-padding);
+    align-self: center;
+}
+
+.search-result-hits .search-result-chip {
+    min-width: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-waiting {
@@ -192,6 +200,10 @@
     width: 10rem;
     height: 10rem;
     background: #EEE;
+}
+
+.compact-view-mode .search-result {
+    flex-grow: 1;
 }
 
 @media screen and (max-height: 800px) {
