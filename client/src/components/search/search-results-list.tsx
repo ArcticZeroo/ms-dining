@@ -62,9 +62,22 @@ interface ISearchResultsListProps {
     shouldStretchResults?: boolean;
     viewMode?: SearchResultsViewMode;
     shouldPromptUserForLocation?: boolean;
+    noResultsView?: React.ReactNode;
 }
 
-export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults, viewMode, shouldPromptUserForLocation = true }) => {
+export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ 
+    queryText, 
+    searchResults, 
+    filter, 
+    isCompact, 
+    limit, 
+    showEndOfResults = true, 
+    showSearchButtonInsteadOfLocations = false, 
+    shouldStretchResults, 
+    viewMode, 
+    shouldPromptUserForLocation = true, 
+    noResultsView 
+}) => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const getIsPriceAllowed = useIsPriceAllowed();
@@ -151,6 +164,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
                     End of Results
                 </div>
             )}
+            {entriesInOrder.length === 0 && noResultsView}
         </div>
     );
 };
