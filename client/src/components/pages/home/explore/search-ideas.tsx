@@ -76,6 +76,7 @@ export const SearchIdeas = () => {
                         showEndOfResults={false}
                         showSearchButtonInsteadOfLocations={true}
                         shouldStretchResults={true}
+                        shouldPromptUserForLocation={false}
                     />
                 )
             }

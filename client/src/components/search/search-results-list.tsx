@@ -7,14 +7,15 @@ import { matchesEntityFilter } from '../../util/search.ts';
 import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
 import { ISearchResultSortingContext, sortSearchResultsInPlace } from '../../util/search-sorting.ts';
-import { PromptingUserLocationNotifier } from '../../api/location/user-location.ts';
+import { PassiveUserLocationNotifier, PromptingUserLocationNotifier } from '../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 
-const useSortContext = (queryText: string): ISearchResultSortingContext => {
+const useSortContext = (queryText: string, shouldPromptUserForLocation: boolean): ISearchResultSortingContext => {
     const { cafes, viewsById } = useContext(ApplicationContext);
 
-    const userLocation = useValueNotifier(PromptingUserLocationNotifier);
+    const targetLocationProvider = shouldPromptUserForLocation ? PromptingUserLocationNotifier : PassiveUserLocationNotifier;
+    const userLocation = useValueNotifier(targetLocationProvider);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const favoriteItemNames = useValueNotifier(ApplicationSettings.favoriteItemNames);
@@ -60,9 +61,10 @@ interface ISearchResultsListProps {
     showSearchButtonInsteadOfLocations?: boolean;
     shouldStretchResults?: boolean;
     viewMode?: SearchResultsViewMode;
+    shouldPromptUserForLocation?: boolean;
 }
 
-export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults, viewMode }) => {
+export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText, searchResults, filter, isCompact, limit, showEndOfResults = true, showSearchButtonInsteadOfLocations = false, shouldStretchResults, viewMode, shouldPromptUserForLocation = true }) => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const getIsPriceAllowed = useIsPriceAllowed();
@@ -81,7 +83,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ queryText
         shouldStretchResults = shouldUseCompactMode;
     }
 
-    const searchSortingContext = useSortContext(queryText);
+    const searchSortingContext = useSortContext(queryText, shouldPromptUserForLocation);
 
     const entriesInOrder = useMemo(
         () => {
