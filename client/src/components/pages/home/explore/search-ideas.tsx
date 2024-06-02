@@ -1,7 +1,7 @@
 import { randomSortInPlace } from '../../../../util/random.ts';
 import { useCallback, useEffect, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchResultsList } from '../../../search/search-results-list.tsx';
 import { SearchEntityFilterType } from '../../../../models/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
@@ -32,7 +32,6 @@ export const SearchIdeas = () => {
     const retrieveSearchResultsCallback = useCallback(() => DiningClient.retrieveSearchResults(selectedIdea), [selectedIdea]);
     const {
         run: runRetrieveSearchResults,
-        stage,
         value,
         error
     } = useDelayedPromiseState(retrieveSearchResultsCallback, false /*keepLastValue*/);
@@ -54,7 +53,7 @@ export const SearchIdeas = () => {
                 ))}
             </div>
             {
-                stage === PromiseStage.running && (
+                !value && (
                     <div>
                         <SearchResultSkeleton
                             isCompact={true}
