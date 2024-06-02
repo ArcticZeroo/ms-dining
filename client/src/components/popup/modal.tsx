@@ -21,7 +21,7 @@ export const Modal: React.FC<IModalProps> = ({ title, buttons, body, footer }) =
                 <div id="modal-title">{title}</div>
                 <div id="modal-buttons">
                     {buttons}
-                    <button onClick={onCloseClicked}>
+                    <button onClick={onCloseClicked} title="Click to close popup">
                         <span className="material-symbols-outlined">
                             close
                         </span>

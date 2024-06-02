@@ -56,7 +56,6 @@
     border-radius: var(--default-padding);
     padding: var(--default-padding);
     background: #EEE;
-    transition: background-color 0.25s ease;
 }
 
 .modal .body {

@@ -15,6 +15,7 @@
     --color-error: #9d5353;
     --color-error-accent: #7e4141;
     --constant-padding: 0.5rem;
+    --icon-size: 24px;
 }
 
 body, html {
@@ -353,10 +354,14 @@ html, body, #root, .App {
     margin-bottom: var(--default-padding);
 }
 
-.material-symbols-outlined {
-    width: 24px;
-    height: 24px;
+.material-symbols-outlined, .icon-sized {
+    width: var(--icon-size);
+    height: var(--icon-size);
     overflow: hidden;
+}
+
+.transition-background {
+    transition: background-color 0.25s ease;
 }
 
 /* wide screens (tablet, computer) */

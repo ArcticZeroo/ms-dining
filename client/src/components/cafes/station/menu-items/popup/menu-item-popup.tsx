@@ -1,27 +1,18 @@
 import { CafeTypes } from '@msdining/common';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ApplicationContext } from '../../../../../context/app.ts';
 import { CartContext } from '../../../../../context/cart.ts';
 import { PopupContext } from '../../../../../context/modal.ts';
-import { SelectedDateContext } from '../../../../../context/time.ts';
-import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { IMenuItem } from '../../../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 import { addOrEditCartItem, calculatePrice, shallowCloneCart } from '../../../../../util/cart.ts';
 import { getRandomId } from '../../../../../util/id.ts';
-import { getViewMenuUrlWithJump } from '../../../../../util/link.ts';
-import { navigateToSearch } from '../../../../../util/search.ts';
-import { getParentView } from '../../../../../util/view.ts';
-import { FavoriteItemButton } from '../../../../button/favorite-item-button.tsx';
 import { Modal } from '../../../../popup/modal.tsx';
 import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
-import { ApplicationSettings } from '../../../../../constants/settings.ts';
 import { useIsOnlineOrderingAllowedForSelectedDate } from '../../../../../hooks/cafe.ts';
+import { MenuItemButtons } from './menu-item-buttons.tsx';
 
 const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
     return useMemo(
@@ -45,19 +36,14 @@ const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (
 };
 
 interface IMenuItemPopupProps {
-    menuItem: IMenuItem;
-    modalSymbol: symbol;
-    cafeId: string;
-    fromCartItem?: ICartItemWithMetadata;
+	menuItem: IMenuItem;
+	modalSymbol: symbol;
+	cafeId: string;
+	fromCartItem?: ICartItemWithMetadata;
 }
 
 export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, fromCartItem }) => {
     const isUpdate = fromCartItem != null;
-
-    const navigate = useNavigate();
-
-    const { viewsById } = useContext(ApplicationContext);
-    const selectedDateNotifier = useContext(SelectedDateContext);
 
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
         return fromCartItem?.choicesByModifierId ?? new Map<string, Set<string>>();
@@ -65,12 +51,10 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 
     const [notes, setNotes] = useState(fromCartItem?.specialInstructions || '');
     const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
-    const [copyButtonBackground, setCopyButtonBackground] = useState<string | undefined>(undefined);
 
     const cartItemsNotifier = useContext(CartContext);
     const modalNotifier = useContext(PopupContext);
 
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const isOnlineOrderingAllowedForSelectedDate = useIsOnlineOrderingAllowedForSelectedDate();
     const isOnlineOrderingAllowed = fromCartItem != null || isOnlineOrderingAllowedForSelectedDate;
 
@@ -132,65 +116,15 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
         setQuantity(quantity - 1);
     };
 
-    const onSearchClicked = () => {
-        navigateToSearch(navigate, menuItem.name);
-        closeModal();
-    };
-
-    const copyToClipboard = async (url: string) => {
-        try {
-            await navigator.clipboard.writeText(url);
-            return true;
-        } catch {
-            return false;
-        }
-    };
-
-    const onCopyClicked = () => {
-        const cafeView = viewsById.get(cafeId);
-
-        if (cafeView == null) {
-            console.error('Could not get cafe view for cafe id', cafeId);
-            return;
-        }
-
-        const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
-
-        const viewPath = getViewMenuUrlWithJump({
-            cafeId,
-            view:       parentView,
-            name:       menuItem.name,
-            entityType: SearchEntityType.menuItem,
-            date:       selectedDateNotifier.value
-        });
-
-        copyToClipboard(`${window.location.origin}${viewPath}`)
-            .then((didSucceed) => {
-                const backgroundColor = didSucceed
-                    ? '#66BB6A'
-                    : '#EF5350';
-                setCopyButtonBackground(backgroundColor);
-                setTimeout(() => setCopyButtonBackground(undefined), 1000);
-            });
-    };
-
     return (
         <Modal
             title={`${isUpdate ? 'Edit ' : ''}${menuItem.name}`}
             buttons={
-                <>
-                    <FavoriteItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
-                    <button title="Click to copy link" onClick={onCopyClicked}>
-                        <span className="material-symbols-outlined" style={{ background: copyButtonBackground }}>
-                            link
-                        </span>
-                    </button>
-                    <button title="Search for this item across campus" onClick={onSearchClicked}>
-                        <span className="material-symbols-outlined">
-							search
-                        </span>
-                    </button>
-                </>
+                <MenuItemButtons
+                    cafeId={cafeId}
+                    menuItem={menuItem}
+                    onClose={closeModal}
+                />
             }
             body={(
                 <MenuItemPopupBody

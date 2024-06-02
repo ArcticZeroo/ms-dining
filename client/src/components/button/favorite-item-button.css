@@ -12,5 +12,5 @@
 }
 
 .favorite-item-button.is-favorite {
-    background: var(--favorite-color);
+    background: var(--favorite-color) !important;
 }

@@ -24,7 +24,10 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, t
 
     const isItemFavorite = useValueNotifierSetTarget(targetSetting, normalizedItemName);
 
-    const onFavoriteClicked = () => {
+    const onFavoriteClicked = (event: React.MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+
         if (isDisabled) {
             return;
         }
@@ -42,7 +45,7 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, t
             title={isItemFavorite ? 'Click to remove from favorites' : 'Favorite this item'}
             onClick={onFavoriteClicked}
         >
-            <img src={filledStarIcon} alt="favorite" className="favorite-enabled" style={{ display: isItemFavorite ? 'block' : 'none' }}/>
+            <img src={filledStarIcon} alt="favorite" className="favorite-enabled icon-sized" style={{ display: isItemFavorite ? 'block' : 'none' }}/>
             <span className="material-symbols-outlined" style={{ display: isItemFavorite ? 'none' : 'block' }}>
                 star
             </span>

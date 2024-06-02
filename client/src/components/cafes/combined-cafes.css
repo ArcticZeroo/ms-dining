@@ -113,6 +113,7 @@
     align-self: stretch;
     justify-content: space-between;
     flex-grow: 1;
+    position: relative;
 }
 
 .station .menu-item:hover {
@@ -256,21 +257,34 @@
 }
 
 .menu-item-buttons {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    --color-button-background: #dcdcdc;
 }
 
-.menu-item-buttons button, .menu-item-buttons a {
-    background: #EEE;
-    color: #212121;
-    cursor: pointer;
+.menu-item:hover .menu-item-buttons {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+}
+
+.menu-item-buttons button {
+    border-radius: var(--default-padding);
+}
+
+.menu-item-buttons button:not(.copy-button) {
+    padding: var(--default-padding);
+    background: var(--color-button-background);
+}
+
+.copy-button > * {
     padding: var(--default-padding);
     border-radius: var(--default-padding);
-    text-decoration: none;
+    background: var(--color-button-background);
 }
 
 /* roughly when the table would horizontally overflow just a little -

@@ -16,6 +16,7 @@ import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
+import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -114,6 +115,12 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     && menuItem.description
                     && <span className="menu-item-description">{menuItem.description}</span>
                 }
+            </div>
+            <div className="menu-item-buttons">
+                <MenuItemButtons
+                    cafeId={cafe.id}
+                    menuItem={menuItem}
+                />
             </div>
             {
                 canShowImage && (
