@@ -16,4 +16,6 @@ export const NotFoundPage = () => {
 
         return navigate('/');
     }, [navigate, view]);
+
+    return null;
 };
