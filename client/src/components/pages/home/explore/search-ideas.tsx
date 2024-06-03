@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchResultsList } from '../../../search/search-results-list.tsx';
-import { SearchEntityFilterType } from '../../../../models/search.ts';
+import {SearchEntityFilterType, SearchResultsViewMode} from '../../../../models/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { classNames } from '../../../../util/react.ts';
 
@@ -70,6 +70,7 @@ export const SearchIdeas = () => {
                         searchResults={value}
                         queryText={selectedIdea}
                         filter={SearchEntityFilterType.all}
+                        viewMode={SearchResultsViewMode.horizontalScroll}
                         isCompact={true}
                         limit={MAX_RESULT_COUNT}
                         showEndOfResults={false}
