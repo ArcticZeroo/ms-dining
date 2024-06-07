@@ -54,7 +54,7 @@ export const SearchIdeas = () => {
             </div>
             {
                 !value && (
-                    <div>
+                    <div className="flex">
                         <SearchResultSkeleton
                             isCompact={true}
                             shouldStretchResults={true}
