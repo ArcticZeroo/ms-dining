@@ -333,6 +333,9 @@ html, body, #root, .App {
 
 .loading-skeleton {
     animation: loading-skeleton 2s ease-in-out infinite;
+}
+
+.loading-skeleton, .loading-skeleton button, .loading-skeleton .pointer {
     cursor: wait;
 }
 
