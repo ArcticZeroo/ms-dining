@@ -30,7 +30,7 @@ export const SettingsPage = () => {
                         description="When enabled, cafes in the nav and search will be grouped by location."
                     />
                     <BooleanSettingInput
-                        icon="tag"
+                        icon="view_compact"
                         setting={ApplicationSettings.shouldUseCompactMode}
                         name="Enable Compact View Mode"
                         description="When enabled, padding & text will be smaller and some elements will be condensed."
