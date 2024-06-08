@@ -14,6 +14,7 @@
     --color-foreground: #FAFAFA;
     --color-error: #9d5353;
     --color-error-accent: #7e4141;
+    --color-header: #00796B;
     --constant-padding: 0.5rem;
     --icon-size: 24px;
 }
@@ -292,7 +293,7 @@ html, body, #root, .App {
     font-size: 1.4em;
     text-align: center;
     padding: var(--default-padding);
-    background: #00796B;
+    background: var(--color-header);
     color: white;
     border-radius: var(--default-padding);
     display: flex;

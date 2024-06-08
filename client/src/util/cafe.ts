@@ -22,7 +22,7 @@ export const getCafeName = ({ cafe, showGroupName, useShortNames = false }: IGet
         return targetName;
     }
 
-    return `${targetName} (${groupName})`;
+    return `${targetName} @ ${groupName}`;
 };
 
 interface IGetViewNameParams {

@@ -1,22 +1,22 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { SearchMatchReason } from '@msdining/common/dist/models/search';
+import { isSameDate } from '@msdining/common/dist/util/date-util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ApplicationSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
+import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
-import './search.css';
-import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
-import { ApplicationSettings } from '../../constants/settings.ts';
+import { pluralize } from '../../util/string.ts';
 import { getSearchUrl } from '../../util/url.ts';
+import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
 import { SearchResultHits } from './search-result-hits.tsx';
-import { SelectedDateContext } from '../../context/time.ts';
-import { isSameDate } from '@msdining/common/dist/util/date-util';
-import { pluralize } from '../../util/string.ts';
+import './search.css';
 import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
 
 interface IEntityDisplayData {
@@ -131,6 +131,8 @@ export interface ISearchResultProps {
     name: string;
     description?: string;
     locationDatesByCafeId?: Map<string, Date[]>;
+    stationByCafeId?: Map<string, string>;
+    priceByCafeId?: Map<string, number>;
     imageUrl?: string;
     entityType: SearchTypes.SearchEntityType;
     extraFields?: ISearchResultField[];
@@ -152,9 +154,11 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     name,
     description,
     locationDatesByCafeId = new Map<string, Date[]>(),
+    stationByCafeId = new Map<string, string>(),
+    priceByCafeId = new Map<string, number>(),
     imageUrl,
     entityType,
-    extraFields,
+    extraFields = [],
     onlyShowLocationsOnDate,
     isCompact = false,
     showFavoriteButton = !isCompact,
@@ -257,7 +261,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         )
                     }
                     {
-                        extraFields && (
+                        extraFields.length > 0 && (
                             <div className="search-result-fields">
                                 {
                                     extraFields.map(({ iconName, value, key }) => (
@@ -292,6 +296,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                         locationEntriesInOrder={locationEntriesInOrder}
                                         cafeIdsOnPage={cafeIdsOnPage}
                                         shouldShowLocationDates={shouldShowLocationDates}
+                                        priceByCafeId={priceByCafeId}
+                                        stationByCafeId={stationByCafeId}
                                     />
                                 )
                         )

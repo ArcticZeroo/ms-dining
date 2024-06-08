@@ -117,6 +117,15 @@
     cursor: pointer;
 }
 
+.card.settings-group {
+    transition: padding 0.25s ease;
+    --color-header: #407484;
+}
+
+.card.settings-group.collapsed {
+    padding: 0;
+}
+
 .settings-group .body {
     display: flex;
     flex-direction: column;

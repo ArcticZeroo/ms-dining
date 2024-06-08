@@ -1,6 +1,6 @@
 import { ISearchQuery, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
-import { ICheapItemSearchResult, ISearchResult } from '../../models/search.js';
+import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
 import { Nullable } from '../../models/util.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
@@ -48,6 +48,7 @@ interface IAddResultParams {
     cafeId: string;
     matchReasons: Iterable<SearchMatchReason>;
     name: string;
+    station: Nullable<string>;
     price: Nullable<number>;
     description: Nullable<string>;
     imageUrl: Nullable<string>;
@@ -60,7 +61,7 @@ class SearchSession {
     readonly queries: Array<ISearchQuery>;
     readonly shouldUseExactMatch: boolean;
     readonly date: Date | null;
-    readonly searchResultsByNameByEntityType = new Map<SearchEntityType, Map<string, ISearchResult>>();
+    readonly searchResultsByNameByEntityType = new Map<SearchEntityType, Map<string, IServerSearchResult>>();
 
     readonly #normalizedQueries: Array<ISearchQuery>;
 
@@ -79,7 +80,7 @@ class SearchSession {
 
     #ensureEntityTypeExists(entityType: SearchEntityType) {
         if (!this.searchResultsByNameByEntityType.has(entityType)) {
-            this.searchResultsByNameByEntityType.set(entityType, new Map<string, ISearchResult>());
+            this.searchResultsByNameByEntityType.set(entityType, new Map<string, IServerSearchResult>());
         }
     }
 
@@ -127,6 +128,7 @@ class SearchSession {
                   dateString,
                   cafeId,
                   matchReasons,
+                  station,
                   price,
                   tags,
                   searchTags
@@ -142,9 +144,11 @@ class SearchSession {
                 name,
                 description,
                 imageUrl,
+                tags:                  tags || undefined,
                 searchTags:            searchTags || undefined,
                 locationDatesByCafeId: new Map<string, Set<string>>(),
-                pricesByCafeId:        new Map<string, number>(),
+                priceByCafeId:         new Map<string, number>(),
+                stationByCafeId:       new Map<string, string>(),
                 matchReasons:          new Set<SearchMatchReason>(),
             });
         }
@@ -161,7 +165,11 @@ class SearchSession {
         searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
 
         if (price != null) {
-            searchResult.pricesByCafeId.set(cafeId, price);
+            searchResult.priceByCafeId.set(cafeId, price);
+        }
+
+        if (station != null) {
+            searchResult.stationByCafeId.set(cafeId, station);
         }
 
         if (searchTags) {
@@ -195,7 +203,7 @@ export abstract class SearchManager {
                                                       queries,
                                                       shouldUseExactMatch,
                                                       date
-                                                  }: IMultiQuerySearchParams): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+                                                  }: IMultiQuerySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         const session = new SearchSession({ queries, shouldUseExactMatch, date });
         const dailyStations = await session.getMenusAsync();
 
@@ -219,7 +227,8 @@ export abstract class SearchManager {
                     price:       undefined,
                     searchTags:  undefined,
                     tags:        undefined,
-                    description: undefined
+                    description: undefined,
+                    station:     undefined
                 });
             }
 
@@ -271,6 +280,7 @@ export abstract class SearchManager {
                             tags:        menuItem.tags,
                             searchTags:  menuItem.searchTags,
                             imageUrl:    getThumbnailUrl(menuItem),
+                            station:     stationData.name,
                             matchReasons,
                         });
                     }
@@ -281,7 +291,7 @@ export abstract class SearchManager {
         return session.searchResultsByNameByEntityType;
     }
 
-    public static async search(query: string, date: Date | null, shouldUseExactMatch: boolean = false): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+    public static async search(query: string, date: Date | null, shouldUseExactMatch: boolean = false): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         return SearchManager._performMultiQuerySearch({
             queries: [{ text: query }],
             date,
@@ -289,7 +299,7 @@ export abstract class SearchManager {
         });
     }
 
-    public static async searchFavorites(queries: Array<ISearchQuery>, date: Date | null): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+    public static async searchFavorites(queries: Array<ISearchQuery>, date: Date | null): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         return SearchManager._performMultiQuerySearch({
             shouldUseExactMatch: true,
             queries,

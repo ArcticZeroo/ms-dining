@@ -29,6 +29,7 @@ export const ApplicationSettings = {
     showTags:                      new BooleanSetting('showTags', true /*defaultValue*/),
     showSearchTags:                new BooleanSetting('showSearchTags', false /*defaultValue*/),
     showFavoritesOnHome:           new BooleanSetting('showFavoritesOnHome', true /*defaultValue*/),
+    showPriceInSearch:             new BooleanSetting('showPriceInSearch', true /*defaultValue*/),
     collapseCafesByDefault:        new BooleanSetting('collapseCafesByDefault', false /*defaultValue*/),
     collapseStationsByDefault:     new BooleanSetting('collapseStationsByDefault', false /*defaultValue*/),
     allowFutureMenus:              new BooleanSetting('allowFutureMenus', false /*defaultValue*/),

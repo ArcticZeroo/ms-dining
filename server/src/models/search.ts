@@ -1,11 +1,13 @@
 import { SearchTypes } from '@msdining/common';
 import { Nullable } from './util.js';
 
-export interface ISearchResult {
+// Needs to be separate from ISearchResult since we use a set of dateStrings instead of an array of dates.
+export interface IServerSearchResult {
     type: SearchTypes.SearchEntityType;
     matchReasons: Set<SearchTypes.SearchMatchReason>;
     locationDatesByCafeId: Map<string, Set<string>>;
-    pricesByCafeId: Map<string, number>;
+    priceByCafeId: Map<string, number>;
+    stationByCafeId: Map<string, string>;
     imageUrl?: Nullable<string>;
     name: string;
     description?: Nullable<string>;

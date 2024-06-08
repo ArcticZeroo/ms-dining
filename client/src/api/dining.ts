@@ -1,7 +1,12 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { IMenuItem } from '@msdining/common/dist/models/cafe';
-import { IDiningCoreResponse, IWaitTimeResponse, MenuResponse } from '@msdining/common/dist/models/http';
+import {
+    IDiningCoreResponse,
+    ISearchResponseResult,
+    IWaitTimeResponse,
+    MenuResponse
+} from '@msdining/common/dist/models/http';
 import { ISearchQuery } from '@msdining/common/dist/models/search';
 import { InternalSettings } from '../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
@@ -9,7 +14,6 @@ import {
     ICheapItemSearchResult,
     IQuerySearchResult,
     IServerCheapItemSearchResult,
-    IServerSearchResult
 } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
@@ -161,7 +165,7 @@ export abstract class DiningClient {
             return [];
         }
 
-        const serverResults = response as Array<IServerSearchResult>;
+        const serverResults = response as Array<ISearchResponseResult>;
         const results: Array<IQuerySearchResult> = [];
 
         for (const serverResult of serverResults) {
@@ -173,7 +177,8 @@ export abstract class DiningClient {
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                pricesByCafeId:        new Map(Object.entries(serverResult.prices)),
+                priceByCafeId:         new Map(Object.entries(serverResult.prices)),
+                stationByCafeId:       new Map(Object.entries(serverResult.stations)),
                 matchReasons:          new Set(serverResult.matchReasons),
                 tags:                  serverResult.tags ? new Set(serverResult.tags) : undefined,
                 searchTags:            serverResult.searchTags ? new Set(serverResult.searchTags) : undefined

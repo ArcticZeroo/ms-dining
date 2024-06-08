@@ -1,8 +1,9 @@
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
+import { ISearchResponseResult } from '@msdining/common/dist/models/http.js';
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { SearchManager } from '../../../api/storage/search.js';
-import { ISearchResult } from '../../../models/search.js';
+import { IServerSearchResult } from '../../../models/search.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { attachRouter, getTrimmedQueryParam } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
@@ -26,19 +27,20 @@ export const registerSearchRoutes = (parent: Router) => {
         return serialized;
     };
 
-    const serializeSearchResult = (searchResult: ISearchResult) => ({
+    const serializeSearchResult = (searchResult: IServerSearchResult): ISearchResponseResult => ({
         type:         searchResult.type,
         name:         searchResult.name,
-        description:  searchResult.description,
-        imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl),
+        description:  searchResult.description || undefined,
+        imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl) || undefined,
         locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
-        prices:       Object.fromEntries(searchResult.pricesByCafeId),
+        prices:       Object.fromEntries(searchResult.priceByCafeId),
+        stations:     Object.fromEntries(searchResult.stationByCafeId),
         matchReasons: Array.from(searchResult.matchReasons),
         tags:         searchResult.tags ? Array.from(searchResult.tags) : undefined,
         searchTags:   searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined
     });
 
-    const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, ISearchResult>>) => {
+    const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
         const searchResults = [];
         for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
             for (const searchResult of searchResultsById.values()) {
@@ -69,6 +71,7 @@ export const registerSearchRoutes = (parent: Router) => {
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');
             const isExact = getTrimmedQueryParam(ctx, 'e') === 'true';
+            console.log(searchQuery);
 
             if (!searchQuery) {
                 ctx.body = [];

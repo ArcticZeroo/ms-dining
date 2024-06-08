@@ -1,4 +1,5 @@
 import { SearchTypes } from '@msdining/common';
+import { SearchMatchReason } from '@msdining/common/dist/models/search';
 
 export enum SearchResultsViewMode {
     horizontalScroll,
@@ -23,7 +24,8 @@ export interface IQuerySearchResult {
     description?: string;
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
-    pricesByCafeId: Map<string, number>;
+    priceByCafeId: Map<string, number>;
+    stationByCafeId: Map<string, string>;
     matchReasons: Set<SearchMatchReason>;
     tags?: Set<string>;
     searchTags?: Set<string>;
@@ -37,18 +39,6 @@ export interface ICheapItemSearchResult {
     price: number;
     minCalories: number;
     maxCalories: number;
-}
-
-export interface IServerSearchResult {
-    type: 'menuItem' | 'station';
-    name: string;
-    description?: string;
-    imageUrl?: string;
-    locations: Record<string, Array<string>>;
-    prices: Record<string, number>;
-    matchReasons: Array<SearchMatchReason>;
-    tags?: Array<string>;
-    searchTags?: Array<string>;
 }
 
 export interface IServerCheapItemSearchResult {

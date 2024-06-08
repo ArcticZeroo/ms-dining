@@ -1,4 +1,5 @@
 import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
+import { SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
 
 export interface IDiningCoreGroupMemberBase {
@@ -69,3 +70,16 @@ export interface IMenuResponseStation {
 export type MenuResponse = Array<IMenuResponseStation>;
 
 export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;
+
+export interface ISearchResponseResult {
+    type: 'menuItem' | 'station';
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    locations: Record<string, Array<string>>;
+    prices: Record<string, number>;
+    stations: Record<string /*cafeId*/, string /*stationName*/>;
+    matchReasons: Array<SearchMatchReason>;
+    tags?: Array<string>;
+    searchTags?: Array<string>;
+}

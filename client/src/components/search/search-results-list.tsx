@@ -121,7 +121,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
             let priceFilterHiddenResultCount = 0;
 
             const searchResultElements = entriesInOrder.map(searchResult => {
-                const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.pricesByCafeId.values()).some(getIsPriceAllowed);
+                const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.priceByCafeId.values()).some(getIsPriceAllowed);
 
                 if (!isPriceAllowed) {
                     priceFilterHiddenResultCount++;
@@ -134,6 +134,8 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         name={searchResult.name}
                         description={searchResult.description}
                         locationDatesByCafeId={searchResult.locationDatesByCafeId}
+                        priceByCafeId={searchResult.priceByCafeId}
+                        stationByCafeId={searchResult.stationByCafeId}
                         imageUrl={searchResult.imageUrl}
                         entityType={searchResult.entityType}
                         tags={searchResult.tags}

@@ -1,3 +1,4 @@
+import { formatPrice } from '../../util/cart.ts';
 import { getParentView } from '../../util/view.ts';
 import { getJumpUrlOnSamePage, getViewMenuUrlWithJump } from '../../util/link.ts';
 import { Link } from 'react-router-dom';
@@ -13,23 +14,27 @@ import { SearchEntityType } from '@msdining/common/dist/models/search';
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
 interface ISearchResultHitsProps {
-	name: string;
-	entityType: SearchEntityType;
-	cafeIdsOnPage?: Set<string>;
-	shouldShowLocationDates: boolean;
-	onlyShowLocationsOnDate?: Date;
-	isCompact: boolean;
-	locationEntriesInOrder: Array<[string, Array<Date>]>;
+    name: string;
+    entityType: SearchEntityType;
+    cafeIdsOnPage?: Set<string>;
+    shouldShowLocationDates: boolean;
+    onlyShowLocationsOnDate?: Date;
+    isCompact: boolean;
+    locationEntriesInOrder: Array<[string, Array<Date>]>;
+    priceByCafeId?: Map<string, number>;
+    stationByCafeId?: Map<string, string>;
 }
 
 export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
-																	   locationEntriesInOrder,
-																	   name,
-																	   entityType,
-																	   cafeIdsOnPage,
-																	   shouldShowLocationDates,
-																	   isCompact
-																   }) => {
+    locationEntriesInOrder,
+    priceByCafeId,
+    stationByCafeId,
+    name,
+    entityType,
+    cafeIdsOnPage,
+    shouldShowLocationDates,
+    isCompact
+}) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -38,7 +43,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
 
     const useShortNames = shouldUseCompactMode
-		|| (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
+                          || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
 
     return (
         <div className="search-result-hits">
@@ -49,6 +54,9 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                     if (!view) {
                         return false;
                     }
+                    
+                    const price = priceByCafeId?.get(cafeId);
+                    const station = stationByCafeId?.get(cafeId);
 
                     const parentView = getParentView(viewsById, view, shouldUseGroups);
                     const targetDate = allowFutureMenus ? locationDates[0] : undefined;
@@ -79,11 +87,11 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                             <div className="chip-data">
                                 {
                                     !isCompact
-									&& (
-									    <span className="material-symbols-outlined icon">
+                                    && (
+                                        <span className="material-symbols-outlined icon">
 											location_on
 									    </span>
-									)
+                                    )
                                 }
                                 <span className="value">
                                     {getViewName({
@@ -91,6 +99,9 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                         useShortNames,
                                         showGroupName: true,
                                     })}
+                                    {
+                                        station && ` (${station})`
+                                    }
                                 </span>
                             </div>
                             {
@@ -105,10 +116,22 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                     </div>
                                 )
                             }
+                            {
+                                price != null && (
+                                    <div className="chip-data">
+                                        <span className="material-symbols-outlined icon">
+											attach_money
+                                        </span>
+                                        <span className="value">
+                                            {formatPrice(price, false /*addCurrencySign*/)}
+                                        </span>
+                                    </div>
+                                )
+                            }
                         </Link>
                     );
                 })
             }
         </div>
-    )
-}
+    );
+};

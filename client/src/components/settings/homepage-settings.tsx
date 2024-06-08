@@ -3,6 +3,7 @@ import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { HomepageViewsSetting } from './homepage-views-setting.tsx';
 import { ApplicationSettings, SpecialSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { SettingsGroup } from './settings-group.tsx';
 
 interface IHomepageSettingsProps {
 	requireButtonToCommitHomepageViews: boolean;
@@ -17,10 +18,7 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
     );
 
     return (
-        <div className="card settings-group">
-            <div className="title">
-                Homepage Setup
-            </div>
+        <SettingsGroup title="Homepage Setup" iconName="home">
             {
                 !hasAnyHomepageViews && homepageViewsComponent
             }
@@ -37,6 +35,6 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
             {
                 hasAnyHomepageViews && homepageViewsComponent
             }
-        </div>
+        </SettingsGroup>
     );
 };
