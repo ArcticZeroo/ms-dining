@@ -1,5 +1,5 @@
 export class ValueNotifier<T> {
-    protected _listeners: Array<(value: T, oldValue: T) => void> = [];
+    protected readonly _listeners: Set<(value: T, oldValue: T) => void> = new Set();
 
     constructor(protected _value: T) {
     }
@@ -17,14 +17,13 @@ export class ValueNotifier<T> {
     }
 
     addListener(listener: (value: T, oldValue: T) => void) {
-        this._listeners.push(listener);
+        const wasAdded = !this._listeners.has(listener);
+        this._listeners.add(listener);
+        return wasAdded;
     }
 
     removeListener(listener: (value: T, oldValue: T) => void) {
-        const index = this._listeners.indexOf(listener);
-        if (index !== -1) {
-            this._listeners.splice(index, 1);
-        }
+        return this._listeners.delete(listener);
     }
 }
 
@@ -61,16 +60,19 @@ export abstract class RefCountedValueNotifier<T> extends ValueNotifier<T> {
     private _tearDownCallback: (() => void) | null = null;
 
     addListener(listener: (value: T, oldValue: T) => void) {
-        super.addListener(listener);
-        if (this._listeners.length === 1) {
+        const wasAdded = super.addListener(listener);
+        if (wasAdded && this._listeners.size === 1) {
             this._tearDownCallback = this.setup();
         }
+        return wasAdded;
     }
 
     removeListener(listener: (value: T, oldValue: T) => void) {
-        super.removeListener(listener);
-        if (this._listeners.length === 0) {
+        const wasRemoved = super.removeListener(listener);
+        if (wasRemoved && this._listeners.size === 0) {
             this._tearDownCallback?.();
+            this._tearDownCallback = null;
         }
+        return wasRemoved;
     }
 }
