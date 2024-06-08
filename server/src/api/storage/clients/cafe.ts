@@ -57,12 +57,4 @@ export abstract class CafeStorageClient {
             id: cafe.id
         });
     }
-
-    public static async deleteCafe(cafeId: string): Promise<void> {
-        // This is going to be slower but hopefully this rarely ever happens anyway
-        await usePrismaClient(client => client.cafe.deleteMany({
-            where: { id: cafeId },
-        }));
-        this._cafeDataById.delete(cafeId);
-    }
 }

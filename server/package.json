@@ -9,7 +9,7 @@
     "@types/node": "^20.6.0",
     "@types/node-cron": "^3.0.8",
     "cross-env": "^7.0.3",
-    "prisma": "^5.11.0",
+    "prisma": "^5.15.0",
     "typescript": "^5.3.2",
     "undici": "^5.24.0"
   },
@@ -20,7 +20,7 @@
     "@arcticzeroo/duration": "^2.0.2",
     "@arcticzeroo/typeguard": "^1.0.0",
     "@koa/router": "^12.0.0",
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.15.0",
     "@types/hat": "^0.0.4",
     "@types/koa-json": "^2.0.20",
     "chatgpt": "^5.2.5",
@@ -37,7 +37,9 @@
     "node-fetch": "^3.3.2",
     "phone": "^3.1.42",
     "semaphore-async-await": "^1.5.1",
-    "sitemap": "^7.1.1"
+    "sitemap": "^7.1.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   },
   "scripts": {
     "start": "npx tsc && node dist/main.js",
