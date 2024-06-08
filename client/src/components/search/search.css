@@ -129,13 +129,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--constant-padding);
-    align-self: center;
 }
 
 .search-result-hits .search-result-chip {
     min-width: 1.5rem;
     display: flex;
-    align-items: center;
     justify-content: center;
 }
 
