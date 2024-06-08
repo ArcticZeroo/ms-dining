@@ -336,7 +336,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
             description:    jsonItem.description,
             receiptText:    jsonItem.receiptText,
             lastUpdateTime: new Date(jsonItem.lastUpdateTime),
-            tags:           Array.from(tags),
+            tags:           new Set(tags),
             modifiers,
             searchTags:     localItem?.searchTags ?? new Set<string>()
         };

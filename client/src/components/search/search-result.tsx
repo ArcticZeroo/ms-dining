@@ -1,17 +1,18 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
+import { SearchMatchReason } from '@msdining/common/dist/models/search';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../context/app.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView } from '../../models/cafe.ts';
-import { SearchMatchReason } from '../../models/search.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import './search.css';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { getSearchUrl } from '../../util/url.ts';
+import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
 import { SearchResultHits } from './search-result-hits.tsx';
 import { SelectedDateContext } from '../../context/time.ts';
 import { isSameDate } from '@msdining/common/dist/util/date-util';
@@ -168,6 +169,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const showTags = useValueNotifier(ApplicationSettings.showTags);
     const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDateNotifier = useContext(SelectedDateContext);
@@ -247,6 +249,11 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                     ))
                                 }
                             </div>
+                        )
+                    }
+                    {
+                        tags && (showTags || matchReasons.has(SearchMatchReason.tags)) && (
+                            <MenuItemTags tags={tags}/>
                         )
                     }
                     {

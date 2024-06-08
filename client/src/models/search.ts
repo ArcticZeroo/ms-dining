@@ -6,11 +6,6 @@ export enum SearchResultsViewMode {
     vertical
 }
 
-export enum SearchMatchReason {
-    title,
-    description
-}
-
 export const allSearchEntityTypes = [
     SearchTypes.SearchEntityType.menuItem,
     SearchTypes.SearchEntityType.station,

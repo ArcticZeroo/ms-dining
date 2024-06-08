@@ -1,4 +1,4 @@
-import { CafeTypes } from '@msdining/common';
+import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util.js';
 import { Nullable } from './util.js';
 
@@ -65,20 +65,4 @@ export interface IMenuItemTag {
     name: string;
 }
 
-export interface IMenuItem {
-    id: string;
-    price: number;
-    name: string;
-    receiptText?: Nullable<string>;
-    calories: number;
-    maxCalories: number;
-    hasThumbnail: boolean;
-    modifiers: CafeTypes.IMenuItemModifier[];
-    thumbnailWidth?: number;
-    thumbnailHeight?: number;
-    imageUrl?: Nullable<string>;
-    description?: Nullable<string>;
-    lastUpdateTime?: Nullable<Date>;
-    tags: string[];
-    searchTags: Set<string>;
-}
+export { IMenuItem };

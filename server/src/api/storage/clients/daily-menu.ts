@@ -154,8 +154,8 @@ export abstract class DailyMenuStorageClient {
                 logoUrl:            stationData.logoUrl || undefined,
                 name:               stationData.name,
                 menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
-                                        ? dailyStation.externalLastUpdateTime
-                                        : undefined,
+                                    ? dailyStation.externalLastUpdateTime
+                                    : undefined,
                 menuItemsById,
                 menuItemIdsByCategoryName
             });
@@ -229,8 +229,9 @@ export abstract class DailyMenuStorageClient {
                         menuItems: {
                             select: {
                                 menuItemId: true,
-                                menuItem: {
+                                menuItem:   {
                                     select: {
+                                        tags: true,
                                         searchTags: {
                                             select: {
                                                 name: true

@@ -1,15 +1,13 @@
-import { IMenuItem } from '../../../models/cafe.js';
-import { MenuItem, MenuItemModifier, MenuItemModifierChoice, Prisma, PrismaClient } from '@prisma/client';
-import { usePrismaClient } from '../client.js';
-import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
-import { retrieveExistingThumbnailData } from '../../cafe/image/thumbnail.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { MenuItemModifier, MenuItemModifierChoice, PrismaClient } from '@prisma/client';
+import { IMenuItem } from '../../../models/cafe.js';
+import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug } from '../../../util/log.js';
+import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
+import { retrieveExistingThumbnailData } from '../../cafe/image/thumbnail.js';
 import { ISearchTagQueueEntry } from '../../worker/search-tags.js';
-import { fromDateString } from '@msdining/common/dist/util/date-util.js';
-import Duration from '@arcticzeroo/duration';
-import { Nullable } from '../../../models/util.js';
+import { usePrismaClient } from '../client.js';
 
 export abstract class MenuItemStorageClient {
     private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -120,7 +118,7 @@ export abstract class MenuItemStorageClient {
             price:                  Number(menuItem.price || 0),
             calories:               Number(menuItem.calories || 0),
             maxCalories:            Number(menuItem.maxCalories || 0),
-            tags:                   menuItem.tags.length === 0 ? null : menuItem.tags.join(';'),
+            tags:                   serializeMenuItemTags(menuItem.tags),
             externalLastUpdateTime: lastUpdateTime,
             externalReceiptText:    menuItem.receiptText || null,
             modifiers:              {
@@ -284,7 +282,7 @@ export abstract class MenuItemStorageClient {
             hasThumbnail:    thumbnailData.hasThumbnail,
             thumbnailHeight: thumbnailData.thumbnailHeight,
             thumbnailWidth:  thumbnailData.thumbnailWidth,
-            tags:            menuItem.tags?.split(';') ?? [],
+            tags:            deserializeMenuItemTags(menuItem.tags),
             searchTags:      new Set(menuItem.searchTags.map(tag => tag.name)),
             modifiers
         };

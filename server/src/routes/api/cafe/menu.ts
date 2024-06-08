@@ -1,9 +1,9 @@
 import Router from '@koa/router';
-import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { MenuResponse } from '@msdining/common/dist/models/http.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { MenuResponse } from '../../../models/routes.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
@@ -36,16 +36,22 @@ const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<
 export const registerMenuRoutes = (parent: Router) => {
     const router = new Router();
 
+    const serializeMenuItem = (menuItem: IMenuItem): IMenuItemDTO => ({
+        ...menuItem,
+        tags: Array.from(menuItem.tags),
+        searchTags: Array.from(menuItem.searchTags)
+    });
+
     const convertMenuToSerializable = (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): MenuResponse => {
         const menusByStation: MenuResponse = [];
 
         for (const station of menuStations) {
             const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
 
-            const itemsByCategory: Record<string, Array<IMenuItem>> = {};
+            const itemsByCategory: Record<string, Array<IMenuItemDTO>> = {};
 
             for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
-                const itemsForCategory: IMenuItem[] = [];
+                const itemsForCategory: IMenuItemDTO[] = [];
 
                 for (const itemId of categoryItemIds) {
                     // Expected; Some items are 86-ed
@@ -53,7 +59,7 @@ export const registerMenuRoutes = (parent: Router) => {
                         continue;
                     }
 
-                    itemsForCategory.push(station.menuItemsById.get(itemId)!);
+                    itemsForCategory.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
                 }
 
                 if (itemsForCategory.length === 0) {

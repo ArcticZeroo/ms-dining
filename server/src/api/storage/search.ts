@@ -48,10 +48,11 @@ interface IAddResultParams {
     cafeId: string;
     matchReasons: Iterable<SearchMatchReason>;
     name: string;
-    price?: number;
-    description?: Nullable<string>;
-    imageUrl?: Nullable<string>;
-    searchTags?: Set<string>;
+    price: Nullable<number>;
+    description: Nullable<string>;
+    imageUrl: Nullable<string>;
+    tags: Nullable<Set<string>>;
+    searchTags: Nullable<Set<string>>;
 }
 
 
@@ -119,16 +120,17 @@ class SearchSession {
     }
 
     addResult({
-                           type,
-                           name,
-                           description,
-                           imageUrl,
-                           dateString,
-                           cafeId,
-                           matchReasons,
-                           price,
-                           searchTags
-                       }: IAddResultParams) {
+                  type,
+                  name,
+                  description,
+                  imageUrl,
+                  dateString,
+                  cafeId,
+                  matchReasons,
+                  price,
+                  tags,
+                  searchTags
+              }: IAddResultParams) {
         this.#ensureEntityTypeExists(type);
 
         const searchResultsById = this.searchResultsByNameByEntityType.get(type)!;
@@ -140,10 +142,10 @@ class SearchSession {
                 name,
                 description,
                 imageUrl,
-                searchTags,
+                searchTags:            searchTags || undefined,
                 locationDatesByCafeId: new Map<string, Set<string>>(),
+                pricesByCafeId:        new Map<string, number>(),
                 matchReasons:          new Set<SearchMatchReason>(),
-                prices:                new Set<number>(),
             });
         }
 
@@ -159,7 +161,7 @@ class SearchSession {
         searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
 
         if (price != null) {
-            searchResult.prices.add(price);
+            searchResult.pricesByCafeId.set(cafeId, price);
         }
 
         if (searchTags) {
@@ -171,6 +173,15 @@ class SearchSession {
             searchResult.searchTags = combinedSearchTags;
         }
 
+        if (tags) {
+            const combinedTags = searchResult.tags || new Set<string>();
+            for (const tag of tags) {
+                combinedTags.add(tag);
+            }
+
+            searchResult.tags = combinedTags;
+        }
+
         // The first item to make it into the map might not be the one with all the info.
         searchResult.description = searchResult.description || description;
         searchResult.imageUrl = searchResult.imageUrl || imageUrl;
@@ -180,7 +191,11 @@ class SearchSession {
 // This is not a storage client because it orchestrates multiple storage clients together,
 // which otherwise should not be interacting (to avoid circular dependencies).
 export abstract class SearchManager {
-    private static async _performMultiQuerySearch({ queries, shouldUseExactMatch, date }: IMultiQuerySearchParams): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
+    private static async _performMultiQuerySearch({
+                                                      queries,
+                                                      shouldUseExactMatch,
+                                                      date
+                                                  }: IMultiQuerySearchParams): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
         const session = new SearchSession({ queries, shouldUseExactMatch, date });
         const dailyStations = await session.getMenusAsync();
 
@@ -200,6 +215,11 @@ export abstract class SearchManager {
                     cafeId:       dailyStation.cafeId,
                     name:         stationData.name,
                     imageUrl:     stationData.logoUrl,
+                    // No data for stations
+                    price:       undefined,
+                    searchTags:  undefined,
+                    tags:        undefined,
+                    description: undefined
                 });
             }
 
@@ -248,6 +268,7 @@ export abstract class SearchManager {
                             name:        menuItem.name,
                             description: menuItem.description,
                             price:       menuItem.price,
+                            tags:        menuItem.tags,
                             searchTags:  menuItem.searchTags,
                             imageUrl:    getThumbnailUrl(menuItem),
                             matchReasons,
@@ -262,7 +283,7 @@ export abstract class SearchManager {
 
     public static async search(query: string, date: Date | null, shouldUseExactMatch: boolean = false): Promise<Map<SearchEntityType, Map<string, ISearchResult>>> {
         return SearchManager._performMultiQuerySearch({
-            queries:[{ text: query }],
+            queries: [{ text: query }],
             date,
             shouldUseExactMatch
         });
@@ -276,7 +297,11 @@ export abstract class SearchManager {
         });
     }
 
-    public static async searchForCheapItems({ minPrice, maxPrice, date }: ICheapItemSearchParams): Promise<ICheapItemSearchResult[]> {
+    public static async searchForCheapItems({
+                                                minPrice,
+                                                maxPrice,
+                                                date
+                                            }: ICheapItemSearchParams): Promise<ICheapItemSearchResult[]> {
         const dailyStations = await DailyMenuStorageClient.getMenusForSearch(date);
 
         const resultsByItemNameByPrice = new Map<string, Map<number, ICheapItemSearchResult>>();
@@ -333,8 +358,8 @@ export abstract class SearchManager {
                             // price, since those are presumably the same item? Not sure how to deal with this.
                             minCalories:           menuItem.calories,
                             maxCalories:           menuItem.maxCalories === 0
-                                                       ? menuItem.calories
-                                                       : menuItem.maxCalories,
+                                                   ? menuItem.calories
+                                                   : menuItem.maxCalories,
                             locationDatesByCafeId: new Map<string, Set<string>>()
                         });
                     }

@@ -26,3 +26,13 @@ export const getBetterLogoUrl = (stationName: string, stationLogoUrl?: Nullable<
     const betterLogoUrl = betterLogosByNormalizedName[normalizeNameForSearch(stationName)];
     return betterLogoUrl || stationLogoUrl;
 }
+
+export const serializeMenuItemTags = (tags: Iterable<string>) => {
+    const tagsArray = Array.from(tags);
+    if (tagsArray.length === 0) {
+        return null;
+    }
+    return tagsArray.join(';');
+}
+
+export const deserializeMenuItemTags = (tags: string | null | undefined) => new Set(tags?.split(';') ?? []);

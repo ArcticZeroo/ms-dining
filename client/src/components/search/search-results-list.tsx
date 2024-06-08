@@ -136,6 +136,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         locationDatesByCafeId={searchResult.locationDatesByCafeId}
                         imageUrl={searchResult.imageUrl}
                         entityType={searchResult.entityType}
+                        tags={searchResult.tags}
                         searchTags={searchResult.searchTags}
                         isCompact={isCompact}
                         showFavoriteButton={true}

@@ -32,8 +32,9 @@ export const registerSearchRoutes = (parent: Router) => {
         description:  searchResult.description,
         imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl),
         locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+        prices:       Object.fromEntries(searchResult.pricesByCafeId),
         matchReasons: Array.from(searchResult.matchReasons),
-        prices:       Array.from(searchResult.prices),
+        tags:         searchResult.tags ? Array.from(searchResult.tags) : undefined,
         searchTags:   searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined
     });
 

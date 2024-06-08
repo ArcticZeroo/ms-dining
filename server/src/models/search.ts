@@ -5,10 +5,11 @@ export interface ISearchResult {
     type: SearchTypes.SearchEntityType;
     matchReasons: Set<SearchTypes.SearchMatchReason>;
     locationDatesByCafeId: Map<string, Set<string>>;
+    pricesByCafeId: Map<string, number>;
     imageUrl?: Nullable<string>;
     name: string;
     description?: Nullable<string>;
-    prices: Set<number>;
+    tags?: Set<string>;
     searchTags?: Set<string>;
 }
 
