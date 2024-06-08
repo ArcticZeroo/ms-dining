@@ -1,3 +1,5 @@
+import { Nullable } from './util.js';
+
 export const ModifierChoices = {
 	radio:       'radio',
 	checkbox:    'checkbox',
@@ -27,5 +29,43 @@ export interface IStationUniquenessData {
 	// e.g. 2: 5 means that five items were in the station for two different days.
 	itemDays: Record<number, number>;
 }
+
+export interface IMenuItem {
+    id: string;
+    price: number;
+    name: string;
+    receiptText?: Nullable<string>;
+    calories: number;
+    maxCalories: number;
+    hasThumbnail: boolean;
+    modifiers: IMenuItemModifier[];
+    thumbnailWidth?: number;
+    thumbnailHeight?: number;
+    imageUrl?: Nullable<string>;
+    description?: Nullable<string>;
+    lastUpdateTime?: Nullable<Date>;
+    tags: Set<string>;
+    searchTags: Set<string>;
+}
+
+export interface IMenuItemDTO {
+    id: string;
+    price: number;
+    name: string;
+    receiptText?: Nullable<string>;
+    calories: number;
+    maxCalories: number;
+    hasThumbnail: boolean;
+    modifiers: IMenuItemModifier[];
+    thumbnailWidth?: number;
+    thumbnailHeight?: number;
+    imageUrl?: Nullable<string>;
+    description?: Nullable<string>;
+    lastUpdateTime?: Nullable<Date>;
+    tags: string[];
+    searchTags: string[];
+}
+
+export type StationMenuByCategoryName = Record<string, Array<IMenuItem>>;
 
 export * from './cart.js';

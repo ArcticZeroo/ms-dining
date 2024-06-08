@@ -12,31 +12,31 @@ import { getDistanceBetweenCoordinates } from './user-location.ts';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 
 export interface ISearchResultSortingContext {
-	viewsById: Map<string, CafeView>;
-	queryText: string;
-	cafePriorityOrder: string[];
-	userLocation: ILocationCoordinates | null;
-	homepageViewIds: Set<string>;
-	isUsingGroups: boolean;
-	favoriteItemNames: Set<string>;
-	favoriteStationNames: Set<string>;
+    viewsById: Map<string, CafeView>;
+    queryText: string;
+    cafePriorityOrder: string[];
+    userLocation: ILocationCoordinates | null;
+    homepageViewIds: Set<string>;
+    isUsingGroups: boolean;
+    favoriteItemNames: Set<string>;
+    favoriteStationNames: Set<string>;
 }
 
 interface ISubstringScoreParams {
-	matchingText: string;
-	queryText: string;
-	isSequential: boolean;
-	perfectMatchScore?: number;
-	perfectMatchWithoutBoundaryScore?: number;
+    matchingText: string;
+    queryText: string;
+    isSequential: boolean;
+    perfectMatchScore?: number;
+    perfectMatchWithoutBoundaryScore?: number;
 }
 
 const getSubstringScore = ({
-							   matchingText,
-							   queryText,
-							   isSequential,
-							   perfectMatchScore,
-							   perfectMatchWithoutBoundaryScore
-						   }: ISubstringScoreParams) => {
+    matchingText,
+    queryText,
+    isSequential,
+    perfectMatchScore,
+    perfectMatchWithoutBoundaryScore
+}: ISubstringScoreParams) => {
     const substringLength = isSequential
         ? findLongestSequentialSubstringLength(matchingText, queryText)
         : findLongestNonSequentialSubstringLength(matchingText, queryText);
@@ -61,7 +61,7 @@ const getSubstringScore = ({
 const getCafePriorityScore = (cafeId: string, cafePriorityOrder: string[]) => {
     const priorityIndex = cafePriorityOrder.indexOf(cafeId);
     return priorityIndex === -1 ? 0 : (cafePriorityOrder.length - priorityIndex);
-}
+};
 
 const getCafeHomepageScore = (cafeId: string, context: ISearchResultSortingContext) => {
     const cafeView = context.viewsById.get(cafeId);
@@ -74,7 +74,7 @@ const getCafeHomepageScore = (cafeId: string, context: ISearchResultSortingConte
     const parentView = getParentView(context.viewsById, cafeView, context.isUsingGroups);
 
     return context.homepageViewIds.has(parentView.value.id) ? 5 : 0;
-}
+};
 
 // This is generally expected to only be useful to people who are already on campus.
 // If you're not on campus, you probably don't care about the distance to a cafe.
@@ -88,7 +88,7 @@ const getLocationCurveScore = (distanceInMiles: number) => {
 
     // This is a downward-facing curve that starts at y=1 when x=0 and reaches y=0 at x=1.5
     // return 2 - Math.pow(Math.E, ((Math.log(2) / MAX_DISTANCE_MILES) * distanceInMiles));
-}
+};
 
 const getCafeLocationScore = (cafeId: string, context: ISearchResultSortingContext) => {
     if (!context.userLocation) {
@@ -116,7 +116,7 @@ const getCafeLocationScore = (cafeId: string, context: ISearchResultSortingConte
 
     // Intentional that this makes cafes which are >MAX_DISTANCE_MILES away have a negative score here.
     return getLocationCurveScore(distanceInMiles);
-}
+};
 
 const getCafeHitsRelevancyTotalScore = (searchResult: ISearchResult, context: ISearchResultSortingContext) => {
     const cafeIds = new Set(Array.from(searchResult.locationDatesByCafeId.keys()));
@@ -166,8 +166,9 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
 
 const MATCH_REASON_MULTIPLIERS: Record<SearchMatchReason, number> = {
     [SearchMatchReason.title]:       1,
+    [SearchMatchReason.tags]:        0.8,
     [SearchMatchReason.description]: 0.7,
-    [SearchMatchReason.tags]:        0.5
+    [SearchMatchReason.searchTags]:  0.5,
 };
 
 const getSubstringScoreForTags = (queryText: string, searchResult: ISearchResult) => {
@@ -190,7 +191,7 @@ const getSubstringScoreForTags = (queryText: string, searchResult: ISearchResult
     }
 
     return totalScore / (queryWords.length * searchResult.searchTags.size);
-}
+};
 
 const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearchResult, matchReason: SearchMatchReason) => {
     if (matchReason === SearchMatchReason.tags) {
@@ -220,7 +221,7 @@ const getSubstringScoreForMatchReason = (queryText: string, searchResult: ISearc
     });
 
     const baseScore = (longestSequentialSubstringLength * 20)
-		+ (longestNonSequentialSubstringLength * 2);
+                      + (longestNonSequentialSubstringLength * 2);
 
     return baseScore * MATCH_REASON_MULTIPLIERS[matchReason];
 };
@@ -235,7 +236,7 @@ const getTargetFavoriteSetForEntityType = (context: ISearchResultSortingContext,
     }
 
     return null;
-}
+};
 
 const FAVORITE_ITEM_MULTIPLIER = 2;
 
@@ -245,12 +246,12 @@ const getFavoriteItemMultiplier = (context: ISearchResultSortingContext, searchR
     return targetSet?.has(normalizeNameForSearch(searchResult.name)) === true
         ? FAVORITE_ITEM_MULTIPLIER
         : 1;
-}
+};
 
 interface IComputeScoreParams {
-	searchResult: ISearchResult;
-	doSubstringScore: boolean;
-	context: ISearchResultSortingContext;
+    searchResult: ISearchResult;
+    doSubstringScore: boolean;
+    context: ISearchResultSortingContext;
 }
 
 const ENTITY_TYPE_MULTIPLIERS: Record<SearchEntityType, number> = {
@@ -271,18 +272,18 @@ const computeScore = ({ searchResult, doSubstringScore, context }: IComputeScore
     const dateRelevancyScore = getDateRelevancyScore(searchResult);
 
     const baseScore = totalSubstringScore
-		+ cafeRelevancyScore
-		+ dateRelevancyScore;
+                      + cafeRelevancyScore
+                      + dateRelevancyScore;
 
     return baseScore
-		* ENTITY_TYPE_MULTIPLIERS[searchResult.entityType]
-		* getFavoriteItemMultiplier(context, searchResult);
+           * ENTITY_TYPE_MULTIPLIERS[searchResult.entityType]
+           * getFavoriteItemMultiplier(context, searchResult);
 };
 
 enum MatchType {
-	perfect = 3,
-	substring = 2,
-	fuzzy = 1
+    perfect = 3,
+    substring = 2,
+    fuzzy = 1
 }
 
 const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: SearchMatchReason): Iterable<string> => {
@@ -325,9 +326,9 @@ const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMat
 };
 
 interface ISearchSortMetadata {
-	matchType: MatchType;
-	score: number;
-	result: ISearchResult;
+    matchType: MatchType;
+    score: number;
+    result: ISearchResult;
 }
 
 export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], context: ISearchResultSortingContext): IQuerySearchResult[] => {

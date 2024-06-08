@@ -1,5 +1,5 @@
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import React, { useMemo } from 'react';
-import { IMenuItem } from '../../../../models/cafe.ts';
 import { MenuItem } from './menu-item.tsx';
 
 export interface IMenuCategoryProps {

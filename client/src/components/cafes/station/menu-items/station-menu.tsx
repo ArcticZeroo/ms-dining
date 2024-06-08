@@ -1,11 +1,11 @@
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React from 'react';
-import { IMenuItemsByCategoryName } from '../../../../models/cafe.ts';
+import { MenuItemsByCategoryName } from '../../../../models/cafe.ts';
 import { MenuCategory } from './menu-category.tsx';
 
 interface IStationMenuProps {
     normalizedStationName: string;
-    menuItemsByCategoryName: IMenuItemsByCategoryName;
+    menuItemsByCategoryName: MenuItemsByCategoryName;
 }
 
 const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStationMenuProps> = ({

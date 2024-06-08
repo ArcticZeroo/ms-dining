@@ -23,7 +23,9 @@ const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {
         const onChange = () => setValue(valueNotifier.value);
         valueNotifier.addListener(onChange);
 
-        return () => valueNotifier.addListener(onChange);
+        return () => {
+            valueNotifier.addListener(onChange);
+        };
     }, [valueNotifier]);
 
     return value;

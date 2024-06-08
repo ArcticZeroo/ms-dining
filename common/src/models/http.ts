@@ -1,4 +1,5 @@
-import { ILocationCoordinates } from './util.js';
+import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
+import { ILocationCoordinates, Nullable } from './util.js';
 
 export interface IDiningCoreGroupMemberBase {
     name: string;
@@ -55,3 +56,16 @@ export interface IPriceResponse {
     totalPriceWithoutTax: number;
     totalTax: number;
 }
+
+export interface IMenuResponseStation {
+    name: string;
+    // Not all stations have a logo URL apparently?
+    logoUrl?: Nullable<string>;
+    menu: Record<string /*categoryName*/, Array<IMenuItemDTO>>;
+    uniqueness: IStationUniquenessData;
+}
+
+// GET /api/dining/menu/:cafeId
+export type MenuResponse = Array<IMenuResponseStation>;
+
+export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;

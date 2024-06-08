@@ -1,4 +1,5 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import {
     IOrderCompletionResponse,
     ISerializedCartItem,
@@ -11,7 +12,6 @@ import { isValidOrderCompletionResponse } from '../util/order.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
 import { IPaymentInfo } from '../components/order/payment/payment-info-form.tsx';
 import { ICartItemWithMetadata, IHydratedCartData, ISerializedCartItemWithName } from '../models/cart.ts';
-import { IMenuItem } from '../models/cafe.ts';
 import { getRandomId } from '../util/id.ts';
 import { calculatePrice } from '../util/cart.ts';
 

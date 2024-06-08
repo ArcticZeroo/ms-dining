@@ -1,7 +1,10 @@
+import { isDuckType } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { IDiningCoreResponse, IWaitTimeResponse } from '@msdining/common/dist/models/http';
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IDiningCoreResponse, IWaitTimeResponse, MenuResponse } from '@msdining/common/dist/models/http';
 import { ISearchQuery } from '@msdining/common/dist/models/search';
-import { CafeMenu, CafeView, ICafe, ICafeStation, IMenuItem } from '../models/cafe.ts';
+import { InternalSettings } from '../constants/settings.ts';
+import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
 import {
     ICheapItemSearchResult,
     IQuerySearchResult,
@@ -9,11 +12,9 @@ import {
     IServerSearchResult
 } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
+import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
-import { isDuckType } from '@arcticzeroo/typeguard';
-import { sortCafesInPriorityOrder } from '../util/sorting.ts';
-import { InternalSettings } from '../constants/settings.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -40,10 +41,29 @@ export abstract class DiningClient {
         return DiningClient._viewListPromise;
     }
 
-    private static _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
-        return makeJsonRequest({
+    private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
+        const response = await makeJsonRequest({
             path: `/api/dining/menu/${id}?date=${dateString}`
-        });
+        }) as MenuResponse;
+
+        const stations: ICafeStation[] = [];
+        for (const responseStation of response) {
+            const menu: Record<string, Array<IMenuItem>> = {};
+            for (const [category, menuItems] of Object.entries(responseStation.menu)) {
+                menu[category] = menuItems.map(dto => ({
+                    ...dto,
+                    tags:       new Set(dto.tags),
+                    searchTags: new Set(dto.searchTags)
+                }));
+            }
+
+            stations.push({
+                ...responseStation,
+                menu
+            });
+        }
+
+        return stations;
     }
 
     private static _addToLastUsedCafeIds(id: string) {
@@ -153,8 +173,9 @@ export abstract class DiningClient {
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
+                pricesByCafeId:        new Map(Object.entries(serverResult.prices)),
                 matchReasons:          new Set(serverResult.matchReasons),
-                prices:                new Set(serverResult.prices),
+                tags:                  serverResult.tags ? new Set(serverResult.tags) : undefined,
                 searchTags:            serverResult.searchTags ? new Set(serverResult.searchTags) : undefined
             });
         }

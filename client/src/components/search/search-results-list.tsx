@@ -14,7 +14,9 @@ import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 const useSortContext = (queryText: string, shouldPromptUserForLocation: boolean): ISearchResultSortingContext => {
     const { cafes, viewsById } = useContext(ApplicationContext);
 
-    const targetLocationProvider = shouldPromptUserForLocation ? PromptingUserLocationNotifier : PassiveUserLocationNotifier;
+    const targetLocationProvider = shouldPromptUserForLocation
+        ? PromptingUserLocationNotifier
+        : PassiveUserLocationNotifier;
     const userLocation = useValueNotifier(targetLocationProvider);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
@@ -119,7 +121,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
             let priceFilterHiddenResultCount = 0;
 
             const searchResultElements = entriesInOrder.map(searchResult => {
-                const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.prices).some(getIsPriceAllowed);
+                const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.pricesByCafeId.values()).some(getIsPriceAllowed);
 
                 if (!isPriceAllowed) {
                     priceFilterHiddenResultCount++;
@@ -139,6 +141,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         showFavoriteButton={true}
                         showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
                         shouldStretchResults={shouldStretchResults}
+                        matchReasons={searchResult.matchReasons}
                     />
                 );
             });

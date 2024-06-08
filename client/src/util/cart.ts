@@ -1,7 +1,7 @@
 import { CafeTypes } from '@msdining/common';
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { ICartItemWithMetadata } from '../models/cart.ts';
-import { IMenuItem } from '../models/cafe.ts';
 
 export const formatPrice = (price: number, addCurrencySign: boolean = true) => {
     return `${addCurrencySign ? '$' : ''}${price.toFixed(2)}`;

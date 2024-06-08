@@ -1,3 +1,4 @@
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useContext, useMemo } from 'react';
@@ -8,7 +9,6 @@ import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 import { PopupContext } from '../../../../context/modal.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
-import { IMenuItem } from '../../../../models/cafe.ts';
 import { formatPrice } from '../../../../util/cart.ts';
 import { getScrollAnchorId } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';

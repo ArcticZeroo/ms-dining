@@ -1,7 +1,7 @@
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import React, { useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { DiningClient } from '../../../../api/dining.ts';
-import { IMenuItem } from '../../../../models/cafe.ts';
 import { Measurement } from '../../../../util/measurement.ts';
 import { DownscaledImage } from '../../../image/downscaled-image.tsx';
 

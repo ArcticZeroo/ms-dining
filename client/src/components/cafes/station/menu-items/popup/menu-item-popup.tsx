@@ -1,8 +1,8 @@
 import { CafeTypes } from '@msdining/common';
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { CartContext } from '../../../../../context/cart.ts';
 import { PopupContext } from '../../../../../context/modal.ts';
-import { IMenuItem } from '../../../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 import { addOrEditCartItem, calculatePrice, shallowCloneCart } from '../../../../../util/cart.ts';
 import { getRandomId } from '../../../../../util/id.ts';

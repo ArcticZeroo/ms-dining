@@ -1,7 +1,7 @@
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import { FavoriteItemButton } from '../../../../button/favorite-item-button.tsx';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useContext, useState } from 'react';
-import { IMenuItem } from '../../../../../models/cafe.ts';
 import { navigateToSearch } from '../../../../../util/search.ts';
 import { getParentView } from '../../../../../util/view.ts';
 import { getViewMenuUrlWithJump } from '../../../../../util/link.ts';

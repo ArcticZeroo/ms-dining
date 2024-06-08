@@ -1,4 +1,4 @@
-import { CafeMenu, ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
+import { CafeMenu, ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import React, { useMemo } from 'react';
 import { StationListEmpty } from './station-list-empty.tsx';
 import { Station } from './station.tsx';
@@ -18,16 +18,16 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
     const shouldHideEveryDayStations = useValueNotifier(ApplicationSettings.hideEveryDayStations);
     const shouldDoIntelligentOrdering = useValueNotifier(ApplicationSettings.intelligentStationSort);
 
-    const filteredStationData: Array<[ICafeStation, IMenuItemsByCategoryName]> = useMemo(
+    const filteredStationData: Array<[ICafeStation, MenuItemsByCategoryName]> = useMemo(
         () => {
-            const filteredStations: Array<[ICafeStation, IMenuItemsByCategoryName]> = [];
+            const filteredStations: Array<[ICafeStation, MenuItemsByCategoryName]> = [];
 
             for (const station of stations) {
                 if (shouldHideEveryDayStations && station.uniqueness?.daysThisWeek === 5) {
                     continue;
                 }
 
-                let menu: IMenuItemsByCategoryName | null = station.menu;
+                let menu: MenuItemsByCategoryName | null = station.menu;
                 if (enablePriceFilters) {
                     menu = getFilteredMenu(station, minPrice, maxPrice)
                 }

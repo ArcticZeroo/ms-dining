@@ -1,8 +1,8 @@
-import { CafeTypes } from '@msdining/common';
 import {
     IDiningCoreGroup, IDiningCoreGroupMember,
 } from '@msdining/common/dist/models/http';
-import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
+import { IMenuItem, IStationUniquenessData } from '@msdining/common/dist/models/cafe';
+import { Nullable } from '@msdining/common/dist/models/util';
 
 export type ICafeGroup = IDiningCoreGroup;
 export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };
@@ -24,29 +24,12 @@ export interface ICafeGroupView {
 
 export type CafeView = ICafeSingleView | ICafeGroupView;
 
-export interface IMenuItem {
-    id: string;
-    price: number;
-    name: string;
-    calories: number;
-    maxCalories: number;
-    imageUrl?: string;
-    description?: string;
-    hasThumbnail: boolean;
-    thumbnailWidth?: number;
-    thumbnailHeight?: number;
-    modifiers: Array<CafeTypes.IMenuItemModifier>;
-    tags: string[];
-}
-
-export interface IMenuItemsByCategoryName {
-    [categoryName: string]: Array<IMenuItem>;
-}
+export type MenuItemsByCategoryName = Record<string, Array<IMenuItem>>;
 
 export interface ICafeStation {
     name: string;
-    logoUrl: string;
-    menu: IMenuItemsByCategoryName;
+    logoUrl?: Nullable<string>;
+    menu: MenuItemsByCategoryName;
     uniqueness: IStationUniquenessData;
 }
 

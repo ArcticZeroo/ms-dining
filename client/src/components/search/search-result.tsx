@@ -5,6 +5,7 @@ import { ApplicationContext } from '../../context/app.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView } from '../../models/cafe.ts';
+import { SearchMatchReason } from '../../models/search.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import './search.css';
@@ -18,8 +19,8 @@ import { pluralize } from '../../util/string.ts';
 import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
 
 interface IEntityDisplayData {
-	className: string;
-	iconName: string;
+    className: string;
+    iconName: string;
 }
 
 const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
@@ -52,9 +53,9 @@ const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShow
 };
 
 interface IUseLocationEntriesParams {
-	viewsById: Map<string, CafeView>;
-	locationDatesByCafeId: Map<string, Date[]>;
-	onlyShowLocationsOnDate?: Date;
+    viewsById: Map<string, CafeView>;
+    locationDatesByCafeId: Map<string, Date[]>;
+    onlyShowLocationsOnDate?: Date;
 }
 
 const useLocationEntries = ({
@@ -119,48 +120,52 @@ const useLocationEntries = ({
 };
 
 interface ISearchResultField {
-	key: string;
-	iconName: string;
-	value: React.ReactNode;
+    key: string;
+    iconName: string;
+    value: React.ReactNode;
 }
 
 export interface ISearchResultProps {
-	isVisible: boolean;
-	name: string;
-	description?: string;
-	locationDatesByCafeId?: Map<string, Date[]>;
-	imageUrl?: string;
-	entityType: SearchTypes.SearchEntityType;
-	extraFields?: ISearchResultField[];
-	onlyShowLocationsOnDate?: Date;
-	isCompact?: boolean;
-	showFavoriteButton?: boolean;
-	shouldColorForFavorites?: boolean;
-	cafeIdsOnPage?: Set<string>;
-	searchTags?: Set<string>;
-	showSearchButtonInsteadOfLocations?: boolean;
-	shouldStretchResults?: boolean;
-	isSkeleton?: boolean;
+    isVisible: boolean;
+    name: string;
+    description?: string;
+    locationDatesByCafeId?: Map<string, Date[]>;
+    imageUrl?: string;
+    entityType: SearchTypes.SearchEntityType;
+    extraFields?: ISearchResultField[];
+    onlyShowLocationsOnDate?: Date;
+    isCompact?: boolean;
+    showFavoriteButton?: boolean;
+    shouldColorForFavorites?: boolean;
+    cafeIdsOnPage?: Set<string>;
+    tags?: Set<string>;
+    searchTags?: Set<string>;
+    showSearchButtonInsteadOfLocations?: boolean;
+    shouldStretchResults?: boolean;
+    isSkeleton?: boolean;
+    matchReasons?: Set<SearchMatchReason>;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
-															   isVisible,
-															   name,
-															   description,
-															   locationDatesByCafeId = new Map<string, Date[]>(),
-															   imageUrl,
-															   entityType,
-															   extraFields,
-															   onlyShowLocationsOnDate,
-															   isCompact = false,
-															   showFavoriteButton = !isCompact,
-															   shouldColorForFavorites = true,
-															   cafeIdsOnPage,
-															   searchTags,
-															   showSearchButtonInsteadOfLocations = false,
-															   shouldStretchResults = false,
-															   isSkeleton = false
-														   }) => {
+    isVisible,
+    name,
+    description,
+    locationDatesByCafeId = new Map<string, Date[]>(),
+    imageUrl,
+    entityType,
+    extraFields,
+    onlyShowLocationsOnDate,
+    isCompact = false,
+    showFavoriteButton = !isCompact,
+    shouldColorForFavorites = true,
+    cafeIdsOnPage,
+    tags,
+    searchTags,
+    showSearchButtonInsteadOfLocations = false,
+    shouldStretchResults = false,
+    isSkeleton = false,
+    matchReasons = new Set()
+}) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
@@ -225,7 +230,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         <div className="search-result-name">
                             {name}
                             {
-                                !isCompact && description && <div className="search-result-description">{description}</div>
+                                !isCompact && description &&
+                                <div className="search-result-description">{description}</div>
                             }
                         </div>
                     </div>
@@ -235,7 +241,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                 {
                                     (searchTags != null && searchTags.size > 0) && Array.from(searchTags).map(tag => (
                                         <Link to={getSearchUrl(tag)} className="search-result-chip" key={tag}
-											  title={`Click to search for "${tag}"`}>
+                                            title={`Click to search for "${tag}"`}>
                                             {tag}
                                         </Link>
                                     ))
@@ -286,9 +292,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     {
                         showSearchButtonInsteadOfLocations && (
                             <Link to={getSearchUrl(name)}
-								  className="default-container default-button text-center text-nowrap">
-								🔍 find
-								in {isSkeleton ? '...' : locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
+                                className="default-container default-button text-center text-nowrap">
+                                                                   🔍 find
+                                                                   in {isSkeleton ? '...' : locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
                             </Link>
                         )
                     }

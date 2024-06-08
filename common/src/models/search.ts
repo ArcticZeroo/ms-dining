@@ -29,8 +29,10 @@ export interface ISearchResult {
     description?: string;
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
+    pricesByCafeId: Map<string, number>;
     matchReasons: Set<SearchMatchReason>;
     searchTags?: Set<string>;
+    tags?: Set<string>;
 }
 
 export interface ISearchQuery {

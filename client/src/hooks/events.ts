@@ -7,7 +7,9 @@ export const useValueNotifier = <T>(valueNotifier: ValueNotifier<T>) => {
     useEffect(() => {
         const listener = (value: T) => setValue(value);
         valueNotifier.addListener(listener);
-        return () => valueNotifier.removeListener(listener);
+        return () => {
+            valueNotifier.removeListener(listener);
+        };
     }, [valueNotifier]);
 
     return value;
@@ -35,7 +37,9 @@ export const useValueNotifierSetTarget = <T>(valueNotifier: ValueNotifier<Set<T>
     useEffect(() => {
         const listener = (value: Set<T>) => setExists(value.has(targetValue));
         valueNotifier.addListener(listener);
-        return () => valueNotifier.removeListener(listener);
+        return () => {
+            valueNotifier.removeListener(listener);
+        };
     }, [targetValue, valueNotifier]);
 
     return exists;

@@ -28,8 +28,9 @@ export interface IQuerySearchResult {
     description?: string;
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
+    pricesByCafeId: Map<string, number>;
     matchReasons: Set<SearchMatchReason>;
-    prices: Set<number>;
+    tags?: Set<string>;
     searchTags?: Set<string>;
 }
 
@@ -49,8 +50,9 @@ export interface IServerSearchResult {
     description?: string;
     imageUrl?: string;
     locations: Record<string, Array<string>>;
+    prices: Record<string, number>;
     matchReasons: Array<SearchMatchReason>;
-    prices: Array<number>;
+    tags?: Array<string>;
     searchTags?: Array<string>;
 }
 

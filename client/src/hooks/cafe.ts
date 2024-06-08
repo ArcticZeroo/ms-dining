@@ -4,7 +4,7 @@ import { useCallback, useContext, useMemo } from 'react';
 import { StringSetSetting } from '../api/settings.ts';
 import { getCafeLocation, getTargetSettingForFavorite } from '../util/cafe.ts';
 import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
-import { ICafeStation, IMenuItemsByCategoryName } from '../models/cafe.ts';
+import { ICafeStation, MenuItemsByCategoryName } from '../models/cafe.ts';
 import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
 import { useIsTodaySelected } from './date-picker.tsx';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
@@ -46,7 +46,7 @@ export const useIsFavoriteItem = (name: string, type: SearchEntityType) => {
 };
 
 export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPrice: number) => {
-    const menu: IMenuItemsByCategoryName = {};
+    const menu: MenuItemsByCategoryName = {};
 
     for (const [categoryName, items] of Object.entries(station.menu)) {
         const filteredItems = items.filter(item => {

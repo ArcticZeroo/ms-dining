@@ -3,3 +3,4 @@ export interface ILocationCoordinates {
     long: number;
 }
 
+export type Nullable<T> = T | null | undefined;

@@ -2,12 +2,12 @@ import React, { useMemo } from 'react';
 import { knownTags } from '../../../../constants/tags.tsx';
 
 interface IMenuItemTagsProps {
-	tags: string[];
+	tags: Set<string>;
 }
 
 export const MenuItemTags: React.FC<IMenuItemTagsProps> = ({ tags }) => {
     const tagElements = useMemo(
-        () => tags.map(tagId => {
+        () => Array.from(tags).map(tagId => {
             const tagData = knownTags[tagId];
 
             if (tagData == null) {

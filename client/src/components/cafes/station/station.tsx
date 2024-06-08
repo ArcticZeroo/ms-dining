@@ -9,7 +9,7 @@ import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hooks/html.ts';
-import { ICafeStation, IMenuItemsByCategoryName } from '../../../models/cafe.ts';
+import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
@@ -61,7 +61,7 @@ const useStationExpansion = (scrollAnchorId: string) => {
 
 export interface ICollapsibleStationProps {
     station: ICafeStation;
-    menu: IMenuItemsByCategoryName;
+    menu: MenuItemsByCategoryName;
 }
 
 export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {

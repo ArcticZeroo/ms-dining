@@ -81,7 +81,7 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
             return;
         }
 
-        if (this._listeners.length === 0 || !ApplicationSettings.allowLocation.value) {
+        if (this._listeners.size === 0 || !ApplicationSettings.allowLocation.value) {
             return;
         }
 
@@ -113,16 +113,19 @@ class UserLocationProvider extends ValueNotifier<ILocationCoordinates | null> {
     }
 
     addListener(listener: (value: ILocationCoordinates | null, oldValue: ILocationCoordinates | null) => void) {
-        super.addListener(listener);
+        const wasAdded = super.addListener(listener);
         this._trySetupListeners();
+        return wasAdded;
     }
 
     removeListener(listener: (value: ILocationCoordinates | null, oldValue: ILocationCoordinates | null) => void) {
-        super.removeListener(listener);
+        const wasRemoved = super.removeListener(listener);
 
-        if (this._listeners.length === 0) {
+        if (wasRemoved && this._listeners.size === 0) {
             this._stopWatching();
         }
+
+        return wasRemoved;
     }
 }
 
