@@ -162,15 +162,27 @@ export abstract class DiningClient {
         return results;
     }
 
-    public static async retrieveSearchResults(query: string, isExact: boolean = false): Promise<Array<IQuerySearchResult>> {
+    public static async retrieveSearchResults(query: string, date?: Date, isExact: boolean = false): Promise<Array<IQuerySearchResult>> {
+        const searchParams = new URLSearchParams();
+
+        searchParams.set('q', encodeURIComponent(query));
+
+        if (isExact) {
+            searchParams.set('e', 'true');
+        }
+
+        if (date != null) {
+            searchParams.set('date', DateUtil.toDateString(date));
+        }
+
         const response = await makeJsonRequest({
-            path: `/api/dining/search?q=${encodeURIComponent(query)}${isExact ? '&e=true' : ''}`
+            path: `/api/dining/search?${searchParams.toString()}`
         });
 
         return DiningClient._deserializeSearchResults(response);
     }
 
-    public static async retrieveFavoriteSearchResults(queries: Array<SearchTypes.ISearchQuery>): Promise<Array<IQuerySearchResult>> {
+    public static async retrieveFavoriteSearchResults(queries: Array<SearchTypes.ISearchQuery>, date?: Date): Promise<Array<IQuerySearchResult>> {
         const results: IQuerySearchResult[] = [];
         const remoteQueries: ISearchQuery[] = [];
 
@@ -184,7 +196,7 @@ export abstract class DiningClient {
         }
 
         const response = await makeJsonRequest({
-            path:    `/api/dining/search/favorites`,
+            path:    `/api/dining/search/favorites${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`,
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
@@ -200,9 +212,9 @@ export abstract class DiningClient {
         return results;
     }
 
-    public static async retrieveCheapItems(): Promise<Array<ICheapItemSearchResult>> {
+    public static async retrieveCheapItems(date?: Date): Promise<Array<ICheapItemSearchResult>> {
         const response = await makeJsonRequest({
-            path: `/api/dining/search/cheap`
+            path: `/api/dining/search/cheap${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`
         });
 
         if (!Array.isArray(response) || response.length === 0) {

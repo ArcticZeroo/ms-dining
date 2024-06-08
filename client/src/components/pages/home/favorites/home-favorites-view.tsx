@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { DiningClient } from '../../../../api/dining.ts';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
+import { useDateForSearch } from '../../../../hooks/date-picker.tsx';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { useHomepageViews } from '../../../../hooks/views.ts';
 import { IQuerySearchResult } from '../../../../models/search.ts';
@@ -27,14 +28,15 @@ interface IFavoriteSearchResultsData {
 
 const useFavoriteSearchResults = (queries: ISearchQuery[]): IFavoriteSearchResultsData => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const dateForSearch = useDateForSearch();
 
     const retrieveFavoriteSearchResults = useCallback(async () => {
         if (queries.length === 0) {
             return [];
         }
 
-        return DiningClient.retrieveFavoriteSearchResults(queries);
-    }, [queries]);
+        return DiningClient.retrieveFavoriteSearchResults(queries, dateForSearch);
+    }, [queries, dateForSearch]);
 
     const { stage, value, actualStage, error, run } = useDelayedPromiseState(
         retrieveFavoriteSearchResults,

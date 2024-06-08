@@ -38,6 +38,19 @@ const padDateValue = (value: number) => value.toString().padStart(2, '0');
 export const toDateString = (date: Date) => `${date.getFullYear()}-${padDateValue(date.getMonth() + 1)}-${padDateValue(date.getDate())}`;
 export const fromDateString = (dateString: string) => new Date(`${dateString}T00:00`);
 
+export const fromMaybeDateString = (value: unknown): Date | null => {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    const date = fromDateString(value);
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return date;
+}
+
 const FIRST_WEEKLY_MENUS_TIME = fromDateString('2023-10-31').getTime();
 
 export const isDateOnWeekend = (date: Date) => {

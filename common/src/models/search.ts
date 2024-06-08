@@ -6,7 +6,10 @@ export enum SearchEntityType {
 export enum SearchMatchReason {
     title = 'title',
     description = 'description',
-    tags = 'tags',
+    // AI-generated tags like "breakfast"
+    searchTags = 'searchTags',
+    // Tags like "vegan"
+    tags = 'tags'
 }
 
 export const allSearchEntityTypes = [

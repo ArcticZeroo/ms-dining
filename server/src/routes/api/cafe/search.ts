@@ -6,7 +6,7 @@ import { ISearchResult } from '../../../models/search.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { attachRouter, getTrimmedQueryParam } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { NumberUtil } from '@msdining/common';
+import { DateUtil, NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 
@@ -24,7 +24,7 @@ export const registerSearchRoutes = (parent: Router) => {
             serialized[cafeId] = Array.from(dates);
         }
         return serialized;
-    }
+    };
 
     const serializeSearchResult = (searchResult: ISearchResult) => ({
         type:         searchResult.type,
@@ -45,7 +45,7 @@ export const registerSearchRoutes = (parent: Router) => {
             }
         }
         return jsonStringifyWithoutNull(searchResults);
-    }
+    };
 
     router.post('/favorites',
         requireNoMenusUpdating,
@@ -57,7 +57,8 @@ export const registerSearchRoutes = (parent: Router) => {
                 return;
             }
 
-            const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries);
+            const date = DateUtil.fromMaybeDateString(ctx.query.date);
+            const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries, date);
             ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
         });
 
@@ -73,7 +74,14 @@ export const registerSearchRoutes = (parent: Router) => {
                 return;
             }
 
-            const searchResultsByIdPerEntityType = await SearchManager.search(searchQuery, isExact);
+            const date = DateUtil.fromMaybeDateString(ctx.query.date);
+
+            const searchResultsByIdPerEntityType = await SearchManager.search(
+                searchQuery,
+                date,
+                isExact
+            );
+
             ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
         });
 
@@ -85,17 +93,20 @@ export const registerSearchRoutes = (parent: Router) => {
             const minPriceRaw = ctx.query.min;
 
             const maxPrice = typeof maxPriceRaw === 'string'
-                ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
-                : DEFAULT_MAX_PRICE;
+                             ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
+                             : DEFAULT_MAX_PRICE;
 
             const minPrice = typeof minPriceRaw === 'string'
-                ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
-                : DEFAULT_MIN_PRICE;
+                             ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
+                             : DEFAULT_MIN_PRICE;
 
-            const cheapItems = await SearchManager.searchForCheapItems(
+            const date = DateUtil.fromMaybeDateString(ctx.query.date);
+
+            const cheapItems = await SearchManager.searchForCheapItems({
                 minPrice,
-                maxPrice
-            );
+                maxPrice,
+                date
+            });
 
             const searchResults = [];
             for (const searchResult of cheapItems) {

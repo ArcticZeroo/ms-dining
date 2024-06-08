@@ -2,6 +2,7 @@ import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise
 import { SearchTypes } from '@msdining/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
+import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
@@ -28,9 +29,11 @@ interface ISearchResultsState {
 
 const useSearchResultsState = (query: string): ISearchResultsState => {
     const [lastQueryText, setLastQueryText] = useState(query);
+    const dateForSearch = useDateForSearch();
+
     const doSearchCallback = useCallback(
-        () => DiningClient.retrieveSearchResults(query).finally(() => setLastQueryText(query)),
-        [query]
+        () => DiningClient.retrieveSearchResults(query, dateForSearch).finally(() => setLastQueryText(query)),
+        [query, dateForSearch]
     );
 
     const {

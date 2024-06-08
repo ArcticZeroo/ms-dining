@@ -1,3 +1,5 @@
+import { SelectedDateContext } from '../../../../context/time.ts';
+import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { randomSortInPlace } from '../../../../util/random.ts';
 import { useCallback, useEffect, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
@@ -28,8 +30,13 @@ const MAX_RESULT_COUNT = 10;
 
 export const SearchIdeas = () => {
     const [selectedIdea, setSelectedIdea] = useState(SEARCH_IDEAS[0]);
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    const retrieveSearchResultsCallback = useCallback(() => DiningClient.retrieveSearchResults(selectedIdea), [selectedIdea]);
+    const retrieveSearchResultsCallback = useCallback(
+        () => DiningClient.retrieveSearchResults(selectedIdea, selectedDate),
+        [selectedIdea, selectedDate]
+    );
+
     const {
         run: runRetrieveSearchResults,
         value,

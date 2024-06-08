@@ -201,13 +201,15 @@ export abstract class DailyMenuStorageClient {
         return result != null;
     }
 
-    public static getAllMenusForWeekForSearch() {
-        const dateStringsForWeek = DateUtil.getDateStringsForWeek();
+    public static getMenusForSearch(date: Date | null) {
+        const dateStrings = date != null
+                            ? [DateUtil.toDateString(date)]
+                            : DateUtil.getDateStringsForWeek();
 
         return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 dateString: {
-                    in: dateStringsForWeek
+                    in: dateStrings
                 }
             },
             select: {

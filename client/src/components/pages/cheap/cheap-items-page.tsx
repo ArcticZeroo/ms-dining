@@ -1,6 +1,7 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../../api/dining.ts';
+import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { ICheapItemSearchResult } from '../../../models/search.ts';
 import { isSearchResultVisible } from '../../../util/search.ts';
@@ -23,11 +24,17 @@ interface ICheapItemsResults {
 const useCheapItems = (): ICheapItemsResults => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const searchDate = useDateForSearch();
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
 
-    const { stage, value: results, error, run } = useImmediatePromiseState(DiningClient.retrieveCheapItems);
+    const retrieveCheapItems = useCallback(
+        () => DiningClient.retrieveCheapItems(searchDate),
+        [searchDate]
+    );
+
+    const { stage, value: results, error, run } = useImmediatePromiseState(retrieveCheapItems);
 
     const filteredResults = useMemo(
         () => {
