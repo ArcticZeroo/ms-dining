@@ -186,7 +186,7 @@ export abstract class DiningClient {
     public static async retrieveSearchResults(query: string, date?: Date, isExact: boolean = false): Promise<Array<IQuerySearchResult>> {
         const searchParams = new URLSearchParams();
 
-        searchParams.set('q', encodeURIComponent(query));
+        searchParams.set('q', query);
 
         if (isExact) {
             searchParams.set('e', 'true');
