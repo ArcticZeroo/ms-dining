@@ -136,7 +136,7 @@ nav form {
     transition: padding 0.5s ease;
 }
 
-.nav-numbered-cafe-list {
+nav.expanded .expandable-nav-list.nav-numbered-cafe-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;

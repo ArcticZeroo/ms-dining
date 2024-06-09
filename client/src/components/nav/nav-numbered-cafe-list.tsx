@@ -1,24 +1,31 @@
 import React, { useMemo } from 'react';
-import { NavLink } from 'react-router-dom';
+import { CafeView } from '../../models/cafe.ts';
+import { NavViewLink } from './nav-view-link.tsx';
 
 interface INavNumberedCafeListProps {
-    viewNumbersById: Map<string, number>;
+    views: CafeView[];
 }
 
-export const NavNumberedCafeList: React.FC<INavNumberedCafeListProps> = ({ viewNumbersById }) => {
-    const numberedCafesList = useMemo(() => {
-        const cafeNumberEntries = Array.from(viewNumbersById.entries()).sort(([, a], [, b]) => a - b);
+export const NavNumberedCafeList: React.FC<INavNumberedCafeListProps> = ({ views }) => {
+    const viewsInOrder = useMemo(
+        () => [...views].sort((a, b) => {
+            const aValue = a.value.shortName;
+            const bValue = b.value.shortName;
 
-        return cafeNumberEntries.map(([cafeId, cafeNumber]) => (
-            <NavLink key={cafeId} className="nav-numbered-cafe-list-item" to={`/menu/${cafeId}`} title={`Menu for Cafe ${cafeNumber}`}>
-                {cafeNumber}
-            </NavLink>
-        ));
-    }, [viewNumbersById]);
+            if (typeof aValue !== 'number' || typeof bValue !== 'number') {
+                throw new Error('Only numbered short names should be used in this component');
+            }
+
+            return aValue - bValue;
+        }),
+        [views]
+    );
 
     return (
-        <li className="nav-numbered-cafe-list">
-            {numberedCafesList}
-        </li>
+        <ul className="expandable-nav-list nav-numbered-cafe-list">
+            {viewsInOrder.map(view => (
+                <NavViewLink key={view.value.id} className="nav-numbered-cafe-list-item" view={view}/>
+            ))}
+        </ul>
     );
 }
