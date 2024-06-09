@@ -22,23 +22,23 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
     onAddQuantityClicked,
     onRemoveQuantityClicked
 }) => {
-    if (!isOnlineOrderingAllowed) {
-        return null;
-    }
-
     const canDecreaseQuantity = quantity > 1;
 
     return (
         <div className="menu-item-order-footer">
             <div className="controls">
-                <button className="material-symbols-outlined"
+                <button
                     disabled={!canDecreaseQuantity}
                     onClick={onRemoveQuantityClicked}>
-                    remove
+                    <span className="material-symbols-outlined">
+                        remove
+                    </span>
                 </button>
-                <button className="material-symbols-outlined"
+                <button
                     onClick={onAddQuantityClicked}>
-                    add
+                    <span className="material-symbols-outlined">
+                        add
+                    </span>
                 </button>
                 <div className="quantity">
                     {quantity}x
@@ -48,17 +48,21 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
                 <div className="price">
                     {formatPrice(totalPrice * quantity)}
                 </div>
-                <button className="add-to-cart"
-                    disabled={!isOrderValid}
-                    title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
-                    onClick={onAddToCartClicked}
-                >
-                    {
-                        isUpdate
-                            ? 'Update Cart Item'
-                            : 'Add to Cart'
-                    }
-                </button>
+                {
+                    isOnlineOrderingAllowed && (
+                        <button className="add-to-cart"
+                            disabled={!isOrderValid}
+                            title={isOrderValid ? 'Click to add to cart' : 'Finish choosing options before adding to your cart!'}
+                            onClick={onAddToCartClicked}
+                        >
+                            {
+                                isUpdate
+                                    ? 'Update Cart Item'
+                                    : 'Add to Cart'
+                            }
+                        </button>
+                    )
+                }
             </div>
         </div>
     );

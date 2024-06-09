@@ -22,7 +22,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
 }) => {
     const shouldSkipBody = !menuItem.description
                            && menuItem.imageUrl == null
-                           && (!isOnlineOrderingAllowed || menuItem.modifiers.length === 0);
+                           && menuItem.modifiers.length === 0;
 
     if (shouldSkipBody) {
         return null;
@@ -43,7 +43,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                 )
             }
             {
-                isOnlineOrderingAllowed && (
+                menuItem.modifiers.length > 0 && (
                     <div className="menu-item-configuration">
                         <div className="menu-item-modifiers">
                             {
@@ -57,13 +57,17 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                                 ))
                             }
                         </div>
-                        <div className="menu-item-notes">
-                            <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                            <textarea id="notes"
-                                placeholder="Enter Special Requests & Preparation Notes Here"
-                                value={notes}
-                                onChange={event => onNotesChanged(event.target.value)}/>
-                        </div>
+                        {
+                            isOnlineOrderingAllowed && (
+                                <div className="menu-item-notes">
+                                    <label htmlFor="notes">Special Requests & Preparation Notes</label>
+                                    <textarea id="notes"
+                                        placeholder="Enter Special Requests & Preparation Notes Here"
+                                        value={notes}
+                                        onChange={event => onNotesChanged(event.target.value)}/>
+                                </div>
+                            )
+                        }
                     </div>
                 )
             }

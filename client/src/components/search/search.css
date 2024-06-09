@@ -35,6 +35,7 @@
 .search-result {
     display: none;
     color: black;
+    content-visibility: auto;
 }
 
 .search-result.visible {
