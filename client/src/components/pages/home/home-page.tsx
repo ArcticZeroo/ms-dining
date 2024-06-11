@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useDatePicker } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
@@ -11,6 +11,8 @@ import { HomeWelcomeMessage } from './home-welcome-message.tsx';
 import { HomeExplore } from './explore/home-explore.tsx';
 
 import './home.css';
+
+const CampusMapView = React.lazy(() => import('../../map/campus-map-view.tsx'));
 
 const useShouldShowWelcomeMessage = () => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
@@ -46,6 +48,9 @@ export const HomePage = () => {
                 )
             }
             <HomeExplore/>
+            <Suspense fallback="Loading map...">
+                <CampusMapView/>
+            </Suspense>
             <HomeViews/>
             <HomepageSettings requireButtonToCommitHomepageViews={true}/>
             <MoreSettingsButton/>

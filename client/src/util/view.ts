@@ -1,4 +1,6 @@
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
+import { getCafeLocation } from './cafe.ts';
 
 export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<string, CafeView>): Array<ICafe> => {
     if (typeof view === 'string') {
@@ -49,3 +51,30 @@ export const isViewVisible = (view: CafeView, shouldUseGroups: boolean) => {
         return !view.value.group || !isGroupVisibleWithGroupsAllowed(view.value.group);
     }
 };
+
+export const getViewLocation = (view: CafeView): ILocationCoordinates => {
+    if (view.type === CafeViewType.single) {
+        return getCafeLocation(view.value);
+    }
+
+    if (view.value.location) {
+        return view.value.location;
+    }
+
+    let totalLat = 0;
+    let totalLong = 0;
+    for (const member of view.value.members) {
+        const { lat, long } = getCafeLocation(member);
+        totalLat += lat;
+        totalLong += long;
+    }
+
+    return {
+        lat:  totalLat / view.value.members.length,
+        long: totalLong / view.value.members.length
+    }
+}
+
+export const getViewEmoji = (view: CafeView) => view.type === CafeViewType.single && view.value.emoji
+    ? view.value.emoji
+    : '🍴';

@@ -1,42 +1,47 @@
 import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { ApplicationSettings } from '../constants/settings.ts';
+import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
+import { stringWithSpaceIfExists } from './string.ts';
 
-interface IGetCafeNameParams {
-    cafe: ICafe,
+interface IGetNameParams {
     showGroupName: boolean;
     useShortNames?: boolean;
+    includeEmoji?: boolean;
 }
 
-export const getCafeName = ({ cafe, showGroupName, useShortNames = false }: IGetCafeNameParams) => {
-    const targetName = (useShortNames && cafe.shortName) || cafe.name;
+interface IGetCafeNameParams extends IGetNameParams {
+    cafe: ICafe;
+}
+
+interface IGetViewNameParams extends IGetNameParams {
+    view: CafeView;
+}
+
+export const getCafeName = ({ cafe, showGroupName, useShortNames = false, includeEmoji = true }: IGetCafeNameParams) => {
+    const targetNameBase = (useShortNames && cafe.shortName) || cafe.name;
+    const targetNameWithEmoji = `${targetNameBase}${stringWithSpaceIfExists(includeEmoji && cafe.emoji)}`;
 
     if (!showGroupName || !cafe.group || cafe.group.alwaysExpand) {
-        return targetName;
+        return targetNameWithEmoji;
     }
 
     const groupName = (useShortNames && cafe.group.shortName) || cafe.group.name;
 
-    if (targetName === groupName) {
-        return targetName;
+    if (targetNameBase === groupName || targetNameWithEmoji === groupName) {
+        return targetNameWithEmoji;
     }
 
-    return `${targetName} @ ${groupName}`;
+    return `${targetNameWithEmoji} @ ${groupName}`;
 };
 
-interface IGetViewNameParams {
-    view: CafeView;
-    showGroupName: boolean;
-    useShortNames?: boolean;
-}
-
-export const getViewName = ({ view, showGroupName, useShortNames = false }: IGetViewNameParams) => {
+export const getViewName = ({ view, showGroupName, useShortNames = false, includeEmoji = true }: IGetViewNameParams) => {
     if (view.type === CafeViewType.single) {
         return getCafeName({
             cafe: view.value,
             showGroupName,
-            useShortNames
+            useShortNames,
+            includeEmoji
         });
     }
 
@@ -57,25 +62,6 @@ export const getCafeLocation = (cafe: ICafe): ILocationCoordinates => {
     return location;
 }
 
-export const getViewLocation = (view: CafeView): ILocationCoordinates => {
-    if (view.type === CafeViewType.single) {
-        return getCafeLocation(view.value);
-    }
-
-    if (view.value.location) {
-        return view.value.location;
-    }
-
-    let totalLat = 0;
-    let totalLong = 0;
-    for (const member of view.value.members) {
-        const { lat, long } = getCafeLocation(member);
-        totalLat += lat;
-        totalLong += long;
-    }
-
-    return {
-        lat:  totalLat / view.value.members.length,
-        long: totalLong / view.value.members.length
-    }
+export const isCafeVisible = (cafe: ICafe, shouldUseGroups: boolean) => {
+    return !shouldUseGroups || !cafe.group || cafe.group.alwaysExpand;
 }

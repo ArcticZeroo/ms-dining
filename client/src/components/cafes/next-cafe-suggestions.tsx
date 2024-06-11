@@ -1,13 +1,14 @@
-import { ICafe } from '../../models/cafe.ts';
-import { useCafesSortedByDistance } from '../../hooks/cafe.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
-import { PassiveUserLocationNotifier } from '../../api/location/user-location.ts';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ApplicationContext } from '../../context/app.ts';
+import { PassiveUserLocationNotifier } from '../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
+import { ApplicationContext } from '../../context/app.ts';
+import { useViewsSortedByDistance } from '../../hooks/cafe.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
+import { ICafe } from '../../models/cafe.ts';
+import { getViewMenuUrl } from '../../util/link.ts';
 import { getParentView } from '../../util/view.ts';
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { LocationAllowButton } from '../button/location-allow-button.tsx';
 
 const VIEW_SUGGESTION_COUNT = 5;
@@ -24,7 +25,7 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ exclu
     const userLocation = useValueNotifier(PassiveUserLocationNotifier);
     const targetLocation = location || userLocation;
 
-    const cafesSortedByDistance = useCafesSortedByDistance(targetLocation);
+    const cafesSortedByDistance = useViewsSortedByDistance(targetLocation);
 
     const cafesToShow = useMemo(
         () => {
@@ -74,7 +75,12 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ exclu
             <div className="flex flex-wrap">
                 {
                     cafesToShow.map(cafe => (
-                        <Link key={cafe.id} to={`/menu/${cafe.id}`} className="chip default-button default-container">
+                        <Link key={cafe.id} to={getViewMenuUrl({
+                            viewsById,
+                            shouldUseGroups,
+                            // todo: maybe make this more robust
+                            view: viewsById.get(cafe.id)!,
+                        })} className="chip default-button default-container">
                             {cafe.name}
                         </Link>
                     ))

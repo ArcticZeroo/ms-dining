@@ -39,9 +39,8 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     }, [groups]);
 };
 
-export const useViewsForNav = () => {
+export const useVisibleViews = (shouldUseGroups: boolean) => {
     const { viewsInOrder } = useContext(ApplicationContext);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     return useMemo(() => {
         const visibleViews: CafeView[] = [];
@@ -54,6 +53,11 @@ export const useViewsForNav = () => {
 
         return sortViews(visibleViews);
     }, [viewsInOrder, shouldUseGroups]);
+}
+
+export const useViewsForNav = () => {
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    return useVisibleViews(shouldUseGroups);
 };
 
 export const useHomepageViews = () => {

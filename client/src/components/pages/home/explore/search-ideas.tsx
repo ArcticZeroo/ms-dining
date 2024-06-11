@@ -52,6 +52,7 @@ export const SearchIdeas = () => {
             <div className="flex search-ideas">
                 {SEARCH_IDEAS.map(idea => (
                     <button
+                        key={idea}
                         className={classNames('search-idea default-container', idea === selectedIdea && 'selected')}
                         onClick={() => setSelectedIdea(idea)}
                     >

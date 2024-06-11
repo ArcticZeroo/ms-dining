@@ -1,15 +1,16 @@
 import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import { useCallback, useContext, useMemo } from 'react';
-import { StringSetSetting } from '../api/settings.ts';
-import { getCafeLocation, getTargetSettingForFavorite } from '../util/cafe.ts';
-import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
-import { ICafeStation, MenuItemsByCategoryName } from '../models/cafe.ts';
-import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
-import { useIsTodaySelected } from './date-picker.tsx';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
-import { ApplicationContext } from '../context/app.ts';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { useCallback, useMemo } from 'react';
+import { StringSetSetting } from '../api/settings.ts';
+import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
+import { ICafeStation, MenuItemsByCategoryName } from '../models/cafe.ts';
+import { getTargetSettingForFavorite } from '../util/cafe.ts';
 import { getDistanceBetweenCoordinates } from '../util/user-location.ts';
+import { getViewLocation } from '../util/view.ts';
+import { useIsTodaySelected } from './date-picker.tsx';
+import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
+import { useViewsForNav } from './views.ts';
 
 const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
     const names = useValueNotifier(setting);
@@ -63,7 +64,7 @@ export const getFilteredMenu = (station: ICafeStation, minPrice: number, maxPric
     }
 
     return menu;
-}
+};
 
 export const useIsPriceAllowed = () => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
@@ -74,7 +75,7 @@ export const useIsPriceAllowed = () => {
         (value: number) => !enablePriceFilters || (value >= minPrice && value <= maxPrice),
         [enablePriceFilters, maxPrice, minPrice]
     );
-}
+};
 
 export const useIsOnlineOrderingAllowedForSelectedDate = () => {
     const isTodaySelected = useIsTodaySelected();
@@ -82,24 +83,24 @@ export const useIsOnlineOrderingAllowedForSelectedDate = () => {
     return isTodaySelected && isOnlineOrderingEnabled;
 };
 
-export const useCafesSortedByDistance = (userLocation: ILocationCoordinates | null) => {
-    const { cafes } = useContext(ApplicationContext);
+export const useViewsSortedByDistance = (userLocation: ILocationCoordinates | null) => {
+    const views = useViewsForNav();
 
     return useMemo(() => {
         if (!userLocation) {
             return [];
         }
 
-        const cafeDistancesById = new Map<string, number>();
-        for (const cafe of cafes) {
-            const cafeLocation = getCafeLocation(cafe);
-            const distance = getDistanceBetweenCoordinates(userLocation, cafeLocation);
-            cafeDistancesById.set(cafe.id, distance);
+        const distancesById = new Map<string, number>();
+        for (const view of views) {
+            const location = getViewLocation(view);
+            const distance = getDistanceBetweenCoordinates(userLocation, location);
+            distancesById.set(view.value.id, distance);
         }
 
-        return cafes.sort((a, b) => {
-            const distanceA = cafeDistancesById.get(a.id);
-            const distanceB = cafeDistancesById.get(b.id);
+        return [...views].sort((a, b) => {
+            const distanceA = distancesById.get(a.value.id);
+            const distanceB = distancesById.get(b.value.id);
 
             if (distanceA == null || distanceB == null) {
                 return 0;
@@ -107,5 +108,5 @@ export const useCafesSortedByDistance = (userLocation: ILocationCoordinates | nu
 
             return distanceA - distanceB;
         });
-    }, [cafes, userLocation]);
-}
+    }, [views, userLocation]);
+};

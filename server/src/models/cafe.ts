@@ -8,6 +8,7 @@ interface ICafeBase {
     shortName?: number | string;
     firstAvailable?: Date;
     url?: string;
+    emoji?: string;
 }
 
 interface ICafeWithoutLocation extends ICafeBase {

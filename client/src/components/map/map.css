@@ -1,0 +1,65 @@
+.campus-map {
+    --color-button-background: #235881;
+}
+
+.campus-map .leaflet-popup-tip {
+    background: var(--color-background);
+}
+
+.campus-map .leaflet-popup-content-wrapper {
+    background: var(--color-background);
+    color: #FAFAFA;
+    border-radius: var(--constant-padding);
+}
+
+.campus-map .leaflet-popup-content {
+    margin: var(--constant-padding);
+    line-height: initial;
+    font-size: initial;
+    display: flex;
+    flex-direction: column;
+    gap: var(--constant-padding);
+}
+
+.campus-map .leaflet-popup-close-button {
+    font-size: 2em;
+}
+
+.campus-map .leaflet-div-icon {
+    background: none;
+    padding: 0.25rem;
+    border-radius: 100%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-button-background);
+}
+
+.campus-map .group-member-list {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-gap: var(--constant-padding);
+    align-items: center;
+}
+
+.campus-map .group-member {
+    color: white;
+    background: #313131;
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    align-self: stretch;
+}
+
+.campus-map a.group-member {
+    background: var(--color-button-background);
+}
+
+.campus-map a.view-menu {
+    color: white;
+    background: var(--color-button-background);
+}

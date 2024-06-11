@@ -1,15 +1,13 @@
-import React from 'react';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
-import { CartHydrationContext } from '../../../context/cart.ts';
-import { useContext } from 'react';
-import { ApplicationContext } from '../../../context/app.ts';
-import { MissingCartItemRow } from './missing-cart-item-row.tsx';
-import { ISerializedCartItemWithName } from '../../../models/cart.ts';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getViewMenuUrl } from '../../../util/link.ts';
-import { getParentView } from '../../../util/view.ts';
-import { getViewName } from '../../../util/cafe.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { ApplicationContext } from '../../../context/app.ts';
+import { CartHydrationContext } from '../../../context/cart.ts';
+import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { ISerializedCartItemWithName } from '../../../models/cart.ts';
+import { getViewName } from '../../../util/cafe.ts';
+import { getViewMenuUrl } from '../../../util/link.ts';
+import { MissingCartItemRow } from './missing-cart-item-row.tsx';
 
 export const MissingItemsTable = () => {
     const { viewsById } = useContext(ApplicationContext);
@@ -31,7 +29,7 @@ export const MissingItemsTable = () => {
                                     <th colSpan={4}>
                                         {
                                             view && (
-                                                <Link to={getViewMenuUrl(getParentView(viewsById, view, shouldUseGroups))}
+                                                <Link to={getViewMenuUrl({ viewsById, view, shouldUseGroups })}
                                                     className="cart-cafe-url">
                                                     {getViewName({
                                                         view,

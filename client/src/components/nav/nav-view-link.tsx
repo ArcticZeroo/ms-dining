@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView } from '../../models/cafe.ts';
-import { getViewMenuUrl } from '../../util/link.ts';
+import { getViewMenuUrlDirect } from '../../util/link.ts';
 import { classNames } from '../../util/react.ts';
 
 interface INavViewLinkProps {
@@ -63,7 +63,7 @@ export const NavViewLink: React.FC<INavViewLinkProps> = ({ view, className }) =>
 
     return (
         <li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`} onClick={onClick}>
-            <NavLink to={getViewMenuUrl(view)} className={classNames(isActive && 'active', className)}>
+            <NavLink to={getViewMenuUrlDirect(view)} className={classNames(isActive && 'active', className)}>
                 {displayValue}
             </NavLink>
         </li>

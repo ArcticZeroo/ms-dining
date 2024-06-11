@@ -261,6 +261,10 @@ html, body, #root, .App {
     justify-content: center;
 }
 
+.align-center {
+    align-items: center;
+}
+
 .flex-between {
     justify-content: space-between;
 }
@@ -287,6 +291,10 @@ html, body, #root, .App {
 
 .self-stretch {
     align-self: stretch;
+}
+
+.relative {
+    position: relative;
 }
 
 .collapsible-content .collapse-toggle {

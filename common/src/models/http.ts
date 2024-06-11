@@ -9,6 +9,7 @@ export interface IDiningCoreGroupMemberBase {
     url?: string;
     logoUrl?: string
     group?: IDiningCoreGroup;
+    emoji?: string;
 }
 
 interface IDiningCoreGroupMemberWithoutLocation extends IDiningCoreGroupMemberBase {

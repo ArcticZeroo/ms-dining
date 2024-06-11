@@ -3,8 +3,20 @@ import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import { DiningClient } from '../api/dining.ts';
 import { CafeView } from '../models/cafe.ts';
+import { getParentView } from './view.ts';
 
-export const getViewMenuUrl = (view: CafeView) => `/menu/${view.value.id}`;
+export const getViewMenuUrlDirect = (view: CafeView) => `/menu/${view.value.id}`;
+
+interface IGetViewUrlParams {
+    view: CafeView;
+    viewsById: Map<string, CafeView>;
+    shouldUseGroups: boolean;
+}
+
+export const getViewMenuUrl = ({ view, viewsById, shouldUseGroups }: IGetViewUrlParams) => {
+    const parentView = getParentView(viewsById, view, shouldUseGroups);
+    return getViewMenuUrlDirect(parentView);
+}
 
 export const idPrefixByEntityType: Record<SearchEntityType, string> = {
     [SearchEntityType.menuItem]: 'menu-item',
@@ -34,5 +46,5 @@ export const getViewMenuUrlWithJump = ({ cafeId, entityType, name, view, date }:
     const dateString = date && !DateUtil.isSameDate(date, DiningClient.getTodayDateForMenu())
         ? `?date=${DateUtil.toDateString(date)}`
         : '';
-    return `${getViewMenuUrl(view)}${dateString}#${getScrollAnchorId({ cafeId, entityType, name })}`;
+    return `${getViewMenuUrlDirect(view)}${dateString}#${getScrollAnchorId({ cafeId, entityType, name })}`;
 };

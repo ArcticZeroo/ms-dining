@@ -24,3 +24,8 @@ export const getDistanceBetweenCoordinates = (start: ILocationCoordinates, end: 
     const distanceInKm = EARTH_RADIUS_KM * c;
     return inMiles ? convertKmToMiles(distanceInKm) : distanceInKm;
 };
+
+export const toLeafletLocation = (location: ILocationCoordinates) => ({
+    lat: location.lat,
+    lng: location.long
+});

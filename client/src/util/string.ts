@@ -1,3 +1,4 @@
+import { Nullable } from '@msdining/common/dist/models/util';
 export const pluralize = (value: string, count: number): string => {
     return count === 1 ? value : `${value}s`;
 };
@@ -26,8 +27,8 @@ export const findLongestSequentialSubstringLength = (parent: string, child: stri
             let substringLength = 0;
 
             while ((i + substringLength) < parent.length
-            && (j + substringLength) < child.length
-            && parent[i + substringLength] === child[j + substringLength]) {
+                   && (j + substringLength) < child.length
+                   && parent[i + substringLength] === child[j + substringLength]) {
                 substringLength++;
             }
 
@@ -42,3 +43,7 @@ export const findLongestSequentialSubstringLength = (parent: string, child: stri
 };
 
 export const normalizeName = (name: string) => name.toLowerCase().trim();
+
+export const stringWithSpaceIfExists = (value: unknown): string => (typeof value === 'string' && value)
+    ? ` ${value}`
+    : '';

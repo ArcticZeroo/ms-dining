@@ -10,12 +10,11 @@ import { ICartItemWithMetadata } from '../../../models/cart.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../util/cart.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
-
-import './cart-contents-table.css';
 import { sortViews } from '../../../util/sorting.ts';
-import { getParentView } from '../../../util/view.ts';
 import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
 import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
+
+import './cart-contents-table.css';
 import { CartItemRow } from './cart-item-row.tsx';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
@@ -103,7 +102,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                 <React.Fragment key={view.value.id}>
                     <tr>
                         <th colSpan={4}>
-                            <Link to={getViewMenuUrl(getParentView(viewsById, view, shouldUseGroups))} className="cart-cafe-url">
+                            <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="cart-cafe-url">
                                 {getViewName({
                                     view,
                                     showGroupName: true
