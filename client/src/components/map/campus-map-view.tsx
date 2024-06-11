@@ -47,7 +47,6 @@ const CampusMapView = () => {
             center={center} 
             zoom={15} 
             scrollWheelZoom={true} 
-            style={{ height: '50vh' }} 
             className="campus-map"
         >
             <TileLayer

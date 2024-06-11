@@ -46,7 +46,7 @@ export const CafeMapMarker: React.FC<IMapMarkerProps> = ({ view }) => {
                 }
                 {
                     (shouldUseGroups || view.type === CafeViewType.single) && (
-                        <Link to={`/menu/${getViewMenuUrl({ view, viewsById, shouldUseGroups })}`} className="default-button default-container text-center view-menu">
+                        <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="default-button default-container text-center view-menu">
                              View menu
                         </Link>
                     )

@@ -6,64 +6,41 @@ import { ApplicationSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useViewsSortedByDistance } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { ICafe } from '../../models/cafe.ts';
+import { CafeView } from '../../models/cafe.ts';
 import { getViewMenuUrl } from '../../util/link.ts';
-import { getParentView } from '../../util/view.ts';
 import { LocationAllowButton } from '../button/location-allow-button.tsx';
 
 const VIEW_SUGGESTION_COUNT = 5;
 
 interface INextCafeSuggestionsProps {
-    excludeCafes: ICafe[];
+    excludeViews: CafeView[];
     location?: ILocationCoordinates;
 }
 
-export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeCafes, location }) => {
+export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeViews, location }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     const userLocation = useValueNotifier(PassiveUserLocationNotifier);
     const targetLocation = location || userLocation;
 
-    const cafesSortedByDistance = useViewsSortedByDistance(targetLocation);
+    const viewsSortedByDistance = useViewsSortedByDistance(targetLocation);
 
-    const cafesToShow = useMemo(
+    const viewsToShow = useMemo(
         () => {
             if (!targetLocation) {
                 return [];
             }
 
-            const cafeIds = new Set(excludeCafes.map(cafe => cafe.id));
-            const seenViewIds = new Set<string>();
-            const viewsInOrder = [];
-            
-            for (const nearbyCafe of cafesSortedByDistance) {
-                if (cafeIds.has(nearbyCafe.id)) {
-                    continue;
-                }
-                
-                const cafeView = viewsById.get(nearbyCafe.id);
-                
-                if (!cafeView) {
-                    throw new Error(`No view found for cafe ${nearbyCafe.id}`);
-                }
-                
-                const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
-                
-                if (seenViewIds.has(parentView.value.id)) {
-                    continue;
-                }
-                
-                seenViewIds.add(parentView.value.id);
-                viewsInOrder.push(parentView.value);
-            }
+            const excludedViewIds = new Set(excludeViews.map(view => view.value.id));
+            const viewsInOrder: CafeView[] = viewsSortedByDistance.filter(view => !excludedViewIds.has(view.value.id));
 
             return viewsInOrder.slice(0, VIEW_SUGGESTION_COUNT);
         },
-        [targetLocation, excludeCafes, cafesSortedByDistance, viewsById, shouldUseGroups]
+        [targetLocation, excludeViews, viewsSortedByDistance]
     );
 
-    if (cafesToShow.length === 0) {
+    if (viewsToShow.length === 0) {
         return null;
     }
 
@@ -74,14 +51,13 @@ export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ exclu
             </div>
             <div className="flex flex-wrap">
                 {
-                    cafesToShow.map(cafe => (
-                        <Link key={cafe.id} to={getViewMenuUrl({
+                    viewsToShow.map(view => (
+                        <Link key={view.value.id} to={getViewMenuUrl({
                             viewsById,
                             shouldUseGroups,
-                            // todo: maybe make this more robust
-                            view: viewsById.get(cafe.id)!,
+                            view
                         })} className="chip default-button default-container">
-                            {cafe.name}
+                            {view.value.name}
                         </Link>
                     ))
                 }

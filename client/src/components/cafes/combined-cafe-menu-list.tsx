@@ -10,7 +10,7 @@ import './combined-cafes.css';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 
 interface ICombinedCafeMenuListProps {
-    views: Iterable<CafeView>;
+    views: CafeView[];
     countTowardsLastUsed: boolean;
     showGroupNames: boolean;
     suggestedLocationCenter?: ILocationCoordinates;
@@ -43,7 +43,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
                     ))
                 }
             </div>
-            <NextCafeSuggestions excludeCafes={cafes} location={suggestedLocationCenter}/>
+            <NextCafeSuggestions excludeViews={views} location={suggestedLocationCenter}/>
             <MenuSettings/>
             <CartPopup/>
         </>

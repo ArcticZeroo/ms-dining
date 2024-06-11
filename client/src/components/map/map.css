@@ -1,5 +1,6 @@
 .campus-map {
     --color-button-background: #235881;
+    height: var(--map-height);
 }
 
 .campus-map .leaflet-popup-tip {

@@ -17,6 +17,7 @@
     --color-header: #00796B;
     --constant-padding: 0.5rem;
     --icon-size: 24px;
+    --map-height: 50vh;
 }
 
 body, html {
@@ -374,6 +375,10 @@ html, body, #root, .App {
 
 .transition-background {
     transition: background-color 0.25s ease;
+}
+
+.map-height {
+    height: var(--map-height);
 }
 
 /* wide screens (tablet, computer) */

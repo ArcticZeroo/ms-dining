@@ -48,9 +48,11 @@ export const HomePage = () => {
                 )
             }
             <HomeExplore/>
-            <Suspense fallback="Loading map...">
-                <CampusMapView/>
-            </Suspense>
+            <div className="map-height">
+                <Suspense fallback="Loading map...">
+                    <CampusMapView/>
+                </Suspense>
+            </div>
             <HomeViews/>
             <HomepageSettings requireButtonToCommitHomepageViews={true}/>
             <MoreSettingsButton/>
