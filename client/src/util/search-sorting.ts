@@ -1,15 +1,15 @@
-import { CafeView, CafeViewType } from '../models/cafe.ts';
+import {CafeView, CafeViewType} from '../models/cafe.ts';
 import {
     findLongestNonSequentialSubstringLength,
     findLongestSequentialSubstringLength
 } from '@msdining/common/dist/util/string-util';
-import { getParentView } from './view.ts';
-import { ISearchResult, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search';
-import { IQuerySearchResult } from '../models/search.ts';
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
-import { getCafeLocation } from './cafe.ts';
-import { getDistanceBetweenCoordinates } from './user-location.ts';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import {getParentView} from './view.ts';
+import {ISearchResult, SearchEntityType, SearchMatchReason} from '@msdining/common/dist/models/search';
+import {IQuerySearchResult} from '../models/search.ts';
+import {ILocationCoordinates} from '@msdining/common/dist/models/util';
+import {getCafeLocation} from './cafe.ts';
+import {getDistanceBetweenCoordinates} from './user-location.ts';
+import {normalizeNameForSearch} from '@msdining/common/dist/util/search-util';
 
 export interface ISearchResultSortingContext {
     viewsById: Map<string, CafeView>;
@@ -293,6 +293,8 @@ const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: Sea
     case SearchMatchReason.description:
         return searchResult.description ? [searchResult.description] : [];
     case SearchMatchReason.tags:
+        return Array.from(searchResult.tags || []);
+    case SearchMatchReason.searchTags:
         return Array.from(searchResult.searchTags || []);
     default:
         throw new Error(`Unexpected match reason: ${matchReason}`);
