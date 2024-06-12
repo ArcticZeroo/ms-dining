@@ -194,6 +194,18 @@ html, body, #root, .App {
         transform: rotate(0deg);
     }
 
+    60% {
+        transform: rotate(370deg);
+    }
+
+    75% {
+        transform: rotate(350deg);
+    }
+
+    85% {
+        transform: rotate(365deg);
+    }
+
     100% {
         transform: rotate(360deg);
     }
@@ -203,11 +215,11 @@ html, body, #root, .App {
     width: 2rem;
     height: 2rem;
     background: #2196F3;
-    animation: loading-spinner 1s ease infinite;
+    animation: loading-spinner 2s ease infinite;
 }
 
 .loading-spinner-custom {
-    animation: loading-spinner 1s ease infinite;
+    animation: loading-spinner 2s ease infinite;
 }
 
 .centered-content {
@@ -467,6 +479,11 @@ html, body, #root, .App {
         --section-title-font-size: 1.1em;
         --card-title-font-size: 1em;
     }
+}
+
+.fade-in {
+    animation-name: fade-in;
+    animation-duration: 0.25s;
 }
 
 @keyframes fade-in {

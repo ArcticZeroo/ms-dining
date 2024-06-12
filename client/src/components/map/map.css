@@ -1,6 +1,7 @@
 .campus-map {
     --color-button-background: #235881;
     height: var(--map-height);
+    border-radius: var(--default-padding);
 }
 
 .campus-map.loading-skeleton {

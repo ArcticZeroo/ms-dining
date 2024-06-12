@@ -32,6 +32,11 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
                 name="Show Explore on Homepage"
                 description="When enabled, the home page will show suggested searches for food on campus."
                 setting={SpecialSettings.showExploreOnHome}/>
+            <BooleanSettingInput
+                icon="map"
+                name="Show Map on Homepage"
+                description="When enabled, the home page will show a map that lets you view nearby cafes and their traveling stations."
+                setting={SpecialSettings.showMapOnHome}/>
             {
                 hasAnyHomepageViews && homepageViewsComponent
             }
