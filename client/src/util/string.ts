@@ -1,4 +1,3 @@
-import { Nullable } from '@msdining/common/dist/models/util';
 export const pluralize = (value: string, count: number): string => {
     return count === 1 ? value : `${value}s`;
 };

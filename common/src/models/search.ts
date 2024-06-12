@@ -30,7 +30,7 @@ export interface ISearchResult {
     imageUrl?: string;
     locationDatesByCafeId: Map<string, Array<Date>>;
     priceByCafeId: Map<string, number>;
-    stationsByCafeId: Map<string, string>;
+    stationByCafeId: Map<string, string>;
     matchReasons: Set<SearchMatchReason>;
     searchTags?: Set<string>;
     tags?: Set<string>;
