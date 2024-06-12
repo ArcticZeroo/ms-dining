@@ -34,7 +34,6 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
 
     return (
         <MapPopupViewContext.Provider value={view}>
-            // Outer container for the interactive padding
             <div className="cafe-popup flex flex-center default-padding fade-in" onClick={onPaddingClicked}>
                 <div className="body flex-col height-full default-container" onClick={onContentClicked}>
                     <div className="flex flex-between">
