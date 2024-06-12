@@ -4,17 +4,18 @@ import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
-import { getCafeName, getViewName } from '../../../util/cafe.ts';
+import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { expandAndFlattenView } from '../../../util/view.ts';
-import { CafePopupOverview } from './overview/cafe-popup-overview.tsx';
+import { CampusMapPopupMember } from './campus-map-popup-member.tsx';
 
-interface ICafePopupProps {
+interface ICampusMapPopupProps {
     view: CafeView;
+
     onClose(): void;
 }
 
-export const CafePopup: React.FC<ICafePopupProps> = ({ view, onClose }) => {
+export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cafesInView = useMemo(
@@ -44,35 +45,32 @@ export const CafePopup: React.FC<ICafePopupProps> = ({ view, onClose }) => {
                             })
                         }
                     </span>
-                    <button onClick={onClose} className="default-button default-container">
+                    <button onClick={onClose} className="default-button default-container icon-container">
                         <span className="material-symbols-outlined">
-                        close
+                            close
                         </span>
                     </button>
                 </div>
                 <div className="group-member-list flex flex-wrap flex-center">
                     {
                         cafesInView.map(cafe => (
-                            <div className="group-member flex-col" key={cafe.id}>
-                                {
-                                    view.type === CafeViewType.group && (
-                                        <span>
-                                            {getCafeName({ cafe, showGroupName: false, includeEmoji: true })}
-                                        </span>
-                                    )
-                                }
-                                <CafePopupOverview cafe={cafe}/>
-                            </div>
+                            <CampusMapPopupMember
+                                popupView={view}
+                                cafe={cafe}
+                            />
                         ))
                     }
                 </div>
                 {
                     (shouldUseGroups || view.type === CafeViewType.single) && (
-                        <Link to={getViewMenuUrl({
-                            view,
-                            viewsById,
-                            shouldUseGroups
-                        })} className="default-button default-container text-center view-menu">
+                        <Link
+                            to={getViewMenuUrl({
+                                view,
+                                viewsById,
+                                shouldUseGroups
+                            })}
+                            className="default-button default-container text-center view-menu"
+                        >
                                                                                    View menu
                         </Link>
                     )
@@ -80,4 +78,4 @@ export const CafePopup: React.FC<ICafePopupProps> = ({ view, onClose }) => {
             </div>
         </div>
     );
-}
+};

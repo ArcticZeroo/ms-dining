@@ -382,6 +382,11 @@ html, body, #root, .App {
     overflow: hidden;
 }
 
+.icon-container {
+    width: calc(var(--icon-size) + var(--default-padding) * 2);
+    height: calc(var(--icon-size) + var(--default-padding) * 2);
+}
+
 .transition-background {
     transition: background-color 0.25s ease;
 }

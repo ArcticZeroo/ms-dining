@@ -14,7 +14,7 @@ import { toLeafletLocation } from '../../util/user-location.ts';
 import { getViewLocation } from '../../util/view.ts';
 import './map.css';
 import { CafeMarker } from './popup/cafe-marker.tsx';
-import { CafePopup } from './popup/cafe-popup.tsx';
+import { CampusMapPopup } from './popup/campus-map-popup.tsx';
 
 // Intentionally not a hook, we don't want to change every time the user clicks on a new cafe
 // (e.g. if the component is mounted on top of the cafe menu at some point in the future).
@@ -96,7 +96,7 @@ const CampusMapView = () => {
             </MapContainer>
             {
                 selectedView != null && (
-                    <CafePopup
+                    <CampusMapPopup
                         view={selectedView}
                         onClose={onClose}
                     />

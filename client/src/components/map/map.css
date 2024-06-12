@@ -74,7 +74,7 @@
 }
 
 .cafe-popup a.group-member {
-    background: var(--color-button-background);
+    text-decoration: none;
 }
 
 .cafe-popup a.view-menu {

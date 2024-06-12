@@ -3,15 +3,17 @@ import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { ICafe } from '../../../models/cafe.ts';
+import { CafeView, CafeViewType, ICafe } from '../../../models/cafe.ts';
 import { getCafeName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
+import { CafePopupOverview } from './overview/cafe-popup-overview.tsx';
 
-interface ICafeMarkerMemberProps {
+interface ICampusMapPopupMember {
+    popupView: CafeView;
     cafe: ICafe;
 }
 
-export const CafePopupMember: React.FC<ICafeMarkerMemberProps> = ({ cafe }) => {
+export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ popupView, cafe }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -27,17 +29,16 @@ export const CafePopupMember: React.FC<ICafeMarkerMemberProps> = ({ cafe }) => {
         includeEmoji:  true
     });
 
-    if (shouldUseGroups) {
-        return (
-            <div className="group-member">
-                {cafeName}
-            </div>
-        );
-    }
-
     return (
-        <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="group-member">
-            {cafeName}
+        <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="group-member flex-col">
+            {
+                popupView.type === CafeViewType.group && (
+                    <span>
+                        {cafeName}
+                    </span>
+                )
+            }
+            <CafePopupOverview cafe={cafe}/>
         </Link>
     );
 };

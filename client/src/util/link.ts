@@ -15,7 +15,7 @@ interface IGetViewUrlParams {
 
 export const getViewMenuUrl = ({ view, viewsById, shouldUseGroups }: IGetViewUrlParams) => {
     const parentView = getParentView(viewsById, view, shouldUseGroups);
-    return getViewMenuUrlDirect(parentView);
+    return `${getViewMenuUrlDirect(parentView)}${parentView === view ? '' : `#${view.value.id}`}`;
 }
 
 export const idPrefixByEntityType: Record<SearchEntityType, string> = {
