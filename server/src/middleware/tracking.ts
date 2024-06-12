@@ -21,7 +21,7 @@ export const sendVisitorAnalytics: Koa.Middleware = async (ctx, next) => {
 
             // Fire and forget, don't block the rest of the request
             sendVisitAsync(visitorId)
-                .catch(err => console.log('Failed to send visit for visitor', visitorId, ', error:', err));
+                .catch(err => console.error('Failed to send visit for visitor', visitorId, ', error:', err));
         }
     }
 

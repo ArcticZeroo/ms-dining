@@ -110,10 +110,12 @@ export const registerMenuRoutes = (parent: Router) => {
             ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
         }));
 
-    router.get('/menu/:id/overview', async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-        const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
-        ctx.body = jsonStringifyWithoutNull(overviewStations);
-    }));
+    router.get('/menu/:id/overview',
+        memoizeResponseBodyByQueryParams(),
+        async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
+            const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
+            ctx.body = jsonStringifyWithoutNull(overviewStations);
+        }));
 
     attachRouter(parent, router);
 };

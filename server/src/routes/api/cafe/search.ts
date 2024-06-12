@@ -71,7 +71,6 @@ export const registerSearchRoutes = (parent: Router) => {
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');
             const isExact = getTrimmedQueryParam(ctx, 'e') === 'true';
-            console.log(searchQuery);
 
             if (!searchQuery) {
                 ctx.body = [];

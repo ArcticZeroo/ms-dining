@@ -23,8 +23,8 @@ export const groupList: CafeGroup[] = [
                 id:        'foodhall6',
                 shortName: 6,
                 location:  {
-                    lat:  47.64173744897988,
-                    long: -122.13015430238059
+                    lat:  47.641714,
+                    long: -122.130664
                 }
             },
             {
@@ -381,8 +381,8 @@ export const groupList: CafeGroup[] = [
                 id:        'in-gredients',
                 url:       'https://dining.azurewebsites.net/ingredients/',
                 location:  {
-                    lat:  47.64471682290945,
-                    long: -122.12446558666647
+                    lat:  47.644554,
+                    long: -122.124415
                 }
             },
         ]
