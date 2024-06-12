@@ -78,8 +78,11 @@
     text-decoration: none;
 }
 
-.cafe-popup a.view-menu {
+.cafe-popup a {
     color: white;
+}
+
+.cafe-popup a.view-menu {
     background: var(--color-button-background);
 }
 

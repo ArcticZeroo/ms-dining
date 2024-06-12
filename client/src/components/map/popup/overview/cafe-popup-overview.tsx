@@ -56,6 +56,7 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
                                 overviewStations.map(station => (
                                     <CafePopupOverviewStation
                                         key={station.name}
+                                        cafe={cafe}
                                         station={station}
                                     />
                                 ))

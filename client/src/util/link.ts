@@ -46,5 +46,8 @@ export const getViewMenuUrlWithJump = ({ cafeId, entityType, name, view, date }:
     const dateString = date && !DateUtil.isSameDate(date, DiningClient.getTodayDateForMenu())
         ? `?date=${DateUtil.toDateString(date)}`
         : '';
-    return `${getViewMenuUrlDirect(view)}${dateString}#${getScrollAnchorId({ cafeId, entityType, name })}`;
+
+    const url = getViewMenuUrlDirect(view);
+
+    return `${url}${dateString}#${getScrollAnchorId({ cafeId, entityType, name })}`;
 };
