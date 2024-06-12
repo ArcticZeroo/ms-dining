@@ -1,5 +1,5 @@
 .campus-map {
-    --color-button-background: #235881;
+    --color-button-background: #163650;
     height: var(--map-height);
     border-radius: var(--default-padding);
 }
@@ -37,13 +37,21 @@
 
 .campus-map .leaflet-div-icon {
     background: none;
-    padding: 0.25rem;
-    border-radius: 100%;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-button-background);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker {
+    padding: 0.25rem;
+    border-radius: 100%;
+    /*background: var(--color-button-background);*/
+    width: 1rem;
+    height: 1rem;
+    font-size: 1.2em;
+    background: #112841;
+    border: 0.25rem solid #225970;
 }
 
 .cafe-popup * {

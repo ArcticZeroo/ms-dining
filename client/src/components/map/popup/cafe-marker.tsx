@@ -5,7 +5,11 @@ import { CafeView } from '../../../models/cafe.ts';
 import { toLeafletLocation } from '../../../util/user-location.ts';
 import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
 
-const getIconHtml = (view: CafeView) => `<span class="cafe-marker-tracker" data-id="${view.value.id}">${getViewEmoji(view)}</span>`;
+const getIconHtml = (view: CafeView) => `
+<span class="cafe-marker-tracker flex flex-center" data-id="${view.value.id}">
+    ${getViewEmoji(view)}
+</span>
+`;
 
 interface ICafeMarkerProps {
     view: CafeView;
