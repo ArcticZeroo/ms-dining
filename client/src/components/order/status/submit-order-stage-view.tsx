@@ -28,7 +28,7 @@ export const SubmitOrderStageView: React.FC<ISubmitOrderStageViewProps> = ({ las
                     </span>
                 )
             }
-            <div className="flex flex-center">
+            <div className="flex flex-justify-center">
                 <table className="chip default-table">
                     <tbody>
                         {

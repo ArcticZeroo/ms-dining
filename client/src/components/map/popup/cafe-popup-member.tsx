@@ -1,17 +1,17 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { ApplicationSettings } from '../../constants/settings.ts';
-import { ApplicationContext } from '../../context/app.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
-import { ICafe } from '../../models/cafe.ts';
-import { getCafeName } from '../../util/cafe.ts';
-import { getViewMenuUrl } from '../../util/link.ts';
+import { ApplicationSettings } from '../../../constants/settings.ts';
+import { ApplicationContext } from '../../../context/app.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { ICafe } from '../../../models/cafe.ts';
+import { getCafeName } from '../../../util/cafe.ts';
+import { getViewMenuUrl } from '../../../util/link.ts';
 
-interface ICafeMapMarkerGroupMemberProps {
+interface ICafeMarkerMemberProps {
     cafe: ICafe;
 }
 
-export const CafeMapMarkerGroupMember: React.FC<ICafeMapMarkerGroupMemberProps> = ({ cafe }) => {
+export const CafePopupMember: React.FC<ICafeMarkerMemberProps> = ({ cafe }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 

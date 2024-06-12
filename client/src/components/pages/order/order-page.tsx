@@ -74,7 +74,7 @@ export const OrderPage = () => {
                 />
                 {
                     orderSubmitStage !== PromiseStage.running && (
-                        <div className="flex flex-center">
+                        <div className="flex flex-justify-center">
                             <button className="default-container" onClick={() => setOrderPromise(undefined)}>
                                 Return to Checkout
                             </button>

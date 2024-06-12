@@ -1,11 +1,5 @@
 import { DateUtil } from '@msdining/common';
-import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { isDateValid } from '../../../util/date.js';
-import { logError } from '../../../util/log.js';
-import { LockedMap } from '../../../util/map.js';
-import { usePrismaClient } from '../client.js';
-import { MenuItemStorageClient } from './menu-item.js';
-import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { ICafeOverviewStation, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import {
     fromDateString,
     getFridayForWeek,
@@ -13,6 +7,13 @@ import {
     yieldDaysInRange
 } from '@msdining/common/dist/util/date-util.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
+import { getDefaultUniquenessDataForStation } from '../../../util/cafe.js';
+import { isDateValid } from '../../../util/date.js';
+import { logError } from '../../../util/log.js';
+import { LockedMap } from '../../../util/map.js';
+import { usePrismaClient } from '../client.js';
+import { MenuItemStorageClient } from './menu-item.js';
 
 interface ICreateDailyStationMenuParams {
     cafeId: string;
@@ -169,6 +170,40 @@ export abstract class DailyMenuStorageClient {
         return dailyMenuByCafeId.update(cafeId, () => this._doRetrieveDailyMenuAsync(cafeId, dateString));
     }
 
+    public static async retrieveDailyMenuOverviewAsync(cafeId: string, dateString: string): Promise<ICafeOverviewStation[]> {
+        const uniquenessDataPromise = this.retrieveUniquenessDataForCafe(cafeId, dateString);
+        const resultsPromise = usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  {
+                cafeId,
+                dateString
+            },
+            select: {
+                station: {
+                    select: {
+                        name:    true,
+                        logoUrl: true
+                    }
+                }
+            }
+        }));
+
+        const [uniquenessData, results] = await Promise.all([
+            uniquenessDataPromise,
+            resultsPromise
+        ]);
+
+        return results.map(result => {
+            const stationName = result.station.name;
+            const stationUniquenessData = uniquenessData.get(stationName);
+
+            return {
+                name:       stationName,
+                logoUrl:    result.station.logoUrl || undefined,
+                uniqueness: stationUniquenessData ?? getDefaultUniquenessDataForStation()
+            };
+        });
+    }
+
     public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {
         const dailyStation = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
             where:  { dateString },
@@ -231,7 +266,7 @@ export abstract class DailyMenuStorageClient {
                                 menuItemId: true,
                                 menuItem:   {
                                     select: {
-                                        tags: true,
+                                        tags:       true,
                                         searchTags: {
                                             select: {
                                                 name: true
@@ -300,7 +335,19 @@ export abstract class DailyMenuStorageClient {
             const currentUniquenessData = new Map<string /*stationName*/, IStationUniquenessData>();
             uniquenessData.set(currentDateString, currentUniquenessData);
 
+            let yesterdayUniquenessData: Map<string, IStationUniquenessData> | undefined;
+            if (i > 0) {
+                const yesterdayDate = dates[i - 1]!;
+                const yesterdayDateString = DateUtil.toDateString(yesterdayDate);
+                yesterdayUniquenessData = uniquenessData.get(yesterdayDateString);
+            }
+
             for (const station of dailyMenu) {
+                const wasHereYesterday = yesterdayUniquenessData?.has(station.name);
+                if (wasHereYesterday && yesterdayUniquenessData != null) {
+                    yesterdayUniquenessData.get(station.name)!.isTraveling = false;
+                }
+
                 const stationCount = stationCountByName.get(station.name) ?? 0;
                 const itemCountsForStation = itemCountsByStationName.get(station.name);
 
@@ -327,6 +374,7 @@ export abstract class DailyMenuStorageClient {
                 }
 
                 currentUniquenessData.set(station.name, {
+                    isTraveling:  !wasHereYesterday,
                     daysThisWeek: stationCount,
                     itemDays:     itemCounts
                 });

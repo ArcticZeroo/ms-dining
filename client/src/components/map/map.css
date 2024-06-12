@@ -3,6 +3,14 @@
     height: var(--map-height);
 }
 
+.campus-map.loading-skeleton {
+    background: #fffefb;
+}
+
+.campus-map .leaflet-popup-pane {
+    /*display: none;*/
+}
+
 .campus-map .leaflet-popup-tip {
     background: var(--color-background);
 }
@@ -37,14 +45,15 @@
     background: var(--color-button-background);
 }
 
-.campus-map .group-member-list {
-    display: grid;
-    grid-template-columns: auto auto auto;
-    grid-gap: var(--constant-padding);
-    align-items: center;
+.cafe-popup * {
+    box-sizing: border-box;
 }
 
-.campus-map .group-member {
+.cafe-popup .group-member-list {
+    width: 100%;
+}
+
+.cafe-popup .group-member {
     color: white;
     background: #313131;
     padding: var(--constant-padding);
@@ -54,13 +63,56 @@
     align-items: center;
     text-align: center;
     align-self: stretch;
+    min-width: 6rem;
+    min-height: 3rem;
+    transition: min-height 0.125s ease, padding 0.125s ease;
 }
 
-.campus-map a.group-member {
+.cafe-popup .group-member:empty {
+    min-height: 0;
+    padding: 0;
+}
+
+.cafe-popup a.group-member {
     background: var(--color-button-background);
 }
 
-.campus-map a.view-menu {
+.cafe-popup a.view-menu {
     color: white;
     background: var(--color-button-background);
+}
+
+.campus-map-container {
+    position: relative;
+}
+
+.campus-map-container .cafe-popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--map-height);
+    /* Leaflet uses pretty high values */
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--color-foreground);
+    cursor: default;
+    box-sizing: border-box;
+    /* Not a lot of space in this, so just reduce padding. */
+    --default-padding: var(--constant-padding);
+}
+
+.campus-map-container .cafe-popup .body {
+    background: var(--default-padding);
+    background: var(--color-background);
+    overflow: auto;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.overview-station img.station-logo {
+    width: 2rem;
+    height: 2rem;
+    background: #363636;
+    border-radius: 0.5rem;
 }

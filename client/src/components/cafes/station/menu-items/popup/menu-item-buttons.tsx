@@ -77,12 +77,12 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
     return (
         <>
             <FavoriteItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
-            <button title="Click to copy link" onClick={onCopyClicked} className="copy-button flex flex-center">
+            <button title="Click to copy link" onClick={onCopyClicked} className="copy-button flex flex-justify-center">
                 <span className="material-symbols-outlined transition-background" style={{ background: copyButtonBackground }}>
                     link
                 </span>
             </button>
-            <button title="Search for this item across campus" onClick={onSearchClicked} className="flex flex-center">
+            <button title="Search for this item across campus" onClick={onSearchClicked} className="flex flex-justify-center">
                 <span className="material-symbols-outlined">
                     search
                 </span>

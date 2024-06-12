@@ -258,7 +258,12 @@ html, body, #root, .App {
     flex-wrap: wrap;
 }
 
+.flex-justify-center {
+    justify-content: center;
+}
+
 .flex-center {
+    align-items: center;
     justify-content: center;
 }
 
@@ -296,6 +301,10 @@ html, body, #root, .App {
 
 .relative {
     position: relative;
+}
+
+.hidden {
+    display: none;
 }
 
 .collapsible-content .collapse-toggle {

@@ -45,6 +45,8 @@ export const HighlightTagsSetting = () => {
                 </div>
                 <div className="setting-description">
 					Menu items with any of these tags will be highlighted in menus.
+                    <br/>
+                    Note that the official menus sometimes forget to put these tags on items.
                 </div>
             </div>
             {chipsElement}

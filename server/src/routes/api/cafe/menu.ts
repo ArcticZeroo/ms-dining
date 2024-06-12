@@ -1,44 +1,31 @@
 import Router from '@koa/router';
 import { IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import { MenuResponse } from '@msdining/common/dist/models/http.js';
+import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
+import { isAnyCafeCurrentlyUpdating, isCafeCurrentlyUpdating } from '../../../api/cafe/cache/update.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
-import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { getBetterLogoUrl } from '../../../util/cafe.js';
+import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
+import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
+import { getBetterLogoUrl, getDefaultUniquenessDataForStation } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { isAnyCafeCurrentlyUpdating, isCafeCurrentlyUpdating } from '../../../api/cafe/cache/update.js';
-import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
-
-const getDefaultUniquenessDataForStation = (station: ICafeStation): IStationUniquenessData => {
-    return {
-        daysThisWeek: 1,
-        itemDays:     {
-            1: station.menuItemsById.size
-        }
-    };
-}
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
-    if (uniquenessData == null) {
-        return getDefaultUniquenessDataForStation(station);
-    }
-
-    if (!uniquenessData.has(station.name)) {
-        return getDefaultUniquenessDataForStation(station);
+    if (uniquenessData == null || !uniquenessData.has(station.name)) {
+        return getDefaultUniquenessDataForStation(station.menuItemsById.size);
     }
 
     return uniquenessData.get(station.name)!;
-}
+};
 
 export const registerMenuRoutes = (parent: Router) => {
     const router = new Router();
 
     const serializeMenuItem = (menuItem: IMenuItem): IMenuItemDTO => ({
         ...menuItem,
-        tags: Array.from(menuItem.tags),
+        tags:       Array.from(menuItem.tags),
         searchTags: Array.from(menuItem.searchTags)
     });
 
@@ -82,44 +69,51 @@ export const registerMenuRoutes = (parent: Router) => {
         }
 
         return menusByStation;
-    }
+    };
+
+    const validateCafeAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
+        const id = ctx.params.id?.toLowerCase();
+        if (!id) {
+            ctx.throw(400, 'Missing cafe id');
+        }
+
+        const dateString = getDateStringForMenuRequest(ctx);
+        if (dateString == null) {
+            ctx.body = JSON.stringify([]);
+            return;
+        }
+
+        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+        if (!cafe) {
+            ctx.throw(404, 'Cafe not found or data is missing');
+        }
+
+        if (isCafeCurrentlyUpdating(dateString, cafe)) {
+            ctx.status = 503;
+            ctx.body = ERROR_BODIES.menusCurrentlyUpdating;
+            return;
+        }
+
+        return onReady(cafe, dateString);
+    };
 
     router.get('/menu/:id',
         memoizeResponseBodyByQueryParams(),
-        async ctx => {
-            const id = ctx.params.id?.toLowerCase();
-            if (!id) {
-                ctx.throw(400, 'Missing cafe id');
-                return;
-            }
-
-            const dateString = getDateStringForMenuRequest(ctx);
-            if (dateString == null) {
-                ctx.body = JSON.stringify([]);
-                return;
-            }
-
-            const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-            if (!cafe) {
-                ctx.throw(404, 'Cafe not found or data is missing');
-                return;
-            }
-
-            if (isCafeCurrentlyUpdating(dateString, cafe)) {
-                ctx.status = 503;
-                ctx.body = ERROR_BODIES.menusCurrentlyUpdating;
-                return;
-            }
-
-            const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(id, dateString);
+        async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
+            const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
 
             let uniquenessData: Map<string, IStationUniquenessData> | null = null;
             if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
-                uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(id, dateString);
+                uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(cafe.id, dateString);
             }
 
             ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
-        });
+        }));
+
+    router.get('/menu/:id/overview', async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
+        const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
+        ctx.body = jsonStringifyWithoutNull(overviewStations);
+    }));
 
     attachRouter(parent, router);
-}
+};

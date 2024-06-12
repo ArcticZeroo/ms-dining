@@ -24,7 +24,7 @@ export const HomeWelcomeNearby = () => {
     }
 
     return (
-        <div className="flex-col flex-center">
+        <div className="flex-col flex-justify-center">
             <LocationAllowButton reason={'for nearby cafe recommendations'}/>
             {
                 nearbyViewsToShow.length > 0 && (
@@ -41,7 +41,7 @@ export const HomeWelcomeNearby = () => {
                                 ))
                             }
                         </div>
-                        <button className="default-container flex flex-center" onClick={onAddAllToHomeClicked}>
+                        <button className="default-container flex flex-justify-center" onClick={onAddAllToHomeClicked}>
                             Add All To Home
                         </button>
                     </div>

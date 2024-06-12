@@ -1,3 +1,4 @@
+import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../models/cafe.js';
 import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
 import { betterLogosByNormalizedName } from '../constants/better-logos.js';
@@ -10,7 +11,7 @@ export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
     }
 
     return `${getBaseApiUrlWithoutTrailingSlash(cafe)}/image/${config.tenantId}/${config.contextId}/${config.logoName}`;
-}
+};
 
 export const getThumbnailUrl = (menuItem: IMenuItem): Nullable<string> => {
     if (!menuItem.hasThumbnail) {
@@ -18,14 +19,14 @@ export const getThumbnailUrl = (menuItem: IMenuItem): Nullable<string> => {
     }
 
     return `/static/menu-items/thumbnail/${menuItem.id}.png`;
-}
+};
 
 export const normalizeTagName = (tagName: string) => tagName.toLowerCase().trim();
 
 export const getBetterLogoUrl = (stationName: string, stationLogoUrl?: Nullable<string>) => {
     const betterLogoUrl = betterLogosByNormalizedName[normalizeNameForSearch(stationName)];
     return betterLogoUrl || stationLogoUrl;
-}
+};
 
 export const serializeMenuItemTags = (tags: Iterable<string>) => {
     const tagsArray = Array.from(tags);
@@ -33,6 +34,12 @@ export const serializeMenuItemTags = (tags: Iterable<string>) => {
         return null;
     }
     return tagsArray.join(';');
-}
+};
 
 export const deserializeMenuItemTags = (tags: string | null | undefined) => new Set(tags?.split(';') ?? []);
+
+export const getDefaultUniquenessDataForStation = (itemCount: number = 0): IStationUniquenessData => ({
+    isTraveling:  false,
+    daysThisWeek: 1,
+    itemDays:     { 1: itemCount }
+});

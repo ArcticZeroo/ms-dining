@@ -24,6 +24,7 @@ export interface IMenuItemModifier {
 }
 
 export interface IStationUniquenessData {
+    isTraveling: boolean;
 	daysThisWeek: number;
 	// keys are the number of days, values are the number of items that were in the station for that many days.
 	// e.g. 2: 5 means that five items were in the station for two different days.
@@ -67,5 +68,11 @@ export interface IMenuItemDTO {
 }
 
 export type StationMenuByCategoryName = Record<string, Array<IMenuItem>>;
+
+export interface ICafeOverviewStation {
+    name: string;
+    logoUrl?: string;
+    uniqueness: IStationUniquenessData;
+}
 
 export * from './cart.js';

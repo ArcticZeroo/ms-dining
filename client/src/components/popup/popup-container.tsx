@@ -18,6 +18,8 @@ export const PopupContainer = () => {
 
         const onEscapePressed = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
+                event.stopPropagation();
+                event.preventDefault();
                 popupNotifier.value = null;
             }
         };

@@ -2,7 +2,7 @@ import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
 
-import { useContext, useMemo } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { InternalSettings } from '../../constants/settings.ts';
@@ -12,8 +12,9 @@ import { CafeView } from '../../models/cafe.ts';
 import { randomChoice } from '../../util/random.ts';
 import { toLeafletLocation } from '../../util/user-location.ts';
 import { getViewLocation } from '../../util/view.ts';
-import { CafeMapMarker } from './cafe-map-marker.tsx';
 import './map.css';
+import { CafeMarker } from './popup/cafe-marker.tsx';
+import { CafePopup } from './popup/cafe-popup.tsx';
 
 // Intentionally not a hook, we don't want to change every time the user clicks on a new cafe
 // (e.g. if the component is mounted on top of the cafe menu at some point in the future).
@@ -41,24 +42,67 @@ const CampusMapView = () => {
         () => toLeafletLocation(getMapCenter(views, viewsById)),
         [views, viewsById]
     );
+    const [selectedView, setSelectedView] = useState<CafeView | null>(null);
+
+    const onClose = useCallback(
+        () => {
+            // closeLeafletPopup();
+            setSelectedView(null);
+        },
+        []
+    );
+
+    useEffect(() => {
+        if (selectedView == null) {
+            return;
+        }
+
+        const onEscapePressed = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.stopPropagation();
+                event.preventDefault();
+                setSelectedView(null);
+            }
+        };
+
+        document.addEventListener('keydown', onEscapePressed);
+
+        return () => {
+            document.removeEventListener('keydown', onEscapePressed);
+        };
+    }, [selectedView]);
 
     return (
-        <MapContainer 
-            center={center} 
-            zoom={15} 
-            scrollWheelZoom={true} 
-            className="campus-map"
-        >
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
+        <div className="map-height campus-map-container">
+            <MapContainer
+                center={center}
+                zoom={15}
+                scrollWheelZoom={true}
+                className="campus-map"
+            >
+                <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {
+                    views.map(view => (
+                        <CafeMarker
+                            key={view.value.id}
+                            view={view}
+                            onClick={setSelectedView}
+                        />
+                    ))
+                }
+            </MapContainer>
             {
-                views.map(view => (
-                    <CafeMapMarker view={view} key={view.value.id}/>
-                ))
+                selectedView != null && (
+                    <CafePopup
+                        view={selectedView}
+                        onClose={onClose}
+                    />
+                )
             }
-        </MapContainer>
+        </div>
     );
 };
 

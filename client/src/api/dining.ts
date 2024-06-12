@@ -1,6 +1,6 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { ICafeOverviewStation, IMenuItem } from '@msdining/common/dist/models/cafe';
 import {
     IDiningCoreResponse,
     ISearchResponseResult,
@@ -111,6 +111,14 @@ export abstract class DiningClient {
             DiningClient._cafeMenusByIdPerDateString.get(dateString)?.delete(id);
             throw err;
         }
+    }
+
+    public static async retrieveCafeMenuOverview(cafe: ICafe, dateString: string): Promise<Array<ICafeOverviewStation>> {
+        const response = await makeJsonRequest({
+            path: `/api/dining/menu/${cafe.id}/overview?date=${dateString}`
+        });
+
+        return response as Array<ICafeOverviewStation>;
     }
 
     public static async retrieveRecentMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {

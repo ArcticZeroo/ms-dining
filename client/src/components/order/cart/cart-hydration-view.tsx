@@ -13,7 +13,7 @@ export const CartHydrationView = () => {
 
     if (cartHydration.stage === PromiseStage.running) {
         return (
-            <div className="flex flex-center cart-loading">
+            <div className="flex flex-justify-center cart-loading">
                 <HourglassLoadingSpinner/>
                 <span>
                     Loading items from your last session...

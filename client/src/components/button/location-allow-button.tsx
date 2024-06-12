@@ -14,7 +14,7 @@ export const LocationAllowButton: React.FC<ILocationAllowButtonProps> = ({ reaso
     }
 
     return (
-        <button className="default-container flex flex-center" onClick={queryForLocationPermission}>
+        <button className="default-container flex flex-justify-center" onClick={queryForLocationPermission}>
             <span className="material-symbols-outlined">
 			   location_on
             </span>
