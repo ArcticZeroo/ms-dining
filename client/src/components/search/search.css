@@ -79,7 +79,7 @@
 }
 
 .search-result.is-favorite .search-result-info {
-    background: var(--favorite-color);
+    background: var(--color-favorite);
 }
 
 .search-result.is-favorite .search-result-type {

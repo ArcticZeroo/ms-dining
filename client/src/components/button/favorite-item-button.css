@@ -1,8 +1,3 @@
-:root {
-    --favorite-color: #ffe7ab;
-    --favorite-color-dark: #ffd97a;
-}
-
 .favorite-item-button {
     background: #EDEDED;
     transition: background-color 0.25s ease;
@@ -12,5 +7,5 @@
 }
 
 .favorite-item-button.is-favorite {
-    background: var(--favorite-color) !important;
+    background: var(--color-favorite) !important;
 }

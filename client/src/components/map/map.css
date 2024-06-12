@@ -44,14 +44,21 @@
 }
 
 .campus-map .leaflet-div-icon .cafe-marker-tracker {
+    --color-icon-background: #112841;
+    --color-icon-border: #225970;
     padding: 0.25rem;
     border-radius: 100%;
     /*background: var(--color-button-background);*/
     width: 1rem;
     height: 1rem;
     font-size: 1.2em;
-    background: #112841;
-    border: 0.25rem solid #225970;
+    background: var(--color-icon-background);
+    border: 0.25rem solid var(--color-icon-border);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker.is-homepage-view {
+    --color-icon-background: var(--color-favorite-dark);
+    --color-icon-border: var(--color-favorite);
 }
 
 .cafe-popup * {

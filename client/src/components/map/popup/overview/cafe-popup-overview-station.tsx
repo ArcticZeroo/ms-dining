@@ -17,6 +17,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
     const popupView = useContext(MapPopupViewContext);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
+    // TODO: Maybe we can show some stations with uniqueness data if none are traveling?
     if (!popupView || !station.uniqueness.isTraveling) {
         return null;
     }

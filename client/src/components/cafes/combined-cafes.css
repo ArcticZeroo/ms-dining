@@ -60,7 +60,7 @@
 }
 
 .station.is-favorite .station-header .title {
-    background: var(--favorite-color-dark);
+    background: var(--color-favorite-dark);
 }
 
 .station .station-header .title img {
@@ -120,11 +120,11 @@
 }
 
 .station .menu-item.is-favorite {
-    background: var(--favorite-color);
+    background: var(--color-favorite);
 }
 
 .station .menu-item.is-favorite:hover {
-    background: var(--favorite-color-dark);
+    background: var(--color-favorite-dark);
 }
 
 .menu-item-image {
