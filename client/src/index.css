@@ -330,8 +330,8 @@ html, body, #root, .App {
     border-radius: var(--default-padding);
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--constant-padding);
+    justify-content: space-between;
+    gap: var(--default-padding);
     border: none;
     text-decoration: none;
     cursor: pointer;
@@ -399,6 +399,11 @@ html, body, #root, .App {
 .icon-container {
     width: calc(var(--icon-size) + var(--default-padding) * 2);
     height: calc(var(--icon-size) + var(--default-padding) * 2);
+}
+
+.icon-container-constant {
+    width: calc(var(--icon-size) + var(--constant-padding) * 2);
+    height: calc(var(--icon-size) + var(--constant-padding) * 2);
 }
 
 .transition-background {

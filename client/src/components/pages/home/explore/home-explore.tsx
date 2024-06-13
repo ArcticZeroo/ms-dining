@@ -11,7 +11,7 @@ export const HomeExplore = () => {
     }
 
     return (
-        <HomeCollapse title="Explore Food on Campus">
+        <HomeCollapse title="Explore Food on Campus" featureToggle={SpecialSettings.showExploreOnHome}>
             <SearchIdeas/>
         </HomeCollapse>
     );

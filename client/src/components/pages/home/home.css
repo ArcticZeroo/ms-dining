@@ -4,3 +4,13 @@
     gap: var(--default-padding);
     justify-content: center;
 }
+
+.remove-button {
+    background: none;
+    color: #FAFAFA;
+    transition: color 0.125s ease;
+}
+
+.remove-button:hover {
+    color: #c96565;
+}

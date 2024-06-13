@@ -1,7 +1,7 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { ISearchQuery } from '@msdining/common/dist/models/search';
 import { getNowWithDaysInFuture, isSameDate, yieldDaysInFutureForThisWeek } from '@msdining/common/dist/util/date-util';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
@@ -10,13 +10,13 @@ import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { useHomepageViews } from '../../../../hooks/views.ts';
 import { IQuerySearchResult } from '../../../../models/search.ts';
 import { MenusCurrentlyUpdatingException } from '../../../../util/exception.ts';
-import { classNames } from '../../../../util/react.ts';
 import { isAnyDateToday } from '../../../../util/search.ts';
 import { expandAndFlattenView } from '../../../../util/view.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
-import { ExpandIcon } from '../../../icon/expand.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
+import { HomeCollapse } from "../home-collapse.tsx";
+import { ApplicationSettings } from "../../../../constants/settings.ts";
 
 interface IFavoriteSearchResultsData {
     stage: PromiseStage;
@@ -64,7 +64,6 @@ interface IHomeFavoritesViewProps {
 export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }) => {
     const { viewsById } = useContext(ApplicationContext);
     const homepageViews = useHomepageViews();
-    const [isCollapsed, setIsCollapsed] = useState(false);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const cafeIdsOnPage = useMemo(
@@ -75,10 +74,6 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
         ),
         [homepageViews, viewsById]
     );
-
-    const onToggleExpansion = () => {
-        setIsCollapsed(!isCollapsed);
-    };
 
     const { stage, results, actualStage, error, retry } = useFavoriteSearchResults(queries);
 
@@ -155,16 +150,12 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     }
 
     return (
-        <div className={classNames('collapsible-content flex-col', isCollapsed && 'collapsed')} id="home-favorites">
-            <div className="collapse-toggle" onClick={onToggleExpansion}>
-                <div className="flex-row">
-                    Favorites Across Campus on {selectedDate.toLocaleDateString()}
-                </div>
-                <ExpandIcon isExpanded={!isCollapsed}/>
-            </div>
-            <div className="collapse-body">
-                {bodyView}
-            </div>
-        </div>
+        <HomeCollapse
+            title={`Favorites Across Campus on ${selectedDate.toLocaleDateString()}`}
+            id="home-favorites"
+            featureToggle={ApplicationSettings.showFavoritesOnHome}
+        >
+            {bodyView}
+        </HomeCollapse>
     );
 };
