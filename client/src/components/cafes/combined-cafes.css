@@ -251,8 +251,8 @@
 
 .menu-item-tag {
     background: #EEE;
-    padding: var(--default-padding);
-    border-radius: var(--default-padding);
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
     text-align: center;
 }
 

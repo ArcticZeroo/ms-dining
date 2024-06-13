@@ -11,13 +11,14 @@ import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
-import { pluralize } from '../../util/string.ts';
 import { getSearchUrl } from '../../util/url.ts';
 import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
 import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
 import { SearchResultHits } from './search-result-hits.tsx';
-import './search.css';
 import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
+import { SearchResultFindButton } from "./search-result-find-button.tsx";
+
+import './search.css';
 
 interface IEntityDisplayData {
     className: string;
@@ -27,11 +28,11 @@ interface IEntityDisplayData {
 const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
     [SearchTypes.SearchEntityType.menuItem]: {
         className: 'entity-menu-item',
-        iconName:  'lunch_dining'
+        iconName: 'lunch_dining'
     },
-    [SearchTypes.SearchEntityType.station]:  {
+    [SearchTypes.SearchEntityType.station]: {
         className: 'entity-station',
-        iconName:  'restaurant'
+        iconName: 'restaurant'
     }
 };
 
@@ -233,11 +234,18 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                 <div className="search-result-info-header">
                     <div className="flex">
                         {!isCompact && favoriteButton}
-                        <div className="search-result-name">
-                            {name}
+                        <div className="title">
+                            <span>
+                                {name}
+                            </span>
                             {
                                 !isCompact && description &&
                                 <div className="search-result-description">{description}</div>
+                            }
+                            {
+                                tags && (showTags || matchReasons.has(SearchMatchReason.tags)) && (
+                                    <MenuItemTags tags={tags} showName={!isCompact}/>
+                                )
                             }
                         </div>
                     </div>
@@ -253,11 +261,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                     ))
                                 }
                             </div>
-                        )
-                    }
-                    {
-                        tags && (showTags || matchReasons.has(SearchMatchReason.tags)) && (
-                            <MenuItemTags tags={tags}/>
                         )
                     }
                     {
@@ -304,11 +307,11 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     }
                     {
                         showSearchButtonInsteadOfLocations && (
-                            <Link to={getSearchUrl(name)}
-                                className="default-container default-button text-center text-nowrap">
-                                                                   🔍 find
-                                                                   in {isSkeleton ? '...' : locationEntriesInOrder.length} {pluralize('cafe', locationEntriesInOrder.length)}
-                            </Link>
+                            <SearchResultFindButton
+                                name={name}
+                                isSkeleton={isSkeleton}
+                                cafeCount={locationEntriesInOrder.length}
+                            />
                         )
                     }
                 </div>

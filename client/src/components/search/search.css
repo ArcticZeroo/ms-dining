@@ -103,7 +103,7 @@
     flex-grow: 1;
 }
 
-.search-result-info-header .search-result-name {
+.search-result-info-header .title {
     font-size: var(--card-title-font-size);
 }
 
@@ -203,6 +203,19 @@
 
 .compact-view-mode .search-result {
     flex-grow: 1;
+}
+
+.search-result-find-button .search-result-find-hits {
+    display: none;
+    position: absolute;
+    top: 100%;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    z-index: var(--z-index-above-content-3);
+}
+
+.search-result-find-button:hover .search-result-find-hits {
+    display: flex;
 }
 
 @media screen and (max-height: 800px) {

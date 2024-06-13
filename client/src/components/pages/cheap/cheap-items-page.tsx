@@ -110,10 +110,10 @@ export const CheapItemsPage: React.FC = () => {
                             <br/>
                             Menus are currently updating. Please try again soon!
                             <br/>
-                            <RetryButton onClick={retry}/>
                         </>
                     )
                 }
+                <RetryButton onClick={retry}/>
             </div>
         );
     }

@@ -5,12 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchResultsList } from '../../../search/search-results-list.tsx';
-import {SearchEntityFilterType, SearchResultsViewMode} from '../../../../models/search.ts';
+import { SearchEntityFilterType, SearchResultsViewMode } from '../../../../models/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { classNames } from '../../../../util/react.ts';
 
 import './search-ideas.css';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
+import { MenusCurrentlyUpdatingException } from "../../../../util/exception.ts";
 
 const SEARCH_IDEAS = randomSortInPlace([
     'burger',
@@ -43,6 +44,8 @@ export const SearchIdeas = () => {
         error
     } = useDelayedPromiseState(retrieveSearchResultsCallback, false /*keepLastValue*/);
 
+    const isLoading = !value && !error;
+
     useEffect(() => {
         runRetrieveSearchResults();
     }, [runRetrieveSearchResults]);
@@ -61,7 +64,7 @@ export const SearchIdeas = () => {
                 ))}
             </div>
             {
-                !value && (
+                isLoading && (
                     <div className="flex">
                         <SearchResultSkeleton
                             isCompact={true}
@@ -92,7 +95,7 @@ export const SearchIdeas = () => {
             {
                 error && (
                     <div className="centered-content">
-						Could not load search results.
+                        {MenusCurrentlyUpdatingException.getText(error, 'Could not load search results.')}
                         <RetryButton onClick={runRetrieveSearchResults}/>
                     </div>
                 )

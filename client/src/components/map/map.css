@@ -1,38 +1,16 @@
+.campus-map-container {
+    border-radius: var(--default-padding);
+    overflow: hidden;
+    position: relative;
+}
+
 .campus-map {
     --color-button-background: #163650;
     height: var(--map-height);
-    border-radius: var(--default-padding);
 }
 
 .campus-map.loading-skeleton {
     background: #fffefb;
-}
-
-.campus-map .leaflet-popup-pane {
-    /*display: none;*/
-}
-
-.campus-map .leaflet-popup-tip {
-    background: var(--color-background);
-}
-
-.campus-map .leaflet-popup-content-wrapper {
-    background: var(--color-background);
-    color: #FAFAFA;
-    border-radius: var(--constant-padding);
-}
-
-.campus-map .leaflet-popup-content {
-    margin: var(--constant-padding);
-    line-height: initial;
-    font-size: initial;
-    display: flex;
-    flex-direction: column;
-    gap: var(--constant-padding);
-}
-
-.campus-map .leaflet-popup-close-button {
-    font-size: 2em;
 }
 
 .campus-map .leaflet-div-icon {
@@ -75,7 +53,7 @@
     padding: var(--constant-padding);
     border-radius: var(--constant-padding);
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     text-align: center;
     align-self: stretch;
@@ -99,10 +77,6 @@
 
 .cafe-popup a.view-menu {
     background: var(--color-button-background);
-}
-
-.campus-map-container {
-    position: relative;
 }
 
 .campus-map-container .cafe-popup {
