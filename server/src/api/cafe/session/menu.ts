@@ -28,7 +28,9 @@ export class CafeMenuSession extends CafeDiscoverySession {
     private _convertExternalStation(stationJson: ICafeStationListItem): ICafeStation {
         const station: ICafeStation = {
             id:                        stationJson.id,
-            name:                      stationJson.name,
+            // Some station names are just a space, e.g. the station for the sandwich place in the commons
+            // This is confusing for users in some cases, so let's just replace it with the cafe name
+            name:                      stationJson.name.trim() || this.cafe.name,
             logoUrl:                   stationJson.image,
             menuId:                    stationJson.priceLevelConfig.menuId,
             menuLastUpdateTime:        new Date(0),
