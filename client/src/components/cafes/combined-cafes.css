@@ -229,6 +229,10 @@
     display: none;
 }
 
+.station .badge {
+    background: #838383;
+}
+
 .menu-item-head {
     display: flex;
     flex-direction: column;
