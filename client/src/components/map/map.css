@@ -109,3 +109,18 @@
     background: #363636;
     border-radius: 0.5rem;
 }
+
+.overview-station .badge {
+    background: #3F51B5;
+    padding: 0.125rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    text-decoration: none;
+    border-radius: 100%;
+}
+
+.overview-station .badge > * {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+}

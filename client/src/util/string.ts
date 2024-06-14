@@ -46,3 +46,5 @@ export const normalizeName = (name: string) => name.toLowerCase().trim();
 export const stringWithSpaceIfExists = (value: unknown): string => (typeof value === 'string' && value)
     ? ` ${value}`
     : '';
+
+export const maybeString = (value: unknown): string | undefined => (typeof value === 'string' && value) ? value : undefined;

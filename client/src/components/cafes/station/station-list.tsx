@@ -5,6 +5,7 @@ import { Station } from './station.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { sortStationUniquenessInPlace } from "../../../util/sorting.ts";
 
 interface IStationListProps {
     stations: CafeMenu;
@@ -22,7 +23,12 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
         () => {
             const filteredStations: Array<[ICafeStation, MenuItemsByCategoryName]> = [];
 
-            for (const station of stations) {
+            const stationsInOrder = [...stations];
+            if (shouldDoIntelligentOrdering) {
+                sortStationUniquenessInPlace(stationsInOrder);
+            }
+
+            for (const station of stationsInOrder) {
                 if (shouldHideEveryDayStations && station.uniqueness?.daysThisWeek === 5) {
                     continue;
                 }
@@ -35,30 +41,6 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
                 if (menu != null) {
                     filteredStations.push([station, menu]);
                 }
-            }
-
-            if (shouldDoIntelligentOrdering) {
-                filteredStations.sort(([stationA], [stationB]) => {
-                    const uniquenessA = stationA.uniqueness;
-                    const uniquenessB = stationB.uniqueness;
-
-                    if (uniquenessA.daysThisWeek !== uniquenessB.daysThisWeek) {
-                        // Stations which are rarer should be first.
-                        return uniquenessA.daysThisWeek - uniquenessB.daysThisWeek;
-                    }
-
-                    // Stations with more unique items should be first.
-                    for (let i = 1; i <= 5; i++) {
-                        const uniqueItemsA = uniquenessA.itemDays[i] || 0;
-                        const uniqueItemsB = uniquenessB.itemDays[i] || 0;
-
-                        if (uniqueItemsA !== uniqueItemsB) {
-                            return uniqueItemsB - uniqueItemsA;
-                        }
-                    }
-                    
-                    return stationA.name.localeCompare(stationB.name);
-                });
             }
 
             return filteredStations;

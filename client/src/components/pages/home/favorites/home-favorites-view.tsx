@@ -17,6 +17,7 @@ import { HomeFavoriteResult } from './home-favorite-result.tsx';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
 import { HomeCollapse } from "../home-collapse.tsx";
 import { ApplicationSettings } from "../../../../constants/settings.ts";
+import { useTitleWithSelectedDate } from "../../../../hooks/string.ts";
 
 interface IFavoriteSearchResultsData {
     stage: PromiseStage;
@@ -65,6 +66,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     const { viewsById } = useContext(ApplicationContext);
     const homepageViews = useHomepageViews();
     const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const title = useTitleWithSelectedDate('Favorites Across Campus');
 
     const cafeIdsOnPage = useMemo(
         () => new Set(
@@ -151,7 +153,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
 
     return (
         <HomeCollapse
-            title={`Favorites Across Campus on ${selectedDate.toLocaleDateString()}`}
+            title={title}
             id="home-favorites"
             featureToggle={ApplicationSettings.showFavoritesOnHome}
         >

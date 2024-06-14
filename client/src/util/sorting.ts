@@ -1,6 +1,7 @@
 import { CafeView, ICafe } from '../models/cafe.ts';
 import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
+import { IStationUniquenessData } from "@msdining/common/dist/models/cafe";
 
 export const normalizeCafeId = (id: string) => {
     return id
@@ -107,3 +108,38 @@ export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, 
     });
 }
 
+interface IUniquenessSortableStation {
+    name: string;
+    uniqueness: IStationUniquenessData;
+}
+
+export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStation>(stations: T[]): T[] => {
+    stations.sort((stationA, stationB) => {
+        const uniquenessA = stationA.uniqueness;
+        const uniquenessB = stationB.uniqueness;
+
+        if (uniquenessA.isTraveling !== uniquenessB.isTraveling) {
+            // Traveling stations should be first.
+            return uniquenessA.isTraveling ? -1 : 1;
+        }
+
+        if (uniquenessA.daysThisWeek !== uniquenessB.daysThisWeek) {
+            // Stations which are rarer should be first.
+            return uniquenessA.daysThisWeek - uniquenessB.daysThisWeek;
+        }
+
+        // Stations with more unique items should be first.
+        for (let i = 1; i <= 5; i++) {
+            const uniqueItemsA = uniquenessA.itemDays[i] || 0;
+            const uniqueItemsB = uniquenessB.itemDays[i] || 0;
+
+            if (uniqueItemsA !== uniqueItemsB) {
+                return uniqueItemsB - uniqueItemsA;
+            }
+        }
+
+        return stationA.name.localeCompare(stationB.name);
+    });
+
+    return stations;
+}
