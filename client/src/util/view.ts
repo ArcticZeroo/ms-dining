@@ -1,4 +1,4 @@
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { ILocationCoordinates, Nullable } from '@msdining/common/dist/models/util';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { getCafeLocation } from './cafe.ts';
 
@@ -40,7 +40,11 @@ export const getParentView = (viewsById: Map<string, CafeView>, view: CafeView, 
     return parentView;
 };
 
-export const isViewVisible = (view: CafeView, shouldUseGroups: boolean) => {
+export const isViewVisible = (view: Nullable<CafeView>, shouldUseGroups: boolean) => {
+    if (view == null) {
+        return false;
+    }
+
     if (!shouldUseGroups) {
         return view.type === CafeViewType.single;
     } else {

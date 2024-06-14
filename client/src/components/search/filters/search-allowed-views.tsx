@@ -5,13 +5,8 @@ import { hasAncestor } from "../../../util/html.ts";
 import { useValueNotifier } from "../../../hooks/events.ts";
 import { ApplicationSettings } from "../../../constants/settings.ts";
 
-interface ISearchAllowedViewsProps {
-    allowedViews: Set<string>;
-
-    onAllowedViewsChanged(viewIds: Set<string>): void;
-}
-
-export const SearchAllowedViews: React.FC<ISearchAllowedViewsProps> = ({ allowedViews, onAllowedViewsChanged }) => {
+export const SearchAllowedViews: React.FC = () => {
+    const allowedViewIds = useValueNotifier(ApplicationSettings.searchAllowedViewIds);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const views = useViewsForNav();
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -54,13 +49,12 @@ export const SearchAllowedViews: React.FC<ISearchAllowedViewsProps> = ({ allowed
     }
 
     const onSelectHomeOnly = () => {
-        const newSelectedOptions = new Set(homepageViewIds);
-        onAllowedViewsChanged(newSelectedOptions);
+        ApplicationSettings.searchAllowedViewIds.value = new Set(homepageViewIds);
     }
 
-    const allowedViewCount = allowedViews.size === 0
+    const allowedViewCount = allowedViewIds.size === 0
         ? views.length
-        : allowedViews.size;
+        : allowedViewIds.size;
 
     return (
         <div className="relative">
@@ -78,8 +72,8 @@ export const SearchAllowedViews: React.FC<ISearchAllowedViewsProps> = ({ allowed
                         ref={dropdownRef}
                         id="search-allowed-views"
                         options={options}
-                        selectedOptions={allowedViews}
-                        onSelectedOptionsChanged={onAllowedViewsChanged}
+                        selectedOptions={allowedViewIds}
+                        onSelectedOptionsChanged={selectedOptions => ApplicationSettings.searchAllowedViewIds.value = selectedOptions}
                         buttons={
                             <>
                                 {

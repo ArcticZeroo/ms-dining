@@ -2,19 +2,11 @@ import { PriceFiltersSetting } from "../../settings/price-filters-setting.tsx";
 import React from "react";
 import { SearchAllowedViews } from "./search-allowed-views.tsx";
 
-interface ISearchFiltersProps {
-    allowedViews: Set<string>;
-    onAllowedViewsChanged(viewIds: Set<string>): void;
-}
-
-export const SearchFilters: React.FC<ISearchFiltersProps> = ({ allowedViews, onAllowedViewsChanged }) => {
+export const SearchFilters: React.FC = () => {
     return (
         <div className="card">
             <PriceFiltersSetting/>
-            <SearchAllowedViews
-                allowedViews={allowedViews}
-                onAllowedViewsChanged={onAllowedViewsChanged}
-            />
+            <SearchAllowedViews/>
         </div>
     );
 };

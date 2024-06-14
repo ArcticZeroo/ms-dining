@@ -12,6 +12,7 @@ import './search-page.css';
 import { SearchWaiting } from "../../search/search-waiting.tsx";
 import { SearchFilters } from "../../search/filters/search-filters.tsx";
 import { classNames } from "../../../util/react.ts";
+import { useAllowedSearchViewIds } from "../../../hooks/search.ts";
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -76,9 +77,9 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
 };
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
+    const allowedViewIds = useAllowedSearchViewIds();
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
-    const [allowedViewIds, setAllowedViewIds] = useState<Set<string>>(new Set());
 
     const {
         actualStage,
@@ -140,10 +141,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     </div>
                     {
                         isFilterMenuOpen && (
-                            <SearchFilters
-                                allowedViews={allowedViewIds}
-                                onAllowedViewsChanged={setAllowedViewIds}
-                            />
+                            <SearchFilters/>
                         )
                     }
                 </div>

@@ -42,6 +42,7 @@ export const ApplicationSettings = {
     highlightTagNames:             new StringSetSetting('highlightTagNames'),
     favoriteItemNames:             new StringSetSetting('favoriteItemNames'),
     favoriteStationNames:          new StringSetSetting('favoriteStationNames'),
+    searchAllowedViewIds:          new StringSetSetting('searchAllowedViewIds'),
     minimumPrice:                  new NumberSetting('minimumPrice', 0),
     maximumPrice:                  new NumberSetting('maximumPrice', 10),
 } as const;
