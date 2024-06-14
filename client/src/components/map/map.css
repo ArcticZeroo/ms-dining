@@ -85,8 +85,8 @@
     left: 0;
     width: 100%;
     height: var(--map-height);
-    /* Leaflet uses pretty high values */
-    z-index: 1000;
+    /*leaflet map is included in content index calculation*/
+    z-index: var(--z-index-above-content);
     background: rgba(0, 0, 0, 0.5);
     color: var(--color-foreground);
     cursor: default;

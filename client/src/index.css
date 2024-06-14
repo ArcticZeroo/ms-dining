@@ -2,14 +2,6 @@
     --color-theme: #3488e0ff;
     --color-card-background: #FAFAFA;
     --color-card-foreground: #212121;
-    --z-index-content: 1;
-    --z-index-above-content: 5;
-    --z-index-above-content-2: 10;
-    --z-index-above-content-3: 15;
-    --z-index-everything-but-top: 50;
-    --z-index-top: 100;
-    /*above top*/
-    --z-index-modal: 200;
     --color-background: #212121;
     --color-foreground: #FAFAFA;
     --color-error: #9d5353;
@@ -20,6 +12,20 @@
     --constant-padding: 0.5rem;
     --icon-size: 24px;
     --map-height: 50vh;
+
+    --z-index-leaflet-popup: 700;
+    /*buttons seem to be the topmost layer of the leaflet container*/
+    --z-index-leaflet-buttons: 1000;
+
+    /*consider the map to be a part of main content. we will rarely want something on the map only.*/
+    --z-index-content: var(--z-index-leaflet-buttons);
+    --z-index-above-content: calc(var(--z-index-content) + 10);
+    --z-index-above-content-2: calc(var(--z-index-above-content) + 10);
+    --z-index-above-content-3: calc(var(--z-index-above-content-2) + 10);
+    --z-index-everything-but-top: calc(var(--z-index-above-content-3) + 100);
+    --z-index-top: calc(var(--z-index-everything-but-top) + 10);
+    /*above top*/
+    --z-index-modal: calc(var(--z-index-top) + 10);
 }
 
 body, html {
