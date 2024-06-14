@@ -1,5 +1,5 @@
 import { IMenuItem } from '@msdining/common/dist/models/cafe';
-import { FavoriteItemButton } from '../../../../button/favorite-item-button.tsx';
+import { FavoriteSearchableItemButton } from '../../../../button/favorite-searchable-item-button.tsx';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useContext, useState } from 'react';
 import { navigateToSearch } from '../../../../../util/search.ts';
@@ -76,7 +76,7 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
     };
     return (
         <>
-            <FavoriteItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
+            <FavoriteSearchableItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
             <button title="Click to copy link" onClick={onCopyClicked} className="copy-button flex flex-justify-center">
                 <span className="material-symbols-outlined transition-background" style={{ background: copyButtonBackground }}>
                     link

@@ -54,10 +54,9 @@ export const DebugSettings = {
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;
 
-// idk, depends on other things? Maybe I need to make it easier to read previous settings within a group like ApplicationSettings
-export const SpecialSettings = {
+export const HomeSettings = {
     showExploreOnHome: new BooleanSetting('showExploreOnHome', isProbablyNewUser /*defaultValue*/),
-    showMapOnHome:     new BooleanSetting('showMapOnHome', isProbablyNewUser /*defaultValue*/),
+    showMapOnHome:     new BooleanSetting('showMapOnHome', true),
 } as const;
 
 export const getVisitorId = () => {

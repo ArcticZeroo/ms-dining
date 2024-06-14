@@ -1,7 +1,7 @@
 import React from 'react';
 import { BooleanSettingInput } from './boolean-setting-input.tsx';
 import { HomepageViewsSetting } from './homepage-views-setting.tsx';
-import { ApplicationSettings, SpecialSettings } from '../../constants/settings.ts';
+import { ApplicationSettings, HomeSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { SettingsGroup } from './settings-group.tsx';
 
@@ -31,12 +31,12 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
                 icon="restaurant_menu"
                 name="Show Explore on Homepage"
                 description="When enabled, the home page will show suggested searches for food on campus."
-                setting={SpecialSettings.showExploreOnHome}/>
+                setting={HomeSettings.showExploreOnHome}/>
             <BooleanSettingInput
                 icon="map"
                 name="Show Map on Homepage"
                 description="When enabled, the home page will show a map that lets you view nearby cafes and their traveling stations."
-                setting={SpecialSettings.showMapOnHome}/>
+                setting={HomeSettings.showMapOnHome}/>
             {
                 hasAnyHomepageViews && homepageViewsComponent
             }

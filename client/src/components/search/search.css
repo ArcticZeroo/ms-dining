@@ -73,11 +73,6 @@
     transition: background-color 0.25s ease;
 }
 
-.search-result .favorite-item-button {
-    padding: var(--constant-padding);
-    border-radius: var(--constant-padding);
-}
-
 .search-result.is-favorite .search-result-info {
     background: var(--color-favorite);
 }

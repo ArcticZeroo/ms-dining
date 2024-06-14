@@ -12,7 +12,7 @@ import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hoo
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getScrollAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
-import { FavoriteItemButton } from '../../button/favorite-item-button.tsx';
+import { FavoriteSearchableItemButton } from '../../button/favorite-searchable-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
@@ -92,7 +92,7 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                 >
                     <ScrollAnchor id={scrollAnchorId} margin={`${cafeHeaderHeight}px`}/>
                     <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
-                        <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
+                        <FavoriteSearchableItemButton name={station.name} type={SearchEntityType.station}/>
                         <button className="title" onClick={onTitleClick}>
                             <span>
                                 {

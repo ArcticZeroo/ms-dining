@@ -32,13 +32,25 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
         [homepageViewIds, shouldUseGroups, view]
     );
 
+    const onContextMenu = (event: L.LeafletMouseEvent) => {
+        event.originalEvent.preventDefault();
+
+        if (homepageViewIds.has(view.value.id)) {
+            ApplicationSettings.homepageViews.delete(view.value.id);
+        } else {
+            ApplicationSettings.homepageViews.add(view.value.id);
+        }
+    }
+
     return (
         <Marker
             position={toLeafletLocation(getViewLocation(view))}
             icon={L.divIcon({ html: getIconHtml(view, isOnHomepage) })}
             eventHandlers={{
-                click: () => onClick(view)
+                click: () => onClick(view),
+                contextmenu: onContextMenu
             }}
+            title={`Click to open overview for ${view.value.name}, or right click to toggle this view on your homepage.`}
         />
     );
 };

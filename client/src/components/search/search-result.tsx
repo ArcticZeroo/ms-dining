@@ -12,7 +12,7 @@ import { CafeView } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import { getSearchUrl } from '../../util/url.ts';
-import { FavoriteItemButton } from '../button/favorite-item-button.tsx';
+import { FavoriteSearchableItemButton } from '../button/favorite-searchable-item-button.tsx';
 import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
 import { SearchResultHits } from './search-result-hits.tsx';
 import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
@@ -206,7 +206,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
     const favoriteButton = showFavoriteButton && (
         <div>
-            <FavoriteItemButton
+            <FavoriteSearchableItemButton
                 name={name}
                 type={entityType}
             />

@@ -1,28 +1,20 @@
-import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import React, { useMemo } from 'react';
-import filledStarIcon from '../../assets/icons/filled/star.svg';
-import { useValueNotifierSetTarget } from '../../hooks/events.ts';
-import { getTargetSettingForFavorite } from '../../util/cafe.ts';
-import { classNames } from '../../util/react.ts';
+import React from "react";
+import { useValueNotifierSetTarget } from "../../hooks/events.ts";
+import { classNames } from "../../util/react.ts";
+import filledStarIcon from "../../assets/icons/filled/star.svg";
+import outlinedStarIcon from "../../assets/icons/outline/star.svg";
+import { StringSetSetting } from "../../api/settings.ts";
 
 import './favorite-item-button.css';
 
 interface IFavoriteItemButtonProps {
     name: string;
-    type: SearchEntityType;
+    setting: StringSetSetting;
     isDisabled?: boolean;
 }
 
-export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, type, isDisabled = false }) => {
-    const targetSetting = getTargetSettingForFavorite(type);
-
-    const normalizedItemName = useMemo(
-        () => normalizeNameForSearch(name),
-        [name]
-    );
-
-    const isItemFavorite = useValueNotifierSetTarget(targetSetting, normalizedItemName);
+export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, setting, isDisabled }) => {
+    const isItemFavorite = useValueNotifierSetTarget(setting, name);
 
     const onFavoriteClicked = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -33,9 +25,9 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, t
         }
 
         if (isItemFavorite) {
-            targetSetting.delete(normalizedItemName);
+            setting.delete(name);
         } else {
-            targetSetting.add(normalizedItemName);
+            setting.add(name);
         }
     };
 
@@ -46,9 +38,7 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, t
             onClick={onFavoriteClicked}
         >
             <img src={filledStarIcon} alt="favorite" className="favorite-enabled icon-sized" style={{ display: isItemFavorite ? 'block' : 'none' }}/>
-            <span className="material-symbols-outlined" style={{ display: isItemFavorite ? 'none' : 'block' }}>
-                star
-            </span>
+            <img src={outlinedStarIcon} alt="not favorite" className="icon-sized" style={{ display: isItemFavorite ? 'none' : 'block' }}/>
         </button>
     )
-}
+};

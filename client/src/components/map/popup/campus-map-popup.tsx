@@ -9,6 +9,7 @@ import { getViewMenuUrl } from '../../../util/link.ts';
 import { expandAndFlattenView } from '../../../util/view.ts';
 import { CampusMapPopupMember } from './campus-map-popup-member.tsx';
 import { MapPopupViewContext } from '../../../context/map.ts';
+import { FavoriteItemButton } from "../../button/favorite-item-button.tsx";
 
 interface ICampusMapPopupProps {
     view: CafeView;
@@ -30,6 +31,7 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
     };
 
     const onContentClicked = (event: React.MouseEvent) => {
+        // don't let the parent know that we clicked, that would close the popup
         event.stopPropagation();
     };
 
@@ -38,13 +40,18 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
             <div className="cafe-popup flex flex-center default-padding fade-in" onClick={onPaddingClicked}>
                 <div className="body flex-col height-full default-container" onClick={onContentClicked}>
                     <div className="flex flex-between">
-                        {
-                            getViewName({
-                                view,
-                                showGroupName: true,
-                                includeEmoji: true
-                            })
-                        }
+                        <FavoriteItemButton
+                            setting={ApplicationSettings.homepageViews}
+                            name={view.value.id}/>
+                        <span>
+                            {
+                                getViewName({
+                                    view,
+                                    showGroupName: true,
+                                    includeEmoji: true
+                                })
+                            }
+                        </span>
                         <button onClick={onClose}
                             className="default-button default-container icon-container close-button">
                             <span className="material-symbols-outlined">

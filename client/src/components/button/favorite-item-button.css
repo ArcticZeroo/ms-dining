@@ -4,6 +4,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
 }
 
 .favorite-item-button.is-favorite {

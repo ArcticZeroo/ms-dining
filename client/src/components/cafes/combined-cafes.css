@@ -40,8 +40,6 @@
 }
 
 .station .station-header .favorite-item-button {
-    padding: var(--constant-padding);
-    border-radius: var(--constant-padding);
     margin: 0 var(--default-padding);
 }
 
