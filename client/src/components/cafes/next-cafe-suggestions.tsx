@@ -14,30 +14,46 @@ const VIEW_SUGGESTION_COUNT = 5;
 
 interface INextCafeSuggestionsProps {
     excludeViews: CafeView[];
-    location?: ILocationCoordinates;
+    locations: ILocationCoordinates[];
 }
 
-export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeViews, location }) => {
+export const NextCafeSuggestions: React.FC<INextCafeSuggestionsProps> = ({ excludeViews, locations }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     const userLocation = useValueNotifier(PassiveUserLocationNotifier);
-    const targetLocation = location || userLocation;
 
-    const viewsSortedByDistance = useViewsSortedByDistance(targetLocation);
+    const targetLocations = useMemo(
+        (): ILocationCoordinates[] => {
+            if (locations) {
+                return locations;
+            }
+
+            if (userLocation) {
+                return [userLocation];
+            }
+
+            return [];
+        },
+        [locations, userLocation]
+    );
+
+    const viewsSortedByDistance = useViewsSortedByDistance(targetLocations);
 
     const viewsToShow = useMemo(
         () => {
-            if (!targetLocation) {
+            if (targetLocations.length === 0) {
                 return [];
             }
 
             const excludedViewIds = new Set(excludeViews.map(view => view.value.id));
+            // Even if one of the views is a group and one of the members is excluded, we can still show the group
+            // e.g. if you navigated to building4, we should still show foodhall4 as a suggestion since there are other members in the group
             const viewsInOrder: CafeView[] = viewsSortedByDistance.filter(view => !excludedViewIds.has(view.value.id));
 
             return viewsInOrder.slice(0, VIEW_SUGGESTION_COUNT);
         },
-        [targetLocation, excludeViews, viewsSortedByDistance]
+        [targetLocations, excludeViews, viewsSortedByDistance]
     );
 
     if (viewsToShow.length === 0) {

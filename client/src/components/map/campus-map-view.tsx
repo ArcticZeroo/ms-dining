@@ -9,8 +9,7 @@ import { InternalSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useVisibleViews } from '../../hooks/views.ts';
 import { CafeView } from '../../models/cafe.ts';
-import { randomChoice } from '../../util/random.ts';
-import { toLeafletLocation } from '../../util/user-location.ts';
+import { calculateCenter, toLeafletLocation } from '../../util/coordinates.ts';
 import { getViewLocation } from '../../util/view.ts';
 import './map.css';
 import { CafeMarker } from './popup/cafe-marker.tsx';
@@ -30,8 +29,7 @@ const getMapCenter = (views: CafeView[], viewsById: Map<string, CafeView>) => {
         }
     }
 
-    // todo: get center of all views?
-    return getViewLocation(randomChoice(views));
+    return calculateCenter(views.map(getViewLocation));
 };
 
 const CampusMapView = () => {

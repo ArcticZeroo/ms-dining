@@ -4,7 +4,7 @@ import { Marker } from 'react-leaflet';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
-import { toLeafletLocation } from '../../../util/user-location.ts';
+import { toLeafletLocation } from '../../../util/coordinates.ts';
 import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
 
 const getIconHtml = (view: CafeView, isHomepageView: boolean) => `

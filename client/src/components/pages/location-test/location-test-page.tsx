@@ -4,7 +4,7 @@ import { PromptingUserLocationNotifier } from '../../../api/location/user-locati
 import { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { getCafeLocation } from '../../../util/cafe.ts';
-import { getDistanceBetweenCoordinates } from '../../../util/user-location.ts';
+import { getDistanceBetweenCoordinates } from '../../../util/coordinates.ts';
 import { LocationSetting } from '../../settings/location-setting.tsx';
 
 export const LocationTestPage = () => {

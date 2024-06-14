@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PassiveUserLocationNotifier } from '../../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
@@ -15,7 +15,14 @@ export const HomeWelcomeNearby = () => {
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const userLocation = useValueNotifier(PassiveUserLocationNotifier);
 
-    const nearbyViews = useViewsSortedByDistance(userLocation);
+    const locations = useMemo(
+        () => userLocation
+            ? [userLocation]
+            : [],
+        [userLocation]
+    );
+
+    const nearbyViews = useViewsSortedByDistance(locations);
 
     const nearbyViewsToShow = nearbyViews.slice(0, NEARBY_CAFE_LIMIT);
 
@@ -35,7 +42,8 @@ export const HomeWelcomeNearby = () => {
                         <div className="flex flex-wrap">
                             {
                                 nearbyViewsToShow.slice(0, NEARBY_CAFE_LIMIT).map(view => (
-                                    <Link key={view.value.id} to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="chip">
+                                    <Link key={view.value.id} to={getViewMenuUrl({ view, viewsById, shouldUseGroups })}
+                                        className="chip">
                                         {view.value.name}
                                     </Link>
                                 ))

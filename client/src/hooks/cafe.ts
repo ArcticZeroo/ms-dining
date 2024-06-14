@@ -6,7 +6,7 @@ import { StringSetSetting } from '../api/settings.ts';
 import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';
 import { ICafeStation, MenuItemsByCategoryName } from '../models/cafe.ts';
 import { getTargetSettingForFavorite } from '../util/cafe.ts';
-import { getDistanceBetweenCoordinates } from '../util/user-location.ts';
+import { getDistanceBetweenCoordinates } from '../util/coordinates.ts';
 import { getViewLocation } from '../util/view.ts';
 import { useIsTodaySelected } from './date-picker.tsx';
 import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
@@ -83,24 +83,29 @@ export const useIsOnlineOrderingAllowedForSelectedDate = () => {
     return isTodaySelected && isOnlineOrderingEnabled;
 };
 
-export const useViewsSortedByDistance = (userLocation: ILocationCoordinates | null) => {
+export const useViewsSortedByDistance = (locations: ILocationCoordinates[]) => {
     const views = useViewsForNav();
 
     return useMemo(() => {
-        if (!userLocation) {
+        if (locations.length === 0) {
             return [];
         }
 
-        const distancesById = new Map<string, number>();
+        const minDistancesById = new Map<string, number>();
         for (const view of views) {
-            const location = getViewLocation(view);
-            const distance = getDistanceBetweenCoordinates(userLocation, location);
-            distancesById.set(view.value.id, distance);
+            for (const location of locations) {
+                const viewLocation = getViewLocation(view);
+
+                const distance = getDistanceBetweenCoordinates(viewLocation, location);
+                const existingDistance = minDistancesById.get(view.value.id) ?? Number.MAX_SAFE_INTEGER;
+
+                minDistancesById.set(view.value.id, Math.min(existingDistance, distance));
+            }
         }
 
         return [...views].sort((a, b) => {
-            const distanceA = distancesById.get(a.value.id);
-            const distanceB = distancesById.get(b.value.id);
+            const distanceA = minDistancesById.get(a.value.id);
+            const distanceB = minDistancesById.get(b.value.id);
 
             if (distanceA == null || distanceB == null) {
                 return 0;
@@ -108,5 +113,5 @@ export const useViewsSortedByDistance = (userLocation: ILocationCoordinates | nu
 
             return distanceA - distanceB;
         });
-    }, [views, userLocation]);
+    }, [locations, views]);
 };

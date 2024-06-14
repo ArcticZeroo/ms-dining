@@ -8,7 +8,7 @@ import {ISearchResult, SearchEntityType, SearchMatchReason} from '@msdining/comm
 import {IQuerySearchResult} from '../models/search.ts';
 import {ILocationCoordinates} from '@msdining/common/dist/models/util';
 import {getCafeLocation} from './cafe.ts';
-import {getDistanceBetweenCoordinates} from './user-location.ts';
+import {getDistanceBetweenCoordinates} from './coordinates.ts';
 import {normalizeNameForSearch} from '@msdining/common/dist/util/search-util';
 
 export interface ISearchResultSortingContext {

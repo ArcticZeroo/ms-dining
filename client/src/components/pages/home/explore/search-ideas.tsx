@@ -29,7 +29,8 @@ const SEARCH_IDEAS = [
     'pizza',
     'fruit',
     'chicken tenders',
-    'fish'
+    'fish',
+    'croissant'
 ];
 
 const MAX_IDEA_COUNT = 6;
