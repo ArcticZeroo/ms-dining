@@ -101,9 +101,14 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         <div className="search-page">
             <div className="search-page-header">
                 <div className="search-info">
-                    <div className="page-title">Search Results for "{lastQuery}"</div>
-                    <div className="search-result-count">
-                        Total Results: {results.length}
+                    <div className="query flex default-container flex-between">
+                        <span className="material-symbols-outlined">
+                            search_check
+                        </span>
+                        <span>
+                            "{lastQuery}"
+                        </span>
+                        <span className="icon-sized"/>
                     </div>
                     <div className="search-filter-selector">
                         <EntityButton name="Menu Items and Stations"

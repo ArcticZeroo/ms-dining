@@ -23,6 +23,7 @@ interface ISearchResultHitsProps {
     locationEntriesInOrder: Array<[string, Array<Date>]>;
     priceByCafeId?: Map<string, number>;
     stationByCafeId?: Map<string, string>;
+    showOnlyCafeNames: boolean;
 }
 
 export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
@@ -33,7 +34,8 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     entityType,
     cafeIdsOnPage,
     shouldShowLocationDates,
-    isCompact
+    isCompact,
+    showOnlyCafeNames
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
@@ -43,7 +45,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
 
     const useShortNames = shouldUseCompactMode
-                          || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
+        || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
 
     return (
         <div className="search-result-hits">
@@ -54,7 +56,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                     if (!view) {
                         return false;
                     }
-                    
+
                     const price = priceByCafeId?.get(cafeId);
                     const station = stationByCafeId?.get(cafeId);
 
@@ -105,27 +107,33 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                 </span>
                             </div>
                             {
-                                shouldShowLocationDates && (
-                                    <div className="chip-data">
-                                        <span className="material-symbols-outlined icon">
-											timer
-                                        </span>
-                                        <span className="value">
-                                            {getLocationDatesDisplay(locationDates)}
-                                        </span>
-                                    </div>
-                                )
-                            }
-                            {
-                                price != null && (
-                                    <div className="chip-data">
-                                        <span className="material-symbols-outlined icon">
-											attach_money
-                                        </span>
-                                        <span className="value">
-                                            {formatPrice(price, false /*addCurrencySign*/)}
-                                        </span>
-                                    </div>
+                                !showOnlyCafeNames && (
+                                    <>
+                                        {
+                                            shouldShowLocationDates && (
+                                                <div className="chip-data">
+                                                    <span className="material-symbols-outlined icon">
+                                                        timer
+                                                    </span>
+                                                    <span className="value">
+                                                        {getLocationDatesDisplay(locationDates)}
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
+                                        {
+                                            price != null && (
+                                                <div className="chip-data">
+                                                    <span className="material-symbols-outlined icon">
+                                                        attach_money
+                                                    </span>
+                                                    <span className="value">
+                                                        {formatPrice(price, false /*addCurrencySign*/)}
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
+                                    </>
                                 )
                             }
                         </Link>

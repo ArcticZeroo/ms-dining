@@ -60,25 +60,25 @@ interface ISearchResultsListProps {
     isCompact?: boolean;
     limit?: number;
     showEndOfResults?: boolean;
-    showSearchButtonInsteadOfLocations?: boolean;
+    showOnlyCafeNames?: boolean;
     shouldStretchResults?: boolean;
     viewMode?: SearchResultsViewMode;
     shouldPromptUserForLocation?: boolean;
     noResultsView?: React.ReactNode;
 }
 
-export const SearchResultsList: React.FC<ISearchResultsListProps> = ({ 
-    queryText, 
-    searchResults, 
-    filter, 
-    isCompact, 
-    limit, 
-    showEndOfResults = true, 
-    showSearchButtonInsteadOfLocations = false, 
-    shouldStretchResults, 
-    viewMode, 
-    shouldPromptUserForLocation = true, 
-    noResultsView 
+export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
+    queryText,
+    searchResults,
+    filter,
+    isCompact,
+    limit,
+    showEndOfResults = true,
+    showOnlyCafeNames = false,
+    shouldStretchResults,
+    viewMode,
+    shouldPromptUserForLocation = true,
+    noResultsView
 }) => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
@@ -106,7 +106,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                 [...searchResults],
                 searchSortingContext
             );
-            
+
             if (limit != null) {
                 return sortedSearchResults.slice(0, limit);
             }
@@ -142,7 +142,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         searchTags={searchResult.searchTags}
                         isCompact={isCompact}
                         showFavoriteButton={true}
-                        showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
+                        showOnlyCafeNames={showOnlyCafeNames}
                         shouldStretchResults={shouldStretchResults}
                         matchReasons={searchResult.matchReasons}
                     />
@@ -151,7 +151,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
 
             return [priceFilterHiddenResultCount, searchResultElements];
         },
-        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showSearchButtonInsteadOfLocations]
+        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showOnlyCafeNames]
     );
 
     return (

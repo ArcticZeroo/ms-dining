@@ -148,6 +148,7 @@ export interface ISearchResultProps {
     shouldStretchResults?: boolean;
     isSkeleton?: boolean;
     matchReasons?: Set<SearchMatchReason>;
+    showOnlyCafeNames?: boolean;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -170,7 +171,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     showSearchButtonInsteadOfLocations = false,
     shouldStretchResults = false,
     isSkeleton = false,
-    matchReasons = new Set()
+    matchReasons = new Set(),
+    showOnlyCafeNames = false
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -287,7 +289,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         isCompact && imageElement
                     }
                     {
-                        !showSearchButtonInsteadOfLocations && (
+                        (
                             isSkeleton
                                 ? <SearchResultHitsSkeleton/>
                                 : (
@@ -301,6 +303,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                         shouldShowLocationDates={shouldShowLocationDates}
                                         priceByCafeId={priceByCafeId}
                                         stationByCafeId={stationByCafeId}
+                                        showOnlyCafeNames={showOnlyCafeNames}
                                     />
                                 )
                         )

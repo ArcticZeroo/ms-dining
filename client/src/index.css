@@ -419,6 +419,7 @@ html, body, #root, .App {
     padding: 0.125rem;
     width: 1.75rem;
     height: 1.75rem;
+    font-size: 1rem;
     text-decoration: none;
     border-radius: 100%;
     display: flex;
@@ -470,17 +471,17 @@ html, body, #root, .App {
 /* tall screens */
 @media screen and (min-height: 801px) {
     :root {
-        --page-title-font-size: 1.8em;
-        --page-subtitle-font-size: 1.6em;
-        --section-title-font-size: 1.4em;
-        --card-title-font-size: 1.2em;
+        --page-title-font-size: 1.6em;
+        --page-subtitle-font-size: 1.4em;
+        --section-title-font-size: 1.2em;
+        --card-title-font-size: 1.1em;
         --card-subtitle-font-size: 0.9em;
     }
 
     .compact-view-mode {
-        --page-title-font-size: 1.6em;
-        --page-subtitle-font-size: 1.4em;
-        --section-title-font-size: 1.2em;
+        --page-title-font-size: 1.5em;
+        --page-subtitle-font-size: 1.3em;
+        --section-title-font-size: 1.1em;
         --card-title-font-size: 1.1em;
         --card-subtitle-font-size: 0.85em;
     }
@@ -492,9 +493,9 @@ html, body, #root, .App {
         --default-padding: 0.5rem;
         --cafe-logo-height: 2rem;
 
-        --page-title-font-size: 1.6em;
-        --page-subtitle-font-size: 1.4em;
-        --section-title-font-size: 1.2em;
+        --page-title-font-size: 1.5em;
+        --page-subtitle-font-size: 1.3em;
+        --section-title-font-size: 1.1em;
         --card-title-font-size: 1.1em;
         --card-subtitle-font-size: 0.85em;
     }
@@ -502,7 +503,6 @@ html, body, #root, .App {
     .compact-view-mode {
         --page-title-font-size: 1.4em;
         --page-subtitle-font-size: 1.2em;
-        --section-title-font-size: 1.1em;
         --card-title-font-size: 1em;
     }
 }

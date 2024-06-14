@@ -97,7 +97,7 @@ export const SearchIdeas = () => {
                         isCompact={true}
                         limit={MAX_RESULT_COUNT}
                         showEndOfResults={false}
-                        showSearchButtonInsteadOfLocations={true}
+                        showOnlyCafeNames={true}
                         shouldStretchResults={true}
                         shouldPromptUserForLocation={false}
                         noResultsView={'Nothing here right now!'}

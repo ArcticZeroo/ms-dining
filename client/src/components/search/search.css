@@ -4,8 +4,9 @@
     gap: var(--default-padding);
 }
 
-.search-page .page-title {
+.search-page .query {
     font-size: var(--page-title-font-size);
+    background: #46736b;
 }
 
 .search-page .search-result-count {
@@ -83,6 +84,7 @@
 
 .search-result.compact .search-result-hits {
     max-width: 25rem;
+    max-height: 8rem;
     justify-content: center;
 }
 
@@ -125,6 +127,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--constant-padding);
+    /*roughly two rows with some extra so that you can see there's stuff to scroll*/
+    max-height: 14rem;
+    overflow: auto;
+    border-radius: var(--default-padding);
 }
 
 .search-result-hits .search-result-chip {
