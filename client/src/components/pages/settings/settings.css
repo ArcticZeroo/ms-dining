@@ -117,12 +117,12 @@
     cursor: pointer;
 }
 
-.card.settings-group {
+.card.collapsible-padding {
     transition: padding 0.25s ease;
     --color-header: #407484;
 }
 
-.card.settings-group.collapsed {
+.card.collapsible-padding.collapsed {
     padding: 0;
 }
 

@@ -322,7 +322,7 @@ html, body, #root, .App {
 }
 
 .collapsible-content .collapse-toggle {
-    font-size: 1.4em;
+    font-size: var(--section-title-font-size);
     text-align: center;
     padding: var(--default-padding);
     background: var(--color-header);
@@ -348,6 +348,10 @@ html, body, #root, .App {
 
 .left-align {
     text-align: left;
+}
+
+.shrink-padding {
+    --default-padding: var(--constant-padding);
 }
 
 .default-container {
@@ -432,6 +436,10 @@ html, body, #root, .App {
     width: 1rem;
     height: 1rem;
     font-size: 1rem;
+}
+
+.default-border-radius {
+    border-radius: var(--default-padding);
 }
 
 /* wide screens (tablet, computer) */

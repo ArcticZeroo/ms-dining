@@ -10,6 +10,7 @@ import { ISearchResultSortingContext, sortSearchResultsInPlace } from '../../uti
 import { PassiveUserLocationNotifier, PromptingUserLocationNotifier } from '../../api/location/user-location.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
+import { expandAndFlattenView } from "../../util/view.ts";
 
 const useSortContext = (queryText: string, shouldPromptUserForLocation: boolean): ISearchResultSortingContext => {
     const { cafes, viewsById } = useContext(ApplicationContext);
@@ -53,10 +54,27 @@ const getClassForViewMode = (viewMode: SearchResultsViewMode) => {
     }
 }
 
+const filterLocations = (searchResult: IQuerySearchResult, allowedViewIds: Set<string>) => {
+    if (allowedViewIds.size === 0) {
+        return searchResult.locationDatesByCafeId;
+    }
+
+    const filteredLocations: Map<string, Array<Date>> = new Map();
+
+    for (const [cafeId, dates] of searchResult.locationDatesByCafeId.entries()) {
+        if (allowedViewIds.has(cafeId)) {
+            filteredLocations.set(cafeId, dates);
+        }
+    }
+
+    return filteredLocations;
+}
+
 interface ISearchResultsListProps {
     queryText: string;
     searchResults: IQuerySearchResult[];
     filter: SearchEntityFilterType;
+    allowedViewIds?: Set<string>;
     isCompact?: boolean;
     limit?: number;
     showEndOfResults?: boolean;
@@ -73,6 +91,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
     filter,
     isCompact,
     limit,
+    allowedViewIds = new Set(),
     showEndOfResults = true,
     showOnlyCafeNames = false,
     shouldStretchResults,
@@ -80,9 +99,33 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
     shouldPromptUserForLocation = true,
     noResultsView
 }) => {
+    const { viewsById } = useContext(ApplicationContext);
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const getIsPriceAllowed = useIsPriceAllowed();
+
+    const expandedAllowedViewIds = useMemo(
+        (): Set<string> => {
+            if (allowedViewIds.size === 0) {
+                return new Set();
+            }
+            
+            const viewIds = new Set(allowedViewIds);
+            for (const allowedViewId of allowedViewIds) {
+                const view = viewsById.get(allowedViewId);
+                if (view == null) {
+                    continue;
+                }
+
+                for (const cafe of expandAndFlattenView(view, viewsById)) {
+                    viewIds.add(cafe.id);
+                }
+            }
+            
+            return viewIds;
+        },
+        [allowedViewIds, viewsById]
+    );
 
     if (isCompact == null) {
         isCompact = shouldUseCompactMode;
@@ -116,15 +159,16 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
         [searchResults, searchSortingContext, limit]
     );
 
-    const [priceFilterHiddenResultCount, searchResultElements] = useMemo(
+    const [filterHiddenResultCount, searchResultElements] = useMemo(
         () => {
-            let priceFilterHiddenResultCount = 0;
+            let filterHiddenResultCount = 0;
 
             const searchResultElements = entriesInOrder.map(searchResult => {
                 const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.priceByCafeId.values()).some(getIsPriceAllowed);
+                const locationDatesByCafeId = filterLocations(searchResult, expandedAllowedViewIds);
 
-                if (!isPriceAllowed) {
-                    priceFilterHiddenResultCount++;
+                if (!isPriceAllowed || locationDatesByCafeId.size === 0) {
+                    filterHiddenResultCount++;
                 }
 
                 return (
@@ -133,7 +177,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         isVisible={isPriceAllowed && matchesEntityFilter(filter, searchResult.entityType)}
                         name={searchResult.name}
                         description={searchResult.description}
-                        locationDatesByCafeId={searchResult.locationDatesByCafeId}
+                        locationDatesByCafeId={locationDatesByCafeId}
                         priceByCafeId={searchResult.priceByCafeId}
                         stationByCafeId={searchResult.stationByCafeId}
                         imageUrl={searchResult.imageUrl}
@@ -149,18 +193,17 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                 );
             });
 
-            return [priceFilterHiddenResultCount, searchResultElements];
+            return [filterHiddenResultCount, searchResultElements];
         },
-        [enablePriceFilters, entriesInOrder, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showOnlyCafeNames]
+        [enablePriceFilters, entriesInOrder, expandedAllowedViewIds, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showOnlyCafeNames]
     );
 
     return (
         <div className={getClassForViewMode(viewMode)}>
             {
-                priceFilterHiddenResultCount > 0 && (
+                filterHiddenResultCount > 0 && (
                     <div className="hidden-results">
-                        {priceFilterHiddenResultCount} {pluralize('result', priceFilterHiddenResultCount)} hidden due to
-                        price filters
+                        {filterHiddenResultCount} {pluralize('result', filterHiddenResultCount)} hidden due to filters
                     </div>
                 )
             }

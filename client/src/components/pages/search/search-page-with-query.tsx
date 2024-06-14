@@ -5,13 +5,13 @@ import { DiningClient } from '../../../api/dining.ts';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
-import { SearchWaiting } from '../../search/search-waiting.tsx';
-import { PriceFiltersSetting } from '../../settings/price-filters-setting.tsx';
 import { EntityButton } from './entity-button.tsx';
-
-import './search-page.css';
 import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
+import './search-page.css';
+import { SearchWaiting } from "../../search/search-waiting.tsx";
+import { SearchFilters } from "../../search/filters/search-filters.tsx";
+import { classNames } from "../../../util/react.ts";
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -76,7 +76,10 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
 };
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
+    const [allowedViewIds, setAllowedViewIds] = useState<Set<string>>(new Set());
+
     const {
         actualStage,
         stage,
@@ -100,38 +103,51 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     return (
         <div className="search-page">
             <div className="search-page-header">
-                <div className="search-info">
-                    <div className="query flex default-container flex-between">
-                        <span className="material-symbols-outlined">
-                            search_check
-                        </span>
+                <div className="search-info flex flex-col default-container">
+                    <div className="query flex flex-between default-container">
+                        <span className="icon-sized"/>
                         <span>
                             "{lastQuery}"
                         </span>
-                        <span className="icon-sized"/>
+                        <SearchWaiting stage={actualStage}/>
                     </div>
-                    <div className="search-filter-selector">
-                        <EntityButton name="Menu Items and Stations"
-                            type={SearchEntityFilterType.all}
-                            onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
-                            {...sharedEntityButtonProps}
-                        />
-                        <EntityButton name="Menu Items Only"
-                            type={SearchEntityFilterType.menuItem}
-                            onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
-                            {...sharedEntityButtonProps}
-                        />
-                        <EntityButton name="Stations Only"
-                            type={SearchEntityFilterType.station}
-                            onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
-                            {...sharedEntityButtonProps}
-                        />
+                    <div className="flex">
+                        <button className={classNames('search-filters-button default-container flex transition-background', isFilterMenuOpen && 'open')} onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}>
+                            <span className="material-symbols-outlined icon">
+                                filter_list
+                            </span>
+                            <span>
+                                Filters
+                            </span>
+                        </button>
+                        <div className="search-entity-selector">
+                            <EntityButton name="Menu Items and Stations"
+                                type={SearchEntityFilterType.all}
+                                onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
+                                {...sharedEntityButtonProps}
+                            />
+                            <EntityButton name="Menu Items Only"
+                                type={SearchEntityFilterType.menuItem}
+                                onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
+                                {...sharedEntityButtonProps}
+                            />
+                            <EntityButton name="Stations Only"
+                                type={SearchEntityFilterType.station}
+                                onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
+                                {...sharedEntityButtonProps}
+                            />
+                        </div>
                     </div>
+                    {
+                        isFilterMenuOpen && (
+                            <SearchFilters
+                                allowedViews={allowedViewIds}
+                                onAllowedViewsChanged={setAllowedViewIds}
+                            />
+                        )
+                    }
                 </div>
-                {/* use actualStage here to show the loading icon when doing a new search after one already exists */}
-                <SearchWaiting stage={actualStage}/>
             </div>
-            <PriceFiltersSetting isOwnCard={true}/>
             {
                 stage === PromiseStage.error && (
                     <div className="error-card">
@@ -158,7 +174,12 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
             }
             {
                 stage === PromiseStage.success && (
-                    <SearchResultsList searchResults={results} queryText={queryText} filter={entityFilterType}/>
+                    <SearchResultsList
+                        searchResults={results}
+                        queryText={queryText}
+                        filter={entityFilterType}
+                        allowedViewIds={allowedViewIds}
+                    />
                 )
             }
         </div>

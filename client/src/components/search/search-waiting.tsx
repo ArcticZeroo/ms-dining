@@ -8,12 +8,14 @@ interface ISearchWaitingProps {
 }
 
 export const SearchWaiting: React.FC<ISearchWaitingProps> = ({ stage }) => {
+    const isVisible = stage === PromiseStage.running;
     return (
-        <div className={classNames('search-waiting', stage === PromiseStage.running && 'visible')}>
-            <HourglassLoadingSpinner/>
-            <div>
-                Loading search results...
-            </div>
+        <div className={classNames('icon-sized search-waiting', isVisible && 'visible')}>
+            {
+                isVisible && (
+                    <HourglassLoadingSpinner/>
+                )
+            }
         </div>
     );
 };

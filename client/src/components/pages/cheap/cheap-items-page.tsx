@@ -5,7 +5,6 @@ import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { ICheapItemSearchResult } from '../../../models/search.ts';
 import { isSearchResultVisible } from '../../../util/search.ts';
-import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { CheapItemResult } from './cheap-item-result.tsx';
 import { SelectedDateContext } from '../../../context/time.ts';
 import { setPageData } from '../../../util/title.ts';
@@ -13,6 +12,7 @@ import { ApplicationSettings } from '../../../constants/settings.ts';
 import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { SearchResultSkeleton } from '../../search/search-result-skeleton.tsx';
+import { SearchWaiting } from "../../search/search-waiting.tsx";
 
 interface ICheapItemsResults {
     stage: PromiseStage;
@@ -120,16 +120,20 @@ export const CheapItemsPage: React.FC = () => {
 
     return (
         <div className="search-page">
-            <div className="search-info">
-                <div>
-                    <div className="search-result-count">
-                        Total Results: {results.length}
-                    </div>
-                    <div>
-                        Sorted by Calories per Dollar (Descending)
-                    </div>
+            <div className="search-info default-border-radius">
+                <div className="query default-container flex flex-between">
+                    <span className="icon-sized badge">
+                        {
+                            stage === PromiseStage.success
+                                ? results.length
+                                : '?'
+                        }
+                    </span>
+                    <span>
+                        Cheap Items
+                    </span>
+                    <SearchWaiting stage={stage}/>
                 </div>
-                <SearchWaiting stage={stage}/>
             </div>
             <div className="flex-col">
                 {

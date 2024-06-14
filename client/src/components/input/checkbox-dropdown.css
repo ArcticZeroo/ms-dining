@@ -1,0 +1,8 @@
+.dropdown {
+    position: absolute;
+    z-index: var(--z-index-above-content);
+    background: #b7c0d3;
+}
+
+.dropdown button {
+}

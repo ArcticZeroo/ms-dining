@@ -12,7 +12,7 @@ export const SettingsGroup: React.FC<ISettingsGroupProps> = ({ iconName, title, 
     const [isExpanded, setIsExpanded] = useState(true);
 
     return (
-        <div className={classNames('card settings-group collapsible-content', !isExpanded && 'collapsed')}>
+        <div className={classNames('card settings-group collapsible-padding collapsible-content', !isExpanded && 'collapsed')}>
             <div className="title collapse-toggle" onClick={() => setIsExpanded(!isExpanded)}>
                 <span className="material-symbols-outlined">
                     {iconName}
