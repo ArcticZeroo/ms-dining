@@ -27,7 +27,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
     const cafeName = getCafeName({
         cafe,
         showGroupName: false,
-        includeEmoji:  true
+        includeEmoji: true
     });
 
     return (
@@ -35,8 +35,17 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
             {
                 popupView.type === CafeViewType.group && (
                     // Intentionally getting the URL for the cafe's view instead of the popup
-                    <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })}>
-                        {cafeName}
+                    <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="flex">
+                        {
+                            cafe.logoUrl && (
+                                <img src={cafe.logoUrl}
+                                    alt={`${cafe.name} logo`}
+                                    className="logo-small"/>
+                            )
+                        }
+                        <span>
+                            {cafeName}
+                        </span>
                     </Link>
                 )
             }

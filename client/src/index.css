@@ -414,6 +414,25 @@ html, body, #root, .App {
     height: var(--map-height);
 }
 
+.badge {
+    background: #3F51B5;
+    padding: 0.125rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    text-decoration: none;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FAFAFA;
+}
+
+.badge > * {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+}
+
 /* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {

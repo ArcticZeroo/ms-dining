@@ -13,7 +13,7 @@ const getStationTitle = (station: ICafeOverviewStation) => {
     if (station.uniqueness.isTraveling) {
         return `This station ${
             station.uniqueness.daysThisWeek === 1
-                ? 'is only available here today this week'
+                ? 'is only here today this week'
                 : 'is traveling here today and may return another day this week'
         }`;
     }
@@ -41,7 +41,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
 
     return (
         <Link
-            className="flex overview-station"
+            className="flex flex-between overview-station"
             to={getViewMenuUrlWithJump({
                 cafeId: cafe.id,
                 view: popupView,
@@ -56,16 +56,18 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                     <img
                         src={station.logoUrl}
                         alt={`${station.name} logo`}
-                        className="station-logo"
+                        className="logo-small"
                     />
                 )
             }
-            {station.name}
+            <span>
+                {station.name}
+            </span>
             <span className="badge flex flex-center">
                 {
                     station.uniqueness.isTraveling && (
                         <span className="material-symbols-outlined">
-                            work
+                            flight
                         </span>
                     )
                 }

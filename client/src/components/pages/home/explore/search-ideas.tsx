@@ -1,7 +1,7 @@
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { randomSortInPlace } from '../../../../util/random.ts';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchResultsList } from '../../../search/search-results-list.tsx';
@@ -13,7 +13,7 @@ import './search-ideas.css';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
 import { MenusCurrentlyUpdatingException } from "../../../../util/exception.ts";
 
-const SEARCH_IDEAS = randomSortInPlace([
+const SEARCH_IDEAS = [
     'burger',
     'burrito',
     'dessert',
@@ -21,16 +21,27 @@ const SEARCH_IDEAS = randomSortInPlace([
     'gyro',
     'latte',
     // 'mango lassi', - only one result
-    // 'milk tea', - not working right now for some reason
+    'milk tea',
     'pasta',
     'sushi',
     'vegetarian',
-]);
+    'curry',
+    'pizza',
+    'fruit',
+    'chicken tenders',
+    'fish'
+];
 
+const MAX_IDEA_COUNT = 6;
 const MAX_RESULT_COUNT = 10;
 
 export const SearchIdeas = () => {
-    const [selectedIdea, setSelectedIdea] = useState(SEARCH_IDEAS[0]);
+    const ideas = useMemo(
+        () => randomSortInPlace([...SEARCH_IDEAS]).slice(0, MAX_IDEA_COUNT),
+        []
+    );
+
+    const [selectedIdea, setSelectedIdea] = useState(ideas[0]);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const retrieveSearchResultsCallback = useCallback(
@@ -52,8 +63,8 @@ export const SearchIdeas = () => {
 
     return (
         <div className="flex-col">
-            <div className="flex search-ideas">
-                {SEARCH_IDEAS.map(idea => (
+            <div className="flex flex-center search-ideas">
+                {ideas.map(idea => (
                     <button
                         key={idea}
                         className={classNames('search-idea default-container', idea === selectedIdea && 'selected')}

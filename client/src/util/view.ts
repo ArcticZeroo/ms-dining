@@ -70,7 +70,7 @@ export const getViewLocation = (view: CafeView): ILocationCoordinates => {
     }
 
     return {
-        lat:  totalLat / view.value.members.length,
+        lat: totalLat / view.value.members.length,
         long: totalLong / view.value.members.length
     }
 }
@@ -78,3 +78,8 @@ export const getViewLocation = (view: CafeView): ILocationCoordinates => {
 export const getViewEmoji = (view: CafeView) => view.type === CafeViewType.single && view.value.emoji
     ? view.value.emoji
     : '🍴';
+
+// Intended for cases like Food Hall 4
+export const getViewPrimaryCafe = (view: CafeView): ICafe | undefined => view.type === CafeViewType.single
+    ? view.value
+    : view.value.members.find(member => member.name === view.value.name);

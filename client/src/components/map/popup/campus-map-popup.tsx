@@ -19,6 +19,7 @@ interface ICampusMapPopupProps {
 export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+
     const cafesInView = useMemo(
         () => expandAndFlattenView(view, viewsById),
         [view, viewsById]
@@ -37,16 +38,15 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
             <div className="cafe-popup flex flex-center default-padding fade-in" onClick={onPaddingClicked}>
                 <div className="body flex-col height-full default-container" onClick={onContentClicked}>
                     <div className="flex flex-between">
-                        <span className="text-center">
-                            {
-                                getViewName({
-                                    view,
-                                    showGroupName: true,
-                                    includeEmoji:  true
-                                })
-                            }
-                        </span>
-                        <button onClick={onClose} className="default-button default-container icon-container">
+                        {
+                            getViewName({
+                                view,
+                                showGroupName: true,
+                                includeEmoji: true
+                            })
+                        }
+                        <button onClick={onClose}
+                            className="default-button default-container icon-container close-button">
                             <span className="material-symbols-outlined">
                             close
                             </span>
@@ -64,16 +64,18 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
                     </div>
                     {
                         (shouldUseGroups || view.type === CafeViewType.single) && (
-                            <Link
-                                to={getViewMenuUrl({
-                                    view,
-                                    viewsById,
-                                    shouldUseGroups
-                                })}
-                                className="default-button default-container text-center view-menu"
-                            >
-                                                                                       View menu
-                            </Link>
+                            <div className="flex flex-center">
+                                <Link
+                                    to={getViewMenuUrl({
+                                        view,
+                                        viewsById,
+                                        shouldUseGroups
+                                    })}
+                                    className="default-button default-container text-center view-menu"
+                                >
+                                    View Menu
+                                </Link>
+                            </div>
                         )
                     }
                 </div>

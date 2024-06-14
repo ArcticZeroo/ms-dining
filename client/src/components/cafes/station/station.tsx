@@ -27,7 +27,7 @@ const useStationExpansion = (scrollAnchorId: string) => {
         () => ({ top: `calc(${cafeHeaderHeight}px - var(--default-padding))` }),
         [cafeHeaderHeight]
     );
-    
+
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(scrollAnchorId);
 
     const updateIsCollapsed = useCallback(
@@ -94,15 +94,35 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                     <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
                         <FavoriteItemButton name={station.name} type={SearchEntityType.station}/>
                         <button className="title" onClick={onTitleClick}>
-                            {
-                                station.logoUrl && (
-                                    <img
-                                        src={station.logoUrl}
-                                        alt={`Logo for station ${station.name}`}
-                                    />
-                                )
-                            }
-                            {station.name}
+                            <span>
+                                {
+                                    station.logoUrl && (
+                                        <img
+                                            src={station.logoUrl}
+                                            alt={`Logo for station ${station.name}`}
+                                        />
+                                    )
+                                }
+                            </span>
+                            <span className="flex">
+                                {station.name}
+                                {
+                                    station.uniqueness.isTraveling && (
+                                        <span className="badge" title="This station is traveling today. It won't be here tomorrow.">
+                                            <span className="material-symbols-outlined">
+                                                flight
+                                            </span>
+                                        </span>
+                                    )
+                                }
+                                {
+                                    !station.uniqueness.isTraveling && (station.uniqueness.itemDays[1] || 0) > 0 && (
+                                        <span className="badge" title="Unique items available today only">
+                                            {String(station.uniqueness.itemDays[1])}
+                                        </span>
+                                    )
+                                }
+                            </span>
                             <ExpandIcon isExpanded={isExpanded}/>
                         </button>
                     </div>
