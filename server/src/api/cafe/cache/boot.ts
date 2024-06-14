@@ -37,10 +37,11 @@ const repairMissingWeeklyMenusAsync = async () => {
 const repairTodaySessionsAsync = async () => {
     const now = new Date();
 
-    // Don't bother repairing today after 5pm if there is already a daily menu;
+    // Don't bother repairing today after 2pm if there is already a daily menu;
     // In case I'm making server changes and need to restart the server, I don't
-    // want to clear history.
-    if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists || now.getHours() > 16 || now.getHours() < 6) {
+    // want to clear history. There are very few cafes open past 2pm, so we can
+    // keep stale data around if we need to.
+    if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists || now.getHours() > 14 || now.getHours() < 6) {
         const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(now));
         if (isAnyMenuAvailableToday) {
             if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists) {
@@ -48,7 +49,7 @@ const repairTodaySessionsAsync = async () => {
                 return;
             }
 
-			logInfo('Skipping repair of today\'s sessions because it is after 5pm and there is already a menu for today');
+			logInfo('Skipping repair of today\'s sessions because it is after 2pm and there is already a menu for today');
             return;
         }
     }
