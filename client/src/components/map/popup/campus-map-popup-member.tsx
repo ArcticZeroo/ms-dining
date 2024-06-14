@@ -31,7 +31,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
     });
 
     return (
-        <div className="group-member flex-col">
+        <div className="group-member flex-col flex-center">
             {
                 popupView.type === CafeViewType.group && (
                     // Intentionally getting the URL for the cafe's view instead of the popup

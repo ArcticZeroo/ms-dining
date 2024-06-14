@@ -72,8 +72,8 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
         [overviewStations]
     );
 
-    if (stationsToShow.length === 0) {
-        return  null;
+    if (!isLoading && stationsToShow.length === 0) {
+        return null;
     }
 
     return (
