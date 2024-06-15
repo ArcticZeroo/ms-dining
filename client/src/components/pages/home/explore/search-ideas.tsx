@@ -64,7 +64,7 @@ export const SearchIdeas = () => {
 
     return (
         <div className="flex-col">
-            <div className="flex flex-center search-ideas">
+            <div className="flex search-ideas">
                 {ideas.map(idea => (
                     <button
                         key={idea}

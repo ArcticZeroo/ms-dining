@@ -40,7 +40,7 @@
 }
 
 .station .station-header .favorite-item-button {
-    margin: 0 var(--default-padding);
+    margin: 0 var(--default-padding) 0 0;
 }
 
 .station .station-header .title {

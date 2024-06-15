@@ -45,36 +45,38 @@ const CheckboxDropdownWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IC
 
     return (
         <div className="dropdown default-container flex-col" ref={ref}>
-            <div className="flex flex-around">
-                { buttons }
-                <button onClick={onSelectAll} className="default-container shrink-padding">
-                    Select All
-                </button>
-                <button onClick={onClearAll} className="default-container shrink-padding">
-                    Clear All
-                </button>
-            </div>
-            <div>
-                {
-                    options.map(option => (
-                        <label
-                            key={option.id}
-                            className="option flex flex-between"
-                            htmlFor={`${id}-${option.id}`}
-                        >
-                            <span>
-                                {option.text}
-                            </span>
-                            <input
-                                id={`${id}-${option.id}`}
-                                value={option.id}
-                                type="checkbox"
-                                checked={selectedOptions.has(option.id)}
-                                onChange={event => onCheckboxChanged(event, option.id)}
-                            />
-                        </label>
-                    ))
-                }
+            <div className="relative">
+                <div className="flex flex-around buttons">
+                    { buttons }
+                    <button onClick={onSelectAll} className="default-container shrink-padding">
+                        Select All
+                    </button>
+                    <button onClick={onClearAll} className="default-container shrink-padding">
+                        Clear All
+                    </button>
+                </div>
+                <div>
+                    {
+                        options.map(option => (
+                            <label
+                                key={option.id}
+                                className="option flex flex-between"
+                                htmlFor={`${id}-${option.id}`}
+                            >
+                                <span>
+                                    {option.text}
+                                </span>
+                                <input
+                                    id={`${id}-${option.id}`}
+                                    value={option.id}
+                                    type="checkbox"
+                                    checked={selectedOptions.has(option.id)}
+                                    onChange={event => onCheckboxChanged(event, option.id)}
+                                />
+                            </label>
+                        ))
+                    }
+                </div>
             </div>
         </div>
     );

@@ -4,7 +4,7 @@ import { SearchAllowedViews } from "./search-allowed-views.tsx";
 
 export const SearchFilters: React.FC = () => {
     return (
-        <div className="card">
+        <div className="card search-filters">
             <PriceFiltersSetting/>
             <SearchAllowedViews/>
         </div>

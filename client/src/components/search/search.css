@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
+    position: relative;
 }
 
 .search-page .query {
@@ -19,6 +20,9 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--default-padding);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-above-content);
 }
 
 .search-results-horizontal {
@@ -222,6 +226,16 @@
 .search-info {
     background: #3d3d3d;
     flex-grow: 1;
+}
+
+.search-filters .dropdown {
+    max-height: 30vh;
+    overflow: scroll;
+}
+
+.search-filters .dropdown .buttons {
+    position: sticky;
+    top: 0;
 }
 
 @media screen and (max-height: 800px) {
