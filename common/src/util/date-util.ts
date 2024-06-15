@@ -151,6 +151,7 @@ const getDaysUntilNextWeekday = (date: Date, targetDay: number) => {
 
 // On Monday morning, this should yield 0, 1, 2, 3, 4
 // On Friday afternoon, this should yield the next week's days, e.g. 3, 4, 5, 6, 7
+// On Saturday, this should yield 2, 3, 4, 5, 6
 // On Sunday morning, this should yield 1, 2, 3, 4, 5
 export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false): Iterable<number> {
     const now = new Date();
@@ -158,16 +159,16 @@ export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false)
 
     const useNextWeek = forceUseNextWeek || shouldUseNextWeek(now);
 
-    const dateOffset = useNextWeek
-        ? getDaysUntilNextWeekday(now, nativeDayOfWeek.Monday)
-        : 0;
-
-    const startWeekdayIndex = useNextWeek || isDateOnWeekend(now)
+    const startDay = useNextWeek
         ? nativeDayOfWeek.Monday
-        : Math.max(nowWeekday, nativeDayOfWeek.Monday);
+        : nowWeekday;
 
-    for (let i = startWeekdayIndex; i <= nativeDayOfWeek.Friday; i++) {
-        yield ((i - nowWeekday) + dateOffset);
+    const daysUntilStartDay = getDaysUntilNextWeekday(now, startDay);
+
+    for (let i = startDay; i <= nativeDayOfWeek.Friday; i++) {
+        const daysSinceStartDay = i - startDay;
+        const daysFromNow = daysUntilStartDay + daysSinceStartDay;
+        yield daysFromNow;
     }
 }
 
