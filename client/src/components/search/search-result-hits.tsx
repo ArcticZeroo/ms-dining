@@ -43,6 +43,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const selectedDateNotifier = useContext(SelectedDateContext);
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
+    const shouldShowPriceInSearch = useValueNotifier(ApplicationSettings.showPriceInSearch);
 
     const useShortNames = shouldUseCompactMode
         || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
@@ -122,7 +123,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                             )
                                         }
                                         {
-                                            price != null && (
+                                            shouldShowPriceInSearch && price != null && (
                                                 <div className="chip-data">
                                                     <span className="material-symbols-outlined icon">
                                                         attach_money

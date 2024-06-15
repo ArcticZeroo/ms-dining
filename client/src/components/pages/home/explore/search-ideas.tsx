@@ -100,6 +100,7 @@ export const SearchIdeas = () => {
                         showOnlyCafeNames={true}
                         shouldStretchResults={true}
                         shouldPromptUserForLocation={false}
+                        showSearchButtonInsteadOfLocations={true}
                         noResultsView={'Nothing here right now!'}
                     />
                 )

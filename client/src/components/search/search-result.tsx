@@ -289,7 +289,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         isCompact && imageElement
                     }
                     {
-                        (
+                        !showSearchButtonInsteadOfLocations && (
                             isSkeleton
                                 ? <SearchResultHitsSkeleton/>
                                 : (

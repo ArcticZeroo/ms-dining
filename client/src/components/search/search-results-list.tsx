@@ -50,7 +50,7 @@ const getClassForViewMode = (viewMode: SearchResultsViewMode) => {
     }
 
     if (viewMode === SearchResultsViewMode.horizontalScroll) {
-        return 'flex flex-around search-results-horizontal';
+        return 'flex search-results-horizontal';
     }
 }
 
@@ -82,6 +82,7 @@ interface ISearchResultsListProps {
     shouldStretchResults?: boolean;
     viewMode?: SearchResultsViewMode;
     shouldPromptUserForLocation?: boolean;
+    showSearchButtonInsteadOfLocations?: boolean;
     noResultsView?: React.ReactNode;
 }
 
@@ -97,6 +98,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
     shouldStretchResults,
     viewMode,
     shouldPromptUserForLocation = true,
+    showSearchButtonInsteadOfLocations = false,
     noResultsView
 }) => {
     const { viewsById } = useContext(ApplicationContext);
@@ -188,6 +190,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         showFavoriteButton={true}
                         showOnlyCafeNames={showOnlyCafeNames}
                         shouldStretchResults={shouldStretchResults}
+                        showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
                         matchReasons={searchResult.matchReasons}
                     />
                 );
@@ -195,7 +198,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
 
             return [filterHiddenResultCount, searchResultElements];
         },
-        [enablePriceFilters, entriesInOrder, expandedAllowedViewIds, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showOnlyCafeNames]
+        [enablePriceFilters, entriesInOrder, expandedAllowedViewIds, filter, getIsPriceAllowed, isCompact, shouldStretchResults, showOnlyCafeNames, showSearchButtonInsteadOfLocations]
     );
 
     return (

@@ -125,9 +125,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--constant-padding);
-    /*roughly two rows with some extra so that you can see there's stuff to scroll*/
-    max-height: 14rem;
-    overflow: auto;
     border-radius: var(--default-padding);
 }
 
