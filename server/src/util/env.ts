@@ -5,7 +5,7 @@ export interface EnvironmentSettings {
     skipWeeklyRepair: boolean;
     maxConcurrentRequests?: number;
     maxConcurrentCafes: number;
-    ignoreTrackingFailures?: boolean;
+    ignoreAnalyticsFailures?: boolean;
     logRequests: boolean;
     alwaysSlowUpdate: boolean;
 }
@@ -27,7 +27,7 @@ const DEV_ENVIRONMENT_SETTINGS: Partial<EnvironmentSettings> = {
     skipWeeklyRepair:            true,
     maxConcurrentRequests:       5,
     maxConcurrentCafes:          5,
-    ignoreTrackingFailures:      true,
+    ignoreAnalyticsFailures:     true,
     alwaysSlowUpdate:            true,
 };
 

@@ -26,7 +26,7 @@ export const registerCafeRoutes = (parent: Router) => {
         memoizeResponseBodyByQueryParams(),
         async ctx => {
             const response: IDiningCoreResponse = {
-                isTrackingEnabled: ApplicationContext.isReadyForTracking,
+                isTrackingEnabled: ApplicationContext.analyticsApplicationsReady.size > 0,
                 groups:            []
             };
 

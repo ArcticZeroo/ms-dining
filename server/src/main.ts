@@ -1,26 +1,21 @@
 import { performMenuBootTasks } from './api/cafe/cache/boot.js';
-import { createTrackingApplicationAsync } from './api/tracking/visitors.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
-import { ApplicationContext } from './constants/context.js';
 import { logDebug, logError, logInfo } from './util/log.js';
+import { createAnalyticsApplications } from './api/tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from './util/env.js';
 
 logDebug('Starting in debug mode');
 logInfo('Starting server on port', webserverPort);
 app.listen(webserverPort);
 
-createTrackingApplicationAsync()
-    .then(() => {
-        logInfo('User tracking is enabled!');
-        ApplicationContext.isReadyForTracking = true;
-    })
+createAnalyticsApplications()
     .catch(err => {
-        if (ENVIRONMENT_SETTINGS.ignoreTrackingFailures) {
+        if (ENVIRONMENT_SETTINGS.ignoreAnalyticsFailures) {
             return;
         }
 
-        logError('Could not create tracking application:', err);
+        logError('Could not create analytics applications:', err);
     });
 
 performMenuBootTasks()
