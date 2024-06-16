@@ -28,6 +28,13 @@ interface IRetrieveCafeMenuParams {
     shouldCountTowardsLastUsed?: boolean;
 }
 
+interface IRetrieveSearchResultsParams {
+    query: string;
+    date?: Date;
+    isExact?: boolean;
+    isExplore?: boolean;
+}
+
 export abstract class DiningClient {
     private static _viewListPromise: Promise<IDiningCoreResponse> | undefined = undefined;
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
@@ -196,13 +203,17 @@ export abstract class DiningClient {
         return results;
     }
 
-    public static async retrieveSearchResults(query: string, date?: Date, isExact: boolean = false): Promise<Array<IQuerySearchResult>> {
+    public static async retrieveSearchResults({ query, date, isExact = false, isExplore = false }: IRetrieveSearchResultsParams): Promise<Array<IQuerySearchResult>> {
         const searchParams = new URLSearchParams();
 
         searchParams.set('q', query);
 
         if (isExact) {
             searchParams.set('e', 'true');
+        }
+
+        if (isExplore) {
+            searchParams.set('exp', 'true');
         }
 
         if (date != null) {

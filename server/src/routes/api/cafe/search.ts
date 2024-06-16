@@ -10,8 +10,8 @@ import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { DateUtil, NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
-import { sendAnonymousVisitFireAndForget } from '../../../api/tracking/visitors.js';
 import { ANALYTICS_APPLICATION_NAMES } from '../../../constants/tracking.js';
+import { sendVisit, sendVisitMiddleware } from '../../../middleware/tracking.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -54,8 +54,8 @@ export const registerSearchRoutes = (parent: Router) => {
 
 	router.post('/favorites',
 		requireNoMenusUpdating,
+		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.searchFavorites),
 		async ctx => {
-			sendAnonymousVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.searchFavorites);
 			const queries = ctx.request.body;
 
 			if (!isDuckTypeArray<ISearchQuery>(queries, { text: 'string', type: 'string' })) {
@@ -77,9 +77,9 @@ export const registerSearchRoutes = (parent: Router) => {
 			const isExplore = getTrimmedQueryParam(ctx, 'exp') === 'true';
 
 			if (isExplore) {
-				sendAnonymousVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.searchExplore);
+				sendVisit(ctx, ANALYTICS_APPLICATION_NAMES.searchExplore);
 			} else {
-				sendAnonymousVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.search);
+				sendVisit(ctx, ANALYTICS_APPLICATION_NAMES.search);
 			}
 
 			if (!searchQuery) {
@@ -101,9 +101,8 @@ export const registerSearchRoutes = (parent: Router) => {
 	router.get('/cheap',
 		requireNoMenusUpdating,
 		memoizeResponseBodyByQueryParams(),
+		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.cheapItems),
 		async ctx => {
-			sendAnonymousVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.cheapItems);
-
 			const maxPriceRaw = ctx.query.max;
 			const minPriceRaw = ctx.query.min;
 

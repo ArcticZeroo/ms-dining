@@ -11,9 +11,8 @@ import { getBetterLogoUrl, getDefaultUniquenessDataForStation } from '../../../u
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { sendAnonymousVisitFireAndForget, sendVisitFireAndForget } from '../../../api/tracking/visitors.js';
 import { getApplicationNameForCafeMenu, getApplicationNameForMenuOverview } from '../../../constants/tracking.js';
-import { randomUUID } from 'node:crypto';
+import { sendVisit } from '../../../middleware/tracking.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -103,7 +102,7 @@ export const registerMenuRoutes = (parent: Router) => {
     router.get('/menu/:id',
         memoizeResponseBodyByQueryParams(),
         async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-            sendAnonymousVisitFireAndForget(getApplicationNameForCafeMenu(cafe.id));
+            sendVisit(ctx, getApplicationNameForCafeMenu(cafe.id));
 
             const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
 
@@ -118,7 +117,7 @@ export const registerMenuRoutes = (parent: Router) => {
     router.get('/menu/:id/overview',
         memoizeResponseBodyByQueryParams(),
         async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-            sendAnonymousVisitFireAndForget(getApplicationNameForMenuOverview(cafe.id));
+            sendVisit(ctx, getApplicationNameForMenuOverview(cafe.id));
 
             const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
             ctx.body = jsonStringifyWithoutNull(overviewStations);

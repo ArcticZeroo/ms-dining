@@ -6,7 +6,7 @@ import { clientFolderDistPath, clientIndexHtmlPath, serverStaticPath } from './c
 import mount from 'koa-mount';
 import bodyParser from 'koa-bodyparser';
 import { createStaticRoutingApp } from './routes/static.js';
-import { sendVisitorAnalytics } from './middleware/tracking.js';
+import { sendUniversalVisitMiddleware } from './middleware/tracking.js';
 import { serveSpaHtmlRoute } from './middleware/static.js';
 import Router from '@koa/router';
 import { attachRouter } from './util/koa.js';
@@ -15,7 +15,7 @@ const app = new Koa();
 
 app.use(json());
 app.use(bodyParser());
-app.use(sendVisitorAnalytics);
+app.use(sendUniversalVisitMiddleware);
 
 registerRoutes(app);
 

@@ -33,16 +33,19 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
     const dateForSearch = useDateForSearch();
 
     const doSearchCallback = useCallback(
-        () => DiningClient.retrieveSearchResults(query, dateForSearch).finally(() => setLastQueryText(query)),
+        () => DiningClient.retrieveSearchResults({
+            query,
+            date: dateForSearch
+        }).finally(() => setLastQueryText(query)),
         [query, dateForSearch]
     );
 
     const {
         actualStage: actualSearchResultStage,
-        stage:       searchResultStage,
-        value:       searchResults,
-        error:       searchResultsError,
-        run:         retrieveSearchResults
+        stage: searchResultStage,
+        value: searchResults,
+        error: searchResultsError,
+        run: retrieveSearchResults
     } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
     const allSearchResults = useMemo(
@@ -66,11 +69,11 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
     }, [retrieveSearchResults]);
 
     return {
-        actualStage:               actualSearchResultStage,
-        stage:                     searchResultStage,
-        results:                   allSearchResults,
-        tabCounts:                 resultCountByEntityType,
-        lastQuery:                 lastQueryText,
+        actualStage: actualSearchResultStage,
+        stage: searchResultStage,
+        results: allSearchResults,
+        tabCounts: resultCountByEntityType,
+        lastQuery: lastQueryText,
         areMenusCurrentlyUpdating: searchResultsError != null && searchResultsError instanceof MenusCurrentlyUpdatingException,
         retrieveSearchResults
     };
@@ -92,7 +95,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     } = useSearchResultsState(queryText);
 
     const sharedEntityButtonProps = {
-        currentFilter:    entityFilterType,
+        currentFilter: entityFilterType,
         totalResultCount: results.length,
         tabCounts,
     } as const;
@@ -113,7 +116,9 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                         <SearchWaiting stage={actualStage}/>
                     </div>
                     <div className="flex">
-                        <button className={classNames('search-filters-button default-container flex transition-background', isFilterMenuOpen && 'open')} onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}>
+                        <button
+                            className={classNames('search-filters-button default-container flex transition-background', isFilterMenuOpen && 'open')}
+                            onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}>
                             <span className="material-symbols-outlined icon">
                                 filter_list
                             </span>

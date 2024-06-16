@@ -161,7 +161,7 @@ export function* yieldDaysInFutureForThisWeek(forceUseNextWeek: boolean = false)
 
     const startDay = useNextWeek
         ? nativeDayOfWeek.Monday
-        : nowWeekday;
+        : Math.max(nativeDayOfWeek.Monday, nowWeekday);
 
     const daysUntilStartDay = getDaysUntilNextWeekday(now, startDay);
 

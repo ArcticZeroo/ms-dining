@@ -19,7 +19,7 @@ export const sendVisitAsync = async (applicationName: string, visitorId: string)
 	});
 
 	if (!response.ok && response.status !== 304) {
-		throw new Error('Failed to send visit');
+		throw new Error(`Failed to send visit: ${response.status}`);
 	}
 };
 
@@ -30,10 +30,6 @@ export const sendVisitFireAndForget = (applicationName: string, visitorId: strin
 
 	sendVisitAsync(applicationName, visitorId)
 		.catch(err => logError(`Failed to send visit for appId: ${applicationName}, error:`, err));
-}
-
-export const sendAnonymousVisitFireAndForget = (applicationName: string) => {
-	sendVisitFireAndForget(applicationName, randomUUID());
 }
 
 export const getVisitsAsync = async (applicationName: string, daysAgo: number): Promise<Array<IAggregatedVisits>> => {

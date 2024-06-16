@@ -76,6 +76,7 @@ export const AnalyticsPage = () => {
                     {
                         dayOptions.map(daysAgoOption => (
                             <button
+                                key={daysAgoOption}
                                 className={classNames('days-ago-option', daysAgoOption === currentDaysAgo && 'active')}
                                 onClick={() => setCurrentDaysAgo(daysAgoOption)}>
                                 {daysAgoOption} {pluralize('Day', daysAgoOption)}

@@ -46,7 +46,11 @@ export const SearchIdeas = () => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const retrieveSearchResultsCallback = useCallback(
-        () => DiningClient.retrieveSearchResults(selectedIdea, selectedDate),
+        () => DiningClient.retrieveSearchResults({
+            query: selectedIdea,
+            date: selectedDate,
+            isExplore: true
+        }),
         [selectedIdea, selectedDate]
     );
 
