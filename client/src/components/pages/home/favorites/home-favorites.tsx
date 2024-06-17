@@ -7,6 +7,8 @@ export const HomeFavorites = () => {
     const shouldShowFavorites = useValueNotifier(ApplicationSettings.showFavoritesOnHome);
     const favoriteQueries = useFavoriteQueries();
 
+    console.debug('favorites', shouldShowFavorites, favoriteQueries);
+
     if (!shouldShowFavorites) {
         return null;
     }

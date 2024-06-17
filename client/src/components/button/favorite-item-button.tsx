@@ -1,9 +1,9 @@
-import React from "react";
-import { useValueNotifierSetTarget } from "../../hooks/events.ts";
-import { classNames } from "../../util/react.ts";
-import filledStarIcon from "../../assets/icons/filled/star.svg";
-import outlinedStarIcon from "../../assets/icons/outline/star.svg";
-import { StringSetSetting } from "../../api/settings.ts";
+import React from 'react';
+import { StringSetSetting } from '../../api/settings.ts';
+import filledStarIcon from '../../assets/icons/filled/star.svg';
+import outlinedStarIcon from '../../assets/icons/outline/star.svg';
+import { useValueNotifierSetTarget } from '../../hooks/events.ts';
+import { classNames } from '../../util/react.ts';
 
 import './favorite-item-button.css';
 
@@ -40,5 +40,5 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, s
             <img src={filledStarIcon} alt="favorite" className="favorite-enabled icon-sized" style={{ display: isItemFavorite ? 'block' : 'none' }}/>
             <img src={outlinedStarIcon} alt="not favorite" className="icon-sized" style={{ display: isItemFavorite ? 'none' : 'block' }}/>
         </button>
-    )
+    );
 };
