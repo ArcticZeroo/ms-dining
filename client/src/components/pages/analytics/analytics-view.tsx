@@ -1,14 +1,14 @@
-import React, { Suspense, useCallback, useEffect, useState } from "react";
-import { AnalyticsClient } from "../../../api/analytics.ts";
-import { PromiseStage, useDelayedPromiseState } from "@arcticzeroo/react-promise-hook";
-import { HourglassLoadingSpinner } from "../../icon/hourglass-loading-spinner.tsx";
-import { RetryButton } from "../../button/retry-button.tsx";
-import { classNames } from "../../../util/react.ts";
-import { pluralize } from "../../../util/string.ts";
-import { BooleanSwitch } from "../../button/boolean-switch.tsx";
-import { VolumeTypeButton } from "./volume-type-button.tsx";
-import { ScenarioDropdown } from "./scenario-dropdown.tsx";
-import { STATIC_SCENARIOS } from "../../../util/analytics.ts";
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import { AnalyticsClient } from '../../../api/analytics.ts';
+import { STATIC_SCENARIOS } from '../../../util/analytics.ts';
+import { classNames } from '../../../util/react.ts';
+import { pluralize } from '../../../util/string.ts';
+import { BooleanSwitch } from '../../button/boolean-switch.tsx';
+import { RetryButton } from '../../button/retry-button.tsx';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
+import { ScenarioDropdown } from './scenario-dropdown.tsx';
+import { VolumeTypeButton } from './volume-type-button.tsx';
 
 const TOTAL_REQUEST_VOLUME_IMPLEMENTED_DATE = new Date('2024-06-17');
 
@@ -72,7 +72,7 @@ export const AnalyticsView = () => {
 
     return (
         <div className="body flex-col">
-            <div className="flex">
+            <div className="flex flex-wrap">
                 <div id="days-ago-selector" className="default-border-radius">
                     {
                         DAY_OPTIONS.map(daysAgoOption => (
