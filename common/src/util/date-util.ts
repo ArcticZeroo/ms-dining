@@ -141,7 +141,7 @@ const shouldUseNextWeek = (date: Date) => {
 const getDaysUntilNextWeekday = (date: Date, targetDay: number) => {
     let daysUntilTargetDay = targetDay - date.getDay();
 
-    if (daysUntilTargetDay <= 0) {
+    if (daysUntilTargetDay < 0) {
         daysUntilTargetDay += 7;
     }
 

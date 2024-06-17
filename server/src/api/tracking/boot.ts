@@ -21,6 +21,8 @@ const getAllApplicationNames = () => {
 }
 
 export const createAnalyticsApplications = async () => {
+	const failedApplicationNames = new Set<string>();
+
 	for (const name of getAllApplicationNames()) {
 		try {
 			// The analytics service runs SQL sequentially anyway, don't need to do this in parallel
@@ -28,12 +30,21 @@ export const createAnalyticsApplications = async () => {
 			ApplicationContext.analyticsApplicationsReady.add(name);
 		} catch (err) {
 			if (!ENVIRONMENT_SETTINGS.ignoreAnalyticsFailures) {
-				logError(`Could not create tracking application "${name}":`, err)
+				// Only log the first. If one is broken it's likely that they all are, and we don't want to spam.
+				if (failedApplicationNames.size === 0) {
+					logError(`Failed to create application for ${name}:`, err);
+				}
 			}
+
+			failedApplicationNames.add(name);
 		}
 	}
 
 	if (ApplicationContext.analyticsApplicationsReady.size > 0) {
-		logInfo(`Created ${ApplicationContext.analyticsApplicationsReady.size} tracking applications`);
+		logInfo(`Created ${ApplicationContext.analyticsApplicationsReady.size} analytics applications`);
+	}
+
+	if (!ENVIRONMENT_SETTINGS.ignoreAnalyticsFailures && failedApplicationNames.size > 0) {
+		logError(`Failed to create ${failedApplicationNames.size} analytics applications`);
 	}
 }
