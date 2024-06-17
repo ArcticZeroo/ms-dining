@@ -22,10 +22,6 @@
     background: #1976D2;
 }
 
-#analytics-page .body {
-    max-height: 100vh;
-}
-
 #analytics-page .volume-type {
     background: var(--color-setting-background);
 }
@@ -45,4 +41,8 @@
 
 #analytics-page .scenarios .dropdown .selected {
     background: #4e92c2;
+}
+
+#analytics-page .chart-container {
+    min-height: 12rem;
 }
