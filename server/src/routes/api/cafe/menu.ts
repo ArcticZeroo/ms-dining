@@ -11,8 +11,8 @@ import { getBetterLogoUrl, getDefaultUniquenessDataForStation } from '../../../u
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { getApplicationNameForCafeMenu, getApplicationNameForMenuOverview } from '../../../constants/tracking.js';
-import { sendVisit } from '../../../middleware/tracking.js';
+import { getApplicationNameForCafeMenu, getApplicationNameForMenuOverview } from '@msdining/common/dist/constants/analytics.js';
+import { sendVisit } from '../../../middleware/analytics.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null || !uniquenessData.has(station.name)) {

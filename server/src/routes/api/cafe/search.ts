@@ -10,8 +10,8 @@ import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { DateUtil, NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
-import { ANALYTICS_APPLICATION_NAMES } from '../../../constants/tracking.js';
-import { sendVisit, sendVisitMiddleware } from '../../../middleware/tracking.js';
+import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
+import { sendVisit, sendVisitMiddleware } from '../../../middleware/analytics.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;

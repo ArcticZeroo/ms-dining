@@ -1,6 +1,11 @@
-#analytics-page #after-selector {
+#analytics-page {
+    --color-setting-background: #DDD;
+}
+
+#analytics-page #days-ago-selector {
     display: flex;
     gap: var(--default-padding);
+    background: var(--color-setting-background);
 }
 
 #analytics-page .days-ago-option {
@@ -19,4 +24,25 @@
 
 #analytics-page .body {
     max-height: 100vh;
+}
+
+#analytics-page .volume-type {
+    background: var(--color-setting-background);
+}
+
+#analytics-page .volume-type .selected {
+    background: #8dd2b4;
+}
+
+#analytics-page .scenarios .dropdown {
+    max-height: 30vh;
+    overflow-y: auto;
+}
+
+#analytics-page .scenarios .dropdown .scenario {
+    flex-grow: 1;
+}
+
+#analytics-page .scenarios .dropdown .selected {
+    background: #4e92c2;
 }

@@ -448,6 +448,12 @@ html, body, #root, .App {
     border-radius: var(--default-padding);
 }
 
+.dropdown {
+    position: absolute;
+    z-index: var(--z-index-above-content);
+    background: #b7c0d3;
+}
+
 /* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {

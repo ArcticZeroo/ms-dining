@@ -1,7 +1,7 @@
 import { ApplicationContext } from '../constants/context.js';
 import { sendVisitFireAndForget } from '../api/tracking/visitors.js';
 import Koa from 'koa';
-import { ANALYTICS_APPLICATION_NAMES } from '../constants/tracking.js';
+import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
 import { randomUUID } from 'node:crypto';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';

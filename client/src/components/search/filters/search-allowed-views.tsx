@@ -1,7 +1,6 @@
 import { useViewsForNav } from "../../../hooks/views.ts";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CheckboxDropdown } from "../../input/checkbox-dropdown.tsx";
-import { hasAncestor } from "../../../util/html.ts";
 import { useValueNotifier } from "../../../hooks/events.ts";
 import { ApplicationSettings } from "../../../constants/settings.ts";
 
@@ -9,7 +8,6 @@ export const SearchAllowedViews: React.FC = () => {
     const allowedViewIds = useValueNotifier(ApplicationSettings.searchAllowedViewIds);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const views = useViewsForNav();
-    const dropdownRef = useRef<HTMLDivElement>(null);
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
 
     const options = useMemo(
@@ -19,29 +17,6 @@ export const SearchAllowedViews: React.FC = () => {
         })),
         [views]
     );
-
-    useEffect(() => {
-        if (!isDropdownOpen) {
-            return;
-        }
-
-        const closeDropdown = (event: MouseEvent) => {
-            const dropdown = dropdownRef.current;
-            const target = event.target as HTMLElement;
-
-            if (hasAncestor(target, dropdown)) {
-                return;
-            }
-
-            setIsDropdownOpen(false);
-        };
-
-        window.addEventListener('click', closeDropdown);
-
-        return () => {
-            window.removeEventListener('click', closeDropdown);
-        };
-    }, [isDropdownOpen]);
 
     const onDropdownToggleClicked = (event: React.MouseEvent) => {
         event.stopPropagation();
@@ -69,7 +44,7 @@ export const SearchAllowedViews: React.FC = () => {
             {
                 isDropdownOpen && (
                     <CheckboxDropdown
-                        ref={dropdownRef}
+                        onClose={() => setIsDropdownOpen(false)}
                         id="search-allowed-views"
                         options={options}
                         selectedOptions={allowedViewIds}

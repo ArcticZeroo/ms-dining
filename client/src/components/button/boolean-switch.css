@@ -1,0 +1,41 @@
+.boolean-switch {
+    --switch-width: 1rem;
+    --padding-size: 0.25rem;
+    background: #AAA;
+    padding: 0.25rem;
+    cursor: pointer;
+    width: calc(var(--switch-width) * 2);
+    height: var(--switch-width);
+    border-radius: var(--switch-width);
+    transition: opacity 0.25s ease, background-color 0.25s ease;
+}
+
+.boolean-switch.disabled {
+    cursor: not-allowed;
+    background: #999;
+    opacity: 0.75;
+}
+
+.boolean-switch .switch {
+    background: #1d68a1;
+    border-radius: 100%;
+    width: var(--switch-width);
+    height: var(--switch-width);
+    position: absolute;
+    left: var(--padding-size);
+    transition: left 0.25s ease, background-color 0.25s ease;
+}
+
+.boolean-switch.true .switch {
+    left: calc(var(--switch-width) + var(--padding-size));
+    background: #2196F3;
+}
+
+.boolean-switch.disabled.true .switch {
+    background: #666;
+}
+
+.boolean-switch input {
+    visibility: hidden;
+    position: absolute;
+}

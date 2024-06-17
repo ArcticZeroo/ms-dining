@@ -1,9 +1,8 @@
 import fetch from 'node-fetch';
-import { IAggregatedVisits } from '../../models/tracking.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { logError } from '../../util/log.js';
 import { ApplicationContext } from '../../constants/context.js';
-import { randomUUID } from 'node:crypto';
+import { IHourlyVisitCount } from '@msdining/common/dist/models/analytics.js';
 
 const serverUrl = 'http://localhost:4000';
 
@@ -32,7 +31,7 @@ export const sendVisitFireAndForget = (applicationName: string, visitorId: strin
 		.catch(err => logError(`Failed to send visit for appId: ${applicationName}, error:`, err));
 }
 
-export const getVisitsAsync = async (applicationName: string, daysAgo: number): Promise<Array<IAggregatedVisits>> => {
+export const getVisitsAsync = async (applicationName: string, daysAgo: number): Promise<Array<IHourlyVisitCount>> => {
 	const response = await fetch(`${serverUrl}/applications/${applicationName}/visits?days=${daysAgo}`);
 
 	if (!response.ok) {
@@ -41,7 +40,7 @@ export const getVisitsAsync = async (applicationName: string, daysAgo: number): 
 
 	const json = await response.json();
 
-	if (!isDuckTypeArray<IAggregatedVisits>(json, {
+	if (!isDuckTypeArray<IHourlyVisitCount>(json, {
 		count: 'number',
 		date:  'string'
 	})) {

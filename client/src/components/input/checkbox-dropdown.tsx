@@ -1,6 +1,7 @@
 import React from "react";
 
 import './checkbox-dropdown.css';
+import { Dropdown } from "../dropdown/dropdown.tsx";
 
 export interface IDropdownOption {
     text: string;
@@ -13,16 +14,18 @@ interface ICheckboxDropdownProps {
     selectedOptions: Set<string>;
     buttons?: React.ReactNode;
 
+    onClose(): void;
     onSelectedOptionsChanged(selectedOptions: Set<string>): void;
 }
 
-const CheckboxDropdownWithRef: React.ForwardRefRenderFunction<HTMLDivElement, ICheckboxDropdownProps> = ({
+export const CheckboxDropdown: React.FC<ICheckboxDropdownProps> = ({
     id,
     options,
     selectedOptions,
+    buttons,
+    onClose,
     onSelectedOptionsChanged,
-    buttons
-}, ref) => {
+}) => {
     const onCheckboxChanged = (event: React.ChangeEvent<HTMLInputElement>, id: string) => {
         const newSelectedOptions = new Set(selectedOptions);
         if (event.target.checked) {
@@ -44,7 +47,7 @@ const CheckboxDropdownWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IC
     }
 
     return (
-        <div className="dropdown default-container flex-col" ref={ref}>
+        <Dropdown onClose={onClose}>
             <div className="relative">
                 <div className="flex flex-around buttons">
                     { buttons }
@@ -78,8 +81,6 @@ const CheckboxDropdownWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IC
                     }
                 </div>
             </div>
-        </div>
+        </Dropdown>
     );
 }
-
-export const CheckboxDropdown = React.forwardRef(CheckboxDropdownWithRef);

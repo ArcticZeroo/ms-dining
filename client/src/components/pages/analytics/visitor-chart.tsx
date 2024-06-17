@@ -1,75 +1,94 @@
 import { Bar } from 'react-chartjs-2';
-import { IHourlyVisitCount } from '../../../models/analytics.ts';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import 'chart.js/auto';
 import 'chartjs-adapter-luxon';
-
-interface IVisitorChartProps {
-    visits: IHourlyVisitCount[];
-}
+import { IHourlyVisitCount } from "@msdining/common/dist/models/analytics";
 
 interface ILineDataPoint {
     x: string;
     y: number;
 }
 
-const VisitorChart: React.FC<IVisitorChartProps> = ({ visits }) => {
-    const [data, setData] = useState<Array<ILineDataPoint>>([]);
-    const [allDates, setAllDates] = useState<Set<string>>(new Set());
+interface IVisitorChartProps {
+    isTotalCount: boolean;
+    visits: IHourlyVisitCount[];
+}
 
-    useEffect(() => {
-        const newAllDates = new Set<string>();
+const VisitorChart: React.FC<IVisitorChartProps> = ({ visits, isTotalCount }) => {
+    const [data, allDates] = useMemo(
+        () => {
+            const data: Array<ILineDataPoint> = [];
+            const allDates = new Set<string>();
 
-        setData(visits.map(visit => {
-            newAllDates.add(visit.date);
-            return {
-                x: visit.date,
-                y: visit.count
-            };
-        }));
+            for (const visit of visits) {
+                allDates.add(visit.date);
+                data.push({
+                    x: visit.date,
+                    y: isTotalCount
+                        ? visit.totalCount
+                        : visit.count
+                });
+            }
 
-        setAllDates(newAllDates);
-    }, [visits]);
+            return [data, allDates];
+        },
+        [visits, isTotalCount]
+    );
+
+    const shouldShowTick = useCallback(
+        (value: unknown) => typeof value === 'string' && allDates.has(value) ? value : undefined,
+        [allDates]
+    );
+
+    const label = isTotalCount
+        ? 'Total Hourly Requests'
+        : 'Unique Hourly Visitors';
+
+    const title = isTotalCount
+        ? 'Total Requests by Hour'
+        : 'Unique Visitors by Hour';
 
     return (
-        <Bar
-            data={{
-                datasets: [{
-                    label: 'Unique Hourly Visitors',
-                    data
-                }],
-            }}
-            options={{
-                scales:  {
-                    x: {
-                        title: {
-                            display: true,
-                            text:    'Time'
+        <div className="chart-container">
+            <Bar
+                data={{
+                    datasets: [{
+                        label,
+                        data
+                    }],
+                }}
+                options={{
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            },
+                            type: 'time',
+                            ticks: {
+                                callback: shouldShowTick
+                            }
                         },
-                        type:  'time',
-                        ticks: {
-                            callback: value => typeof value === 'string' && allDates.has(value) ? value : undefined
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Visitors'
+                            },
+                            beginAtZero: true
                         }
                     },
-                    y: {
-                        title:       {
+                    plugins: {
+                        title: {
                             display: true,
-                            text:    'Visitors'
+                            text: title,
                         },
-                        beginAtZero: true
+                        legend: {
+                            display: false
+                        }
                     }
-                },
-                plugins: {
-                    title:  {
-                        display: true,
-                        text:    'Unique Visitors by Hour',
-                    },
-                    legend: {
-                        display: false
-                    }
-                }
-            }}
-        />
+                }}
+            />
+        </div>
     );
 };
 
