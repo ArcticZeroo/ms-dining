@@ -11,7 +11,7 @@ import { DateUtil, NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
-import { sendVisit, sendVisitMiddleware } from '../../../middleware/analytics.js';
+import { sendVisit, sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -68,19 +68,19 @@ export const registerSearchRoutes = (parent: Router) => {
 			ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
 		});
 
+	const getApplicationNameForSearch = (isExplore: string) => {
+		return isExplore === 'true'
+			? ANALYTICS_APPLICATION_NAMES.searchExplore
+			: ANALYTICS_APPLICATION_NAMES.search
+	};
+
 	router.get('/',
 		requireNoMenusUpdating,
+		sendVisitFromQueryParamMiddleware('exp', getApplicationNameForSearch),
 		memoizeResponseBodyByQueryParams(),
 		async ctx => {
 			const searchQuery = getTrimmedQueryParam(ctx, 'q');
 			const isExact = getTrimmedQueryParam(ctx, 'e') === 'true';
-			const isExplore = getTrimmedQueryParam(ctx, 'exp') === 'true';
-
-			if (isExplore) {
-				sendVisit(ctx, ANALYTICS_APPLICATION_NAMES.searchExplore);
-			} else {
-				sendVisit(ctx, ANALYTICS_APPLICATION_NAMES.search);
-			}
 
 			if (!searchQuery) {
 				ctx.body = [];
@@ -100,8 +100,8 @@ export const registerSearchRoutes = (parent: Router) => {
 
 	router.get('/cheap',
 		requireNoMenusUpdating,
-		memoizeResponseBodyByQueryParams(),
 		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.cheapItems),
+		memoizeResponseBodyByQueryParams(),
 		async ctx => {
 			const maxPriceRaw = ctx.query.max;
 			const minPriceRaw = ctx.query.min;

@@ -12,7 +12,7 @@ import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { getApplicationNameForCafeMenu, getApplicationNameForMenuOverview } from '@msdining/common/dist/constants/analytics.js';
-import { sendVisit } from '../../../middleware/analytics.js';
+import { sendVisit, sendVisitFromCafeParamMiddleware } from '../../../middleware/analytics.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -100,10 +100,9 @@ export const registerMenuRoutes = (parent: Router) => {
     };
 
     router.get('/menu/:id',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
         memoizeResponseBodyByQueryParams(),
         async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-            sendVisit(ctx, getApplicationNameForCafeMenu(cafe.id));
-
             const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
 
             let uniquenessData: Map<string, IStationUniquenessData> | null = null;
@@ -115,10 +114,9 @@ export const registerMenuRoutes = (parent: Router) => {
         }));
 
     router.get('/menu/:id/overview',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
         memoizeResponseBodyByQueryParams(),
         async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-            sendVisit(ctx, getApplicationNameForMenuOverview(cafe.id));
-
             const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
             ctx.body = jsonStringifyWithoutNull(overviewStations);
         }));
