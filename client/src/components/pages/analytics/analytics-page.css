@@ -26,6 +26,11 @@
     background: var(--color-setting-background);
 }
 
+#analytics-page .volume-type button.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 #analytics-page .volume-type .selected {
     background: #8dd2b4;
 }

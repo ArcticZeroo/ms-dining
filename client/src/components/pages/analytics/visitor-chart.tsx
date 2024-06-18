@@ -49,46 +49,44 @@ const VisitorChart: React.FC<IVisitorChartProps> = ({ visits, isTotalCount }) =>
         : 'Unique Visitors by Hour';
 
     return (
-        <div className="chart-container">
-            <Bar
-                data={{
-                    datasets: [{
-                        label,
-                        data
-                    }],
-                }}
-                options={{
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Time'
-                            },
-                            type: 'time',
-                            ticks: {
-                                callback: shouldShowTick
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Visitors'
-                            },
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
+        <Bar
+            data={{
+                datasets: [{
+                    label,
+                    data
+                }],
+            }}
+            options={{
+                scales: {
+                    x: {
                         title: {
                             display: true,
-                            text: title,
+                            text: 'Time'
                         },
-                        legend: {
-                            display: false
+                        type: 'time',
+                        ticks: {
+                            callback: shouldShowTick
                         }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Visitors'
+                        },
+                        beginAtZero: true
                     }
-                }}
-            />
-        </div>
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title,
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }}
+        />
     );
 };
 
