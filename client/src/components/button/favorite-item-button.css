@@ -1,13 +1,19 @@
 .favorite-item-button {
     background: #EDEDED;
-    transition: background-color 0.25s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--constant-padding);
-    border-radius: var(--constant-padding);
+    border-radius: var(--default-padding);
+    position: relative;
 }
 
-.favorite-item-button.is-favorite {
+.favorite-item-button > * {
+    position: absolute;
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+    transition: background-color 0.25s ease, opacity 0.25s ease;
+}
+
+.favorite-item-button.is-favorite > * {
     background: var(--color-favorite) !important;
 }

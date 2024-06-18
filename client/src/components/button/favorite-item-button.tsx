@@ -33,12 +33,21 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, s
 
     return (
         <button
-            className={classNames('favorite-item-button', isItemFavorite && 'is-favorite', isDisabled && 'disabled')}
+            className={classNames('favorite-item-button icon-container', isItemFavorite && 'is-favorite', isDisabled && 'disabled')}
             title={isItemFavorite ? 'Click to remove from favorites' : 'Favorite this item'}
             onClick={onFavoriteClicked}
         >
-            <img src={filledStarIcon} alt="favorite" className="favorite-enabled icon-sized" style={{ display: isItemFavorite ? 'block' : 'none' }}/>
-            <img src={outlinedStarIcon} alt="not favorite" className="icon-sized" style={{ display: isItemFavorite ? 'none' : 'block' }}/>
+            <img
+                src={outlinedStarIcon}
+                alt="not favorite"
+                className="icon-sized"
+            />
+            <img
+                src={filledStarIcon}
+                alt="favorite"
+                className="favorite-enabled icon-sized"
+                style={{ opacity: isItemFavorite ? '1' : '0' }}
+            />
         </button>
     );
 };

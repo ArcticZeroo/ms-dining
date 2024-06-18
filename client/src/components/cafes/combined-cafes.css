@@ -39,10 +39,6 @@
     background: var(--color-background);
 }
 
-.station .station-header .favorite-item-button {
-    margin: 0 var(--default-padding) 0 0;
-}
-
 .station .station-header .title {
     font-size: var(--section-title-font-size);
     display: flex;
@@ -263,6 +259,7 @@
     position: absolute;
     bottom: 0;
     right: 0;
+    z-index: calc(var(--z-index-content) + 1);
     --color-button-background: #dcdcdc;
 }
 
@@ -276,17 +273,12 @@
 
 .menu-item-buttons button {
     border-radius: var(--default-padding);
-}
-
-.menu-item-buttons button:not(.copy-button) {
-    padding: var(--default-padding);
     background: var(--color-button-background);
 }
 
-.copy-button > * {
-    padding: var(--default-padding);
+.menu-item-buttons button > * {
     border-radius: var(--default-padding);
-    background: var(--color-button-background);
+    padding: var(--default-padding);
 }
 
 /* roughly when the table would horizontally overflow just a little -
