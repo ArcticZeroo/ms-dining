@@ -62,6 +62,15 @@ export interface ICafeMenuItemDetailsResponse {
     }
 }
 
+export interface ICafeMenuItemPriceLevelData {
+    priceLevelId: string;
+    name: string;
+    price: {
+        currencyUnit: string;
+        amount: string;
+    }
+}
+
 export interface ICafeMenuItemListResponseItem {
     id: string;
     amount: string;
@@ -76,6 +85,7 @@ export interface ICafeMenuItemListResponseItem {
     isItemCustomizationEnabled?: boolean;
     tagIds?: string[];
     receiptText: string;
+    priceLevels: Record<string, ICafeMenuItemPriceLevelData>;
 }
 
 export interface ICafeStationTag {

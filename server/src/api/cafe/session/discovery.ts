@@ -31,11 +31,11 @@ export class CafeDiscoverySession {
     constructor(public readonly cafe: ICafe) {
     }
 
-    private _getUrl(path: string) {
+    protected _getUrl(path: string) {
         return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}${path}`;
     }
 
-    private _getRequestOptions(options: any = {}) {
+    protected _getRequestOptions(options: any = {}) {
         return {
             ...options,
             headers: {
@@ -77,7 +77,7 @@ export class CafeDiscoverySession {
         }
     }
 
-    private async performLoginAsync() {
+    protected async performLoginAsync() {
         const response = await this._requestAsync('/login/anonymous',
             {
                 method: 'PUT'
@@ -90,7 +90,7 @@ export class CafeDiscoverySession {
         this.#token = response.headers.get('access-token')!;
     }
 
-    private async retrieveConfigDataAsync() {
+    protected async retrieveConfigDataAsync() {
         try {
             const cafeFromDatabase = await CafeStorageClient.retrieveCafeAsync(this.cafe.id);
             if (cafeFromDatabase != null

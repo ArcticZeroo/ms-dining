@@ -25,7 +25,7 @@ const tagLock = new Semaphore.Lock();
 export class CafeMenuSession extends CafeDiscoverySession {
     #retrievedTagStationIds = new Set<string>();
 
-    private _convertExternalStation(stationJson: ICafeStationListItem): ICafeStation {
+    protected _convertExternalStation(stationJson: ICafeStationListItem): ICafeStation {
         const station: ICafeStation = {
             id:                        stationJson.id,
             // Some station names are just a space, e.g. the station for the sandwich place in the commons
@@ -53,7 +53,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return station;
     }
 
-    private async retrieveStationListAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
+    protected async retrieveStationListAsync(scheduledDay: number = 0): Promise<Array<ICafeStation>> {
         if (!this.config) {
             throw new Error('Config is required to retrieve station list!');
         }
@@ -91,7 +91,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return json.map(stationJson => this._convertExternalStation(stationJson));
     }
 
-    private _mapModifierChoiceType(jsonChoiceType: string): ModifierChoiceType {
+    protected _mapModifierChoiceType(jsonChoiceType: string): ModifierChoiceType {
         switch (jsonChoiceType) {
             case 'radio':
                 return ModifierChoices.radio;
@@ -102,7 +102,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         }
     }
 
-    private _mapModifiersFromDetails(jsonItem: ICafeMenuItemDetailsResponse): Array<IMenuItemModifier> {
+    protected _mapModifiersFromDetails(jsonItem: ICafeMenuItemDetailsResponse): Array<IMenuItemModifier> {
         const modifiers = jsonItem.modifiers?.modifiers?.map(jsonModifier => ({
             id:          jsonModifier.id,
             description: jsonModifier.description,
@@ -119,7 +119,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return modifiers ?? [];
     }
 
-    private async _requestModifierDetailsAsync(itemId: string): Promise<Array<IMenuItemModifier>> {
+    protected async _requestModifierDetailsAsync(itemId: string): Promise<Array<IMenuItemModifier>> {
         if (!this.config) {
             throw new Error('Config is required to retrieve modifier details!');
         }
@@ -151,7 +151,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return this._mapModifiersFromDetails(json);
     }
 
-    private async _retrieveModifierDetailsAsync(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemModifier>> {
+    protected async _retrieveModifierDetailsAsync(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemModifier>> {
         // In case parsing is weird, don't treat null as a reason to skip retrieving
         if (jsonItem.isItemCustomizationEnabled === false) {
             return [];
@@ -169,7 +169,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         }
     }
 
-    private _isAnyModifierWeird(localItem: IMenuItem): boolean {
+    protected _isAnyModifierWeird(localItem: IMenuItem): boolean {
         return localItem.modifiers.some(modifier => {
             if (modifier.maximum === 0) {
                 return true;
@@ -192,7 +192,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         });
     }
 
-    private _shouldRetrieveModifierDetails(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
+    protected _shouldRetrieveModifierDetails(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
         if (localItem == null || localItem.lastUpdateTime == null || Number.isNaN(localItem.lastUpdateTime.getTime())) {
             return true;
         }
@@ -209,7 +209,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return this._isAnyModifierWeird(localItem);
     }
 
-    private async _requestTagDefinitionsAsync(stationId: string, menuId: string): Promise<Map<string, string>> {
+    protected async _requestTagDefinitionsAsync(stationId: string, menuId: string): Promise<Map<string, string>> {
         if (!this.config) {
             throw new Error('Config is required to retrieve tag definitions!');
         }
@@ -275,7 +275,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         );
     }
 
-    private async _retrieveTagNameAsync(tagId: string, station: ICafeStation): Promise<string | undefined> {
+    protected async _retrieveTagNameAsync(tagId: string, station: ICafeStation): Promise<string | undefined> {
         try {
             // This might be a bottleneck, but we don't want to drop tags
             await tagLock.acquire();
@@ -312,7 +312,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         }
     }
 
-    private async _convertExternalMenuItem(station: ICafeStation, localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
+    protected async _convertExternalMenuItem(station: ICafeStation, localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
         const localItem: IMenuItem | undefined = localItemsById.get(jsonItem.id);
 
         const modifiers = await this._retrieveModifierDetailsAsync(localItem, jsonItem);
@@ -339,12 +339,12 @@ export class CafeMenuSession extends CafeDiscoverySession {
             receiptText:    jsonItem.receiptText,
             lastUpdateTime: new Date(jsonItem.lastUpdateTime),
             tags:           new Set(tags),
+            searchTags:     localItem?.searchTags ?? new Set<string>(),
             modifiers,
-            searchTags:     localItem?.searchTags ?? new Set<string>()
         };
     }
 
-    private async _requestMenuItemDetails(station: ICafeStation, localItemsById: Map<string, IMenuItem>, itemIds: string[]): Promise<Array<IMenuItem>> {
+    protected async _requestMenuItemDetailsFromServer(station: ICafeStation, itemIds: string[]): Promise<Array<ICafeMenuItemListResponseItem>> {
         if (!this.config) {
             throw new Error('Config is required to retrieve menu item details!');
         }
@@ -357,12 +357,12 @@ export class CafeMenuSession extends CafeDiscoverySession {
                     conceptId:          station.id,
                     currencyUnit:       'USD',
                     isCategoryHasItems: true,
-                    itemIds,
                     menuPriceLevel:     {
                         menuId: station.menuId
                     },
                     show86edItems:      false,
-                    useIgPosApi:        false
+                    useIgPosApi:        false,
+                    itemIds,
                 })
             }
         );
@@ -376,6 +376,12 @@ export class CafeMenuSession extends CafeDiscoverySession {
         })) {
             throw new Error('Invalid object type');
         }
+
+        return json;
+    }
+
+    protected async _requestMenuItemDetails(station: ICafeStation, localItemsById: Map<string, IMenuItem>, itemIds: string[]): Promise<Array<IMenuItem>> {
+        const json = await this._requestMenuItemDetailsFromServer(station, itemIds);
 
         const items: IMenuItem[] = [];
 
@@ -392,7 +398,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return items;
     }
 
-    private async retrieveMenuItemDetailsAsync(station: ICafeStation, itemIds: string[], alwaysGetServerItems: boolean): Promise<Array<IMenuItem>> {
+    protected async retrieveMenuItemDetailsAsync(station: ICafeStation, itemIds: string[], alwaysGetServerItems: boolean): Promise<Array<IMenuItem>> {
         const itemIdsToRetrieve = new Set(itemIds);
         const items: IMenuItem[] = [];
         const localItemsById = new Map<string, IMenuItem>();
@@ -439,7 +445,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         return items;
     }
 
-    private async _populateMenuItemsForStationAsync(station: ICafeStation, alwaysGetServerItems: boolean) {
+    protected async _populateMenuItemsForStationAsync(station: ICafeStation, alwaysGetServerItems: boolean) {
         const itemIds = Array.from(station.menuItemIdsByCategoryName.values()).flat();
 
         const menuItems = await this.retrieveMenuItemDetailsAsync(station, itemIds, alwaysGetServerItems);
@@ -449,7 +455,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
         }
     }
 
-    private async populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
+    protected async populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
         const populatePromises: Array<Promise<void>> = [];
 
         for (const station of stations) {
