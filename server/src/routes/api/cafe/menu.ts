@@ -11,115 +11,119 @@ import { getBetterLogoUrl, getDefaultUniquenessDataForStation } from '../../../u
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { getApplicationNameForCafeMenu, getApplicationNameForMenuOverview } from '@msdining/common/dist/constants/analytics.js';
+import {
+	getApplicationNameForCafeMenu,
+	getApplicationNameForMenuOverview
+} from '@msdining/common/dist/constants/analytics.js';
 import { sendVisit, sendVisitFromCafeParamMiddleware } from '../../../middleware/analytics.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
-    if (uniquenessData == null || !uniquenessData.has(station.name)) {
-        return getDefaultUniquenessDataForStation(station.menuItemsById.size);
-    }
+	if (uniquenessData == null || !uniquenessData.has(station.name)) {
+		return getDefaultUniquenessDataForStation(station.menuItemsById.size);
+	}
 
-    return uniquenessData.get(station.name)!;
+	return uniquenessData.get(station.name)!;
 };
 
 export const registerMenuRoutes = (parent: Router) => {
-    const router = new Router();
+	const router = new Router();
 
-    const serializeMenuItem = (menuItem: IMenuItem): IMenuItemDTO => ({
-        ...menuItem,
-        tags:       Array.from(menuItem.tags),
-        searchTags: Array.from(menuItem.searchTags)
-    });
+	const serializeMenuItem = (menuItem: IMenuItem): IMenuItemDTO => ({
+		...menuItem,
+		tags:       Array.from(menuItem.tags),
+		searchTags: Array.from(menuItem.searchTags)
+	});
 
-    const convertMenuToSerializable = (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): MenuResponse => {
-        const menusByStation: MenuResponse = [];
+	const convertMenuToSerializable = (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): MenuResponse => {
+		const menusByStation: MenuResponse = [];
 
-        for (const station of menuStations) {
-            const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
+		for (const station of menuStations) {
+			const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
 
-            const itemsByCategory: Record<string, Array<IMenuItemDTO>> = {};
+			const itemsByCategory: Record<string, Array<IMenuItemDTO>> = {};
 
-            for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
-                const itemsForCategory: IMenuItemDTO[] = [];
+			for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
+				const itemsForCategory: IMenuItemDTO[] = [];
 
-                for (const itemId of categoryItemIds) {
-                    // Expected; Some items are 86-ed
-                    if (!station.menuItemsById.has(itemId)) {
-                        continue;
-                    }
+				for (const itemId of categoryItemIds) {
+					// Expected; Some items are 86-ed
+					if (!station.menuItemsById.has(itemId)) {
+						continue;
+					}
 
-                    itemsForCategory.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
-                }
+					itemsForCategory.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
+				}
 
-                if (itemsForCategory.length === 0) {
-                    continue;
-                }
+				if (itemsForCategory.length === 0) {
+					continue;
+				}
 
-                itemsByCategory[categoryName] = itemsForCategory;
-            }
+				itemsByCategory[categoryName] = itemsForCategory;
+			}
 
-            if (Object.keys(itemsByCategory).length === 0) {
-                continue;
-            }
+			if (Object.keys(itemsByCategory).length === 0) {
+				continue;
+			}
 
-            menusByStation.push({
-                name:       station.name,
-                logoUrl:    getBetterLogoUrl(station.name, station.logoUrl),
-                menu:       itemsByCategory,
-                uniqueness: uniquenessDataForStation
-            });
-        }
+			menusByStation.push({
+				name:       station.name,
+				logoUrl:    getBetterLogoUrl(station.name, station.logoUrl),
+				menu:       itemsByCategory,
+				uniqueness: uniquenessDataForStation,
+				pattern:    station.pattern,
+			});
+		}
 
-        return menusByStation;
-    };
+		return menusByStation;
+	};
 
-    const validateCafeAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
-        const id = ctx.params.id?.toLowerCase();
-        if (!id) {
-            ctx.throw(400, 'Missing cafe id');
-        }
+	const validateCafeAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
+		const id = ctx.params.id?.toLowerCase();
+		if (!id) {
+			ctx.throw(400, 'Missing cafe id');
+		}
 
-        const dateString = getDateStringForMenuRequest(ctx);
-        if (dateString == null) {
-            ctx.body = JSON.stringify([]);
-            return;
-        }
+		const dateString = getDateStringForMenuRequest(ctx);
+		if (dateString == null) {
+			ctx.body = JSON.stringify([]);
+			return;
+		}
 
-        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-        if (!cafe) {
-            ctx.throw(404, 'Cafe not found or data is missing');
-        }
+		const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+		if (!cafe) {
+			ctx.throw(404, 'Cafe not found or data is missing');
+		}
 
-        if (isCafeCurrentlyUpdating(dateString, cafe)) {
-            ctx.status = 503;
-            ctx.body = ERROR_BODIES.menusCurrentlyUpdating;
-            return;
-        }
+		if (isCafeCurrentlyUpdating(dateString, cafe)) {
+			ctx.status = 503;
+			ctx.body = ERROR_BODIES.menusCurrentlyUpdating;
+			return;
+		}
 
-        return onReady(cafe, dateString);
-    };
+		return onReady(cafe, dateString);
+	};
 
-    router.get('/menu/:id',
-        sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-        memoizeResponseBodyByQueryParams(),
-        async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-            const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
+	router.get('/menu/:id',
+		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+		memoizeResponseBodyByQueryParams(),
+		async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
+			const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
 
-            let uniquenessData: Map<string, IStationUniquenessData> | null = null;
-            if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
-                uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(cafe.id, dateString);
-            }
+			let uniquenessData: Map<string, IStationUniquenessData> | null = null;
+			if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
+				uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(cafe.id, dateString);
+			}
 
-            ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
-        }));
+			ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
+		}));
 
-    router.get('/menu/:id/overview',
-        sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-        memoizeResponseBodyByQueryParams(),
-        async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
-            const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
-            ctx.body = jsonStringifyWithoutNull(overviewStations);
-        }));
+	router.get('/menu/:id/overview',
+		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
+		memoizeResponseBodyByQueryParams(),
+		async ctx => validateCafeAsync(ctx, async (cafe, dateString) => {
+			const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
+			ctx.body = jsonStringifyWithoutNull(overviewStations);
+		}));
 
-    attachRouter(parent, router);
+	attachRouter(parent, router);
 };

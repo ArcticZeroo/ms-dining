@@ -8,9 +8,8 @@ import {
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { IAvailabilityPattern } from '@msdining/common/dist/models/pattern.js';
-import { cafeList } from '../../../constants/cafes.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
-import { logDebug, logInfo } from '../../../util/log.js';
+import { logInfo } from '../../../util/log.js';
 
 const WINDOW_WEEK_COUNT = 5;
 

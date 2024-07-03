@@ -1,6 +1,7 @@
 import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
 import { SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
+import { IAvailabilityPattern } from './pattern.js';
 
 export interface IDiningCoreGroupMemberBase {
     name: string;
@@ -65,6 +66,7 @@ export interface IMenuResponseStation {
     logoUrl?: Nullable<string>;
     menu: Record<string /*categoryName*/, Array<IMenuItemDTO>>;
     uniqueness: IStationUniquenessData;
+    pattern: Nullable<IAvailabilityPattern>;
 }
 
 // GET /api/dining/menu/:cafeId
