@@ -29,8 +29,11 @@ type AllCafeItemsByStationMap = Map<string /*cafeId*/, ItemsByStationMap>;
 
 type CafeItemPriceMap = Map<string /*stationName*/, MenuItemPriceMap>;
 
-const retrieveAllMenuItemIdsAsync = async (): Promise<AllCafeItemsByStationMap> => {
+const retrieveAllMenuItemIdsAsync = async (cafeId: string): Promise<AllCafeItemsByStationMap> => {
 	const allMenus = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+		where: {
+			cafeId
+		},
 		select: {
 			cafeId:     true,
 			dateString: true,
@@ -207,13 +210,11 @@ const retrievePriceHistoryForCafeAsync = async (allCafeItems: AllCafeItemsByStat
 }
 
 const retrievePriceHistoryForAllCafesAsync = async (): Promise<Map<string /*cafeId*/, CafeItemPriceMap>> => {
-	console.log('Retrieving all menu item IDs...');
-	const allCafeItems = await retrieveAllMenuItemIdsAsync();
-
 	console.log('Finding price history for each cafe...');
 	const cafePriceHistoryById = new Map<string, CafeItemPriceMap>();
 
 	const promises = cafeList.map(async (cafe) => {
+		const allCafeItems = await retrieveAllMenuItemIdsAsync(cafe.id);
 		cafePriceHistoryById.set(cafe.id, await retrievePriceHistoryForCafeAsync(allCafeItems, cafe));
 	});
 
