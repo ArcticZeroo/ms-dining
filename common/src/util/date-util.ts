@@ -18,6 +18,8 @@ export const nativeDayOfWeek = {
 
 export const nativeDayOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+export const isDayOfWeekOnWeekend = (dayOfWeek: number) => dayOfWeek === nativeDayOfWeek.Saturday || dayOfWeek === nativeDayOfWeek.Sunday;
+
 export const nativeMonth = {
     January:   0,
     February:  1,
@@ -138,7 +140,7 @@ const shouldUseNextWeek = (date: Date) => {
     return date.getDay() === nativeDayOfWeek.Friday && date.getHours() >= 17; // after 5pm on Fridays
 }
 
-const getDaysUntilNextWeekday = (date: Date, targetDay: number) => {
+export const getDaysUntilNextWeekday = (date: Date, targetDay: number) => {
     let daysUntilTargetDay = targetDay - date.getDay();
 
     if (daysUntilTargetDay < 0) {

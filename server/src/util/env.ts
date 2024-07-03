@@ -3,6 +3,7 @@ export interface EnvironmentSettings {
     shouldFetchOnlyOneStation: boolean;
     skipDailyRepairIfMenuExists: boolean;
     skipWeeklyRepair: boolean;
+    skipPatternRepair: boolean;
     maxConcurrentRequests?: number;
     maxConcurrentCafes: number;
     ignoreAnalyticsFailures?: boolean;
@@ -17,6 +18,7 @@ const DEFAULT_ENVIRONMENT_SETTINGS: Readonly<EnvironmentSettings> = {
     shouldFetchOnlyOneStation:   false,
     skipDailyRepairIfMenuExists: false,
     skipWeeklyRepair:            false,
+    skipPatternRepair:           false,
     maxConcurrentCafes:          10,
     logRequests:                 false,
     alwaysSlowUpdate:            false,

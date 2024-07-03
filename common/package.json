@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@arcticzeroo/duration": "^2.0.2",
+    "@arcticzeroo/typeguard": "^1.0.0",
     "credit-card-type": "^10.0.0"
   }
 }

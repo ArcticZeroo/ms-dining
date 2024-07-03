@@ -24,6 +24,8 @@ model MenuItem {
   imageUrl       String?
   price          Float
 
+  pattern String?
+
   // externalItemId String?
   externalLastUpdateTime DateTime?
   externalReceiptText    String?
@@ -75,6 +77,8 @@ model Station {
   name    String
   logoUrl String?
   menuId  String
+
+  pattern String?
 
   dailyStations DailyStation[]
 }

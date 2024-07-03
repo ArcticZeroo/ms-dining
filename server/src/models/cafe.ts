@@ -1,6 +1,7 @@
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util.js';
 import { Nullable } from './util.js';
+import { IAvailabilityPattern } from '@msdining/common/dist/models/pattern.js';
 
 interface ICafeBase {
     name: string;
@@ -59,6 +60,7 @@ export interface ICafeStation {
     menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IMenuItem>;
     menuLastUpdateTime?: Date;
+    pattern: Nullable<IAvailabilityPattern>;
 }
 
 export interface IMenuItemTag {

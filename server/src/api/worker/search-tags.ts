@@ -75,5 +75,3 @@ const startQueue = () => {
 }
 
 startQueue();
-
-
