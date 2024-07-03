@@ -115,7 +115,7 @@ export class DailyCafeUpdateSession {
         }
     }
 
-    public async populateAsync(isSlowUpdate: boolean = false) {
+    public async populateAsync() {
         await this.resetDailyState();
 
         logInfo(`{${this.dateString}} Populating cafe sessions...`);
@@ -130,11 +130,7 @@ export class DailyCafeUpdateSession {
 
             const discoverPromise = this.discoverCafeAsync(cafe);
 
-            if (isSlowUpdate) {
-                await discoverPromise;
-            } else {
-                cafePromises.push(discoverPromise);
-            }
+            cafePromises.push(discoverPromise);
 
             if (ENVIRONMENT_SETTINGS.shouldFetchOnlyOneCafe) {
                 break;

@@ -11,8 +11,7 @@ export const populateDailySessionsAsync = async () => {
         return;
     }
 
-    const isBeforeWorkingHours = (new Date()).getHours() < 7;
-    await updateSession.populateAsync(isBeforeWorkingHours /*isSlowUpdate*/);
+    await updateSession.populateAsync();
 };
 
 const populateDailySessions = () => {
