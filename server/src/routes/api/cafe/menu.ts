@@ -16,6 +16,7 @@ import {
 	getApplicationNameForMenuOverview
 } from '@msdining/common/dist/constants/analytics.js';
 import { sendVisit, sendVisitFromCafeParamMiddleware } from '../../../middleware/analytics.js';
+import { patternToString } from '@msdining/common/dist/util/pattern.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -30,6 +31,9 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	const serializeMenuItem = (menuItem: IMenuItem): IMenuItemDTO => ({
 		...menuItem,
+		pattern:    menuItem.pattern
+						? patternToString(menuItem.pattern)
+						: undefined,
 		tags:       Array.from(menuItem.tags),
 		searchTags: Array.from(menuItem.searchTags)
 	});
@@ -70,7 +74,9 @@ export const registerMenuRoutes = (parent: Router) => {
 				logoUrl:    getBetterLogoUrl(station.name, station.logoUrl),
 				menu:       itemsByCategory,
 				uniqueness: uniquenessDataForStation,
-				pattern:    station.pattern,
+				pattern:    station.pattern
+								? patternToString(station.pattern)
+								: undefined,
 			});
 		}
 

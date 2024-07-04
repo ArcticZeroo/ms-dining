@@ -21,8 +21,8 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     isOnlineOrderingAllowed
 }) => {
     const shouldSkipBody = !menuItem.description
-                           && menuItem.imageUrl == null
-                           && menuItem.modifiers.length === 0;
+        && menuItem.imageUrl == null
+        && menuItem.modifiers.length === 0;
 
     if (shouldSkipBody) {
         return null;

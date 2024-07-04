@@ -58,15 +58,6 @@ const repairTodaySessionsAsync = async () => {
 	await populateDailySessionsAsync();
 };
 
-const repairPatterns = () => {
-    shouldCalculatePatternsOnBootAsync()
-        .then(shouldCalculate => {
-            if (shouldCalculate) {
-                calculatePatternsInBackground();
-            }
-        });
-}
-
 export const performMenuBootTasks = async () => {
     await MenuItemStorageClient.batchNormalizeMenuItemNamesAsync();
     SEARCH_TAG_WORKER_QUEUE.start();
@@ -74,7 +65,7 @@ export const performMenuBootTasks = async () => {
     await repairTodaySessionsAsync();
     await repairMissingWeeklyMenusAsync();
 
-    repairPatterns();
+    calculatePatternsInBackground();
 
     scheduleDailyUpdateJob();
     scheduleWeeklyUpdateJob();

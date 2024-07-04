@@ -11,6 +11,7 @@
     transform: translateX(var(--default-padding));
     width: 4rem;
     height: 4rem;
+    z-index: var(--z-index-top);
 }
 
 #scroll-top.visible {

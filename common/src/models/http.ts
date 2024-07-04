@@ -1,7 +1,6 @@
 import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
 import { SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
-import { IAvailabilityPattern } from './pattern.js';
 
 export interface IDiningCoreGroupMemberBase {
     name: string;
@@ -60,17 +59,19 @@ export interface IPriceResponse {
     totalTax: number;
 }
 
-export interface IMenuResponseStation {
+export interface IStationDTO {
     name: string;
     // Not all stations have a logo URL apparently?
     logoUrl?: Nullable<string>;
     menu: Record<string /*categoryName*/, Array<IMenuItemDTO>>;
     uniqueness: IStationUniquenessData;
-    pattern: Nullable<IAvailabilityPattern>;
+    // todo: revisit this, it seems weird to make this a string instead of json directly
+    // maybe we just make patterns use arrays to avoid needing conversion
+    pattern?: string;
 }
 
 // GET /api/dining/menu/:cafeId
-export type MenuResponse = Array<IMenuResponseStation>;
+export type MenuResponse = Array<IStationDTO>;
 
 export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;
 

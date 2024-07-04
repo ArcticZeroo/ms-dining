@@ -67,7 +67,7 @@ export interface IMenuItemDTO {
     lastUpdateTime?: Nullable<Date>;
     tags: string[];
     searchTags: string[];
-	pattern: Nullable<IAvailabilityPattern>;
+	pattern?: string;
 }
 
 export type StationMenuByCategoryName = Record<string, Array<IMenuItem>>;

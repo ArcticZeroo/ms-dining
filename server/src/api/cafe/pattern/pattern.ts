@@ -9,7 +9,7 @@ import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { IAvailabilityPattern } from '@msdining/common/dist/models/pattern.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
-import { logInfo } from '../../../util/log.js';
+import { logDebug, logInfo } from '../../../util/log.js';
 
 const WINDOW_WEEK_COUNT = 5;
 
@@ -127,10 +127,9 @@ const calculatePattern = (startTime: Date, availability: Set<string>): IAvailabi
 export const calculatePatternsForCafe = async (cafe: ICafe) => {
 	const [startTime, endTime] = getPatternDataTimeRange();
 
-	logInfo(`[${cafe.id}] Calculating patterns from `, toDateString(startTime), 'to', toDateString(endTime));
 	const availability = await DailyMenuStorageClient.retrieveCafeChildAvailability(cafe.id, startTime, endTime);
 
-	logInfo(`[${cafe.id}] Retrieved availability for ${availability.stationVisitsById.size} stations and ${availability.itemVisitsById.size} items`);
+	logInfo(`[${cafe.id}] Calculating patterns for ${availability.stationVisitsById.size} stations and ${availability.itemVisitsById.size} items from ${toDateString(startTime)} to ${toDateString(endTime)}`);
 
 	for (const [stationId, stationAvailability] of availability.stationVisitsById) {
 		const pattern = calculatePattern(startTime, stationAvailability);
@@ -141,6 +140,4 @@ export const calculatePatternsForCafe = async (cafe: ICafe) => {
 		const pattern = calculatePattern(startTime, menuItemAvailability);
 		await MenuItemStorageClient.setPatternAsync(menuItemId, pattern);
 	}
-
-	logInfo(`[${cafe.id}] Finished calculating patterns`);
 }

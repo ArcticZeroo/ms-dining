@@ -10,15 +10,12 @@ import {
 import { ISearchQuery } from '@msdining/common/dist/models/search';
 import { InternalSettings } from '../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
-import {
-    ICheapItemSearchResult,
-    IQuerySearchResult,
-    IServerCheapItemSearchResult,
-} from '../models/search.ts';
+import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
+import { stringToPattern } from "@msdining/common/dist/util/pattern";
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -63,13 +60,19 @@ export abstract class DiningClient {
             for (const [category, menuItems] of Object.entries(responseStation.menu)) {
                 menu[category] = menuItems.map(dto => ({
                     ...dto,
-                    tags:       new Set(dto.tags),
-                    searchTags: new Set(dto.searchTags)
+                    tags: new Set(dto.tags),
+                    searchTags: new Set(dto.searchTags),
+                    pattern: dto.pattern
+                        ? stringToPattern(dto.pattern)
+                        : null
                 }));
             }
 
             stations.push({
                 ...responseStation,
+                pattern: responseStation.pattern
+                    ? stringToPattern(responseStation.pattern)
+                    : null,
                 menu
             });
         }
@@ -140,7 +143,7 @@ export abstract class DiningClient {
             }
 
             await DiningClient.retrieveCafeMenu({
-                id:                         cafe.id,
+                id: cafe.id,
                 shouldCountTowardsLastUsed: false
             });
         }
@@ -185,25 +188,30 @@ export abstract class DiningClient {
 
         for (const serverResult of serverResults) {
             results.push({
-                entityType:            serverResult.type === 'menuItem'
+                entityType: serverResult.type === 'menuItem'
                     ? SearchTypes.SearchEntityType.menuItem
                     : SearchTypes.SearchEntityType.station,
-                name:                  serverResult.name,
-                description:           serverResult.description,
-                imageUrl:              serverResult.imageUrl,
+                name: serverResult.name,
+                description: serverResult.description,
+                imageUrl: serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                priceByCafeId:         new Map(Object.entries(serverResult.prices)),
-                stationByCafeId:       new Map(Object.entries(serverResult.stations)),
-                matchReasons:          new Set(serverResult.matchReasons),
-                tags:                  serverResult.tags ? new Set(serverResult.tags) : undefined,
-                searchTags:            serverResult.searchTags ? new Set(serverResult.searchTags) : undefined
+                priceByCafeId: new Map(Object.entries(serverResult.prices)),
+                stationByCafeId: new Map(Object.entries(serverResult.stations)),
+                matchReasons: new Set(serverResult.matchReasons),
+                tags: serverResult.tags ? new Set(serverResult.tags) : undefined,
+                searchTags: serverResult.searchTags ? new Set(serverResult.searchTags) : undefined
             });
         }
 
         return results;
     }
 
-    public static async retrieveSearchResults({ query, date, isExact = false, isExplore = false }: IRetrieveSearchResultsParams): Promise<Array<IQuerySearchResult>> {
+    public static async retrieveSearchResults({
+        query,
+        date,
+        isExact = false,
+        isExplore = false
+    }: IRetrieveSearchResultsParams): Promise<Array<IQuerySearchResult>> {
         const searchParams = new URLSearchParams();
 
         searchParams.set('q', query);
@@ -241,11 +249,11 @@ export abstract class DiningClient {
         }
 
         const response = await makeJsonRequest({
-            path:    `/api/dining/search/favorites${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`,
+            path: `/api/dining/search/favorites${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`,
             options: {
-                method:  'POST',
+                method: 'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify(remoteQueries)
+                body: JSON.stringify(remoteQueries)
             }
         });
 
@@ -271,13 +279,13 @@ export abstract class DiningClient {
 
         for (const serverResult of serverResults) {
             results.push({
-                name:                  serverResult.name,
-                description:           serverResult.description,
-                imageUrl:              serverResult.imageUrl,
+                name: serverResult.name,
+                description: serverResult.description,
+                imageUrl: serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                price:                 serverResult.price,
-                minCalories:           serverResult.minCalories,
-                maxCalories:           serverResult.maxCalories,
+                price: serverResult.price,
+                minCalories: serverResult.minCalories,
+                maxCalories: serverResult.maxCalories,
             });
         }
 
