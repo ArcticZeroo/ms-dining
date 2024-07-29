@@ -215,11 +215,6 @@ export const groupList: CafeGroup[] = [
             long: -122.1369674720719
         },
         members:  [
-            // Acapulco has been shut down for now
-            /*{
-                name: 'Acapulco Fresh 🌯',
-                id:   'acapulcofresh',
-            },*/
             {
                 name: 'Chandy\'s',
                 id:   'chandys',
@@ -230,8 +225,8 @@ export const groupList: CafeGroup[] = [
                 emoji: '🐟'
             },
             {
-                name:  'Kalia',
-                id:    'kalia',
+                name:  'Himalaya',
+                id:    'himalaya',
                 emoji: '🍛'
             },
             {
