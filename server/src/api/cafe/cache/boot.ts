@@ -7,7 +7,6 @@ import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../worker/search-tags.js';
-import { calculatePatternsInBackground, scheduleWeeklyPatternJob, shouldCalculatePatternsOnBootAsync } from '../pattern/job.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -65,9 +64,9 @@ export const performMenuBootTasks = async () => {
     await repairTodaySessionsAsync();
     await repairMissingWeeklyMenusAsync();
 
-    calculatePatternsInBackground();
+    // calculatePatternsInBackground();
 
     scheduleDailyUpdateJob();
     scheduleWeeklyUpdateJob();
-    scheduleWeeklyPatternJob();
+    // scheduleWeeklyPatternJob();
 };
