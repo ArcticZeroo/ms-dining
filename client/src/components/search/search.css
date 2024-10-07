@@ -115,6 +115,10 @@
     gap: var(--constant-padding);
 }
 
+.search-result-chip.grey {
+    background: #8baab0;
+}
+
 .chip-data {
     display: flex;
     align-items: center;

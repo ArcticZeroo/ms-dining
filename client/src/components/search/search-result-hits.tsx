@@ -10,6 +10,8 @@ import React, { useContext } from 'react';
 import { SelectedDateContext } from '../../context/time.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { isSameDate } from "@msdining/common/dist/util/date-util";
+import { classNames } from "../../util/react.ts";
 
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
@@ -64,6 +66,8 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                     const parentView = getParentView(viewsById, view, shouldUseGroups);
                     const targetDate = allowFutureMenus ? locationDates[0] : undefined;
 
+                    const isAnyDateToday = locationDates.some(date => isSameDate(date, new Date()));
+
                     const onLinkClick = () => {
                         if (targetDate != null) {
                             selectedDateNotifier.value = targetDate;
@@ -83,7 +87,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                     return (
                         <Link
                             to={url}
-                            className="search-result-chip"
+                            className={classNames('search-result-chip', !isAnyDateToday && 'grey')}
                             key={view.value.id}
                             onClick={onLinkClick}
                         >
