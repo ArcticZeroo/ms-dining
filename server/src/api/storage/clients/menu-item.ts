@@ -8,9 +8,6 @@ import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../../cafe/image/thumbnail.js';
 import { ISearchTagQueueEntry } from '../../worker/search-tags.js';
 import { usePrismaClient } from '../client.js';
-import { IAvailabilityPattern } from '@msdining/common/dist/models/pattern.js';
-import { patternToString, stringToPattern } from '@msdining/common/dist/util/pattern.js';
-import { Nullable } from '../../../models/util.js';
 
 export abstract class MenuItemStorageClient {
 	private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -287,7 +284,6 @@ export abstract class MenuItemStorageClient {
 			thumbnailWidth:  thumbnailData.thumbnailWidth,
 			tags:            deserializeMenuItemTags(menuItem.tags),
 			searchTags:      new Set(menuItem.searchTags.map(tag => tag.name)),
-			pattern:         menuItem.pattern ? stringToPattern(menuItem.pattern) : null,
 			modifiers
 		};
 	}
@@ -386,19 +382,5 @@ export abstract class MenuItemStorageClient {
 
 			return new Set(menuItem.searchTags.map(tag => tag.name));
 		});
-	}
-
-	public static async setPatternAsync(itemId: string, pattern: Nullable<IAvailabilityPattern>): Promise<void> {
-		const patternString = pattern ? patternToString(pattern) : null;
-
-		await usePrismaClient(prismaClient => prismaClient.menuItem.update({
-			where: { id: itemId },
-			data:  { pattern: patternString }
-		}));
-
-		const localMenuItem = this._menuItemsById.get(itemId);
-		if (localMenuItem != null) {
-			localMenuItem.pattern = pattern;
-		}
 	}
 }

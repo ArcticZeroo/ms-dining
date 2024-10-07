@@ -3,7 +3,6 @@ import {
 } from '@msdining/common/dist/models/http';
 import { IMenuItem, IStationUniquenessData } from '@msdining/common/dist/models/cafe';
 import { Nullable } from '@msdining/common/dist/models/util';
-import { IAvailabilityPattern } from "@msdining/common/dist/models/pattern";
 
 export type ICafeGroup = IDiningCoreGroup;
 export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };
@@ -32,7 +31,6 @@ export interface ICafeStation {
     logoUrl?: Nullable<string>;
     menu: MenuItemsByCategoryName;
     uniqueness: IStationUniquenessData;
-    pattern: Nullable<IAvailabilityPattern>;
 }
 
 export type CafeMenu = ICafeStation[];

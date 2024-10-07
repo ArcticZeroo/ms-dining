@@ -15,7 +15,6 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
-import { stringToPattern } from "@msdining/common/dist/util/pattern";
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -61,18 +60,12 @@ export abstract class DiningClient {
                 menu[category] = menuItems.map(dto => ({
                     ...dto,
                     tags: new Set(dto.tags),
-                    searchTags: new Set(dto.searchTags),
-                    pattern: dto.pattern
-                        ? stringToPattern(dto.pattern)
-                        : null
+                    searchTags: new Set(dto.searchTags)
                 }));
             }
 
             stations.push({
                 ...responseStation,
-                pattern: responseStation.pattern
-                    ? stringToPattern(responseStation.pattern)
-                    : null,
                 menu
             });
         }

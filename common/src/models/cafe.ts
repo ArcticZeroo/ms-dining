@@ -1,5 +1,4 @@
 import { Nullable } from './util.js';
-import { IAvailabilityPattern } from './pattern.js';
 
 export const ModifierChoices = {
 	radio:       'radio',
@@ -48,7 +47,6 @@ export interface IMenuItem {
     lastUpdateTime?: Nullable<Date>;
     tags: Set<string>;
     searchTags: Set<string>;
-	pattern: Nullable<IAvailabilityPattern>;
 }
 
 export interface IMenuItemDTO {

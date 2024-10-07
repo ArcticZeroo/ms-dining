@@ -14,7 +14,6 @@ import { logError } from '../../../util/log.js';
 import { LockedMap } from '../../../util/map.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
-import { stringToPattern } from '@msdining/common/dist/util/pattern.js';
 
 interface ICreateDailyStationMenuParams {
 	cafeId: string;
@@ -108,8 +107,7 @@ export abstract class DailyMenuStorageClient {
 					select: {
 						name:    true,
 						logoUrl: true,
-						menuId:  true,
-						pattern: true,
+						menuId:  true
 					}
 				},
 				categories:             {
@@ -159,9 +157,6 @@ export abstract class DailyMenuStorageClient {
 				menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
 										? dailyStation.externalLastUpdateTime
 										: undefined,
-				pattern:            stationData.pattern
-										? stringToPattern(stationData.pattern)
-										: null,
 				menuItemsById,
 				menuItemIdsByCategoryName
 			});

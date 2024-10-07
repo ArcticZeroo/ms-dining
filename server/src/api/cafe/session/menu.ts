@@ -33,7 +33,6 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			name:                      stationJson.name.trim() || this.cafe.name,
 			logoUrl:                   stationJson.image,
 			menuId:                    stationJson.priceLevelConfig.menuId,
-			pattern:                   null,
 			menuLastUpdateTime:        new Date(0),
 			menuItemIdsByCategoryName: new Map(),
 			menuItemsById:             new Map()
@@ -341,7 +340,6 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			lastUpdateTime: new Date(jsonItem.lastUpdateTime),
 			tags:           new Set(tags),
 			searchTags:     localItem?.searchTags ?? new Set<string>(),
-			pattern:        null,
 			modifiers,
 		};
 	}

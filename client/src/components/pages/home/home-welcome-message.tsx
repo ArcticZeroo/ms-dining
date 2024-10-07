@@ -22,6 +22,9 @@ export const HomeWelcomeMessage = () => {
                     </span>
                 </div>
             </div>
+            <div className="subtitle">
+                Note: This website is unofficial and not affiliated with Microsoft. See more at <a href="/info">the info page.</a>
+            </div>
         </div>
     );
 }

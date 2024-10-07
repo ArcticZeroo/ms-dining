@@ -2,17 +2,13 @@ import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { usePrismaClient } from '../client.js';
 import { Station } from '@prisma/client';
 import { ICafeStation } from '../../../models/cafe.js';
-import { IAvailabilityPattern } from '@msdining/common/dist/models/pattern.js';
-import { patternToString } from '@msdining/common/dist/util/pattern.js';
-import { Nullable } from '../../../models/util.js';
 
 export abstract class StationStorageClient {
 	public static async createStationAsync(station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
 		const dataWithoutId: Omit<Station, 'id'> = {
 			name:    station.name,
 			menuId:  station.menuId,
-			logoUrl: station.logoUrl || null,
-			pattern: null
+			logoUrl: station.logoUrl || null
 		};
 
 		const data: Station = {
@@ -36,21 +32,5 @@ export abstract class StationStorageClient {
 				throw err;
 			}
 		}
-	}
-
-	public static async setPatternAsync(stationId: string, pattern: Nullable<IAvailabilityPattern>): Promise<void> {
-		const patternString = pattern ? patternToString(pattern) : null;
-
-		await usePrismaClient(prismaClient => prismaClient.station.update({
-			where: { id: stationId },
-			data:  { pattern: patternString }
-		}));
-	}
-
-	public static doesAnyStationHavePatternAsync(): Promise<boolean> {
-		return usePrismaClient(async prismaClient => {
-			const station = await prismaClient.station.findFirst({ where: { NOT: { pattern: null } } });
-			return station !== null;
-		});
 	}
 }
