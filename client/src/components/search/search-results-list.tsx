@@ -192,6 +192,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         shouldStretchResults={shouldStretchResults}
                         showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
                         matchReasons={searchResult.matchReasons}
+                        matchedModifiers={searchResult.matchedModifiers}
                     />
                 );
             });

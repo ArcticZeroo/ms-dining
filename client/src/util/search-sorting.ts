@@ -1,15 +1,15 @@
-import {CafeView, CafeViewType} from '../models/cafe.ts';
+import { ISearchResult, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import {
     findLongestNonSequentialSubstringLength,
     findLongestSequentialSubstringLength
 } from '@msdining/common/dist/util/string-util';
-import {getParentView} from './view.ts';
-import {ISearchResult, SearchEntityType, SearchMatchReason} from '@msdining/common/dist/models/search';
-import {IQuerySearchResult} from '../models/search.ts';
-import {ILocationCoordinates} from '@msdining/common/dist/models/util';
-import {getCafeLocation} from './cafe.ts';
-import {getDistanceBetweenCoordinates} from './coordinates.ts';
-import {normalizeNameForSearch} from '@msdining/common/dist/util/search-util';
+import { CafeView, CafeViewType } from '../models/cafe.ts';
+import { IQuerySearchResult } from '../models/search.ts';
+import { getCafeLocation } from './cafe.ts';
+import { getDistanceBetweenCoordinates } from './coordinates.ts';
+import { getParentView } from './view.ts';
 
 export interface ISearchResultSortingContext {
     viewsById: Map<string, CafeView>;
@@ -169,6 +169,7 @@ const MATCH_REASON_MULTIPLIERS: Record<SearchMatchReason, number> = {
     [SearchMatchReason.tags]:        0.8,
     [SearchMatchReason.description]: 0.7,
     [SearchMatchReason.searchTags]:  0.5,
+    [SearchMatchReason.modifier]:    0.6
 };
 
 const getSubstringScoreForTags = (queryText: string, searchResult: ISearchResult) => {
@@ -296,6 +297,8 @@ const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: Sea
         return Array.from(searchResult.tags || []);
     case SearchMatchReason.searchTags:
         return Array.from(searchResult.searchTags || []);
+    case SearchMatchReason.modifier:
+        return []; // todo. maybe never anyway since perfect matches don't need to matter for mods?
     default:
         throw new Error(`Unexpected match reason: ${matchReason}`);
     }

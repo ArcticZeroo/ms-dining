@@ -29,6 +29,7 @@ export interface IQuerySearchResult {
     matchReasons: Set<SearchMatchReason>;
     tags?: Set<string>;
     searchTags?: Set<string>;
+    matchedModifiers: Map<string, Set<string>>;
 }
 
 export interface ICheapItemSearchResult {

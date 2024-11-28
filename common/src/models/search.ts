@@ -9,7 +9,9 @@ export enum SearchMatchReason {
     // AI-generated tags like "breakfast"
     searchTags = 'searchTags',
     // Tags like "vegan"
-    tags = 'tags'
+    tags = 'tags',
+    // Modifiers like "Decaf" on a latte
+    modifier = 'modifier'
 }
 
 export const allSearchEntityTypes = [
@@ -34,6 +36,7 @@ export interface ISearchResult {
     matchReasons: Set<SearchMatchReason>;
     searchTags?: Set<string>;
     tags?: Set<string>;
+    matchedModifiers: Map<string, Set<string>>;
 }
 
 export interface ISearchQuery {

@@ -11,7 +11,7 @@ import { DateUtil, NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
-import { sendVisit, sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
+import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -21,9 +21,9 @@ export const registerSearchRoutes = (parent: Router) => {
 		prefix: '/search'
 	});
 
-	const serializeLocationDatesByCafeId = (locationDatesByCafeId: Map<string, Set<string>>) => {
+	const serializeMapOfStringToSet = (deserialized: Map<string, Set<string>>) => {
 		const serialized: Record<string /*cafeId*/, Array<string>> = {};
-		for (const [cafeId, dates] of locationDatesByCafeId.entries()) {
+		for (const [cafeId, dates] of deserialized.entries()) {
 			serialized[cafeId] = Array.from(dates);
 		}
 		return serialized;
@@ -34,12 +34,13 @@ export const registerSearchRoutes = (parent: Router) => {
 		name:         searchResult.name,
 		description:  searchResult.description || undefined,
 		imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl) || undefined,
-		locations:    serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+		locations:    serializeMapOfStringToSet(searchResult.locationDatesByCafeId),
 		prices:       Object.fromEntries(searchResult.priceByCafeId),
 		stations:     Object.fromEntries(searchResult.stationByCafeId),
 		matchReasons: Array.from(searchResult.matchReasons),
 		tags:         searchResult.tags ? Array.from(searchResult.tags) : undefined,
-		searchTags:   searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined
+		searchTags:   searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
+		matchedModifiers: serializeMapOfStringToSet(searchResult.matchedModifiers)
 	});
 
 	const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
@@ -128,7 +129,7 @@ export const registerSearchRoutes = (parent: Router) => {
 					name:        searchResult.name,
 					description: searchResult.description,
 					imageUrl:    searchResult.imageUrl,
-					locations:   serializeLocationDatesByCafeId(searchResult.locationDatesByCafeId),
+					locations:   serializeMapOfStringToSet(searchResult.locationDatesByCafeId),
 					price:       searchResult.price,
 					minCalories: searchResult.minCalories,
 					maxCalories: searchResult.maxCalories,

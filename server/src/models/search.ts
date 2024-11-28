@@ -13,6 +13,7 @@ export interface IServerSearchResult {
     description?: Nullable<string>;
     tags?: Set<string>;
     searchTags?: Set<string>;
+    matchedModifiers: Map<string /*modifierDescription*/, Set<string> /*choiceDescriptions*/>;
 }
 
 export interface ICheapItemSearchResult {

@@ -171,6 +171,14 @@ export abstract class DiningClient {
         return locationDatesByCafeId;
     }
 
+    private static _deserializeMatchedModifiers(serialized: Record<string, Array<string>>) {
+        const matchedModifiers = new Map<string, Set<string>>();
+        for (const [modifierDescription, choiceDescriptions] of Object.entries(serialized)) {
+            matchedModifiers.set(modifierDescription, new Set(choiceDescriptions));
+        }
+        return matchedModifiers;
+    }
+
     private static _deserializeSearchResults(response: unknown) {
         if (!Array.isArray(response) || response.length === 0) {
             return [];
@@ -192,7 +200,8 @@ export abstract class DiningClient {
                 stationByCafeId: new Map(Object.entries(serverResult.stations)),
                 matchReasons: new Set(serverResult.matchReasons),
                 tags: serverResult.tags ? new Set(serverResult.tags) : undefined,
-                searchTags: serverResult.searchTags ? new Set(serverResult.searchTags) : undefined
+                searchTags: serverResult.searchTags ? new Set(serverResult.searchTags) : undefined,
+                matchedModifiers: DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers)
             });
         }
 

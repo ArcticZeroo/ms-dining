@@ -86,4 +86,5 @@ export interface ISearchResponseResult {
     matchReasons: Array<SearchMatchReason>;
     tags?: Array<string>;
     searchTags?: Array<string>;
+    matchedModifiers: Record<string, Array<string>>;
 }

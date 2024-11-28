@@ -54,6 +54,7 @@ interface IAddResultParams {
     imageUrl: Nullable<string>;
     tags: Nullable<Set<string>>;
     searchTags: Nullable<Set<string>>;
+    matchedModifiers?: Map<string, Set<string>>;
 }
 
 
@@ -131,7 +132,8 @@ class SearchSession {
                   station,
                   price,
                   tags,
-                  searchTags
+                  searchTags,
+                  matchedModifiers
               }: IAddResultParams) {
         this.#ensureEntityTypeExists(type);
 
@@ -150,6 +152,7 @@ class SearchSession {
                 priceByCafeId:         new Map<string, number>(),
                 stationByCafeId:       new Map<string, string>(),
                 matchReasons:          new Set<SearchMatchReason>(),
+                matchedModifiers:      new Map<string, Set<string>>()
             });
         }
 
@@ -190,6 +193,16 @@ class SearchSession {
             searchResult.tags = combinedTags;
         }
 
+        if (matchedModifiers) {
+            for (const [modifierDescription, choiceDescriptions] of matchedModifiers) {
+                const combinedChoiceDescriptions = searchResult.matchedModifiers.get(modifierDescription) ?? new Set<string>();
+                for (const choiceDescription of choiceDescriptions) {
+                    combinedChoiceDescriptions.add(choiceDescription);
+                }
+                searchResult.matchedModifiers.set(modifierDescription, combinedChoiceDescriptions);
+            }
+        }
+
         // The first item to make it into the map might not be the one with all the info.
         searchResult.description = searchResult.description || description;
         searchResult.imageUrl = searchResult.imageUrl || imageUrl;
@@ -210,12 +223,12 @@ export abstract class SearchManager {
         for (const dailyStation of dailyStations) {
             const stationData = dailyStation.station;
 
-            const stationMatchReasons: SearchMatchReason[] = [];
+            const stationMatchReasons = new Set<SearchMatchReason>();
             if (session.isMatch(stationData.name, SearchEntityType.station)) {
-                stationMatchReasons.push(SearchMatchReason.title);
+                stationMatchReasons.add(SearchMatchReason.title);
             }
 
-            if (stationMatchReasons.length > 0 || session.isResultAlreadyAdded(SearchEntityType.station, stationData.name)) {
+            if (stationMatchReasons.size > 0 || session.isResultAlreadyAdded(SearchEntityType.station, stationData.name)) {
                 session.addResult({
                     type:         SearchEntityType.station,
                     matchReasons: stationMatchReasons,
@@ -240,10 +253,11 @@ export abstract class SearchManager {
                         continue;
                     }
 
-                    const matchReasons: SearchMatchReason[] = [];
+                    const matchReasons = new Set<SearchMatchReason>();
+                    const matchedModifiers = new Map<string, Set<string>>();
 
                     if (session.isMatch(menuItem.name, SearchEntityType.menuItem)) {
-                        matchReasons.push(SearchMatchReason.title);
+                        matchReasons.add(SearchMatchReason.title);
                     }
 
                     // If we are using exact name matching, we don't want to get anything that just matches the tags
@@ -251,25 +265,42 @@ export abstract class SearchManager {
                     // similar items.
                     if (!shouldUseExactMatch) {
                         if (session.isMatch(menuItem.description, SearchEntityType.menuItem)) {
-                            matchReasons.push(SearchMatchReason.description);
+                            matchReasons.add(SearchMatchReason.description);
                         }
 
                         for (const searchTag of menuItem.searchTags) {
                             if (session.isMatch(searchTag, SearchEntityType.menuItem)) {
-                                matchReasons.push(SearchMatchReason.searchTags);
+                                matchReasons.add(SearchMatchReason.searchTags);
                                 break;
+                            }
+                        }
+
+                        for (const modifier of menuItem.modifiers) {
+                            if (session.isMatch(modifier.description, SearchEntityType.menuItem)) {
+                                matchReasons.add(SearchMatchReason.modifier);
+                                matchedModifiers.set(modifier.description, new Set<string>());
+                            }
+
+                            for (const modifierChoice of modifier.choices) {
+                                if (session.isMatch(modifierChoice.description, SearchEntityType.menuItem)) {
+                                    matchReasons.add(SearchMatchReason.modifier);
+
+                                    const matchedChoices = matchedModifiers.get(modifierChoice.description) ?? new Set<string>();
+                                    matchedChoices.add(modifierChoice.description);
+                                    matchedModifiers.set(modifier.description, matchedChoices);
+                                }
                             }
                         }
                     }
 
                     for (const tag of menuItem.tags) {
                         if (session.isMatch(tag, SearchEntityType.menuItem)) {
-                            matchReasons.push(SearchMatchReason.tags);
+                            matchReasons.add(SearchMatchReason.tags);
                             break;
                         }
                     }
 
-                    if (matchReasons.length > 0 || session.isResultAlreadyAdded(SearchEntityType.menuItem, menuItem.name)) {
+                    if (matchReasons.size > 0 || session.isResultAlreadyAdded(SearchEntityType.menuItem, menuItem.name)) {
                         session.addResult({
                             type:        SearchEntityType.menuItem,
                             dateString:  dailyStation.dateString,
@@ -282,6 +313,7 @@ export abstract class SearchManager {
                             imageUrl:    getThumbnailUrl(menuItem),
                             station:     stationData.name,
                             matchReasons,
+                            matchedModifiers
                         });
                     }
                 }

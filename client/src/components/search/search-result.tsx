@@ -16,7 +16,7 @@ import { FavoriteSearchableItemButton } from '../button/favorite-searchable-item
 import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
 import { SearchResultHits } from './search-result-hits.tsx';
 import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
-import { SearchResultFindButton } from "./search-result-find-button.tsx";
+import { SearchResultFindButton } from './search-result-find-button.tsx';
 
 import './search.css';
 
@@ -28,11 +28,11 @@ interface IEntityDisplayData {
 const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
     [SearchTypes.SearchEntityType.menuItem]: {
         className: 'entity-menu-item',
-        iconName: 'lunch_dining'
+        iconName:  'lunch_dining'
     },
-    [SearchTypes.SearchEntityType.station]: {
+    [SearchTypes.SearchEntityType.station]:  {
         className: 'entity-station',
-        iconName: 'restaurant'
+        iconName:  'restaurant'
     }
 };
 
@@ -52,6 +52,14 @@ const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShow
     }
 
     return resultEntries;
+};
+
+const cleanModifierDescription = (description: string) => {
+    if (description.endsWith(':')) {
+        return description.slice(0, description.length - 1);
+    }
+
+    return description;
 };
 
 interface IUseLocationEntriesParams {
@@ -149,6 +157,7 @@ export interface ISearchResultProps {
     isSkeleton?: boolean;
     matchReasons?: Set<SearchMatchReason>;
     showOnlyCafeNames?: boolean;
+    matchedModifiers?: Map<string, Set<string>>;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -158,6 +167,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     locationDatesByCafeId = new Map<string, Date[]>(),
     stationByCafeId = new Map<string, string>(),
     priceByCafeId = new Map<string, number>(),
+    matchedModifiers = new Map<string, Set<string>>(),
     imageUrl,
     entityType,
     extraFields = [],
@@ -205,6 +215,16 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
             ? <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
             : isSkeleton && <div className="search-result-image"/>
     );
+
+    if (matchedModifiers.size > 0) {
+        for (const [modifierDescription, choiceDescriptions] of matchedModifiers) {
+            extraFields.push({
+                iconName: 'list',
+                value:    `${cleanModifierDescription(modifierDescription)}${choiceDescriptions.size > 0 ? `: ${Array.from(choiceDescriptions).join(', ')}` : ''}`,
+                key:      modifierDescription
+            });
+        }
+    }
 
     const favoriteButton = showFavoriteButton && (
         <div>
