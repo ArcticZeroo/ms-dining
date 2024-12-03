@@ -1,0 +1,1 @@
+export const localeCompareSortAsc = (a: string, b: string) => a.localeCompare(b);

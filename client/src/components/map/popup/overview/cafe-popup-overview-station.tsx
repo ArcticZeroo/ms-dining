@@ -7,7 +7,7 @@ import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
 import { getViewMenuUrlWithJump } from '../../../../util/link.ts';
-import { pluralize } from "../../../../util/string.ts";
+import { pluralize } from '../../../../util/string.ts';
 
 const getStationTitle = (station: ICafeOverviewStation) => {
     if (station.uniqueness.isTraveling) {
@@ -24,7 +24,7 @@ const getStationTitle = (station: ICafeOverviewStation) => {
     }
 
     return undefined;
-}
+};
 
 interface ICafePopupOverviewStationProps {
     cafe: ICafe;
@@ -41,43 +41,50 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
 
     return (
         <Link
-            className="flex flex-between overview-station"
+            className="overview-station"
             to={getViewMenuUrlWithJump({
-                cafeId: cafe.id,
-                view: popupView,
+                cafeId:     cafe.id,
+                view:       popupView,
                 entityType: SearchEntityType.station,
-                name: station.name,
-                date: selectedDate
+                name:       station.name,
+                date:       selectedDate
             })}
             title={getStationTitle(station)}
         >
-            {
-                station.logoUrl && (
-                    <img
-                        src={station.logoUrl}
-                        alt={`${station.name} logo`}
-                        className="logo-small"
-                    />
-                )
-            }
-            <span>
-                {station.name}
-            </span>
-            <span className="badge flex flex-center">
+            <div className="flex flex-between">
                 {
-                    station.uniqueness.isTraveling && (
-                        <span className="material-symbols-outlined">
+                    station.logoUrl && (
+                        <img
+                            src={station.logoUrl}
+                            alt={`${station.name} logo`}
+                            className="logo-small"
+                        />
+                    )
+                }
+                <span>
+                    {station.name}
+                </span>
+                <span className="badge flex flex-center">
+                    {
+                        station.uniqueness.isTraveling && (
+                            <span className="material-symbols-outlined">
                             flight
-                        </span>
-                    )
-                }
-                {
-                    !station.uniqueness.isTraveling && (
-                        station.uniqueness.itemDays[1]
-                    )
-                }
-            </span>
+                            </span>
+                        )
+                    }
+                    {
+                        !station.uniqueness.isTraveling && (
+                            station.uniqueness.itemDays[1]
+                        )
+                    }
+                </span>
+            </div>
             {
+                station.uniqueness.theme != null && (
+                    <div className="subtitle">
+                        {station.uniqueness.theme}
+                    </div>
+                )
             }
         </Link>
     );

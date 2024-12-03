@@ -45,6 +45,12 @@ export const MenuSettings = () => (
                 />
             </div>
         </div>
+        <BooleanSettingInput
+            icon="list"
+            setting={ApplicationSettings.showStationOverviews}
+            name="Show Station Overviews"
+            description={"When enabled, cafes will show overview of traveling and interesting stations."}
+        />
         <HighlightTagsSetting/>
         <PriceFiltersSetting/>
         <BooleanSettingInput

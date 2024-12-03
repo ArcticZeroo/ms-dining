@@ -163,7 +163,7 @@ html, body, #root, .App {
     text-align: center;
 }
 
-.card .subtitle {
+.subtitle {
     font-size: var(--card-subtitle-font-size);
     opacity: 0.75;
     font-style: italic;

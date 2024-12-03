@@ -6,7 +6,7 @@ import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/ca
 import { logDebug } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { retrieveExistingThumbnailData } from '../../cafe/image/thumbnail.js';
-import { ISearchTagQueueEntry } from '../../worker/search-tags.js';
+import { ISearchTagQueueEntry } from '../../../worker/search-tags.js';
 import { usePrismaClient } from '../client.js';
 
 export abstract class MenuItemStorageClient {

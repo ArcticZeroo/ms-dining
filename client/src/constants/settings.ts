@@ -37,6 +37,7 @@ export const ApplicationSettings = {
     suppressMultiCafeOrderWarning: new BooleanSetting('suppressMultiCafeOrderWarning', false /*defaultValue*/),
     allowLocation:                 new BooleanSetting('allowLocation', true /*defaultValue*/),
     hideEveryDayStations:          new BooleanSetting('hideEveryDayStations', false /*defaultValue*/),
+    showStationOverviews:          new BooleanSetting('showStationOverviews', true /*defaultValue*/),
     intelligentStationSort:        new BooleanSetting('intelligentStationSort', true /*defaultValue*/),
     homepageViews:                 new StringSetSetting('homepageDiningHalls'),
     highlightTagNames:             new StringSetSetting('highlightTagNames'),

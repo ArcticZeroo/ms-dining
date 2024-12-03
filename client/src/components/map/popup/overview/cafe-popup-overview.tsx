@@ -5,6 +5,7 @@ import { DiningClient } from '../../../../api/dining.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
+import { sortStationUniquenessInPlace } from '../../../../util/sorting.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { CafePopupOverviewStation } from './cafe-popup-overview-station.tsx';
 import { ICafeOverviewStation } from "@msdining/common/dist/models/cafe";
@@ -49,6 +50,11 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
                     continue;
                 }
 
+                if (station.uniqueness.theme != null) {
+                    result.push(station);
+                    continue;
+                }
+
                 const uniqueItemsToday = station.uniqueness.itemDays[1];
                 if (uniqueItemsToday > 0) {
                     stationsWithUniqueItemsToday.push(station);
@@ -66,6 +72,8 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
 
                 result.push(...stationsWithUniqueItemsToday.slice(0, remainingForTargetCount));
             }
+
+            sortStationUniquenessInPlace(result);
 
             return result;
         },

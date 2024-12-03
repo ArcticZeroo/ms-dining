@@ -196,15 +196,6 @@ export const groupList: CafeGroup[] = [
                     long: -122.13318512974796
                 }
             },
-            {
-                name:      'General Store (Building 8)',
-                shortName: 'General Store',
-                id:        'generalstore',
-                location:  {
-                    lat:  47.64121784464865,
-                    long: -122.13128667829052
-                }
-            },
         ]
     },
     {
@@ -323,11 +314,6 @@ export const groupList: CafeGroup[] = [
                 name:  'Dote',
                 id:    'dote',
                 emoji: '☕',
-            },
-            {
-                name:  'The Collective',
-                id:    'thecollective',
-                emoji: '🧀'
             },
             {
                 name:  'Salt & Straw',

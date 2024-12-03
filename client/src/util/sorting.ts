@@ -1,7 +1,7 @@
 import { CafeView, ICafe } from '../models/cafe.ts';
 import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
-import { IStationUniquenessData } from "@msdining/common/dist/models/cafe";
+import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
 
 export const normalizeCafeId = (id: string) => {
     return id
@@ -19,7 +19,7 @@ export const getCafeNumber = (name: string) => {
     }
 
     return NaN;
-}
+};
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {
     // Normally I don't like parseInt, but for once
@@ -59,13 +59,13 @@ export const compareViewNames = (a: string, b: string) => {
     }
 
     return a.localeCompare(b);
-}
+};
 
 export const sortViews = (views: Iterable<CafeView>) => {
     return Array
         .from(views)
         .sort((a, b) => compareViewNames(a.value.name, b.value.name));
-}
+};
 
 export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, CafeView>) => {
     const homepageViewIds = ApplicationSettings.homepageViews.value;
@@ -106,7 +106,7 @@ export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, 
 
         return bIndex - aIndex;
     });
-}
+};
 
 interface IUniquenessSortableStation {
     name: string;
@@ -138,8 +138,15 @@ export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStatio
             }
         }
 
+        // A station that has a theme should go before a station that does not have a theme
+        if (uniquenessA.theme == null && uniquenessB.theme != null) {
+            return -1;
+        } else if (uniquenessA != null && uniquenessB.theme == null) {
+            return 1;
+        }
+
         return stationA.name.localeCompare(stationB.name);
     });
 
     return stations;
-}
+};

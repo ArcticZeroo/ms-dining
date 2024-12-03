@@ -1,7 +1,7 @@
-import { IS_OPENAI_ENABLED, retrieveMenuItemSearchTagsFromAiWithRetries } from '../openai.js';
-import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
-import { Nullable } from '../../models/util.js';
-import { logDebug, logError, logInfo } from '../../util/log.js';
+import { IS_OPENAI_ENABLED, retrieveMenuItemSearchTagsFromAiWithRetries } from '../api/openai.js';
+import { MenuItemStorageClient } from '../api/storage/clients/menu-item.js';
+import { Nullable } from '../models/util.js';
+import { logDebug, logError, logInfo } from '../util/log.js';
 import { WorkerQueue } from './queue.js';
 import Duration from '@arcticzeroo/duration';
 
@@ -42,7 +42,7 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
         let searchTags = await MenuItemStorageClient.getExistingSearchTagsForName(name);
 
         if (searchTags.size === 0) {
-            searchTags = await retrieveMenuItemSearchTagsFromAiWithRetries(name, description);
+            searchTags = await retrieveMenuItemSearchTagsFromAiWithRetries({ name, description });
         } else {
             logDebug('Search tags already exist for:', name);
             workResult = WorkerQueue.QUEUE_SKIP_ENTRY;

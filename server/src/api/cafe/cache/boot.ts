@@ -6,7 +6,7 @@ import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
-import { SEARCH_TAG_WORKER_QUEUE } from '../../worker/search-tags.js';
+import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/search-tags.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {

@@ -14,7 +14,7 @@ import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import Semaphore from 'semaphore-async-await';
 import { CafeTypes } from '@msdining/common';
-import { SEARCH_TAG_WORKER_QUEUE } from '../../worker/search-tags.js';
+import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/search-tags.js';
 
 type IMenuItemModifier = CafeTypes.IMenuItemModifier;
 type ModifierChoiceType = CafeTypes.ModifierChoiceType;

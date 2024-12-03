@@ -216,7 +216,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
             : isSkeleton && <div className="search-result-image"/>
     );
 
-    if (matchedModifiers.size > 0) {
+    if (!isCompact && matchedModifiers.size > 0) {
         for (const [modifierDescription, choiceDescriptions] of matchedModifiers) {
             extraFields.push({
                 iconName: 'list',

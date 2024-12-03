@@ -1,6 +1,6 @@
 import Duration from '@arcticzeroo/duration';
-import { logDebug } from '../../util/log.js';
-import { Nullable } from '../../models/util.js';
+import { logDebug } from '../util/log.js';
+import { Nullable } from '../models/util.js';
 
 interface IWorkerQueueParams {
     successPollInterval: Duration;

@@ -1,8 +1,8 @@
 import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
-import { ICafe, ICafeConfig, ICafeStation, IMenuItem } from '../models/cafe.js';
-import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
-import { betterLogosByNormalizedName } from '../constants/better-logos.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { betterLogosByNormalizedName } from '../constants/better-logos.js';
+import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
+import { ICafe, ICafeConfig, IMenuItem } from '../models/cafe.js';
 import { Nullable } from '../models/util.js';
 
 export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
@@ -41,5 +41,7 @@ export const deserializeMenuItemTags = (tags: string | null | undefined) => new 
 export const getDefaultUniquenessDataForStation = (itemCount: number = 0): IStationUniquenessData => ({
     isTraveling:  false,
     daysThisWeek: 1,
-    itemDays:     { 1: itemCount }
+    itemDays:     { 1: itemCount },
+    themeItemIds: [],
+    theme:        undefined
 });
