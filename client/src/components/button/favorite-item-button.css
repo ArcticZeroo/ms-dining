@@ -1,5 +1,5 @@
 .favorite-item-button {
-    background: #EDEDED;
+    background: var(--color-favorite-button-false-background);
     display: flex;
     justify-content: center;
     align-items: center;

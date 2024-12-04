@@ -7,7 +7,7 @@
 
 .search-page .query {
     align-self: stretch;
-    background: #46736b;
+    background: var(--color-search-page-query);
 }
 
 .search-page .search-result-count {
@@ -53,15 +53,15 @@
 }
 
 .entity-menu-item {
-    background: #3F51B5;
+    background: var(--color-search-entity-menu-item);
 }
 
 .entity-station {
-    background: #673AB7;
+    background: var(--color-search-entity-station);
 }
 
 .search-result-info {
-    background: #FAFAFA;
+    background: var(--color-search-result);
     border-bottom-right-radius: var(--default-padding);
     border-top-right-radius: var(--default-padding);
     display: flex;
@@ -77,7 +77,7 @@
 }
 
 .search-result.is-favorite .search-result-type {
-    background: #a7911b;
+    background: var(--color-search-entity-favorite);
 }
 
 .search-result.compact .search-result-hits {
@@ -103,7 +103,7 @@
 }
 
 .search-result-chip {
-    background: #2196F3;
+    background: var(--color-setting-chip);
     color: white;
     border-radius: var(--default-padding);
     padding: var(--default-padding);
@@ -116,7 +116,7 @@
 }
 
 .search-result-chip.grey {
-    background: #8baab0;
+    background: var(--color-search-result-chip-grey);
 }
 
 .chip-data {
@@ -168,7 +168,7 @@
 }
 
 .hidden-results {
-    background: #3678a1;
+    background: var(--color-search-results-hidden);
     color: white;
     padding: var(--default-padding);
     border-radius: var(--default-padding);
@@ -181,7 +181,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--default-padding);
-    --color-search-tag: #58886d;
+    --color-search-tag: var(--color-search-tags);
 }
 
 .search-result .search-tags .search-result-chip {
@@ -194,7 +194,7 @@
 .search-result.loading-skeleton .search-result-image {
     width: 10rem;
     height: 10rem;
-    background: #EEE;
+    background: var(--color-search-result-loading-image);
 }
 
 .compact-view-mode .search-result {
@@ -215,17 +215,17 @@
 }
 
 .search-filters-button {
-    background: #818181;
-    color: #FAFAFA;
+    background: var(--color-search-filters-button);
+    color: var(--color-almost-white);
     align-self: stretch;
 }
 
 .search-filters-button.open {
-    background: #679f30;
+    background: var(--color-search-filters-button-open);
 }
 
 .search-info {
-    background: #3d3d3d;
+    background: var(--color-search-info);
     flex-grow: 1;
 }
 

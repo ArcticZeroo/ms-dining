@@ -1,4 +1,4 @@
 .station .station-theme {
-    background: #AAA;
+    background: var(--color-station-theme);
     flex-direction: row;
 }

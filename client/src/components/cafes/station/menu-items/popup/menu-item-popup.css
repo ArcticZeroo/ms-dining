@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
-    background: #F4F4F4;
+    background: var(--color-menu-item-popup-body);
     border-radius: var(--default-padding);
     padding: var(--default-padding);
 }
@@ -33,7 +33,7 @@
 }
 
 .menu-item-modifier {
-    background: #E7E7E7;
+    background: var(--color-menu-item-modifier);
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
@@ -43,11 +43,11 @@
 }
 
 .menu-item-modifier.error {
-    background: #e7dede;
+    background: var(--color-menu-item-modifier-error);
 }
 
 .menu-item-modifier.error .modifier-choice-option {
-    background: #dad1d1;
+    background: var(--color-menu-item-modifier-option);
 }
 
 .menu-item-notes {
@@ -74,7 +74,7 @@
 }
 
 .menu-item-order-footer .add-to-cart {
-    background: #2196F3;
+    background: var(--color-theme);
     color: white;
     border-radius: var(--default-padding);
     padding: 1rem;
@@ -82,7 +82,7 @@
 }
 
 .menu-item-order-footer .add-to-cart:disabled {
-    background: #BBDEFB;
+    background: var(--color-menu-item-add-to-cart-disabled);
 }
 
 .menu-item-order-body .menu-item-notes textarea {
@@ -100,14 +100,14 @@
     align-items: center;
     gap: var(--constant-padding);
     padding: var(--constant-padding);
-    background: #DADADA;
+    background: var(--color-menu-item-modifier-option);
     border-radius: var(--default-padding);
     transition: all 0.25s ease;
 }
 
 .menu-item-order-body .modifier-choice-option.disabled {
-    background: #E5E5E5;
-    color: #999;
+    background: var(--color-menu-item-modifier-option-disabled-background);
+    color: var(--color-menu-item-modifier-option-disabled-text);
 }
 
 .menu-item-order-body .modifier-choice-option input {

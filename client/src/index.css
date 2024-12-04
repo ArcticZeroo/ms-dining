@@ -1,14 +1,99 @@
 :root {
-    --color-theme: #3488e0ff;
-    --color-card-background: #FAFAFA;
-    --color-card-foreground: #212121;
+    --color-theme: #3488E0;
+    --color-theme-dark: #2A6AA6;
+    /*--color-header: #00796B;*/
+    /*--color-cafe-order-link: #0277BD;*/
+    /*--color-search-entity-type-active: #0277BD;*/
+    /*--color-boolean-switch-false: #1D68A1;*/
     --color-background: #212121;
+    /*--color-card-foreground: #212121;*/
+    /*--color-search-ideas-background: #212121;*/
+    /*--color-card-blue: #2196F3;*/
+    /*--color-search-bar-background: #232323;*/
+    /*--color-card-dark-blue: #254569;*/
+    --color-theme-dark: #2A6AA6;
+    /*--color-search-entity-type-disabled: #2C3041;*/
+    /*--color-search-ideas-entry-selected: #2CCE91;*/
+    /*--color-map-cafe-popup-group-member-background: #313131;*/
+    /*--color-date-picker: #32768A;*/
+    /*--color-map-cafe-popup-jump-to-menu-button: #336e9a;*/
+    --color-theme: #3488E0;
+    /*--color-search-results-hidden: #3678A1;*/
+    /*--color-search-info: #3D3D3D;*/
+    /*--color-badge: #3F51B5;*/
+    /*--color-cart-popup: #3F51B5;*/
+    /*--color-cart-popup-checkout: #3F51B5;*/
+    /*--color-search-entity-menu-item: #3F51B5;*/
+    /*--color-collapsible-header: #407484;*/
+    /*--color-nav-numbered-cafe-hover: #444;*/
+    /*--color-search-page-query: #46736B;*/
+    /*--color-category-name-background: #485470;*/
+    /*--color-analytics-dropdown-selected: #4E92C2;*/
+    /*--color-nav-view-group-name: #4E92C2;*/
+    /*--color-setting-custom-button: #4E92C2;*/
+    /*--color-setting-group: #4E92C2;*/
+    /*--color-setting-homepage-views-commit: #4E92C2;*/
+    /*--color-search-tags: #58886D;*/
+    /*--color-cart-warning: #5B3049;*/
+    /*--color-cart-popup-body: #5E76FF;*/
+    /*--color-map-cafe-popup-close-button: #623B3B;*/
+    /*--color-price-filters-number-setting-at-limit: #6382BE;*/
+    /*--color-map-cafe-logo-background: #657C94;*/
+    /*--color-boolean-switch-disabled: #666;*/
+    /*--color-search-entity-station: #673AB7;*/
+    /*--color-search-filters-button-open: #679F30;*/
+    /*--color-search-ideas-entry-hover: #6DA0A9;*/
+    /*--color-payment-submit: #7CC4FF;*/
+    /*--color-error-accent: #7e4141;*/
+    /*--color-search-filters-button: #818181;*/
+    /*--color-station-badge: #838383;*/
+    /*--color-price-filters-number-setting: #85A4DE;*/
+    /*--color-search-ideas-entry: #86BAC7;*/
+    /*--color-notice-flashing-text: #88BBD9;*/
+    /*--color-search-result-chip-grey: #8BAAB0;*/
+    /*--color-analytics-volume-type-selected: #8DD2B4;*/
+    /*--color-boolean-disabled-background: #999;*/
+    /*--color-menu-item-modifier-option-disabled-text: #999;*/
+    /*--color-error: #9d5353;*/
+    /*--color-search-entity-favorite: #A7911B;*/
+    /*--color-boolean-background: #AAA;*/
+    /*--color-station-theme: #AAA;*/
+    /*--color-dropdown-background: #B7C0D3;*/
+    /*--color-station-header-background: #BBB;*/
+    /*--color-menu-item-add-to-cart-disabled: #BBDEFB;*/
+    /*--color-notice-text: #BDD0DA;*/
+    /*--color-price-filters-number-setting-invalid: #BE6363;*/
+    /*--color-remove-button-hover: #C96565;*/
+    /*--color-menu-item-image-background: #CCC;*/
+    /*--color-retry-disabled: #CDCDCD;*/
+    /*--color-payment-submit-invalid: #CFDBE3;*/
+    /*--color-card-yellow: #d3973c;*/
+    /*--color-menu-item-modifier-error-option: #DAD1D1;*/
+    /*--color-menu-item-modifier-option: #DADADA;*/
+    /*--color-nav-visibility-toggle: #DDD;*/
+    /*--color-price-filters-number-setting-disabled: #DDD;*/
+    /*--color-setting-chip: #DDD;*/
+    /*--color-menu-item-modifier-option-disabled-background: #E5E5E5;*/
+    /*--color-menu-item-modifier-error: #E7DEDE;*/
+    /*--color-menu-item-modifier: #E7E7E7;*/
+    /*--color-favorite-button-false-background: #EDEDED;*/
+    /*--color-menu-item-hover: #EEE;*/
+    /*--color-menu-item-tag: #EEE;*/
+    /*--color-payment-info-field: #EEE;*/
+    /*--color-popup-button-background: #EEE;*/
+    /*--color-search-result-loading-image: #EEE;*/
+    /*--color-setting: #EEE;*/
+    /*--color-menu-item-popup-body: #F4F4F4;*/
+    /*--color-almost-white: #FAFAFA;*/
+    /*--color-card-background: #FAFAFA;*/
     --color-foreground: #FAFAFA;
-    --color-error: #9d5353;
-    --color-error-accent: #7e4141;
-    --color-header: #00796B;
-    --color-favorite: #ffe7ab;
-    --color-favorite-dark: #ffd97a;
+    /*--color-search-result: #FAFAFA;*/
+    /*--color-payment-info-field-invalid: #FFBBBB;*/
+    /*--color-favorite-dark: #ffd97a;*/
+    /*--color-favorite: #ffe7ab;*/
+    /*--color-map-loading-background: #fffefb;*/
+    /*--color-search-result-chip: var(--color-theme);*/
+
     --constant-padding: 0.5rem;
     --icon-size: 24px;
     --map-height: 50vh;
@@ -87,13 +172,13 @@ image {
 }
 
 .card.yellow {
-    background: #d3973c;
+    background: var(--color-card-yellow);
     color: var(--color-card-foreground);
 }
 
 .card.theme {
     background: var(--color-theme);
-    color: #FAFAFA;
+    color: var(--color-almost-white);
 }
 
 .App {
@@ -116,14 +201,14 @@ html, body, #root, .App {
 }
 
 .search-bar-container {
-    background: #232323;
+    background: var(--color-search-bar-background);
     padding: var(--default-padding);
 }
 
 .search-bar {
     display: flex;
     justify-content: space-between;
-    background: #FAFAFA;
+    background: var(--color-almost-white);
     border-radius: var(--default-padding);
 }
 
@@ -170,12 +255,12 @@ html, body, #root, .App {
 }
 
 .card.blue {
-    background: #2196F3;
+    background: var(--color-card-blue);
     color: white;
 }
 
 .card.dark-blue {
-    background: #254569;
+    background: var(--color-card-dark-blue);
     color: white;
 }
 
@@ -188,7 +273,7 @@ html, body, #root, .App {
 }
 
 .default-button {
-    background: #2196F3;
+    background: var(--color-theme);
     color: white;
     text-decoration: none;
 }
@@ -222,7 +307,7 @@ html, body, #root, .App {
 .loading-spinner {
     width: 2rem;
     height: 2rem;
-    background: #2196F3;
+    background: var(--color-theme);
     animation: loading-spinner 2s ease infinite;
 }
 
@@ -425,7 +510,7 @@ html, body, #root, .App {
 }
 
 .badge {
-    background: #3F51B5;
+    background: var(--color-badge);
     padding: 0.125rem;
     width: 1.75rem;
     height: 1.75rem;
@@ -435,7 +520,7 @@ html, body, #root, .App {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #FAFAFA;
+    color: var(--color-almost-white);
 }
 
 .badge > * {
@@ -451,7 +536,7 @@ html, body, #root, .App {
 .dropdown {
     position: absolute;
     z-index: var(--z-index-above-content);
-    background: #b7c0d3;
+    background: var(--color-dropdown-background);
 }
 
 /* wide screens (tablet, computer) */

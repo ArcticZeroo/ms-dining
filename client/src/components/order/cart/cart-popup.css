@@ -5,7 +5,6 @@
     gap: var(--default-padding);
     transition: transform 0.2s ease;
     padding: 0 0 1rem 1rem;
-    --color-cart-popup: #3F51B5;
 }
 
 .cart-popup .cart-header {
@@ -42,7 +41,7 @@
 .cart-popup:hover .cart-body {
     display: flex;
     flex-direction: column;
-    background: #5e76ff;
+    background: var(--color-cart-popup-body);
     border-bottom-left-radius: var(--default-padding);
 }
 
@@ -87,8 +86,8 @@
 }
 
 .cart-popup .checkout-button {
-    background: #3F51B5;
-    color: white;
+    background: var(--color-cart-popup-checkout);
+    color: var(--color-almost-white);
     text-decoration: none;
     margin: var(--default-padding);
     border-radius: var(--default-padding);
@@ -111,7 +110,7 @@
     padding: 0.25rem;
     left: 0;
     bottom: 0;
-    background: #5b3049;
+    background: var(--color-cart-warning);
     border-radius: 100%;
 }
 

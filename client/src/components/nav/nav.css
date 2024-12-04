@@ -49,7 +49,7 @@ nav.expanded .expandable-nav-list {
 }
 
 nav a.link-button.visibility-toggle {
-    background: #DDD;
+    background: var(--color-nav-visibility-toggle);
     height: min-content;
     padding: var(--default-padding);
     position: sticky;
@@ -80,7 +80,7 @@ nav a.link-button.active {
 }
 
 .expandable-nav-list .cafe a:hover, .nav-numbered-cafe-list-item:hover {
-    background: #444;
+    background: var(--color-nav-numbered-cafe-hover);
 }
 
 .expandable-nav-list .cafe a.active {
@@ -96,7 +96,7 @@ nav a.link-button.active {
 .expandable-nav-list .view-group-name {
     padding: var(--constant-padding);
     text-align: center;
-    background: #4e92c2;
+    background: var(--color-nav-view-group-name);
 }
 
 nav a {

@@ -1,5 +1,5 @@
 .notice {
-    color: #bdd0da;
+    color: var(--color-notice-text);
     text-align: center;
     opacity: 0;
     transition: opacity 0.25s ease;
@@ -19,15 +19,15 @@
 
 @keyframes flash {
     0% {
-        background: #FAFAFA;
+        background: var(--color-almost-white);
     }
 
     50% {
-        background: #88bbd9;
+        background: var(--color-notice-flashing-text);
     }
 
     100% {
-        background: #FAFAFA;
+        background: var(--color-almost-white);
     }
 }
 

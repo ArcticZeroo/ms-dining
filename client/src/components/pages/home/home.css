@@ -7,10 +7,10 @@
 
 .remove-button {
     background: none;
-    color: #FAFAFA;
+    color: var(--color-almost-white);
     transition: color 0.125s ease;
 }
 
 .remove-button:hover {
-    color: #c96565;
+    color: var(--color-remove-button-hover);
 }

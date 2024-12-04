@@ -10,7 +10,7 @@
 }
 
 .campus-map.loading-skeleton {
-    background: #fffefb;
+    background: var(--color-map-loading-background);
 }
 
 .campus-map .leaflet-div-icon {
@@ -49,7 +49,7 @@
 
 .cafe-popup .group-member {
     color: white;
-    background: #313131;
+    background: var(--color-map-cafe-popup-group-member-background);
     padding: var(--constant-padding);
     border-radius: var(--constant-padding);
     display: flex;
@@ -76,7 +76,7 @@
 }
 
 .cafe-popup a.view-menu {
-    background: #336e9a;
+    background: var(--color-map-cafe-popup-jump-to-menu-button);
 }
 
 .campus-map-container .cafe-popup {
@@ -104,13 +104,13 @@
 }
 
 .cafe-popup .close-button {
-    background: #623b3b;
+    background: var(--color-map-cafe-popup-close-button);
 }
 
 .campus-map-container .logo-small {
     width: 2rem;
     height: 2rem;
-    background: #657c94;
+    background: var(--color-map-cafe-logo-background);
     border-radius: 0.5rem;
     object-fit: contain;
 }

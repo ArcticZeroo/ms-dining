@@ -13,13 +13,13 @@
     outline: none;
     border: none;
     border-radius: var(--default-padding);
-    background: #2196F3;
+    background: var(--color-theme);
     color: white;
     transition: background-color 0.2s ease-in-out;
 }
 
 #analytics-page .days-ago-option:hover, #analytics-page .days-ago-option.active {
-    background: #1976D2;
+    background: var(--color-theme-dark);
 }
 
 #analytics-page .volume-type {
@@ -32,7 +32,7 @@
 }
 
 #analytics-page .volume-type .selected {
-    background: #8dd2b4;
+    background: var(--color-analytics-volume-type-selected);
 }
 
 #analytics-page .scenarios .dropdown {
@@ -45,7 +45,7 @@
 }
 
 #analytics-page .scenarios .dropdown .selected {
-    background: #4e92c2;
+    background: var(--color-analytics-dropdown-selected);
 }
 
 #analytics-page .chart-container {

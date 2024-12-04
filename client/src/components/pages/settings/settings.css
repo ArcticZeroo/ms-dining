@@ -10,7 +10,7 @@
     gap: var(--default-padding);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
-    background: #EEE;
+    background: var(--color-setting);
 }
 
 .boolean-setting, .boolean-setting * {
@@ -34,7 +34,7 @@
 #setting-homepage .group {
     padding: var(--constant-padding);
     border-radius: var(--constant-padding);
-    background: #4e92c2;
+    background: var(--color-setting-group);
     display: flex;
     flex-wrap: wrap;
     gap: var(--constant-padding);
@@ -66,7 +66,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #DDD;
+    background: var(--color-setting-chip);
     border-radius: var(--default-padding);
     padding: var(--default-padding);
     gap: var(--constant-padding);
@@ -90,7 +90,7 @@
 }
 
 #setting-custom button {
-    background: #4e92c2;
+    background: var(--color-setting-custom-button);
     color: white;
     padding: var(--default-padding);
     border-radius: var(--default-padding);
@@ -110,7 +110,7 @@
 }
 
 #homepage-views-commit-button {
-    background: #4e92c2;
+    background: var(--color-setting-homepage-views-commit);
     color: white;
     padding: var(--default-padding);
     border-radius: var(--default-padding);
@@ -119,7 +119,7 @@
 
 .card.collapsible-padding {
     transition: padding 0.25s ease;
-    --color-header: #407484;
+    --color-header: var(--color-collapsible-header);
 }
 
 .card.collapsible-padding.collapsed {
@@ -138,7 +138,7 @@
 }
 
 #setting-price-filters .number-setting {
-    background: #85a4de;
+    background: var(--color-price-filters-number-setting);
     transition: background-color 0.25s ease, opacity 0.25s ease;
 }
 
@@ -147,15 +147,15 @@
 }
 
 #setting-price-filters .number-setting.invalid {
-    background: #be6363;
+    background: var(--color-price-filters-number-setting-invalid);
 }
 
 #setting-price-filters .number-setting.at-limit {
-    background: #6382be;
+    background: var(--color-price-filters-number-setting-at-limit);
 }
 
 #setting-price-filters .number-setting.disabled {
-    background: #DDD;
+    background: var(--color-price-filters-number-setting-disabled);
     opacity: 0.5;
 }
 

@@ -55,7 +55,7 @@
 .modal .title #modal-buttons button > * {
     border-radius: var(--default-padding);
     padding: var(--default-padding);
-    background: #EEE;
+    background: var(--color-popup-button-background);
 }
 
 .modal .body {

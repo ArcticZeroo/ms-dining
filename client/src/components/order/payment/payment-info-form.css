@@ -8,11 +8,11 @@
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     transition: background-color 0.25s ease;
-    background: #EEE;
+    background: var(--color-payment-info-field);
 }
 
 #payment-info .field.invalid {
-    background: #ffbbbb;
+    background: var(--color-payment-info-field-invalid);
 }
 
 #payment-info .field .field-info {
@@ -28,12 +28,12 @@
 }
 
 #payment-info #payment-submit {
-    background: #7cc4ff;
+    background: var(--color-payment-submit);
     transition: background-color 0.25s ease;
 }
 
 #payment-info #payment-submit.invalid {
-    background: #cfdbe3;
+    background: var(--color-payment-submit-invalid);
 }
 
 @media screen and (max-width: 800px) {

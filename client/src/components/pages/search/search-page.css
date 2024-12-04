@@ -9,8 +9,8 @@
 .entity-button {
     padding: var(--default-padding);
     border-radius: var(--default-padding);
-    background: #2196F3;
-    color: white;
+    background: var(--color-theme);
+    color: var(--color-almost-white);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,7 +20,7 @@
 }
 
 .entity-button.active {
-    background: #0277BD;
+    background: var(--color-search-entity-type-active);
 }
 
 .entity-button input {
@@ -32,7 +32,7 @@
 .entity-button.disabled {
     cursor: not-allowed;
     opacity: 0.5;
-    background: #2c3041;
+    background: var(--color-search-entity-type-disabled);
 }
 
 .entity-button.disabled label {

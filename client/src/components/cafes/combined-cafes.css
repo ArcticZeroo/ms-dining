@@ -25,7 +25,7 @@
 
 .station {
     border-radius: var(--constant-padding);
-    color: #212121;
+    color: var(--color-background);
     display: flex;
     flex-direction: column;
     max-width: 100%;
@@ -44,7 +44,7 @@
     display: flex;
     align-items: center;
     gap: var(--default-padding);
-    background: #BBB;
+    background: var(--color-station-header-background);
     padding: var(--default-padding);
     border-top-right-radius: var(--constant-padding);
     border-top-left-radius: var(--constant-padding);
@@ -78,7 +78,7 @@
 
 .category-name {
     text-align: center;
-    background: #485470;
+    background: var(--color-category-name-background);
     color: var(--color-foreground);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
@@ -110,7 +110,7 @@
 }
 
 .station .menu-item:hover {
-    background: #EEE;
+    background: var(--color-menu-item-hover);
 }
 
 .station .menu-item.is-favorite {
@@ -122,7 +122,7 @@
 }
 
 .menu-item-image {
-    background: #CCC;
+    background: var(--color-menu-item-image-background);
     border-radius: var(--default-padding);
     max-width: 20rem;
     object-fit: contain;
@@ -183,7 +183,7 @@
 }
 
 .collapsible-cafe .cafe-order-link {
-    background: #0277BD;
+    background: var(--color-cafe-order-link);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     color: white;
@@ -209,7 +209,7 @@
 }
 
 .station .menu-body {
-    background: #FAFAFA;
+    background: var(--color-almost-white);
 }
 
 .station.collapsed {
@@ -226,7 +226,7 @@
 }
 
 .station .badge {
-    background: #838383;
+    background: var(--color-station-badge);
 }
 
 .menu-item-head {
@@ -248,7 +248,7 @@
 }
 
 .menu-item-tag {
-    background: #EEE;
+    background: var(--color-menu-item-tag);
     padding: var(--constant-padding);
     border-radius: var(--constant-padding);
     text-align: center;
