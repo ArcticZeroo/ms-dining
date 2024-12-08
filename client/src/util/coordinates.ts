@@ -4,6 +4,11 @@ import { getPercentileIndex } from "./stats.ts";
 const EARTH_RADIUS_KM = 6371.137;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
+export interface ILeafletLocation {
+    lat: number;
+    lng: number;
+}
+
 export const convertKmToMiles = (km: number): number => km * 0.621371;
 
 export const getDistanceBetweenCoordinates = (start: ILocationCoordinates, end: ILocationCoordinates, inMiles: boolean = false): number => {
@@ -26,7 +31,7 @@ export const getDistanceBetweenCoordinates = (start: ILocationCoordinates, end: 
     return inMiles ? convertKmToMiles(distanceInKm) : distanceInKm;
 };
 
-export const toLeafletLocation = (location: ILocationCoordinates) => ({
+export const toLeafletLocation = (location: ILocationCoordinates): ILeafletLocation => ({
     lat: location.lat,
     lng: location.long
 });

@@ -34,9 +34,7 @@
     --color-card-background: var(--color-background-raised);
     --color-search-ideas-entry-hover: var(--color-theme-dark);
     --color-search-ideas-entry: var(--color-theme);
-    --color-map-cafe-popup-group-member-background: var(--color-background-raised);
     --color-date-picker: var(--color-foreground);
-    --color-map-cafe-popup-jump-to-menu-button: var(--color-button-cta);
     --color-search-results-hidden: var(--color-theme-dark);
     --color-search-info: var(--color-background-raised-2);
     --color-badge: var(--color-theme-purple);
@@ -51,8 +49,11 @@
     --color-cart-popup: var(--color-theme-purple);
     --color-cart-popup-checkout: var(--color-theme);
     --color-cart-popup-body: var(--color-theme-purple-dark);
+    --color-map-cafe-popup-group-member-background: var(--color-background-raised);
+    --color-map-cafe-popup-jump-to-menu-button: var(--color-button-cta);
     --color-map-cafe-popup-close-button: var(--color-error-dark);
     --color-map-cafe-logo-background: var(--color-almost-white);
+    --color-map-loading-background: var(--color-background-raised);
     --color-search-entity-station: #614d7e;
     --color-payment-submit: var(--color-button-cta);
     --color-payment-submit-invalid: var(--color-button-cta-disabled);
@@ -99,7 +100,6 @@
     --color-payment-info-field-invalid: var(--color-error-light);
     --color-favorite-dark: #AF892A;
     --color-favorite: #C39D3E;
-    --color-map-loading-background: var(--color-background-raised);
     --color-search-result-chip: var(--color-theme);
     --color-cafe-list: var(--color-background);
     --color-button-background: var(--color-background-raised);

@@ -14,6 +14,9 @@ import { getViewLocation } from '../../util/view.ts';
 import './map.css';
 import { CafeMarker } from './popup/cafe-marker.tsx';
 import { CampusMapPopup } from './popup/campus-map-popup.tsx';
+import { CampusMapControls } from "./campus-map-controls.tsx";
+import { DEFAULT_MAP_ZOOM } from "../../constants/map.ts";
+import { CampusMapUserLocation } from "./campus-map-user-location.tsx";
 
 // Intentionally not a hook, we don't want to change every time the user clicks on a new cafe
 // (e.g. if the component is mounted on top of the cafe menu at some point in the future).
@@ -74,10 +77,14 @@ const CampusMapView = () => {
         <div className="map-height campus-map-container">
             <MapContainer
                 center={center}
-                zoom={15}
+                zoom={DEFAULT_MAP_ZOOM}
                 scrollWheelZoom={true}
                 className="campus-map"
             >
+                <CampusMapUserLocation/>
+                <CampusMapControls
+                    center={center}
+                />
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

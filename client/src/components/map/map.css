@@ -7,10 +7,18 @@
 .campus-map {
     --color-button-background: #163650;
     height: var(--map-height);
+    background: var(--color-map-loading-background);
 }
 
 .campus-map.loading-skeleton {
     background: var(--color-map-loading-background);
+}
+
+.campus-map .controls {
+    position: absolute;
+    top: var(--default-padding);
+    right: var(--default-padding);
+    z-index: var(--z-index-leaflet-buttons);
 }
 
 .campus-map .leaflet-div-icon {
