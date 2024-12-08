@@ -2,4 +2,5 @@
     cursor: not-allowed;
     filter: grayscale(0.75);
     color: var(--color-retry-disabled);
+    opacity: 0.75;
 }

@@ -1,98 +1,114 @@
 :root {
     --color-theme: #3488E0;
     --color-theme-dark: #2A6AA6;
-    /*--color-header: #00796B;*/
-    /*--color-cafe-order-link: #0277BD;*/
-    /*--color-search-entity-type-active: #0277BD;*/
-    /*--color-boolean-switch-false: #1D68A1;*/
+    --color-theme-light: #6ab3ff;
+    --color-theme-purple: #3F51B5;
+    --color-theme-purple-dark: #3a499d;
+    --color-theme-purple-light: #5E76FF;
+    --color-theme-turquoise: #319890;
+    --color-theme-turquoise-light: #61d5cc;
+    --color-theme-turquoise-dark: #00796B;
+    --color-theme-green: #58886D;
+    --color-theme-green-light: #7fb094;
+    --color-theme-green-dark: #4d6959;
+    --color-theme-cyan: #407484;
+    --color-theme-blue: #485470;
+    --color-theme-background-accent: #3e434f;
+    --color-header: var(--color-background-raised);
+    --color-cafe-order-link: var(--color-theme);
+    --color-error: #9d5353;
+    --color-error-light: #FFBBBB;
+    --color-error-dark: #7e4141;
+    --color-error-purple: #5B3049;
+    --color-button-cta: var(--color-theme);
+    --color-button-cta-disabled: var(--color-theme-dark);
     --color-background: #212121;
-    /*--color-card-foreground: #212121;*/
-    /*--color-search-ideas-background: #212121;*/
-    /*--color-card-blue: #2196F3;*/
-    /*--color-search-bar-background: #232323;*/
-    /*--color-card-dark-blue: #254569;*/
-    --color-theme-dark: #2A6AA6;
-    /*--color-search-entity-type-disabled: #2C3041;*/
-    /*--color-search-ideas-entry-selected: #2CCE91;*/
-    /*--color-map-cafe-popup-group-member-background: #313131;*/
-    /*--color-date-picker: #32768A;*/
-    /*--color-map-cafe-popup-jump-to-menu-button: #336e9a;*/
-    --color-theme: #3488E0;
-    /*--color-search-results-hidden: #3678A1;*/
-    /*--color-search-info: #3D3D3D;*/
-    /*--color-badge: #3F51B5;*/
-    /*--color-cart-popup: #3F51B5;*/
-    /*--color-cart-popup-checkout: #3F51B5;*/
-    /*--color-search-entity-menu-item: #3F51B5;*/
-    /*--color-collapsible-header: #407484;*/
-    /*--color-nav-numbered-cafe-hover: #444;*/
-    /*--color-search-page-query: #46736B;*/
-    /*--color-category-name-background: #485470;*/
-    /*--color-analytics-dropdown-selected: #4E92C2;*/
-    /*--color-nav-view-group-name: #4E92C2;*/
-    /*--color-setting-custom-button: #4E92C2;*/
-    /*--color-setting-group: #4E92C2;*/
-    /*--color-setting-homepage-views-commit: #4E92C2;*/
-    /*--color-search-tags: #58886D;*/
-    /*--color-cart-warning: #5B3049;*/
-    /*--color-cart-popup-body: #5E76FF;*/
-    /*--color-map-cafe-popup-close-button: #623B3B;*/
-    /*--color-price-filters-number-setting-at-limit: #6382BE;*/
-    /*--color-map-cafe-logo-background: #657C94;*/
-    /*--color-boolean-switch-disabled: #666;*/
-    /*--color-search-entity-station: #673AB7;*/
-    /*--color-search-filters-button-open: #679F30;*/
-    /*--color-search-ideas-entry-hover: #6DA0A9;*/
-    /*--color-payment-submit: #7CC4FF;*/
-    /*--color-error-accent: #7e4141;*/
-    /*--color-search-filters-button: #818181;*/
-    /*--color-station-badge: #838383;*/
-    /*--color-price-filters-number-setting: #85A4DE;*/
-    /*--color-search-ideas-entry: #86BAC7;*/
-    /*--color-notice-flashing-text: #88BBD9;*/
-    /*--color-search-result-chip-grey: #8BAAB0;*/
-    /*--color-analytics-volume-type-selected: #8DD2B4;*/
-    /*--color-boolean-disabled-background: #999;*/
-    /*--color-menu-item-modifier-option-disabled-text: #999;*/
-    /*--color-error: #9d5353;*/
-    /*--color-search-entity-favorite: #A7911B;*/
-    /*--color-boolean-background: #AAA;*/
-    /*--color-station-theme: #AAA;*/
-    /*--color-dropdown-background: #B7C0D3;*/
-    /*--color-station-header-background: #BBB;*/
-    /*--color-menu-item-add-to-cart-disabled: #BBDEFB;*/
-    /*--color-notice-text: #BDD0DA;*/
-    /*--color-price-filters-number-setting-invalid: #BE6363;*/
-    /*--color-remove-button-hover: #C96565;*/
-    /*--color-menu-item-image-background: #CCC;*/
-    /*--color-retry-disabled: #CDCDCD;*/
-    /*--color-payment-submit-invalid: #CFDBE3;*/
-    /*--color-card-yellow: #d3973c;*/
-    /*--color-menu-item-modifier-error-option: #DAD1D1;*/
-    /*--color-menu-item-modifier-option: #DADADA;*/
-    /*--color-nav-visibility-toggle: #DDD;*/
-    /*--color-price-filters-number-setting-disabled: #DDD;*/
-    /*--color-setting-chip: #DDD;*/
-    /*--color-menu-item-modifier-option-disabled-background: #E5E5E5;*/
-    /*--color-menu-item-modifier-error: #E7DEDE;*/
-    /*--color-menu-item-modifier: #E7E7E7;*/
-    /*--color-favorite-button-false-background: #EDEDED;*/
-    /*--color-menu-item-hover: #EEE;*/
-    /*--color-menu-item-tag: #EEE;*/
-    /*--color-payment-info-field: #EEE;*/
-    /*--color-popup-button-background: #EEE;*/
-    /*--color-search-result-loading-image: #EEE;*/
-    /*--color-setting: #EEE;*/
-    /*--color-menu-item-popup-body: #F4F4F4;*/
-    /*--color-almost-white: #FAFAFA;*/
-    /*--color-card-background: #FAFAFA;*/
-    --color-foreground: #FAFAFA;
-    /*--color-search-result: #FAFAFA;*/
-    /*--color-payment-info-field-invalid: #FFBBBB;*/
-    /*--color-favorite-dark: #ffd97a;*/
-    /*--color-favorite: #ffe7ab;*/
-    /*--color-map-loading-background: #fffefb;*/
-    /*--color-search-result-chip: var(--color-theme);*/
+    --color-background-raised: #313131;
+    --color-background-raised-2: #414141;
+    --color-background-raised-3: #515151;
+    --color-background-raised-4: #616161;
+    --color-card-foreground: var(--color-foreground);
+    --color-card-blue: var(--color-theme);
+    --color-card-dark-blue: var(--color-theme-dark);
+    --color-card-yellow: #D3973C;
+    --color-card-background: var(--color-background-raised);
+    --color-search-ideas-entry-hover: var(--color-theme-dark);
+    --color-search-ideas-entry: var(--color-theme);
+    --color-map-cafe-popup-group-member-background: var(--color-background-raised);
+    --color-date-picker: var(--color-foreground);
+    --color-map-cafe-popup-jump-to-menu-button: var(--color-button-cta);
+    --color-search-results-hidden: var(--color-theme-dark);
+    --color-search-info: var(--color-background-raised-2);
+    --color-badge: var(--color-theme-purple);
+    --color-search-entity-menu-item: #3b3f6c;
+    --color-collapsible-header: var(--color-theme-cyan);
+    --color-nav-hover: var(--color-background-raised);
+    --color-search-page-query: var(--color-background-raised-3);
+    --color-category-name-background: var(--color-theme-background-accent);
+    --color-setting-homepage-views-commit: var(--color-button-cta);
+    --color-search-tags: var(--color-theme-green);
+    --color-cart-warning: var(--color-error-purple);
+    --color-cart-popup: var(--color-theme-purple);
+    --color-cart-popup-checkout: var(--color-theme);
+    --color-cart-popup-body: var(--color-theme-purple-dark);
+    --color-map-cafe-popup-close-button: var(--color-error-dark);
+    --color-map-cafe-logo-background: var(--color-almost-white);
+    --color-search-entity-station: #614d7e;
+    --color-payment-submit: var(--color-button-cta);
+    --color-payment-submit-invalid: var(--color-button-cta-disabled);
+    --color-search-filters-button: var(--color-button-cta);
+    --color-notice-flash-from: var(--color-error);
+    --color-notice-flash-to: var(--color-error-purple);
+    --color-search-result-chip-grey: var(--color-background-raised-2);
+    --color-boolean-disabled-background: var(--color-foreground);
+    --color-boolean-background: var(--color-foreground-raised);
+    --color-boolean-switch-disabled: var(--color-foreground);
+    --color-boolean-switch-false: var(--color-theme-dark);
+    --color-dropdown-background: var(--color-theme-background-accent);
+    --color-nav-view-group-name: var(--color-background-raised);
+    --color-search-entity-favorite: var(--color-favorite-dark);
+    --color-station-header-background: var(--color-background-raised-2);
+    --color-menu-item-add-to-cart-disabled: var(--color-theme-dark);
+    --color-remove-button-hover: var(--color-error-light);
+    --color-menu-item-image-background: var(--color-background-raised-2);
+    --color-retry-disabled: var(--color-button-cta-disabled);
+    --color-nav-visibility-toggle: var(--color-theme-background-accent);
+    --color-price-filters-number-setting-disabled: var(--color-background-raised);
+    --color-price-filters-number-setting: var(--color-background-raised-2);
+    --color-price-filters-number-setting-invalid: var(--color-error);
+    --color-price-filters-number-setting-at-limit: var(--color-background-raised-2);
+    --color-setting-chip: var(--color-background-raised-2);
+    --color-menu-item-modifier: var(--color-background-raised-3);
+    --color-menu-item-modifier-error: var(--color-error);
+    --color-menu-item-modifier-error-option: var(--color-error-dark);
+    --color-menu-item-modifier-option-disabled-background: var(--color-background-raised-2);
+    --color-menu-item-modifier-option-disabled-text: var(--color-foreground-raised);
+    --color-menu-item-modifier-option: var(--color-background-raised-4);
+    --color-favorite-button-false-background: var(--color-background-raised-3);
+    --color-menu-item-hover: var(--color-background-raised-2);
+    --color-menu-item-tag: var(--color-background-raised-2); /*probably won't be shown, but better to have a reasonable default*/
+    --color-payment-info-field: var(--color-background-raised-2);
+    --color-search-result-loading-image: var(--color-background-raised-2);
+    --color-popup-button-background: var(--color-foreground);
+    --color-setting: var(--color-background-raised-2);
+    --color-menu-item-popup-body: var(--color-background-raised-2);
+    --color-almost-white: #FAFAFA;
+    --color-foreground: var(--color-almost-white);
+    --color-foreground-raised: #E6E6E6;
+    --color-search-result: var(--color-background-raised);
+    --color-payment-info-field-invalid: var(--color-error-light);
+    --color-favorite-dark: #AF892A;
+    --color-favorite: #C39D3E;
+    --color-map-loading-background: var(--color-background-raised);
+    --color-search-result-chip: var(--color-theme);
+    --color-cafe-list: var(--color-background);
+    --color-button-background: var(--color-background-raised);
+    --color-nav-active: var(--color-theme-light);
+    --color-semi-transparent-cover: rgba(0, 0, 0, 0.5);
+    --color-semi-transparent-popover: color-mix(in srgb, var(--color-foreground), 75% transparent);
+    --color-button-radio-option: var(--color-theme-turquoise);
+    --color-button-radio-selected: var(--color-theme-turquoise-light);
+    --color-button-radio-disabled: var(--color-theme-turquoise-dark);
 
     --constant-padding: 0.5rem;
     --icon-size: 24px;
@@ -111,6 +127,12 @@
     --z-index-top: calc(var(--z-index-everything-but-top) + 10);
     /*above top*/
     --z-index-modal: calc(var(--z-index-top) + 10);
+
+    --icon-container-size: calc(var(--icon-size) + var(--default-padding) * 2);
+}
+
+* {
+    scrollbar-color: var(--color-foreground) var(--color-background-raised);
 }
 
 body, html {
@@ -127,7 +149,6 @@ html {
 button {
     cursor: pointer;
     border: none;
-    outline: none;
     margin: 0;
     padding: 0;
     user-select: none;
@@ -201,7 +222,7 @@ html, body, #root, .App {
 }
 
 .search-bar-container {
-    background: var(--color-search-bar-background);
+    background: var(--color-cafe-list);
     padding: var(--default-padding);
 }
 
@@ -417,7 +438,7 @@ html, body, #root, .App {
     text-align: center;
     padding: var(--default-padding);
     background: var(--color-header);
-    color: white;
+    color: var(--color-foreground);
     border-radius: var(--default-padding);
     display: flex;
     align-items: center;
@@ -492,13 +513,8 @@ html, body, #root, .App {
 }
 
 .icon-container {
-    width: calc(var(--icon-size) + var(--default-padding) * 2);
-    height: calc(var(--icon-size) + var(--default-padding) * 2);
-}
-
-.icon-container-constant {
-    width: calc(var(--icon-size) + var(--constant-padding) * 2);
-    height: calc(var(--icon-size) + var(--constant-padding) * 2);
+    width: var(--icon-container-size);
+    height: var(--icon-container-size);
 }
 
 .transition-background {

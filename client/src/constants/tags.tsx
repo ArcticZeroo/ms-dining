@@ -11,16 +11,16 @@ export const knownTags: Record<string, ITagData> = {
     'gluten free': {
         name: 'Gluten Free',
         icon: '🌾',
-        color: '#ffefd0'
+        color: '#8c796e'
     },
     'vegan': {
         name: 'Vegan',
         icon: '🥕',
-        color: '#98de98'
+        color: '#496449'
     },
     'vegetarian': {
         name: 'Vegetarian',
         icon: '🥦',
-        color: '#cfffcf'
+        color: '#7d967d'
     },
 };

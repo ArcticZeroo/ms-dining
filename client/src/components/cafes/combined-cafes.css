@@ -45,6 +45,7 @@
     align-items: center;
     gap: var(--default-padding);
     background: var(--color-station-header-background);
+    color: var(--color-foreground);
     padding: var(--default-padding);
     border-top-right-radius: var(--constant-padding);
     border-top-left-radius: var(--constant-padding);
@@ -57,10 +58,12 @@
     background: var(--color-favorite-dark);
 }
 
-.station .station-header .title img {
+.station .station-header .title .station-logo {
     height: 1.4em;
     margin-right: 0.25rem;
     transition: height 0.5s ease;
+    background: var(--color-foreground);
+    border-radius: var(--constant-padding);
 }
 
 .station .menu-body {
@@ -209,7 +212,8 @@
 }
 
 .station .menu-body {
-    background: var(--color-almost-white);
+    background: var(--color-card-background);
+    color: var(--color-card-foreground);
 }
 
 .station.collapsed {
@@ -223,10 +227,6 @@
 
 .station.collapsed .menu-body {
     display: none;
-}
-
-.station .badge {
-    background: var(--color-station-badge);
 }
 
 .menu-item-head {

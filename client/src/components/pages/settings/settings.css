@@ -89,14 +89,6 @@
     flex-grow: 1;
 }
 
-#setting-custom button {
-    background: var(--color-setting-custom-button);
-    color: white;
-    padding: var(--default-padding);
-    border-radius: var(--default-padding);
-    cursor: pointer;
-}
-
 #setting-custom #custom-key-checkbox {
     display: flex;
     align-items: center;
@@ -110,7 +102,7 @@
 }
 
 #homepage-views-commit-button {
-    background: var(--color-setting-homepage-views-commit);
+    background: var(--color-button-cta);
     color: white;
     padding: var(--default-padding);
     border-radius: var(--default-padding);

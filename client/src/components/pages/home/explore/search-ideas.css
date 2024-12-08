@@ -1,18 +1,13 @@
 .search-ideas {
-    background: var(--color-search-ideas-background);
     overflow-x: auto;
 }
 
 .search-idea {
-    background: var(--color-search-ideas-entry);
+    background: var(--color-button-radio-option);
     transition: background-color 0.25s ease;
     white-space: nowrap;
 }
 
-.search-idea:hover {
-    background: var(--color-search-ideas-entry-hover);
-}
-
-.search-idea.selected {
-    background: var(--color-search-ideas-entry-selected);
+.search-idea:hover, .search-idea.selected {
+    background: var(--color-button-radio-selected);
 }

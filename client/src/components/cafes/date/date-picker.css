@@ -1,5 +1,6 @@
 .date-picker {
     background: color-mix(in srgb, var(--color-date-picker) 70%, transparent);
+    color: var(--color-background);
     padding: var(--default-padding);
     display: flex;
     align-items: center;

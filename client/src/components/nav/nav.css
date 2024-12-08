@@ -7,8 +7,6 @@ nav {
     z-index: var(--z-index-top);
     display: flex;
     flex-direction: column;
-    --color-cafe-list: #333;
-    --color-button-background: #FAFAFA;
 }
 
 nav #sticky-header-list {
@@ -59,14 +57,18 @@ nav a.link-button {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: var(--color-button-background);
+    background: var(--color-background);
     transition: background-color 0.2s ease;
-    color: black;
+    color: var(--color-foreground);
     text-decoration: none;
 }
 
+nav a.link-button:hover {
+    background: var(--color-background-raised);
+}
+
 nav a.link-button.active {
-    background: deepskyblue;
+    background: var(--color-nav-active);
     color: black;
 }
 
@@ -80,11 +82,11 @@ nav a.link-button.active {
 }
 
 .expandable-nav-list .cafe a:hover, .nav-numbered-cafe-list-item:hover {
-    background: var(--color-nav-numbered-cafe-hover);
+    background: var(--color-nav-hover);
 }
 
 .expandable-nav-list .cafe a.active {
-    background: deepskyblue;
+    background: var(--color-nav-active);
     color: var(--color-cafe-list);
 }
 
@@ -108,7 +110,7 @@ nav a {
 }
 
 nav a.active {
-    color: deepskyblue;
+    color: var(--color-nav-active);
 }
 
 

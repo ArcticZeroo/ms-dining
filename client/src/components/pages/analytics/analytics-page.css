@@ -1,29 +1,25 @@
-#analytics-page {
-    --color-setting-background: #DDD;
-}
-
 #analytics-page #days-ago-selector {
     display: flex;
     gap: var(--default-padding);
-    background: var(--color-setting-background);
+    padding: var(--default-padding);
+    background: var(--color-background-raised-2);
 }
 
 #analytics-page .days-ago-option {
     padding: var(--default-padding) 2rem var(--default-padding) 2rem;
-    outline: none;
     border: none;
     border-radius: var(--default-padding);
-    background: var(--color-theme);
-    color: white;
+    background: var(--color-button-radio-option);
     transition: background-color 0.2s ease-in-out;
 }
 
 #analytics-page .days-ago-option:hover, #analytics-page .days-ago-option.active {
-    background: var(--color-theme-dark);
+    background: var(--color-button-radio-selected);
 }
 
 #analytics-page .volume-type {
-    background: var(--color-setting-background);
+    background: var(--color-background-raised-2);
+    padding: var(--default-padding);
 }
 
 #analytics-page .volume-type button.disabled {
@@ -32,7 +28,7 @@
 }
 
 #analytics-page .volume-type .selected {
-    background: var(--color-analytics-volume-type-selected);
+    background: var(--color-button-radio-selected);
 }
 
 #analytics-page .scenarios .dropdown {
@@ -45,7 +41,7 @@
 }
 
 #analytics-page .scenarios .dropdown .selected {
-    background: var(--color-analytics-dropdown-selected);
+    background: var(--color-button-radio-selected);
 }
 
 #analytics-page .chart-container {

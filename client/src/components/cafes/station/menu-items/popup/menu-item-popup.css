@@ -47,7 +47,7 @@
 }
 
 .menu-item-modifier.error .modifier-choice-option {
-    background: var(--color-menu-item-modifier-option);
+    background: var(--color-menu-item-modifier-error-option);
 }
 
 .menu-item-notes {
@@ -78,11 +78,12 @@
     color: white;
     border-radius: var(--default-padding);
     padding: 1rem;
-    transition: background-color 0.25s ease;
+    transition: background-color 0.25s ease, opacity 0.25s ease;
 }
 
 .menu-item-order-footer .add-to-cart:disabled {
     background: var(--color-menu-item-add-to-cart-disabled);
+    opacity: 0.75;
 }
 
 .menu-item-order-body .menu-item-notes textarea {
@@ -108,6 +109,7 @@
 .menu-item-order-body .modifier-choice-option.disabled {
     background: var(--color-menu-item-modifier-option-disabled-background);
     color: var(--color-menu-item-modifier-option-disabled-text);
+    opacity: 0.65;
 }
 
 .menu-item-order-body .modifier-choice-option input {

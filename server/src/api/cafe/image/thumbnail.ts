@@ -8,7 +8,7 @@ import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { defaultUserAgent } from '../../../constants/http.js';
 import { IMenuItem } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
-import { logDebug } from '../../../util/log.js';
+import { logDebug, logError } from '../../../util/log.js';
 
 const maxThumbnailHeightPx = 200;
 const maxThumbnailWidthPx = 400;
@@ -58,6 +58,7 @@ export const retrieveExistingThumbnailData = async (id: string, existingThumbnai
     const thumbnailPath = getThumbnailFilepath(id);
 
     if (!fs.existsSync(thumbnailPath)) {
+        logDebug('Thumbnail for id', id, 'does not exist');
         return {
             hasThumbnail: false
         };
@@ -92,6 +93,8 @@ export const retrieveExistingThumbnailData = async (id: string, existingThumbnai
             lastUpdateTime:  fileLastUpdateTime
         };
     } catch (err) {
+        logError('Could not get thumbnail stats:', err);
+
         // Could not read file?
         return {
             hasThumbnail: false
@@ -116,10 +119,12 @@ const thumbnailDataFromMenuItem = (menuItem: IMenuItem): IThumbnailData => {
 
 const isThumbnailUpToDate = (thumbnailData: IThumbnailData, menuItem: IMenuItem): boolean => {
     if (!thumbnailData.hasThumbnail || !thumbnailData.lastUpdateTime) {
+        logDebug(`Thumbnail for "${menuItem.name}" is out of date because previous data is missing.`);
         return false;
     }
 
     if (!menuItem.lastUpdateTime) {
+        logDebug(`Thumbnail for "${menuItem.name}" is out of date because we don't know when the menu item was last updated.`);
         return false;
     }
 

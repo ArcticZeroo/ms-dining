@@ -5,7 +5,7 @@
     height: 100%;
     display: flex;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--color-semi-transparent-cover);
 }
 
 .fade-in {

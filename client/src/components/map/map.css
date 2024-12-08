@@ -35,12 +35,8 @@
 }
 
 .campus-map .leaflet-div-icon .cafe-marker-tracker.is-homepage-view {
-    --color-icon-background: var(--color-favorite-dark);
-    --color-icon-border: var(--color-favorite);
-}
-
-.cafe-popup * {
-    box-sizing: border-box;
+    --color-icon-background: var(--color-favorite);
+    --color-icon-border: var(--color-favorite-dark);
 }
 
 .cafe-popup .group-member-list {
@@ -87,7 +83,7 @@
     height: var(--map-height);
     /*leaflet map is included in content index calculation*/
     z-index: var(--z-index-above-content);
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--color-semi-transparent-cover);
     color: var(--color-foreground);
     cursor: default;
     box-sizing: border-box;

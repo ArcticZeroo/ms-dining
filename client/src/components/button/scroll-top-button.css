@@ -3,11 +3,11 @@
     bottom: var(--default-padding);
     padding: 1rem;
     border-radius: 100%;
-    background: rgba(44, 48, 65, 0.5);
+    background: color-mix(in srgb, var(--color-foreground), 75% transparent);
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.5s ease;
-    color: white;
+    color: var(--color-foreground);
     transform: translateX(var(--default-padding));
     width: 4rem;
     height: 4rem;

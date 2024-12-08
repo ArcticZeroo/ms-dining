@@ -14,7 +14,7 @@ export const StationTheme: React.FC<IStationThemeProps> = ({ theme }) => {
     return (
         <div className="card station-theme flex" title="This theme is AI-generated and may not be accurate.">
             <span>
-                📒
+                🤖
             </span>
             <span>
                 {theme}

@@ -42,7 +42,8 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
                     <div className="flex flex-between">
                         <FavoriteItemButton
                             setting={ApplicationSettings.homepageViews}
-                            name={view.value.id}/>
+                            name={view.value.id}
+                        />
                         <span>
                             {
                                 getViewName({

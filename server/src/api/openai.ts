@@ -45,12 +45,46 @@ const getThemePrompt = (stationName: string, menuItemsByCategory: Map<string /*c
     chicken/eggplant parmesan, or orange chicken and eggplant at a rotating chinese food station). 
     Your job is to write a short summary of the rotating menu given the list of items available today.
     You will be given the station name, the list of categories and the item names/descriptions within those categories. 
-    The summary should be as descriptive as you can be within a few words or short sentence.
-    Some days, the summary will just be a list of the items available. For instance, it is not helpful to just say 
-    "Dim Sum" or "Vegetarian Options" - customers want to easily glance and see something along the lines of 
-    "Dim Sum: Dumplings and Eggplant" or "Vegetarian: Pasta and veggie burger" so that they can filter their interests 
-    by the summary alone.
+    The summary should be descriptive but brief.
     [End Task Description]
+    
+    [Example]
+    Today's station name: What The Pho
+    
+    Today's Menu:
+    - [What The Pho]: "Pho Steak", "Pho Steak & Beef Meatballs", "Pho Steak & Veggies", "Pho Chicken", "Pho Chicken + Veg", "Pho Tofu & Veg"
+    
+    Today's theme: Beef/Chicken/Tofu Pho
+    [End Example]
+    
+    [Example]
+    Today's station name: Street Food
+    
+    Today's Menu:
+    - [Tenders]: "Basic Chicken Tenders", "Spicy Buffalo Tenders", "Sweet Chili Chicken Tenders", "General Tso Chicken Tenders"
+    - [Cauliflower Tenders]: "Basic Cauliflower Tenders", "Spicy Buffalo Cauliflower Tenders", "Sweet Chili Cauliflower Tenders", "General Tso Cauliflower Tenders"
+    
+    Today's theme: Flavored Chicken or Cauliflower Tenders
+    [End Example]
+    
+    [Example]
+    Today's station name: Street Food
+    
+    Today's Menu:
+    - [Tenders]: "Basic Chicken Tenders", "Spicy Buffalo Tenders", "Sweet Chili Chicken Tenders", "General Tso Chicken Tenders"
+    - [Cauliflower Tenders]: "Basic Cauliflower Tenders", "Spicy Buffalo Cauliflower Tenders", "Sweet Chili Cauliflower Tenders", "General Tso Cauliflower Tenders"
+    
+    Today's theme: Flavored Chicken or Cauliflower Tenders
+    [End Example]
+    
+    [Example]
+    Today's station name: Facing East
+    
+    Today's Menu:
+    - [Lunch Box]: "3 Cup Chicken Bento", "Beef Stew Bento", "Pork Belly Bento", "Vegetarian Bento"
+    
+    Today's theme: Chicken/Beef/Pork/Vegetarian Bento Boxes
+    [End Example]
 
     Today's station name: "${stationName}"
 

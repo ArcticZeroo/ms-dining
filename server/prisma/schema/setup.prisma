@@ -8,5 +8,5 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dining.db"
+  url      = "file:../dining.db"
 }

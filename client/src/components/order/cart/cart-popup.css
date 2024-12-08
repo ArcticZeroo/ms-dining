@@ -23,7 +23,7 @@
 }
 
 .cart-popup.has-missing-items .cart-info {
-    --color-cart-popup: var(--color-error-accent);
+    --color-cart-popup: var(--color-error-dark);
 }
 
 .cart-popup.hidden {

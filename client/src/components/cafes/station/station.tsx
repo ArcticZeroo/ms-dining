@@ -94,16 +94,15 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                     <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
                         <FavoriteSearchableItemButton name={station.name} type={SearchEntityType.station}/>
                         <button className="title" onClick={onTitleClick}>
-                            <span>
-                                {
-                                    station.logoUrl && (
-                                        <img
-                                            src={station.logoUrl}
-                                            alt={`Logo for station ${station.name}`}
-                                        />
-                                    )
-                                }
-                            </span>
+                            {
+                                station.logoUrl ? (
+                                    <img
+                                        src={station.logoUrl}
+                                        alt={`Logo for station ${station.name}`}
+                                        className="station-logo"
+                                    />
+                                ) : <span/>
+                            }
                             <span className="flex">
                                 {station.name}
                                 {
