@@ -23,7 +23,7 @@ export const makeJsonRequest = async <T>({
         ...options,
         headers: {
             'X-Visitor-Id': getVisitorId(),
-            [VERSION_TAG_HEADER]: VERSION_TAG.modifiersInSearchResults,
+            [VERSION_TAG_HEADER]: VERSION_TAG.modifiersInSearchResults.toString(),
             ...headers
         },
     });
