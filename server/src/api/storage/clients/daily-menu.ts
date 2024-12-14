@@ -10,7 +10,7 @@ import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.j
 import { ICafeStation, IMenuItem } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation } from '../../../util/cafe.js';
 import { isDateValid } from '../../../util/date.js';
-import { logError } from '../../../util/log.js';
+import { logDebug, logError } from '../../../util/log.js';
 import { LockedMap } from '../../../util/map.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
@@ -290,7 +290,7 @@ export abstract class DailyMenuStorageClient {
         const dates = Array.from(yieldDaysInRange(mondayDate, fridayDate));
         const dailyMenus = await Promise.all(dates.map(date => DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, DateUtil.toDateString(date))));
 
-        return dates.map((date, i) => ([date, dailyMenus[i]!] as const));
+        return dates.map((date, i) => ([date, dailyMenus[i]!]));
     }
 
     private static _calculateUniquenessMetrics(entries: Array<[Date, Array<ICafeStation>]>) {
@@ -337,6 +337,8 @@ export abstract class DailyMenuStorageClient {
     }
 
     private static async _calculateUniquenessDataForCafe(cafeId: string, targetDateString: string): Promise<Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>> {
+        logDebug(cafeId, targetDateString, 'Calculating uniqueness data');
+
         const targetDate = fromDateString(targetDateString);
         const menuEntries = await DailyMenuStorageClient._getMenuEntriesForWeek(cafeId, targetDate);
 
@@ -356,12 +358,14 @@ export abstract class DailyMenuStorageClient {
             }
         }
 
+        logDebug(cafeId, 'First pass stations:', Array.from(uniquenessData.entries()).map(([dateString, map]) => [dateString, Array.from(map.keys())]));
+
         const calculateUniquenessDataForDay = async ([todayDate, todayMenu]: [Date, Array<ICafeStation>], i: number) => {
             const todayDateString = DateUtil.toDateString(todayDate);
 
             const todayUniquenessData = uniquenessData.get(todayDateString);
             if (todayUniquenessData == null) {
-                logError('Missing uniqueness data for dateString', todayDateString);
+                logError(cafeId, 'Missing uniqueness data for dateString', todayDateString);
                 return;
             }
 
@@ -385,13 +389,16 @@ export abstract class DailyMenuStorageClient {
             for (const station of todayMenu) {
                 const stationUniquenessData = todayUniquenessData.get(station.name);
                 if (stationUniquenessData == null) {
-                    logError('Missing station uniqueness data for', station.name, 'on', todayDateString);
+                    logError(cafeId, todayDateString, 'Missing station uniqueness data for', station.name);
                     continue;
                 }
 
                 const wasHereYesterday = yesterdayUniquenessData?.has(station.name) ?? false;
                 if (wasHereYesterday && yesterdayUniquenessData != null) {
                     yesterdayUniquenessData.get(station.name)!.isTraveling = false;
+                    logDebug(cafeId, todayDateString, 'Marking', station.name, 'as having been here yesterday');
+                } else if (wasHereYesterday) {
+                    logError(cafeId, todayDateString, 'Something went wrong... yesterdayUniquenessData is missing');
                 }
 
                 stationUniquenessData.isTraveling = !wasHereYesterday;
@@ -400,7 +407,7 @@ export abstract class DailyMenuStorageClient {
 
                 if (stationUniquenessData.daysThisWeek <= 0 || stationUniquenessData.daysThisWeek > 5 || itemCountsForStation == null) {
                     // Something weird happened.
-                    logError(`Station ${station.name} has erroneous data for date ${todayDateString}`);
+                    logError(cafeId, todayDateString, `Station ${station.name} has erroneous data for date ${todayDateString}`);
                     continue;
                 }
 
@@ -441,6 +448,15 @@ export abstract class DailyMenuStorageClient {
                 stationUniquenessData.theme = await StationThemeClient.retrieveThemeAsync(station.name, themeItemsByCategory);
             }
         };
+
+        logDebug(cafeId, 'Traveling stations by day:', Array.from(uniquenessData.entries())
+            .map(([dateString, map]) => [
+                dateString,
+                Array.from(map.entries())
+                    .filter(([, data]) => data.isTraveling)
+                    .map(([station]) => station)
+            ])
+        );
 
         await Promise.all(menuEntries.map(calculateUniquenessDataForDay));
 

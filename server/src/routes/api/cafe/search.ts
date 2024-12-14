@@ -1,17 +1,19 @@
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
 import { ISearchResponseResult } from '@msdining/common/dist/models/http.js';
-import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search.js';
+import { ISearchQuery, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
 import { SearchManager } from '../../../api/storage/search.js';
 import { IServerSearchResult } from '../../../models/search.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
-import { attachRouter, getTrimmedQueryParam } from '../../../util/koa.js';
+import { attachRouter, getTrimmedQueryParam, getVersionTag } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { DateUtil, NumberUtil } from '@msdining/common';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
+import Koa from 'koa';
+import { supportsModifiersInSearchResults } from '@msdining/common/dist/constants/versions.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -29,28 +31,38 @@ export const registerSearchRoutes = (parent: Router) => {
 		return serialized;
 	};
 
-	const serializeSearchResult = (searchResult: IServerSearchResult): ISearchResponseResult => ({
-		type:         searchResult.type,
-		name:         searchResult.name,
-		description:  searchResult.description || undefined,
-		imageUrl:     getBetterLogoUrl(searchResult.name, searchResult.imageUrl) || undefined,
-		locations:    serializeMapOfStringToSet(searchResult.locationDatesByCafeId),
-		prices:       Object.fromEntries(searchResult.priceByCafeId),
-		stations:     Object.fromEntries(searchResult.stationByCafeId),
-		matchReasons: Array.from(searchResult.matchReasons),
-		tags:         searchResult.tags ? Array.from(searchResult.tags) : undefined,
-		searchTags:   searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
-		matchedModifiers: serializeMapOfStringToSet(searchResult.matchedModifiers)
-	});
+	const serializeSearchResult = (searchResult: IServerSearchResult, allowModifiers: boolean): ISearchResponseResult => {
+		const matchReasons = new Set(searchResult.matchReasons);
+		if (!allowModifiers) {
+			matchReasons.delete(SearchMatchReason.modifier);
+		}
 
-	const serializeSearchResults = (searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
+		return ({
+			type:             searchResult.type,
+			name:             searchResult.name,
+			description:      searchResult.description || undefined,
+			imageUrl:         getBetterLogoUrl(searchResult.name, searchResult.imageUrl) || undefined,
+			locations:        serializeMapOfStringToSet(searchResult.locationDatesByCafeId),
+			prices:           Object.fromEntries(searchResult.priceByCafeId),
+			stations:         Object.fromEntries(searchResult.stationByCafeId),
+			tags:             searchResult.tags ? Array.from(searchResult.tags) : undefined,
+			searchTags:       searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
+			matchedModifiers: allowModifiers ? serializeMapOfStringToSet(searchResult.matchedModifiers) : {},
+			matchReasons:     Array.from(matchReasons),
+		});
+	};
+
+	const serializeSearchResults = (ctx: Koa.Context, searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
 		const searchResults = [];
+		const areModifiersAllowed = supportsModifiersInSearchResults(getVersionTag(ctx));
+
 		for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
 			for (const searchResult of searchResultsById.values()) {
-				searchResults.push(serializeSearchResult(searchResult));
+				searchResults.push(serializeSearchResult(searchResult, areModifiersAllowed));
 			}
 		}
-		return jsonStringifyWithoutNull(searchResults);
+
+		ctx.body = jsonStringifyWithoutNull(searchResults);
 	};
 
 	router.post('/favorites',
@@ -66,7 +78,7 @@ export const registerSearchRoutes = (parent: Router) => {
 
 			const date = DateUtil.fromMaybeDateString(ctx.query.date);
 			const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries, date);
-			ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+			serializeSearchResults(ctx, searchResultsByIdPerEntityType);
 		});
 
 	const getApplicationNameForSearch = (isExplore: string) => {
@@ -96,7 +108,7 @@ export const registerSearchRoutes = (parent: Router) => {
 				isExact
 			);
 
-			ctx.body = serializeSearchResults(searchResultsByIdPerEntityType);
+			serializeSearchResults(ctx, searchResultsByIdPerEntityType);
 		});
 
 	router.get('/cheap',

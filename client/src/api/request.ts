@@ -2,6 +2,7 @@ import { ERROR_BODIES } from '@msdining/common/dist/responses';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
 
 import { getVisitorId } from '../constants/settings.ts';
+import { VERSION_TAG, VERSION_TAG_HEADER } from "@msdining/common/dist/constants/versions";
 
 interface IMakeRequestParams {
     path: string;
@@ -22,6 +23,7 @@ export const makeJsonRequest = async <T>({
         ...options,
         headers: {
             'X-Visitor-Id': getVisitorId(),
+            [VERSION_TAG_HEADER]: VERSION_TAG.modifiersInSearchResults,
             ...headers
         },
     });

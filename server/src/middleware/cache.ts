@@ -1,5 +1,6 @@
 import Duration from '@arcticzeroo/duration';
 import Koa from 'koa';
+import { getVersionTag } from '../util/koa.js';
 
 interface ICacheEntry {
     expirationTime: number;
@@ -59,7 +60,7 @@ export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_
         return queryParamsKeys.map(key => `${key}=${queryParams[key]}`).join('&');
     }
 
-    const getCacheKey = (ctx: Koa.Context) => `${ctx.path}?${serializeQueryParams(ctx)}`;
+    const getCacheKey = (ctx: Koa.Context) => `${ctx.path}?${serializeQueryParams(ctx)}@${getVersionTag(ctx)}`;
 
     return async (ctx, next) => {
         const cacheKey = getCacheKey(ctx);
