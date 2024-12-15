@@ -31,7 +31,6 @@ export const scheduleWeeklyUpdateJob = () => {
         // Each weekday (except Friday), update all weekly menus to account for any changes
         // Fridays will be handled by the daily update job.
         '0 9 * * 1,2,3,4'
-        // TODO: Ensure that we have menus for next week by EOD on Fridays
     ], false /*forceUseNextWeek*/);
 
     scheduleWeeklyJobs([
