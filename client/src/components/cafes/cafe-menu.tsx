@@ -6,7 +6,7 @@ import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { ICafe } from '../../models/cafe.ts';
-import { getCafeName } from '../../util/cafe.ts';
+import { didEntityOpenRecently, getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
@@ -40,6 +40,11 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
 
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
 
+    const openedRecently = useMemo(
+        () => didEntityOpenRecently(cafe),
+        [cafe]
+    );
+
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
             collapsedCafeIdsNotifier.add(cafe.id);
@@ -67,7 +72,8 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                         className={classNames(
                             'collapsible-content collapsible-cafe',
                             isCollapsed && 'collapsed',
-                            !isCollapsed && 'expanded'
+                            !isCollapsed && 'expanded',
+                            openedRecently && 'recently-opened'
                         )}
                         key={cafe.id}
                     >
@@ -94,7 +100,11 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                     {cafeName}
                                     <ExpandIcon isExpanded={!isCollapsed}/>
                                 </span>
-                                <span className="corner"/>
+                                <span className="corner recently-opened">
+                                    {
+                                        openedRecently && <span className="default-container recently-opened-notice">New!</span>
+                                    }
+                                </span>
                             </button>
                         </div>
                         <CafeMenuBody

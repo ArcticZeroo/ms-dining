@@ -173,6 +173,10 @@
     flex: 1;
 }
 
+.collapsible-cafe .collapse-toggle .recently-opened {
+    justify-content: flex-end;
+}
+
 .collapsible-cafe .collapse-toggle .cafe-name {
     display: flex;
     justify-content: center;
