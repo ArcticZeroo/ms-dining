@@ -107,8 +107,9 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             title={title}
             style={{ backgroundColor: currentHighlightTag?.color }}
         >
-            <ScrollAnchor id={scrollAnchorId} margin={scrollAnchorMargin}/>
             <div className="menu-item-head">
+                {/*Scroll anchor is in the head to avoid extra gap*/}
+                <ScrollAnchor id={scrollAnchorId} margin={scrollAnchorMargin}/>
                 <span className="menu-item-name">{menuItem.name}</span>
                 {
                     showDescriptions

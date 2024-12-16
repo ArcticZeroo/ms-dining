@@ -90,13 +90,14 @@
 .station .menu-category {
     align-self: stretch;
     flex-grow: 1;
+    gap: var(--constant-mini-padding);
 }
 
 .station .menu-category .menu-category-items {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: var(--default-padding);
+    gap: var(--constant-mini-padding);
     flex-grow: 1;
 }
 

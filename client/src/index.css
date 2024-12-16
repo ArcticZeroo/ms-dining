@@ -111,6 +111,7 @@
     --color-button-radio-disabled: var(--color-theme-turquoise-dark);
 
     --constant-padding: 0.5rem;
+    --constant-mini-padding: 0.25rem;
     --icon-size: 24px;
     --map-height: 50vh;
 
