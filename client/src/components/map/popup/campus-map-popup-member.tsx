@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { MapPopupViewContext } from '../../../context/map.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeViewType, ICafe } from '../../../models/cafe.ts';
-import { getCafeName } from '../../../util/cafe.ts';
+import { didEntityOpenRecently, getCafeName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
+import { classNames } from '../../../util/react.ts';
 import { CafePopupOverview } from './overview/cafe-popup-overview.tsx';
 
 interface ICampusMapPopupMember {
@@ -19,6 +20,16 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     const view = viewsById.get(cafe.id);
+    const openedRecently = useMemo(
+        () => {
+            if (!view) {
+                return false;
+            }
+
+            return didEntityOpenRecently(view.value);
+        },
+        [view]
+    );
 
     if (!popupView || !view) {
         return null;
@@ -27,14 +38,14 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
     const cafeName = getCafeName({
         cafe,
         showGroupName: false,
-        includeEmoji: true
+        includeEmoji:  true
     });
 
     return (
-        <div className="group-member flex-col flex-center">
+        <div className={classNames('group-member flex-col flex-center', openedRecently && 'recently-opened')}>
             {
                 popupView.type === CafeViewType.group && (
-                    // Intentionally getting the URL for the cafe's view instead of the popup
+                // Intentionally getting the URL for the cafe's view instead of the popup
                     <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="flex">
                         {
                             cafe.logoUrl && (

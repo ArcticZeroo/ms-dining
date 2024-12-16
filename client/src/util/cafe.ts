@@ -1,5 +1,8 @@
+import Duration from '@arcticzeroo/duration';
+import { IDiningCoreEntity } from '@msdining/common/dist/models/http';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { fromDateString, isDateBefore } from '@msdining/common/dist/util/date-util';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
 import { stringWithSpaceIfExists } from './string.ts';
@@ -62,6 +65,22 @@ export const getCafeLocation = (cafe: ICafe): ILocationCoordinates => {
     return location;
 }
 
-export const isCafeVisible = (cafe: ICafe, shouldUseGroups: boolean) => {
-    return !shouldUseGroups || !cafe.group || cafe.group.alwaysExpand;
+export const isViewAvailable = (view: CafeView, minMenuDate: Date) => {
+    if (view.value.firstAvailableDate == null) {
+        return true;
+    }
+
+    return !isDateBefore(fromDateString(view.value.firstAvailableDate), minMenuDate);
+};
+
+const RECENT_OPEN_TIME = new Duration({ days: 10 });
+
+export const didEntityOpenRecently = (entity: IDiningCoreEntity) => {
+    if (entity.firstAvailableDate == null) {
+        return false;
+    }
+
+    const firstAvailableDate = fromDateString(entity.firstAvailableDate);
+    const timeSinceFirstAvailableMs = Date.now() - firstAvailableDate.getTime();
+    return (timeSinceFirstAvailableMs > 0) && (timeSinceFirstAvailableMs <= RECENT_OPEN_TIME.inMilliseconds);
 }

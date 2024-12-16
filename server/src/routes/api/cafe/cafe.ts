@@ -1,17 +1,18 @@
 import Router from '@koa/router';
+import { VERSION_TAG } from '@msdining/common/dist/constants/versions.js';
+import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/dist/models/http.js';
+import { getMinimumDateForMenu, toMaybeDateString } from '@msdining/common/dist/util/date-util.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';
-import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/dist/models/http.js';
+import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { getLogoUrl } from '../../../util/cafe.js';
 import { isCafeAvailable } from '../../../util/date.js';
-import { attachRouter } from '../../../util/koa.js';
+import { attachRouter, supportsVersionTag } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { registerMenuRoutes } from './menu.js';
-import { registerSearchRoutes } from './search.js';
 import { registerOrderingRoutes } from './ordering.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { getMinimumDateForMenu } from '@msdining/common/dist/util/date-util.js';
+import { registerSearchRoutes } from './search.js';
 
 export const registerCafeRoutes = (parent: Router) => {
     const router = new Router({
@@ -46,7 +47,7 @@ export const registerCafeRoutes = (parent: Router) => {
                     // Allows us to add cafes before they've officially opened, without polluting the menu list.
                     // For instance, when Food Hall 4 was added, the online ordering menu became available more than
                     // a week early.
-                    if (!isCafeAvailable(cafe, getMinimumDateForMenu())) {
+                    if (!supportsVersionTag(ctx, VERSION_TAG.unreleasedCafes) && !isCafeAvailable(cafe, getMinimumDateForMenu())) {
                         continue;
                     }
 
@@ -57,16 +58,18 @@ export const registerCafeRoutes = (parent: Router) => {
                     }
 
                     const member: IDiningCoreGroupMember = {
-                        name:      cafe.name,
-                        id:        cafe.id,
-                        shortName: cafe.shortName,
-                        url:       cafe.url,
-                        logoUrl:   getLogoUrl(cafe, cafeData),
-                        location:  cafe.location,
-                        emoji:     cafe.emoji
+                        name:               cafe.name,
+                        id:                 cafe.id,
+                        shortName:          cafe.shortName,
+                        url:                cafe.url,
+                        logoUrl:            getLogoUrl(cafe, cafeData),
+                        location:           cafe.location,
+                        emoji:              cafe.emoji,
+                        firstAvailableDate: toMaybeDateString(cafe.firstAvailable)
                     };
 
                     // @ts-expect-error: TS doesn't know that we have already enforced the location requirement
+                    // in the original definition of the group
                     responseGroup.members.push(member);
                 }
 

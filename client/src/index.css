@@ -556,6 +556,10 @@ html, body, #root, .App {
     background: var(--color-dropdown-background);
 }
 
+.recently-opened-notice {
+    background: var(--color-theme-turquoise);
+}
+
 /* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {

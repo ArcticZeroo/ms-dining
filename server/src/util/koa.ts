@@ -35,3 +35,5 @@ export const getVersionTag = (ctx: Koa.Context): number => {
 
     return ctx.state.versionTag;
 }
+
+export const supportsVersionTag = (ctx: Koa.Context, tag: number) => getVersionTag(ctx) >= tag;

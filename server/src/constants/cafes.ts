@@ -1,3 +1,4 @@
+import { fromDateString } from '@msdining/common/dist/util/date-util.js';
 import { CafeGroup, ICafe } from '../models/cafe.js';
 
 export const getBaseApiUrlWithoutTrailingSlash = ({ id }: ICafe) => `https://${id}.buy-ondemand.com/api`;
@@ -335,7 +336,7 @@ export const groupList: CafeGroup[] = [
 				name:  'Bobae',
 				id:    'bobae',
 				emoji: '🧋',
-				firstAvailable: new Date(2024, 11 /*monthIndex*/, 16)
+				firstAvailable: fromDateString('2024-12-16')
 			}
 		]
 	},

@@ -2,10 +2,14 @@ import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
 import { SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
 
-export interface IDiningCoreGroupMemberBase {
+export interface IDiningCoreEntity {
     name: string;
     id: string;
     shortName?: number | string;
+    firstAvailableDate?: string;
+}
+
+export interface IDiningCoreGroupMemberBase extends IDiningCoreEntity {
     url?: string;
     logoUrl?: string
     group?: IDiningCoreGroup;
@@ -22,10 +26,7 @@ interface IDiningCoreGroupMemberWithLocation extends IDiningCoreGroupMemberBase 
 
 export type IDiningCoreGroupMember = IDiningCoreGroupMemberWithoutLocation | IDiningCoreGroupMemberWithLocation;
 
-interface IDiningCoreGroupBase {
-    name: string;
-    id: string;
-    shortName?: number | string;
+interface IDiningCoreGroupBase extends IDiningCoreEntity {
     alwaysExpand: boolean;
 }
 

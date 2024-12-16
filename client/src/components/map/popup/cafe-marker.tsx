@@ -4,11 +4,13 @@ import { Marker } from 'react-leaflet';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
+import { didEntityOpenRecently } from '../../../util/cafe.ts';
 import { toLeafletLocation } from '../../../util/coordinates.ts';
+import { classNames } from '../../../util/react.ts';
 import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
 
-const getIconHtml = (view: CafeView, isHomepageView: boolean) => `
-<span class="cafe-marker-tracker flex flex-center${isHomepageView ? ' is-homepage-view' : ''}" data-id="${view.value.id}">
+const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: boolean) => `
+<span class="${classNames('cafe-marker-tracker flex flex-center', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened')}" data-id="${view.value.id}">
     ${getViewEmoji(view)}
 </span>
 `;
@@ -22,7 +24,7 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
-    const isOnHomepage = useMemo(
+    const isHomepageView = useMemo(
         () => {
             return homepageViewIds.has(view.value.id)
                    || (!shouldUseGroups
@@ -30,6 +32,22 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
                        && view.value.members.some(member => homepageViewIds.has(member.id)));
         },
         [homepageViewIds, shouldUseGroups, view]
+    );
+
+    const isRecentlyOpened = useMemo(
+        () => {
+            if (view.type === CafeViewType.group) {
+                return view.value.members.some(didEntityOpenRecently);
+            }
+
+            return didEntityOpenRecently(view.value);
+        },
+        [view]
+    );
+
+    const iconHtml = useMemo(
+        () => getIconHtml(view, isHomepageView, isRecentlyOpened),
+        [view, isHomepageView, isRecentlyOpened]
     );
 
     const onContextMenu = (event: L.LeafletMouseEvent) => {
@@ -45,7 +63,7 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
     return (
         <Marker
             position={toLeafletLocation(getViewLocation(view))}
-            icon={L.divIcon({ html: getIconHtml(view, isOnHomepage) })}
+            icon={L.divIcon({ html: iconHtml })}
             eventHandlers={{
                 click: () => onClick(view),
                 contextmenu: onContextMenu

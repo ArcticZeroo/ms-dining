@@ -1,10 +1,11 @@
+import { getMinimumDateForMenu } from '@msdining/common/dist/util/date-util';
 import { useContext, useMemo } from 'react';
+import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { sortViews } from '../util/sorting.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
-import { ApplicationSettings } from '../constants/settings.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     return useMemo(() => {
@@ -45,8 +46,9 @@ export const useVisibleViews = (shouldUseGroups: boolean) => {
     return useMemo(() => {
         const visibleViews: CafeView[] = [];
 
+        const minMenuDate = getMinimumDateForMenu();
         for (const view of viewsInOrder) {
-            if (isViewVisible(view, shouldUseGroups)) {
+            if (isViewVisible(view, shouldUseGroups, minMenuDate)) {
                 visibleViews.push(view);
             }
         }
@@ -69,13 +71,14 @@ export const useHomepageViews = () => {
     // Users may have added cafes to their home set which are currently unavailable
     return useMemo(() => {
         const availableViews: CafeView[] = [];
+        const minMenuDate = getMinimumDateForMenu();
 
         for (const viewId of homepageViewIds) {
             if (viewsById.has(viewId)) {
                 const view = viewsById.get(viewId)!;
 
                 // If the user selected a single view that should be a group, don't show it
-                if (isViewVisible(view, shouldUseGroups)) {
+                if (isViewVisible(view, shouldUseGroups, minMenuDate)) {
                     availableViews.push(view);
                 }
             }

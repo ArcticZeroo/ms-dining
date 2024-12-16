@@ -42,9 +42,14 @@
     border: 0.25rem solid var(--color-icon-border);
 }
 
+.campus-map .leaflet-div-icon .cafe-marker-tracker.recently-opened:not(.is-homepage-view) {
+    --color-icon-background: var(--color-theme-turquoise-dark);
+    --color-icon-border: var(--color-theme-turquoise);
+}
+
 .campus-map .leaflet-div-icon .cafe-marker-tracker.is-homepage-view {
-    --color-icon-background: var(--color-favorite);
-    --color-icon-border: var(--color-favorite-dark);
+    --color-icon-background: var(--color-favorite-dark);
+    --color-icon-border: var(--color-favorite);
 }
 
 .cafe-popup .group-member-list {
@@ -64,6 +69,10 @@
     min-width: 6rem;
     min-height: 3rem;
     transition: min-height 0.125s ease, padding 0.125s ease;
+}
+
+.cafe-popup .group-member.recently-opened {
+    background: var(--color-theme-turquoise-dark);
 }
 
 .cafe-popup .group-member:empty {

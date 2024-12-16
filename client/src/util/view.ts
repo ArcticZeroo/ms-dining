@@ -1,6 +1,6 @@
 import { ILocationCoordinates, Nullable } from '@msdining/common/dist/models/util';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
-import { getCafeLocation } from './cafe.ts';
+import { getCafeLocation, isViewAvailable } from './cafe.ts';
 
 export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<string, CafeView>): Array<ICafe> => {
     if (typeof view === 'string') {
@@ -40,8 +40,12 @@ export const getParentView = (viewsById: Map<string, CafeView>, view: CafeView, 
     return parentView;
 };
 
-export const isViewVisible = (view: Nullable<CafeView>, shouldUseGroups: boolean) => {
+export const isViewVisible = (view: Nullable<CafeView>, shouldUseGroups: boolean, minMenuDate: Date) => {
     if (view == null) {
+        return false;
+    }
+
+    if (!isViewAvailable(view, minMenuDate)) {
         return false;
     }
 
@@ -74,10 +78,10 @@ export const getViewLocation = (view: CafeView): ILocationCoordinates => {
     }
 
     return {
-        lat: totalLat / view.value.members.length,
+        lat:  totalLat / view.value.members.length,
         long: totalLong / view.value.members.length
-    }
-}
+    };
+};
 
 export const getViewEmoji = (view: CafeView) => view.type === CafeViewType.single && view.value.emoji
     ? view.value.emoji
