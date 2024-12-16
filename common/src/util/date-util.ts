@@ -78,6 +78,14 @@ export const isDateAfter = (date: Date, compareDate: Date) => {
     return getDateWithoutTime(date).getTime() > getDateWithoutTime(compareDate).getTime();
 };
 
+export const isDateInRangeInclusive = (date: Date, [start, end]: [Date, Date]) => {
+    const dateWithoutTime = getDateWithoutTime(date);
+    const startWithoutTime = getDateWithoutTime(start);
+    const endWithoutTime = getDateWithoutTime(end);
+
+    return dateWithoutTime.getTime() >= startWithoutTime.getTime() && dateWithoutTime.getTime() <= endWithoutTime.getTime();
+}
+
 export const getNowWithDaysInFuture = (daysInFuture: number) => {
     const now = new Date();
     now.setDate(now.getDate() + daysInFuture);

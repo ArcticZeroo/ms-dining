@@ -11,7 +11,7 @@ import { registerMenuRoutes } from './menu.js';
 import { registerSearchRoutes } from './search.js';
 import { registerOrderingRoutes } from './ordering.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import Duration from '@arcticzeroo/duration';
+import { getMinimumDateForMenu } from '@msdining/common/dist/util/date-util.js';
 
 export const registerCafeRoutes = (parent: Router) => {
     const router = new Router({
@@ -46,7 +46,7 @@ export const registerCafeRoutes = (parent: Router) => {
                     // Allows us to add cafes before they've officially opened, without polluting the menu list.
                     // For instance, when Food Hall 4 was added, the online ordering menu became available more than
                     // a week early.
-                    if (!isCafeAvailable(cafe)) {
+                    if (!isCafeAvailable(cafe, getMinimumDateForMenu())) {
                         continue;
                     }
 
