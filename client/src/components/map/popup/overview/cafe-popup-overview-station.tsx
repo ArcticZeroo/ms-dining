@@ -39,6 +39,9 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
         return null;
     }
 
+    const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1];
+    const shouldShowBadge = station.uniqueness.isTraveling || itemsHereTodayOnlyCount > 0;
+
     return (
         <Link
             className="overview-station"
@@ -64,20 +67,24 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                 <span>
                     {station.name}
                 </span>
-                <span className="badge flex flex-center">
-                    {
-                        station.uniqueness.isTraveling && (
-                            <span className="material-symbols-outlined">
+                {
+                    shouldShowBadge && (
+                        <span className="badge flex flex-center">
+                            {
+                                station.uniqueness.isTraveling && (
+                                    <span className="material-symbols-outlined">
                             flight
-                            </span>
-                        )
-                    }
-                    {
-                        !station.uniqueness.isTraveling && (
-                            station.uniqueness.itemDays[1]
-                        )
-                    }
-                </span>
+                                    </span>
+                                )
+                            }
+                            {
+                                !station.uniqueness.isTraveling && (
+                                    itemsHereTodayOnlyCount
+                                )
+                            }
+                        </span>
+                    )
+                }
             </div>
             {
                 station.uniqueness.theme != null && (
