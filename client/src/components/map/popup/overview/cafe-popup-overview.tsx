@@ -6,7 +6,6 @@ import { DiningClient } from '../../../../api/dining.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
-import { didEntityOpenRecently } from '../../../../util/cafe.ts';
 import { sortStationUniquenessInPlace } from '../../../../util/sorting.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { CafePopupOverviewStation } from './cafe-popup-overview-station.tsx';
@@ -38,11 +37,6 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
 
     const overviewStations = overviewState.value;
     const isLoading = overviewStations == null && !overviewState.error;
-
-    const openedRecently = useMemo(
-        () => didEntityOpenRecently(cafe),
-        [cafe]
-    );
 
     const stationsToShow = useMemo(
         () => {
@@ -100,13 +94,6 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
             {
                 !isLoading && stationsToShow.length > 0 && (
                     <div key={cafe.id} className="flex-col">
-                        {
-                            openedRecently && (
-                                <span className="recently-opened-notice default-container">
-                                    🥳 Opened recently!
-                                </span>
-                            )
-                        }
                         <span>
                             Interesting stations today:
                         </span>

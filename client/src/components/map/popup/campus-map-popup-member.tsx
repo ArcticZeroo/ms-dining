@@ -60,6 +60,13 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
                     </Link>
                 )
             }
+            {
+                openedRecently && (
+                    <span className="recently-opened-notice default-container">
+                        New!
+                    </span>
+                )
+            }
             <CafePopupOverview
                 cafe={cafe}
             />
