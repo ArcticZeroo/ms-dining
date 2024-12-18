@@ -68,7 +68,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                     {station.name}
                 </span>
                 {
-                    shouldShowBadge && (
+                    shouldShowBadge ? (
                         <span className="badge flex flex-center">
                             {
                                 station.uniqueness.isTraveling && (
@@ -83,7 +83,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                                 )
                             }
                         </span>
-                    )
+                    ) : <span/>
                 }
             </div>
             {

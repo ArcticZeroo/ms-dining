@@ -38,7 +38,9 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
             {
                 menuItem.imageUrl != null && (
                     <div className="menu-item-image-container">
-                        <img src={menuItem.imageUrl} alt="Menu item image" className="menu-item-image"/>
+                        <img src={menuItem.imageUrl} 
+                            alt="Menu item image" 
+                            className="menu-item-image"/>
                     </div>
                 )
             }

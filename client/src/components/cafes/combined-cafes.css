@@ -37,6 +37,7 @@
     position: sticky;
     z-index: var(--z-index-above-content);
     background: var(--color-background);
+    gap: var(--default-padding);
 }
 
 .station .station-header .title {
@@ -314,10 +315,6 @@
         display: flex;
         flex-direction: column;
         gap: var(--default-padding);
-        box-sizing: border-box;
-    }
-
-    .station * {
         box-sizing: border-box;
     }
 
