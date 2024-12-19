@@ -8,7 +8,6 @@ export interface EnvironmentSettings {
     maxConcurrentCafes: number;
     ignoreAnalyticsFailures?: boolean;
     logRequests: boolean;
-    alwaysSlowUpdate: boolean;
 }
 
 export const isDev = process.env.NODE_ENV?.toLowerCase() === 'dev';
@@ -21,7 +20,6 @@ const DEFAULT_ENVIRONMENT_SETTINGS: Readonly<EnvironmentSettings> = {
     skipPatternRepair:           false,
     maxConcurrentCafes:          10,
     logRequests:                 false,
-    alwaysSlowUpdate:            false,
 };
 
 const DEV_ENVIRONMENT_SETTINGS: Partial<EnvironmentSettings> = {
@@ -30,7 +28,6 @@ const DEV_ENVIRONMENT_SETTINGS: Partial<EnvironmentSettings> = {
     maxConcurrentRequests:       5,
     maxConcurrentCafes:          5,
     ignoreAnalyticsFailures:     true,
-    alwaysSlowUpdate:            true,
 };
 
 const getEnvironmentSettings = (): Readonly<EnvironmentSettings> => {

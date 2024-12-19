@@ -5,7 +5,6 @@ import { IMenuItem } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
-import { retrieveExistingThumbnailData } from '../../cafe/image/thumbnail.js';
 import { ISearchTagQueueEntry } from '../../../worker/search-tags.js';
 import { usePrismaClient } from '../client.js';
 
@@ -250,8 +249,6 @@ export abstract class MenuItemStorageClient {
 			return null;
 		}
 
-		const thumbnailData = await retrieveExistingThumbnailData(id);
-
 		const modifiers: IMenuItemModifier[] = [];
 		for (const modifier of menuItem.modifiers) {
 			modifiers.push({
@@ -279,9 +276,7 @@ export abstract class MenuItemStorageClient {
 			imageUrl:        menuItem.imageUrl,
 			lastUpdateTime:  menuItem.externalLastUpdateTime,
 			receiptText:     menuItem.externalReceiptText,
-			hasThumbnail:    thumbnailData.hasThumbnail,
-			thumbnailHeight: thumbnailData.thumbnailHeight,
-			thumbnailWidth:  thumbnailData.thumbnailWidth,
+			hasThumbnail:    false,
 			tags:            deserializeMenuItemTags(menuItem.tags),
 			searchTags:      new Set(menuItem.searchTags.map(tag => tag.name)),
 			modifiers

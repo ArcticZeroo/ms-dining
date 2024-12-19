@@ -4,6 +4,7 @@ import { Nullable } from '../models/util.js';
 import { logDebug, logError, logInfo } from '../util/log.js';
 import { WorkerQueue } from './queue.js';
 import Duration from '@arcticzeroo/duration';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 5 });
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 15 });
@@ -16,7 +17,7 @@ export interface ISearchTagQueueEntry {
     description: Nullable<string>;
 }
 
-class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
+class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
     constructor() {
         super({
             successPollInterval: QUEUE_SUCCESS_POLL_INTERVAL,
@@ -35,6 +36,10 @@ class SearchTagsWorkerQueue extends WorkerQueue<ISearchTagQueueEntry> {
         }
 
         super.add(...entries);
+    }
+
+    protected getKey(entry: ISearchTagQueueEntry): string {
+        return normalizeNameForSearch(entry.name);
     }
 
     public async doWorkAsync({ id, name, description }: ISearchTagQueueEntry) {

@@ -3,7 +3,6 @@ import fs from 'fs/promises';
 import Semaphore from 'semaphore-async-await';
 import { cafeList } from '../../../constants/cafes.js';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
-import { ApplicationContext } from '../../../constants/context.js';
 import { ICafe } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
@@ -11,9 +10,9 @@ import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveSessionAsync } from './storage.js';
-import { writeThumbnailsForCafe } from './thumbnail.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { CafeMenuSession } from '../session/menu.js';
+import { THUMBNAIL_WORKER_QUEUE } from '../../../worker/thumbnail.js';
 
 export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryCount = 3;
@@ -88,11 +87,7 @@ export class DailyCafeUpdateSession {
                 cafeDiscoveryRetryDelayMs
             );
 
-            try {
-                await writeThumbnailsForCafe(cafe, stations);
-            } catch (e) {
-                logError('Unhandled error while populating thumbnails for cafe', cafe.name, 'with error:', e);
-            }
+            THUMBNAIL_WORKER_QUEUE.addFromMenu(stations);
 
             await saveSessionAsync({
                 cafe,

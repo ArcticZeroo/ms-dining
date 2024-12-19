@@ -333,7 +333,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			name:           jsonItem.displayText,
 			calories:       Number(jsonItem.properties.calories || 0),
 			maxCalories:    Number(jsonItem.properties.maxCalories || 0),
-			hasThumbnail:   jsonItem.image != null,
+			hasThumbnail:   false,
 			imageUrl:       jsonItem.image,
 			description:    jsonItem.description,
 			receiptText:    jsonItem.receiptText,
