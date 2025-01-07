@@ -235,6 +235,12 @@ export const groupList: CafeGroup[] = [
 				id:    'typhoon',
 				emoji: '🍜'
 			},
+			{
+				name:  'Maya\'s Mexican + Pita',
+				id:    'mayas',
+				emoji: '🫓',
+				firstAvailable: fromDateString('2025-01-06')
+			},
 		]
 	},
 	{
