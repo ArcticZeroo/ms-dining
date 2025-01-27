@@ -27,7 +27,7 @@ const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>
             document.documentElement.scrollTop = scrollTopRef.current;
         }
     }, [shouldStopScroll, scrollTopRef]);
-}
+};
 
 const useScrollTracker = (shouldStopScroll: boolean) => {
     const location = useLocation();
@@ -62,8 +62,12 @@ export const Root = () => {
             <Nav/>
             <div className={classNames('content', shouldStopScroll && 'noscroll')}
                 ref={pageBodyDivRef}>
+                <div className="card error">
+                    buy-ondemand APIs have recently made breaking changes which broke this site, hopefully menus should
+                    be back soon!
+                </div>
                 <Outlet/>
-                { !shouldStopScroll && <ScrollTopButton containerRef={pageBodyDivRef}/> }
+                {!shouldStopScroll && <ScrollTopButton containerRef={pageBodyDivRef}/>}
             </div>
         </>
     );
