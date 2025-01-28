@@ -16,5 +16,3 @@ export const serverMenuItemThumbnailPath = path.join(serverStaticPath, 'menu-ite
 export const clientFolderDistPath = path.join(rootFolderPath, 'client', 'dist');
 
 export const clientIndexHtmlPath = path.join(clientFolderDistPath, 'index.html');
-
-export const requestRetryCount = 3;

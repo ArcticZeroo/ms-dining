@@ -15,7 +15,6 @@ import { CafeMenuSession } from '../session/menu.js';
 import { THUMBNAIL_WORKER_QUEUE } from '../../../worker/thumbnail.js';
 
 export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
-const cafeDiscoveryRetryCount = 3;
 const cafeDiscoveryRetryDelayMs = 1000;
 
 const dateStringsCurrentlyUpdatingByCafeId = new Map<string /*cafeId*/, Set<string /*dateString*/>>();
@@ -83,7 +82,7 @@ export class DailyCafeUpdateSession {
 
             const stations = await runPromiseWithRetries(
                 (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),
-                cafeDiscoveryRetryCount,
+                ENVIRONMENT_SETTINGS.cafeDiscoveryRetryCount,
                 cafeDiscoveryRetryDelayMs
             );
 

@@ -79,13 +79,18 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			return [];
 		}
 
+		if (!response.ok) {
+			throw new Error(`Unable to retrieve station list: ${response.status}`);
+		}
+
 		const json = await response.json();
+
 		if (!isDuckTypeArray<ICafeStationListItem>(json, {
 			id:    'string',
 			name:  'string',
 			menus: 'object'
 		})) {
-			throw new Error('Invalid object type');
+			throw new Error('Station list item is missing id/name/menus');
 		}
 
 		return json.map(stationJson => this._convertExternalStation(stationJson));
@@ -374,7 +379,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			displayText: 'string',
 			properties:  'object'
 		})) {
-			throw new Error('Invalid object type');
+			throw new Error('Cafe menu item is missing id/amount/displayText/properties');
 		}
 
 		return json;
