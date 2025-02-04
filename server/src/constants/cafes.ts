@@ -238,8 +238,7 @@ export const groupList: CafeGroup[] = [
 			{
 				name:  'Maya\'s Mexican + Pita',
 				id:    'mayas',
-				emoji: '🫓',
-				firstAvailable: fromDateString('2025-01-06')
+				emoji: '🫓'
 			},
 		]
 	},
