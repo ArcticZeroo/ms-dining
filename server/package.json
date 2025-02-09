@@ -47,6 +47,7 @@
     "dev": "npx cross-env NODE_ENV=dev npm run start",
     "predeploy": "npx tsc --project ../common/tsconfig.json && npx prisma migrate deploy && npx prisma generate",
     "deploy": "npm run predeploy && npm run start",
-    "deploy-dev": "npm run predeploy && npm run start"
+    "deploy-dev": "npm run predeploy && npm run start",
+    "test": "npx tsc && node --test dist/**/*.test.js"
   }
 }

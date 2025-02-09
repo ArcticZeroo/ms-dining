@@ -13,6 +13,7 @@ import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerOrderingRoutes } from './ordering.js';
 import { registerSearchRoutes } from './search.js';
+import { logDebug } from '../../../util/log.js';
 
 export const registerCafeRoutes = (parent: Router) => {
     const router = new Router({
@@ -48,6 +49,7 @@ export const registerCafeRoutes = (parent: Router) => {
                     // For instance, when Food Hall 4 was added, the online ordering menu became available more than
                     // a week early.
                     if (!supportsVersionTag(ctx, VERSION_TAG.unreleasedCafes) && !isCafeAvailable(cafe, getMinimumDateForMenu())) {
+                        logDebug(`Skipping cafe ${cafe.id} because it is not yet available & client does not support unreleased cafes`);
                         continue;
                     }
 

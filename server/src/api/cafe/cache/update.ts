@@ -7,7 +7,7 @@ import { ICafe } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-import { logError, logInfo } from '../../../util/log.js';
+import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveSessionAsync } from './storage.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
@@ -119,6 +119,7 @@ export class DailyCafeUpdateSession {
 
         for (const cafe of cafeList) {
             if (!isCafeAvailable(cafe, this.date)) {
+                logDebug(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is not available`);
                 continue;
             }
 
