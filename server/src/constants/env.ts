@@ -14,4 +14,4 @@ export const WELL_KNOWN_ENVIRONMENT_VARIABLES = {
     openAi: 'OPENAI_API_KEY'
 };
 
-export const getChatGptKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);
+export const getOpenAiKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);

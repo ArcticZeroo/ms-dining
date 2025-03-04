@@ -215,7 +215,8 @@ export abstract class DiningClient {
                 matchReasons: new Set(serverResult.matchReasons),
                 tags: serverResult.tags ? new Set(serverResult.tags) : undefined,
                 searchTags: serverResult.searchTags ? new Set(serverResult.searchTags) : undefined,
-                matchedModifiers: DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers)
+                matchedModifiers: DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers),
+                vectorDistance: serverResult.vectorDistance
             });
         }
 

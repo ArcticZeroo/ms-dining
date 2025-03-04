@@ -49,6 +49,7 @@ export const registerSearchRoutes = (parent: Router) => {
             searchTags:       searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
             matchedModifiers: allowModifiers ? serializeMapOfStringToSet(searchResult.matchedModifiers) : {},
             matchReasons:     Array.from(matchReasons),
+            vectorDistance:   searchResult.vectorDistance,
         });
     };
 
@@ -102,13 +103,22 @@ export const registerSearchRoutes = (parent: Router) => {
 
             const date = DateUtil.fromMaybeDateString(ctx.query.date);
 
-            const searchResultsByIdPerEntityType = await SearchManager.search(
-                searchQuery,
-                date,
-                isExact
-            );
+            if (!isExact) {
+                console.time(`search "${searchQuery}"`);
+                const results = await SearchManager.searchVector(searchQuery, date);
+                console.timeEnd(`search "${searchQuery}"`);
 
-            serializeSearchResults(ctx, searchResultsByIdPerEntityType);
+                serializeSearchResults(ctx, results);
+            } else {
+                const results = await SearchManager.search(
+                    searchQuery,
+                    date,
+                    isExact
+                );
+
+                serializeSearchResults(ctx, results);
+            }
+
         });
 
     router.get('/cheap',

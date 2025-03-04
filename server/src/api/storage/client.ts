@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import Semaphore from 'semaphore-async-await';
+import { Lock } from 'semaphore-async-await';
 
 // According to docs, perf can be very bad if we make parallel requests to SQLite
-const databaseLock = new Semaphore.Lock();
+const databaseLock = new Lock();
 
 const prismaClient = new PrismaClient();
 

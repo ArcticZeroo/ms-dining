@@ -6,13 +6,13 @@ import { ICafeConfigResponse } from '../../../models/buyondemand/responses.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError } from '../../../util/log.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../util/request.js';
-import Semaphore from 'semaphore-async-await';
+import { Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { StringUtil } from '../../../util/string.js';
 import hat from 'hat';
 
 const requestSemaphore = ENVIRONMENT_SETTINGS.maxConcurrentRequests
-	? new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentRequests)
+	? new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests)
 	: null;
 
 const getHeaders = (token: string, csrfToken: string) => token ? ({

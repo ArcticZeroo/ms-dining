@@ -1,5 +1,6 @@
 import { DateUtil } from '@msdining/common';
 import { ICafeOverviewStation, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import {
     fromDateString,
     getFridayForWeek,
@@ -237,6 +238,38 @@ export abstract class DailyMenuStorageClient {
         return result != null;
     }
 
+    public static async getPendingMenusForEmbedding() {
+        const dateStrings = DateUtil.getDateStringsForWeek();
+
+        return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  {
+                dateString: {
+                    in: dateStrings
+                }
+            },
+            select: {
+                cafeId:     true,
+                dateString: true,
+                stationId:  true,
+                station:    {
+                    select: {
+                        name: true
+                    }
+                },
+                categories: {
+                    select: {
+                        name:      true,
+                        menuItems: {
+                            select: {
+                                menuItemId: true
+                            }
+                        }
+                    }
+                }
+            }
+        }));
+    }
+
     public static getMenusForSearch(date: Date | null) {
         const dateStrings = date != null
                             ? [DateUtil.toDateString(date)]
@@ -256,7 +289,6 @@ export abstract class DailyMenuStorageClient {
                     select: {
                         name:    true,
                         logoUrl: true,
-                        menuId:  true
                     }
                 },
                 categories: {

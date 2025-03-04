@@ -1,6 +1,5 @@
 import { DateUtil } from '@msdining/common';
 import fs from 'fs/promises';
-import Semaphore from 'semaphore-async-await';
 import { cafeList } from '../../../constants/cafes.js';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe } from '../../../models/cafe.js';
@@ -8,13 +7,15 @@ import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
+import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
+import { Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveSessionAsync } from './storage.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { CafeMenuSession } from '../session/menu.js';
 import { THUMBNAIL_WORKER_QUEUE } from '../../../worker/thumbnail.js';
 
-export const cafeSemaphore = new Semaphore.default(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
+export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryDelayMs = 1000;
 
 const dateStringsCurrentlyUpdatingByCafeId = new Map<string /*cafeId*/, Set<string /*dateString*/>>();
@@ -87,6 +88,7 @@ export class DailyCafeUpdateSession {
             );
 
             THUMBNAIL_WORKER_QUEUE.addFromMenu(stations);
+            EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations);
 
             await saveSessionAsync({
                 cafe,

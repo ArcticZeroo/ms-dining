@@ -59,7 +59,7 @@ const repairTodaySessionsAsync = async () => {
 
 export const performMenuBootTasks = async () => {
     await MenuItemStorageClient.batchNormalizeMenuItemNamesAsync();
-    SEARCH_TAG_WORKER_QUEUE.start();
+    // SEARCH_TAG_WORKER_QUEUE.start();
 
     await repairTodaySessionsAsync();
     await repairMissingWeeklyMenusAsync();

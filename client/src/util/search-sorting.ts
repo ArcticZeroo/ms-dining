@@ -261,6 +261,10 @@ const ENTITY_TYPE_MULTIPLIERS: Record<SearchEntityType, number> = {
 };
 
 const computeScore = ({ searchResult, doSubstringScore, context }: IComputeScoreParams) => {
+    if (searchResult.vectorDistance) {
+        return 1 / searchResult.vectorDistance;
+    }
+
     let totalSubstringScore = 0;
     if (doSubstringScore) {
         for (const matchReason of searchResult.matchReasons) {

@@ -88,4 +88,5 @@ export interface ISearchResponseResult {
     tags?: Array<string>;
     searchTags?: Array<string>;
     matchedModifiers: Record<string, Array<string>>;
+    vectorDistance?: number;
 }

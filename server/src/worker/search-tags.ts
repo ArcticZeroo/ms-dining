@@ -1,10 +1,10 @@
-import { IS_OPENAI_ENABLED, retrieveMenuItemSearchTagsFromAiWithRetries } from '../api/openai.js';
-import { MenuItemStorageClient } from '../api/storage/clients/menu-item.js';
-import { Nullable } from '../models/util.js';
-import { logDebug, logError, logInfo } from '../util/log.js';
-import { WorkerQueue } from './queue.js';
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { retrieveMenuItemSearchTagsFromAiWithRetries } from '../api/openai.js';
+import { MenuItemStorageClient } from '../api/storage/clients/menu-item.js';
+import { Nullable } from '../models/util.js';
+import { logDebug, logError } from '../util/log.js';
+import { WorkerQueue } from './queue.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 5 });
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 15 });
@@ -26,15 +26,7 @@ class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
         });
     }
 
-    get isEnabled() {
-        return IS_OPENAI_ENABLED;
-    }
-
     add(...entries: ISearchTagQueueEntry[]) {
-        if (!this.isEnabled) {
-            return;
-        }
-
         super.add(...entries);
     }
 
@@ -66,17 +58,9 @@ class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
 export const SEARCH_TAG_WORKER_QUEUE = new SearchTagsWorkerQueue();
 
 const startQueue = () => {
-    // Don't bother starting the queue if OpenAI is disabled
-    if (!SEARCH_TAG_WORKER_QUEUE.isEnabled) {
-        logInfo('OpenAI is disabled due to missing env variable, search tag worker queue will not start');
-        return;
-    }
-
     // queue is currently started in boot in order to normalize names first
     // SEARCH_TAG_WORKER_QUEUE.start();
     MenuItemStorageClient.retrievePendingSearchTagQueueEntries()
         .then(entries => SEARCH_TAG_WORKER_QUEUE.add(...entries))
         .catch(err => logError('Unable to retrieve pending search tag queue entries:', err));
 }
-
-startQueue();

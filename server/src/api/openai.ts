@@ -1,6 +1,7 @@
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
-import { ChatGPTAPI } from 'chatgpt';
-import { getChatGptKey, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../constants/env.js';
+import OpenAI from 'openai';
+import { getOpenAiKey } from '../constants/env.js';
+import { ICafeStation } from '../models/cafe.js';
 import { IMenuItemForAi } from '../models/openai.js';
 import { runPromiseWithRetries } from '../util/async.js';
 import { isDev } from '../util/env.js';
@@ -8,19 +9,47 @@ import { lazy } from '../util/lazy.js';
 import { logDebug } from '../util/log.js';
 import { StationThemeClient } from './storage/clients/station-theme.js';
 
-export const IS_OPENAI_ENABLED = hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);
-
-const getClient = lazy(() => new ChatGPTAPI({
-    apiKey: getChatGptKey(),
-    completionParams: {
-        model: 'gpt-3.5-turbo' // seems probably good enough and gives us 3500 requests per minute
-    }
+const getClient = lazy(() => new OpenAI({
+    apiKey: getOpenAiKey()
 }));
 
-const retrieveAiResponse = async (question: string) => {
+const retrieveChatCompletion = async (question: string) => {
     // todo: handle 429
-    const response = await getClient().sendMessage(question);
-    return response.text;
+    const response = await getClient().chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+            {
+                role: 'user',
+                content: question
+            }
+        ]
+    });
+
+    const choice = response.choices[0];
+    if (!choice) {
+        throw new Error('AI did not return a choice');
+    }
+
+    const message = choice.message.content;
+    if (!message) {
+        throw new Error('AI chat completion did not return a message');
+    }
+
+    return message;
+};
+
+export const retrieveEmbeddings = async (text: string) => {
+    const response = await getClient().embeddings.create({
+        model: 'text-embedding-3-small',
+        input: text
+    });
+
+    const data = response.data[0];
+    if (!data) {
+        throw new Error('AI did not return embeddings');
+    }
+
+    return data.embedding;
 }
 
 const getSearchTagsPrompt = ({ name, description }: IMenuItemForAi) => (
@@ -94,13 +123,13 @@ const getThemePrompt = (stationName: string, menuItemsByCategory: Map<string /*c
     ))}
     
     Today's theme:`.trim()
-)
+);
 
 const AI_RETRY_COUNT = 3;
 
 const retrieveMenuItemSearchTagsFromAi = async (menuItem: IMenuItemForAi): Promise<Set<string>> => {
-    logDebug('Retrieving search tags for menu item:', menuItem.name, menuItem.description)
-    const response = await retrieveAiResponse(getSearchTagsPrompt(menuItem));
+    logDebug('Retrieving search tags for menu item:', menuItem.name, menuItem.description);
+    const response = await retrieveChatCompletion(getSearchTagsPrompt(menuItem));
 
     const rawTags = response.trim().split(',').map(tag => tag.trim());
 
@@ -119,7 +148,7 @@ const retrieveMenuItemSearchTagsFromAi = async (menuItem: IMenuItemForAi): Promi
     logDebug('Retrieved search tags:', resultTags);
 
     return resultTags;
-}
+};
 
 export const retrieveMenuItemSearchTagsFromAiWithRetries = async (menuItem: IMenuItemForAi): Promise<Set<string>> => (
     runPromiseWithRetries(() => retrieveMenuItemSearchTagsFromAi(menuItem), AI_RETRY_COUNT)
@@ -134,7 +163,7 @@ export const retrieveStationThemeFromAi = async (stationName: string, menuItemsB
                 logDebug(`[${i}] Getting station theme for station contents: ${StationThemeClient.serializeItemsByCategory(menuItemsByCategory)}`);
             }
 
-            const theme = await retrieveAiResponse(prompt);
+            const theme = await retrieveChatCompletion(prompt);
 
             if (isDev) {
                 logDebug(`[${i}] Theme for ${StationThemeClient.serializeItemsByCategory(menuItemsByCategory)}: ${theme}`);
@@ -145,3 +174,51 @@ export const retrieveStationThemeFromAi = async (stationName: string, menuItemsB
         AI_RETRY_COUNT
     );
 };
+
+const serializeMenuItemForEmbeddings = (menuItem: IMenuItem): string => {
+    const parts = [
+        `Menu Item Name: ${menuItem.name}`,
+    ];
+
+    if (menuItem.description) {
+        parts.push(`Menu Item Description: ${menuItem.description}`);
+    }
+
+    if (menuItem.modifiers.length > 0) {
+        parts.push(`Menu Item Modifiers:`);
+        for (const modifier of menuItem.modifiers) {
+            parts.push(`- ${modifier.description} [${modifier.choices.map(choice => choice.description).join(', ')}]`);
+        }
+    }
+
+    return parts.join('\n');
+};
+
+export const retrieveMenuItemEmbeddings = async (menuItem: IMenuItem, categoryName: string, stationName: string) => {
+    return retrieveEmbeddings(
+        `
+        Station Name: ${stationName}
+        Category Name: ${categoryName}
+        ${serializeMenuItemForEmbeddings(menuItem)}
+    `);
+}
+
+export const retrieveStationEmbeddings = async (station: ICafeStation) => {
+    const categoryStrings: string[] = [];
+    for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName.entries()) {
+        const categoryStringParts = [`- Category Name: ${categoryName} [`];
+        for (const menuItemId of menuItemIds) {
+            const menuItem = station.menuItemsById.get(menuItemId);
+            if (menuItem) {
+                categoryStringParts.push(`-- { ${serializeMenuItemForEmbeddings(menuItem)} }`);
+            }
+        }
+        categoryStringParts.push(']');
+        categoryStrings.push(categoryStringParts.join('\n'));
+    }
+
+    return retrieveEmbeddings(`
+        Station Name: ${station.name}
+        Station Categories: ${categoryStrings.join('\n')}
+    `);
+}

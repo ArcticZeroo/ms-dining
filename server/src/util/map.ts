@@ -1,7 +1,7 @@
-import Semaphore from 'semaphore-async-await';
+import { Lock } from 'semaphore-async-await';
 
 interface ILockedMapEntry<V> {
-    lock: Semaphore.Lock;
+    lock: Lock;
     value: V | undefined;
 }
 
@@ -18,7 +18,7 @@ export class LockedMap<K, V> {
 
         if (!this.#map.has(key)) {
             this.#map.set(key, {
-                lock: new Semaphore.Lock(),
+                lock: new Lock(),
                 value: undefined
             });
         }
