@@ -1,6 +1,5 @@
 import { DateUtil } from '@msdining/common';
 import { ICafeOverviewStation, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import {
     fromDateString,
     getFridayForWeek,

@@ -44,7 +44,6 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
     }
 
     async doWorkAsync(entry: EmbeddingsWorkItem): Promise<void | Nullable<symbol>> {
-        console.log(`Embedding ${entry.entityType} ${entry.item.id}...`);
         if (entry.entityType === SearchEntityType.menuItem) {
             await embedMenuItem(entry.item, entry.categoryName, entry.stationName);
         } else {

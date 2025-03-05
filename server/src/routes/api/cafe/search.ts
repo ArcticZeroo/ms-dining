@@ -104,9 +104,7 @@ export const registerSearchRoutes = (parent: Router) => {
             const date = DateUtil.fromMaybeDateString(ctx.query.date);
 
             if (!isExact) {
-                console.time(`search "${searchQuery}"`);
                 const results = await SearchManager.searchVector(searchQuery, date);
-                console.timeEnd(`search "${searchQuery}"`);
 
                 serializeSearchResults(ctx, results);
             } else {

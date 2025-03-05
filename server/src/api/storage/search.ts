@@ -1,3 +1,4 @@
+import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import {
     DB_ID_TO_SEARCH_ENTITY_TYPE,
     ISearchQuery,
@@ -251,12 +252,31 @@ class SearchSession {
         });
     }
 
-    registerResult(isMatch: boolean, result: IAddResultParams) {
-        if (isMatch) {
-            this.#addResult(result);
-        } else {
-            this.#addPendingResult(result);
+    isExactSubstring(text: Nullable<string>, entityType: SearchEntityType) {
+        if (!text) {
+            return false;
         }
+
+        const normalizedText = normalizeNameForSearch(text);
+        if (normalizedText.length === 0) {
+            return false;
+        }
+
+        return this.#normalizedQueries.some(query => {
+            if (query.type != null && query.type !== entityType) {
+                return false;
+            }
+
+            return normalizedText.includes(query.text);
+        });
+    }
+
+    isVectorMatch(distance: number | undefined, entityType: SearchEntityType, exactMatchCandidates: Array<Nullable<string>>) {
+        if (distance != null) {
+            return true;
+        }
+
+        return exactMatchCandidates.some(candidate => candidate && this.isExactSubstring(candidate, entityType));
     }
 
     #addPendingResult(result: IAddResultParams) {
@@ -276,6 +296,74 @@ class SearchSession {
 
         this.#searchResults.addResult(result);
     }
+
+    registerResult(isMatch: boolean, result: IAddResultParams) {
+        if (isMatch) {
+            this.#addResult(result);
+        } else {
+            this.#addPendingResult(result);
+        }
+    }
+
+    getMenuItemMatch(menuItem: IMenuItem) {
+        const matchReasons = new Set<SearchMatchReason>();
+        const matchedModifiers = new Map<string, Set<string>>();
+
+        if (this.isMatch(menuItem.name, SearchEntityType.menuItem)) {
+            matchReasons.add(SearchMatchReason.title);
+        }
+
+        // If we are using exact name matching, we don't want to get anything that just matches the tags
+        // or description. Exact match is intended to be used for favorites, where you don't care about
+        // similar items.
+        if (!this.shouldUseExactMatch) {
+            if (this.isMatch(menuItem.description, SearchEntityType.menuItem)) {
+                matchReasons.add(SearchMatchReason.description);
+            }
+
+            for (const searchTag of menuItem.searchTags) {
+                if (this.isMatch(searchTag, SearchEntityType.menuItem)) {
+                    matchReasons.add(SearchMatchReason.searchTags);
+                    break;
+                }
+            }
+
+            for (const modifier of menuItem.modifiers) {
+                if (this.isMatch(modifier.description, SearchEntityType.menuItem)) {
+                    matchReasons.add(SearchMatchReason.modifier);
+                    matchedModifiers.set(modifier.description, new Set<string>());
+                }
+
+                for (const modifierChoice of modifier.choices) {
+                    if (this.isMatch(modifierChoice.description, SearchEntityType.menuItem)) {
+                        matchReasons.add(SearchMatchReason.modifier);
+
+                        const matchedChoices = matchedModifiers.get(modifierChoice.description) ?? new Set<string>();
+                        matchedChoices.add(modifierChoice.description);
+                        matchedModifiers.set(modifier.description, matchedChoices);
+                    }
+                }
+            }
+        }
+
+        for (const tag of menuItem.tags) {
+            if (this.isMatch(tag, SearchEntityType.menuItem)) {
+                matchReasons.add(SearchMatchReason.tags);
+                break;
+            }
+        }
+
+        return { matchReasons, matchedModifiers } as const;
+    }
+
+    getStationMatch(name: string) {
+        const matchReasons = new Set<SearchMatchReason>();
+        if (this.isMatch(name, SearchEntityType.station)) {
+            matchReasons.add(SearchMatchReason.title);
+        }
+
+        return { matchReasons } as const;
+    }
 }
 
 // This is not a storage client because it orchestrates multiple storage clients together,
@@ -292,11 +380,7 @@ export abstract class SearchManager {
         for (const dailyStation of dailyStations) {
             const stationData = dailyStation.station;
 
-            const stationMatchReasons = new Set<SearchMatchReason>();
-            if (session.isMatch(stationData.name, SearchEntityType.station)) {
-                stationMatchReasons.add(SearchMatchReason.title);
-            }
-
+            const { matchReasons: stationMatchReasons } = session.getStationMatch(stationData.name);
             session.registerResult(stationMatchReasons.size > 0, {
                 type:         SearchEntityType.station,
                 matchReasons: stationMatchReasons,
@@ -320,53 +404,7 @@ export abstract class SearchManager {
                         continue;
                     }
 
-                    const matchReasons = new Set<SearchMatchReason>();
-                    const matchedModifiers = new Map<string, Set<string>>();
-
-                    if (session.isMatch(menuItem.name, SearchEntityType.menuItem)) {
-                        matchReasons.add(SearchMatchReason.title);
-                    }
-
-                    // If we are using exact name matching, we don't want to get anything that just matches the tags
-                    // or description. Exact match is intended to be used for favorites, where you don't care about
-                    // similar items.
-                    if (!shouldUseExactMatch) {
-                        if (session.isMatch(menuItem.description, SearchEntityType.menuItem)) {
-                            matchReasons.add(SearchMatchReason.description);
-                        }
-
-                        for (const searchTag of menuItem.searchTags) {
-                            if (session.isMatch(searchTag, SearchEntityType.menuItem)) {
-                                matchReasons.add(SearchMatchReason.searchTags);
-                                break;
-                            }
-                        }
-
-                        for (const modifier of menuItem.modifiers) {
-                            if (session.isMatch(modifier.description, SearchEntityType.menuItem)) {
-                                matchReasons.add(SearchMatchReason.modifier);
-                                matchedModifiers.set(modifier.description, new Set<string>());
-                            }
-
-                            for (const modifierChoice of modifier.choices) {
-                                if (session.isMatch(modifierChoice.description, SearchEntityType.menuItem)) {
-                                    matchReasons.add(SearchMatchReason.modifier);
-
-                                    const matchedChoices = matchedModifiers.get(modifierChoice.description) ?? new Set<string>();
-                                    matchedChoices.add(modifierChoice.description);
-                                    matchedModifiers.set(modifier.description, matchedChoices);
-                                }
-                            }
-                        }
-                    }
-
-                    for (const tag of menuItem.tags) {
-                        if (session.isMatch(tag, SearchEntityType.menuItem)) {
-                            matchReasons.add(SearchMatchReason.tags);
-                            break;
-                        }
-                    }
-
+                    const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
                     session.registerResult(matchReasons.size > 0, {
                         type:        SearchEntityType.menuItem,
                         dateString:  dailyStation.dateString,
@@ -428,25 +466,29 @@ export abstract class SearchManager {
             }
 
             return vectorFoundItems.get(entityType)!.get(id);
-        }
+        };
 
         for (const { dateString, cafeId, station, stationId, categories } of menus) {
             const stationDistance = getVectorDistance(SearchEntityType.station, stationId);
-            session.registerResult(stationDistance != null, {
-                type:         SearchEntityType.station,
-                matchReasons: new Set(),
-                dateString:   dateString,
-                cafeId:       cafeId,
-                name:         station.name,
-                imageUrl:     station.logoUrl,
-                vectorDistance: stationDistance,
-                // No data for stations
-                price:       undefined,
-                searchTags:  undefined,
-                tags:        undefined,
-                description: undefined,
-                station:     undefined
-            });
+            const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
+
+            session.registerResult(
+                session.isVectorMatch(stationDistance, SearchEntityType.station, [station.name]),
+                {
+                    type:           SearchEntityType.station,
+                    matchReasons:   stationMatchReasons,
+                    dateString:     dateString,
+                    cafeId:         cafeId,
+                    name:           station.name,
+                    imageUrl:       station.logoUrl,
+                    vectorDistance: stationDistance,
+                    // No data for stations
+                    price:       undefined,
+                    searchTags:  undefined,
+                    tags:        undefined,
+                    description: undefined,
+                    station:     undefined
+                });
 
             for (const category of categories) {
                 for (const dailyMenuItem of category.menuItems) {
@@ -456,19 +498,32 @@ export abstract class SearchManager {
                     }
 
                     const menuItemDistance = getVectorDistance(SearchEntityType.menuItem, menuItem.id);
-                    session.registerResult(menuItemDistance != null, {
-                        type:         SearchEntityType.menuItem,
-                        dateString:   dateString,
-                        cafeId:       cafeId,
-                        name:         menuItem.name,
-                        description:  menuItem.description,
-                        price:        menuItem.price,
-                        tags:         menuItem.tags,
-                        searchTags:   menuItem.searchTags,
-                        imageUrl:     getThumbnailUrl(menuItem),
-                        station:      station.name,
-                        matchReasons: new Set(),
-                        vectorDistance: menuItemDistance,
+
+                    const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
+
+                    const exactMatchCandidates: Array<Nullable<string>> = [
+                        menuItem.name,
+                        menuItem.description,
+                        ...menuItem.searchTags,
+                        ...menuItem.tags
+                    ];
+
+                    session.registerResult(
+                        session.isVectorMatch(menuItemDistance, SearchEntityType.menuItem, exactMatchCandidates),
+                        {
+                        type:             SearchEntityType.menuItem,
+                        dateString:       dateString,
+                        cafeId:           cafeId,
+                        name:             menuItem.name,
+                        description:      menuItem.description,
+                        price:            menuItem.price,
+                        tags:             menuItem.tags,
+                        searchTags:       menuItem.searchTags,
+                        imageUrl:         getThumbnailUrl(menuItem),
+                        station:          station.name,
+                        matchReasons:     matchReasons,
+                        matchedModifiers: matchedModifiers,
+                        vectorDistance:   menuItemDistance,
                     });
                 }
             }

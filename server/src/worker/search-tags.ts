@@ -58,9 +58,10 @@ class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
 export const SEARCH_TAG_WORKER_QUEUE = new SearchTagsWorkerQueue();
 
 const startQueue = () => {
-    // queue is currently started in boot in order to normalize names first
-    // SEARCH_TAG_WORKER_QUEUE.start();
+    SEARCH_TAG_WORKER_QUEUE.start();
     MenuItemStorageClient.retrievePendingSearchTagQueueEntries()
         .then(entries => SEARCH_TAG_WORKER_QUEUE.add(...entries))
         .catch(err => logError('Unable to retrieve pending search tag queue entries:', err));
 }
+
+startQueue();

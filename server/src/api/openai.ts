@@ -191,6 +191,14 @@ const serializeMenuItemForEmbeddings = (menuItem: IMenuItem): string => {
         }
     }
 
+    if (menuItem.tags.size > 0) {
+        parts.push(`Menu Item Tags: ${Array.from(menuItem.tags).join(', ')}`);
+    }
+
+    if (menuItem.searchTags.size > 0) {
+        parts.push(`Menu Item Search Tags: ${Array.from(menuItem.searchTags).join(', ')}`);
+    }
+
     return parts.join('\n');
 };
 

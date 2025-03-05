@@ -30,6 +30,10 @@ export abstract class WorkerQueue<TKey, TValue> {
     }
     abstract doWorkAsync(entry: TValue): Promise<void | Nullable<symbol>>;
 
+    get remainingItems() {
+        return this.#keysInOrder.length;
+    }
+
     public add(...entries: TValue[]) {
         for (const entry of entries) {
             if (!this.isWorkNeeded(entry)) {
