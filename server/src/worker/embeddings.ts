@@ -1,7 +1,7 @@
 import Duration from '@arcticzeroo/duration';
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { embedMenuItem, embedStation, isEmbeddedItem } from '../api/storage/vector/client.js';
+import { embedMenuItem, embedStation, isEmbeddedEntity } from '../api/storage/vector/client.js';
 import { ICafeStation } from '../models/cafe.js';
 import { Nullable } from '../models/util.js';
 import { WorkerQueue } from './queue.js';
@@ -39,11 +39,13 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
         return entry.item.id;
     }
 
-    protected isWorkNeeded(entry: EmbeddingsWorkItem): boolean {
-        return !isEmbeddedItem(entry.entityType, entry.item.id);
-    }
-
     async doWorkAsync(entry: EmbeddingsWorkItem): Promise<void | Nullable<symbol>> {
+        const isEmbedded = await isEmbeddedEntity(entry.entityType, entry.item.id);
+
+        if (isEmbedded) {
+            return WorkerQueue.QUEUE_SKIP_ENTRY;
+        }
+
         if (entry.entityType === SearchEntityType.menuItem) {
             await embedMenuItem(entry.item, entry.categoryName, entry.stationName);
         } else {

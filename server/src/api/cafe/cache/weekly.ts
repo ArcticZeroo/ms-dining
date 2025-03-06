@@ -1,17 +1,19 @@
 import cron from 'node-cron';
 import { logError, logInfo } from '../../../util/log.js';
-import { DailyCafeUpdateSession } from './update.js';
+import { DailyCafeUpdateSession, updateCafes } from './update.js';
 import { DateUtil } from '@msdining/common';
 
 const updateWeeklyCafeMenusAsync = async (forceUseNextWeek: boolean) => {
-    logInfo('Updating weekly cafe menus...');
-    for (const i of DateUtil.yieldDaysInFutureForThisWeek(forceUseNextWeek)) {
-        const updateSession = new DailyCafeUpdateSession(i);
-        await updateSession.populateAsync();
-    }
+    await updateCafes(async () => {
+        logInfo('Updating weekly cafe menus...');
+        for (const i of DateUtil.yieldDaysInFutureForThisWeek(forceUseNextWeek)) {
+            const updateSession = new DailyCafeUpdateSession(i);
+            await updateSession.populateAsync();
+        }
+    });
 }
 
-const updateWeeklyCafeMenus = (forceUseNextWeek: boolean) => {
+export const updateWeeklyCafeMenus = (forceUseNextWeek: boolean) => {
     updateWeeklyCafeMenusAsync(forceUseNextWeek)
         .catch(err => logError('Failed to update weekly cafe menus:', err));
 }

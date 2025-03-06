@@ -1,17 +1,19 @@
 import cron from 'node-cron';
 import { logError, logInfo } from '../../../util/log.js';
-import { DailyCafeUpdateSession } from './update.js';
+import { DailyCafeUpdateSession, updateCafes } from './update.js';
 import { DateUtil } from '@msdining/common';
 
 export const populateDailySessionsAsync = async () => {
-    const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);
+    await updateCafes(async () => {
+        const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);
 
-    if (DateUtil.isDateOnWeekend(updateSession.date)) {
-        logInfo('Skipping daily update for weekend');
-        return;
-    }
+        if (DateUtil.isDateOnWeekend(updateSession.date)) {
+            logInfo('Skipping daily update for weekend');
+            return;
+        }
 
-    await updateSession.populateAsync();
+        await updateSession.populateAsync();
+    });
 };
 
 const populateDailySessions = () => {

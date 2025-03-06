@@ -8,13 +8,14 @@ import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
-import { Semaphore } from '../../lock.js';
+import { Lock, Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveSessionAsync } from './storage.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { CafeMenuSession } from '../session/menu.js';
 import { THUMBNAIL_WORKER_QUEUE } from '../../../worker/thumbnail.js';
 
+const updateLock = new Lock();
 export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryDelayMs = 1000;
 
@@ -35,6 +36,16 @@ export const isCafeCurrentlyUpdating = (dateString: string, cafe: ICafe) => {
 export const isAnyCafeCurrentlyUpdating = () => {
     return dateStringsCurrentlyUpdatingByCafeId.size > 0;
 }
+
+export const updateCafes = async (callback: () => Promise<void>) => {
+    await updateLock.acquire();
+
+    try {
+        await callback();
+    } finally {
+        updateLock.release();
+    }
+};
 
 export class DailyCafeUpdateSession {
     public readonly cafeSessionsById = new Map<string, CafeMenuSession>();

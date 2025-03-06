@@ -1,5 +1,5 @@
 export interface IFetchEmbeddingQueryResult {
-    embedding: number[];
+    embedding: Float32Array;
 }
 
 export interface IVectorSearchResult {

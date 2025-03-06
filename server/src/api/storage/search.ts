@@ -11,10 +11,7 @@ import { Nullable } from '../../models/util.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
-import { searchVectorRaw } from './vector/client.js';
-
-const VECTOR_SEARCH_ITEM_LIMIT = 50;
-const VECTOR_SEARCH_MAX_DISTANCE = 1;
+import * as vectorClient from './vector/client.js';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
@@ -442,7 +439,7 @@ export abstract class SearchManager {
         });
 
         const [rawResults, menus] = await Promise.all([
-            searchVectorRaw(query, VECTOR_SEARCH_ITEM_LIMIT),
+            vectorClient.searchVectorRaw(query),
             session.getMenusAsync()
         ]);
 

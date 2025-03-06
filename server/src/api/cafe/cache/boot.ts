@@ -2,36 +2,37 @@ import { DateUtil } from '@msdining/common';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logInfo } from '../../../util/log.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
-import { DailyCafeUpdateSession } from './update.js';
+import { DailyCafeUpdateSession, updateCafes } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
-import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/search-tags.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
         return;
     }
 
-    logInfo('Repairing missing weekly menus...');
+    await updateCafes(async () => {
+        let isRepairNeeded = false;
 
-    let isRepairNeeded = false;
-    for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
-        const date = DateUtil.getNowWithDaysInFuture(i);
-        const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(date));
-        if (!isAnyMenuAvailableToday) {
-            isRepairNeeded = true;
-            logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}`);
-            const updateSession = new DailyCafeUpdateSession(i);
-            await updateSession.populateAsync();
-        } else {
-            logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
+        logInfo('Repairing missing weekly menus...');
+        for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
+            const date = DateUtil.getNowWithDaysInFuture(i);
+            const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(date));
+            if (!isAnyMenuAvailableToday) {
+                isRepairNeeded = true;
+                logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}`);
+                const updateSession = new DailyCafeUpdateSession(i);
+                await updateSession.populateAsync();
+            } else {
+                logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
+            }
         }
-    }
 
-    if (!isRepairNeeded) {
-        logInfo('No missing weekly menus found');
-    }
+        if (!isRepairNeeded) {
+            logInfo('No missing weekly menus found');
+        }
+    });
 };
 
 const repairTodaySessionsAsync = async () => {
@@ -49,7 +50,7 @@ const repairTodaySessionsAsync = async () => {
                 return;
             }
 
-			logInfo('Skipping repair of today\'s sessions because it is after 2pm and there is already a menu for today');
+			logInfo('Skipping repair of today\'s sessions because it is after 3pm and there is already a menu for today');
             return;
         }
     }
