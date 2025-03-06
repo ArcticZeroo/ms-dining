@@ -25,10 +25,21 @@ export abstract class WorkerQueue<TKey, TValue> {
     }
 
     protected abstract getKey(entry: TValue): TKey;
+    protected isWorkNeeded(entry: TValue): boolean {
+        return true;
+    }
     abstract doWorkAsync(entry: TValue): Promise<void | Nullable<symbol>>;
+
+    get remainingItems() {
+        return this.#keysInOrder.length;
+    }
 
     public add(...entries: TValue[]) {
         for (const entry of entries) {
+            if (!this.isWorkNeeded(entry)) {
+                continue;
+            }
+
             const key = this.getKey(entry);
             if (this.#entriesByKey.has(key)) {
                 continue;
@@ -72,7 +83,10 @@ export abstract class WorkerQueue<TKey, TValue> {
             logDebug(this.constructor.name, 'Processing queue entry', key, ', remaining entries:', this.#keysInOrder.length);
 
             this.doWorkAsync(entry)
-                .catch(() => setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds))
+                .catch((err) => {
+                    logDebug(this.constructor.name, 'Failed to process queue entry', key, err);
+                    setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds);
+                })
                 .then((result) => {
                     if (result === WorkerQueue.QUEUE_SKIP_ENTRY) {
                         // Immediately poke to next queue entry if we skipped this one

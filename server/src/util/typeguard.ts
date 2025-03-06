@@ -1,5 +1,6 @@
 import { ISerializedCartItem, ISerializedModifier, ISubmitOrderItems } from '@msdining/common/dist/models/cart.js';
-import { isDuckType } from '@arcticzeroo/typeguard';
+import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
+import { IFetchEmbeddingQueryResult, IVectorSearchResult } from '../models/vector.js';
 
 export const isDuckTypeModifier = (data: unknown): data is ISerializedModifier => {
     if (!isDuckType<ISerializedModifier>(data, { modifierId: 'string', choiceIds: 'object' })) {
@@ -11,7 +12,7 @@ export const isDuckTypeModifier = (data: unknown): data is ISerializedModifier =
     }
 
     return data.choiceIds.every(choiceId => typeof choiceId === 'string');
-}
+};
 
 export const isDuckTypeSerializedCartItem = (data: unknown): data is ISerializedCartItem => {
     if (!isDuckType<ISerializedCartItem>(data, {
@@ -31,11 +32,11 @@ export const isDuckTypeSerializedCartItem = (data: unknown): data is ISerialized
     }
 
     return true;
-}
+};
 
 export const isDuckTypeJsonObject = (data: unknown): data is Record<string, unknown> => {
     return data != null && typeof data === 'object' && !Array.isArray(data);
-}
+};
 
 export const isValidItemsByCafeId = (data: unknown): data is ISubmitOrderItems => {
     if (!isDuckTypeJsonObject(data)) {
@@ -53,10 +54,10 @@ export const isValidItemsByCafeId = (data: unknown): data is ISubmitOrderItems =
     }
 
     return true;
-}
+};
 
 export const isValidItemIdsByCafeId = (data: unknown): data is Record<string, Array<string>> => {
-if (!isDuckTypeJsonObject(data)) {
+    if (!isDuckTypeJsonObject(data)) {
         return false;
     }
 
@@ -71,4 +72,17 @@ if (!isDuckTypeJsonObject(data)) {
     }
 
     return true;
-}
+};
+
+export const isValidEmbeddingResult = (data: unknown): data is IFetchEmbeddingQueryResult => isDuckType<IFetchEmbeddingQueryResult>(data, {
+    embedding: 'object'
+});
+
+export const isValidVectorSearchResultArray = (data: unknown): data is Array<IVectorSearchResult> => isDuckTypeArray<IVectorSearchResult>(
+    data,
+    {
+        id:           'string',
+        entity_type:  'number',
+        distance:     'number',
+    }
+);

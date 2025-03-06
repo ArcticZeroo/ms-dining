@@ -12,7 +12,7 @@ import { normalizeTagName } from '../../../util/cafe.js';
 import { TagStorageClient } from '../../storage/clients/tags.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-import Semaphore from 'semaphore-async-await';
+import { Lock } from 'semaphore-async-await';
 import { CafeTypes } from '@msdining/common';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/search-tags.js';
 
@@ -20,7 +20,7 @@ type IMenuItemModifier = CafeTypes.IMenuItemModifier;
 type ModifierChoiceType = CafeTypes.ModifierChoiceType;
 const ModifierChoices = CafeTypes.ModifierChoices;
 
-const tagLock = new Semaphore.Lock();
+const tagLock = new Lock();
 
 export class CafeMenuSession extends CafeDiscoverySession {
 	#retrievedTagStationIds = new Set<string>();

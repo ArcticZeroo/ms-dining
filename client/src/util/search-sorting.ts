@@ -252,6 +252,7 @@ const getFavoriteItemMultiplier = (context: ISearchResultSortingContext, searchR
 interface IComputeScoreParams {
     searchResult: ISearchResult;
     doSubstringScore: boolean;
+    bestDistance: number;
     context: ISearchResultSortingContext;
 }
 
@@ -260,13 +261,26 @@ const ENTITY_TYPE_MULTIPLIERS: Record<SearchEntityType, number> = {
     [SearchEntityType.station]:  0.8
 };
 
-const computeScore = ({ searchResult, doSubstringScore, context }: IComputeScoreParams) => {
+const getDistanceMultiplier = (searchResult: ISearchResult, bestDistance: number) => {
+    if (searchResult.vectorDistance == null) {
+        return 1;
+    }
+
+    const baseMultiplier = bestDistance / searchResult.vectorDistance;
+
+    return (2 / (1 + Math.exp(25 * baseMultiplier))) + 0.5;
+};
+
+const computeScore = ({ searchResult, doSubstringScore, bestDistance, context }: IComputeScoreParams) => {
     let totalSubstringScore = 0;
     if (doSubstringScore) {
         for (const matchReason of searchResult.matchReasons) {
             totalSubstringScore += getSubstringScoreForMatchReason(context.queryText, searchResult, matchReason);
         }
-        totalSubstringScore /= searchResult.matchReasons.size;
+
+        if (searchResult.matchReasons.size > 0) {
+            totalSubstringScore /= searchResult.matchReasons.size;
+        }
     }
 
     const cafeRelevancyScore = getCafeHitsRelevancyTotalScore(searchResult, context);
@@ -278,7 +292,8 @@ const computeScore = ({ searchResult, doSubstringScore, context }: IComputeScore
 
     return baseScore
            * ENTITY_TYPE_MULTIPLIERS[searchResult.entityType]
-           * getFavoriteItemMultiplier(context, searchResult);
+           * getFavoriteItemMultiplier(context, searchResult)
+           * getDistanceMultiplier(searchResult, bestDistance);
 };
 
 enum MatchType {
@@ -336,12 +351,27 @@ interface ISearchSortMetadata {
     result: ISearchResult;
 }
 
+const getBestDistance = (searchResults: IQuerySearchResult[]) => {
+    let bestDistance: number | undefined = undefined;
+
+    for (const searchResult of searchResults) {
+        if (bestDistance == null || (searchResult.vectorDistance != null && searchResult.vectorDistance < bestDistance)) {
+            bestDistance = searchResult.vectorDistance;
+        }
+    }
+
+    // If no search results have a distance, it doesn't matter what this is anyway
+    return bestDistance ?? 0;
+}
+
 export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], context: ISearchResultSortingContext): IQuerySearchResult[] => {
     context.queryText = context.queryText.toLowerCase();
 
     const perfectMatchRegex = new RegExp(`\\b${context.queryText}\\b`, 'i');
 
     const searchResultMetadataByEntityType = new Map<SearchEntityType, Map<string, ISearchSortMetadata>>();
+
+    const bestDistance = getBestDistance(searchResults);
 
     const getMetadata = (searchResult: ISearchResult) => {
         if (!searchResultMetadataByEntityType.has(searchResult.entityType)) {
@@ -359,6 +389,7 @@ export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], co
                 score:  computeScore({
                     searchResult,
                     context,
+                    bestDistance,
                     doSubstringScore: matchType !== MatchType.perfect /*doSubstringScore*/,
                 })
             });

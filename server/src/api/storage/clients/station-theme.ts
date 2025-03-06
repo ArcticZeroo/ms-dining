@@ -3,7 +3,7 @@ import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.j
 import { md5 } from '../../../util/hash.js';
 import { logError } from '../../../util/log.js';
 import { localeCompareSortAsc } from '../../../util/sort.js';
-import { IS_OPENAI_ENABLED, retrieveStationThemeFromAi } from '../../openai.js';
+import { retrieveStationThemeFromAi } from '../../openai.js';
 import { usePrismaClient } from '../client.js';
 
 abstract class StationThemeLocalClient {
@@ -54,16 +54,14 @@ export abstract class StationThemeClient {
     }
 
     static async #initializeTheme(stationName: string, hash: string, itemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>): Promise<string | undefined> {
-        if (IS_OPENAI_ENABLED) {
-            try {
-                const theme = await retrieveStationThemeFromAi(stationName, itemsByCategory);
+        try {
+            const theme = await retrieveStationThemeFromAi(stationName, itemsByCategory);
 
-                await StationThemeLocalClient.saveThemeAsync(hash, theme);
+            await StationThemeLocalClient.saveThemeAsync(hash, theme);
 
-                return theme;
-            } catch (err) {
-                logError(`Could not save theme for hash ${hash}:`, err);
-            }
+            return theme;
+        } catch (err) {
+            logError(`Could not save theme for hash ${hash}:`, err);
         }
 
         return undefined;

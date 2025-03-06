@@ -4,6 +4,9 @@ import { webserverPort } from './constants/config.js';
 import { logDebug, logError, logInfo } from './util/log.js';
 import { createAnalyticsApplications } from './api/tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from './util/env.js';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 logDebug('Starting in debug mode');
 logInfo('Starting server on port', webserverPort);

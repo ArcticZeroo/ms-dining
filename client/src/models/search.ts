@@ -30,6 +30,7 @@ export interface IQuerySearchResult {
     tags?: Set<string>;
     searchTags?: Set<string>;
     matchedModifiers: Map<string, Set<string>>;
+    vectorDistance?: number;
 }
 
 export interface ICheapItemSearchResult {

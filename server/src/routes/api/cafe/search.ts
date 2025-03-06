@@ -14,6 +14,8 @@ import { IServerSearchResult } from '../../../models/search.js';
 import { getBetterLogoUrl } from '../../../util/cafe.js';
 import { attachRouter, getTrimmedQueryParam, supportsVersionTag } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
+import { logDebug } from '../../../util/log.js';
+import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -49,6 +51,7 @@ export const registerSearchRoutes = (parent: Router) => {
             searchTags:       searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
             matchedModifiers: allowModifiers ? serializeMapOfStringToSet(searchResult.matchedModifiers) : {},
             matchReasons:     Array.from(matchReasons),
+            vectorDistance:   searchResult.vectorDistance,
         });
     };
 
@@ -94,6 +97,7 @@ export const registerSearchRoutes = (parent: Router) => {
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');
             const isExact = getTrimmedQueryParam(ctx, 'e') === 'true';
+            const isVectorSearchAllowed = getTrimmedQueryParam(ctx, 'nv') !== 'true';
 
             if (!searchQuery) {
                 ctx.body = [];
@@ -102,13 +106,24 @@ export const registerSearchRoutes = (parent: Router) => {
 
             const date = DateUtil.fromMaybeDateString(ctx.query.date);
 
-            const searchResultsByIdPerEntityType = await SearchManager.search(
-                searchQuery,
-                date,
-                isExact
-            );
+            // Temporary while we prove out vector search. Eventually we should be able to get exact queries.
+            if (isVectorSearchAllowed && !isExact) {
+                const startTime = Date.now();
+                const results = await SearchManager.searchVector(searchQuery, date);
+                serializeSearchResults(ctx, results);
+                const endTime = Date.now();
+                logDebug(`Search for ${searchQuery} took ${endTime - startTime}ms`);
+                ctx.set('X-Remaining-Embeddings', String(EMBEDDINGS_WORKER_QUEUE.remainingItems));
+            } else {
+                const results = await SearchManager.search(
+                    searchQuery,
+                    date,
+                    isExact
+                );
 
-            serializeSearchResults(ctx, searchResultsByIdPerEntityType);
+                serializeSearchResults(ctx, results);
+            }
+
         });
 
     router.get('/cheap',

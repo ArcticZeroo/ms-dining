@@ -1,10 +1,17 @@
-import { ISearchQuery, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
+import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import {
+    DB_ID_TO_SEARCH_ENTITY_TYPE,
+    ISearchQuery,
+    SearchEntityType,
+    SearchMatchReason
+} from '@msdining/common/dist/models/search.js';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
 import { Nullable } from '../../models/util.js';
 import { getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
+import * as vectorClient from './vector/client.js';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
@@ -55,29 +62,11 @@ interface IAddResultParams {
     tags: Nullable<Set<string>>;
     searchTags: Nullable<Set<string>>;
     matchedModifiers?: Map<string, Set<string>>;
+    vectorDistance?: number;
 }
 
-
-class SearchSession {
-    readonly queries: Array<ISearchQuery>;
-    readonly shouldUseExactMatch: boolean;
-    readonly date: Date | null;
+class SearchResults {
     readonly searchResultsByNameByEntityType = new Map<SearchEntityType, Map<string, IServerSearchResult>>();
-
-    readonly #normalizedQueries: Array<ISearchQuery>;
-
-    constructor({ queries, shouldUseExactMatch, date }: IMultiQuerySearchParams) {
-        this.queries = queries;
-        this.shouldUseExactMatch = shouldUseExactMatch;
-        this.date = date;
-
-        this.#normalizedQueries = queries.map(({ text, type }) => {
-            return {
-                text: normalizeNameForSearch(text),
-                type
-            } as const;
-        });
-    }
 
     #ensureEntityTypeExists(entityType: SearchEntityType) {
         if (!this.searchResultsByNameByEntityType.has(entityType)) {
@@ -90,35 +79,25 @@ class SearchSession {
         return this.searchResultsByNameByEntityType.get(entityType)!;
     }
 
-    isResultAlreadyAdded(entityType: SearchEntityType, name: string) {
-        return this.#getResultsForType(entityType).has(normalizeNameForSearch(name));
+    set(entityType: SearchEntityType, name: string, result: IServerSearchResult) {
+        this.#ensureEntityTypeExists(entityType);
+        const searchResultsById = this.searchResultsByNameByEntityType.get(entityType)!;
+        searchResultsById.set(name, result);
     }
 
-    getMenusAsync() {
-        return DailyMenuStorageClient.getMenusForSearch(this.date);
+    delete(entityType: SearchEntityType, name: string) {
+        const searchResultsById = this.#getResultsForType(entityType);
+        searchResultsById.delete(name);
     }
 
-    isMatch(text: Nullable<string>, entityType: SearchEntityType) {
-        if (!text) {
-            return false;
-        }
+    get(entityType: SearchEntityType, name: string) {
+        const searchResultsById = this.#getResultsForType(entityType);
+        return searchResultsById.get(name);
+    }
 
-        const normalizedText = normalizeNameForSearch(text);
-        if (normalizedText.length === 0) {
-            return false;
-        }
-
-        return this.#normalizedQueries.some(query => {
-            if (query.type != null && query.type !== entityType) {
-                return false;
-            }
-
-            if (this.shouldUseExactMatch) {
-                return normalizedText === query.text;
-            } else {
-                return fuzzySearch(normalizedText, query.text);
-            }
-        });
+    has(entityType: SearchEntityType, name: string) {
+        const searchResultsById = this.#getResultsForType(entityType);
+        return searchResultsById.has(name);
     }
 
     addResult({
@@ -133,7 +112,8 @@ class SearchSession {
                   price,
                   tags,
                   searchTags,
-                  matchedModifiers
+                  matchedModifiers,
+                  vectorDistance
               }: IAddResultParams) {
         this.#ensureEntityTypeExists(type);
 
@@ -146,6 +126,7 @@ class SearchSession {
                 name,
                 description,
                 imageUrl,
+                vectorDistance,
                 tags:                  tags || undefined,
                 searchTags:            searchTags || undefined,
                 locationDatesByCafeId: new Map<string, Set<string>>(),
@@ -157,6 +138,12 @@ class SearchSession {
         }
 
         const searchResult = searchResultsById.get(normalizedName)!;
+
+        if (vectorDistance != null) {
+            if (searchResult.vectorDistance == null || searchResult.vectorDistance > vectorDistance) {
+                searchResult.vectorDistance = vectorDistance;
+            }
+        }
 
         for (const matchReason of matchReasons) {
             searchResult.matchReasons.add(matchReason);
@@ -209,6 +196,173 @@ class SearchSession {
     }
 }
 
+class SearchSession {
+    readonly queries: Array<ISearchQuery>;
+    readonly shouldUseExactMatch: boolean;
+    readonly date: Date | null;
+
+    readonly #searchResults = new SearchResults();
+    readonly #pendingSearchResults = new SearchResults();
+    readonly #normalizedQueries: Array<ISearchQuery>;
+
+    constructor({ queries, shouldUseExactMatch, date }: IMultiQuerySearchParams) {
+        this.queries = queries;
+        this.shouldUseExactMatch = shouldUseExactMatch;
+        this.date = date;
+
+        this.#normalizedQueries = queries.map(({ text, type }) => {
+            return {
+                text: normalizeNameForSearch(text),
+                type
+            } as const;
+        });
+    }
+
+    get results() {
+        return this.#searchResults.searchResultsByNameByEntityType;
+    }
+
+    getMenusAsync() {
+        return DailyMenuStorageClient.getMenusForSearch(this.date);
+    }
+
+    isMatch(text: Nullable<string>, entityType: SearchEntityType) {
+        if (!text) {
+            return false;
+        }
+
+        const normalizedText = normalizeNameForSearch(text);
+        if (normalizedText.length === 0) {
+            return false;
+        }
+
+        return this.#normalizedQueries.some(query => {
+            if (query.type != null && query.type !== entityType) {
+                return false;
+            }
+
+            if (this.shouldUseExactMatch) {
+                return normalizedText === query.text;
+            } else {
+                return fuzzySearch(normalizedText, query.text);
+            }
+        });
+    }
+
+    isExactSubstring(text: Nullable<string>, entityType: SearchEntityType) {
+        if (!text) {
+            return false;
+        }
+
+        const normalizedText = normalizeNameForSearch(text);
+        if (normalizedText.length === 0) {
+            return false;
+        }
+
+        return this.#normalizedQueries.some(query => {
+            if (query.type != null && query.type !== entityType) {
+                return false;
+            }
+
+            return normalizedText.includes(query.text);
+        });
+    }
+
+    isVectorMatch(distance: number | undefined, entityType: SearchEntityType, exactMatchCandidates: Array<Nullable<string>>) {
+        if (distance != null) {
+            return true;
+        }
+
+        return exactMatchCandidates.some(candidate => candidate && this.isExactSubstring(candidate, entityType));
+    }
+
+    #addPendingResult(result: IAddResultParams) {
+        if (this.#searchResults.has(result.type, result.name)) {
+            this.#searchResults.addResult(result);
+        } else {
+            this.#pendingSearchResults.addResult(result);
+        }
+    }
+
+    #addResult(result: IAddResultParams) {
+        const pendingResult = this.#pendingSearchResults.get(result.type, result.name);
+        if (pendingResult) {
+            this.#searchResults.set(result.type, result.name, pendingResult);
+            this.#pendingSearchResults.delete(result.type, result.name);
+        }
+
+        this.#searchResults.addResult(result);
+    }
+
+    registerResult(isMatch: boolean, result: IAddResultParams) {
+        if (isMatch) {
+            this.#addResult(result);
+        } else {
+            this.#addPendingResult(result);
+        }
+    }
+
+    getMenuItemMatch(menuItem: IMenuItem) {
+        const matchReasons = new Set<SearchMatchReason>();
+        const matchedModifiers = new Map<string, Set<string>>();
+
+        if (this.isMatch(menuItem.name, SearchEntityType.menuItem)) {
+            matchReasons.add(SearchMatchReason.title);
+        }
+
+        // If we are using exact name matching, we don't want to get anything that just matches the tags
+        // or description. Exact match is intended to be used for favorites, where you don't care about
+        // similar items.
+        if (!this.shouldUseExactMatch) {
+            if (this.isMatch(menuItem.description, SearchEntityType.menuItem)) {
+                matchReasons.add(SearchMatchReason.description);
+            }
+
+            for (const searchTag of menuItem.searchTags) {
+                if (this.isMatch(searchTag, SearchEntityType.menuItem)) {
+                    matchReasons.add(SearchMatchReason.searchTags);
+                    break;
+                }
+            }
+
+            for (const modifier of menuItem.modifiers) {
+                if (this.isMatch(modifier.description, SearchEntityType.menuItem)) {
+                    matchReasons.add(SearchMatchReason.modifier);
+                    matchedModifiers.set(modifier.description, new Set<string>());
+                }
+
+                for (const modifierChoice of modifier.choices) {
+                    if (this.isMatch(modifierChoice.description, SearchEntityType.menuItem)) {
+                        matchReasons.add(SearchMatchReason.modifier);
+
+                        const matchedChoices = matchedModifiers.get(modifierChoice.description) ?? new Set<string>();
+                        matchedChoices.add(modifierChoice.description);
+                        matchedModifiers.set(modifier.description, matchedChoices);
+                    }
+                }
+            }
+        }
+
+        for (const tag of menuItem.tags) {
+            if (this.isMatch(tag, SearchEntityType.menuItem)) {
+                matchReasons.add(SearchMatchReason.tags);
+                break;
+            }
+        }
+
+        return { matchReasons, matchedModifiers } as const;
+    }
+
+    getStationMatch(name: string) {
+        const matchReasons = new Set<SearchMatchReason>();
+        if (this.isMatch(name, SearchEntityType.station)) {
+            matchReasons.add(SearchMatchReason.title);
+        }
+
+        return { matchReasons } as const;
+    }
+}
+
 // This is not a storage client because it orchestrates multiple storage clients together,
 // which otherwise should not be interacting (to avoid circular dependencies).
 export abstract class SearchManager {
@@ -223,27 +377,21 @@ export abstract class SearchManager {
         for (const dailyStation of dailyStations) {
             const stationData = dailyStation.station;
 
-            const stationMatchReasons = new Set<SearchMatchReason>();
-            if (session.isMatch(stationData.name, SearchEntityType.station)) {
-                stationMatchReasons.add(SearchMatchReason.title);
-            }
-
-            if (stationMatchReasons.size > 0 || session.isResultAlreadyAdded(SearchEntityType.station, stationData.name)) {
-                session.addResult({
-                    type:         SearchEntityType.station,
-                    matchReasons: stationMatchReasons,
-                    dateString:   dailyStation.dateString,
-                    cafeId:       dailyStation.cafeId,
-                    name:         stationData.name,
-                    imageUrl:     stationData.logoUrl,
-                    // No data for stations
-                    price:       undefined,
-                    searchTags:  undefined,
-                    tags:        undefined,
-                    description: undefined,
-                    station:     undefined
-                });
-            }
+            const { matchReasons: stationMatchReasons } = session.getStationMatch(stationData.name);
+            session.registerResult(stationMatchReasons.size > 0, {
+                type:         SearchEntityType.station,
+                matchReasons: stationMatchReasons,
+                dateString:   dailyStation.dateString,
+                cafeId:       dailyStation.cafeId,
+                name:         stationData.name,
+                imageUrl:     stationData.logoUrl,
+                // No data for stations
+                price:       undefined,
+                searchTags:  undefined,
+                tags:        undefined,
+                description: undefined,
+                station:     undefined
+            });
 
             for (const category of dailyStation.categories) {
                 for (const dailyMenuItem of category.menuItems) {
@@ -253,74 +401,26 @@ export abstract class SearchManager {
                         continue;
                     }
 
-                    const matchReasons = new Set<SearchMatchReason>();
-                    const matchedModifiers = new Map<string, Set<string>>();
-
-                    if (session.isMatch(menuItem.name, SearchEntityType.menuItem)) {
-                        matchReasons.add(SearchMatchReason.title);
-                    }
-
-                    // If we are using exact name matching, we don't want to get anything that just matches the tags
-                    // or description. Exact match is intended to be used for favorites, where you don't care about
-                    // similar items.
-                    if (!shouldUseExactMatch) {
-                        if (session.isMatch(menuItem.description, SearchEntityType.menuItem)) {
-                            matchReasons.add(SearchMatchReason.description);
-                        }
-
-                        for (const searchTag of menuItem.searchTags) {
-                            if (session.isMatch(searchTag, SearchEntityType.menuItem)) {
-                                matchReasons.add(SearchMatchReason.searchTags);
-                                break;
-                            }
-                        }
-
-                        for (const modifier of menuItem.modifiers) {
-                            if (session.isMatch(modifier.description, SearchEntityType.menuItem)) {
-                                matchReasons.add(SearchMatchReason.modifier);
-                                matchedModifiers.set(modifier.description, new Set<string>());
-                            }
-
-                            for (const modifierChoice of modifier.choices) {
-                                if (session.isMatch(modifierChoice.description, SearchEntityType.menuItem)) {
-                                    matchReasons.add(SearchMatchReason.modifier);
-
-                                    const matchedChoices = matchedModifiers.get(modifierChoice.description) ?? new Set<string>();
-                                    matchedChoices.add(modifierChoice.description);
-                                    matchedModifiers.set(modifier.description, matchedChoices);
-                                }
-                            }
-                        }
-                    }
-
-                    for (const tag of menuItem.tags) {
-                        if (session.isMatch(tag, SearchEntityType.menuItem)) {
-                            matchReasons.add(SearchMatchReason.tags);
-                            break;
-                        }
-                    }
-
-                    if (matchReasons.size > 0 || session.isResultAlreadyAdded(SearchEntityType.menuItem, menuItem.name)) {
-                        session.addResult({
-                            type:        SearchEntityType.menuItem,
-                            dateString:  dailyStation.dateString,
-                            cafeId:      dailyStation.cafeId,
-                            name:        menuItem.name,
-                            description: menuItem.description,
-                            price:       menuItem.price,
-                            tags:        menuItem.tags,
-                            searchTags:  menuItem.searchTags,
-                            imageUrl:    getThumbnailUrl(menuItem),
-                            station:     stationData.name,
-                            matchReasons,
-                            matchedModifiers
-                        });
-                    }
+                    const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
+                    session.registerResult(matchReasons.size > 0, {
+                        type:        SearchEntityType.menuItem,
+                        dateString:  dailyStation.dateString,
+                        cafeId:      dailyStation.cafeId,
+                        name:        menuItem.name,
+                        description: menuItem.description,
+                        price:       menuItem.price,
+                        tags:        menuItem.tags,
+                        searchTags:  menuItem.searchTags,
+                        imageUrl:    getThumbnailUrl(menuItem),
+                        station:     stationData.name,
+                        matchReasons,
+                        matchedModifiers
+                    });
                 }
             }
         }
 
-        return session.searchResultsByNameByEntityType;
+        return session.results;
     }
 
     public static async search(query: string, date: Date | null, shouldUseExactMatch: boolean = false): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
@@ -329,6 +429,104 @@ export abstract class SearchManager {
             date,
             shouldUseExactMatch
         });
+    }
+
+    public static async searchVector(query: string, date: Date | null): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+        const session = new SearchSession({
+            queries:             [{ text: query }],
+            shouldUseExactMatch: false,
+            date,
+        });
+
+        const [rawResults, menus] = await Promise.all([
+            vectorClient.searchVectorRaw(query),
+            session.getMenusAsync()
+        ]);
+
+        const vectorFoundItems = new Map<SearchEntityType, Map<string /*id*/, number /*distance*/>>();
+        for (const result of rawResults) {
+            const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] as SearchEntityType;
+            if (!entityType) {
+                throw new Error(`Invalid entity type: ${result.entity_type}`);
+            }
+
+            if (!vectorFoundItems.has(entityType)) {
+                vectorFoundItems.set(entityType, new Map());
+            }
+
+            vectorFoundItems.get(entityType)!.set(result.id, result.distance);
+        }
+
+        const getVectorDistance = (entityType: SearchEntityType, id: string) => {
+            if (!vectorFoundItems.has(entityType)) {
+                return undefined;
+            }
+
+            return vectorFoundItems.get(entityType)!.get(id);
+        };
+
+        for (const { dateString, cafeId, station, stationId, categories } of menus) {
+            const stationDistance = getVectorDistance(SearchEntityType.station, stationId);
+            const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
+
+            session.registerResult(
+                session.isVectorMatch(stationDistance, SearchEntityType.station, [station.name]),
+                {
+                    type:           SearchEntityType.station,
+                    matchReasons:   stationMatchReasons,
+                    dateString:     dateString,
+                    cafeId:         cafeId,
+                    name:           station.name,
+                    imageUrl:       station.logoUrl,
+                    vectorDistance: stationDistance,
+                    // No data for stations
+                    price:       undefined,
+                    searchTags:  undefined,
+                    tags:        undefined,
+                    description: undefined,
+                    station:     undefined
+                });
+
+            for (const category of categories) {
+                for (const dailyMenuItem of category.menuItems) {
+                    const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
+                    if (menuItem == null) {
+                        continue;
+                    }
+
+                    const menuItemDistance = getVectorDistance(SearchEntityType.menuItem, menuItem.id);
+
+                    const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
+
+                    const exactMatchCandidates: Array<Nullable<string>> = [
+                        menuItem.name,
+                        menuItem.description,
+                        ...menuItem.searchTags,
+                        ...menuItem.tags
+                    ];
+
+                    session.registerResult(
+                        session.isVectorMatch(menuItemDistance, SearchEntityType.menuItem, exactMatchCandidates),
+                        {
+                        type:             SearchEntityType.menuItem,
+                        dateString:       dateString,
+                        cafeId:           cafeId,
+                        name:             menuItem.name,
+                        description:      menuItem.description,
+                        price:            menuItem.price,
+                        tags:             menuItem.tags,
+                        searchTags:       menuItem.searchTags,
+                        imageUrl:         getThumbnailUrl(menuItem),
+                        station:          station.name,
+                        matchReasons:     matchReasons,
+                        matchedModifiers: matchedModifiers,
+                        vectorDistance:   menuItemDistance,
+                    });
+                }
+            }
+        }
+
+        return session.results;
     }
 
     public static async searchFavorites(queries: Array<ISearchQuery>, date: Date | null): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {

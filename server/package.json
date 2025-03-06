@@ -1,6 +1,7 @@
 {
   "type": "module",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
     "@types/koa": "^2.13.8",
     "@types/koa__router": "^12.0.0",
     "@types/koa-bodyparser": "^4.3.12",
@@ -23,6 +24,7 @@
     "@prisma/client": "^6.0.0",
     "@types/hat": "^0.0.4",
     "@types/koa-json": "^2.0.20",
+    "better-sqlite3": "^11.8.1",
     "chatgpt": "^5.2.5",
     "dotenv": "^16.4.1",
     "hat": "^0.0.3",
@@ -35,11 +37,13 @@
     "koa-static": "^5.0.0",
     "node-cron": "^3.0.2",
     "node-fetch": "^3.3.2",
+    "openai": "^4.86.1",
     "phone": "^3.1.42",
     "rrule": "^2.8.1",
     "semaphore-async-await": "^1.5.1",
     "sitemap": "^7.1.1",
     "sqlite": "^5.1.1",
+    "sqlite-vec": "^0.1.7-alpha.2",
     "sqlite3": "^5.1.7"
   },
   "scripts": {
