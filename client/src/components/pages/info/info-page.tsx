@@ -48,6 +48,8 @@ export const InfoPage = () => {
                     A randomly-generated user id is also used for custom pageview tracking. Source code for the pageview
                     tracking is available <a href="https://github.com/arcticzeroo/frozor-analytics" target="_blank">here
                     on GitHub</a>.
+                    <br/>
+                    Search query strings are cached as vector embeddings in order to speed up similar searches in the future.
                 </div>
             </div>
             {
