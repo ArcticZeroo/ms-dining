@@ -45,11 +45,13 @@ export const sendVisitFromCafeParamMiddleware = (transform: (value: string) => s
     }
 }
 
-export const sendVisitFromQueryParamMiddleware = (queryParamName: string, transform: (value: string) => string): Koa.Middleware => {
+export const sendVisitFromQueryParamMiddleware = (queryParamName: string, transform: (value: string | undefined) => string | undefined): Koa.Middleware => {
     return (ctx, next) => {
         const value = getTrimmedQueryParam(ctx, queryParamName);
-        if (value && value.length > 0) {
-            sendVisit(ctx, transform(value));
+
+        const applicationName = transform(value);
+        if (applicationName) {
+            sendVisit(ctx, applicationName);
         }
 
         return next();

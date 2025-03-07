@@ -84,7 +84,7 @@ export const registerSearchRoutes = (parent: Router) => {
             serializeSearchResults(ctx, searchResultsByIdPerEntityType);
         });
 
-    const getApplicationNameForSearch = (isExplore: string) => {
+    const getApplicationNameForSearch = (isExplore: string | undefined) => {
         return isExplore === 'true'
                ? ANALYTICS_APPLICATION_NAMES.searchExplore
                : ANALYTICS_APPLICATION_NAMES.search;
