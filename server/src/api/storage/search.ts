@@ -502,7 +502,8 @@ export abstract class SearchManager {
                         menuItem.name,
                         menuItem.description,
                         ...menuItem.searchTags,
-                        ...menuItem.tags
+                        ...menuItem.tags,
+                        ...menuItem.modifiers.flatMap(modifier => [modifier.description, ...modifier.choices.map(choice => choice.description)])
                     ];
 
                     session.registerResult(
