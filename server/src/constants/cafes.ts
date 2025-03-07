@@ -322,11 +322,6 @@ export const groupList: CafeGroup[] = [
 				emoji: '☕',
 			},
 			{
-				name:  'Salt & Straw',
-				id:    'saltandstraw',
-				emoji: '🍨'
-			},
-			{
 				name:  'L\'Experience',
 				id:    'l-experience',
 				emoji: '🥐'
