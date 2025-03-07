@@ -23,20 +23,20 @@ interface ISearchResultsState {
     stage: PromiseStage;
     results: IQuerySearchResult[];
     tabCounts: Map<SearchTypes.SearchEntityType, number>;
-    lastQuery: string;
+    queryForCurrentResults: string;
     areMenusCurrentlyUpdating: boolean;
     retrieveSearchResults: () => void;
 }
 
 const useSearchResultsState = (query: string): ISearchResultsState => {
-    const [lastQueryText, setLastQueryText] = useState(query);
+    const [queryForCurrentResults, setQueryForCurrentResults] = useState(query);
     const dateForSearch = useDateForSearch();
 
     const doSearchCallback = useCallback(
         () => DiningClient.retrieveSearchResults({
             query,
             date: dateForSearch
-        }).finally(() => setLastQueryText(query)),
+        }).finally(() => setQueryForCurrentResults(query)),
         [query, dateForSearch]
     );
 
@@ -73,7 +73,7 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
         stage: searchResultStage,
         results: allSearchResults,
         tabCounts: resultCountByEntityType,
-        lastQuery: lastQueryText,
+        queryForCurrentResults: queryForCurrentResults,
         areMenusCurrentlyUpdating: searchResultsError != null && searchResultsError instanceof MenusCurrentlyUpdatingException,
         retrieveSearchResults
     };
@@ -89,7 +89,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         stage,
         results,
         tabCounts,
-        lastQuery,
+        queryForCurrentResults,
         areMenusCurrentlyUpdating,
         retrieveSearchResults
     } = useSearchResultsState(queryText);
@@ -111,7 +111,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     <div className="query flex flex-between default-container">
                         <span className="icon-sized"/>
                         <span>
-                            "{lastQuery}"
+                            "{queryForCurrentResults}"
                         </span>
                         <SearchWaiting stage={actualStage}/>
                     </div>
@@ -179,7 +179,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                 stage === PromiseStage.success && (
                     <SearchResultsList
                         searchResults={results}
-                        queryText={queryText}
+                        queryText={queryForCurrentResults}
                         filter={entityFilterType}
                         allowedViewIds={allowedViewIds}
                     />
