@@ -7,7 +7,8 @@ import { DebugSettings } from '../../constants/settings.ts';
 const ALLOWED_SETTINGS: BooleanSetting[] = [
     DebugSettings.allowOnlineOrdering,
     DebugSettings.suppressExperimentalOnlineOrderingWarning,
-    DebugSettings.verboseLogging
+    DebugSettings.verboseLogging,
+    DebugSettings.noVectorSearch,
 ];
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {

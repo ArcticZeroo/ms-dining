@@ -52,6 +52,7 @@ export const DebugSettings = {
     allowOnlineOrdering:                       new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),
     suppressExperimentalOnlineOrderingWarning: new BooleanSetting('SUPPRESS_EXPERIMENTAL_ONLINE_ORDERING_WARNING_DO_NOT_USE', false /*defaultValue*/),
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),
+    noVectorSearch:                            new BooleanSetting('noVectorSearch', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

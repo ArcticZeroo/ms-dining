@@ -8,7 +8,7 @@ import {
     MenuResponse
 } from '@msdining/common/dist/models/http';
 import { ISearchQuery } from '@msdining/common/dist/models/search';
-import { InternalSettings } from '../constants/settings.ts';
+import { DebugSettings, InternalSettings } from '../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../models/search.ts';
 import { ICancellationToken, pause } from '../util/async.ts';
@@ -239,6 +239,10 @@ export abstract class DiningClient {
 
         if (isExplore) {
             searchParams.set('exp', 'true');
+        }
+
+        if (DebugSettings.noVectorSearch.value) {
+            searchParams.set('nv', 'true');
         }
 
         if (date != null) {
