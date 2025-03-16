@@ -3,3 +3,8 @@ export interface IAvailabilityPattern {
 	weekdays: Set<number>;
 	gap: number;
 }
+
+export interface IEntityVisitData {
+	dateString: string;
+	cafeId: string;
+}

@@ -112,11 +112,11 @@ export const requireDevKey: Middleware = async (ctx, next) => {
     await next();
 }
 
-export const getEntityTypeAndId = (ctx: Koa.Context): [SearchEntityType, string] => {
+export const getEntityTypeAndName = (ctx: Koa.Context): [SearchEntityType, string] => {
     const entityTypeRaw = getTrimmedQueryParam(ctx, 'type');
-    const entityId = getTrimmedQueryParam(ctx, 'id');
+    const entityName = getTrimmedQueryParam(ctx, 'name');
 
-    if (!entityTypeRaw || !entityId) {
+    if (!entityTypeRaw || !entityName) {
         ctx.throw(400, 'Missing type or id');
     }
 
@@ -125,5 +125,5 @@ export const getEntityTypeAndId = (ctx: Koa.Context): [SearchEntityType, string]
         ctx.throw(400, 'Invalid entityType');
     }
 
-    return [entityType, entityId];
+    return [entityType, entityName];
 }

@@ -10,8 +10,8 @@ import React, { useContext } from 'react';
 import { SelectedDateContext } from '../../context/time.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { isSameDate } from "@msdining/common/dist/util/date-util";
-import { classNames } from "../../util/react.ts";
+import { isSameDate } from '@msdining/common/dist/util/date-util';
+import { classNames } from '../../util/react.ts';
 
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
@@ -113,11 +113,13 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                     )
                                 }
                                 <span className="value">
-                                    {getViewName({
-                                        view,
-                                        useShortNames,
-                                        showGroupName: true,
-                                    })}
+                                    {
+                                        getViewName({
+                                            view,
+                                            useShortNames,
+                                            showGroupName: true,
+                                        })
+                                    }
                                     {
                                         station && ` (${station})`
                                     }

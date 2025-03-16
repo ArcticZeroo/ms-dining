@@ -19,6 +19,7 @@ import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton
 import { SearchResultFindButton } from './search-result-find-button.tsx';
 
 import './search.css';
+import { SearchResultVisitHistoryButton } from "./schedule/search-result-visit-history-button.tsx";
 
 interface IEntityDisplayData {
     className: string;
@@ -244,6 +245,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                 {
                     isCompact && favoriteButton
                 }
+                {
+                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name} />
+                }
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}
                 </span>
@@ -252,6 +256,11 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                 <div className="search-result-info-header">
                     <div className="flex">
                         {!isCompact && favoriteButton}
+                        {
+                            !isCompact && (
+                                <SearchResultVisitHistoryButton entityType={entityType} name={name} />
+                            )
+                        }
                         <div className="title">
                             <span>
                                 {name}

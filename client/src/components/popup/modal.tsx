@@ -5,7 +5,7 @@ interface IModalProps {
     title: React.ReactNode;
     buttons?: React.ReactNode;
     body: React.ReactNode;
-    footer: React.ReactNode;
+    footer?: React.ReactNode;
 }
 
 export const Modal: React.FC<IModalProps> = ({ title, buttons, body, footer }) => {

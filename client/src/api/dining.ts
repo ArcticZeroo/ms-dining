@@ -1,4 +1,4 @@
-import { isDuckType } from '@arcticzeroo/typeguard';
+import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { ICafeOverviewStation, IMenuItem } from '@msdining/common/dist/models/cafe';
 import {
@@ -7,7 +7,7 @@ import {
     IWaitTimeResponse,
     MenuResponse
 } from '@msdining/common/dist/models/http';
-import { ISearchQuery } from '@msdining/common/dist/models/search';
+import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
 import { DebugSettings, InternalSettings } from '../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../models/search.ts';
@@ -15,6 +15,8 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
+import { IEntityVisitData } from "@msdining/common/dist/models/pattern";
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -326,6 +328,18 @@ export abstract class DiningClient {
 
         if (!isDuckType<IWaitTimeResponse>(response, { minTime: 'number', maxTime: 'number' })) {
             throw new Error('Invalid response format: missing min/maxTime or in wrong format');
+        }
+
+        return response;
+    }
+
+    public static async retrieveVisitHistory(entityType: SearchEntityType, name: string, date?: Date): Promise<Array<IEntityVisitData>> {
+        const response = await makeJsonRequest({
+            path: `/api/dining/search/visit-history?type=${entityType}&name=${normalizeNameForSearch(name)}${date != null ? `&date=${DateUtil.toDateString(date)}` : ''}`
+        });
+
+        if (!isDuckTypeArray<IEntityVisitData>(response, { dateString: 'string', cafeId: 'string' })) {
+            throw new Error('Invalid response format: missing dateString or cafeId or in wrong format');
         }
 
         return response;

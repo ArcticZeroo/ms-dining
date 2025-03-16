@@ -80,7 +80,7 @@ type IAddResultParams = IAddResultParamsWithoutAppearance | IAddResultParamsWith
 
 interface ISimilarEntitySearchParams {
     entityType: SearchEntityType;
-    entityId: string;
+    entityName: string;
     date: Date;
 }
 
@@ -620,8 +620,10 @@ export abstract class SearchManager {
         return SearchManager._searchVectorInner(query, date, () => vectorClient.searchVectorRawFromQuery(query), allowResultsWithoutAppearances);
     }
 
-    public static async searchForSimilarEntities({ entityId, entityType, date }: ISimilarEntitySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
-        return SearchManager._searchVectorInner('', date, () => vectorClient.searchSimilarEntities(entityType, entityId), false /*allowResultsWithoutAppearances*/);
+    public static async searchForSimilarEntities({ entityName, entityType, date }: ISimilarEntitySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+        // todo: find ids for all entities with the same name, then get embeddings for each entity
+        return new Map();
+        // return SearchManager._searchVectorInner('', date, () => vectorClient.searchSimilarEntities(entityType, entityName), false /*allowResultsWithoutAppearances*/);
     }
 
     public static async searchFavorites(queries: Array<ISearchQuery>, date: Date | null): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {

@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { RouteBuilder } from '../../../models/koa.js';
 import {
-	attachRouter, getEntityTypeAndId,
+	attachRouter, getEntityTypeAndName,
 	getMaybeNumberQueryParam,
 	getTrimmedQueryParam,
 	serializeSearchResults
@@ -46,7 +46,7 @@ export const registerRecommendationsRoutes: RouteBuilder = (parent) => {
 	}
 
 	router.get('/similar', async ctx => {
-		const [entityType, entityId] = getEntityTypeAndId(ctx);
+		const [entityType, entityName] = getEntityTypeAndName(ctx);
 
 		const date = fromMaybeDateString(getTrimmedQueryParam(ctx, 'date'));
 		const limit = getMaybeNumberQueryParam(ctx, 'limit');
@@ -61,7 +61,7 @@ export const registerRecommendationsRoutes: RouteBuilder = (parent) => {
 			return;
 		}
 
-		const rawResults = await SearchManager.searchForSimilarEntities({ entityId, entityType, date });
+		const rawResults = await SearchManager.searchForSimilarEntities({ entityName, entityType, date });
 		serializeSearchResults(ctx, trimResults(rawResults, limit));
 	});
 

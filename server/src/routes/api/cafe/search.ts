@@ -13,7 +13,7 @@ import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 import { IServerSearchResult } from '../../../models/search.js';
 import { getStationLogoUrl } from '../../../util/cafe.js';
 import {
-    attachRouter, getEntityTypeAndId,
+    attachRouter, getEntityTypeAndName,
     getTrimmedQueryParam,
     serializeMapOfStringToSet,
     serializeSearchResults,
@@ -22,6 +22,8 @@ import {
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug } from '../../../util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
+import Duration from '@arcticzeroo/duration';
+import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -133,15 +135,15 @@ export const registerSearchRoutes = (parent: Router) => {
             ctx.body = jsonStringifyWithoutNull(searchResults);
         });
 
-    router.get('/pattern',
+    router.get('/visit-history',
         requireNoMenusUpdating,
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.pattern),
         memoizeResponseBodyByQueryParams(),
         async ctx => {
-            const [entityType, entityId] = getEntityTypeAndId(ctx);
-            const date = DateUtil.fromMaybeDateString(ctx.query.date) || new Date();
-
-
+            const [entityType, entityName] = getEntityTypeAndName(ctx);
+            const endingOnDate = DateUtil.fromMaybeDateString(getTrimmedQueryParam(ctx, 'date')) || new Date();
+            const startingOnDate = DateUtil.addDurationToDate(endingOnDate, new Duration({ days: -31 }));
+            ctx.body = await DailyMenuStorageClient.retrieveEntityVisits(entityType, entityName, startingOnDate, endingOnDate);
         });
 
     attachRouter(parent, router);
