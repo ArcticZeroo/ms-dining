@@ -297,6 +297,21 @@ export abstract class MenuItemStorageClient {
 		return this._menuItemsById.get(id)!;
 	}
 
+	public static async retrieveMenuMenuItemsLocallyAsync(ids: string[]): Promise<IMenuItem[]> {
+		const items: IMenuItem[] = [];
+
+		const retrieveMenuItem = async (id: string) => {
+			const menuItem = await this.retrieveMenuItemLocallyAsync(id);
+			if (menuItem != null) {
+				items.push(menuItem);
+			}
+		}
+
+		await Promise.all(ids.map(retrieveMenuItem));
+
+		return items;
+	}
+
 	public static async batchNormalizeMenuItemNamesAsync(): Promise<void> {
 		const now = Date.now();
 

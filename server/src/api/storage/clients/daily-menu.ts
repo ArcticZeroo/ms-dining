@@ -616,4 +616,30 @@ export abstract class DailyMenuStorageClient {
 
         return itemVisitsById;
     }
+
+    public static async retrieveMenuItemsAvailableTodayFromNames(normalizedNames: Array<string>, date: Date) {
+        const dateString = DateUtil.toDateString(date);
+
+        const dailyMenuItems = await usePrismaClient(prismaClient => prismaClient.dailyMenuItem.findMany({
+            where:  {
+                menuItem: {
+                    normalizedName: {
+                        in: normalizedNames
+                    }
+                },
+                category: {
+                    station: {
+                        dateString: {
+                            equals: dateString
+                        }
+                    }
+                }
+            },
+            select: {
+                menuItemId: true
+            }
+        }));
+
+        return new Set(dailyMenuItems.map(item => item.menuItemId));
+    }
 }

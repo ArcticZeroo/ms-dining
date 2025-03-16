@@ -7,9 +7,9 @@ import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
-import { getBetterLogoUrl, getDefaultUniquenessDataForStation } from '../../../util/cafe.js';
+import { getStationLogoUrl, getDefaultUniquenessDataForStation } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
-import { attachRouter } from '../../../util/koa.js';
+import { attachRouter, getTrimmedQueryParam } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
 	getApplicationNameForCafeMenu,
@@ -67,7 +67,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			menusByStation.push({
 				name:       station.name,
-				logoUrl:    getBetterLogoUrl(station.name, station.logoUrl),
+				logoUrl:    getStationLogoUrl(station.name, station.logoUrl),
 				menu:       itemsByCategory,
 				uniqueness: uniquenessDataForStation,
 			});

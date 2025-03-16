@@ -24,7 +24,7 @@ const createDatabaseFactory = (path: string) => {
 
 			db.exec(`
 CREATE VIRTUAL TABLE IF NOT EXISTS query_vec USING vec0(
-    query TEXT,
+    query TEXT UNIQUE,
     embedding float[1536]
 )
 `);
@@ -85,6 +85,19 @@ const ALL_EMBEDDED_ITEMS_STATEMENT = createPreparedStatementFactory(`
 	FROM search_vec
 `);
 
+const GET_SEARCH_ENTITY_STATEMENT = createPreparedStatementFactory(`
+	SELECT embedding
+	FROM search_vec
+	WHERE id = ? AND entity_type = CAST(? AS INTEGER)
+`);
+
+const SEARCH_QUERIES_STATEMENT = createPreparedStatementFactory(`
+	SELECT query
+	FROM query_vec
+	WHERE embedding MATCH ? AND QUERY != ?
+	ORDER BY distance LIMIT ?
+`);
+
 const populateAllEmbeddedItems = () => {
 	const embeddedItems = new Map<SearchEntityType, Set<string /*id*/>>;
 
@@ -105,7 +118,7 @@ const populateAllEmbeddedItems = () => {
 
 const ALL_EMBEDDED_ITEMS = populateAllEmbeddedItems();
 
-export const getAllEmbeddedItems = () => ALL_EMBEDDED_ITEMS;
+export const getAllEmbeddedEntities = () => ALL_EMBEDDED_ITEMS;
 
 export const isEmbeddedEntity = (entityType: SearchEntityType, id: string) => {
 	return ALL_EMBEDDED_ITEMS.get(entityType)?.has(id) === true;
@@ -146,3 +159,34 @@ export const searchVectorRaw = async (queryEmbedding: Float32Array, limit: numbe
 
 	return results;
 };
+
+export const getAllSearchQueries = () => {
+	const statement = getSearchVectorDatabase().prepare('SELECT query FROM query_vec');
+	const results = statement.all();
+
+	if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
+		throw new Error('Invalid query results');
+	}
+
+	return new Set(results.map(row => row.query));
+}
+
+export const getSearchEntityEmbedding = (entityType: SearchEntityType, id: string) => {
+	const result = GET_SEARCH_ENTITY_STATEMENT().get(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+
+	if (isValidEmbeddingResult(result)) {
+		return result.embedding;
+	}
+
+	return null;
+}
+
+export const searchForSimilarQueries = async (queryEmbedding: Float32Array, query: string, limit: number) => {
+	const results = SEARCH_QUERIES_STATEMENT().all(queryEmbedding, query, limit);
+
+	if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
+		throw new Error('Invalid search results');
+	}
+
+	return results.map(row => row.query);
+}

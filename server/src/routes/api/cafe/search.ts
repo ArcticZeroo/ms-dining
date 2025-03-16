@@ -11,8 +11,14 @@ import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../..
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 import { IServerSearchResult } from '../../../models/search.js';
-import { getBetterLogoUrl } from '../../../util/cafe.js';
-import { attachRouter, getTrimmedQueryParam, supportsVersionTag } from '../../../util/koa.js';
+import { getStationLogoUrl } from '../../../util/cafe.js';
+import {
+    attachRouter, getEntityTypeAndId,
+    getTrimmedQueryParam,
+    serializeMapOfStringToSet,
+    serializeSearchResults,
+    supportsVersionTag
+} from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug } from '../../../util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
@@ -24,49 +30,6 @@ export const registerSearchRoutes = (parent: Router) => {
     const router = new Router({
         prefix: '/search'
     });
-
-    const serializeMapOfStringToSet = (deserialized: Map<string, Set<string>>) => {
-        const serialized: Record<string /*cafeId*/, Array<string>> = {};
-        for (const [cafeId, dates] of deserialized.entries()) {
-            serialized[cafeId] = Array.from(dates);
-        }
-        return serialized;
-    };
-
-    const serializeSearchResult = (searchResult: IServerSearchResult, allowModifiers: boolean): ISearchResponseResult => {
-        const matchReasons = new Set(searchResult.matchReasons);
-        if (!allowModifiers) {
-            matchReasons.delete(SearchMatchReason.modifier);
-        }
-
-        return ({
-            type:             searchResult.type,
-            name:             searchResult.name,
-            description:      searchResult.description || undefined,
-            imageUrl:         getBetterLogoUrl(searchResult.name, searchResult.imageUrl) || undefined,
-            locations:        serializeMapOfStringToSet(searchResult.locationDatesByCafeId),
-            prices:           Object.fromEntries(searchResult.priceByCafeId),
-            stations:         Object.fromEntries(searchResult.stationByCafeId),
-            tags:             searchResult.tags ? Array.from(searchResult.tags) : undefined,
-            searchTags:       searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
-            matchedModifiers: allowModifiers ? serializeMapOfStringToSet(searchResult.matchedModifiers) : {},
-            matchReasons:     Array.from(matchReasons),
-            vectorDistance:   searchResult.vectorDistance,
-        });
-    };
-
-    const serializeSearchResults = (ctx: Koa.Context, searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
-        const searchResults = [];
-        const areModifiersAllowed = supportsVersionTag(ctx, VERSION_TAG.modifiersInSearchResults);
-
-        for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
-            for (const searchResult of searchResultsById.values()) {
-                searchResults.push(serializeSearchResult(searchResult, areModifiersAllowed));
-            }
-        }
-
-        ctx.body = jsonStringifyWithoutNull(searchResults);
-    };
 
     router.post('/favorites',
         requireNoMenusUpdating,
@@ -109,7 +72,11 @@ export const registerSearchRoutes = (parent: Router) => {
             // Temporary while we prove out vector search. Eventually we should be able to get exact queries.
             if (isVectorSearchAllowed && !isExact) {
                 const startTime = Date.now();
-                const results = await SearchManager.searchVector(searchQuery, date);
+                // If a date is specified, we clearly only want appearances from that date.
+                // Otherwise, we only want appearances from this week if the client supports it (since otherwise it shows weird hidden UI)
+                // and the client hasn't told us to filter out results without appearances (e.g. search ideas)
+                const allowResultsWithoutAppearances = date == null && supportsVersionTag(ctx, VERSION_TAG.searchResultsNotHereThisWeek) && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
+                const results = await SearchManager.searchVector(searchQuery, date, allowResultsWithoutAppearances);
                 serializeSearchResults(ctx, results);
                 const endTime = Date.now();
                 logDebug(`Search for ${searchQuery} took ${endTime - startTime}ms`);
@@ -164,6 +131,17 @@ export const registerSearchRoutes = (parent: Router) => {
             }
 
             ctx.body = jsonStringifyWithoutNull(searchResults);
+        });
+
+    router.get('/pattern',
+        requireNoMenusUpdating,
+        sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.pattern),
+        memoizeResponseBodyByQueryParams(),
+        async ctx => {
+            const [entityType, entityId] = getEntityTypeAndId(ctx);
+            const date = DateUtil.fromMaybeDateString(ctx.query.date) || new Date();
+
+
         });
 
     attachRouter(parent, router);

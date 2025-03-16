@@ -23,7 +23,7 @@ export const getThumbnailUrl = (menuItem: IMenuItem): Nullable<string> => {
 
 export const normalizeTagName = (tagName: string) => tagName.toLowerCase().trim();
 
-export const getBetterLogoUrl = (stationName: string, stationLogoUrl?: Nullable<string>) => {
+export const getStationLogoUrl = (stationName: string, stationLogoUrl?: Nullable<string>) => {
     const betterLogoUrl = betterLogosByNormalizedName[normalizeNameForSearch(stationName)];
     return betterLogoUrl || stationLogoUrl;
 };

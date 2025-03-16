@@ -13,7 +13,8 @@ export const SCENARIO_NAMES = {
 	search:          'search',
 	searchExplore:   'search-explore',
 	searchFavorites: 'search-favorites',
-	cheapItems:      'cheap-items'
+	cheapItems:      'cheap-items',
+	pattern:         'pattern',
 };
 
 export const ANALYTICS_APPLICATION_NAMES = {
@@ -23,4 +24,5 @@ export const ANALYTICS_APPLICATION_NAMES = {
 	searchExplore:   getApplicationNameForScenario(SCENARIO_NAMES.searchExplore),
 	searchFavorites: getApplicationNameForScenario(SCENARIO_NAMES.searchFavorites),
 	cheapItems:      getApplicationNameForScenario(SCENARIO_NAMES.cheapItems),
+	pattern:         getApplicationNameForScenario(SCENARIO_NAMES.pattern),
 };

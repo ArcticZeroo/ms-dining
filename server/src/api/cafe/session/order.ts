@@ -23,7 +23,7 @@ import { phone, PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 
-const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+type="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
+const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+entityType="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
 
 // TODO: Maybe just directly call get-items for each item instead of dealing with a bunch of extra data storage?
 
@@ -969,7 +969,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     igSettings:                      {
                         'discountStateTitle':              'Check for loyalty discounts',
                         'timezone':                        'PST8PDT',
-                        'LOYALTY/uiNoTendersAvailableMsg': 'You do not have available points or vouchers to apply. \nPlease use a different payment type or cancel this order.',
+                        'LOYALTY/uiNoTendersAvailableMsg': 'You do not have available points or vouchers to apply. \nPlease use a different payment entityType or cancel this order.',
                         'isSmsEnabled':                    'true',
                         'greetingText':                    'Select to begin',
                         'currency/currencyCultureName':    'en-US',

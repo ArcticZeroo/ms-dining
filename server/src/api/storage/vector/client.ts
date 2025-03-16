@@ -17,13 +17,30 @@ const getQueryEmbedding = async (query: string): Promise<Float32Array> => {
 	return embedding;
 }
 
-export const searchVectorRaw = async (query: string): Promise<Array<IVectorSearchResult>> => {
+export const searchVectorRawFromEmbedding = async (embedding: Float32Array): Promise<Array<IVectorSearchResult>> => {
+	return SEARCH_THREAD_HANDLER.sendRequest('getSearchResults', { query: embedding });
+}
+
+export const searchVectorRawFromQuery = async (query: string): Promise<Array<IVectorSearchResult>> => {
 	const embedding = await getQueryEmbedding(query);
-	return SEARCH_THREAD_HANDLER.sendRequest('getSearchResults', embedding);
+	return searchVectorRawFromEmbedding(embedding);
 }
 
 export const isEmbeddedEntity = async (entityType: SearchEntityType, id: string): Promise<boolean> => {
 	return SEARCH_THREAD_HANDLER.sendRequest('getIsSearchEntityEmbedded', { entityType, id });
+}
+
+export const getSearchEntityEmbedding = async (entityType: SearchEntityType, id: string): Promise<Float32Array | null> => {
+	return SEARCH_THREAD_HANDLER.sendRequest('getSearchEntityEmbedding', { entityType, id });
+}
+
+export const searchSimilarEntities = async (entityType: SearchEntityType, id: string): Promise<Array<IVectorSearchResult>> => {
+	const embedding = await getSearchEntityEmbedding(entityType, id);
+	if (!embedding) {
+		return [];
+	}
+
+	return searchVectorRawFromEmbedding(embedding);
 }
 
 export const embedMenuItem = async (menuItem: IMenuItem, categoryName: string, stationName: string) => {
@@ -46,4 +63,16 @@ export const embedStation = async (station: ICafeStation) => {
 
 export const getAllExistingEmbeddings = async (): Promise<Map<SearchEntityType, Set<string>>> => {
 	return SEARCH_THREAD_HANDLER.sendRequest('getAllEmbeddedEntities', undefined);
+}
+
+export const getAllSearchQueries = async (): Promise<Set<string>> => {
+	return SEARCH_THREAD_HANDLER.sendRequest('getAllSearchQueries', undefined);
+}
+
+export const getSimilarQueries = async (query: string): Promise<Array<string>> => {
+	const embedding = await getQueryEmbedding(query);
+	return SEARCH_THREAD_HANDLER.sendRequest('getSimilarQueries', {
+		query,
+		queryEmbedding: embedding
+	});
 }

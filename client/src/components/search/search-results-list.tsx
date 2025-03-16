@@ -169,7 +169,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                 const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.priceByCafeId.values()).some(getIsPriceAllowed);
                 const locationDatesByCafeId = filterLocations(searchResult, expandedAllowedViewIds);
 
-                if (!isPriceAllowed || locationDatesByCafeId.size === 0) {
+                if (!isPriceAllowed || (searchResult.locationDatesByCafeId.size !== 0 && locationDatesByCafeId.size === 0)) {
                     filterHiddenResultCount++;
                 }
 

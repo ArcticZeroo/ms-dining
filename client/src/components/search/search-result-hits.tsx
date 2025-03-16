@@ -47,6 +47,18 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const shouldShowPriceInSearch = useValueNotifier(ApplicationSettings.showPriceInSearch);
 
+    if (locationEntriesInOrder.length === 0) {
+        return (
+            <div className="search-result-hits">
+                <div className="search-result-chip grey">
+                    <span className="value">
+                        Not available this week.
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
     const useShortNames = shouldUseCompactMode
         || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
 

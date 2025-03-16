@@ -29,6 +29,7 @@ interface IRetrieveSearchResultsParams {
     date?: Date;
     isExact?: boolean;
     isExplore?: boolean;
+    onlyAvailableResults?: boolean;
 }
 
 export abstract class DiningClient {
@@ -227,7 +228,8 @@ export abstract class DiningClient {
         query,
         date,
         isExact = false,
-        isExplore = false
+        isExplore = false,
+        onlyAvailableResults = false
     }: IRetrieveSearchResultsParams): Promise<Array<IQuerySearchResult>> {
         const searchParams = new URLSearchParams();
 
@@ -239,6 +241,10 @@ export abstract class DiningClient {
 
         if (isExplore) {
             searchParams.set('exp', 'true');
+        }
+
+        if (onlyAvailableResults) {
+            searchParams.set('availableOnly', 'true');
         }
 
         if (DebugSettings.noVectorSearch.value) {

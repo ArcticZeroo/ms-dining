@@ -49,7 +49,8 @@ export const SearchIdeas = () => {
         () => DiningClient.retrieveSearchResults({
             query: selectedIdea,
             date: selectedDate,
-            isExplore: true
+            isExplore: true,
+            onlyAvailableResults: true
         }),
         [selectedIdea, selectedDate]
     );

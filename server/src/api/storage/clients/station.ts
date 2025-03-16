@@ -33,4 +33,10 @@ export abstract class StationStorageClient {
 			}
 		}
 	}
+
+	public static async retrieveStationAsync(stationId: string): Promise<Station | null> {
+		return usePrismaClient(prismaClient => prismaClient.station.findUnique({
+			where: { id: stationId }
+		}));
+	}
 }

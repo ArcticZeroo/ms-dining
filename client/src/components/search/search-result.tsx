@@ -206,10 +206,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
     const locationEntriesInOrder = useLocationEntries({ viewsById, locationDatesByCafeId, onlyShowLocationsOnDate });
 
-    if (!isSkeleton && locationEntriesInOrder.length === 0) {
-        return null;
-    }
-
     const imageElement = showImages && (
         imageUrl
             ? <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>

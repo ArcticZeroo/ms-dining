@@ -8,10 +8,13 @@ import {
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
 import { Nullable } from '../../models/util.js';
-import { getThumbnailUrl } from '../../util/cafe.js';
+import { getStationLogoUrl, getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
+import { IVectorSearchResult } from '../../models/vector.js';
+import { StationStorageClient } from './clients/station.js';
+import { logDebug } from '../../util/log.js';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
@@ -49,10 +52,8 @@ interface ICheapItemSearchParams {
     date: Date | null;
 }
 
-interface IAddResultParams {
+interface IAddResultParamsBase {
     type: SearchEntityType;
-    dateString: string;
-    cafeId: string;
     matchReasons: Iterable<SearchMatchReason>;
     name: string;
     station: Nullable<string>;
@@ -63,6 +64,24 @@ interface IAddResultParams {
     searchTags: Nullable<Set<string>>;
     matchedModifiers?: Map<string, Set<string>>;
     vectorDistance?: number;
+}
+
+interface IAddResultParamsWithoutAppearance extends IAddResultParamsBase {
+    dateString: undefined;
+    cafeId: undefined;
+}
+
+interface IAddResultParamsWithAppearance extends IAddResultParamsBase {
+    dateString: string;
+    cafeId: string;
+}
+
+type IAddResultParams = IAddResultParamsWithoutAppearance | IAddResultParamsWithAppearance;
+
+interface ISimilarEntitySearchParams {
+    entityType: SearchEntityType;
+    entityId: string;
+    date: Date;
 }
 
 class SearchResults {
@@ -149,17 +168,19 @@ class SearchResults {
             searchResult.matchReasons.add(matchReason);
         }
 
-        if (!searchResult.locationDatesByCafeId.has(cafeId)) {
-            searchResult.locationDatesByCafeId.set(cafeId, new Set());
-        }
-        searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
+        if (cafeId != null) {
+            if (!searchResult.locationDatesByCafeId.has(cafeId)) {
+                searchResult.locationDatesByCafeId.set(cafeId, new Set());
+            }
+            searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
 
-        if (price != null) {
-            searchResult.priceByCafeId.set(cafeId, price);
-        }
+            if (price != null) {
+                searchResult.priceByCafeId.set(cafeId, price);
+            }
 
-        if (station != null) {
-            searchResult.stationByCafeId.set(cafeId, station);
+            if (station != null) {
+                searchResult.stationByCafeId.set(cafeId, station);
+            }
         }
 
         if (searchTags) {
@@ -204,6 +225,7 @@ class SearchSession {
     readonly #searchResults = new SearchResults();
     readonly #pendingSearchResults = new SearchResults();
     readonly #normalizedQueries: Array<ISearchQuery>;
+    #hasAnyNonEmptyQuery: boolean = false;
 
     constructor({ queries, shouldUseExactMatch, date }: IMultiQuerySearchParams) {
         this.queries = queries;
@@ -211,10 +233,16 @@ class SearchSession {
         this.date = date;
 
         this.#normalizedQueries = queries.map(({ text, type }) => {
+            const normalizedText = normalizeNameForSearch(text);
+
+            if (normalizedText.length > 0) {
+                this.#hasAnyNonEmptyQuery = true;
+            }
+
             return {
-                text: normalizeNameForSearch(text),
+                text: normalizedText,
                 type
-            } as const;
+            };
         });
     }
 
@@ -227,7 +255,7 @@ class SearchSession {
     }
 
     isMatch(text: Nullable<string>, entityType: SearchEntityType) {
-        if (!text) {
+        if (!text || !this.#hasAnyNonEmptyQuery) {
             return false;
         }
 
@@ -250,7 +278,7 @@ class SearchSession {
     }
 
     isExactSubstring(text: Nullable<string>, entityType: SearchEntityType) {
-        if (!text) {
+        if (!text || !this.#hasAnyNonEmptyQuery) {
             return false;
         }
 
@@ -431,7 +459,7 @@ export abstract class SearchManager {
         });
     }
 
-    public static async searchVector(query: string, date: Date | null): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+    private static async _searchVectorInner(query: string, date: Date | null, doVectorSearch: () => Promise<IVectorSearchResult[]>, allowResultsWithoutAppearances: boolean): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         const session = new SearchSession({
             queries:             [{ text: query }],
             shouldUseExactMatch: false,
@@ -439,10 +467,11 @@ export abstract class SearchManager {
         });
 
         const [rawResults, menus] = await Promise.all([
-            vectorClient.searchVectorRaw(query),
+            doVectorSearch(),
             session.getMenusAsync()
         ]);
 
+        const vectorFoundItemsWithoutAppearances = new Map<SearchEntityType, Set<string /*id*/>>();
         const vectorFoundItems = new Map<SearchEntityType, Map<string /*id*/, number /*distance*/>>();
         for (const result of rawResults) {
             const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] as SearchEntityType;
@@ -454,19 +483,25 @@ export abstract class SearchManager {
                 vectorFoundItems.set(entityType, new Map());
             }
 
+            if (!vectorFoundItemsWithoutAppearances.has(entityType)) {
+                vectorFoundItemsWithoutAppearances.set(entityType, new Set());
+            }
+
             vectorFoundItems.get(entityType)!.set(result.id, result.distance);
+            vectorFoundItemsWithoutAppearances.get(entityType)!.add(result.id);
         }
 
-        const getVectorDistance = (entityType: SearchEntityType, id: string) => {
+        const getVectorDistanceAndMarkSeen = (entityType: SearchEntityType, id: string) => {
             if (!vectorFoundItems.has(entityType)) {
                 return undefined;
             }
 
-            return vectorFoundItems.get(entityType)!.get(id);
+            vectorFoundItemsWithoutAppearances.get(entityType)?.delete(id);
+            return vectorFoundItems.get(entityType)?.get(id);
         };
 
         for (const { dateString, cafeId, station, stationId, categories } of menus) {
-            const stationDistance = getVectorDistance(SearchEntityType.station, stationId);
+            const stationDistance = getVectorDistanceAndMarkSeen(SearchEntityType.station, stationId);
             const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
 
             session.registerResult(
@@ -477,7 +512,7 @@ export abstract class SearchManager {
                     dateString:     dateString,
                     cafeId:         cafeId,
                     name:           station.name,
-                    imageUrl:       station.logoUrl,
+                    imageUrl:       getStationLogoUrl(station.name, station.logoUrl),
                     vectorDistance: stationDistance,
                     // No data for stations
                     price:       undefined,
@@ -494,7 +529,7 @@ export abstract class SearchManager {
                         continue;
                     }
 
-                    const menuItemDistance = getVectorDistance(SearchEntityType.menuItem, menuItem.id);
+                    const menuItemDistance = getVectorDistanceAndMarkSeen(SearchEntityType.menuItem, menuItem.id);
 
                     const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
 
@@ -509,25 +544,84 @@ export abstract class SearchManager {
                     session.registerResult(
                         session.isVectorMatch(menuItemDistance, SearchEntityType.menuItem, exactMatchCandidates),
                         {
-                        type:             SearchEntityType.menuItem,
-                        dateString:       dateString,
-                        cafeId:           cafeId,
-                        name:             menuItem.name,
-                        description:      menuItem.description,
-                        price:            menuItem.price,
-                        tags:             menuItem.tags,
-                        searchTags:       menuItem.searchTags,
-                        imageUrl:         getThumbnailUrl(menuItem),
-                        station:          station.name,
-                        matchReasons:     matchReasons,
-                        matchedModifiers: matchedModifiers,
-                        vectorDistance:   menuItemDistance,
-                    });
+                            type:             SearchEntityType.menuItem,
+                            dateString:       dateString,
+                            cafeId:           cafeId,
+                            name:             menuItem.name,
+                            description:      menuItem.description,
+                            price:            menuItem.price,
+                            tags:             menuItem.tags,
+                            searchTags:       menuItem.searchTags,
+                            imageUrl:         getThumbnailUrl(menuItem),
+                            station:          station.name,
+                            matchReasons:     matchReasons,
+                            matchedModifiers: matchedModifiers,
+                            vectorDistance:   menuItemDistance,
+                        });
+                }
+            }
+        }
+
+        if (allowResultsWithoutAppearances) {
+            for (const [entityType, ids] of vectorFoundItemsWithoutAppearances) {
+                for (const id of ids) {
+                    if (entityType === SearchEntityType.station) {
+                        const station = await StationStorageClient.retrieveStationAsync(id);
+                        if (station != null) {
+                            logDebug('Adding vector station result without appearance', station.name);
+                            const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
+                            session.registerResult(true /*isMatch*/, {
+                                type:         SearchEntityType.station,
+                                matchReasons: stationMatchReasons,
+                                dateString:   undefined,
+                                cafeId:       undefined,
+                                name:         station.name,
+                                imageUrl:     getStationLogoUrl(station.name, station.logoUrl),
+                                // No data for stations
+                                price:       undefined,
+                                searchTags:  undefined,
+                                tags:        undefined,
+                                description: undefined,
+                                station:     undefined
+                            });
+                        } else {
+                            logDebug('Station not found for vector result', id);
+                        }
+                    } else if (entityType === SearchEntityType.menuItem) {
+                        // todo: find the last appearance maybe? would be nice to have cafe/station data.
+                        const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(id);
+                        if (menuItem != null) {
+                            logDebug('Adding vector menu item result without appearance', menuItem.name);
+                            const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
+                            session.registerResult(true /*isMatch*/, {
+                                type:        SearchEntityType.menuItem,
+                                dateString:  undefined,
+                                cafeId:      undefined,
+                                name:        menuItem.name,
+                                description: menuItem.description,
+                                price:       menuItem.price,
+                                tags:        menuItem.tags,
+                                searchTags:  menuItem.searchTags,
+                                imageUrl:    getThumbnailUrl(menuItem),
+                                station:     undefined,
+                                matchReasons,
+                                matchedModifiers
+                            });
+                        }
+                    }
                 }
             }
         }
 
         return session.results;
+    }
+
+    public static async searchVector(query: string, date: Date | null, allowResultsWithoutAppearances: boolean): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+        return SearchManager._searchVectorInner(query, date, () => vectorClient.searchVectorRawFromQuery(query), allowResultsWithoutAppearances);
+    }
+
+    public static async searchForSimilarEntities({ entityId, entityType, date }: ISimilarEntitySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+        return SearchManager._searchVectorInner('', date, () => vectorClient.searchSimilarEntities(entityType, entityId), false /*allowResultsWithoutAppearances*/);
     }
 
     public static async searchFavorites(queries: Array<ISearchQuery>, date: Date | null): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
