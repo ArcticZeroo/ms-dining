@@ -15,8 +15,7 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
-import { IEntityVisitData } from "@msdining/common/dist/models/pattern";
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -335,7 +334,7 @@ export abstract class DiningClient {
 
     public static async retrieveVisitHistory(entityType: SearchEntityType, name: string, date?: Date): Promise<Array<IEntityVisitData>> {
         const response = await makeJsonRequest({
-            path: `/api/dining/search/visit-history?type=${entityType}&name=${normalizeNameForSearch(name)}${date != null ? `&date=${DateUtil.toDateString(date)}` : ''}`
+            path: `/api/dining/search/visit-history?type=${entityType}&name=${encodeURIComponent(name)}${date != null ? `&date=${DateUtil.toDateString(date)}` : ''}`
         });
 
         if (!isDuckTypeArray<IEntityVisitData>(response, { dateString: 'string', cafeId: 'string' })) {
