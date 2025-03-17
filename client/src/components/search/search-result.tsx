@@ -246,7 +246,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     isCompact && favoriteButton
                 }
                 {
-                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name} />
+                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name} cafeIdsOnPage={cafeIdsOnPage} />
                 }
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}
@@ -258,7 +258,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         {!isCompact && favoriteButton}
                         {
                             !isCompact && (
-                                <SearchResultVisitHistoryButton entityType={entityType} name={name} />
+                                <SearchResultVisitHistoryButton entityType={entityType} name={name} cafeIdsOnPage={cafeIdsOnPage} />
                             )
                         }
                         <div className="title">

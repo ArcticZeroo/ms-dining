@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { SearchEntityType } from '@msdining/common/dist/models/search.ts';
 import { PopupContext } from '../../../context/modal.ts';
-import { SearchResultVisitHistoryPopupBody } from './search-result-visit-history-popup-body.tsx';
+import { SearchResultVisitHistory } from './search-result-visit-history.tsx';
 import { Modal } from '../../popup/modal.tsx';
 
 const MODAL_ID = Symbol();
@@ -9,9 +9,10 @@ const MODAL_ID = Symbol();
 interface ISearchResultVisitHistoryProps {
     entityType: SearchEntityType;
     name: string;
+    cafeIdsOnPage: Set<string> | undefined;
 }
 
-export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryProps> = ({ entityType, name }) => {
+export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryProps> = ({ entityType, name, cafeIdsOnPage }) => {
     const modalNotifier = useContext(PopupContext);
 
     const openSchedule = () => {
@@ -20,7 +21,7 @@ export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryP
             body: (
                 <Modal
                     title={`Visit history for "${name}"`}
-                    body={<SearchResultVisitHistoryPopupBody entityType={entityType} name={name}/>}
+                    body={<SearchResultVisitHistory entityType={entityType} name={name} cafeIdsOnPage={cafeIdsOnPage}/>}
                 />
             ),
         };

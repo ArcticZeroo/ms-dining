@@ -19,16 +19,20 @@ const useVisitHistoryRequest = (entityType: SearchEntityType, name: string) => {
     return useImmediatePromiseState(makeRequestCallback);
 };
 
-const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEntityVisitData>>): Array<[string, Array<CafeView>]> => {
+const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEntityVisitData>>): Map<CafeView, Array<string /*dateString*/>> => {
     const { viewsById } = useContext(ApplicationContext);
 
     return useMemo(
         () => {
             if (response.value == null) {
-                return [];
+                return new Map();
             }
 
-            const viewsByDateString: Map<string, Array<CafeView>> = new Map();
+            response.value.sort((a, b) => {
+                return b.dateString.localeCompare(a.dateString);
+            });
+
+            const visitsByView: Map<CafeView, Array<string /*dateString*/>> = new Map();
 
             for (const { dateString, cafeId } of response.value) {
                 const view = viewsById.get(cafeId);
@@ -36,15 +40,12 @@ const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEnti
                     continue;
                 }
 
-                const views = viewsByDateString.get(dateString) ?? [];
-                views.push(view);
-                viewsByDateString.set(dateString, views);
+                const visitsForView = visitsByView.get(view) ?? [];
+                visitsForView.push(dateString);
+                visitsByView.set(view, visitsForView);
             }
 
-            return Array.from(viewsByDateString.entries())
-                .sort(([a], [b]) => {
-                    return b.localeCompare(a);
-                });
+            return visitsByView;
         },
         [response.value, viewsById]
     );
@@ -53,9 +54,14 @@ const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEnti
 interface ISearchResultVisitHistoryPopupBodyProps {
     entityType: SearchEntityType;
     name: string;
+    cafeIdsOnPage: Set<string> | undefined;
 }
 
-export const SearchResultVisitHistoryPopupBody: React.FC<ISearchResultVisitHistoryPopupBodyProps> = ({ entityType, name }) => {
+export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBodyProps> = ({
+    entityType,
+    name,
+    // cafeIdsOnPage
+}) => {
     const response = useVisitHistoryRequest(entityType, name);
     const data = useVisitHistoryDataResponse(response);
 
@@ -81,11 +87,11 @@ export const SearchResultVisitHistoryPopupBody: React.FC<ISearchResultVisitHisto
         );
     }
 
-    if (data.length === 0) {
+    if (data.size === 0) {
         return (
             <div className="card">
                 <span>
-                    No previous visits.
+                    No visits recorded in the past month.
                 </span>
             </div>
         );
@@ -97,47 +103,33 @@ export const SearchResultVisitHistoryPopupBody: React.FC<ISearchResultVisitHisto
                 <thead>
                     <tr>
                         <th>
-                            Date
+                        Cafe
                         </th>
                         <th>
-                            Cafe
+                        Visit Dates
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        data.map(([dateString, views]) => {
-                            const viewNames = views.map(view => getViewName({ view, showGroupName: true }));
-                            viewNames.sort((a, b) => {
-                                if (typeof a === 'number') {
-                                    if (typeof b === 'number') {
-                                        return a - b;
-                                    }
-
-                                    return -1;
-                                }
-
-                                if (typeof b === 'number') {
-                                    return 1;
-                                }
-
-                                return a.localeCompare(b);
-                            })
-
+                        Array.from(data).map(([view, dateStrings]) => {
                             return (
                                 <tr>
                                     <td>
                                         {
-                                            fromDateString(dateString).toLocaleDateString(undefined, {
-                                                weekday: 'long',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                                month: 'long'
-                                            })
+                                            getViewName({ view, showGroupName: true })
                                         }
                                     </td>
                                     <td>
-                                        {viewNames.join(', ')}
+                                        {
+                                            dateStrings.map(dateString =>
+                                                fromDateString(dateString).toLocaleDateString(undefined, {
+                                                    weekday: 'long',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                    month: 'long'
+                                                })).join(', ')
+                                        }
                                     </td>
                                 </tr>
                             );
