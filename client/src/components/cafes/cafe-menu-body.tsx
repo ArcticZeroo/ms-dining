@@ -41,6 +41,10 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
         retrieveMenu();
     }, [retrieveMenu]);
 
+    if (!isExpanded) {
+        return null;
+    }
+
     if (error != null) {
         const isMenusCurrentlyUpdating = error instanceof MenusCurrentlyUpdatingException;
         const errorText = isMenusCurrentlyUpdating
@@ -57,7 +61,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     }
 
     if (value != null) {
-        return <StationList stations={value} isVisible={isExpanded}/>;
+        return <StationList stations={value}/>;
     }
 
     return (

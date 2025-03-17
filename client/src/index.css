@@ -100,6 +100,7 @@
     --color-payment-info-field-invalid: var(--color-error-light);
     --color-favorite-dark: #AF892A;
     --color-favorite: #C39D3E;
+    --color-favorite-light: #e0bb5f;
     --color-search-result-chip: var(--color-theme);
     --color-cafe-list: var(--color-background);
     --color-button-background: var(--color-background-raised);

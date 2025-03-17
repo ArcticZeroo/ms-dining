@@ -33,6 +33,10 @@ export const STATIC_SCENARIOS: IScenario[] = [
     {
         label: 'Cheap Items',
         scenarioName: SCENARIO_NAMES.cheapItems
+    },
+    {
+        label: 'Visit History',
+        scenarioName: SCENARIO_NAMES.pattern
     }
 ];
 

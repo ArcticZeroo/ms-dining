@@ -48,7 +48,7 @@
 }
 
 .campus-map .leaflet-div-icon .cafe-marker-tracker.is-homepage-view {
-    --color-icon-background: var(--color-favorite-dark);
+    --color-icon-background: var(--color-favorite-light);
     --color-icon-border: var(--color-favorite);
 }
 

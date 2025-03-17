@@ -9,10 +9,9 @@ import { sortStationUniquenessInPlace } from "../../../util/sorting.ts";
 
 interface IStationListProps {
     stations: CafeMenu;
-    isVisible: boolean;
 }
 
-export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }) => {
+export const StationList: React.FC<IStationListProps> = ({ stations  }) => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
@@ -47,10 +46,6 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isVisible }
         },
         [shouldDoIntelligentOrdering, stations, shouldHideEveryDayStations, enablePriceFilters, minPrice, maxPrice]
     );
-
-    if (!isVisible) {
-        return null;
-    }
 
     if (stations.length === 0) {
         return (
