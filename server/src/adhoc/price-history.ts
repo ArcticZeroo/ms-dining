@@ -1,7 +1,7 @@
 import { CafeMenuSession } from '../api/cafe/session/menu.js';
 import { ICafe } from '../models/cafe.js';
 import { usePrismaClient } from '../api/storage/client.js';
-import { cafeList } from '../constants/cafes.js';
+import { ALL_CAFES } from '../constants/cafes.js';
 import * as fs from 'node:fs/promises';
 import { JSON_HEADERS } from '../api/cafe/session/discovery.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
@@ -213,7 +213,7 @@ const retrievePriceHistoryForAllCafesAsync = async (): Promise<Map<string /*cafe
 	console.log('Finding price history for each cafe...');
 	const cafePriceHistoryById = new Map<string, CafeItemPriceMap>();
 
-	const promises = cafeList.map(async (cafe) => {
+	const promises = ALL_CAFES.map(async (cafe) => {
 		const allCafeItems = await retrieveAllMenuItemIdsAsync(cafe.id);
 		cafePriceHistoryById.set(cafe.id, await retrievePriceHistoryForCafeAsync(allCafeItems, cafe));
 	});
@@ -231,7 +231,7 @@ const createPriceHistoryOutput = async () => {
 	const stationNamesById = await retrieveAllStationNamesById();
 
 	const output = ['Cafe,Station,Item,2024 Price,2023 Price,2019 Price'];
-	for (const cafe of cafeList) {
+	for (const cafe of ALL_CAFES) {
 		const cafePriceHistory = priceHistory.get(cafe.id);
 
 		if (!cafePriceHistory) {

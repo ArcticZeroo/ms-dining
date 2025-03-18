@@ -7,12 +7,12 @@ import { createAnalyticsApplicationAsync } from './visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
 import { logError, logInfo } from '../../util/log.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
-import { cafeList } from '../../constants/cafes.js';
+import { ALL_CAFES } from '../../constants/cafes.js';
 
 const getAllApplicationNames = () => {
 	const names = new Set(Object.values(ANALYTICS_APPLICATION_NAMES));
 
-	for (const cafe of cafeList) {
+	for (const cafe of ALL_CAFES) {
 		names.add(getApplicationNameForCafeMenu(cafe.id));
 		names.add(getApplicationNameForMenuOverview(cafe.id));
 	}

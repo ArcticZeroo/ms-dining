@@ -149,16 +149,25 @@ const shouldUseNextWeek = (date: Date) => {
     return date.getDay() === nativeDayOfWeek.Friday && date.getHours() >= 17; // after 5pm on Fridays
 }
 
-export const getDaysUntilNextWeekday = (date: Date, targetDay: number) => {
-    let daysUntilTargetDay = targetDay - date.getDay();
+export const getDaysUntilNextWeekday = (date: Date, targetDay: number, excludeToday: boolean = false) => {
+    const daysUntilTargetDay = targetDay - date.getDay();
 
-    if (daysUntilTargetDay < 0) {
-        daysUntilTargetDay += 7;
+    if (daysUntilTargetDay < 0 || (daysUntilTargetDay === 0 && excludeToday)) {
+        return daysUntilTargetDay + 7;
     }
 
     return daysUntilTargetDay;
 }
 
+export const getDaysSinceLastWeekday = (date: Date, targetDay: number, excludeToday: boolean = false) => {
+    const daysSinceTargetDay = date.getDay() - targetDay;
+
+    if (daysSinceTargetDay < 0 || (daysSinceTargetDay === 0 && excludeToday)) {
+        return daysSinceTargetDay + 7;
+    }
+
+    return daysSinceTargetDay;
+}
 
 // On Monday morning, this should yield 0, 1, 2, 3, 4
 // On Friday afternoon, this should yield the next week's days, e.g. 3, 4, 5, 6, 7
@@ -208,6 +217,20 @@ export const getFridayForWeek = (date: Date): Date => {
     return result;
 }
 
+export const getWeekdayBounds = (date: Date): [Date, Date] => {
+    return [getMondayForWeek(date), getFridayForWeek(date)];
+}
+
+export const getWeekdaysForWeek = (date: Date): Date[] => {
+    const [start, end] = getWeekdayBounds(date);
+    return Array.from(yieldDaysInRange(start, end));
+}
+
+/**
+ * Inclusive.
+ * @param start
+ * @param end
+ */
 export function* yieldDaysInRange(start: Date, end: Date) {
     const currentDate = new Date(start.getTime());
 
@@ -215,4 +238,43 @@ export function* yieldDaysInRange(start: Date, end: Date) {
         yield new Date(currentDate.getTime());
         currentDate.setDate(currentDate.getDate() + 1);
     }
+}
+
+/**
+ * Moves to the last time this weekday occurred, which might be today.
+ * @param date
+ * @param targetWeekDay
+ */
+export const moveToMostRecentDay = (date: Date, targetWeekDay: number) => {
+    const result = new Date(date.getTime());
+
+    const daysSinceTargetDay = getDaysSinceLastWeekday(result, targetWeekDay);
+    result.setDate(result.getDate() - daysSinceTargetDay);
+
+    return result;
+}
+
+/**
+ * Moves to the next time this weekday occurs, which might be today.
+ * @param date
+ * @param targetWeekDay
+ */
+export const moveToNextMostRecentDay = (date: Date, targetWeekDay: number) => {
+    const result = new Date(date.getTime());
+
+    const daysUntilTargetDay = getDaysUntilNextWeekday(result, targetWeekDay);
+    result.setDate(result.getDate() + daysUntilTargetDay);
+
+    return result;
+}
+
+export const getNextWeekday = (date: Date) => {
+    const result = new Date(date.getTime());
+    result.setDate(result.getDate() + 1);
+
+    if (isDateOnWeekend(result)) {
+        result.setDate(result.getDate() + getDaysUntilNextWeekday(result, nativeDayOfWeek.Monday));
+    }
+
+    return result;
 }

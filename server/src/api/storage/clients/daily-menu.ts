@@ -216,6 +216,15 @@ export abstract class DailyMenuStorageClient {
 		return dailyStation != null;
 	}
 
+	public static async getMenusAvailableForDayAsync(dateString: string): Promise<Set<string /*cafeId*/>> {
+		const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  { dateString },
+			select: { cafeId: true }
+		}));
+
+		return new Set(stations.map(station => station.cafeId));
+	}
+
 	public static async isAnyAllowedMenuAvailableForCafe(cafeId: string): Promise<boolean> {
 		const currentDate = DateUtil.getMinimumDateForMenu();
 		const maximumDate = DateUtil.getMaximumDateForMenu();

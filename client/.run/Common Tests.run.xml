@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Common Tests" type="NodeJsTestRunner">
+    <node-interpreter value="project" />
+    <working-dir value="$PROJECT_DIR$/../common" />
+    <envs />
+    <scope-kind value="DIRECTORY" />
+    <test-directory value="$PROJECT_DIR$/../common/dist" />
+    <method v="2">
+      <option name="TypeScript.Before.Run" enabled="true" FAIL_ON_ERROR="true" CONFIG_PATH="$PROJECT_DIR$/../common/tsconfig.json" />
+    </method>
+  </configuration>
+</component>

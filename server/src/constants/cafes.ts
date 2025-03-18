@@ -453,6 +453,6 @@ export const groupList: CafeGroup[] = [
 	},
 ];
 
-export const cafeList = groupList.flatMap(group => group.members);
+export const ALL_CAFES = groupList.flatMap(group => group.members);
 
-export const cafesById = new Map(cafeList.map(cafe => [cafe.id, cafe]));
+export const cafesById = new Map(ALL_CAFES.map(cafe => [cafe.id, cafe]));

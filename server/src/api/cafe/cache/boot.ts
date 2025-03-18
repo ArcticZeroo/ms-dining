@@ -6,6 +6,7 @@ import { DailyCafeUpdateSession, updateCafes } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
+import { ALL_CAFES } from '../../../constants/cafes.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
     if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -18,12 +19,13 @@ const repairMissingWeeklyMenusAsync = async () => {
         logInfo('Repairing missing weekly menus...');
         for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
             const date = DateUtil.getNowWithDaysInFuture(i);
-            const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(date));
-            if (!isAnyMenuAvailableToday) {
+
+            const cafesWithMenuToday = await DailyMenuStorageClient.getMenusAvailableForDayAsync(DateUtil.toDateString(date));
+            if (cafesWithMenuToday.size !== ALL_CAFES.length) {
                 isRepairNeeded = true;
-                logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}`);
+                logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}. ${ALL_CAFES.length - cafesWithMenuToday.size} cafe(s) are missing a menu.`);
                 const updateSession = new DailyCafeUpdateSession(i);
-                await updateSession.populateAsync();
+                await updateSession.populateAsync(cafesWithMenuToday);
             } else {
                 logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
             }

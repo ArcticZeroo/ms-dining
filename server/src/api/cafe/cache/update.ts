@@ -1,6 +1,6 @@
 import { DateUtil } from '@msdining/common';
 import fs from 'fs/promises';
-import { cafeList } from '../../../constants/cafes.js';
+import { ALL_CAFES } from '../../../constants/cafes.js';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
@@ -122,7 +122,7 @@ export class DailyCafeUpdateSession {
         }
     }
 
-    public async populateAsync() {
+    public async populateAsync(skipCafeIds: Set<string> = new Set()) {
         await this.resetDailyState();
 
         logInfo(`{${this.dateString}} Populating cafe sessions...`);
@@ -130,7 +130,12 @@ export class DailyCafeUpdateSession {
 
         const cafePromises: Array<Promise<unknown>> = [];
 
-        for (const cafe of cafeList) {
+        for (const cafe of ALL_CAFES) {
+            if (skipCafeIds.has(cafe.id)) {
+                logDebug(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is in the skip list`);
+                continue;
+            }
+
             if (!isCafeAvailable(cafe, this.date)) {
                 logDebug(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is not available`);
                 continue;
