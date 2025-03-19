@@ -287,6 +287,11 @@
     padding: var(--default-padding);
 }
 
+/* This is a bit of a hack to make the buttons not have padding in case they're used in multiple places */
+.menu-item-buttons button.default-container {
+    padding: 0;
+}
+
 /* roughly when the table would horizontally overflow just a little -
  * not enough for the UX to be unusable horizontally, but enough for
  * scrolling to be broken since stuff is cut off with justify-content: center

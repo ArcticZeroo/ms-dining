@@ -10,10 +10,11 @@ import { ApplicationContext } from '../../../../../context/app.ts';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../../../constants/settings.ts';
 import { SelectedDateContext } from '../../../../../context/time.ts';
+import { SearchResultVisitHistoryButton } from '../../../../search/schedule/search-result-visit-history-button.tsx';
 
 interface IMenuItemButtonsProps {
-	cafeId: string;
-	menuItem: IMenuItem;
+    cafeId: string;
+    menuItem: IMenuItem;
     onClose?: () => void;
 }
 
@@ -59,10 +60,10 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
 
         const viewPath = getViewMenuUrlWithJump({
             cafeId,
-            view:       parentView,
-            name:       menuItem.name,
+            view: parentView,
+            name: menuItem.name,
             entityType: SearchEntityType.menuItem,
-            date:       selectedDateNotifier.value
+            date: selectedDateNotifier.value
         });
 
         copyToClipboard(`${window.location.origin}${viewPath}`)
@@ -78,15 +79,20 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
         <>
             <FavoriteSearchableItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
             <button title="Click to copy link" onClick={onCopyClicked} className="copy-button flex flex-justify-center">
-                <span className="material-symbols-outlined transition-background" style={{ background: copyButtonBackground }}>
+                <span className="material-symbols-outlined transition-background"
+                    style={{ background: copyButtonBackground }}>
                     link
                 </span>
             </button>
-            <button title="Search for this item across campus" onClick={onSearchClicked} className="flex flex-justify-center">
+            <button title="Search for this item across campus" onClick={onSearchClicked}
+                className="flex flex-justify-center">
                 <span className="material-symbols-outlined">
                     search
                 </span>
             </button>
+            <SearchResultVisitHistoryButton entityType={SearchEntityType.menuItem}
+                name={menuItem.name}
+                cafeIdsOnPage={undefined}/>
         </>
-    )
-}
+    );
+};

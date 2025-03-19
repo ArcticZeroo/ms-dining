@@ -13,23 +13,15 @@ export interface IGapData {
 }
 
 export interface IPatternData {
+	allVisits: Date[];
 	gapByWeekday: Map<number, IGapData>;
 	visitsWithoutPattern: Date[];
 	isEveryWeekday: boolean;
 	nextExpectedVisit?: Date;
 }
 
-const getIsEveryWeekday = (visitDateStringsSet: Set<string>) => {
-	const mostRecentMonday = moveToMostRecentDay(new Date(), nativeDayOfWeek.Monday);
-	const oneMondayAgo = addDurationToDate(mostRecentMonday, new Duration({ days: -7 }));
-
-	for (const day of getWeekdaysForWeek(oneMondayAgo)) {
-		if (!visitDateStringsSet.has(toDateString(day))) {
-			return false;
-        }
-    }
-
-	return true;
+const getIsEveryWeekday = (pattern: IPatternData) => {
+	return pattern.gapByWeekday.size === 5 && Array.from(pattern.gapByWeekday.values()).every(gapData => gapData.gap === 1);
 }
 
 const getWeeksBetween = (date1: Date, date2: Date) => {
@@ -77,13 +69,13 @@ const calculateNextExpectedVisit = (pattern: IPatternData): Date | null => {
 }
 
 export const calculatePattern = (visitDateStrings: string[]): IPatternData => {
-	const visitDateStringsSet = new Set(visitDateStrings);
 	const visitDates = Array.from(visitDateStrings).map(fromDateString);
 
 	const pattern: IPatternData = {
+		allVisits: visitDates,
 		gapByWeekday: new Map(),
 		visitsWithoutPattern: [],
-		isEveryWeekday: getIsEveryWeekday(visitDateStringsSet)
+		isEveryWeekday: false
 	};
 
 	const visitsByWeekday = new Map<number, Set<Date>>();
@@ -103,6 +95,7 @@ export const calculatePattern = (visitDateStrings: string[]): IPatternData => {
 		}
 	}
 
+	pattern.isEveryWeekday = getIsEveryWeekday(pattern);
 	pattern.nextExpectedVisit = calculateNextExpectedVisit(pattern);
 
 	return pattern;

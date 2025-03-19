@@ -7,6 +7,8 @@ import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.ts
 import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
 import { VisitPattern } from './visit-pattern.tsx';
 
+import './visit.css';
+
 const useVisitHistoryRequest = (entityType: SearchEntityType, name: string) => {
     const makeRequestCallback = useCallback(
         () => DiningClient.retrieveVisitHistory(entityType, name),
@@ -88,12 +90,17 @@ export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBo
     }
 
     return (
-        <div className="card flex flex-wrap">
-            {
-                Array.from(data.entries()).map(([cafeId, visitDates]) => (
-                    <VisitPattern key={cafeId} cafeId={cafeId} visits={visitDates}/>
-                ))
-            }
+        <div className="card flex">
+            <div className="flex flex-wrap flex-center">
+                {
+                    Array.from(data.entries()).map(([cafeId, visitDates]) => (
+                        <VisitPattern key={cafeId} cafeId={cafeId} visits={visitDates}/>
+                    ))
+                }
+            </div>
+            <div className="subtitle">
+                Pattern estimates are based on the last month. No guarantees for future visits.
+            </div>
         </div>
     );
 };

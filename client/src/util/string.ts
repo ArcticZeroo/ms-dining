@@ -2,6 +2,10 @@ export const pluralize = (value: string, count: number): string => {
     return count === 1 ? value : `${value}s`;
 };
 
+export const pluralizeWithCount = (value: string, count: number): string => {
+    return count === 1 ? value : `${count} ${value}s`;
+}
+
 export const findLongestNonSequentialSubstringLength = (parent: string, child: string): number => {
     let score = 0;
     let parentIndex = 0;

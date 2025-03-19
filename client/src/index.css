@@ -204,6 +204,18 @@ image {
     color: var(--color-almost-white);
 }
 
+.bg-raised {
+    background: var(--color-background-raised);
+}
+
+.bg-raised-2 {
+    background: var(--color-background-raised-2);
+}
+
+.bg-raised-3 {
+    background: var(--color-background-raised-3);
+}
+
 .App {
     display: flex;
 }
