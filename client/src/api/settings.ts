@@ -2,6 +2,8 @@ import { ValueNotifier } from '../util/events.ts';
 import { ISerializedCartItemsByCafeId } from '../models/cart.ts';
 import { isDuckTypeSerializedCartItem } from '../util/typeguard.ts';
 
+export const ARRAY_DELIMITER = ';';
+
 const getBooleanSetting = (key: string, defaultValue: boolean) => {
     try {
         const value = localStorage.getItem(key);
@@ -30,7 +32,7 @@ const getStringSetting = (key: string, defaultValue: string) => {
     }
 };
 
-const getStringArraySetting = (key: string, delimiter: string = ';') => {
+const getStringArraySetting = (key: string, delimiter: string = ARRAY_DELIMITER) => {
     try {
         const value = localStorage.getItem(key);
         if (value == null || value.trim().length === 0) {
@@ -42,7 +44,7 @@ const getStringArraySetting = (key: string, delimiter: string = ';') => {
     }
 };
 
-const setStringArraySetting = (key: string, value: string[], delimiter: string = ';') => {
+const setStringArraySetting = (key: string, value: string[], delimiter: string = ARRAY_DELIMITER) => {
     try {
         if (value.length === 0) {
             localStorage.removeItem(key);
@@ -71,7 +73,7 @@ export abstract class Setting<T> extends ValueNotifier<T> {
     set shouldPersist(shouldPersist: boolean) {
         this._shouldPersist = shouldPersist;
         if (shouldPersist) {
-            this.serialize(this.value);
+            this.save(this.value);
         }
     }
 
@@ -81,12 +83,12 @@ export abstract class Setting<T> extends ValueNotifier<T> {
 
     set value(value: T) {
         if (this.shouldPersist) {
-            this.serialize(value);
+            this.save(value);
         }
         super.value = value;
     }
 
-    protected abstract serialize(value: T): void;
+    protected abstract save(value: T): void;
 }
 
 export class BooleanSetting extends Setting<boolean> {
@@ -94,7 +96,7 @@ export class BooleanSetting extends Setting<boolean> {
         super(name, getBooleanSetting(name, defaultValue));
     }
 
-    protected serialize(value: boolean) {
+    protected save(value: boolean) {
         setBooleanSetting(this.name, value);
     }
 }
@@ -104,7 +106,7 @@ export class StringArraySetting extends Setting<Array<string>> {
         super(name, getStringArraySetting(name));
     }
 
-    protected serialize(value: Array<string>) {
+    protected save(value: Array<string>) {
         setStringArraySetting(this.name, value);
     }
 
@@ -124,7 +126,7 @@ export class StringSetSetting extends Setting<Set<string>> {
         this.shouldPersist = shouldPersist;
     }
 
-    protected serialize(value: Set<string>) {
+    protected save(value: Set<string>) {
         setStringArraySetting(this.name, Array.from(value));
     }
 
@@ -154,7 +156,7 @@ export class StringSetting extends Setting<string> {
         super(name, getStringSetting(name, defaultValue));
     }
 
-    protected serialize(value: string) {
+    protected save(value: string) {
         localStorage.setItem(this.name, value);
     }
 }
@@ -184,7 +186,7 @@ export class NumberSetting extends Setting<number> {
         }
     }
 
-    protected serialize(value: number) {
+    protected save(value: number) {
         localStorage.setItem(this.name, value.toString());
     }
 }
@@ -224,7 +226,7 @@ export class CartSetting extends Setting<ISerializedCartItemsByCafeId | null> {
         }
     }
 
-    protected serialize(value: ISerializedCartItemsByCafeId) {
+    protected save(value: ISerializedCartItemsByCafeId) {
         localStorage.setItem(this.name, JSON.stringify(value));
     }
 }

@@ -17,6 +17,7 @@ export const InternalSettings = {
     nameOnCard:        new StringSetting('nameOnCard'),
     postalCode:        new StringSetting('postalCode'),
     cart:              new CartSetting('cart'),
+    hasMigratedToDiningSite: new BooleanSetting('hasMigratedToDiningSite', false /*defaultValue*/),
 } as const;
 
 export const ApplicationSettings = {

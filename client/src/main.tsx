@@ -16,26 +16,36 @@ import { OrderPage } from './components/pages/order/order-page.tsx';
 import { LocationTestPage } from './components/pages/location-test/location-test-page.tsx';
 
 import './index.css';
+import { checkMigrationCookie, doMigrationAndRedirectToDiningSite } from './util/migration.ts';
 
-const router = createBrowserRouter(
-    createRoutesFromElements(
-        <Route path="/" element={<App/>} loader={() => DiningClient.retrieveViewList()} errorElement={<ErrorPage/>}>
-            <Route path="/menu/:id" element={<CafeViewPage/>}/>
-            <Route path="/settings" element={<SettingsPage/>}/>
-            <Route path="/search" element={<SearchPage/>}/>
-            <Route path="/cheap" element={<CheapItemsPage/>}/>
-            <Route path="/info" element={<InfoPage/>}/>
-            <Route path="/order" element={<OrderPage/>}/>
-            <Route path="/analytics" element={<AnalyticsPage/>}/>
-            <Route path="/location-test" element={<LocationTestPage/>}/>
-            <Route index={true} element={<HomePage/>}/>
-            <Route path="*" element={<NotFoundPage/>}/>
-        </Route>
-    )
-);
+const startApp = () => {
+    const router = createBrowserRouter(
+        createRoutesFromElements(
+            <Route path="/" element={<App/>} loader={() => DiningClient.retrieveViewList()} errorElement={<ErrorPage/>}>
+                <Route path="/menu/:id" element={<CafeViewPage/>}/>
+                <Route path="/settings" element={<SettingsPage/>}/>
+                <Route path="/search" element={<SearchPage/>}/>
+                <Route path="/cheap" element={<CheapItemsPage/>}/>
+                <Route path="/info" element={<InfoPage/>}/>
+                <Route path="/order" element={<OrderPage/>}/>
+                <Route path="/analytics" element={<AnalyticsPage/>}/>
+                <Route path="/location-test" element={<LocationTestPage/>}/>
+                <Route index={true} element={<HomePage/>}/>
+                <Route path="*" element={<NotFoundPage/>}/>
+            </Route>
+        )
+    );
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <RouterProvider router={router}/>
-    </React.StrictMode>,
-);
+    ReactDOM.createRoot(document.getElementById('root')!).render(
+        <React.StrictMode>
+            <RouterProvider router={router}/>
+        </React.StrictMode>,
+    );
+}
+
+if (window.location.hostname === 'msdining.frozor.io') {
+    doMigrationAndRedirectToDiningSite();
+} else {
+    startApp();
+    checkMigrationCookie();
+}
