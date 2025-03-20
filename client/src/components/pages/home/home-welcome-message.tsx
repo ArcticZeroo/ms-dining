@@ -6,7 +6,7 @@ export const HomeWelcomeMessage = () => {
     return (
         <div className="card theme centered-content" id="home-welcome-message">
             <div className="title">
-                Welcome to MSDining! 🎉
+                Welcome to Dining! 🎉
             </div>
             <div className="subtitle">
                 View cafe menus, search for items across campus, easily find favorites, and more!

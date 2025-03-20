@@ -12,7 +12,7 @@ export const NavListHeaderItems = () => {
                     <div id="site-header">
                         <img src={'/penguin.svg'} alt="Site Icon"/>
                         <span>
-                                MSDining
+                                Dining
                         </span>
                     </div>
                 )

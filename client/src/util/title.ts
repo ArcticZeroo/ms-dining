@@ -1,5 +1,5 @@
 export const setPageData = (subtitle: string, description: string) => {
-    document.title = `MSDining - ${subtitle}`;
+    document.title = `Dining - ${subtitle}`;
 
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
