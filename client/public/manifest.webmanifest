@@ -1,6 +1,6 @@
 {
-  "short_name": "MSDining",
-  "name": "MSDining: Menus for Microsoft cafeterias",
+  "short_name": "Dining",
+  "name": "Dining: Unofficial Menus for Microsoft cafeterias",
   "icons": [
     {
       "src": "/penguin.svg",
@@ -39,7 +39,7 @@
       ]
     }
   ],
-  "description": "Menus, search, and more for Microsoft cafeterias!",
+  "description": "Menus, search, and more for Microsoft cafeterias! (Unofficial)",
   "launch_handler": {
     "client_mode": [
       "focus-existing",

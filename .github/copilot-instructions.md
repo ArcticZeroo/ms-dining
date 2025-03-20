@@ -1,4 +1,4 @@
-This project is called MSDining and it is a web app that allows users to view
+This project is called Dining and it is a web app that allows users to view
 and search for cafeteria menus at the Redmond campus of Microsoft. The app is
 build using React and TypeScript on the frontend, with a Node.js backend running
 Koa.

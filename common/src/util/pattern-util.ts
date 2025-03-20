@@ -36,6 +36,16 @@ const calculateRegularWeeklyGap = (dates: Date[]): IGapData | null => {
 
 	dates.sort((a, b) => a.getTime() - b.getTime());
 
+	// Sometimes the schedule changes on a month boundary.
+	// If we have enough data to figure out the gap anyway,
+	// then only use the most recent month's data so that we
+	// don't falsely declare there to be no regular gap.
+	const lastVisit = dates[dates.length - 1];
+	const datesOnlyInLastMonth = dates.filter(date => date.getMonth() === lastVisit.getMonth());
+	if (datesOnlyInLastMonth.length >= 2) {
+		dates = datesOnlyInLastMonth;
+	}
+
 	const weeklyGap = getWeeksBetween(dates[0], dates[1]);
 	for (let i = 1; i < dates.length; i++) {
 		const gap = getWeeksBetween(dates[i - 1], dates[i]);
@@ -46,7 +56,7 @@ const calculateRegularWeeklyGap = (dates: Date[]): IGapData | null => {
 
 	return {
 		gap: weeklyGap,
-		lastVisit: dates[dates.length - 1]
+		lastVisit
 	};
 }
 

@@ -30,7 +30,7 @@ export const InfoPage = () => {
                     Site Info
                 </div>
                 <div className="body">
-                    Microsoft Cafeteria Menus was created by <a href="mailto:spnovick@microsoft.com">Spencer Novick</a>.
+                    This website was created by <a href="mailto:spnovick@microsoft.com">Spencer Novick</a>.
                     Please feel free to send thoughts, issues, or feedback!
                     <br/>
                     Source code can be found on <a href="https://github.com/arcticzeroo/ms-dining"

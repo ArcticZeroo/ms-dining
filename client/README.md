@@ -1,4 +1,4 @@
-# MSDining Client
+# Dining Client
 
 Written in react, with vite as a build tool
 
