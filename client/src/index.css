@@ -523,7 +523,7 @@ html, body, #root, .App {
 .material-symbols-outlined, .icon-sized {
     width: var(--icon-size);
     height: var(--icon-size);
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 .icon-container {

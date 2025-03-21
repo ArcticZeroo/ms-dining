@@ -149,6 +149,7 @@
 .search-result-image {
     align-self: center;
     height: 10rem;
+    min-width: 10rem;
     border-radius: var(--default-padding);
     transition: max-height 0.25s ease;
 }

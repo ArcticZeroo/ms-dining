@@ -12,6 +12,8 @@ import { ApplicationContext } from '../../context/app.ts';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { classNames } from '../../util/react.ts';
+import { Masonry, RenderComponentProps } from 'masonic';
+import { getConstantPadding } from '../../util/css.ts';
 
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
@@ -62,103 +64,107 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const useShortNames = shouldUseCompactMode
         || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
 
-    return (
-        <div className="search-result-hits">
-            {
-                locationEntriesInOrder.map(([cafeId, locationDates]) => {
-                    const view = viewsById.get(cafeId);
+    const renderLocation: React.ComponentType<RenderComponentProps<(typeof locationEntriesInOrder)[0]>> = ({ data: [cafeId, locationDates] }) => {
+        const view = viewsById.get(cafeId);
 
-                    if (!view) {
-                        return false;
-                    }
+        if (!view) {
+            return false;
+        }
 
-                    const price = priceByCafeId?.get(cafeId);
-                    const station = stationByCafeId?.get(cafeId);
+        const price = priceByCafeId?.get(cafeId);
+        const station = stationByCafeId?.get(cafeId);
 
-                    const parentView = getParentView(viewsById, view, shouldUseGroups);
-                    const targetDate = allowFutureMenus ? locationDates[0] : undefined;
+        const parentView = getParentView(viewsById, view, shouldUseGroups);
+        const targetDate = allowFutureMenus ? locationDates[0] : undefined;
 
-                    const isAnyDateToday = locationDates.some(date => isSameDate(date, new Date()));
+        const isAnyDateToday = locationDates.some(date => isSameDate(date, new Date()));
 
-                    const onLinkClick = () => {
-                        if (targetDate != null) {
-                            selectedDateNotifier.value = targetDate;
-                        }
-                    };
+        const onLinkClick = () => {
+            if (targetDate != null) {
+                selectedDateNotifier.value = targetDate;
+            }
+        };
 
-                    const url = cafeIdsOnPage != null && cafeIdsOnPage.has(cafeId)
-                        ? getJumpUrlOnSamePage({ entityType, name, cafeId })
-                        : getViewMenuUrlWithJump({
-                            cafeId,
-                            name,
-                            entityType,
-                            view: parentView,
-                            date: targetDate
-                        });
+        const url = cafeIdsOnPage != null && cafeIdsOnPage.has(cafeId)
+            ? getJumpUrlOnSamePage({ entityType, name, cafeId })
+            : getViewMenuUrlWithJump({
+                cafeId,
+                name,
+                entityType,
+                view: parentView,
+                date: targetDate
+            });
 
-                    return (
-                        <Link
-                            to={url}
-                            className={classNames('search-result-chip', !isAnyDateToday && 'grey')}
-                            key={view.value.id}
-                            onClick={onLinkClick}
-                        >
-                            <div className="chip-data">
-                                {
-                                    !isCompact
-                                    && (
-                                        <span className="material-symbols-outlined icon">
+        return (
+            <Link
+                to={url}
+                className={classNames('search-result-chip', !isAnyDateToday && 'grey')}
+                key={view.value.id}
+                onClick={onLinkClick}
+            >
+                <div className="chip-data">
+                    {
+                        !isCompact
+                        && (
+                            <span className="material-symbols-outlined icon">
 											location_on
 									    </span>
-                                    )
-                                }
-                                <span className="value">
-                                    {
-                                        getViewName({
-                                            view,
-                                            useShortNames,
-                                            showGroupName: true,
-                                        })
-                                    }
-                                    {
-                                        station && ` (${station})`
-                                    }
-                                </span>
-                            </div>
+                        )
+                    }
+                    <span className="value">
+                        {
+                            getViewName({
+                                view,
+                                useShortNames,
+                                showGroupName: true,
+                            })
+                        }
+                        {
+                            station && ` (${station})`
+                        }
+                    </span>
+                </div>
+                {
+                    !showOnlyCafeNames && (
+                        <>
                             {
-                                !showOnlyCafeNames && (
-                                    <>
-                                        {
-                                            shouldShowLocationDates && (
-                                                <div className="chip-data">
-                                                    <span className="material-symbols-outlined icon">
+                                shouldShowLocationDates && (
+                                    <div className="chip-data">
+                                        <span className="material-symbols-outlined icon">
                                                         timer
-                                                    </span>
-                                                    <span className="value">
-                                                        {getLocationDatesDisplay(locationDates)}
-                                                    </span>
-                                                </div>
-                                            )
-                                        }
-                                        {
-                                            shouldShowPriceInSearch && price != null && (
-                                                <div className="chip-data">
-                                                    <span className="material-symbols-outlined icon">
-                                                        attach_money
-                                                    </span>
-                                                    <span className="value">
-                                                        {formatPrice(price, false /*addCurrencySign*/)}
-                                                    </span>
-                                                </div>
-                                            )
-                                        }
-                                    </>
+                                        </span>
+                                        <span className="value">
+                                            {getLocationDatesDisplay(locationDates)}
+                                        </span>
+                                    </div>
                                 )
                             }
-                        </Link>
-                    );
-                })
-            }
+                            {
+                                shouldShowPriceInSearch && price != null && (
+                                    <div className="chip-data">
+                                        <span className="material-symbols-outlined icon">
+                                                        attach_money
+                                        </span>
+                                        <span className="value">
+                                            {formatPrice(price, false /*addCurrencySign*/)}
+                                        </span>
+                                    </div>
+                                )
+                            }
+                        </>
+                    )
+                }
+            </Link>
+        );
+    };
+
+    return (
+        <div className="search-result-hits">
+            <Masonry
+                items={locationEntriesInOrder}
+                render={renderLocation}
+                columnGutter={getConstantPadding().inPixels}
+            />
         </div>
     );
 };

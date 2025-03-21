@@ -1,6 +1,6 @@
 import {
     getDaysSinceLastWeekday,
-    getDaysUntilNextWeekday,
+    getDaysUntilNextWeekday, getSequentialDateGroups,
     nativeDayOfWeek,
     nativeDayOfWeekNames
 } from '../../util/date-util.js';
@@ -186,5 +186,87 @@ describe('DateUtil', () => {
                 }
             });
         }
+    });
+});
+
+describe('getSequentialDateGroups', () => {
+    it('returns empty array when given empty array', () => {
+        assert.deepStrictEqual(getSequentialDateGroups([]), []);
+    });
+
+    it('returns single group when given one date', () => {
+        const date = new Date();
+        assert.deepStrictEqual(getSequentialDateGroups([date]), [[date]]);
+    });
+
+    it('returns single group when given two sequential dates', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        date2.setDate(date2.getDate() + 1);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2]), [[date1, date2]]);
+    });
+
+    it('returns two groups when given three dates with a gap', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        date2.setDate(date2.getDate() + 1);
+        const date3 = new Date(date2);
+        date3.setDate(date3.getDate() + 2);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2, date3]), [[date1, date2], [date3]]);
+    });
+
+    it('returns two groups when given three dates with a gap and minGroupSizeToAvoidBreakup=2', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        date2.setDate(date2.getDate() + 1);
+        const date3 = new Date(date2);
+        date3.setDate(date3.getDate() + 2);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2, date3], 2), [[date1, date2], [date3]]);
+    });
+
+    it('returns three groups when given three dates with a gap and minGroupSizeToAvoidBreakup=3', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        date2.setDate(date2.getDate() + 1);
+        const date3 = new Date(date2);
+        date3.setDate(date3.getDate() + 2);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2, date3], 3), [[date1], [date2], [date3]]);
+    });
+
+    it('returns one group when given three sequential dates and minGroupSizeToAvoidBreakup=3', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        const date3 = new Date(date1);
+
+        date2.setDate(date2.getDate() + 1);
+        date3.setDate(date3.getDate() + 2);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2, date3], 3), [[date1, date2, date3]]);
+    });
+
+    it('returns two groups when given three sequential dates and one with a gap, and minGroupSizeToAvoidBreakup=3', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        const date3 = new Date(date1);
+        const date4 = new Date(date1);
+
+        date2.setDate(date2.getDate() + 1);
+        date3.setDate(date3.getDate() + 2);
+        date4.setDate(date4.getDate() + 4);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2, date3, date4], 3), [[date1, date2, date3], [date4]]);
+    });
+
+    // It's important that the group to be broken up is at the end.
+    it('returns two groups when given two sequential dates and minGroupSizeToAvoidBreakup=3', () => {
+        const date1 = new Date();
+        const date2 = new Date(date1);
+        date2.setDate(date2.getDate() + 1);
+
+        assert.deepStrictEqual(getSequentialDateGroups([date1, date2], 3), [[date1], [date2]]);
     });
 });

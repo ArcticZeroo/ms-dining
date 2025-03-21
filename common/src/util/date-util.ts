@@ -278,3 +278,46 @@ export const getNextWeekday = (date: Date) => {
 
     return result;
 }
+
+export const getNextDay = (date: Date) => {
+    const nextDate = new Date(date);
+    nextDate.setDate(nextDate.getDate() + 1);
+    return nextDate;
+}
+
+export const getSequentialDateGroups = (dates: Date[], minGroupSizeToAvoidBreakup: number = 0): Array<Array<Date>> => {
+    const groups: Array<Array<Date>> = [];
+    let currentGroup: Array<Date> = [];
+
+    const ensureGroupIsLargeEnough = () => {
+        if (currentGroup.length < minGroupSizeToAvoidBreakup) {
+            for (let i = 1; i < currentGroup.length; i++) {
+                groups.push([currentGroup[i]]);
+            }
+
+            currentGroup.splice(1, currentGroup.length - 1);
+        }
+    }
+
+    for (const date of dates) {
+        if (currentGroup.length < 1) {
+            currentGroup = [date];
+            groups.push(currentGroup);
+            continue;
+        }
+
+        const lastDate = currentGroup[currentGroup.length - 1]!;
+        if (isSameDate(getNextDay(lastDate), date) || isSameDate(getNextDay(date), lastDate)) {
+            currentGroup.push(date);
+            continue;
+        }
+
+        ensureGroupIsLargeEnough();
+        currentGroup = [date];
+        groups.push(currentGroup);
+    }
+
+    ensureGroupIsLargeEnough();
+    return groups;
+};
+

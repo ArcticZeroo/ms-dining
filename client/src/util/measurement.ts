@@ -15,6 +15,16 @@ export class Measurement {
         return new Measurement(px);
     }
 
+    public static fromCssString(cssString: string) {
+        if (cssString.endsWith('rem')) {
+            return Measurement.fromRem(parseFloat(cssString));
+        } else if (cssString.endsWith('px')) {
+            return Measurement.fromPixels(parseFloat(cssString));
+        }
+
+        return Measurement.fromPixels(0);
+    }
+
     public get inRem(): number {
         return this.inPixels / getOneRemInPx();
     }

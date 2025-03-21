@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { IRunnablePromiseState, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../../api/dining.ts';
@@ -6,8 +6,12 @@ import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
 import { VisitPattern } from './visit-pattern.tsx';
-
+import { ApplicationContext } from '../../../context/app.ts';
+import { CafeView } from '../../../models/cafe.ts';
+import { compareViewNames } from '../../../util/sorting.ts';
 import './visit.css';
+import { Masonry } from 'masonic';
+import { getConstantPadding } from '../../../util/css.ts';
 
 const useVisitHistoryRequest = (entityType: SearchEntityType, name: string) => {
     const makeRequestCallback = useCallback(
@@ -18,28 +22,41 @@ const useVisitHistoryRequest = (entityType: SearchEntityType, name: string) => {
     return useImmediatePromiseState(makeRequestCallback);
 };
 
-const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEntityVisitData>>): Map<string /*cafeId*/, Array<string /*dateString*/>> => {
+const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEntityVisitData>>): Array<[CafeView, Array<string /*dateString*/>]> => {
+    const { viewsById } = useContext(ApplicationContext);
+
     return useMemo(
         () => {
             if (response.value == null) {
-                return new Map();
+                return [];
             }
 
             response.value.sort((a, b) => {
                 return b.dateString.localeCompare(a.dateString);
             });
 
-            const visitsByCafeId: Map<string /*cafeId*/, Array<string /*dateString*/>> = new Map();
+            const visitsByView: Map<CafeView, Array<string /*dateString*/>> = new Map();
 
             for (const { dateString, cafeId } of response.value) {
-                const visitsForView = visitsByCafeId.get(cafeId) ?? [];
-                visitsForView.push(dateString);
-                visitsByCafeId.set(cafeId, visitsForView);
-            }
+                const view = viewsById.get(cafeId);
+                if (view == null) {
+                    console.error(`Could not find view for cafeId ${cafeId}`);
+                    continue;
+                }
 
-            return visitsByCafeId;
+                const visitsForView = visitsByView.get(view) ?? [];
+                visitsForView.push(dateString);
+                visitsByView.set(view, visitsForView);
+            }
+            
+            const visitEntries = Array.from(visitsByView.entries());
+            visitEntries.sort(([a], [b]) => {
+                return compareViewNames(a.value.name, b.value.name);
+            });
+
+            return visitEntries;
         },
-        [response.value]
+        [response.value, viewsById]
     );
 };
 
@@ -79,7 +96,7 @@ export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBo
         );
     }
 
-    if (data.size === 0) {
+    if (data.length === 0) {
         return (
             <div className="card">
                 <span>
@@ -91,13 +108,11 @@ export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBo
 
     return (
         <div className="card flex">
-            <div className="flex flex-wrap flex-center">
-                {
-                    Array.from(data.entries()).map(([cafeId, visitDates]) => (
-                        <VisitPattern key={cafeId} cafeId={cafeId} visits={visitDates}/>
-                    ))
-                }
-            </div>
+            <Masonry
+                items={data}
+                render={({ data: [view, visits] }) => (<VisitPattern view={view} visits={visits} />)}
+                columnGutter={getConstantPadding().inPixels}
+            />
             <div className="subtitle">
                 Pattern estimates are based on the last month. No guarantees for future visits.
             </div>

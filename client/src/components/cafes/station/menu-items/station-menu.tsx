@@ -19,21 +19,23 @@ const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStatio
         // This div wrapper is needed for the table to scroll independently of the header
         <div className="menu-body" ref={menuBodyRef}>
             <StationTheme theme={theme}/>
-            {
-                Object.entries(menuItemsByCategoryName).map(([categoryName, menuItems], i) => {
-                    const shouldSkipCategoryName = (
-                        i === 0
-                        && normalizeNameForSearch(categoryName) === normalizedStationName
-                    );
+            <div>
+                {
+                    Object.entries(menuItemsByCategoryName).map(([categoryName, menuItems], i) => {
+                        const shouldSkipCategoryName = (
+                            i === 0
+                            && normalizeNameForSearch(categoryName) === normalizedStationName
+                        );
 
-                    return (
-                        <MenuCategory key={categoryName}
-                            categoryName={shouldSkipCategoryName ? undefined : categoryName}
-                            menuItems={menuItems}
-                        />
-                    );
-                })
-            }
+                        return (
+                            <MenuCategory key={categoryName}
+                                categoryName={shouldSkipCategoryName ? undefined : categoryName}
+                                menuItems={menuItems}
+                            />
+                        );
+                    })
+                }
+            </div>
         </div>
     );
 };

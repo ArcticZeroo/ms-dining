@@ -46,6 +46,6 @@ const startApp = () => {
 if (window.location.hostname === 'msdining.frozor.io') {
     doMigrationAndRedirectToDiningSite();
 } else {
-    startApp();
     checkMigrationCookie();
+    startApp();
 }
