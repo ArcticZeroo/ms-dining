@@ -112,6 +112,7 @@ export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBo
                 items={data}
                 render={({ data: [view, visits] }) => (<VisitPattern view={view} visits={visits} />)}
                 columnGutter={getConstantPadding().inPixels}
+                itemKey={([view]) => view.value.id}
             />
             <div className="subtitle">
                 Pattern estimates are based on the last month. No guarantees for future visits.

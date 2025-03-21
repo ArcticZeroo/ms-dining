@@ -164,6 +164,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                 items={locationEntriesInOrder}
                 render={renderLocation}
                 columnGutter={getConstantPadding().inPixels}
+                itemKey={([cafeId]) => cafeId}
             />
         </div>
     );
