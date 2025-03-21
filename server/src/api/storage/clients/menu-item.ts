@@ -1,6 +1,6 @@
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
-import { MenuItemModifier, MenuItemModifierChoice, PrismaClient } from '@prisma/client';
+import { MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry, PrismaClient } from '@prisma/client';
 import { IMenuItem } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug } from '../../../util/log.js';
@@ -109,6 +109,18 @@ export abstract class MenuItemStorageClient {
 			? null
 			: menuItem.lastUpdateTime;
 
+		const modifierEntriesById = new Map<string, MenuItemModifierEntry>();
+		for (let i = 0; i < menuItem.modifiers.length; i++) {
+			const modifier = menuItem.modifiers[i]!;
+			modifierEntriesById.set(modifier.id, {
+				modifierId: modifier.id,
+				menuItemId: menuItem.id,
+				index:      i
+			});
+		}
+
+		const modifierIdsToAdd = new Set(modifierEntriesById.keys());
+
 		const dataWithoutId = {
 			name:                   menuItem.name.trim(),
 			normalizedName:         normalizeNameForSearch(menuItem.name),
@@ -119,10 +131,7 @@ export abstract class MenuItemStorageClient {
 			maxCalories:            Number(menuItem.maxCalories || 0),
 			tags:                   serializeMenuItemTags(menuItem.tags),
 			externalLastUpdateTime: lastUpdateTime,
-			externalReceiptText:    menuItem.receiptText || null,
-			modifiers:              {
-				connect: menuItem.modifiers.map(modifier => ({ id: modifier.id }))
-			}
+			externalReceiptText:    menuItem.receiptText || null
 		} as const;
 
 		const data = {
@@ -150,7 +159,7 @@ export abstract class MenuItemStorageClient {
 					select: {
 						modifiers: {
 							select: {
-								id: true
+								modifierId: true
 							}
 						}
 					}
@@ -158,38 +167,53 @@ export abstract class MenuItemStorageClient {
 
 				if (existingItem != null) {
 					// Menu items should have only a few modifiers, this complexity is fine.
-					const modifiersToRemove = existingItem.modifiers.filter(existingModifier => {
-						return menuItem.modifiers.every(modifier => modifier.id !== existingModifier.id);
-					});
+					const modifierIdsToRemove: string[] = [];
+					for (const existingModifier of existingItem.modifiers) {
+						if (!modifierIdsToAdd.has(existingModifier.modifierId)) {
+							modifierIdsToRemove.push(existingModifier.modifierId);
+						} else {
+							modifierIdsToAdd.delete(existingModifier.modifierId);
+						}
+					}
+
+					if (modifierIdsToRemove.length > 0) {
+						await prismaClient.menuItemModifierEntry.deleteMany({
+							where: {
+								menuItemId: menuItem.id,
+								modifierId: {
+									in: modifierIdsToRemove
+								}
+							}
+						});
+					}
 
 					await prismaClient.menuItem.update({
 						where: {
 							id: menuItem.id
 						},
 						data:  {
-							...dataWithoutId,
-							modifiers: {
-								...dataWithoutId.modifiers,
-								disconnect: modifiersToRemove.map(modifier => ({ id: modifier.id }))
-							}
+							...dataWithoutId
 						}
 					});
 				} else {
-					await prismaClient.menuItem.create({
-						data
-					});
+					await prismaClient.menuItem.create({ data });
 				}
 			} else {
 				try {
-					await prismaClient.menuItem.create({
-						data
-					});
+					await prismaClient.menuItem.create({ data });
 				} catch (err) {
 					// OK to fail unique constraint validation since we don't want to update existing items
 					if (!isUniqueConstraintFailedError(err)) {
 						throw err;
 					}
 				}
+			}
+
+			if (modifierIdsToAdd.size > 0) {
+				const modifierEntriesToAdd = Array.from(modifierIdsToAdd).map(modifierId => modifierEntriesById.get(modifierId)!);
+				await prismaClient.menuItemModifierEntry.createMany({
+					data: modifierEntriesToAdd
+				});
 			}
 		});
 	}
@@ -234,7 +258,14 @@ export abstract class MenuItemStorageClient {
 			include: {
 				modifiers:  {
 					include: {
-						choices: true
+						modifier: {
+							include: {
+								choices: true
+							}
+						}
+					},
+					orderBy: {
+						index: 'asc'
 					}
 				},
 				searchTags: {
@@ -250,15 +281,15 @@ export abstract class MenuItemStorageClient {
 		}
 
 		const modifiers: IMenuItemModifier[] = [];
-		for (const modifier of menuItem.modifiers) {
+		for (const modifierEntry of menuItem.modifiers) {
 			modifiers.push({
-				id:          modifier.id,
-				description: modifier.description,
-				minimum:     modifier.minimum,
-				maximum:     modifier.maximum,
+				id:          modifierEntry.modifier.id,
+				description: modifierEntry.modifier.description,
+				minimum:     modifierEntry.modifier.minimum,
+				maximum:     modifierEntry.modifier.maximum,
 				// Maybe a bad idea?
-				choiceType: modifier.choiceType as ModifierChoiceType,
-				choices:    modifier.choices.map(choice => ({
+				choiceType: modifierEntry.modifier.choiceType as ModifierChoiceType,
+				choices:    modifierEntry.modifier.choices.map(choice => ({
 					id:          choice.id,
 					description: choice.description,
 					price:       choice.price

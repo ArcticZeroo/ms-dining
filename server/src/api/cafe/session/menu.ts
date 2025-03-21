@@ -211,6 +211,11 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			return true;
 		}
 
+		// Just in case we missed modifiers previously...
+		if (localItem.modifiers.length === 0) {
+			return true;
+		}
+
 		return this._isAnyModifierWeird(localItem);
 	}
 

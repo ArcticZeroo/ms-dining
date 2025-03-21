@@ -29,10 +29,21 @@ model MenuItem {
   externalReceiptText    String?
 
   dailyMenuItems DailyMenuItem[]
-  modifiers      MenuItemModifier[]
+  modifiers      MenuItemModifierEntry[]
   searchTags     SearchTag[]
 
   tags String?
+}
+
+model MenuItemModifierEntry {
+  modifierId String
+  menuItemId String
+  index      Int
+
+  modifier MenuItemModifier @relation(fields: [modifierId], references: [id], onDelete: Cascade)
+  MenuItem MenuItem         @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@id([modifierId, menuItemId])
 }
 
 model MenuItemTag {
@@ -55,7 +66,7 @@ model MenuItemModifier {
   maximum     Int
   choiceType  String
 
-  menuItems MenuItem[]
+  menuItems MenuItemModifierEntry[]
   choices   MenuItemModifierChoice[]
 }
 
