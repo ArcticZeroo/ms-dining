@@ -9,10 +9,9 @@ const MODAL_ID = Symbol();
 interface ISearchResultVisitHistoryProps {
     entityType: SearchEntityType;
     name: string;
-    cafeIdsOnPage: Set<string> | undefined;
 }
 
-export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryProps> = ({ entityType, name, cafeIdsOnPage }) => {
+export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryProps> = ({ entityType, name }) => {
     const modalNotifier = useContext(PopupContext);
 
     const openSchedule = () => {
@@ -21,7 +20,7 @@ export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryP
             body: (
                 <Modal
                     title={`Visit history for "${name}"`}
-                    body={<SearchResultVisitHistory entityType={entityType} name={name} cafeIdsOnPage={cafeIdsOnPage}/>}
+                    body={<SearchResultVisitHistory entityType={entityType} name={name}/>}
                 />
             ),
         };

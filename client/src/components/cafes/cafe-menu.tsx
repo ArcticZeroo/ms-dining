@@ -11,6 +11,7 @@ import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
+import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
@@ -28,6 +29,8 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
         showGroupName,
         shouldCountTowardsLastUsed,
     }) => {
+    useTrackThisCafeOnPage(cafe.id);
+
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);

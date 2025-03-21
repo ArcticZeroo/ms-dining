@@ -5,10 +5,9 @@ import { SearchResult } from '../../../search/search-result.tsx';
 interface IHomeFavoriteResultProps {
     result: IQuerySearchResult;
     date: Date;
-    cafeIdsOnPage: Set<string>;
 }
 
-export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result, date, cafeIdsOnPage }) => {
+export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result, date }) => {
     return (
         <SearchResult
             isVisible={true}
@@ -20,7 +19,6 @@ export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result,
             isCompact={true}
             showFavoriteButton={true}
             shouldColorForFavorites={false}
-            cafeIdsOnPage={cafeIdsOnPage}
         />
     );
 };

@@ -63,17 +63,16 @@ const useVisitHistoryDataResponse = (response: IRunnablePromiseState<Array<IEnti
 interface ISearchResultVisitHistoryPopupBodyProps {
     entityType: SearchEntityType;
     name: string;
-    cafeIdsOnPage: Set<string> | undefined;
 }
 
 export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBodyProps> = ({
     entityType,
     name,
-    // cafeIdsOnPage
 }) => {
     const response = useVisitHistoryRequest(entityType, name);
     const data = useVisitHistoryDataResponse(response);
 
+    // todo: cafeIdsOnPage
     if (response.error != null) {
         return (
             <div className="card error">

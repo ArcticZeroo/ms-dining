@@ -139,7 +139,6 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                             key={result.name}
                             result={result}
                             date={selectedDate}
-                            cafeIdsOnPage={cafeIdsOnPage}
                         />
                     ))
                 }

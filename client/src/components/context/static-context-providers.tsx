@@ -10,6 +10,8 @@ import { useCartHydration } from '../../hooks/cart.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ValueNotifier, ValueNotifierSet } from '../../util/events.ts';
 import { getInitialDateFromUrl } from '../../util/url.ts';
+import { CafesOnPageContext } from '../../context/cafes-on-page.ts';
+import { CafesOnPageNotifier } from '../../util/cafes-on-page.ts';
 
 interface IStaticContextProvidersProps {
     children: React.ReactNode;
@@ -31,8 +33,9 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
     const cafeCollapseNotifier = useMemo(() => new ValueNotifierSet<string>(new Set()), []);
     const cardNumberNotifier = useMemo(() => new ValueNotifier<string>(''), []);
     const stationCollapseNotifier = useMemo(() => new ValueNotifierSet<string>(new Set()), []);
-
+    const cafesOnPageNotifier = useMemo(() => new CafesOnPageNotifier(), []);
     const cartItemNotifier = useMemo(() => new ValueNotifier<CartItemsByCafeId>(new Map()), []);
+
     const cartHydrationNotifier = useCartHydration(cartItemNotifier);
 
     useEffect(() => {
@@ -49,7 +52,9 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
                         <CafeCollapseContext.Provider value={cafeCollapseNotifier}>
                             <StationCollapseContext.Provider value={stationCollapseNotifier}>
                                 <CardNumberContext.Provider value={cardNumberNotifier}>
-                                    {children}
+                                    <CafesOnPageContext.Provider value={cafesOnPageNotifier}>
+                                        {children}
+                                    </CafesOnPageContext.Provider>
                                 </CardNumberContext.Provider>
                             </StationCollapseContext.Provider>
                         </CafeCollapseContext.Provider>

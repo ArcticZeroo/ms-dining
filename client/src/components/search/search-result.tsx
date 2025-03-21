@@ -19,7 +19,7 @@ import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton
 import { SearchResultFindButton } from './search-result-find-button.tsx';
 
 import './search.css';
-import { SearchResultVisitHistoryButton } from "./schedule/search-result-visit-history-button.tsx";
+import { SearchResultVisitHistoryButton } from './schedule/search-result-visit-history-button.tsx';
 
 interface IEntityDisplayData {
     className: string;
@@ -150,7 +150,6 @@ export interface ISearchResultProps {
     isCompact?: boolean;
     showFavoriteButton?: boolean;
     shouldColorForFavorites?: boolean;
-    cafeIdsOnPage?: Set<string>;
     tags?: Set<string>;
     searchTags?: Set<string>;
     showSearchButtonInsteadOfLocations?: boolean;
@@ -176,7 +175,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     isCompact = false,
     showFavoriteButton = !isCompact,
     shouldColorForFavorites = true,
-    cafeIdsOnPage,
     tags,
     searchTags,
     showSearchButtonInsteadOfLocations = false,
@@ -246,7 +244,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     isCompact && favoriteButton
                 }
                 {
-                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name} cafeIdsOnPage={cafeIdsOnPage} />
+                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name} />
                 }
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}
@@ -258,7 +256,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                         {!isCompact && favoriteButton}
                         {
                             !isCompact && (
-                                <SearchResultVisitHistoryButton entityType={entityType} name={name} cafeIdsOnPage={cafeIdsOnPage} />
+                                <SearchResultVisitHistoryButton entityType={entityType} name={name} />
                             )
                         }
                         <div className="title">
@@ -324,7 +322,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                         onlyShowLocationsOnDate={onlyShowLocationsOnDate}
                                         isCompact={isCompact}
                                         locationEntriesInOrder={locationEntriesInOrder}
-                                        cafeIdsOnPage={cafeIdsOnPage}
                                         shouldShowLocationDates={shouldShowLocationDates}
                                         priceByCafeId={priceByCafeId}
                                         stationByCafeId={stationByCafeId}

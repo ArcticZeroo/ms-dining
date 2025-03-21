@@ -14,13 +14,13 @@ import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { classNames } from '../../util/react.ts';
 import { Masonry, RenderComponentProps } from 'masonic';
 import { getConstantPadding } from '../../util/css.ts';
+import { useCafesOnPage } from '../../hooks/cafes-on-page.ts';
 
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
 interface ISearchResultHitsProps {
     name: string;
     entityType: SearchEntityType;
-    cafeIdsOnPage?: Set<string>;
     shouldShowLocationDates: boolean;
     onlyShowLocationsOnDate?: Date;
     isCompact: boolean;
@@ -36,7 +36,6 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     stationByCafeId,
     name,
     entityType,
-    cafeIdsOnPage,
     shouldShowLocationDates,
     isCompact,
     showOnlyCafeNames
@@ -48,6 +47,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const shouldShowPriceInSearch = useValueNotifier(ApplicationSettings.showPriceInSearch);
+    const cafeIdsOnPage = useCafesOnPage();
 
     if (locationEntriesInOrder.length === 0) {
         return (
@@ -85,7 +85,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
             }
         };
 
-        const url = cafeIdsOnPage != null && cafeIdsOnPage.has(cafeId)
+        const url = cafeIdsOnPage.has(cafeId)
             ? getJumpUrlOnSamePage({ entityType, name, cafeId })
             : getViewMenuUrlWithJump({
                 cafeId,
@@ -131,7 +131,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                 shouldShowLocationDates && (
                                     <div className="chip-data">
                                         <span className="material-symbols-outlined icon">
-                                                        timer
+                                            timer
                                         </span>
                                         <span className="value">
                                             {getLocationDatesDisplay(locationDates)}
@@ -143,7 +143,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
                                 shouldShowPriceInSearch && price != null && (
                                     <div className="chip-data">
                                         <span className="material-symbols-outlined icon">
-                                                        attach_money
+                                            attach_money
                                         </span>
                                         <span className="value">
                                             {formatPrice(price, false /*addCurrencySign*/)}
