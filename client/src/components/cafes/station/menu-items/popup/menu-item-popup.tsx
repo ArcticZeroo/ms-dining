@@ -2,7 +2,6 @@ import { CafeTypes } from '@msdining/common';
 import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { CartContext } from '../../../../../context/cart.ts';
-import { PopupContext } from '../../../../../context/modal.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
 import { addOrEditCartItem, calculatePrice, shallowCloneCart } from '../../../../../util/cart.ts';
 import { getRandomId } from '../../../../../util/id.ts';
@@ -13,6 +12,7 @@ import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 import './menu-item-popup.css';
 import { useIsOnlineOrderingAllowedForSelectedDate } from '../../../../../hooks/cafe.ts';
 import { MenuItemButtons } from './menu-item-buttons.tsx';
+import { usePopupCloserSymbol } from '../../../../../hooks/popup.ts';
 
 const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
     return useMemo(
@@ -53,16 +53,10 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
     const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
 
     const cartItemsNotifier = useContext(CartContext);
-    const modalNotifier = useContext(PopupContext);
+    const closeModal = usePopupCloserSymbol();
 
     const isOnlineOrderingAllowedForSelectedDate = useIsOnlineOrderingAllowedForSelectedDate();
     const isOnlineOrderingAllowed = fromCartItem != null || isOnlineOrderingAllowedForSelectedDate;
-
-    const closeModal = () => {
-        if (modalNotifier.value?.id === modalSymbol) {
-            modalNotifier.value = null;
-        }
-    };
 
     const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
         return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
@@ -101,7 +95,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
         addOrEditCartItem(newCart, newCartItem);
         cartItemsNotifier.value = newCart;
 
-        closeModal();
+        closeModal(modalSymbol);
     };
 
     const onAddQuantityClicked = () => {
@@ -123,7 +117,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                 <MenuItemButtons
                     cafeId={cafeId}
                     menuItem={menuItem}
-                    onClose={closeModal}
+                    onClose={() => closeModal(modalSymbol)}
                 />
             }
             body={(

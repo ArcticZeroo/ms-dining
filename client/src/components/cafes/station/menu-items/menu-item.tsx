@@ -6,7 +6,6 @@ import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../../context/html.ts';
 import { CurrentCafeContext } from '../../../../context/menu-item.ts';
-import { PopupContext } from '../../../../context/modal.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { formatPrice } from '../../../../util/cart.ts';
@@ -17,6 +16,7 @@ import { MenuItemImage } from './menu-item-image.tsx';
 import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
+import { usePopupOpener } from '../../../../hooks/popup.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -58,25 +58,20 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const isFavoriteItem = useIsFavoriteItem(menuItem.name, SearchEntityType.menuItem);
-    const modalNotifier = useContext(PopupContext);
     const scrollAnchorMargin = useScrollAnchorMargin();
+    const openModal = usePopupOpener();
 
     const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
 
     const onOpenModalClick = () => {
-        // There's already a modal active.
-        if (modalNotifier.value != null) {
-            return;
-        }
-
-        modalNotifier.value = {
+        openModal({
             id:   menuItemModalSymbol,
             body: <MenuItemPopup
                 cafeId={cafe.id}
                 menuItem={menuItem}
                 modalSymbol={menuItemModalSymbol}
             />,
-        };
+        });
     };
 
     const currentHighlightTag = useMemo(() => {

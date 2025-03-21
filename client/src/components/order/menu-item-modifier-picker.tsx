@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { getMinMaxDisplay } from '../../util/cart.ts';
 import { classNames } from '../../util/react.ts';
 import { ModifierChoices } from './choices/modifier-choices.tsx';
+import { useValueNotifier } from '../../hooks/events.ts';
+import { DebugSettings } from '../../constants/settings.ts';
 
 interface IMenuItemModifierPickerProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -11,9 +13,15 @@ interface IMenuItemModifierPickerProps {
 }
 
 export const MenuItemModifierPicker: React.FC<IMenuItemModifierPickerProps> = ({ modifier, selectedChoiceIds, onSelectedChoiceIdsChanged }) => {
+    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
+
     const isValid = useMemo(() => {
+        if (!isOnlineOrderingAllowed) {
+            return true;
+        }
+
         return selectedChoiceIds.size >= modifier.minimum && selectedChoiceIds.size <= modifier.maximum;
-    }, [modifier, selectedChoiceIds]);
+    }, [isOnlineOrderingAllowed, modifier.maximum, modifier.minimum, selectedChoiceIds.size]);
 
     return (
         <div className={classNames('menu-item-modifier', !isValid && 'error')}>

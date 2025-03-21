@@ -2,17 +2,32 @@ import { useValueNotifier } from '../../hooks/events.ts';
 import { PopupContext } from '../../context/modal.ts';
 import React, { useContext, useEffect } from 'react';
 
-import './popup.css';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
+import { useLocationHash } from '../../hooks/location.ts';
+import { usePopupCloserSymbol } from '../../hooks/popup.ts';
+
+import './popup.css';
+import { useNavigate } from 'react-router-dom';
 
 export const PopupContainer = () => {
     const popupNotifier = useContext(PopupContext);
     const popup = useValueNotifier(popupNotifier);
     const deviceType = useDeviceType();
+    const hash = useLocationHash();
+    const navigate = useNavigate();
+    const closePopup = usePopupCloserSymbol();
+
+    const isPopupActive = popup != null && hash === '#popup';
 
     useEffect(() => {
         if (popup == null) {
+            navigate('#');
+        }
+    }, [navigate, popup]);
+
+    useEffect(() => {
+        if (!isPopupActive) {
             return;
         }
 
@@ -20,7 +35,7 @@ export const PopupContainer = () => {
             if (event.key === 'Escape') {
                 event.stopPropagation();
                 event.preventDefault();
-                popupNotifier.value = null;
+                closePopup();
             }
         };
 
@@ -29,15 +44,15 @@ export const PopupContainer = () => {
         return () => {
             document.removeEventListener('keydown', onEscapePressed);
         };
-    }, [popupNotifier, popup]);
+    }, [popupNotifier, isPopupActive, closePopup]);
 
-    if (popup == null) {
+    if (!isPopupActive) {
         return null;
     }
 
     const onOverlayClicked = (event: React.MouseEvent) => {
         if (event.target === event.currentTarget) {
-            popupNotifier.value = null;
+            closePopup();
         }
     };
 

@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { calculatePattern, IPatternData } from '@msdining/common/dist/util/pattern-util';
 import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../util/link.ts';
-import { closeActivePopup, PopupContext } from '../../../context/modal.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { pluralizeWithCount } from '../../../util/string.ts';
 import { nativeDayOfWeekNames } from '@msdining/common/dist/util/date-util';
@@ -14,6 +13,7 @@ import { CafeView } from '../../../models/cafe.ts';
 import { AllVisitsDisplay } from './all-visits-display.tsx';
 import { VisitRepeat } from './visit-repeat.tsx';
 import { useCafeIdsOnPage } from '../../../hooks/cafes-on-page.ts';
+import { usePopupCloserAlways } from '../../../hooks/popup.ts';
 
 interface IVisitPatternProps {
     view: CafeView;
@@ -47,10 +47,10 @@ const getWeekdayGroups = (pattern: IPatternData) => {
 }
 
 export const VisitPattern: React.FC<IVisitPatternProps> = ({ view, visits }) => {
-    const popupNotifier = useContext(PopupContext);
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cafeIdsOnPage = useCafeIdsOnPage();
+    const closePopup = usePopupCloserAlways();
 
     const pattern = calculatePattern(visits);
     const weekdayGroups = getWeekdayGroups(pattern);
@@ -60,7 +60,7 @@ export const VisitPattern: React.FC<IVisitPatternProps> = ({ view, visits }) => 
     return (
         <div className="flex flex-col shrink-padding default-container bg-raised-2">
             <Link to={url} className="default-button default-container"
-                onClick={() => closeActivePopup(popupNotifier)}>
+                onClick={closePopup}>
                 { getViewName({ view, showGroupName: true }) }
             </Link>
             {

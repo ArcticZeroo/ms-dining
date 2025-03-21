@@ -8,6 +8,7 @@ import { NavExpansionContext } from './context/nav.ts';
 import { useValueNotifierContext } from './hooks/events.ts';
 import { DeviceType, useDeviceType } from './hooks/media-query.ts';
 import { classNames } from './util/react.ts';
+import { useLocationHash } from './hooks/location.ts';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -51,8 +52,9 @@ export const Root = () => {
     const deviceType = useDeviceType();
 
     const currentModal = useValueNotifierContext(PopupContext);
+    const hash = useLocationHash();
 
-    const shouldStopScroll = (isNavExpanded && deviceType === DeviceType.Mobile) || currentModal != null;
+    const shouldStopScroll = (isNavExpanded && deviceType === DeviceType.Mobile) || (currentModal != null && hash === '#popup');
 
     const pageBodyDivRef = useScrollTracker(shouldStopScroll);
 

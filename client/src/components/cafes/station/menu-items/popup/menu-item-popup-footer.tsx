@@ -27,22 +27,28 @@ export const MenuItemPopupFooter: React.FC<IMenuItemPopupFooterProps> = ({
     return (
         <div className="menu-item-order-footer">
             <div className="controls">
-                <button
-                    disabled={!canDecreaseQuantity}
-                    onClick={onRemoveQuantityClicked}>
-                    <span className="material-symbols-outlined">
-                        remove
-                    </span>
-                </button>
-                <button
-                    onClick={onAddQuantityClicked}>
-                    <span className="material-symbols-outlined">
-                        add
-                    </span>
-                </button>
-                <div className="quantity">
-                    {quantity}x
-                </div>
+                {
+                    isOnlineOrderingAllowed && (
+                        <>
+                            <button
+                                disabled={!canDecreaseQuantity}
+                                onClick={onRemoveQuantityClicked}>
+                                <span className="material-symbols-outlined">
+                                    remove
+                                </span>
+                            </button>
+                            <button
+                                onClick={onAddQuantityClicked}>
+                                <span className="material-symbols-outlined">
+                                    add
+                                </span>
+                            </button>
+                            <div className="quantity">
+                                {quantity}x
+                            </div>
+                        </>
+                    )
+                }
             </div>
             <div className="info">
                 <div className="price">

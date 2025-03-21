@@ -2,6 +2,8 @@ import { CafeTypes } from '@msdining/common';
 import React from 'react';
 import { getChoiceHtmlId, maybeFormatPrice } from '../../../util/cart.ts';
 import { classNames } from '../../../util/react.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { DebugSettings } from '../../../constants/settings.ts';
 
 interface IModifierCheckboxesProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -15,6 +17,7 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
     selectedChoiceIds,
     onSelectedChoiceIdsChanged
 }) => {
+    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
     const isAtMaximum = selectedChoiceIds.size >= modifier.maximum;
 
     const handleChoiceChange = (choiceId: string) => {
@@ -47,15 +50,19 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
                     <label key={choice.id}
                         htmlFor={htmlId}
                         className={classNames('modifier-choice-option', isDisabled && 'disabled')}>
-                        <input
-                            type="checkbox"
-                            id={htmlId}
-                            name={choice.description}
-                            value={choice.id}
-                            onChange={() => handleChoiceChange(choice.id)}
-                            checked={isSelected}
-                            disabled={isDisabled}
-                        />
+                        {
+                            isOnlineOrderingAllowed && (
+                                <input
+                                    type="checkbox"
+                                    id={htmlId}
+                                    name={choice.description}
+                                    value={choice.id}
+                                    onChange={() => handleChoiceChange(choice.id)}
+                                    checked={isSelected}
+                                    disabled={isDisabled}
+                                />
+                            )
+                        }
                         <span>{choice.description} {maybeFormatPrice(choice.price)}</span>
                     </label>
                 );
