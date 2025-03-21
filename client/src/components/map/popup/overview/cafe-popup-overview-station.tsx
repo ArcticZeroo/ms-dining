@@ -6,7 +6,7 @@ import { MapPopupViewContext } from '../../../../context/map.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
-import { getViewMenuUrlWithJump } from '../../../../util/link.ts';
+import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
 
 const getStationTitle = (station: ICafeOverviewStation) => {
@@ -45,7 +45,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
     return (
         <Link
             className="overview-station"
-            to={getViewMenuUrlWithJump({
+            to={getSearchAnchorJumpUrlOnAnotherPage({
                 cafeId:     cafe.id,
                 view:       popupView,
                 entityType: SearchEntityType.station,

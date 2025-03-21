@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { calculatePattern } from '@msdining/common/dist/util/pattern-util';
+import { calculatePattern, IPatternData } from '@msdining/common/dist/util/pattern-util';
 import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { closeActivePopup, PopupContext } from '../../../context/modal.ts';
@@ -13,6 +13,7 @@ import { getLocationDatesDisplay } from '../../../util/date.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { AllVisitsDisplay } from './all-visits-display.tsx';
 import { VisitRepeat } from './visit-repeat.tsx';
+import { useCafeIdsOnPage } from '../../../hooks/cafes-on-page.ts';
 
 interface IVisitPatternProps {
     view: CafeView;
@@ -30,12 +31,7 @@ const getWeekdayGapString = (gap: number, weekdays: Array<number>) => {
     return `Every ${pluralizeWithCount('week', gap)} on ${weekdayDisplay}`;
 };
 
-export const VisitPattern: React.FC<IVisitPatternProps> = ({ view, visits }) => {
-    const popupNotifier = useContext(PopupContext);
-    const { viewsById } = useContext(ApplicationContext);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-
-    const pattern = calculatePattern(visits);
+const getWeekdayGroups = (pattern: IPatternData) => {
     const weekdayGroups = new Map<number /*count*/, Array<number> /*weekdays*/>();
     for (const [weekday, gapData] of pattern.gapByWeekday) {
         const group = weekdayGroups.get(gapData.gap) ?? [];
@@ -47,13 +43,25 @@ export const VisitPattern: React.FC<IVisitPatternProps> = ({ view, visits }) => 
         group.sort((a, b) => a - b);
     }
 
+    return weekdayGroups;
+}
+
+export const VisitPattern: React.FC<IVisitPatternProps> = ({ view, visits }) => {
+    const popupNotifier = useContext(PopupContext);
+    const { viewsById } = useContext(ApplicationContext);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const cafeIdsOnPage = useCafeIdsOnPage();
+
+    const pattern = calculatePattern(visits);
+    const weekdayGroups = getWeekdayGroups(pattern);
+
+    const url = getViewMenuUrl({ view, viewsById, shouldUseGroups, cafeIdsOnPage });
+
     return (
         <div className="flex flex-col shrink-padding default-container bg-raised-2">
-            <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="default-button default-container"
+            <Link to={url} className="default-button default-container"
                 onClick={() => closeActivePopup(popupNotifier)}>
-                {
-                    getViewName({ view, showGroupName: true })
-                }
+                { getViewName({ view, showGroupName: true }) }
             </Link>
             {
                 pattern.isEveryWeekday && (

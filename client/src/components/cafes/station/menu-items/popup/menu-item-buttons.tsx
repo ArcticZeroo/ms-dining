@@ -4,7 +4,7 @@ import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useContext, useState } from 'react';
 import { navigateToSearch } from '../../../../../util/search.ts';
 import { getParentView } from '../../../../../util/view.ts';
-import { getViewMenuUrlWithJump } from '../../../../../util/link.ts';
+import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../../util/link.ts';
 import { useNavigate } from 'react-router-dom';
 import { ApplicationContext } from '../../../../../context/app.ts';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
@@ -58,7 +58,7 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
 
         const parentView = getParentView(viewsById, cafeView, shouldUseGroups);
 
-        const viewPath = getViewMenuUrlWithJump({
+        const viewPath = getSearchAnchorJumpUrlOnAnotherPage({
             cafeId,
             view: parentView,
             name: menuItem.name,

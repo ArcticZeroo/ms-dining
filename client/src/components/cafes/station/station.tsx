@@ -10,7 +10,7 @@ import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
 import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hooks/html.ts';
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
-import { getScrollAnchorId } from '../../../util/link.ts';
+import { getSearchAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { FavoriteSearchableItemButton } from '../../button/favorite-searchable-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
@@ -77,7 +77,7 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
     );
 
     const scrollAnchorId = useMemo(
-        () => getScrollAnchorId({ cafeId: cafe.id, entityType: SearchEntityType.station, name: normalizedName }),
+        () => getSearchAnchorId({ cafeId: cafe.id, entityType: SearchEntityType.station, name: normalizedName }),
         [cafe.id, normalizedName]
     );
 

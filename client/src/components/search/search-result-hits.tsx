@@ -1,6 +1,6 @@
 import { formatPrice } from '../../util/cart.ts';
 import { getParentView } from '../../util/view.ts';
-import { getJumpUrlOnSamePage, getViewMenuUrlWithJump } from '../../util/link.ts';
+import { getSearchAnchorJumpUrl } from '../../util/link.ts';
 import { Link } from 'react-router-dom';
 import { getLocationDatesDisplay } from '../../util/date.ts';
 import { getViewName } from '../../util/cafe.ts';
@@ -14,7 +14,7 @@ import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { classNames } from '../../util/react.ts';
 import { Masonry, RenderComponentProps } from 'masonic';
 import { getConstantPadding } from '../../util/css.ts';
-import { useCafesOnPage } from '../../hooks/cafes-on-page.ts';
+import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
 
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
 
@@ -47,7 +47,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const shouldShowPriceInSearch = useValueNotifier(ApplicationSettings.showPriceInSearch);
-    const cafeIdsOnPage = useCafesOnPage();
+    const cafeIdsOnPage = useCafeIdsOnPage();
 
     if (locationEntriesInOrder.length === 0) {
         return (
@@ -85,15 +85,14 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
             }
         };
 
-        const url = cafeIdsOnPage.has(cafeId)
-            ? getJumpUrlOnSamePage({ entityType, name, cafeId })
-            : getViewMenuUrlWithJump({
-                cafeId,
-                name,
-                entityType,
-                view: parentView,
-                date: targetDate
-            });
+        const url = getSearchAnchorJumpUrl({
+            cafeId,
+            entityType,
+            name,
+            cafeIdsOnPage,
+            view: parentView,
+            date: targetDate,
+        });
 
         return (
             <Link

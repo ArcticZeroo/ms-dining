@@ -72,7 +72,6 @@ export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBo
     const response = useVisitHistoryRequest(entityType, name);
     const data = useVisitHistoryDataResponse(response);
 
-    // todo: cafeIdsOnPage
     if (response.error != null) {
         return (
             <div className="card error">

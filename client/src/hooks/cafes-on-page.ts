@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo } from 'react';
 import { CafesOnPageContext } from '../context/cafes-on-page.ts';
 import { useValueNotifier } from './events.ts';
 
-export const useCafesOnPage = () => {
+export const useCafeIdsOnPage = () => {
     // There's a type error from using useValueNotifierContext, and I don't feel like fixing it right now
     const notifier = useContext(CafesOnPageContext);
     return useValueNotifier(notifier);

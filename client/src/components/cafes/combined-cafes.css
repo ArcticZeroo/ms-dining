@@ -129,7 +129,8 @@
 .menu-item-image {
     background: var(--color-menu-item-image-background);
     border-radius: var(--default-padding);
-    max-width: 20rem;
+    max-width: 10rem;
+    max-height: 10rem;
     object-fit: contain;
     content-visibility: auto;
 }

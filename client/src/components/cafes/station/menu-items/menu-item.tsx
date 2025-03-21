@@ -10,7 +10,7 @@ import { PopupContext } from '../../../../context/modal.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { formatPrice } from '../../../../util/cart.ts';
-import { getScrollAnchorId } from '../../../../util/link.ts';
+import { getSearchAnchorId } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';
 import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
 import { MenuItemImage } from './menu-item-image.tsx';
@@ -93,7 +93,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     );
 
     const scrollAnchorId = useMemo(
-        () => getScrollAnchorId({ cafeId: cafe.id, name: normalizedName, entityType: SearchEntityType.menuItem }),
+        () => getSearchAnchorId({ cafeId: cafe.id, name: normalizedName, entityType: SearchEntityType.menuItem }),
         [cafe.id, normalizedName]
     );
 
