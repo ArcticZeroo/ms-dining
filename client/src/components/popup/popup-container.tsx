@@ -5,7 +5,7 @@ import React, { useContext, useEffect } from 'react';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
 import { useLocationHash } from '../../hooks/location.ts';
-import { usePopupCloserSymbol } from '../../hooks/popup.ts';
+import { usePopupCloserAlways } from '../../hooks/popup.ts';
 
 import './popup.css';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ export const PopupContainer = () => {
     const deviceType = useDeviceType();
     const hash = useLocationHash();
     const navigate = useNavigate();
-    const closePopup = usePopupCloserSymbol();
+    const closePopup = usePopupCloserAlways();
 
     const isPopupActive = popup != null && hash === '#popup';
 

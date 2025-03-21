@@ -90,9 +90,7 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
                     search
                 </span>
             </button>
-            <SearchResultVisitHistoryButton entityType={SearchEntityType.menuItem}
-                name={menuItem.name}
-                cafeIdsOnPage={undefined}/>
+            <SearchResultVisitHistoryButton entityType={SearchEntityType.menuItem} name={menuItem.name}/>
         </>
     );
 };
