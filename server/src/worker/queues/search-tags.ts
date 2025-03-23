@@ -1,9 +1,9 @@
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
-import { retrieveMenuItemSearchTagsFromAiWithRetries } from '../api/openai.js';
-import { MenuItemStorageClient } from '../api/storage/clients/menu-item.js';
-import { Nullable } from '../models/util.js';
-import { logDebug, logError } from '../util/log.js';
+import { retrieveMenuItemSearchTagsFromAiWithRetries } from '../../api/openai.js';
+import { MenuItemStorageClient } from '../../api/storage/clients/menu-item.js';
+import { Nullable } from '../../models/util.js';
+import { logDebug, logError } from '../../util/log.js';
 import { WorkerQueue } from './queue.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 5 });

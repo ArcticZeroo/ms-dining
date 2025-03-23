@@ -1,9 +1,9 @@
 import Duration from '@arcticzeroo/duration';
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { embedMenuItem, embedStation, isEmbeddedEntity } from '../api/storage/vector/client.js';
-import { ICafeStation } from '../models/cafe.js';
-import { Nullable } from '../models/util.js';
+import { embedMenuItem, embedStation, isEmbeddedEntity } from '../../api/storage/vector/client.js';
+import { ICafeStation } from '../../models/cafe.js';
+import { Nullable } from '../../models/util.js';
 import { WorkerQueue } from './queue.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 1 });

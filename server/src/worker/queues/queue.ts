@@ -1,11 +1,11 @@
 import Duration from '@arcticzeroo/duration';
-import { logDebug } from '../util/log.js';
-import { Nullable } from '../models/util.js';
+import { logDebug } from '../../util/log.js';
+import { Nullable } from '../../models/util.js';
 
 interface IWorkerQueueParams {
-    successPollInterval: Duration;
+    successPollInterval?: Duration;
     emptyPollInterval: Duration;
-    failedPollInterval: Duration;
+    failedPollInterval?: Duration;
 }
 
 export abstract class WorkerQueue<TKey, TValue> {
@@ -19,9 +19,9 @@ export abstract class WorkerQueue<TKey, TValue> {
     #runningSymbol: symbol | undefined;
 
     protected constructor({ successPollInterval, emptyPollInterval, failedPollInterval }: IWorkerQueueParams) {
-        this.#successPollInterval = successPollInterval;
+        this.#successPollInterval = successPollInterval ?? new Duration({ milliseconds: 0 });
+        this.#failedPollInterval = failedPollInterval ?? new Duration({ milliseconds: 0 });
         this.#emptyPollInterval = emptyPollInterval;
-        this.#failedPollInterval = failedPollInterval;
     }
 
     protected abstract getKey(entry: TValue): TKey;

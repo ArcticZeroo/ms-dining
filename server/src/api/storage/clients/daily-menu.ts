@@ -216,7 +216,7 @@ export abstract class DailyMenuStorageClient {
 		return dailyStation != null;
 	}
 
-	public static async getMenusAvailableForDayAsync(dateString: string): Promise<Set<string /*cafeId*/>> {
+	public static async getCafesAvailableForDayAsync(dateString: string): Promise<Set<string /*cafeId*/>> {
 		const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
 			where:  { dateString },
 			select: { cafeId: true }

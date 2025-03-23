@@ -7,13 +7,12 @@ import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
-import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
+import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 import { Lock, Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveSessionAsync } from './storage.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { CafeMenuSession } from '../session/menu.js';
-import { THUMBNAIL_WORKER_QUEUE } from '../../../worker/thumbnail.js';
 
 const updateLock = new Lock();
 export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
@@ -98,7 +97,6 @@ export class DailyCafeUpdateSession {
                 cafeDiscoveryRetryDelayMs
             );
 
-            THUMBNAIL_WORKER_QUEUE.addFromMenu(stations);
             EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations);
 
             await saveSessionAsync({

@@ -9,6 +9,8 @@ import { defaultUserAgent } from '../../../constants/http.js';
 import { IMenuItem } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { logDebug, logError } from '../../../util/log.js';
+import { IThumbnailWorkerCompletionNotification, IThumbnailWorkerRequest } from '../../../models/thumbnail-worker.js';
+import { Nullable } from '../../../models/util.js';
 
 const maxThumbnailHeightPx = 200;
 const maxThumbnailWidthPx = 400;
@@ -47,31 +49,26 @@ export const loadImageData = async (url: string): Promise<Buffer> => {
 // static/menu-items/thumbnail/<id>
 export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
 
-interface IThumbnailData {
-    hasThumbnail: boolean;
-    thumbnailWidth?: number;
-    thumbnailHeight?: number;
+interface IThumbnailExistsData {
+    hasThumbnail: true;
+    thumbnailWidth: number;
+    thumbnailHeight: number;
     lastUpdateTime?: Date;
 }
 
-export const retrieveExistingThumbnailData = async (id: string, existingThumbnailData?: IThumbnailData): Promise<IThumbnailData> => {
+interface IThumbnailDoesNotExistData {
+    hasThumbnail: false;
+}
+
+type IThumbnailData = IThumbnailExistsData | IThumbnailDoesNotExistData;
+
+export const retrieveExistingThumbnailData = async (id: string): Promise<IThumbnailData> => {
     const thumbnailPath = getThumbnailFilepath(id);
 
     if (!fs.existsSync(thumbnailPath)) {
         logDebug('Thumbnail for id', id, 'does not exist');
         return {
             hasThumbnail: false
-        };
-    }
-
-    const { mtime: fileLastUpdateTime } = await fsPromises.stat(thumbnailPath);
-
-    if (existingThumbnailData?.hasThumbnail && existingThumbnailData?.thumbnailWidth && existingThumbnailData?.thumbnailHeight) {
-        return {
-            hasThumbnail:    true,
-            thumbnailWidth:  existingThumbnailData.thumbnailWidth,
-            thumbnailHeight: existingThumbnailData.thumbnailHeight,
-            lastUpdateTime:  fileLastUpdateTime
         };
     }
 
@@ -85,6 +82,14 @@ export const retrieveExistingThumbnailData = async (id: string, existingThumbnai
         }
 
         const { width, height } = imageSizeResult;
+        const { mtime: fileLastUpdateTime } = await fsPromises.stat(thumbnailPath);
+
+        if (width == null || height == null) {
+            logError('Could not get thumbnail stats:', imageSizeResult);
+            return {
+                hasThumbnail: false
+            };
+        }
 
         return {
             hasThumbnail:    true,
@@ -117,35 +122,30 @@ const thumbnailDataFromMenuItem = (menuItem: IMenuItem): IThumbnailData => {
     }
 };
 
-const isThumbnailUpToDate = (thumbnailData: IThumbnailData, menuItem: IMenuItem): boolean => {
+const isThumbnailUpToDate = (thumbnailData: IThumbnailData, requestLastUpdateTime: Nullable<Date>): boolean => {
     if (!thumbnailData.hasThumbnail || !thumbnailData.lastUpdateTime) {
-        logDebug(`Thumbnail for "${menuItem.name}" is out of date because previous data is missing.`);
         return false;
     }
 
-    if (!menuItem.lastUpdateTime) {
-        logDebug(`Thumbnail for "${menuItem.name}" is out of date because we don't know when the menu item was last updated.`);
+    if (!requestLastUpdateTime) {
         return false;
     }
 
-    return thumbnailData.lastUpdateTime.getTime() >= menuItem.lastUpdateTime.getTime();
+    return thumbnailData.lastUpdateTime.getTime() >= requestLastUpdateTime.getTime();
 }
 
-export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Promise<void> => {
-    if (!menuItem.imageUrl || (menuItem.hasThumbnail && menuItem.thumbnailWidth && menuItem.thumbnailHeight)) {
-        return;
-    }
-
+export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorkerRequest): Promise<IThumbnailWorkerCompletionNotification> => {
     // May have been created on a previous day/run
-    const thumbnailData = await retrieveExistingThumbnailData(menuItem.id, thumbnailDataFromMenuItem(menuItem));
-    if (thumbnailData.hasThumbnail && isThumbnailUpToDate(thumbnailData, menuItem)) {
-        menuItem.hasThumbnail = true;
-        menuItem.thumbnailWidth = thumbnailData.thumbnailWidth;
-        menuItem.thumbnailHeight = thumbnailData.thumbnailHeight;
-        return;
+    const thumbnailData = await retrieveExistingThumbnailData(request.id);
+    if (thumbnailData.hasThumbnail && isThumbnailUpToDate(thumbnailData, request.lastUpdateTime)) {
+        return {
+            id: request.id,
+            thumbnailWidth: thumbnailData.thumbnailWidth,
+            thumbnailHeight: thumbnailData.thumbnailHeight
+        };
     }
 
-    const imageData = await loadImageData(menuItem.imageUrl);
+    const imageData = await loadImageData(request.imageUrl);
     const image = await Jimp.read(imageData);
 
     const { height, width } = image.bitmap;
@@ -153,8 +153,11 @@ export const createAndSaveThumbnailForMenuItem = async (menuItem: IMenuItem): Pr
 
     image.scale(scale);
 
-    await image.writeAsync(getThumbnailFilepath(menuItem.id));
+    await image.writeAsync(getThumbnailFilepath(request.id));
 
-    menuItem.thumbnailWidth = image.getWidth();
-    menuItem.thumbnailHeight = image.getHeight();
+    return {
+        id: request.id,
+        thumbnailWidth: image.getWidth(),
+        thumbnailHeight: image.getHeight()
+    };
 };

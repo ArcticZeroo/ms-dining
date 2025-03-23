@@ -21,7 +21,7 @@ import {
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug } from '../../../util/log.js';
-import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/embeddings.js';
+import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 import Duration from '@arcticzeroo/duration';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 

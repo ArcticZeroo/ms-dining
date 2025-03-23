@@ -5,8 +5,9 @@ import { IMenuItem } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
-import { ISearchTagQueueEntry } from '../../../worker/search-tags.js';
+import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
+import { queueMenuItemThumbnail } from '../../../worker/client/thumbnail.js';
 
 export abstract class MenuItemStorageClient {
 	private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -322,25 +323,11 @@ export abstract class MenuItemStorageClient {
 				return null;
 			}
 
+			queueMenuItemThumbnail(menuItem);
 			this._menuItemsById.set(id, menuItem);
 		}
 
 		return this._menuItemsById.get(id)!;
-	}
-
-	public static async retrieveMenuMenuItemsLocallyAsync(ids: string[]): Promise<IMenuItem[]> {
-		const items: IMenuItem[] = [];
-
-		const retrieveMenuItem = async (id: string) => {
-			const menuItem = await this.retrieveMenuItemLocallyAsync(id);
-			if (menuItem != null) {
-				items.push(menuItem);
-			}
-		}
-
-		await Promise.all(ids.map(retrieveMenuItem));
-
-		return items;
 	}
 
 	public static async batchNormalizeMenuItemNamesAsync(): Promise<void> {
