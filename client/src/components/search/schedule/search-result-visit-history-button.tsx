@@ -14,7 +14,10 @@ interface ISearchResultVisitHistoryProps {
 export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryProps> = ({ entityType, name }) => {
     const openPopup = usePopupOpener();
 
-    const openSchedule = () => {
+    const openSchedule = (event: React.MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+
         openPopup({
             id: MODAL_ID,
             body: (

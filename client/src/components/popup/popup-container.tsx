@@ -4,27 +4,29 @@ import React, { useContext, useEffect } from 'react';
 
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
-import { useLocationHash } from '../../hooks/location.ts';
+import { useLocationHash, usePartialNavigate } from '../../hooks/location.ts';
 import { usePopupCloserAlways } from '../../hooks/popup.ts';
 
 import './popup.css';
-import { useNavigate } from 'react-router-dom';
 
 export const PopupContainer = () => {
     const popupNotifier = useContext(PopupContext);
     const popup = useValueNotifier(popupNotifier);
     const deviceType = useDeviceType();
     const hash = useLocationHash();
-    const navigate = useNavigate();
+    const navigate = usePartialNavigate();
     const closePopup = usePopupCloserAlways();
 
-    const isPopupActive = popup != null && hash === '#popup';
+    const isPopupHash = hash === '#popup';
+    const isPopupActive = popup != null && isPopupHash;
 
     useEffect(() => {
-        if (popup == null) {
-            navigate('#');
+        if (popup == null && isPopupHash) {
+            navigate({
+                hash: ''
+            });
         }
-    }, [navigate, popup]);
+    }, [isPopupHash, navigate, popup]);
 
     useEffect(() => {
         if (!isPopupActive) {

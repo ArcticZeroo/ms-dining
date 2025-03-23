@@ -16,6 +16,9 @@ export const ErrorPage = () => {
             <Link to="/" className="link-button">
                 Navigate Home
             </Link>
+            <button onClick={() => window.location.reload()} className="link-button">
+                Reload Page
+            </button>
         </div>
     );
 };

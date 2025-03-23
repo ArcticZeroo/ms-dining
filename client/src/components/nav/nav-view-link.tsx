@@ -55,6 +55,7 @@ export const NavViewLink: React.FC<INavViewLinkProps> = ({ view, className }) =>
         }
 
         if (resultIds.length === 0) {
+            // User removed all cafes from the current selection, go back home
             navigate('/');
         } else {
             navigate(`/menu/${resultIds.join('+')}`);

@@ -1,15 +1,17 @@
 import { useCallback, useContext } from 'react';
 import { IPopupContext, PopupContext } from '../context/modal.ts';
-import { useNavigate } from 'react-router-dom';
+import { usePartialNavigate } from './location.ts';
 
 export const usePopupOpener = () => {
     const popupNotifier = useContext(PopupContext);
-    const navigate = useNavigate();
+    const navigate = usePartialNavigate();
 
     return useCallback(
         (popup: IPopupContext) => {
             popupNotifier.value = popup;
-            navigate('#popup');
+            navigate({
+                hash: 'popup'
+            });
         },
         [popupNotifier, navigate]
     );
@@ -17,7 +19,7 @@ export const usePopupOpener = () => {
 
 export const usePopupCloserSymbol = () => {
     const popupNotifier = useContext(PopupContext);
-    const navigate = useNavigate();
+    const navigate = usePartialNavigate();
 
     return useCallback(
         (id: symbol) => {
@@ -25,18 +27,22 @@ export const usePopupCloserSymbol = () => {
                 return;
             }
 
-            navigate('#');
+            navigate({
+                hash: ''
+            });
         },
         [popupNotifier, navigate]
     );
 };
 
 export const usePopupCloserAlways = () => {
-    const navigate = useNavigate();
+    const navigate = usePartialNavigate();
 
     return useCallback(
         () => {
-            navigate('#');
+            navigate({
+                hash: ''
+            });
         },
         [navigate]
     );
