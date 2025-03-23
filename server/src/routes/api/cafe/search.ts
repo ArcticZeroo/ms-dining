@@ -3,17 +3,14 @@ import Router from '@koa/router';
 import { DateUtil, NumberUtil } from '@msdining/common';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
 import { VERSION_TAG } from '@msdining/common/dist/constants/versions.js';
-import { ISearchResponseResult } from '@msdining/common/dist/models/http.js';
-import { ISearchQuery, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
-import Koa from 'koa';
+import { ISearchQuery } from '@msdining/common/dist/models/search.js';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { requireNoMenusUpdating } from '../../../middleware/menu.js';
-import { IServerSearchResult } from '../../../models/search.js';
-import { getStationLogoUrl } from '../../../util/cafe.js';
 import {
-    attachRouter, getEntityTypeAndName,
+    attachRouter,
+    getEntityTypeAndName,
     getTrimmedQueryParam,
     serializeMapOfStringToSet,
     serializeSearchResults,

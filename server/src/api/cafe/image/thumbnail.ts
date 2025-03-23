@@ -107,21 +107,6 @@ export const retrieveExistingThumbnailData = async (id: string): Promise<IThumbn
     }
 };
 
-const thumbnailDataFromMenuItem = (menuItem: IMenuItem): IThumbnailData => {
-    if (menuItem.hasThumbnail) {
-        return {
-            hasThumbnail:    true,
-            thumbnailWidth:  menuItem.thumbnailWidth || 0,
-            thumbnailHeight: menuItem.thumbnailHeight || 0,
-            lastUpdateTime:  menuItem.lastUpdateTime || new Date(0)
-        };
-    } else {
-        return {
-            hasThumbnail: false
-        };
-    }
-};
-
 const isThumbnailUpToDate = (thumbnailData: IThumbnailData, requestLastUpdateTime: Nullable<Date>): boolean => {
     if (!thumbnailData.hasThumbnail || !thumbnailData.lastUpdateTime) {
         return false;
