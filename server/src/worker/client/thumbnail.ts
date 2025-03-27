@@ -1,5 +1,5 @@
 import { Worker } from 'node:worker_threads';
-import { IThumbnailWorkerCompletionNotification, IThumbnailWorkerRequest } from '../../models/thumbnail-worker.js';
+import { IThumbnailWorkerCompletionNotification, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { logError } from '../../util/log.js';
 import { MenuItemStorageClient } from '../../api/storage/clients/menu-item.js';

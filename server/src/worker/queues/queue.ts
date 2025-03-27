@@ -1,6 +1,8 @@
 import Duration from '@arcticzeroo/duration';
-import { logDebug } from '../../util/log.js';
+import { getNamespaceLogger, logDebug, Logger, logInfo } from '../../util/log.js';
 import { Nullable } from '../../models/util.js';
+
+const LOG_STATUS_INTERVAL = new Duration({ minutes: 1 });
 
 interface IWorkerQueueParams {
     successPollInterval?: Duration;
@@ -11,6 +13,7 @@ interface IWorkerQueueParams {
 export abstract class WorkerQueue<TKey, TValue> {
     protected static readonly QUEUE_SKIP_ENTRY = Symbol('queue-skip-entry');
 
+    readonly #logger: Logger;
     readonly #successPollInterval: Duration;
     readonly #emptyPollInterval: Duration;
     readonly #failedPollInterval: Duration;
@@ -22,6 +25,23 @@ export abstract class WorkerQueue<TKey, TValue> {
         this.#successPollInterval = successPollInterval ?? new Duration({ milliseconds: 0 });
         this.#failedPollInterval = failedPollInterval ?? new Duration({ milliseconds: 0 });
         this.#emptyPollInterval = emptyPollInterval;
+        this.#logger = getNamespaceLogger(this.constructor.name);
+
+        setInterval(() => this.#logStatus(), LOG_STATUS_INTERVAL.inMilliseconds);
+    }
+
+    #logStatus() {
+        if (this.#keysInOrder.length === 0) {
+            this.#logger.debug('Queue is empty');
+            return;
+        }
+
+        if (!this.#runningSymbol) {
+            this.#logger.info('Queue is not running but has items waiting');
+            return;
+        }
+
+        this.#logger.debug('Queue status:', this.#keysInOrder.length, 'items remaining');
     }
 
     protected abstract getKey(entry: TValue): TKey;
@@ -55,7 +75,7 @@ export abstract class WorkerQueue<TKey, TValue> {
             return;
         }
 
-        logDebug(this.constructor.name, 'Starting worker queue');
+        this.#logger.debug('Starting worker queue');
 
         const currentSymbol = Symbol();
         this.#runningSymbol = currentSymbol;
@@ -80,11 +100,11 @@ export abstract class WorkerQueue<TKey, TValue> {
                 throw new Error('Queue entry is missing from map');
             }
 
-            logDebug(this.constructor.name, 'Processing queue entry', key, ', remaining entries:', this.#keysInOrder.length);
+            this.#logger.debug('Processing queue entry', key, ', remaining entries:', this.#keysInOrder.length);
 
             this.doWorkAsync(entry)
                 .catch((err) => {
-                    logDebug(this.constructor.name, 'Failed to process queue entry', key, err);
+                    this.#logger.debug('Failed to process queue entry', key, err);
                     setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds);
                 })
                 .then((result) => {

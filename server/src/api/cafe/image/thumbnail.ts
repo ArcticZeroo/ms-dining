@@ -9,15 +9,14 @@ import { defaultUserAgent } from '../../../constants/http.js';
 import { IMenuItem } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { logDebug, logError } from '../../../util/log.js';
-import { IThumbnailWorkerCompletionNotification, IThumbnailWorkerRequest } from '../../../models/thumbnail-worker.js';
+import { IThumbnailWorkerCompletionNotification, IThumbnailWorkerRequest } from '../../../models/thumbnail.js';
 import { Nullable } from '../../../models/util.js';
+import { retrieveImageMetadataAsync } from '../../../util/image.js';
 
 const maxThumbnailHeightPx = 200;
 const maxThumbnailWidthPx = 400;
 const loadImageRetries = 2;
 const loadImageRetryDelayMs = 1000;
-
-const getImageSizeAsync = promisify(getImageSizeSync);
 
 export const loadImageData = async (url: string): Promise<Buffer> => {
     logDebug(`[Thumbnail] Loading image data from ${encodeURI(url)}`);
@@ -49,7 +48,7 @@ export const loadImageData = async (url: string): Promise<Buffer> => {
 // static/menu-items/thumbnail/<id>
 export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
 
-interface IThumbnailExistsData {
+export interface IThumbnailExistsData {
     hasThumbnail: true;
     thumbnailWidth: number;
     thumbnailHeight: number;
@@ -73,19 +72,9 @@ export const retrieveExistingThumbnailData = async (id: string): Promise<IThumbn
     }
 
     try {
-        const imageSizeResult = await getImageSizeAsync(thumbnailPath);
+        const metadata = await retrieveImageMetadataAsync(thumbnailPath);
 
-        if (imageSizeResult == null) {
-            return {
-                hasThumbnail: false
-            };
-        }
-
-        const { width, height } = imageSizeResult;
-        const { mtime: fileLastUpdateTime } = await fsPromises.stat(thumbnailPath);
-
-        if (width == null || height == null) {
-            logError('Could not get thumbnail stats:', imageSizeResult);
+        if (metadata == null) {
             return {
                 hasThumbnail: false
             };
@@ -93,9 +82,9 @@ export const retrieveExistingThumbnailData = async (id: string): Promise<IThumbn
 
         return {
             hasThumbnail:    true,
-            thumbnailWidth:  width,
-            thumbnailHeight: height,
-            lastUpdateTime:  fileLastUpdateTime
+            thumbnailWidth:  metadata.width,
+            thumbnailHeight: metadata.height,
+            lastUpdateTime:  metadata.lastUpdateTime
         };
     } catch (err) {
         logError('Could not get thumbnail stats:', err);

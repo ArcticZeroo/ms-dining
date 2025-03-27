@@ -1,7 +1,7 @@
 import { isMainThread, parentPort } from 'node:worker_threads';
 import { logError, logInfo } from '../../util/log.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { IThumbnailWorkerRequest } from '../../models/thumbnail-worker.js';
+import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { ThumbnailWorkerQueue } from '../queues/thumbnail.js';
 
 const queue = new ThumbnailWorkerQueue();
