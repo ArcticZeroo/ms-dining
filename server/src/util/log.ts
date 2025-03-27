@@ -16,3 +16,11 @@ export const logError = (...message: any[]) => {
 const noop = () => {};
 
 export const logDebug = isDev ? logInfo : noop;
+
+export const getNamespaceLogger = (namespace: string) => ({
+    info: (...message: any[]) => logInfo(`[${namespace}]`, ...message),
+    error: (...message: any[]) => logError(`[${namespace}]`, ...message),
+    debug: (...message: any[]) => logDebug(`[${namespace}]`, ...message)
+});
+
+export type Logger = ReturnType<typeof getNamespaceLogger>;
