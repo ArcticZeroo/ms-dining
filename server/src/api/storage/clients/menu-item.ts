@@ -7,7 +7,7 @@ import { logDebug } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
-import { queueMenuItemThumbnail } from '../../../worker/client/thumbnail.js';
+import { retrieveThumbnailData } from '../../../worker/client/thumbnail.js';
 
 export abstract class MenuItemStorageClient {
 	private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -298,6 +298,8 @@ export abstract class MenuItemStorageClient {
 			});
 		}
 
+		const thumbnailData = await retrieveThumbnailData(menuItem);
+
 		return {
 			id:              menuItem.id,
 			name:            menuItem.name,
@@ -308,9 +310,9 @@ export abstract class MenuItemStorageClient {
 			imageUrl:        menuItem.imageUrl,
 			lastUpdateTime:  menuItem.externalLastUpdateTime,
 			receiptText:     menuItem.externalReceiptText,
-			hasThumbnail:    false,
 			tags:            deserializeMenuItemTags(menuItem.tags),
 			searchTags:      new Set(menuItem.searchTags.map(tag => tag.name)),
+			...thumbnailData,
 			modifiers
 		};
 	}
@@ -323,7 +325,6 @@ export abstract class MenuItemStorageClient {
 				return null;
 			}
 
-			queueMenuItemThumbnail(menuItem);
 			this._menuItemsById.set(id, menuItem);
 		}
 

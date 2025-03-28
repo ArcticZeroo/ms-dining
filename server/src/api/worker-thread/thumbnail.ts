@@ -6,10 +6,13 @@ import { logError } from '../../util/log.js';
 import { IImageMetadata, retrieveImageMetadataAsync } from '../../util/image.js';
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
+import { createAndSaveThumbnailForMenuItem } from '../cafe/image/thumbnail.js';
 
 const thumbnailDataByMenuItemId = new Map<string, IImageMetadata>();
 
 const loadExistingThumbnailsOnBoot = async () => {
+	console.time('thumbnail loading on boot');
+
 	const files = await fs.readdir(serverMenuItemThumbnailPath);
 
 	for (const fileNode of files) {
@@ -31,9 +34,11 @@ const loadExistingThumbnailsOnBoot = async () => {
 
 		thumbnailDataByMenuItemId.set(id, metadata);
 	}
+
+	console.timeEnd('thumbnail loading on boot');
 }
 
-const loadThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
+const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
 	if (thumbnailDataByMenuItemId.has(request.id)) {
 		const metadata = thumbnailDataByMenuItemId.get(request.id)!;
 		if (request.lastUpdateTime != null && metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
@@ -41,7 +46,9 @@ const loadThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IIma
 		}
 	}
 
-	const
+	const result = await createAndSaveThumbnailForMenuItem(request);
+	thumbnailDataByMenuItemId.set(request.id, result);
+	return result;
 }
 
 if (!isMainThread) {
@@ -49,4 +56,6 @@ if (!isMainThread) {
 		.catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
 }
 
-export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), {});
+export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), {
+	getThumbnailData
+});
