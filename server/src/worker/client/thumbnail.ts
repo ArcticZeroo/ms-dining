@@ -2,14 +2,9 @@ import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../models/t
 import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
 import { Nullable } from '../../models/util.js';
 import { logError } from '../../util/log.js';
+import { MenuItem } from '@prisma/client';
 
-interface IMenuItemForThumbnail {
-	id: string;
-	imageUrl?: Nullable<string>;
-	lastUpdateTime?: Date;
-}
-
-export const retrieveThumbnailData = async (menuItem: IMenuItemForThumbnail): Promise<IThumbnailExistenceData> => {
+export const retrieveThumbnailData = async (menuItem: MenuItem): Promise<IThumbnailExistenceData> => {
 	try {
 		if (!menuItem.imageUrl) {
 			return {
@@ -20,11 +15,10 @@ export const retrieveThumbnailData = async (menuItem: IMenuItemForThumbnail): Pr
 		const request: IThumbnailWorkerRequest = {
 			id:             menuItem.id,
 			imageUrl:       menuItem.imageUrl,
-			lastUpdateTime: menuItem.lastUpdateTime
+			lastUpdateTime: menuItem.externalLastUpdateTime
 		};
 
 		const result = await THUMBNAIL_THREAD_HANDLER.sendRequest('getThumbnailData', request);
-
 		if (!result) {
 			return {
 				hasThumbnail: false
