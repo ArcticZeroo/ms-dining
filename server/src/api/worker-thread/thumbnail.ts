@@ -2,7 +2,7 @@ import { WorkerThreadCommandHandler } from './commanding.js';
 import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
 import { serverMenuItemThumbnailPath } from '../../constants/config.js';
-import { logError } from '../../util/log.js';
+import { logError, logInfo } from '../../util/log.js';
 import { IImageMetadata, retrieveImageMetadataAsync } from '../../util/image.js';
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
@@ -35,13 +35,15 @@ const loadExistingThumbnailsOnBoot = async () => {
 		thumbnailDataByMenuItemId.set(id, metadata);
 	}
 
+	logInfo(`[Thumbnail Thread] Loaded ${thumbnailDataByMenuItemId.size} thumbnails on boot`);
+
 	console.timeEnd('thumbnail loading on boot');
 }
 
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
-	if (thumbnailDataByMenuItemId.has(request.id)) {
+	if (request.lastUpdateTime  != null && thumbnailDataByMenuItemId.has(request.id)) {
 		const metadata = thumbnailDataByMenuItemId.get(request.id)!;
-		if (request.lastUpdateTime != null && metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
+		if (metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
 			return metadata;
 		}
 	}
