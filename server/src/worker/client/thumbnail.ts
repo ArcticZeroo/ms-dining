@@ -1,6 +1,5 @@
 import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
-import { Nullable } from '../../models/util.js';
 import { logError } from '../../util/log.js';
 import { MenuItem } from '@prisma/client';
 
