@@ -7,7 +7,6 @@ import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ALL_CAFES } from '../../../constants/cafes.js';
-import { queueMenuItemThumbnailFromMenu } from '../../../worker/client/thumbnail.js';
 
 const repairMissingWeeklyMenusAsync = async () => {
 	if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
@@ -61,18 +60,6 @@ const repairTodaySessionsAsync = async () => {
 	await populateDailySessionsAsync();
 };
 
-const populateThumbnailQueue = async () => {
-	for (const date of DateUtil.yieldDaysThisWeek()) {
-		const dateString = DateUtil.toDateString(date);
-		for (const cafe of ALL_CAFES) {
-			const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
-			// Should already have been queued when it was first retrieved from storage inside retrieveDailyMenuAsync,
-			// but just in case the underlying logic changes, queue it here as well.
-			queueMenuItemThumbnailFromMenu(menu);
-		}
-	}
-}
-
 export const performMenuBootTasks = async () => {
 	await MenuItemStorageClient.batchNormalizeMenuItemNamesAsync();
 
@@ -84,6 +71,4 @@ export const performMenuBootTasks = async () => {
 	scheduleDailyUpdateJob();
 	scheduleWeeklyUpdateJob();
 	// scheduleWeeklyPatternJob();
-
-	await populateThumbnailQueue();
 };

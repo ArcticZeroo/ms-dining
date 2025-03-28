@@ -6,6 +6,16 @@ export interface IThumbnailData {
 	lastUpdateTime?: Date;
 }
 
+export interface IThumbnailDoesExistData extends IThumbnailData {
+	hasThumbnail: true;
+}
+
+export interface IThumbnailDoesNotExistData {
+	hasThumbnail: false;
+}
+
+export type IThumbnailExistenceData = IThumbnailDoesExistData | IThumbnailDoesNotExistData;
+
 export interface IThumbnailWorkerRequest {
 	id: string;
 	imageUrl: string;

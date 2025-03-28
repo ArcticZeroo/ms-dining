@@ -1,57 +1,47 @@
-import { Worker } from 'node:worker_threads';
-import { IThumbnailWorkerCompletionNotification, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
-import { isDuckType } from '@arcticzeroo/typeguard';
+import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
+import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
+import { Nullable } from '../../models/util.js';
 import { logError } from '../../util/log.js';
-import { MenuItemStorageClient } from '../../api/storage/clients/menu-item.js';
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
-import { ICafeStation } from '../../models/cafe.js';
 
-const thumbnailWorker = new Worker(new URL('../thread/thumbnail-worker.js', import.meta.url));
-
-const handleThumbnailWorkerCompletionAsync = async (message: IThumbnailWorkerCompletionNotification) => {
-	const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(message.id);
-	if (menuItem == null) {
-		logError('Received thumbnail completion notification for unknown menu item:', message.id);
-		return;
-	}
-
-	menuItem.thumbnailWidth = message.thumbnailWidth;
-	menuItem.thumbnailHeight = message.thumbnailHeight;
-	menuItem.hasThumbnail = true;
+interface IMenuItemForThumbnail {
+	id: string;
+	imageUrl?: Nullable<string>;
+	lastUpdateTime?: Date;
 }
 
-thumbnailWorker.on('message', (message) => {
-	if (!isDuckType<IThumbnailWorkerCompletionNotification>(message, {
-		id:              'string',
-		thumbnailWidth:  'number',
-		thumbnailHeight: 'number'
-	})) {
-		logError('Received invalid message from thumbnail worker:', message);
-		return;
-	}
-
-	handleThumbnailWorkerCompletionAsync(message)
-		.catch((err) => logError('Failed to handle thumbnail worker completion:', err));
-});
-
-export const queueMenuItemThumbnail = (menuItem: IMenuItem) => {
-	if (!menuItem.imageUrl || (menuItem.hasThumbnail && menuItem.thumbnailWidth != null && menuItem.thumbnailHeight != null)) {
-		return;
-	}
-
-	const request: IThumbnailWorkerRequest = {
-		id:             menuItem.id,
-		imageUrl:       menuItem.imageUrl,
-		lastUpdateTime: menuItem.lastUpdateTime,
-	};
-
-	thumbnailWorker.postMessage(request);
-}
-
-export const queueMenuItemThumbnailFromMenu = (stations: ICafeStation[]) => {
-	for (const station of stations) {
-		for (const menuItem of station.menuItemsById.values()) {
-			queueMenuItemThumbnail(menuItem);
+export const retrieveThumbnailData = async (menuItem: IMenuItemForThumbnail): Promise<IThumbnailExistenceData> => {
+	try {
+		if (!menuItem.imageUrl) {
+			return {
+				hasThumbnail: false
+			};
 		}
+
+		const request: IThumbnailWorkerRequest = {
+			id:             menuItem.id,
+			imageUrl:       menuItem.imageUrl,
+			lastUpdateTime: menuItem.lastUpdateTime
+		};
+
+		const result = await THUMBNAIL_THREAD_HANDLER.sendRequest('getThumbnailData', request);
+
+		if (!result) {
+			return {
+				hasThumbnail: false
+			};
+		}
+
+		return {
+			hasThumbnail:    true,
+			thumbnailWidth:  result.width,
+			thumbnailHeight: result.height,
+			lastUpdateTime:  result.lastUpdateTime
+		};
+	} catch (err) {
+		logError(`Failed to retrieve thumbnail data for menu item ${menuItem.id}`, err);
+
+		return {
+			hasThumbnail: false
+		};
 	}
 }
