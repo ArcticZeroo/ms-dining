@@ -131,8 +131,7 @@
     border-radius: var(--default-padding);
     max-width: 10rem;
     max-height: 10rem;
-    object-fit: contain;
-    content-visibility: auto;
+    object-fit: cover;
 }
 
 .menu-item-image.fallback {

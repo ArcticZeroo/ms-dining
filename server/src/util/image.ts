@@ -32,6 +32,11 @@ export const retrieveImageMetadataAsync = async (imagePath: string): Promise<IIm
 		};
 	} catch (err) {
 		logError('Could not get image metadata:', err);
+
+		if (String(err).includes('Empty file')) {
+			await fs.rm(imagePath);
+		}
+
 		return null;
 	}
 }

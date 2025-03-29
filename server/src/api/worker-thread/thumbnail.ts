@@ -41,6 +41,8 @@ const loadExistingThumbnailsOnBoot = async () => {
 }
 
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
+	await loadThumbnailsPromise;
+
 	if (request.lastUpdateTime  != null && thumbnailDataByMenuItemId.has(request.id)) {
 		const metadata = thumbnailDataByMenuItemId.get(request.id)!;
 		if (metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
@@ -53,10 +55,10 @@ const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImag
 	return result;
 }
 
-if (!isMainThread) {
-	loadExistingThumbnailsOnBoot()
-		.catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
-}
+const loadThumbnailsPromise = isMainThread ? Promise.resolve() : loadExistingThumbnailsOnBoot();
+
+loadThumbnailsPromise
+	.catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
 
 export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), {
 	getThumbnailData
