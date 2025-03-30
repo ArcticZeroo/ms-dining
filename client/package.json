@@ -23,7 +23,6 @@
     "history": "^5.3.0",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
-    "masonic": "^4.0.1",
     "phone": "^3.1.42",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",

@@ -12,8 +12,6 @@ import { ApplicationContext } from '../../context/app.ts';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { isSameDate } from '@msdining/common/dist/util/date-util';
 import { classNames } from '../../util/react.ts';
-import { Masonry, RenderComponentProps } from 'masonic';
-import { getConstantPadding } from '../../util/css.ts';
 import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
 
 const MAX_LOCATIONS_WITHOUT_CONDENSE = 5;
@@ -64,7 +62,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const useShortNames = shouldUseCompactMode
         || (shouldCondenseNumbers && locationEntriesInOrder.length > MAX_LOCATIONS_WITHOUT_CONDENSE);
 
-    const renderLocation: React.ComponentType<RenderComponentProps<(typeof locationEntriesInOrder)[0]>> = ({ data: [cafeId, locationDates] }) => {
+    const renderLocation = (cafeId: string, locationDates: Date[]) => {
         const view = viewsById.get(cafeId);
 
         if (!view) {
@@ -159,12 +157,9 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
 
     return (
         <div className="search-result-hits">
-            <Masonry
-                items={locationEntriesInOrder}
-                render={renderLocation}
-                columnGutter={getConstantPadding().inPixels}
-                itemKey={([cafeId]) => cafeId}
-            />
+            {
+                Array.from(locationEntriesInOrder).map(([cafeId, locationDates]) => renderLocation(cafeId, locationDates))
+            }
         </div>
     );
 };

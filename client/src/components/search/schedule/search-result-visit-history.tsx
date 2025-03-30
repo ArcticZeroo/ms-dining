@@ -10,8 +10,6 @@ import { ApplicationContext } from '../../../context/app.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { compareViewNames } from '../../../util/sorting.ts';
 import './visit.css';
-import { Masonry } from 'masonic';
-import { getConstantPadding } from '../../../util/css.ts';
 
 const useVisitHistoryRequest = (entityType: SearchEntityType, name: string) => {
     const makeRequestCallback = useCallback(
@@ -106,12 +104,13 @@ export const SearchResultVisitHistory: React.FC<ISearchResultVisitHistoryPopupBo
 
     return (
         <div className="card flex">
-            <Masonry
-                items={data}
-                render={({ data: [view, visits] }) => (<VisitPattern view={view} visits={visits} />)}
-                columnGutter={getConstantPadding().inPixels}
-                itemKey={([view]) => view.value.id}
-            />
+            <div className="flex flex-wrap flex-center">
+                {
+                    data.map(([view, visitDates]) => (
+                        <VisitPattern key={view.value.id} view={view} visits={visitDates}/>
+                    ))
+                }
+            </div>
             <div className="subtitle">
                 Pattern estimates are based on the last month. No guarantees for future visits.
             </div>
