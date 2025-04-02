@@ -43,9 +43,9 @@ const loadExistingThumbnailsOnBoot = async () => {
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
 	await loadThumbnailsPromise;
 
-	if (request.lastUpdateTime  != null && thumbnailDataByMenuItemId.has(request.id)) {
+	if (thumbnailDataByMenuItemId.has(request.id)) {
 		const metadata = thumbnailDataByMenuItemId.get(request.id)!;
-		if (metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
+		if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
 			return metadata;
 		}
 	}
