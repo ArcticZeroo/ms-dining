@@ -10,6 +10,7 @@ import { sendUniversalVisitMiddleware } from './middleware/analytics.js';
 import { serveSpaHtmlRoute } from './middleware/static.js';
 import Router from '@koa/router';
 import { attachRouter } from './util/koa.js';
+import path from 'path';
 
 const app = new Koa();
 
@@ -19,6 +20,7 @@ app.use(sendUniversalVisitMiddleware);
 
 registerRoutes(app);
 
+app.use(mount('/.well-known', serve(path.join(serverStaticPath, '.well-known'))));
 app.use(mount('/static', createStaticRoutingApp()));
 app.use(mount('/', serve(clientFolderDistPath)));
 
