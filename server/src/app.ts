@@ -11,8 +11,19 @@ import { serveSpaHtmlRoute } from './middleware/static.js';
 import Router from '@koa/router';
 import { attachRouter } from './util/koa.js';
 import path from 'path';
+import passport from 'koa-passport';
+import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from './constants/env.js';
+import session from 'koa-session';
 
 const app = new Koa();
+
+if (hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
+	app.keys = [getSessionSecret()];
+	app.use(session({}, app));
+}
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(json());
 app.use(bodyParser());

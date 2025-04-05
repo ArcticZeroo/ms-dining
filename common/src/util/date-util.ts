@@ -216,10 +216,7 @@ export const getMondayForWeek = (date: Date): Date => {
 
 export const getFridayForWeek = (date: Date): Date => {
     const result = getSundayForWeek(date);
-
-    const offset = result.getDay() === nativeDayOfWeek.Saturday ? 7 : 0;
-    result.setDate(result.getDate() + nativeDayOfWeek.Friday + offset);
-
+    result.setDate(result.getDate() + nativeDayOfWeek.Friday);
     return result;
 }
 

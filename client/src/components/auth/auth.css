@@ -1,0 +1,9 @@
+#site-header .auth-info {
+    border-radius: var(--default-padding);
+    background: var(--color-theme-dark);
+}
+
+#site-header img.login-brand {
+    height: 21px;
+    width: 21px;
+}

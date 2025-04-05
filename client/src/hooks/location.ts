@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Path } from 'history';
+import { setPageData } from '../util/title.ts';
 
 export const useLocationHash = () => {
     const location = useLocation();
@@ -21,3 +22,12 @@ export const usePartialNavigate = () => {
         [location, navigate]
     );
 };
+
+export const usePageData = (subtitle: string, description: string) => {
+    useEffect(
+        () => {
+            setPageData(subtitle, description);
+        },
+        [subtitle, description]
+    );
+}

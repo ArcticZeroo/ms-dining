@@ -38,7 +38,7 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 const App = () => {
-    const { groups, isTrackingEnabled } = useLoaderData() as IDiningCoreResponse;
+    const { groups, isTrackingEnabled, isLoggedIn } = useLoaderData() as IDiningCoreResponse;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
@@ -57,9 +57,10 @@ const App = () => {
             viewsInOrder,
             cafes,
             groups,
-            isTrackingEnabled
+            isTrackingEnabled,
+            isLoggedIn
         }),
-        [viewsById, viewsInOrder, cafes, groups, isTrackingEnabled]
+        [viewsById, viewsInOrder, cafes, groups, isTrackingEnabled, isLoggedIn]
     );
 
     const navExpansionContext = useMemo(

@@ -9,6 +9,7 @@ const ALLOWED_SETTINGS: BooleanSetting[] = [
     DebugSettings.suppressExperimentalOnlineOrderingWarning,
     DebugSettings.verboseLogging,
     DebugSettings.noVectorSearch,
+    DebugSettings.auth,
 ];
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {

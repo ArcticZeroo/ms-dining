@@ -14,8 +14,9 @@ import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResul
 import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
-import { JSON_HEADERS, makeJsonRequest } from './request.ts';
+import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from './request.ts';
 import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
+import { IClientUser, IClientUserDTO } from '@msdining/common/dist/models/auth';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -38,13 +39,13 @@ export abstract class DiningClient {
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
     private static readonly _favoritesCache = new FavoritesCache();
 
-    private static async _retrieveViewListInner(): Promise<IDiningCoreResponse> {
+    private static async _makeCoreRequest(): Promise<IDiningCoreResponse> {
         return makeJsonRequest({ path: '/api/dining/' });
     }
 
-    public static retrieveViewList(): Promise<IDiningCoreResponse> {
+    public static retrieveCoreData(): Promise<IDiningCoreResponse> {
         if (!DiningClient._viewListPromise) {
-            DiningClient._viewListPromise = DiningClient._retrieveViewListInner();
+            DiningClient._viewListPromise = DiningClient._makeCoreRequest();
         }
 
         return DiningClient._viewListPromise;
@@ -342,5 +343,32 @@ export abstract class DiningClient {
         }
 
         return response;
+    }
+
+    public static async retrieveAuthenticatedUser(): Promise<IClientUser> {
+        const user = await makeJsonRequest({
+            path: `/api/auth/me`
+        });
+
+        if (!isDuckType<IClientUserDTO>(user, { id: 'string', displayName: 'string', provider: 'string', createdAt: 'number' })) {
+            throw new Error('Invalid response format: missing email or displayName');
+        }
+
+        return {
+            id: user.id,
+            displayName: user.displayName,
+            provider: user.provider,
+            createdAt: new Date(user.createdAt)
+        };
+    }
+
+    public static async updateMyDisplayName(displayName: string): Promise<void> {
+        await makeJsonRequestNoParse({
+            path: '/api/auth/me/name',
+            options: {
+                method: 'PATCH',
+                body: JSON.stringify({ displayName })
+            }
+        });
     }
 }

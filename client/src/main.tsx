@@ -17,11 +17,13 @@ import { LocationTestPage } from './components/pages/location-test/location-test
 
 import './index.css';
 import { checkMigrationCookie, doMigrationAndRedirectToDiningSite } from './util/migration.ts';
+import { ProfilePage } from './components/pages/profile/profile-page.tsx';
+import { LoginPage } from './components/pages/login/login-page.tsx';
 
 const startApp = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
-            <Route path="/" element={<App/>} loader={() => DiningClient.retrieveViewList()} errorElement={<ErrorPage/>}>
+            <Route path="/" element={<App/>} loader={() => DiningClient.retrieveCoreData()} errorElement={<ErrorPage/>}>
                 <Route path="/menu/:id" element={<CafeViewPage/>}/>
                 <Route path="/settings" element={<SettingsPage/>}/>
                 <Route path="/search" element={<SearchPage/>}/>
@@ -30,6 +32,8 @@ const startApp = () => {
                 <Route path="/order" element={<OrderPage/>}/>
                 <Route path="/analytics" element={<AnalyticsPage/>}/>
                 <Route path="/location-test" element={<LocationTestPage/>}/>
+                <Route path="/profile" element={<ProfilePage/>}/>
+                <Route path="/login" element={<LoginPage/>}/>
                 <Route index={true} element={<HomePage/>}/>
                 <Route path="*" element={<NotFoundPage/>}/>
             </Route>

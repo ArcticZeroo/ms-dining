@@ -1,0 +1,5 @@
+.provider-chip {
+    background: white;
+    color: #212121;
+    gap: var(--constant-padding);
+}

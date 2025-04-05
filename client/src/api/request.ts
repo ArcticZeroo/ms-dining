@@ -4,7 +4,7 @@ import { ERROR_BODIES } from '@msdining/common/dist/responses';
 import { getVisitorId } from '../constants/settings.ts';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
 
-interface IMakeRequestParams {
+interface IMakeRequestParamsBase {
     path: string;
     options?: RequestInit;
 }
@@ -13,17 +13,24 @@ export const JSON_HEADERS = {
     'Content-Type': 'application/json'
 };
 
-export const makeJsonRequest = async <T>({
+export const getDefaultHeaders = (): Record<string, string> => {
+    return {
+        'X-Visitor-Id': getVisitorId(),
+        'Content-Type': 'application/json',
+        [VERSION_TAG_HEADER]: VERSION_TAG.searchResultsNotHereThisWeek.toString(),
+    };
+}
+
+export const makeJsonRequestNoParse = async ({
     path,
-    options = {}
-}: IMakeRequestParams): Promise<T> => {
+    options = {},
+}: IMakeRequestParamsBase): Promise<Response> => {
     const headers = options.headers ?? {};
 
     const response = await fetch(path, {
         ...options,
         headers: {
-            'X-Visitor-Id': getVisitorId(),
-            [VERSION_TAG_HEADER]: VERSION_TAG.searchResultsNotHereThisWeek.toString(),
+            ...getDefaultHeaders(),
             ...headers
         },
     });
@@ -39,5 +46,13 @@ export const makeJsonRequest = async <T>({
         throw new Error(`Response failed with status: ${response.status}`);
     }
 
+    return response;
+}
+
+export const makeJsonRequest = async <T>({
+    path,
+    options = {},
+}: IMakeRequestParamsBase): Promise<T> => {
+    const response = await makeJsonRequestNoParse({ path, options });
     return response.json();
 }

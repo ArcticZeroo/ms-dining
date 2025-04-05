@@ -25,10 +25,12 @@ export const registerCafeRoutes = (parent: Router) => {
 	registerOrderingRoutes(router);
 
 	router.get('/',
-		memoizeResponseBodyByQueryParams(),
+		// can't memoize because it depends on auth now
+		// memoizeResponseBodyByQueryParams(),
 		async ctx => {
 			const response: IDiningCoreResponse = {
 				isTrackingEnabled: ApplicationContext.analyticsApplicationsReady.size > 0,
+				isLoggedIn:        ctx.isAuthenticated(),
 				groups:            []
 			};
 

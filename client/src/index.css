@@ -311,6 +311,11 @@ html, body, #root, .App {
     background: var(--color-theme);
     color: white;
     text-decoration: none;
+    transition: background-color 0.125s ease;
+}
+
+.default-button.error {
+    background: var(--color-error);
 }
 
 .mono {
@@ -421,6 +426,10 @@ html, body, #root, .App {
 
 .flex-end {
     justify-content: flex-end;
+}
+
+.flex-grow {
+    flex-grow: 1;
 }
 
 .text-left {
@@ -674,4 +683,9 @@ html, body, #root, .App {
         opacity: 0;
         display: none;
     }
+}
+
+.auth-provider-icon {
+    width: 2rem;
+    height: 2rem;
 }

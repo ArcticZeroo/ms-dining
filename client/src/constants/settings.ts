@@ -9,14 +9,14 @@ import {
 } from '../api/settings.ts';
 
 export const InternalSettings = {
-    lastUsedCafeIds:   new StringArraySetting('lastUsedDiningHalls'),
-    collapsedStations: new StringSetSetting('collapsedStations'),
-    visitorId:         new StringSetting('visitorId'),
-    alias:             new StringSetting('alias'),
-    phoneNumber:       new StringSetting('phoneNumber'),
-    nameOnCard:        new StringSetting('nameOnCard'),
-    postalCode:        new StringSetting('postalCode'),
-    cart:              new CartSetting('cart'),
+    lastUsedCafeIds:         new StringArraySetting('lastUsedDiningHalls'),
+    collapsedStations:       new StringSetSetting('collapsedStations'),
+    visitorId:               new StringSetting('visitorId'),
+    alias:                   new StringSetting('alias'),
+    phoneNumber:             new StringSetting('phoneNumber'),
+    nameOnCard:              new StringSetting('nameOnCard'),
+    postalCode:              new StringSetting('postalCode'),
+    cart:                    new CartSetting('cart'),
     hasMigratedToDiningSite: new BooleanSetting('hasMigratedToDiningSite', false /*defaultValue*/),
 } as const;
 
@@ -54,6 +54,7 @@ export const DebugSettings = {
     suppressExperimentalOnlineOrderingWarning: new BooleanSetting('SUPPRESS_EXPERIMENTAL_ONLINE_ORDERING_WARNING_DO_NOT_USE', false /*defaultValue*/),
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),
     noVectorSearch:                            new BooleanSetting('noVectorSearch', false /*defaultValue*/),
+    auth:                                      new BooleanSetting('auth', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

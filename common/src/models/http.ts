@@ -45,6 +45,7 @@ export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCo
 // GET /api/dining/
 export interface IDiningCoreResponse {
     isTrackingEnabled: boolean;
+    isLoggedIn: boolean;
     groups: IDiningCoreGroup[];
 }
 

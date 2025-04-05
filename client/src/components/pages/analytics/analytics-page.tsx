@@ -1,17 +1,15 @@
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApplicationContext } from '../../../context/app.ts';
-import { setPageData } from '../../../util/title.ts';
-import { AnalyticsView } from "./analytics-view.tsx";
+import { AnalyticsView } from './analytics-view.tsx';
 import './analytics-page.css';
+import { usePageData } from '../../../hooks/location.ts';
 
 export const AnalyticsPage = () => {
     const { isTrackingEnabled } = useContext(ApplicationContext);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        setPageData('User Analytics', 'View user analytics for the app');
-    }, []);
+    usePageData('User Analytics', 'View user analytics for the app');
 
     useEffect(() => {
         // Parent page

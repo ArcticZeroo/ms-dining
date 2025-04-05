@@ -1,23 +1,20 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { ISearchQuery } from '@msdining/common/dist/models/search';
-import { getNowWithDaysInFuture, isSameDate, yieldDaysInFutureForThisWeek } from '@msdining/common/dist/util/date-util';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { getFridayForWeek, getMondayForWeek, isDateInRangeInclusive } from '@msdining/common/dist/util/date-util';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
-import { ApplicationContext } from '../../../../context/app.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useDateForSearch } from '../../../../hooks/date-picker.tsx';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
-import { useHomepageViews } from '../../../../hooks/views.ts';
 import { IQuerySearchResult } from '../../../../models/search.ts';
 import { MenusCurrentlyUpdatingException } from '../../../../util/exception.ts';
 import { isAnyDateToday } from '../../../../util/search.ts';
-import { expandAndFlattenView } from '../../../../util/view.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
-import { HomeCollapse } from "../home-collapse.tsx";
-import { ApplicationSettings } from "../../../../constants/settings.ts";
-import { useTitleWithSelectedDate } from "../../../../hooks/string.ts";
+import { HomeCollapse } from '../home-collapse.tsx';
+import { ApplicationSettings } from '../../../../constants/settings.ts';
+import { useTitleWithSelectedDate } from '../../../../hooks/string.ts';
 
 interface IFavoriteSearchResultsData {
     stage: PromiseStage;
@@ -63,32 +60,17 @@ interface IHomeFavoritesViewProps {
 }
 
 export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }) => {
-    const { viewsById } = useContext(ApplicationContext);
-    const homepageViews = useHomepageViews();
     const selectedDate = useValueNotifierContext(SelectedDateContext);
     const title = useTitleWithSelectedDate('Favorites Across Campus');
 
-    const cafeIdsOnPage = useMemo(
-        () => new Set(
-            Array.from(homepageViews.values())
-                .flatMap(viewId => expandAndFlattenView(viewId, viewsById))
-                .map(cafe => cafe.id)
-        ),
-        [homepageViews, viewsById]
-    );
-
     const { stage, results, actualStage, error, retry } = useFavoriteSearchResults(queries);
 
-    const shouldHideFavorites = useMemo(
+    const areFavoritesAllowedForSelectedDay = useMemo(
         () => {
-            // favorites search only allows you to search for items this week
-            for (const daysInFuture of yieldDaysInFutureForThisWeek()) {
-                if (isSameDate(getNowWithDaysInFuture(daysInFuture), selectedDate)) {
-                    return false;
-                }
-            }
-
-            return true;
+            const now = new Date();
+            const monday = getMondayForWeek(now);
+            const friday = getFridayForWeek(now);
+            return isDateInRangeInclusive(selectedDate, [monday, friday]);
         },
         [selectedDate]
     );
@@ -144,9 +126,9 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                 }
             </div>
         );
-    }, [stage, results, error, actualStage, retry, selectedDate, cafeIdsOnPage]);
+    }, [stage, results, error, actualStage, retry, selectedDate]);
 
-    if (shouldHideFavorites) {
+    if (!areFavoritesAllowedForSelectedDay) {
         return null;
     }
 

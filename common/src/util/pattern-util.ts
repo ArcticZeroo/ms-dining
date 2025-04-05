@@ -1,10 +1,4 @@
-import {
-	addDurationToDate,
-	fromDateString, getFridayForWeek, getNextWeekday,
-	getWeekdaysForWeek,
-	moveToMostRecentDay, moveToNextMostRecentDay,
-	nativeDayOfWeek, toDateString
-} from './date-util.js';
+import { addDurationToDate, fromDateString, getNextWeekday } from './date-util.js';
 import Duration from '@arcticzeroo/duration';
 
 export interface IGapData {

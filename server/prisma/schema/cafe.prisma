@@ -139,3 +139,14 @@ model DailyCafeOrderingContext {
 
   @@id([dateString, cafeId])
 }
+
+model User {
+  id          String   @id @default(uuid())
+  externalId  String
+  provider    String
+  displayName String
+  role        String   @default("user")
+  createdAt   DateTime @default(now())
+
+  @@unique([externalId, provider])
+}
