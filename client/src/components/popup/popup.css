@@ -47,6 +47,10 @@
     justify-content: center;
 }
 
+.modal .title #modal-buttons .default-container {
+    padding: 0;
+}
+
 .modal .title #modal-buttons button {
     background: none;
     cursor: pointer;

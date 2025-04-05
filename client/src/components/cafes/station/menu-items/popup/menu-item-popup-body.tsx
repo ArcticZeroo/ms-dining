@@ -29,7 +29,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     }
 
     return (
-        <div className="menu-item-order-body">
+        <div className="menu-item-popup-body">
             {
                 menuItem.description && (
                     <div className="menu-item-description">{menuItem.description}</div>
