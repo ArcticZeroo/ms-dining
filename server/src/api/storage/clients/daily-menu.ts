@@ -138,7 +138,7 @@ export abstract class DailyMenuStorageClient {
 				const menuItemIds: string[] = [];
 
 				for (const dailyMenuItem of category.menuItems) {
-					const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
+					const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
 
 					if (menuItem == null) {
 						logError(`Unable to find menu item ${dailyMenuItem.menuItemId} for category ${category.name} in station ${stationData.name} (${dailyStation.stationId})`);

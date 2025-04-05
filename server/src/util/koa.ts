@@ -127,3 +127,16 @@ export const getEntityTypeAndName = (ctx: Koa.Context): [SearchEntityType, strin
 
     return [entityType, entityName];
 }
+
+export const getUserIdOrThrow = (ctx: Koa.Context): string => {
+    if (!ctx.isAuthenticated()) {
+        ctx.throw(401, 'User not authenticated');
+    }
+
+    const userId = ctx.state.user;
+    if (!userId) {
+        ctx.throw(500, 'User ID not found in session');
+    }
+
+    return userId;
+}

@@ -32,6 +32,11 @@ export abstract class CafeStorageClient {
         return this._cafeDataById;
     }
 
+    public static async doesCafeExistAsync(id: string): Promise<boolean> {
+        await this._ensureCafesExist();
+        return this._cafeDataById.has(id);
+    }
+
     public static async createCafeAsync(cafe: ICafe, config: ICafeConfig): Promise<void> {
         const cafeWithConfig: Omit<Cafe, 'id'> = {
             name:             cafe.name,

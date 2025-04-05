@@ -1,7 +1,7 @@
 import React from 'react';
 import { StringSetSetting } from '../../api/settings.ts';
-import filledStarIcon from '../../assets/icons/filled/star.svg';
-import outlinedStarIcon from '../../assets/icons/outline/star.svg';
+import filledIcon from '../../assets/icons/filled/heart.svg';
+import outlinedIcon from '../../assets/icons/outline/heart.svg';
 import { useValueNotifierSetTarget } from '../../hooks/events.ts';
 import { classNames } from '../../util/react.ts';
 
@@ -38,12 +38,12 @@ export const FavoriteItemButton: React.FC<IFavoriteItemButtonProps> = ({ name, s
             onClick={onFavoriteClicked}
         >
             <img
-                src={outlinedStarIcon}
+                src={outlinedIcon}
                 alt="not favorite"
                 className="icon-sized"
             />
             <img
-                src={filledStarIcon}
+                src={filledIcon}
                 alt="favorite"
                 className="favorite-enabled icon-sized"
                 style={{ opacity: isItemFavorite ? '1' : '0' }}

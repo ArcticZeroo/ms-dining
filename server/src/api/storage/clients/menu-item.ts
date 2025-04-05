@@ -317,7 +317,7 @@ export abstract class MenuItemStorageClient {
 		};
 	}
 
-	public static async retrieveMenuItemLocallyAsync(id: string): Promise<IMenuItem | null> {
+	public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
 		if (!this._menuItemsById.has(id)) {
 			const menuItem = await this._doRetrieveMenuItemAsync(id);
 

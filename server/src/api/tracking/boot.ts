@@ -1,7 +1,8 @@
 import {
 	ANALYTICS_APPLICATION_NAMES,
 	getApplicationNameForCafeMenu,
-	getApplicationNameForMenuOverview
+	getApplicationNameForMenuOverview,
+	getApplicationNameForReviews
 } from '@msdining/common/dist/constants/analytics.js';
 import { createAnalyticsApplicationAsync } from './visitors.js';
 import { ApplicationContext } from '../../constants/context.js';
@@ -15,6 +16,7 @@ const getAllApplicationNames = () => {
 	for (const cafe of ALL_CAFES) {
 		names.add(getApplicationNameForCafeMenu(cafe.id));
 		names.add(getApplicationNameForMenuOverview(cafe.id));
+		names.add(getApplicationNameForReviews(cafe.id));
 	}
 
 	return names;

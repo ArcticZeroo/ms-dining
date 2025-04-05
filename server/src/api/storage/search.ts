@@ -423,7 +423,7 @@ export abstract class SearchManager {
 
             for (const category of dailyStation.categories) {
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
 
                     if (menuItem == null) {
                         continue;
@@ -524,7 +524,7 @@ export abstract class SearchManager {
 
             for (const category of categories) {
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
                     if (menuItem == null) {
                         continue;
                     }
@@ -589,7 +589,7 @@ export abstract class SearchManager {
                         }
                     } else if (entityType === SearchEntityType.menuItem) {
                         // todo: find the last appearance maybe? would be nice to have cafe/station data.
-                        const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(id);
+                        const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(id);
                         if (menuItem != null) {
                             logDebug('Adding vector menu item result without appearance', menuItem.name);
                             const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
@@ -654,7 +654,7 @@ export abstract class SearchManager {
                 }
 
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
 
                     if (menuItem == null) {
                         continue;

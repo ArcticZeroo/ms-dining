@@ -1,8 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { useValueNotifier } from './events.ts';
+import { useValueNotifier, useValueNotifierContext } from './events.ts';
 import { DebugSettings } from '../constants/settings.ts';
-import { useContext, useEffect } from 'react';
-import { ApplicationContext } from '../context/app.ts';
+import { useEffect } from 'react';
+import { UserIdContext } from '../context/auth.ts';
+
+export const useIsLoggedIn = () => {
+    const userId = useValueNotifierContext(UserIdContext);
+    const isAuthEnabled = useValueNotifier(DebugSettings.auth);
+    return isAuthEnabled && userId !== null;
+}
 
 export const useRequireAuthEnabled = () => {
     const navigate = useNavigate();
@@ -15,16 +21,16 @@ export const useRequireAuthEnabled = () => {
     }, [isAuthEnabled, navigate]);
 }
 
-export const useRequireLoginStatus = (shouldBeLoggedIn: boolean) => {
+export const useRequireLoginStatus = (shouldBeLoggedIn: boolean, navigateToPageOtherwise = '/') => {
     const navigate = useNavigate();
-    const { isLoggedIn } = useContext(ApplicationContext);
     const isAuthEnabled = useValueNotifier(DebugSettings.auth);
+    const isLoggedIn = useIsLoggedIn();
 
     const isAllowed = isAuthEnabled && isLoggedIn === shouldBeLoggedIn;
 
     useEffect(() => {
         if (!isAuthEnabled) {
-            navigate('/');
+            navigate(navigateToPageOtherwise);
             return;
         }
 
@@ -32,10 +38,10 @@ export const useRequireLoginStatus = (shouldBeLoggedIn: boolean) => {
             if (shouldBeLoggedIn) {
                 navigate('/login');
             } else {
-                navigate('/');
+                navigate(navigateToPageOtherwise);
             }
         }
-    }, [isAuthEnabled, isLoggedIn, navigate, shouldBeLoggedIn]);
+    }, [isAuthEnabled, isLoggedIn, navigate, shouldBeLoggedIn, navigateToPageOtherwise]);
 
     return isAllowed;
 }

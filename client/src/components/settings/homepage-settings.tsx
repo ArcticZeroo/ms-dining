@@ -23,7 +23,7 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
                 !hasAnyHomepageViews && homepageViewsComponent
             }
             <BooleanSettingInput
-                icon="star"
+                icon="favorite"
                 name="Show Favorites on Homepage"
                 description="When enabled, the home page will search for items that are in your favorites list."
                 setting={ApplicationSettings.showFavoritesOnHome}/>

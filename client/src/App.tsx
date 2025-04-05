@@ -14,6 +14,8 @@ import { useValueNotifier } from './hooks/events.ts';
 import { ApplicationSettings } from './constants/settings.ts';
 import { classNames } from './util/react.ts';
 import { useRemoveSource } from "./hooks/telemetry.ts";
+import { UserIdContext } from './context/auth.ts';
+import { ValueNotifier } from './util/events.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -38,7 +40,7 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 const App = () => {
-    const { groups, isTrackingEnabled, isLoggedIn } = useLoaderData() as IDiningCoreResponse;
+    const { groups, isTrackingEnabled, userId } = useLoaderData() as IDiningCoreResponse;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
@@ -58,9 +60,8 @@ const App = () => {
             cafes,
             groups,
             isTrackingEnabled,
-            isLoggedIn
         }),
-        [viewsById, viewsInOrder, cafes, groups, isTrackingEnabled, isLoggedIn]
+        [viewsById, viewsInOrder, cafes, groups, isTrackingEnabled]
     );
 
     const navExpansionContext = useMemo(
@@ -68,14 +69,21 @@ const App = () => {
         [isNavVisible]
     );
 
+    const userIdNotifier = useMemo(
+        () => new ValueNotifier(userId),
+        [userId]
+    );
+
     return (
         <div className={classNames('App', shouldUseCompactMode && 'compact-view-mode')}>
             <ApplicationContext.Provider value={applicationContext}>
-                <NavExpansionContext.Provider value={navExpansionContext}>
-                    <StaticContextProviders>
-                        <Root/>
-                    </StaticContextProviders>
-                </NavExpansionContext.Provider>
+                <UserIdContext.Provider value={userIdNotifier}>
+                    <NavExpansionContext.Provider value={navExpansionContext}>
+                        <StaticContextProviders>
+                            <Root/>
+                        </StaticContextProviders>
+                    </NavExpansionContext.Provider>
+                </UserIdContext.Provider>
             </ApplicationContext.Provider>
         </div>
     );

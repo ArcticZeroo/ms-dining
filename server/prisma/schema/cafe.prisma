@@ -11,6 +11,7 @@ model Cafe {
 
   dailyStations         DailyStation[]
   dailyOrderingContexts DailyCafeOrderingContext[]
+  reviews               Review[]
 }
 
 model MenuItem {
@@ -32,7 +33,8 @@ model MenuItem {
   modifiers      MenuItemModifierEntry[]
   searchTags     SearchTag[]
 
-  tags String?
+  tags    String?
+  reviews Review[]
 }
 
 model MenuItemModifierEntry {
@@ -148,5 +150,24 @@ model User {
   role        String   @default("user")
   createdAt   DateTime @default(now())
 
+  reviews Review[]
+
   @@unique([externalId, provider])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  // 0-10
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
 }

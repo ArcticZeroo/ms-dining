@@ -1,10 +1,9 @@
 import './auth.css';
 import { Link } from 'react-router-dom';
-import { useContext } from 'react';
-import { ApplicationContext } from '../../context/app.ts';
+import { useIsLoggedIn } from '../../hooks/auth.ts';
 
 export const AuthInfo = () => {
-    const { isLoggedIn } = useContext(ApplicationContext);
+    const isLoggedIn = useIsLoggedIn();
 
     if (!isLoggedIn) {
         return (
@@ -19,4 +18,4 @@ export const AuthInfo = () => {
             My Profile
         </Link>
     );
-}
+};

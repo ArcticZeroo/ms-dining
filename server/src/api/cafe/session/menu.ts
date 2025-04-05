@@ -414,7 +414,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
 		const localItemsById = new Map<string, IMenuItem>();
 
 		const retrieveMenuItemDetailsLocallyAsync = async (itemId: string) => {
-			const existingItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(itemId);
+			const existingItem = await MenuItemStorageClient.retrieveMenuItemAsync(itemId);
 			if (existingItem == null) {
 				return;
 			}

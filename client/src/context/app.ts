@@ -7,7 +7,6 @@ interface IApplicationContext {
 	cafes: ICafe[];
 	groups: ICafeGroup[];
 	isTrackingEnabled: boolean;
-    isLoggedIn: boolean;
 }
 
 export const ApplicationContext = React.createContext<IApplicationContext>({
@@ -16,5 +15,4 @@ export const ApplicationContext = React.createContext<IApplicationContext>({
     cafes:             [],
     groups:            [],
     isTrackingEnabled: false,
-    isLoggedIn:        false,
 });

@@ -92,7 +92,7 @@ const validateCartData = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderI
         const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowDateString);
 
         for (const serializedItem of serializedItems) {
-            const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(serializedItem.itemId);
+            const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(serializedItem.itemId);
 
             if (menuItem == null) {
                 return ctx.throw(400, `Menu item with id ${serializedItem.itemId} does not exist`);

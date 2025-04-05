@@ -30,7 +30,7 @@ export const registerCafeRoutes = (parent: Router) => {
 		async ctx => {
 			const response: IDiningCoreResponse = {
 				isTrackingEnabled: ApplicationContext.analyticsApplicationsReady.size > 0,
-				isLoggedIn:        ctx.isAuthenticated(),
+				userId:            ctx.isAuthenticated() ? ctx.state.user : null,
 				groups:            []
 			};
 

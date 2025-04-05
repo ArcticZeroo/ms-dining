@@ -223,7 +223,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Config is required to add items to the cart!');
         }
 
-        const menuItem = await MenuItemStorageClient.retrieveMenuItemLocallyAsync(cartItem.itemId);
+        const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(cartItem.itemId);
 
         if (menuItem == null) {
             throw new Error(`Failed to find menu item with id "${cartItem.itemId}"`);

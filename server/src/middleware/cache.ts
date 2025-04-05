@@ -60,7 +60,7 @@ export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_
         return queryParamsKeys.map(key => `${key}=${queryParams[key]}`).join('&');
     }
 
-    const getCacheKey = (ctx: Koa.Context) => `${ctx.path}?${serializeQueryParams(ctx)}@${getVersionTag(ctx)}`;
+    const getCacheKey = (ctx: Koa.Context) => `${ctx.path}@${getVersionTag(ctx)}?${serializeQueryParams(ctx)}`;
 
     return async (ctx, next) => {
         const cacheKey = getCacheKey(ctx);

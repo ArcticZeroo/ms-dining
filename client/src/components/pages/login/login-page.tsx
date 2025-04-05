@@ -5,7 +5,7 @@ import { PROVIDER_GOOGLE, PROVIDER_MICROSOFT } from '@msdining/common/dist/model
 import { useRequireLoginStatus } from '../../../hooks/auth.ts';
 
 export const LoginPage = () => {
-    const isPageAllowed = useRequireLoginStatus(false);
+    const isPageAllowed = useRequireLoginStatus(false, '/profile');
     usePageData('Log In', 'Log into an account for more features.');
     
     if (!isPageAllowed) {
@@ -39,12 +39,15 @@ export const LoginPage = () => {
                 <div>
                     <ul>
                         <li>
-                            Sync your favorites across devices
+                            Sync settings like your favorites across devices
                         </li>
                         <li>
                             Save reviews for menu items
                         </li>
                     </ul>
+                </div>
+                <div>
+                    You don't have to log in for the majority of functionality. You can still view menus, search, etc. regardless.
                 </div>
             </div>
         </div>

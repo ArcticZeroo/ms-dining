@@ -5,7 +5,7 @@ export const FavoriteItemButtonSkeleton = () => (
         disabled={true}
     >
         <span className="material-symbols-outlined">
-			star
+			favorite
         </span>
     </button>
 );
