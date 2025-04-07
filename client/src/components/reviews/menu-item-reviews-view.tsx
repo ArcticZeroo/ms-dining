@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../api/dining.ts';
-import { MenuItemReviewsList } from './menu-item-review-list.tsx';
+import { MenuItemReviewsLoadingList } from './menu-item-review-list.tsx';
 
 interface IMenuItemReviewsViewProps {
     menuItemId: string;
@@ -21,7 +21,7 @@ export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuI
             <div className="title">
                 Reviews
             </div>
-            <MenuItemReviewsList stage={state.stage} reviews={state.value} onRetry={state.run} />
+            <MenuItemReviewsLoadingList stage={state.stage} reviews={state.value} onRetry={state.run} />
         </div>
     )
 }

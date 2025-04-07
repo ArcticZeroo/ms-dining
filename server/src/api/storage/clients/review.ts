@@ -48,6 +48,11 @@ export abstract class ReviewStorageClient {
 					select: {
 						displayName: true
 					}
+				},
+				menuItem: {
+					select: {
+						name: true
+					}
 				}
 			}
 		}));

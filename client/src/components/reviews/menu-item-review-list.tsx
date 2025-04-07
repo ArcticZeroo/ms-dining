@@ -14,7 +14,7 @@ interface IMenuItemReviewsListProps {
     onRetry: () => void;
 }
 
-export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ stage, reviews, onRetry }) => {
+export const MenuItemReviewsLoadingList: React.FC<IMenuItemReviewsListProps> = ({ stage, reviews, onRetry }) => {
     const isLoggedIn = useIsLoggedIn();
 
     if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {

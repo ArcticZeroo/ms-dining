@@ -170,13 +170,17 @@ export const registerMenuRoutes = (parent: Router) => {
 		return menuItem;
 	}
 
-	const serializeReviews = (reviews: Array<Review & { user: { displayName: string } }>): IReviewDTO[] => {
+	const serializeReviews = (reviews: Array<Review & {
+		user: { displayName: string },
+		menuItem?: { name: string }
+	}>): IReviewDTO[] => {
 		return reviews.map(review => ({
 			id:              review.id,
 			cafeId:          review.cafeId,
 			userId:          review.userId,
 			userDisplayName: review.user.displayName,
 			menuItemId:      review.menuItemId,
+			menuItemName:    review.menuItem?.name,
 			rating:          review.rating,
 			comment:         review.comment || undefined,
 			createdAt:       review.createdAt.getTime()

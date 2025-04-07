@@ -3,6 +3,7 @@ export interface IReviewDTO {
 	userId: string;
 	userDisplayName: string;
 	menuItemId: string;
+	menuItemName?: string;
 	cafeId: string;
 	rating: number;
 	comment?: string;
@@ -14,6 +15,7 @@ export interface IReview {
 	userId: string;
 	userDisplayName: string;
 	menuItemId: string;
+	menuItemName?: string;
 	cafeId: string;
 	rating: number;
 	comment?: string;
