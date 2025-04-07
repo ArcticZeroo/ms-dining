@@ -7,8 +7,10 @@ import { IImageMetadata, retrieveImageMetadataAsync } from '../../util/image.js'
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem } from '../cafe/image/thumbnail.js';
+import { Lock } from '../lock.js';
 
 const thumbnailDataByMenuItemId = new Map<string, IImageMetadata>();
+const THUMBNAIL_SEMAPHORE = new Lock();
 
 const loadExistingThumbnailsOnBoot = async () => {
 	console.time('thumbnail loading on boot');
@@ -43,16 +45,21 @@ const loadExistingThumbnailsOnBoot = async () => {
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
 	await loadThumbnailsPromise;
 
-	if (thumbnailDataByMenuItemId.has(request.id)) {
-		const metadata = thumbnailDataByMenuItemId.get(request.id)!;
-		if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
-			return metadata;
+	await THUMBNAIL_SEMAPHORE.acquire();
+	try {
+		if (thumbnailDataByMenuItemId.has(request.id)) {
+			const metadata = thumbnailDataByMenuItemId.get(request.id)!;
+			if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
+				return metadata;
+			}
 		}
-	}
 
-	const result = await createAndSaveThumbnailForMenuItem(request);
-	thumbnailDataByMenuItemId.set(request.id, result);
-	return result;
+		const result = await createAndSaveThumbnailForMenuItem(request);
+		thumbnailDataByMenuItemId.set(request.id, result);
+		return result;
+	} finally {
+		THUMBNAIL_SEMAPHORE.release();
+	}
 }
 
 const loadThumbnailsPromise = isMainThread ? Promise.resolve() : loadExistingThumbnailsOnBoot();

@@ -1,7 +1,7 @@
 import { randomUserId } from '../util/random.ts';
 import {
     BooleanSetting,
-    CartSetting,
+    CartSetting, DateSetting,
     NumberSetting,
     StringArraySetting,
     StringSetSetting,
@@ -9,15 +9,16 @@ import {
 } from '../api/settings.ts';
 
 export const InternalSettings = {
-    lastUsedCafeIds:         new StringArraySetting('lastUsedDiningHalls'),
-    collapsedStations:       new StringSetSetting('collapsedStations'),
-    visitorId:               new StringSetting('visitorId'),
-    alias:                   new StringSetting('alias'),
-    phoneNumber:             new StringSetting('phoneNumber'),
-    nameOnCard:              new StringSetting('nameOnCard'),
-    postalCode:              new StringSetting('postalCode'),
-    cart:                    new CartSetting('cart'),
-    hasMigratedToDiningSite: new BooleanSetting('hasMigratedToDiningSite', false /*defaultValue*/),
+    lastUsedCafeIds:               new StringArraySetting('lastUsedDiningHalls'),
+    collapsedStations:             new StringSetSetting('collapsedStations'),
+    visitorId:                     new StringSetting('visitorId'),
+    alias:                         new StringSetting('alias'),
+    phoneNumber:                   new StringSetting('phoneNumber'),
+    nameOnCard:                    new StringSetting('nameOnCard'),
+    postalCode:                    new StringSetting('postalCode'),
+    cart:                          new CartSetting('cart'),
+    hasMigratedToDiningSite:       new BooleanSetting('hasMigratedToDiningSite', false /*defaultValue*/),
+    lastRoamingSettingsUpdateTime: new DateSetting('lastRoamingSettingsUpdateTime', new Date(NaN) /*defaultValue*/),
 } as const;
 
 export const ApplicationSettings = {
@@ -40,10 +41,19 @@ export const ApplicationSettings = {
     hideEveryDayStations:          new BooleanSetting('hideEveryDayStations', false /*defaultValue*/),
     showStationOverviews:          new BooleanSetting('showStationOverviews', true /*defaultValue*/),
     intelligentStationSort:        new BooleanSetting('intelligentStationSort', true /*defaultValue*/),
-    homepageViews:                 new StringSetSetting('homepageDiningHalls'),
+    homepageViews:                 new StringSetSetting('homepageDiningHalls', {
+        key:               'homepageIds',
+        lastUpdateSetting: InternalSettings.lastRoamingSettingsUpdateTime
+    } /*roamingData*/),
+    favoriteItemNames:             new StringSetSetting('favoriteItemNames', {
+        key:               'favoriteMenuItems',
+        lastUpdateSetting: InternalSettings.lastRoamingSettingsUpdateTime
+    } /*roamingData*/),
+    favoriteStationNames:          new StringSetSetting('favoriteStationNames', {
+        key:               'favoriteStations',
+        lastUpdateSetting: InternalSettings.lastRoamingSettingsUpdateTime
+    } /*roamingData*/),
     highlightTagNames:             new StringSetSetting('highlightTagNames'),
-    favoriteItemNames:             new StringSetSetting('favoriteItemNames'),
-    favoriteStationNames:          new StringSetSetting('favoriteStationNames'),
     searchAllowedViewIds:          new StringSetSetting('searchAllowedViewIds'),
     minimumPrice:                  new NumberSetting('minimumPrice', 0),
     maximumPrice:                  new NumberSetting('maximumPrice', 10),
@@ -55,6 +65,7 @@ export const DebugSettings = {
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),
     noVectorSearch:                            new BooleanSetting('noVectorSearch', false /*defaultValue*/),
     auth:                                      new BooleanSetting('auth', false /*defaultValue*/),
+    reviews:                                   new BooleanSetting('reviews', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

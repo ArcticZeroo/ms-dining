@@ -150,6 +150,11 @@ model User {
   role        String   @default("user")
   createdAt   DateTime @default(now())
 
+  favoriteStations   String?
+  favoriteMenuItems  String?
+  homepageIds        String?
+  lastSettingsUpdate DateTime?
+
   reviews Review[]
 
   @@unique([externalId, provider])

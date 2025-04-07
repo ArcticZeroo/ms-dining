@@ -1,6 +1,7 @@
 import { ISerializedCartItem, ISerializedModifier, ISubmitOrderItems } from '@msdining/common/dist/models/cart.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { IFetchEmbeddingQueryResult, IVectorSearchResult } from '../models/vector.js';
+import { IUpdateUserSettingsInput } from '@msdining/common/dist/models/http.js';
 
 export const isDuckTypeModifier = (data: unknown): data is ISerializedModifier => {
     if (!isDuckType<ISerializedModifier>(data, { modifierId: 'string', choiceIds: 'object' })) {
@@ -86,3 +87,35 @@ export const isValidVectorSearchResultArray = (data: unknown): data is Array<IVe
         distance:     'number',
     }
 );
+
+export const isStringArray = (data: unknown): data is Array<string> => {
+    if (!Array.isArray(data)) {
+        return false;
+    }
+
+    return data.every(item => typeof item === 'string');
+}
+
+export const isUpdateUserSettingsInput = (input: unknown): input is IUpdateUserSettingsInput => {
+    if (input == null || typeof input !== 'object') {
+        return false;
+    }
+
+    if (!('timestamp' in input) || typeof input.timestamp !== 'number') {
+        return false;
+    }
+
+    if ('favoriteStations' in input && !isStringArray(input.favoriteStations)) {
+        return false;
+    }
+
+    if ('favoriteMenuItems' in input && !isStringArray(input.favoriteMenuItems)) {
+        return false;
+    }
+
+    if ('homepageIds' in input && !isStringArray(input.homepageIds)) {
+        return false;
+    }
+
+    return true;
+}

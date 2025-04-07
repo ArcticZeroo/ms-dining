@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, PROVIDER_MICROSOFT } from '@msdining/common/dist/models/auth.js';
 import { UserStorageClient } from '../api/storage/clients/user.js';
 import { requireEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../constants/env.js';
+import { IMicrosoftProfileData } from '../models/auth.js';
 
 export const getMicrosoftStrategy = () => new MicrosoftStrategy.Strategy(
 	{

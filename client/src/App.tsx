@@ -13,7 +13,6 @@ import { ICancellationToken } from './util/async';
 import { useValueNotifier } from './hooks/events.ts';
 import { ApplicationSettings } from './constants/settings.ts';
 import { classNames } from './util/react.ts';
-import { useRemoveSource } from "./hooks/telemetry.ts";
 import { UserIdContext } from './context/auth.ts';
 import { ValueNotifier } from './util/events.ts';
 
@@ -40,13 +39,13 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 const App = () => {
-    const { groups, isTrackingEnabled, userId } = useLoaderData() as IDiningCoreResponse;
+    const { groups, isTrackingEnabled, user } = useLoaderData() as IDiningCoreResponse;
+    const userId = user?.id;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
 
     useBackgroundMenuUpdate(viewsById, cafes);
-    useRemoveSource();
 
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const [isNavExpanded, setIsNavExpanded] = useState(false);

@@ -2,6 +2,9 @@ import { CafeTypes } from '@msdining/common';
 import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import React from 'react';
 import { MenuItemModifierPicker } from '../../../../order/menu-item-modifier-picker.tsx';
+import { MenuItemReviewsView } from '../../../../reviews/menu-item-reviews-view.tsx';
+import { useValueNotifier } from '../../../../../hooks/events.ts';
+import { DebugSettings } from '../../../../../constants/settings.ts';
 
 interface IMenuItemPopupBodyProps {
     menuItem: IMenuItem;
@@ -20,7 +23,10 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     onNotesChanged,
     isOnlineOrderingAllowed
 }) => {
-    const shouldSkipBody = !menuItem.description
+    const allowReviews = useValueNotifier(DebugSettings.reviews);
+
+    const shouldSkipBody = !allowReviews
+        && !menuItem.description
         && menuItem.imageUrl == null
         && menuItem.modifiers.length === 0;
 
@@ -71,6 +77,11 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                             )
                         }
                     </div>
+                )
+            }
+            {
+                allowReviews && (
+                    <MenuItemReviewsView menuItemId={menuItem.id} />
                 )
             }
         </div>

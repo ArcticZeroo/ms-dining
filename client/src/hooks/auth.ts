@@ -7,7 +7,7 @@ import { UserIdContext } from '../context/auth.ts';
 export const useIsLoggedIn = () => {
     const userId = useValueNotifierContext(UserIdContext);
     const isAuthEnabled = useValueNotifier(DebugSettings.auth);
-    return isAuthEnabled && userId !== null;
+    return isAuthEnabled && userId != null;
 }
 
 export const useRequireAuthEnabled = () => {

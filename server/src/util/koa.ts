@@ -7,6 +7,8 @@ import { SearchEntityType, SearchMatchReason } from '@msdining/common/dist/model
 import { getStationLogoUrl } from './cafe.js';
 import { jsonStringifyWithoutNull } from './serde.js';
 import { getDevKey } from '../constants/env.js';
+import { UserStorageClient } from '../api/storage/clients/user.js';
+import { IServerUser } from '../models/auth.js';
 
 export const attachRouter = (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 
@@ -139,4 +141,16 @@ export const getUserIdOrThrow = (ctx: Koa.Context): string => {
     }
 
     return userId;
+}
+
+export const getUserOrThrowAsync = async (ctx: Koa.Context): Promise<IServerUser> => {
+    const id = getUserIdOrThrow(ctx);
+
+    const user = await UserStorageClient.getUserAsync({ id });
+
+    if (!user) {
+        ctx.throw(500, 'User not found');
+    }
+
+    return user;
 }

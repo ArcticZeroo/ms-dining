@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { attachRouter } from '../../util/koa.js';
+import { attachRouter, getUserIdOrThrow, getUserOrThrowAsync } from '../../util/koa.js';
 import passport from 'koa-passport';
 import { hasAuthEnvironmentVariables } from '../../constants/env.js';
 import { logInfo } from '../../util/log.js';
@@ -8,6 +8,7 @@ import { UserStorageClient } from '../../api/storage/clients/user.js';
 import { requireAuthenticated } from '../../middleware/auth.js';
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUserDTO } from '@msdining/common/dist/models/auth.js';
 import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategies.js';
+import { isUpdateUserSettingsInput } from '../../util/typeguard.js';
 
 export const registerAuthRoutes = (parent: Router) => {
 	if (!hasAuthEnvironmentVariables()) {
@@ -58,34 +59,18 @@ export const registerAuthRoutes = (parent: Router) => {
 		});
 
 	router.get('/me', requireAuthenticated, async ctx => {
-		const id = ctx.state.user;
-
-		if (!id || typeof id !== 'string') {
-			ctx.throw(500, 'User not found in session');
-			return;
-		}
-
-		const user = await UserStorageClient.getUserAsync({ id });
-		if (!user) {
-			ctx.throw(500, 'User not found');
-			return;
-		}
+		const user = await getUserOrThrowAsync(ctx);
 
 		ctx.body = {
-			id: user.id,
+			id:          user.id,
 			displayName: user.displayName,
-			provider: user.provider,
-			createdAt: user.createdAt.getTime(),
+			provider:    user.provider,
+			createdAt:   user.createdAt.getTime(),
 		} satisfies IClientUserDTO;
 	});
 
 	router.patch('/me/name', requireAuthenticated, async ctx => {
-		const id = ctx.state.user;
-
-		if (!id || typeof id !== 'string') {
-			ctx.throw(500, 'User not found in session');
-			return;
-		}
+		const id = getUserIdOrThrow(ctx);
 
 		const body = ctx.request.body;
 		if (!isDuckType<{ displayName: string }>(body, { displayName: 'string' })) {
@@ -101,6 +86,27 @@ export const registerAuthRoutes = (parent: Router) => {
 		}
 
 		await UserStorageClient.updateUserDisplayNameAsync(id, displayName);
+		ctx.status = 204;
+	});
+
+	router.patch('/me/settings', requireAuthenticated, async ctx => {
+		const id = getUserIdOrThrow(ctx);
+
+		const body = ctx.request.body;
+		if (!isUpdateUserSettingsInput(body)) {
+			ctx.throw(400, 'Invalid settings');
+			return;
+		}
+
+		console.log(body);
+
+		await UserStorageClient.updateUserSettingsAsync(id, {
+			favoriteMenuItems: body.favoriteMenuItems,
+			favoriteStations:  body.favoriteStations,
+			homepageIds:       body.homepageIds,
+			timestamp:         body.timestamp,
+		});
+
 		ctx.status = 204;
 	});
 

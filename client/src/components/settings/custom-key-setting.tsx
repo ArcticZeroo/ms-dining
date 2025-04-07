@@ -1,16 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { BooleanSetting } from '../../api/settings.ts';
 import { ValueNotifier } from '../../util/events.ts';
 import { classNames } from '../../util/react.ts';
 import { DebugSettings } from '../../constants/settings.ts';
 
-const ALLOWED_SETTINGS: BooleanSetting[] = [
-    DebugSettings.allowOnlineOrdering,
-    DebugSettings.suppressExperimentalOnlineOrderingWarning,
-    DebugSettings.verboseLogging,
-    DebugSettings.noVectorSearch,
-    DebugSettings.auth,
-];
+const ALLOWED_SETTINGS = Object.values(DebugSettings);
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {
     const [value, setValue] = useState<boolean>(false);

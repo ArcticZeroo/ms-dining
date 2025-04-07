@@ -3,7 +3,7 @@ import { DateUtil, SearchTypes } from '@msdining/common';
 import { ICafeOverviewStation, IMenuItem } from '@msdining/common/dist/models/cafe';
 import {
     IDiningCoreResponse,
-    ISearchResponseResult,
+    ISearchResponseResult, IUpdateUserSettingsInput,
     IWaitTimeResponse,
     MenuResponse
 } from '@msdining/common/dist/models/http';
@@ -17,6 +17,7 @@ import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from './request.ts';
 import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/dist/models/auth';
+import { IReview, IReviewDTO } from '@msdining/common/dist/models/review';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -368,6 +369,46 @@ export abstract class DiningClient {
             options: {
                 method: 'PATCH',
                 body: JSON.stringify({ displayName })
+            }
+        });
+    }
+
+    private static _deserializeReviews(reviews: unknown): Array<IReview> {
+        if (!isDuckTypeArray<IReviewDTO>(reviews, { id: 'string', userId: 'string', userDisplayName: 'string', cafeId: 'string', rating: 'number', createdAt: 'number' })) {
+            throw new Error('Invalid response format: missing reviews or in wrong format');
+        }
+
+        return reviews.map(review => ({
+            ...review,
+            createdAt: new Date(review.createdAt)
+        }));
+    }
+
+    public static async retrieveReviewsForMenuItem(menuItemId: string, cafeId?: string): Promise<Array<IReview>> {
+        const reviews = await makeJsonRequest({
+            path: `/api/dining/menu/menu-items/${menuItemId}/reviews${cafeId ? `?cafeId=${cafeId}` : ''}`
+        });
+
+        return DiningClient._deserializeReviews(reviews);
+    }
+
+    public static async retrieveMyReviews(): Promise<Array<IReview>> {
+        const reviews = await makeJsonRequest({
+            path: '/api/dining/menu/reviews/mine'
+        });
+
+        return DiningClient._deserializeReviews(reviews);
+    }
+
+    public static async updateSettings(settings: Omit<IUpdateUserSettingsInput, 'timestamp'>): Promise<void> {
+        await makeJsonRequestNoParse({
+            path: '/api/auth/me/settings',
+            options: {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    ...settings,
+                    timestamp: Date.now()
+                })
             }
         });
     }

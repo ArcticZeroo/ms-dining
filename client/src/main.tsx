@@ -14,16 +14,23 @@ import { ErrorPage } from './components/pages/error/error-page.tsx';
 import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
 import { OrderPage } from './components/pages/order/order-page.tsx';
 import { LocationTestPage } from './components/pages/location-test/location-test-page.tsx';
-
-import './index.css';
 import { checkMigrationCookie, doMigrationAndRedirectToDiningSite } from './util/migration.ts';
 import { ProfilePage } from './components/pages/profile/profile-page.tsx';
 import { LoginPage } from './components/pages/login/login-page.tsx';
+import { removeSourceQueryParamIfNeeded } from './util/telemetry.ts';
+import { updateRoamingSettingsOnBoot } from './util/settings.ts';
+import './index.css';
+
+const coreDataLoader = async () => {
+    const coreData = await DiningClient.retrieveCoreData();
+    updateRoamingSettingsOnBoot(coreData.user);
+    return coreData;
+};
 
 const startApp = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
-            <Route path="/" element={<App/>} loader={() => DiningClient.retrieveCoreData()} errorElement={<ErrorPage/>}>
+            <Route path="/" element={<App/>} loader={coreDataLoader} errorElement={<ErrorPage/>}>
                 <Route path="/menu/:id" element={<CafeViewPage/>}/>
                 <Route path="/settings" element={<SettingsPage/>}/>
                 <Route path="/search" element={<SearchPage/>}/>
@@ -45,11 +52,12 @@ const startApp = () => {
             <RouterProvider router={router}/>
         </React.StrictMode>,
     );
-}
+};
 
 if (window.location.hostname === 'msdining.frozor.io') {
     doMigrationAndRedirectToDiningSite();
 } else {
     checkMigrationCookie();
+    removeSourceQueryParamIfNeeded();
     startApp();
 }

@@ -1,6 +1,9 @@
 import { ValueNotifier } from '../util/events.ts';
 import { ISerializedCartItemsByCafeId } from '../models/cart.ts';
 import { isDuckTypeSerializedCartItem } from '../util/typeguard.ts';
+import { IUpdateUserSettingsInput } from '@msdining/common/dist/models/http';
+import { DiningClient } from './dining.ts';
+import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
 export const ARRAY_DELIMITER = ';';
 
@@ -119,15 +122,42 @@ export class StringArraySetting extends Setting<Array<string>> {
     }
 }
 
+interface IRoamingData {
+    key: keyof IUpdateUserSettingsInput;
+    lastUpdateSetting: DateSetting;
+}
+
 export class StringSetSetting extends Setting<Set<string>> {
-    constructor(name: string, shouldPersist: boolean = true) {
-        const initialValue = shouldPersist ? new Set(getStringArraySetting(name)) : new Set<string>();
+    private _roamingStage: PromiseStage = PromiseStage.notRun;
+
+    constructor(name: string, roamingData?: IRoamingData) {
+        const initialValue = new Set(getStringArraySetting(name));
         super(name, initialValue);
-        this.shouldPersist = shouldPersist;
+
+        if (roamingData != null) {
+            this.addListener(value => {
+                this._roamingStage = PromiseStage.running;
+                roamingData.lastUpdateSetting.updateToNow();
+
+                DiningClient.updateSettings({
+                    [roamingData.key]: Array.from(value)
+                }).then(() => {
+                    this._roamingStage = PromiseStage.success;
+                }).catch(err => {
+                    // todo: handle case where page thinks they're signed in but their session has expired
+                    console.error(`Failed to roam setting ${this.name}`, err);
+                    this._roamingStage = PromiseStage.error;
+                });
+            });
+        }
     }
 
     protected save(value: Set<string>) {
         setStringArraySetting(this.name, Array.from(value));
+    }
+
+    public get roamingStage() {
+        return this._roamingStage;
     }
 
     add(...values: string[]) {
@@ -228,5 +258,39 @@ export class CartSetting extends Setting<ISerializedCartItemsByCafeId | null> {
 
     protected save(value: ISerializedCartItemsByCafeId) {
         localStorage.setItem(this.name, JSON.stringify(value));
+    }
+}
+
+export class DateSetting extends Setting<Date> {
+    constructor(name: string, defaultValue: Date) {
+        super(name, DateSetting.deserialize(name, defaultValue));
+    }
+
+    private static deserialize(name: string, defaultValue: Date): Date {
+        try {
+            const valueRaw = localStorage.getItem(name);
+
+            if (!valueRaw?.trim()) {
+                return defaultValue;
+            }
+
+            const value = new Date(valueRaw);
+
+            if (Number.isNaN(value.getTime())) {
+                return defaultValue;
+            }
+
+            return value;
+        } catch {
+            return defaultValue;
+        }
+    }
+
+    protected save(value: Date) {
+        localStorage.setItem(this.name, value.toISOString());
+    }
+
+    updateToNow() {
+        this.value = new Date();
     }
 }

@@ -24,17 +24,31 @@ export abstract class ReviewStorageClient {
 
 	public static async getReviewsForMenuItemAsync(menuItemId: string, cafeId?: string) {
 		return usePrismaClient(client => client.review.findMany({
-			where: {
+			where:   {
 				menuItemId,
 				cafeId
+			},
+			include: {
+				user: {
+					select: {
+						displayName: true
+					}
+				}
 			}
 		}));
 	}
 
 	public static async getReviewsForUserAsync(userId: string) {
 		return usePrismaClient(client => client.review.findMany({
-			where: {
+			where:   {
 				userId
+			},
+			include: {
+				user: {
+					select: {
+						displayName: true
+					}
+				}
 			}
 		}));
 	}
@@ -44,9 +58,10 @@ export abstract class ReviewStorageClient {
 			where: {
 				id: reviewId
 			},
-			data: {
-				rating:  update.rating,
-				comment: update.comment
+			data:  {
+				rating:    update.rating,
+				comment:   update.comment,
+				createdAt: new Date()
 			}
 		}));
 	}

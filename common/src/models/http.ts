@@ -46,7 +46,15 @@ export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCo
 export interface IDiningCoreResponse {
 	isTrackingEnabled: boolean;
 	groups: IDiningCoreGroup[];
-	userId?: string;
+	user?: {
+		id: string;
+		settings?: {
+			favoriteStations: string[];
+			favoriteMenuItems: string[];
+			homepageIds: string[];
+			lastUpdate: number;
+		}
+	};
 }
 
 // GET /api/dining/order/wait/:cafeId?items=$number
@@ -108,3 +116,10 @@ export interface ICreateReviewResponse {
 }
 
 export const REVIEW_MAX_COMMENT_LENGTH_CHARS = 500;
+
+export interface IUpdateUserSettingsInput {
+	favoriteStations?: string[];
+	favoriteMenuItems?: string[];
+	homepageIds?: string[];
+	timestamp: number;
+}

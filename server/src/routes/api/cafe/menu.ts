@@ -24,6 +24,8 @@ import { ReviewStorageClient } from '../../../api/storage/clients/review.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { requireAuthenticated } from '../../../middleware/auth.js';
+import { Review } from '@prisma/client';
+import { IReviewDTO } from '@msdining/common/dist/models/review.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -168,6 +170,19 @@ export const registerMenuRoutes = (parent: Router) => {
 		return menuItem;
 	}
 
+	const serializeReviews = (reviews: Array<Review & { user: { displayName: string } }>): IReviewDTO[] => {
+		return reviews.map(review => ({
+			id:              review.id,
+			cafeId:          review.cafeId,
+			userId:          review.userId,
+			userDisplayName: review.user.displayName,
+			menuItemId:      review.menuItemId,
+			rating:          review.rating,
+			comment:         review.comment || undefined,
+			createdAt:       review.createdAt.getTime()
+		}));
+	}
+
 	router.get('/menu-items/:menuItemId/reviews',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForReviews),
 		memoizeResponseBodyByQueryParams(),
@@ -177,7 +192,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			// todo: limit? paging?
 			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem.id, maybeCafe?.id);
-			ctx.body = jsonStringifyWithoutNull(reviews);
+			ctx.body = jsonStringifyWithoutNull(serializeReviews(reviews));
 		});
 
 	router.post('/menu-items/:menuItemId/reviews',
@@ -245,7 +260,7 @@ export const registerMenuRoutes = (parent: Router) => {
 		async ctx => {
 			// todo: limit? paging?
 			const reviews = await ReviewStorageClient.getReviewsForUserAsync(getUserIdOrThrow(ctx));
-			ctx.body = jsonStringifyWithoutNull(reviews);
+			ctx.body = jsonStringifyWithoutNull(serializeReviews(reviews));
 		});
 
 	router.patch('/reviews/:reviewId',
@@ -259,6 +274,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			const request = validateUpdateReviewRequest(ctx, ctx.request.body);
 			await ReviewStorageClient.updateReviewAsync(reviewId, request);
+			ctx.status = 204;
 		});
 
 	attachRouter(parent, router);
