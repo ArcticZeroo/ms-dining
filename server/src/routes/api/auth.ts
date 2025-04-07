@@ -98,8 +98,6 @@ export const registerAuthRoutes = (parent: Router) => {
 			return;
 		}
 
-		console.log(body);
-
 		await UserStorageClient.updateUserSettingsAsync(id, {
 			favoriteMenuItems: body.favoriteMenuItems,
 			favoriteStations:  body.favoriteStations,

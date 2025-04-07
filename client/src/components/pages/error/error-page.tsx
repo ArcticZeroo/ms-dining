@@ -1,5 +1,6 @@
 import { Link, useLocation, useRouteError } from 'react-router-dom';
 import { useEffect } from 'react';
+import { ReloadButton } from '../../button/reload-button.tsx';
 
 export const ErrorPage = () => {
     const location = useLocation();
@@ -23,9 +24,7 @@ export const ErrorPage = () => {
                     </Link>
                 )
             }
-            <button onClick={() => window.location.reload()} className="link-button">
-                Reload Page
-            </button>
+            <ReloadButton/>
         </div>
     );
 };

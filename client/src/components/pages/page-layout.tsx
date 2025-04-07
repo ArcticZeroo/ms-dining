@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { ScrollTopButton } from './components/button/scroll-top-button.tsx';
-import { Nav } from './components/nav/nav.tsx';
-import { PopupContainer } from './components/popup/popup-container.tsx';
-import { PopupContext } from './context/modal.ts';
-import { NavExpansionContext } from './context/nav.ts';
-import { useValueNotifierContext } from './hooks/events.ts';
-import { DeviceType, useDeviceType } from './hooks/media-query.ts';
-import { classNames } from './util/react.ts';
-import { useLocationHash } from './hooks/location.ts';
+import { ScrollTopButton } from '../button/scroll-top-button.tsx';
+import { Nav } from '../nav/nav.tsx';
+import { PopupContainer } from '../popup/popup-container.tsx';
+import { PopupContext } from '../../context/modal.ts';
+import { NavExpansionContext } from '../../context/nav.ts';
+import { useValueNotifierContext } from '../../hooks/events.ts';
+import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
+import { classNames } from '../../util/react.ts';
+import { useLocationHash } from '../../hooks/location.ts';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -47,7 +47,7 @@ const useScrollTracker = (shouldStopScroll: boolean) => {
     return pageBodyDivRef;
 };
 
-export const Root = () => {
+export const PageLayout = () => {
     const [isNavExpanded] = useContext(NavExpansionContext);
     const deviceType = useDeviceType();
 

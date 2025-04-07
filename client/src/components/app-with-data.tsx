@@ -1,20 +1,19 @@
-import { IDiningCoreResponse } from '@msdining/common/dist/models/http';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import { DiningClient } from './api/dining.ts';
-import { StaticContextProviders } from './components/context/static-context-providers.tsx';
-import { ApplicationContext } from './context/app.ts';
-import { NavExpansionContext } from './context/nav.ts';
-import { DeviceType, useDeviceType } from './hooks/media-query.ts';
-import { useViewDataFromResponse } from './hooks/views';
-import { CafeView, ICafe } from './models/cafe.ts';
-import { Root } from './root.tsx';
-import { ICancellationToken } from './util/async';
-import { useValueNotifier } from './hooks/events.ts';
-import { ApplicationSettings } from './constants/settings.ts';
-import { classNames } from './util/react.ts';
-import { UserIdContext } from './context/auth.ts';
-import { ValueNotifier } from './util/events.ts';
+import { IDiningCoreResponse } from '@msdining/common/dist/models/http.ts';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { DiningClient } from '../api/dining.ts';
+import { StaticContextProviders } from './context/static-context-providers.tsx';
+import { ApplicationContext } from '../context/app.ts';
+import { NavExpansionContext } from '../context/nav.ts';
+import { DeviceType, useDeviceType } from '../hooks/media-query.ts';
+import { useViewDataFromResponse } from '../hooks/views.ts';
+import { CafeView, ICafe } from '../models/cafe.ts';
+import { PageLayout } from './pages/page-layout.tsx';
+import { ICancellationToken } from '../util/async.ts';
+import { useValueNotifier } from '../hooks/events.ts';
+import { ApplicationSettings } from '../constants/settings.ts';
+import { classNames } from '../util/react.ts';
+import { UserIdContext } from '../context/auth.ts';
+import { ValueNotifier } from '../util/events.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -38,8 +37,12 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
     }, [cafes, viewsById]);
 };
 
-const App = () => {
-    const { groups, isTrackingEnabled, user } = useLoaderData() as IDiningCoreResponse;
+interface IAppWithDataProps {
+    response: IDiningCoreResponse;
+}
+
+const AppWithData: React.FC<IAppWithDataProps> = ({ response }) => {
+    const { groups, isTrackingEnabled, user } = response;
     const userId = user?.id;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
@@ -79,7 +82,7 @@ const App = () => {
                 <UserIdContext.Provider value={userIdNotifier}>
                     <NavExpansionContext.Provider value={navExpansionContext}>
                         <StaticContextProviders>
-                            <Root/>
+                            <PageLayout/>
                         </StaticContextProviders>
                     </NavExpansionContext.Provider>
                 </UserIdContext.Provider>
@@ -88,4 +91,4 @@ const App = () => {
     );
 };
 
-export default App;
+export default AppWithData;

@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
-import { DiningClient } from './api/dining.ts';
 import { CafeViewPage } from './components/pages/menu/cafe-view-page.tsx';
 import { SettingsPage } from './components/pages/settings/settings-page.tsx';
 import { NotFoundPage } from './components/pages/not-found/not-found-page.tsx';
@@ -18,19 +16,13 @@ import { checkMigrationCookie, doMigrationAndRedirectToDiningSite } from './util
 import { ProfilePage } from './components/pages/profile/profile-page.tsx';
 import { LoginPage } from './components/pages/login/login-page.tsx';
 import { removeSourceQueryParamIfNeeded } from './util/telemetry.ts';
-import { updateRoamingSettingsOnBoot } from './util/settings.ts';
+import { App } from './components/app.tsx';
 import './index.css';
-
-const coreDataLoader = async () => {
-    const coreData = await DiningClient.retrieveCoreData();
-    updateRoamingSettingsOnBoot(coreData.user);
-    return coreData;
-};
 
 const startApp = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
-            <Route path="/" element={<App/>} loader={coreDataLoader} errorElement={<ErrorPage/>}>
+            <Route path="/" element={<App/>} errorElement={<ErrorPage/>}>
                 <Route path="/menu/:id" element={<CafeViewPage/>}/>
                 <Route path="/settings" element={<SettingsPage/>}/>
                 <Route path="/search" element={<SearchPage/>}/>
