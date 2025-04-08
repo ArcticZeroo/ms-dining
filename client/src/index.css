@@ -78,7 +78,7 @@
     --color-price-filters-number-setting: var(--color-background-raised-2);
     --color-price-filters-number-setting-invalid: var(--color-error);
     --color-price-filters-number-setting-at-limit: var(--color-background-raised-2);
-    --color-setting-chip: var(--color-background-raised-2);
+    --color-setting-chip: var(--color-background-raised-3);
     --color-menu-item-modifier: var(--color-background-raised-3);
     --color-menu-item-modifier-error: var(--color-error);
     --color-menu-item-modifier-error-option: var(--color-error-dark);

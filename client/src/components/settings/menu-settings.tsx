@@ -43,6 +43,12 @@ export const MenuSettings = () => (
                     name="Show Tags"
                     isChip={true}
                 />
+                <BooleanSettingInput
+                    icon="star"
+                    setting={ApplicationSettings.showReviews}
+                    name="Show Reviews"
+                    isChip={true}
+                />
             </div>
         </div>
         <BooleanSettingInput

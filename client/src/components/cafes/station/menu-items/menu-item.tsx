@@ -17,6 +17,7 @@ import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
+import { pluralize } from '../../../../util/string.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -55,6 +56,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
     const showTags = useValueNotifier(ApplicationSettings.showTags);
+    const showReviews = useValueNotifier(ApplicationSettings.showReviews);
     const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const isFavoriteItem = useIsFavoriteItem(menuItem.name, SearchEntityType.menuItem);
@@ -140,6 +142,13 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             {
                 showTags && (
                     <MenuItemTags tags={menuItem.tags}/>
+                )
+            }
+            {
+                showReviews && menuItem.totalReviewCount > 0 && (
+                    <span>
+                        {menuItem.overallRating / 2} ⭐ ({menuItem.totalReviewCount} {pluralize('review', menuItem.totalReviewCount)})
+                    </span>
                 )
             }
         </div>

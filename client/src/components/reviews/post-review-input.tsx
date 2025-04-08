@@ -62,7 +62,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                     setReviewCreationStage(PromiseStage.error);
                 });
         },
-        [menuItemId, onReviewIdChanged, onCommentChanged, onRatingChanged]
+        [menuItemId, onReviewIdChanged]
     );
 
     // If a user clicks on the stars, it'll try to set them to null.

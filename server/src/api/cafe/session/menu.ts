@@ -337,20 +337,25 @@ export class CafeMenuSession extends CafeDiscoverySession {
 			}
 		}
 
+		// Don't use localItem for properties that are native to the buy-ondemand
+		// API, consider buy-ondemand to be the source of truth so if something
+		// is missing then we should clear it from the local item as well.
 		return {
-			id:             jsonItem.id,
-			cafeId:         this.cafe.id,
-			price:          Number(jsonItem.amount || 0),
-			name:           jsonItem.displayText,
-			calories:       Number(jsonItem.properties.calories || 0),
-			maxCalories:    Number(jsonItem.properties.maxCalories || 0),
-			hasThumbnail:   false,
-			imageUrl:       jsonItem.image,
-			description:    jsonItem.description,
-			receiptText:    jsonItem.receiptText,
-			lastUpdateTime: new Date(jsonItem.lastUpdateTime),
-			tags:           new Set(tags),
-			searchTags:     localItem?.searchTags ?? new Set<string>(),
+			id:               jsonItem.id,
+			cafeId:           this.cafe.id,
+			price:            Number(jsonItem.amount || 0),
+			name:             jsonItem.displayText,
+			calories:         Number(jsonItem.properties.calories || 0),
+			maxCalories:      Number(jsonItem.properties.maxCalories || 0),
+			hasThumbnail:     false,
+			imageUrl:         jsonItem.image,
+			description:      jsonItem.description,
+			receiptText:      jsonItem.receiptText,
+			lastUpdateTime:   new Date(jsonItem.lastUpdateTime),
+			tags:             new Set(tags),
+			searchTags:       localItem?.searchTags ?? new Set<string>(),
+			totalReviewCount: localItem?.totalReviewCount ?? 0,
+			overallRating:    localItem?.overallRating ?? 0,
 			modifiers,
 		};
 	}

@@ -33,7 +33,12 @@ export interface IStationUniquenessData {
     themeItemIds: Array<string>;
 }
 
-export interface IMenuItem {
+export interface IMenuItemReviewHeader {
+	totalReviewCount: number;
+	overallRating: number;
+}
+
+export interface IMenuItem extends IMenuItemReviewHeader {
     id: string;
 	cafeId: string;
     price: number;
@@ -52,7 +57,7 @@ export interface IMenuItem {
     searchTags: Set<string>;
 }
 
-export interface IMenuItemDTO {
+export interface IMenuItemDTO extends IMenuItemReviewHeader {
     id: string;
     cafeId: string;
     price: number;

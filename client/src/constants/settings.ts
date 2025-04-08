@@ -29,6 +29,7 @@ export const ApplicationSettings = {
     showCalories:                  new BooleanSetting('showCalories', true /*defaultValue*/),
     showDescriptions:              new BooleanSetting('showDescription', true /*defaultValue*/),
     showTags:                      new BooleanSetting('showTags', true /*defaultValue*/),
+    showReviews:                   new BooleanSetting('showReviews', true /*defaultValue*/),
     showSearchTags:                new BooleanSetting('showSearchTags', false /*defaultValue*/),
     showFavoritesOnHome:           new BooleanSetting('showFavoritesOnHome', true /*defaultValue*/),
     showPriceInSearch:             new BooleanSetting('showPriceInSearch', true /*defaultValue*/),

@@ -1,4 +1,9 @@
-import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
+import {
+	IMenuItemModifier,
+	IMenuItemModifierChoice,
+	IMenuItemReviewHeader,
+	ModifierChoiceType
+} from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry, PrismaClient } from '@prisma/client';
 import { IMenuItem } from '../../../models/cafe.js';
@@ -254,6 +259,23 @@ export abstract class MenuItemStorageClient {
 		}
 	}
 
+	private static async _retrieveReviewHeaderAsync(id: string): Promise<IMenuItemReviewHeader> {
+		const stats = await usePrismaClient(prismaClient => prismaClient.review.aggregate({
+			where: {
+				menuItemId: id
+			},
+			_count: true,
+			_avg: {
+				rating: true
+			}
+		}));
+
+		return {
+			totalReviewCount: stats._count,
+			overallRating: stats._avg.rating ?? 0
+		};
+	}
+
 	private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
 		const menuItem = await usePrismaClient(prismaClient => prismaClient.menuItem.findUnique({
 			where:   { id },
@@ -299,7 +321,10 @@ export abstract class MenuItemStorageClient {
 			});
 		}
 
-		const thumbnailData = await retrieveThumbnailData(menuItem);
+		const [thumbnailData, reviewHeader] = await Promise.all([
+			retrieveThumbnailData(menuItem),
+			MenuItemStorageClient._retrieveReviewHeaderAsync(id)
+		]);
 
 		return {
 			id:             menuItem.id,
@@ -314,6 +339,7 @@ export abstract class MenuItemStorageClient {
 			receiptText:    menuItem.externalReceiptText,
 			tags:           deserializeMenuItemTags(menuItem.tags),
 			searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
+			...reviewHeader,
 			...thumbnailData,
 			modifiers
 		};
