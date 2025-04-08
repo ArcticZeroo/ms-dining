@@ -1,6 +1,6 @@
 import { PostReviewInput } from './post-review-input.tsx';
 import { pluralize } from '../../util/string.ts';
-import { MenuItemReviewsStats } from './menu-item-reviews-stats.tsx';
+import { ReviewStats } from './review-stats.tsx';
 import { MenuItemReviewsList } from './menu-item-reviews-list.tsx';
 import { IReviewDataForMenuItem } from '@msdining/common/dist/models/review.ts';
 import React, { useMemo, useState } from 'react';
@@ -91,13 +91,10 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                         </Link>
                     )
                 }
-                <div className="flex flex-center">
-                    {(stats.overallRating / 2).toFixed(2)} ⭐
-                    ({stats.totalCount} {pluralize('review', stats.totalCount)})
-                </div>
-                <MenuItemReviewsStats
+                <ReviewStats
                     counts={stats.counts}
                     totalCount={stats.totalCount}
+                    overallRating={stats.overallRating}
                 />
             </div>
             <MenuItemReviewsList
