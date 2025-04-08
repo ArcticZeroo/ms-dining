@@ -2,6 +2,7 @@ import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { ICafeOverviewStation, IMenuItem } from '@msdining/common/dist/models/cafe';
 import {
+    ICreateReviewRequest,
     IDiningCoreResponse,
     ISearchResponseResult, IUpdateUserSettingsInput,
     IWaitTimeResponse,
@@ -17,7 +18,7 @@ import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from './request.ts';
 import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/dist/models/auth';
-import { IReview, IReviewDTO } from '@msdining/common/dist/models/review';
+import { IReview, IReviewDataForMenuItem } from '@msdining/common/dist/models/review';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -36,20 +37,19 @@ interface IRetrieveSearchResultsParams {
 }
 
 export abstract class DiningClient {
-    private static _viewListPromise: Promise<IDiningCoreResponse> | undefined = undefined;
     private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
     private static readonly _favoritesCache = new FavoritesCache();
 
-    private static async _makeCoreRequest(): Promise<IDiningCoreResponse> {
-        return makeJsonRequest({ path: '/api/dining/' });
-    }
+    public static async retrieveCoreData(): Promise<IDiningCoreResponse> {
+        const response = await makeJsonRequest({
+            path: '/api/dining'
+        });
 
-    public static retrieveCoreData(): Promise<IDiningCoreResponse> {
-        if (!DiningClient._viewListPromise) {
-            DiningClient._viewListPromise = DiningClient._makeCoreRequest();
+        if (!isDuckType<IDiningCoreResponse>(response, { groups: 'object', isTrackingEnabled: 'boolean' })) {
+            throw new Error('Response is not in the expected format');
         }
 
-        return DiningClient._viewListPromise;
+        return response;
     }
 
     private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
@@ -374,22 +374,23 @@ export abstract class DiningClient {
     }
 
     private static _deserializeReviews(reviews: unknown): Array<IReview> {
-        if (!isDuckTypeArray<IReviewDTO>(reviews, { id: 'string', userId: 'string', userDisplayName: 'string', cafeId: 'string', rating: 'number', createdAt: 'number' })) {
+        if (!isDuckTypeArray<IReview>(reviews, { id: 'string', userId: 'string', userDisplayName: 'string', rating: 'number', createdDate: 'string' })) {
             throw new Error('Invalid response format: missing reviews or in wrong format');
         }
 
-        return reviews.map(review => ({
-            ...review,
-            createdAt: new Date(review.createdAt)
-        }));
+        return reviews;
     }
 
-    public static async retrieveReviewsForMenuItem(menuItemId: string, cafeId?: string): Promise<Array<IReview>> {
-        const reviews = await makeJsonRequest({
-            path: `/api/dining/menu/menu-items/${menuItemId}/reviews${cafeId ? `?cafeId=${cafeId}` : ''}`
+    public static async retrieveReviewsForMenuItem(menuItemId: string): Promise<IReviewDataForMenuItem> {
+        const response = await makeJsonRequest({
+            path: `/api/dining/menu/menu-items/${menuItemId}/reviews`
         });
 
-        return DiningClient._deserializeReviews(reviews);
+        if (!isDuckType<IReviewDataForMenuItem>(response, { overallRating: 'number', totalCount: 'number', counts: 'object', reviewsWithComments: 'object' })) {
+            throw new Error('Reviews not in the correct format');
+        }
+
+        return response;
     }
 
     public static async retrieveMyReviews(): Promise<Array<IReview>> {
@@ -409,6 +410,35 @@ export abstract class DiningClient {
                     ...settings,
                     timestamp: Date.now()
                 })
+            }
+        });
+    }
+
+    public static async createReview(menuItemId: string, request: ICreateReviewRequest): Promise<string /*id*/> {
+        if (request.comment?.trim().length === 0) {
+            request.comment = undefined;
+        }
+
+        const response = await makeJsonRequest({
+            path: `/api/dining/menu/menu-items/${menuItemId}/reviews`,
+            options: {
+                method: 'PUT',
+                body: JSON.stringify(request)
+            }
+        });
+
+        if (!isDuckType<{ id: string }>(response, { id: 'string' })) {
+            throw new Error('Response is invalid or in the wrong format');
+        }
+
+        return response.id;
+    }
+
+    public static async deleteReview(reviewId: string): Promise<void> {
+        await makeJsonRequestNoParse({
+            path: `/api/dining/menu/reviews/${reviewId}`,
+            options: {
+                method: 'DELETE'
             }
         });
     }

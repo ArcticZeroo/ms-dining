@@ -89,8 +89,9 @@ export const registerCafeRoutes = (parent: Router) => {
 		const userId = getUserIdOrThrow(ctx);
 		const user = await UserStorageClient.getUserAsync({ id: userId });
 
+		// If we have to swap out the database for any reason, just sign out users who had previously authed.
 		if (user == null) {
-			ctx.throw(500, 'User is authenticated but not found');
+			await ctx.logout();
 			return;
 		}
 

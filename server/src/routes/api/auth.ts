@@ -9,6 +9,7 @@ import { requireAuthenticated } from '../../middleware/auth.js';
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUserDTO } from '@msdining/common/dist/models/auth.js';
 import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategies.js';
 import { isUpdateUserSettingsInput } from '../../util/typeguard.js';
+import { normalizeDisplayName } from '@msdining/common/dist/util/string-util.js';
 
 export const registerAuthRoutes = (parent: Router) => {
 	if (!hasAuthEnvironmentVariables()) {
@@ -80,12 +81,14 @@ export const registerAuthRoutes = (parent: Router) => {
 
 		const { displayName } = body;
 
-		if (displayName.length > DISPLAY_NAME_MAX_LENGTH_CHARS) {
+		const normalizedDisplayName = normalizeDisplayName(displayName);
+
+		if (normalizedDisplayName.length > DISPLAY_NAME_MAX_LENGTH_CHARS) {
 			ctx.throw(400, 'Name too long');
 			return;
 		}
 
-		await UserStorageClient.updateUserDisplayNameAsync(id, displayName);
+		await UserStorageClient.updateUserDisplayNameAsync(id, normalizedDisplayName);
 		ctx.status = 204;
 	});
 

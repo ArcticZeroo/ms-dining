@@ -1,48 +1,53 @@
 import { usePrismaClient } from '../client.js';
 import { IUpdateReviewRequest } from '@msdining/common/dist/models/http.js';
+import { toDateString } from '@msdining/common/dist/util/date-util.js';
+import { Prisma } from '@prisma/client';
 
 interface ICreateReviewItem {
 	menuItemId: string;
-	cafeId: string;
+	cafeId?: string;
 	userId: string;
 	rating: number;
 	comment?: string;
 }
 
+interface IGetReviewsForUserParams {
+	userId: string;
+	menuItemId?: string;
+}
+
 export abstract class ReviewStorageClient {
 	public static async createReviewAsync(review: ICreateReviewItem) {
-		return usePrismaClient(client => client.review.create({
-			data: {
-				menuItemId: review.menuItemId,
-				cafeId:     review.cafeId,
-				userId:     review.userId,
-				rating:     review.rating,
-				comment:    review.comment
-			}
-		}));
-	}
+		const nowDateString = toDateString(new Date());
 
-	public static async getReviewsForMenuItemAsync(menuItemId: string, cafeId?: string) {
-		return usePrismaClient(client => client.review.findMany({
-			where:   {
-				menuItemId,
-				cafeId
+		return usePrismaClient(client => client.review.upsert({
+			create: {
+				menuItemId:  review.menuItemId,
+				userId:      review.userId,
+				rating:      review.rating,
+				comment:     review.comment,
+				createdDate: nowDateString
 			},
-			include: {
-				user: {
-					select: {
-						displayName: true
-					}
+			update: {
+				rating:      review.rating,
+				comment:     review.comment,
+				createdDate: nowDateString
+			},
+			where:  {
+				userId_menuItemId: {
+					userId:     review.userId,
+					menuItemId: review.menuItemId
 				}
+			},
+			select: {
+				id: true
 			}
 		}));
 	}
 
-	public static async getReviewsForUserAsync(userId: string) {
+	public static async getReviewsForMenuItemAsync(menuItemId: string) {
 		return usePrismaClient(client => client.review.findMany({
-			where:   {
-				userId
-			},
+			where:   { menuItemId },
 			include: {
 				user: {
 					select: {
@@ -51,8 +56,39 @@ export abstract class ReviewStorageClient {
 				},
 				menuItem: {
 					select: {
-						name: true
+						name: true,
+						cafe: {
+							select: {
+								id: true
+							}
+						}
+					},
+				}
+			}
+		}));
+	}
+
+	public static async getReviewsForUserAsync({ userId, menuItemId }: IGetReviewsForUserParams) {
+		return usePrismaClient(client => client.review.findMany({
+			where:   {
+				userId,
+				menuItemId
+			},
+			include: {
+				user:     {
+					select: {
+						displayName: true
 					}
+				},
+				menuItem: {
+					select: {
+						name: true,
+						cafe: {
+							select: {
+								id: true
+							}
+						}
+					},
 				}
 			}
 		}));
@@ -64,10 +100,32 @@ export abstract class ReviewStorageClient {
 				id: reviewId
 			},
 			data:  {
-				rating:    update.rating,
-				comment:   update.comment,
-				createdAt: new Date()
+				rating:      update.rating,
+				comment:     update.comment,
+				createdDate: toDateString(new Date())
 			}
 		}));
+	}
+
+	public static async deleteReviewAsync(reviewId: string) {
+		return usePrismaClient(client => client.review.delete({
+			where: {
+				id: reviewId
+			},
+		}));
+	}
+
+	public static async isOwnedByUser(reviewId: string, userId: string) {
+		const review = await usePrismaClient(prismaClient => prismaClient.review.findUnique({
+			where:  {
+				id: reviewId,
+				userId
+			},
+			select: {
+				userId: true
+			}
+		}));
+
+		return review != null;
 	}
 }

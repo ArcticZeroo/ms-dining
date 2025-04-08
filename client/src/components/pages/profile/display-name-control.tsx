@@ -4,6 +4,7 @@ import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../../api/dining.ts';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { classNames } from '../../../util/react.ts';
+import { normalizeDisplayName } from '@msdining/common/dist/util/string-util';
 
 interface IDisplayNameControlProps {
     user: IClientUser;
@@ -48,7 +49,7 @@ export const DisplayNameControl: React.FC<IDisplayNameControlProps> = ({ user })
                 return;
             }
 
-            const valueToSet = editDisplayNameValue.trim().replace(/\s+/g, ' ');
+            const valueToSet = normalizeDisplayName(editDisplayNameValue);
 
             if (valueToSet === userDisplayName) {
                 setEditActive(false);

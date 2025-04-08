@@ -101,8 +101,8 @@ export interface ISearchResponseResult {
 }
 
 export interface ICreateReviewRequest {
-	cafeId: string;
 	rating: number;
+	cafeId?: string;
 	comment?: string;
 }
 

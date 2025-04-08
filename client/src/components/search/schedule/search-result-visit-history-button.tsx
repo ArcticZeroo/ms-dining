@@ -1,5 +1,5 @@
 import React from 'react';
-import { SearchEntityType } from '@msdining/common/dist/models/search.ts';
+import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { SearchResultVisitHistory } from './search-result-visit-history.tsx';
 import { Modal } from '../../popup/modal.tsx';
 import { usePopupOpener } from '../../../hooks/popup.ts';

@@ -1,0 +1,10 @@
+.review-count {
+    color: #AAA;
+}
+
+.review-count-bar {
+    border-top-right-radius: var(--default-padding);
+    border-bottom-right-radius: var(--default-padding);
+    background: var(--color-theme-turquoise);
+    height: 1em;
+}

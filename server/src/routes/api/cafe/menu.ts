@@ -1,7 +1,8 @@
 import Router from '@koa/router';
 import { IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import {
-	ICreateReviewRequest, IUpdateReviewRequest,
+	ICreateReviewRequest,
+	IUpdateReviewRequest,
 	MenuResponse,
 	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/dist/models/http.js';
@@ -13,11 +14,12 @@ import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
-import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
+import { attachRouter, getMaybeUserId, getTrimmedQueryParam, getUserIdOrThrow } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
 	getApplicationNameForCafeMenu,
-	getApplicationNameForMenuOverview, getApplicationNameForReviews
+	getApplicationNameForMenuOverview,
+	getApplicationNameForReviews
 } from '@msdining/common/dist/constants/analytics.js';
 import { sendVisitFromCafeParamMiddleware } from '../../../middleware/analytics.js';
 import { ReviewStorageClient } from '../../../api/storage/clients/review.js';
@@ -25,7 +27,7 @@ import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { Review } from '@prisma/client';
-import { IReviewDTO } from '@msdining/common/dist/models/review.js';
+import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/dist/models/review.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -142,20 +144,6 @@ export const registerMenuRoutes = (parent: Router) => {
 			ctx.body = jsonStringifyWithoutNull(overviewStations);
 		}));
 
-	const maybeGetCafeFromQueryAsync = async (ctx: Router.RouterContext) => {
-		const id = ctx.query.cafeId;
-		if (!id || typeof id !== 'string') {
-			return null;
-		}
-
-		const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-		if (!cafe) {
-			return null;
-		}
-
-		return cafe;
-	}
-
 	const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
 		const menuItemId = ctx.params.menuItemId;
 		if (!menuItemId) {
@@ -170,62 +158,94 @@ export const registerMenuRoutes = (parent: Router) => {
 		return menuItem;
 	}
 
-	const serializeReviews = (reviews: Array<Review & {
+	const serializeReview = (review: Review & {
 		user: { displayName: string },
-		menuItem?: { name: string }
-	}>): IReviewDTO[] => {
-		return reviews.map(review => ({
-			id:              review.id,
-			cafeId:          review.cafeId,
-			userId:          review.userId,
-			userDisplayName: review.user.displayName,
-			menuItemId:      review.menuItemId,
-			menuItemName:    review.menuItem?.name,
-			rating:          review.rating,
-			comment:         review.comment || undefined,
-			createdAt:       review.createdAt.getTime()
-		}));
-	}
+		menuItem: { name: string, cafe: { id: string } }
+	}): IReview => ({
+		id:              review.id,
+		userId:          review.userId,
+		userDisplayName: review.user.displayName,
+		menuItemId:      review.menuItemId,
+		menuItemName:    review.menuItem.name,
+		cafeId:          review.menuItem.cafe.id,
+		rating:          review.rating,
+		comment:         review.comment || undefined,
+		createdDate:     review.createdDate,
+	});
 
 	router.get('/menu-items/:menuItemId/reviews',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForReviews),
-		memoizeResponseBodyByQueryParams(),
+		// todo... figure out how to memo and deal with updates.
 		async ctx => {
+			const userId = getMaybeUserId(ctx);
 			const menuItem = await getMenuItemFromRequest(ctx);
-			const maybeCafe = await maybeGetCafeFromQueryAsync(ctx);
 
 			// todo: limit? paging?
-			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem.id, maybeCafe?.id);
-			ctx.body = jsonStringifyWithoutNull(serializeReviews(reviews));
+			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem.id);
+
+			const response: IReviewDataForMenuItem = {
+				counts:              {},
+				reviewsWithComments: [],
+				totalCount:          0,
+				overallRating:       0,
+			};
+
+			for (const review of reviews) {
+				response.totalCount += 1;
+				response.overallRating += review.rating;
+
+				if (!response.counts.hasOwnProperty(review.rating)) {
+					response.counts[review.rating] = 1;
+				} else {
+					response.counts[review.rating] += 1;
+				}
+
+				if (review.comment != null && review.comment.trim().length > 0) {
+					const serializedReview = serializeReview(review);
+					serializedReview.comment = review.comment;
+					response.reviewsWithComments.push(serializedReview as IReviewWithComment);
+				}
+
+				if (userId != null && review.userId === userId) {
+					response.myReview = serializeReview(review);
+				}
+			}
+
+			if (reviews.length > 0) {
+				response.overallRating /= reviews.length;
+			}
+
+			ctx.body = jsonStringifyWithoutNull(response);
 		});
 
-	router.post('/menu-items/:menuItemId/reviews',
+	router.put('/menu-items/:menuItemId/reviews',
 		requireAuthenticated,
 		async ctx => {
 			const menuItem = await getMenuItemFromRequest(ctx);
 
 			const body = ctx.request.body;
-			if (!isDuckType<ICreateReviewRequest>(body, { cafeId: 'string', rating: 'number' })) {
+			if (!isDuckType<ICreateReviewRequest>(body, { rating: 'number' })) {
 				ctx.throw(400, 'Invalid review');
 				return;
 			}
 
-			if (!(await CafeStorageClient.doesCafeExistAsync(body.cafeId))) {
-				ctx.throw(400, 'Invalid cafe id');
-				return;
-			}
-
-			if (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS) {
+			if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
 				ctx.throw(400, 'Invalid review comment');
 				return;
 			}
 
+			if (body.rating < 1 || body.rating > 10) {
+				ctx.throw(400, 'Invalid rating');
+				return;
+			}
+
+			const userId = getUserIdOrThrow(ctx);
+
 			const review = await ReviewStorageClient.createReviewAsync({
+				userId,
 				menuItemId: menuItem.id,
-				cafeId:     body.cafeId,
-				userId:     getUserIdOrThrow(ctx),
 				rating:     body.rating,
-				comment:    body.comment
+				comment:    body.comment?.trim()
 			});
 
 			ctx.body = {
@@ -233,51 +253,46 @@ export const registerMenuRoutes = (parent: Router) => {
 			};
 		});
 
-	const validateUpdateReviewRequest = (ctx: Router.RouterContext, body: unknown): IUpdateReviewRequest => {
-		if (!isDuckType<Record<string, unknown>>(body, {})) {
-			ctx.throw(400, 'Invalid update data');
-		}
-
-		const rating = body.rating ?? undefined;
-		if (rating != null && typeof rating !== 'number') {
-			ctx.throw(400, 'Invalid rating');
-		}
-
-		const comment = body.comment ?? undefined;
-		if (comment != null && typeof comment !== 'string') {
-			ctx.throw(400, 'Invalid comment');
-		}
-
-		if (comment != null && comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS) {
-			ctx.throw(400, 'Invalid review comment');
-		}
-
-		return {
-			rating:  rating,
-			comment: comment
-		};
-	}
-
 	router.get('/reviews/mine',
 		requireAuthenticated,
 		memoizeResponseBodyByQueryParams(),
 		async ctx => {
-			// todo: limit? paging?
-			const reviews = await ReviewStorageClient.getReviewsForUserAsync(getUserIdOrThrow(ctx));
-			ctx.body = jsonStringifyWithoutNull(serializeReviews(reviews));
-		});
+			const menuItemId = getTrimmedQueryParam(ctx, 'menuItemId');
 
-	router.patch('/reviews/:reviewId',
-		requireAuthenticated,
-		async ctx => {
-			const reviewId = ctx.params.reviewId;
-			if (!reviewId) {
-				ctx.throw(400, 'Missing review id');
-				return;
+			if (menuItemId != null) {
+				const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
+				if (menuItem == null) {
+					ctx.throw(400, 'Invalid menu item');
+					return;
+				}
 			}
 
-			const request = validateUpdateReviewRequest(ctx, ctx.request.body);
-			await ReviewStorageClient.updateReviewAsync(reviewId, request);
+			const reviews = await ReviewStorageClient.getReviewsForUserAsync({
+				userId: getUserIdOrThrow(ctx),
+				menuItemId
+			});
+
+			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
+		});
+
+	const validateReviewOwnershipAsync = async (ctx: Router.RouterContext) => {
+		const reviewId = ctx.params.reviewId;
+		if (!reviewId) {
+			ctx.throw(400, 'Missing review id');
+		}
+
+		if (!(await ReviewStorageClient.isOwnedByUser(reviewId, getUserIdOrThrow(ctx)))) {
+			ctx.throw(403, 'Not allowed to modify another user\'s review');
+		}
+
+		return reviewId;
+	}
+
+	router.delete('/reviews/:reviewId',
+		requireAuthenticated,
+		async ctx => {
+			const reviewId = await validateReviewOwnershipAsync(ctx);
+			await ReviewStorageClient.deleteReviewAsync(reviewId);
 			ctx.status = 204;
 		});
 

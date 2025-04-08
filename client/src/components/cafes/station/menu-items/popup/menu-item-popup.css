@@ -1,6 +1,6 @@
 .menu-item-popup-body {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--default-padding);
     background: var(--color-menu-item-popup-body);
     border-radius: var(--default-padding);

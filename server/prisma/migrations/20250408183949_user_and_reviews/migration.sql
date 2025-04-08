@@ -17,14 +17,15 @@ CREATE TABLE "Review" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "rating" INTEGER NOT NULL,
     "comment" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdDate" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "menuItemId" TEXT NOT NULL,
-    "cafeId" TEXT NOT NULL,
     CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Review_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "MenuItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Review_cafeId_fkey" FOREIGN KEY ("cafeId") REFERENCES "Cafe" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "Review_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "MenuItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_externalId_provider_key" ON "User"("externalId", "provider");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Review_userId_menuItemId_key" ON "Review"("userId", "menuItemId");

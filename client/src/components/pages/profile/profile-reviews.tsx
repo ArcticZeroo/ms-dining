@@ -34,20 +34,26 @@ export const ProfileReviews = () => {
             <div className="title">
                 Your Reviews
             </div>
-            <div>
-                {
-                    reviews.value.length === 0 && (
-                        'You haven\'t left any reviews yet. Click on any menu item to leave a review.'
-                    )
-                }
-                {
-                    reviews.value.map(review => (
-                        <MenuItemReview
-                            key={review.id}
-                            review={review}/>
-                    ))
-                }
-            </div>
+            {
+                reviews.value.length === 0 && (
+                    <div>
+                        You haven't left any reviews yet. Click on any menu item to leave a review.
+                    </div>
+                )
+            }
+            {
+                reviews.value.length > 0 && (
+                    <div className="flex-col">
+                        {
+                            reviews.value.map(review => (
+                                <MenuItemReview
+                                    key={review.id}
+                                    review={review}/>
+                            ))
+                        }
+                    </div>
+                )
+            }
         </div>
     );
 };

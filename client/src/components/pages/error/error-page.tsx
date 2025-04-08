@@ -1,6 +1,7 @@
 import { Link, useLocation, useRouteError } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ReloadButton } from '../../button/reload-button.tsx';
+import { FullHeightCenteredContainer } from '../../util/full-height-centered-container.tsx';
 
 export const ErrorPage = () => {
     const location = useLocation();
@@ -13,18 +14,20 @@ export const ErrorPage = () => {
     }, [error]);
 
     return (
-        <div className="error-card">
-            <div>
-                {String(error)}
+        <FullHeightCenteredContainer>
+            <div className="card error">
+                <div>
+                    {String(error)}
+                </div>
+                {
+                    !isHome && (
+                        <Link to="/" className="link-button">
+                            Navigate Home
+                        </Link>
+                    )
+                }
+                <ReloadButton/>
             </div>
-            {
-                !isHome && (
-                    <Link to="/" className="link-button">
-                        Navigate Home
-                    </Link>
-                )
-            }
-            <ReloadButton/>
-        </div>
+        </FullHeightCenteredContainer>
     );
 };

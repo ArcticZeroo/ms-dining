@@ -1,3 +1,5 @@
+import { Nullable } from '@msdining/common/dist/models/util';
+
 export const pluralize = (value: string, count: number): string => {
     return count === 1 ? value : `${value}s`;
 };
@@ -52,3 +54,13 @@ export const stringWithSpaceIfExists = (value: unknown): string => (typeof value
     : '';
 
 export const maybeString = (value: unknown): string | undefined => (typeof value === 'string' && value) ? value : undefined;
+
+export const isNullOrEmpty = (value: Nullable<string>) => value == null || value.trim().length === 0;
+
+export const repeat = (value: string, count: number) => {
+    const pieces: string[] = [];
+    for (let i = 0; i < count; i++) {
+        pieces.push(value);
+    }
+    return pieces.join('');
+}

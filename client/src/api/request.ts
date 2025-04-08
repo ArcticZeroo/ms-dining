@@ -3,6 +3,7 @@ import { ERROR_BODIES } from '@msdining/common/dist/responses';
 
 import { getVisitorId } from '../constants/settings.ts';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
+import { HttpException } from '../exception/http.ts';
 
 interface IMakeRequestParamsBase {
     path: string;
@@ -43,7 +44,7 @@ export const makeJsonRequestNoParse = async ({
             }
         }
 
-        throw new Error(`Response failed with status: ${response.status}`);
+        throw new HttpException(response.status);
     }
 
     return response;

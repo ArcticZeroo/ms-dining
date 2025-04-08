@@ -36,3 +36,7 @@ export const findLongestSequentialSubstringLength = (parent: string, child: stri
 
     return longestLength;
 }
+
+export const normalizeDisplayName = (value: string) => {
+    return value.trim().replaceAll(/\s+/g, ' ');
+}

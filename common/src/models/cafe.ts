@@ -35,6 +35,7 @@ export interface IStationUniquenessData {
 
 export interface IMenuItem {
     id: string;
+	cafeId: string;
     price: number;
     name: string;
     receiptText?: Nullable<string>;
@@ -53,6 +54,7 @@ export interface IMenuItem {
 
 export interface IMenuItemDTO {
     id: string;
+    cafeId: string;
     price: number;
     name: string;
     receiptText?: Nullable<string>;

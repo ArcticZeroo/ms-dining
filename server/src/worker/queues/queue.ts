@@ -100,7 +100,7 @@ export abstract class WorkerQueue<TKey, TValue> {
                 throw new Error('Queue entry is missing from map');
             }
 
-            this.#logger.debug('Processing queue entry', key, ', remaining entries:', this.#keysInOrder.length);
+            // this.#logger.debug('Processing queue entry', key, ', remaining entries:', this.#keysInOrder.length);
 
             this.doWorkAsync(entry)
                 .catch((err) => {

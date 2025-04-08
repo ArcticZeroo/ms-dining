@@ -123,6 +123,7 @@ export abstract class MenuItemStorageClient {
 		const modifierIdsToAdd = new Set(modifierEntriesById.keys());
 
 		const dataWithoutId = {
+			cafeId:                 menuItem.cafeId,
 			name:                   menuItem.name.trim(),
 			normalizedName:         normalizeNameForSearch(menuItem.name),
 			imageUrl:               menuItem.imageUrl || null,
@@ -301,17 +302,18 @@ export abstract class MenuItemStorageClient {
 		const thumbnailData = await retrieveThumbnailData(menuItem);
 
 		return {
-			id:              menuItem.id,
-			name:            menuItem.name,
-			description:     menuItem.description,
-			price:           menuItem.price,
-			calories:        menuItem.calories,
-			maxCalories:     menuItem.maxCalories,
-			imageUrl:        menuItem.imageUrl,
-			lastUpdateTime:  menuItem.externalLastUpdateTime,
-			receiptText:     menuItem.externalReceiptText,
-			tags:            deserializeMenuItemTags(menuItem.tags),
-			searchTags:      new Set(menuItem.searchTags.map(tag => tag.name)),
+			id:             menuItem.id,
+			cafeId:         menuItem.cafeId,
+			name:           menuItem.name,
+			description:    menuItem.description,
+			price:          menuItem.price,
+			calories:       menuItem.calories,
+			maxCalories:    menuItem.maxCalories,
+			imageUrl:       menuItem.imageUrl,
+			lastUpdateTime: menuItem.externalLastUpdateTime,
+			receiptText:    menuItem.externalReceiptText,
+			tags:           deserializeMenuItemTags(menuItem.tags),
+			searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
 			...thumbnailData,
 			modifiers
 		};

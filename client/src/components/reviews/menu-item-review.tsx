@@ -2,82 +2,74 @@ import { IReview } from '@msdining/common/dist/models/review';
 import React, { useContext } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
+import { useValueNotifierContext } from '../../hooks/events.ts';
 import { UserIdContext } from '../../context/auth.ts';
 import { classNames } from '../../util/react.ts';
 import { Link } from 'react-router-dom';
-import { getViewMenuUrl } from '../../util/link.ts';
+import { getSearchAnchorJumpUrl } from '../../util/link.ts';
 import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
-import { ApplicationSettings } from '../../constants/settings.ts';
+import { fromDateString } from '@msdining/common/dist/util/date-util';
+import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { normalizeName } from '../../util/string.ts';
+import { Rating } from '@mui/material'
 
 interface IMenuItemReviewProps {
     review: IReview;
+    showMenuItemName?: boolean;
 }
 
-export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review }) => {
+export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMenuItemName = true }) => {
     const userId = useValueNotifierContext(UserIdContext);
     const { viewsById } = useContext(ApplicationContext);
-    const view = viewsById.get(review.cafeId);
     const cafeIdsOnPage = useCafeIdsOnPage();
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const view = viewsById.get(review.cafeId);
 
-    if (!view) {
+    if (view == null) {
         return null;
     }
 
     const isMe = userId === review.userId;
 
-    const link = getViewMenuUrl({ view, viewsById, cafeIdsOnPage, shouldUseGroups });
+    const link = getSearchAnchorJumpUrl({
+        cafeId:     review.cafeId,
+        entityType: SearchEntityType.menuItem,
+        name:       normalizeName(review.menuItemName),
+        view,
+        cafeIdsOnPage,
+        date:       new Date()
+    });
 
     return (
-        <div className={classNames("flex-col card", isMe && 'blue')}>
-            <div>
-                <span className="material-symbols-outlined">
-                    person
-                </span>
+        <div className={classNames('flex-col card', isMe && 'blue')}>
+            <div className="flex">
                 <span>
-                    {review.userDisplayName}
+                    <span className="bold">
+                        {review.userDisplayName}
+                    </span>
+                    {
+                        showMenuItemName && (
+                            <span>
+                            &nbsp;reviewed {review.menuItemName} @&nbsp;
+                            </span>
+                        )
+                    }
                 </span>
-            </div>
-            {
-                review.menuItemName != null && (
-                    <div>
-                        <span className="material-symbols-outlined">
-                            restaurant
-                        </span>
-                        <span>
-                            {review.menuItemName}
-                        </span>
-                    </div>
-                )
-            }
-            <div>
-                <span className="material-symbols-outlined">
-                    location_on
-                </span>
-                <Link to={link}>
+                <Link to={link} className="flex">
                     {getViewName({ view, showGroupName: true })}
                 </Link>
             </div>
-            <div>
-                <span className="material-symbols-outlined">
-                    calendar_today
-                </span>
+            <div className="flex flex-around">
+                <Rating
+                    value={review.rating / 2}
+                    readOnly={true}
+                />
                 <span>
-                    {review.createdAt.toLocaleDateString()}
-                </span>
-            </div>
-            <div>
-                <span className="material-symbols-outlined">
-                    star
-                </span>
-                <span>
-                    {review.rating / 2}
+                    {fromDateString(review.createdDate).toLocaleDateString()}
                 </span>
             </div>
             {
                 review.comment && (
-                    <div>
+                    <div className="flex">
                         <span className="material-symbols-outlined">
                             comment
                         </span>
@@ -89,4 +81,4 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review }) => {
             }
         </div>
     );
-}
+};

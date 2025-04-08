@@ -164,6 +164,10 @@ image {
     object-fit: contain;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .card, .error-card {
     background: var(--color-card-background);
     color: var(--color-card-foreground);
@@ -214,6 +218,10 @@ image {
 
 .bg-raised-3 {
     background: var(--color-background-raised-3);
+}
+
+.bg-raised-4 {
+    background: var(--color-background-raised-4);
 }
 
 .App {
@@ -314,6 +322,10 @@ html, body, #root, .App {
     transition: background-color 0.125s ease;
 }
 
+.default-button:disabled {
+    filter: grayscale(0.25) brightness(0.75);
+}
+
 .default-button.error {
     background: var(--color-error);
 }
@@ -395,6 +407,12 @@ html, body, #root, .App {
 
 .flex {
     display: flex;
+    align-items: center;
+    gap: var(--default-padding);
+}
+
+.flex-inline {
+    display: inline-flex;
     align-items: center;
     gap: var(--default-padding);
 }
@@ -613,6 +631,10 @@ html, body, #root, .App {
 
     .station .menu-body {
         overflow-x: auto;
+    }
+
+    .menu-item-popup-body {
+        flex-direction: column;
     }
 }
 

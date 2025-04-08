@@ -44,9 +44,21 @@ class ExpiringCache {
             value
         });
     }
+
+    deleteEntry(key: string) {
+        this.#cache.delete(key);
+    }
+
+    clearAllEntries() {
+        this.#cache.clear();
+    }
 }
 
-export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_EXPIRATION_TIME): Koa.Middleware => {
+interface IMemoizeController extends Koa.Middleware {
+    clearCache(ctx?: Koa.Context): void;
+}
+
+export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_EXPIRATION_TIME): IMemoizeController => {
     const cache = new ExpiringCache(expirationTime);
 
     const serializeQueryParams = (ctx: Koa.Context) => {
@@ -62,7 +74,7 @@ export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_
 
     const getCacheKey = (ctx: Koa.Context) => `${ctx.path}@${getVersionTag(ctx)}?${serializeQueryParams(ctx)}`;
 
-    return async (ctx, next) => {
+    const middleware: Koa.Middleware = async (ctx, next) => {
         const cacheKey = getCacheKey(ctx);
         const cachedBody = cache.getValue(cacheKey);
 
@@ -76,5 +88,15 @@ export const memoizeResponseBodyByQueryParams = (expirationTime = DEFAULT_CACHE_
         if (ctx.body && ctx.status === 200) {
             cache.insertEntry(cacheKey, ctx.body);
         }
-    }
+    };
+
+    (middleware as IMemoizeController).clearCache = (ctx) => {
+        if (ctx) {
+            cache.deleteEntry(getCacheKey(ctx));
+        } else {
+            cache.clearAllEntries();
+        }
+    };
+
+    return middleware as IMemoizeController;
 }

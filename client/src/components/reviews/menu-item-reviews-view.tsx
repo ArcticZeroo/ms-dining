@@ -1,27 +1,34 @@
 import React, { useCallback } from 'react';
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../api/dining.ts';
-import { MenuItemReviewsLoadingList } from './menu-item-review-list.tsx';
+import { MenuItemReviewsLoadingView } from './menu-item-review-loading-view.tsx';
+
+import './reviews.css';
 
 interface IMenuItemReviewsViewProps {
     menuItemId: string;
     cafeId?: string;
 }
 
-export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId, cafeId }) => {
+export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId }) => {
     const fetchReviews = useCallback(
-        () => DiningClient.retrieveReviewsForMenuItem(menuItemId, cafeId),
-        [menuItemId, cafeId]
+        () => DiningClient.retrieveReviewsForMenuItem(menuItemId),
+        [menuItemId]
     );
 
-    const state = useImmediatePromiseState(fetchReviews);
+    const { stage, value, run } = useImmediatePromiseState(fetchReviews);
 
     return (
-        <div className="card">
+        <div className="default-container bg-raised-3 flex-col">
             <div className="title">
                 Reviews
             </div>
-            <MenuItemReviewsLoadingList stage={state.stage} reviews={state.value} onRetry={state.run} />
+            <MenuItemReviewsLoadingView
+                stage={stage}
+                response={value}
+                onRetry={run}
+                menuItemId={menuItemId}
+            />
         </div>
     )
 }

@@ -11,7 +11,7 @@ model Cafe {
 
   dailyStations         DailyStation[]
   dailyOrderingContexts DailyCafeOrderingContext[]
-  reviews               Review[]
+  menuItems             MenuItem[]
 }
 
 model MenuItem {
@@ -19,22 +19,24 @@ model MenuItem {
   id             String  @id
   name           String
   normalizedName String  @default("")
-  calories       Int
-  maxCalories    Int
   description    String?
   imageUrl       String?
+  tags           String?
+  calories       Int
+  maxCalories    Int
   price          Float
 
   // externalItemId String?
   externalLastUpdateTime DateTime?
   externalReceiptText    String?
 
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
   dailyMenuItems DailyMenuItem[]
   modifiers      MenuItemModifierEntry[]
   searchTags     SearchTag[]
-
-  tags    String?
-  reviews Review[]
+  reviews        Review[]
 }
 
 model MenuItemModifierEntry {
@@ -43,7 +45,7 @@ model MenuItemModifierEntry {
   index      Int
 
   modifier MenuItemModifier @relation(fields: [modifierId], references: [id], onDelete: Cascade)
-  MenuItem MenuItem         @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  menuItem MenuItem         @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
   @@id([modifierId, menuItemId])
 }
@@ -161,11 +163,11 @@ model User {
 }
 
 model Review {
-  id        String   @id @default(uuid())
+  id          String  @id @default(uuid())
   // 0-10
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
+  rating      Int
+  comment     String?
+  createdDate String
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -173,6 +175,5 @@ model Review {
   menuItemId String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
-  cafeId String
-  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  @@unique([userId, menuItemId])
 }

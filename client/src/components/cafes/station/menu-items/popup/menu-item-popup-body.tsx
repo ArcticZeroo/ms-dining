@@ -81,7 +81,9 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
             }
             {
                 allowReviews && (
-                    <MenuItemReviewsView menuItemId={menuItem.id} />
+                    <MenuItemReviewsView
+                        menuItemId={menuItem.id}
+                    />
                 )
             }
         </div>

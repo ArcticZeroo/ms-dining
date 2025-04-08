@@ -70,7 +70,7 @@ export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: 
 			const [resolve, reject] = pendingRequest;
 			this.#pendingRequests.delete(message.requestId);
 
-			logDebug('Got response for worker thread command id', message.requestId, message.success ? 'success' : 'failure');
+			// logDebug('Got response for worker thread command id', message.requestId, message.success ? 'success' : 'failure');
 			if (!message.success) {
 				reject(message.error);
 			} else {
@@ -92,7 +92,7 @@ export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: 
 
 			const { command, requestId, data } = message;
 
-			logDebug('Got worker thread command', command, requestId);
+			// logDebug('Got worker thread command', command, requestId);
 
 			const handler = this.#commands[command];
 			if (handler == null) {
@@ -108,7 +108,7 @@ export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: 
 
 				try {
 					const response = await handler(data);
-					logDebug('Sending response for worker thread command', command, requestId);
+					// logDebug('Sending response for worker thread command', command, requestId);
 					parentPort.postMessage({ requestId, success: true, data: response });
 				} catch (err) {
 					logError('Error processing worker thread command:', err);

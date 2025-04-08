@@ -339,6 +339,7 @@ export class CafeMenuSession extends CafeDiscoverySession {
 
 		return {
 			id:             jsonItem.id,
+			cafeId:         this.cafe.id,
 			price:          Number(jsonItem.amount || 0),
 			name:           jsonItem.displayText,
 			calories:       Number(jsonItem.properties.calories || 0),
