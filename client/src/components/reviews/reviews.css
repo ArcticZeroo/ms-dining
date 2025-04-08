@@ -8,3 +8,7 @@
     background: var(--color-theme-turquoise);
     height: 1em;
 }
+
+a.review-location {
+    color: unset;
+}

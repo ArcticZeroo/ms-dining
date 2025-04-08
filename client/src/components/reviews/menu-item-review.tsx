@@ -16,9 +16,10 @@ import { Rating } from '@mui/material'
 interface IMenuItemReviewProps {
     review: IReview;
     showMenuItemName?: boolean;
+    showMyself?: boolean;
 }
 
-export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMenuItemName = true }) => {
+export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMenuItemName = true, showMyself = true }) => {
     const userId = useValueNotifierContext(UserIdContext);
     const { viewsById } = useContext(ApplicationContext);
     const cafeIdsOnPage = useCafeIdsOnPage();
@@ -29,6 +30,10 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMen
     }
 
     const isMe = userId === review.userId;
+
+    if (isMe && !showMyself) {
+        return null;
+    }
 
     const link = getSearchAnchorJumpUrl({
         cafeId:     review.cafeId,
@@ -54,12 +59,13 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMen
                         )
                     }
                 </span>
-                <Link to={link} className="flex">
+                <Link to={link} className="review-location">
                     {getViewName({ view, showGroupName: true })}
                 </Link>
             </div>
             <div className="flex flex-around">
                 <Rating
+                    precision={0.5}
                     value={review.rating / 2}
                     readOnly={true}
                 />

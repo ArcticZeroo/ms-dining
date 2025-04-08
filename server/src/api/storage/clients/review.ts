@@ -18,20 +18,17 @@ interface IGetReviewsForUserParams {
 
 export abstract class ReviewStorageClient {
 	public static async createReviewAsync(review: ICreateReviewItem) {
-		const nowDateString = toDateString(new Date());
-
 		return usePrismaClient(client => client.review.upsert({
 			create: {
-				menuItemId:  review.menuItemId,
-				userId:      review.userId,
-				rating:      review.rating,
-				comment:     review.comment,
-				createdDate: nowDateString
+				menuItemId: review.menuItemId,
+				userId:     review.userId,
+				rating:     review.rating,
+				comment:    review.comment,
 			},
 			update: {
-				rating:      review.rating,
-				comment:     review.comment,
-				createdDate: nowDateString
+				rating:    review.rating,
+				comment:   review.comment,
+				createdAt: new Date()
 			},
 			where:  {
 				userId_menuItemId: {
@@ -49,7 +46,7 @@ export abstract class ReviewStorageClient {
 		return usePrismaClient(client => client.review.findMany({
 			where:   { menuItemId },
 			include: {
-				user: {
+				user:     {
 					select: {
 						displayName: true
 					}
@@ -90,19 +87,6 @@ export abstract class ReviewStorageClient {
 						}
 					},
 				}
-			}
-		}));
-	}
-
-	public static async updateReviewAsync(reviewId: string, update: IUpdateReviewRequest) {
-		return usePrismaClient(client => client.review.update({
-			where: {
-				id: reviewId
-			},
-			data:  {
-				rating:      update.rating,
-				comment:     update.comment,
-				createdDate: toDateString(new Date())
 			}
 		}));
 	}

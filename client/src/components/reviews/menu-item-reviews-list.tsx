@@ -1,27 +1,17 @@
-import { IReviewDataForMenuItem } from '@msdining/common/dist/models/review';
+import { IReviewWithComment } from '@msdining/common/dist/models/review';
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { MenuItemReview } from './menu-item-review.tsx';
 
 interface IMenuItemReviewsListProps {
-    reviewData: IReviewDataForMenuItem;
+    totalCount: number;
+    reviewsWithComments: IReviewWithComment[];
 }
 
-export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ reviewData }) => {
-    const isLoggedIn = useIsLoggedIn();
-
-    if (reviewData.totalCount === 0) {
+export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ totalCount, reviewsWithComments }) => {
+    if (totalCount === 0) {
         return (
             <div className="flex flex-center flex-col">
                 <span>There are no reviews yet for this item. Be the first!</span>
-                {
-                    !isLoggedIn && (
-                        <Link to="/login" className="default-button default-container">
-                            Log in to leave a review
-                        </Link>
-                    )
-                }
             </div>
         );
     }
@@ -29,10 +19,11 @@ export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ revie
     return (
         <>
             {
-                reviewData.reviewsWithComments.map(review => (
+                reviewsWithComments.map(review => (
                     <MenuItemReview
                         key={review.id}
                         review={review}
+                        showMyself={false}
                     />
                 ))
             }

@@ -28,6 +28,7 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { Review } from '@prisma/client';
 import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/dist/models/review.js';
+import { toDateString } from '@msdining/common/dist/util/date-util.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -170,7 +171,7 @@ export const registerMenuRoutes = (parent: Router) => {
 		cafeId:          review.menuItem.cafe.id,
 		rating:          review.rating,
 		comment:         review.comment || undefined,
-		createdDate:     review.createdDate,
+		createdDate:     toDateString(review.createdAt),
 	});
 
 	router.get('/menu-items/:menuItemId/reviews',
@@ -255,7 +256,6 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	router.get('/reviews/mine',
 		requireAuthenticated,
-		memoizeResponseBodyByQueryParams(),
 		async ctx => {
 			const menuItemId = getTrimmedQueryParam(ctx, 'menuItemId');
 

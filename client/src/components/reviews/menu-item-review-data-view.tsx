@@ -4,6 +4,8 @@ import { MenuItemReviewsStats } from './menu-item-reviews-stats.tsx';
 import { MenuItemReviewsList } from './menu-item-reviews-list.tsx';
 import { IReviewDataForMenuItem } from '@msdining/common/dist/models/review.ts';
 import React, { useMemo, useState } from 'react';
+import { useIsLoggedIn } from '../../hooks/auth.ts';
+import { Link } from 'react-router-dom';
 
 interface IMenuItemReviewsDataViewProps {
     response: IReviewDataForMenuItem;
@@ -56,25 +58,39 @@ const useLocalStats = (reviewData: IReviewDataForMenuItem, localRating: number |
         },
         [reviewData, localRating]
     );
-}
+};
 
 export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = ({ response, menuItemId }) => {
+    const [localComment, setLocalComment] = useState<string>(response.myReview?.comment ?? '');
     const [localRating, setLocalRating] = useState<number>(response.myReview?.rating ?? 0);
     const [reviewId, setReviewId] = useState<string | undefined>(response.myReview?.id);
+    const isLoggedIn = useIsLoggedIn();
 
     const stats = useLocalStats(response, localRating);
 
     return (
         <div className="flex">
             <div className="flex-col">
-                <PostReviewInput
-                    menuItemId={menuItemId}
-                    existingReview={response.myReview}
-                    rating={localRating}
-                    reviewId={reviewId}
-                    onRatingChanged={setLocalRating}
-                    onReviewIdChanged={setReviewId}
-                />
+                {
+                    isLoggedIn && (
+                        <PostReviewInput
+                            menuItemId={menuItemId}
+                            comment={localComment}
+                            rating={localRating}
+                            reviewId={reviewId}
+                            onRatingChanged={setLocalRating}
+                            onCommentChanged={setLocalComment}
+                            onReviewIdChanged={setReviewId}
+                        />
+                    )
+                }
+                {
+                    !isLoggedIn && (
+                        <Link to="/login" className="default-button default-container flex flex-center">
+                            Log in to leave a review
+                        </Link>
+                    )
+                }
                 <div className="flex flex-center">
                     {(stats.overallRating / 2).toFixed(2)} ⭐
                     ({stats.totalCount} {pluralize('review', stats.totalCount)})
@@ -84,7 +100,10 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                     totalCount={stats.totalCount}
                 />
             </div>
-            <MenuItemReviewsList reviewData={response}/>
+            <MenuItemReviewsList
+                totalCount={stats.totalCount}
+                reviewsWithComments={response.reviewsWithComments}
+            />
         </div>
     );
-}
+};

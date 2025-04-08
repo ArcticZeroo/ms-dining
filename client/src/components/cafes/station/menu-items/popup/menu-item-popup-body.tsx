@@ -36,20 +36,22 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
 
     return (
         <div className="menu-item-popup-body">
-            {
-                menuItem.description && (
-                    <div className="menu-item-description">{menuItem.description}</div>
-                )
-            }
-            {
-                menuItem.imageUrl != null && (
-                    <div className="menu-item-image-container">
-                        <img src={menuItem.imageUrl} 
-                            alt="Menu item image" 
-                            className="menu-item-image"/>
-                    </div>
-                )
-            }
+            <div className="flex-col flex-center">
+                {
+                    menuItem.description && (
+                        <div className="menu-item-description">{menuItem.description}</div>
+                    )
+                }
+                {
+                    menuItem.imageUrl != null && (
+                        <div className="menu-item-image-container">
+                            <img src={menuItem.imageUrl}
+                                alt="Menu item image"
+                                className="menu-item-image"/>
+                        </div>
+                    )
+                }
+            </div>
             {
                 menuItem.modifiers.length > 0 && (
                     <div className="menu-item-configuration">
