@@ -172,6 +172,10 @@ a:visited {
     color: var(--color-almost-white);
 }
 
+.no-decoration {
+    text-decoration: none;
+}
+
 .bold {
     font-weight: bold;
 }

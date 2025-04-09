@@ -49,7 +49,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     }
 
     const link = view == null
-        ? ''
+        ? '#'
         : getSearchAnchorJumpUrl({
             cafeId:     review.cafeId,
             entityType: SearchEntityType.menuItem,
@@ -77,7 +77,8 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     };
 
     return (
-        <div className={classNames('flex-col card', isMe && 'dark-blue', stretchSelf && 'self-stretch')}>
+        <Link to={link}
+            className={classNames('flex-col card no-decoration', isMe && 'dark-blue', stretchSelf && 'self-stretch')}>
             <div className="flex">
                 <span>
                     <span className="bold">
@@ -86,25 +87,25 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                     {
                         showMenuItemName && (
                             <span>
-                            &nbsp;reviewed {review.menuItemName} @&nbsp;
+                            &nbsp;reviewed {review.menuItemName} at&nbsp;
+                            </span>
+                        )
+                    }
+                    {
+                        view == null && (
+                            <span>
+                            ...
+                            </span>
+                        )
+                    }
+                    {
+                        view != null && (
+                            <span>
+                                {getViewName({ view, showGroupName: true })}
                             </span>
                         )
                     }
                 </span>
-                {
-                    view == null && (
-                        <span>
-                            ...
-                        </span>
-                    )
-                }
-                {
-                    view != null && (
-                        <Link to={link} className="review-location">
-                            {getViewName({ view, showGroupName: true })}
-                        </Link>
-                    )
-                }
             </div>
             <div className="flex flex-around">
                 <Rating
@@ -148,6 +149,6 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                     </div>
                 )
             }
-        </div>
+        </Link>
     );
 };
