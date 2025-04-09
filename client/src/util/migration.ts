@@ -73,6 +73,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
             homeSettings: {
                 showExploreOnHome: HomeSettings.showExploreOnHome.value.toString(),
                 showMapOnHome: HomeSettings.showMapOnHome.value.toString(),
+                showRecentReviewsOnHome: HomeSettings.showRecentReviewsOnHome.value.toString()
             },
         };
 
