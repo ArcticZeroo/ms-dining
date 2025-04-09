@@ -16,11 +16,11 @@ import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter, getMaybeUserId, getTrimmedQueryParam, getUserIdOrThrow } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
+	ANALYTICS_APPLICATION_NAMES,
 	getApplicationNameForCafeMenu,
 	getApplicationNameForMenuOverview,
-	getApplicationNameForReviews
 } from '@msdining/common/dist/constants/analytics.js';
-import { sendVisitFromCafeParamMiddleware } from '../../../middleware/analytics.js';
+import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { ReviewStorageClient } from '../../../api/storage/clients/review.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
@@ -153,7 +153,7 @@ export const registerMenuRoutes = (parent: Router) => {
 	});
 
 	router.get('/menu-items/:menuItemId/reviews',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForReviews),
+		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.getReviews),
 		// todo... figure out how to memo and deal with updates.
 		async ctx => {
 			const userId = getMaybeUserId(ctx);
@@ -199,6 +199,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	router.put('/menu-items/:menuItemId/reviews',
 		requireAuthenticated,
+		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.postReview),
 		async ctx => {
 			const menuItem = await getMenuItemFromRequest(ctx);
 

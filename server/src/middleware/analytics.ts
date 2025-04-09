@@ -1,4 +1,3 @@
-import { ApplicationContext } from '../constants/context.js';
 import { sendVisitFireAndForget } from '../api/tracking/visitors.js';
 import Koa from 'koa';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
@@ -7,11 +6,11 @@ import { getTrimmedQueryParam } from '../util/koa.js';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
 
+export const getVisitorId = (ctx: Koa.Context) => ctx.get(VISITOR_ID_HEADER);
+
 export const sendVisit = (ctx: Koa.Context, applicationName: string) => {
-    if (ApplicationContext.analyticsApplicationsReady.has(applicationName)) {
-        const visitorId = ctx.get(VISITOR_ID_HEADER);
-        sendVisitFireAndForget(applicationName, visitorId || randomUUID());
-    }
+    const visitorId = getVisitorId(ctx);
+    sendVisitFireAndForget(applicationName, visitorId || randomUUID());
 }
 
 export const sendVisitMiddleware = (applicationName: string): Koa.Middleware => {

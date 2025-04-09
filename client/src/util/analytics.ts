@@ -1,9 +1,9 @@
-import { ICafe } from "../models/cafe.ts";
+import { ICafe } from '../models/cafe.ts';
 import {
     getScenarioForCafeMenu,
     getScenarioForMenuOverview,
     SCENARIO_NAMES
-} from "@msdining/common/dist/constants/analytics";
+} from '@msdining/common/dist/constants/analytics';
 
 export interface IScenario {
     label: string;
@@ -15,8 +15,8 @@ export const STATIC_SCENARIOS: IScenario[] = [
         label: 'All Traffic'
     },
     {
-        label: 'Poster QR Code',
-        scenarioName: SCENARIO_NAMES.poster
+        label: 'User Signups',
+        scenarioName: SCENARIO_NAMES.userSignup
     },
     {
         label: 'Search',
@@ -37,7 +37,19 @@ export const STATIC_SCENARIOS: IScenario[] = [
     {
         label: 'Visit History',
         scenarioName: SCENARIO_NAMES.pattern
-    }
+    },
+    {
+        label: 'Post Review',
+        scenarioName: SCENARIO_NAMES.postReview
+    },
+    {
+        label: 'Get Reviews',
+        scenarioName: SCENARIO_NAMES.getReviews
+    },
+    {
+        label: 'Poster QR Code',
+        scenarioName: SCENARIO_NAMES.poster
+    },
 ];
 
 export const getScenarios = (cafes: ICafe[]): IScenario[] => {

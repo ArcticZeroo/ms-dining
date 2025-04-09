@@ -5,6 +5,9 @@ import { IServerUser } from '../../../models/auth.js';
 import { IUpdateUserSettingsInput } from '@msdining/common/dist/models/http.js';
 import { Nullable } from '../../../models/util.js';
 import { logDebug } from '../../../util/log.js';
+import { sendVisitFireAndForget } from '../../tracking/visitors.js';
+import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
+import { randomUUID } from 'node:crypto';
 
 const ID_DELIMITER = ';';
 
@@ -16,17 +19,21 @@ interface IUpdateUserSettingsPrismaData {
 }
 
 export abstract class UserStorageClient {
-	static async createUserAsync(user: Prisma.UserCreateInput): Promise<IServerUser> {
+	static async createUserAsync(userToCreate: Prisma.UserCreateInput): Promise<IServerUser> {
 		const newUser = await usePrismaClient(async prismaClient => {
 			try {
-				return await prismaClient.user.create({ data: user });
+				const user = await prismaClient.user.create({ data: userToCreate });
+
+				sendVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.userSignup, randomUUID());
+
+				return user;
 			} catch (err) {
 				if (isUniqueConstraintFailedError(err)) {
 					return prismaClient.user.findUnique({
 						where: {
 							externalId_provider: {
-								externalId: user.externalId,
-								provider:   user.provider
+								externalId: userToCreate.externalId,
+								provider:   userToCreate.provider
 							}
 						}
 					});
