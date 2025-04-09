@@ -644,6 +644,10 @@ html, body, #root, .App {
     .menu-item-popup-body {
         flex-direction: column;
     }
+
+    .menu-item-reviews {
+        flex-direction: column;
+    }
 }
 
 /* tall screens */

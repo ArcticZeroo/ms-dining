@@ -68,7 +68,7 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
     const stats = useLocalStats(response, localRating);
 
     return (
-        <div className="flex">
+        <div className="menu-item-reviews flex">
             <div className="flex-col">
                 {
                     isLoggedIn && (
