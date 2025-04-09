@@ -70,8 +70,9 @@ export const DebugSettings = {
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;
 
 export const HomeSettings = {
-    showExploreOnHome: new BooleanSetting('showExploreOnHome', isProbablyNewUser /*defaultValue*/),
-    showMapOnHome:     new BooleanSetting('showMapOnHome', true),
+    showExploreOnHome:       new BooleanSetting('showExploreOnHome', isProbablyNewUser /*defaultValue*/),
+    showMapOnHome:           new BooleanSetting('showMapOnHome', true),
+    showRecentReviewsOnHome: new BooleanSetting('showRecentReviewsOnHome', true /*defaultValue*/),
 } as const;
 
 export const getVisitorId = () => {

@@ -15,29 +15,28 @@ import { Rating } from '@mui/material';
 import { DiningClient } from '../../api/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
-interface IMenuItemReviewBaseProps {
+interface IMenuItemReviewProps {
     review: IReview;
+    isSkeleton?: boolean;
     showMenuItemName?: boolean;
+    showMyself: boolean;
+    onDeleted?: () => void;
 }
 
-interface IMenuItemReviewNoSelfProps extends IMenuItemReviewBaseProps {
-    showMyself?: false;
-    onDeleted?: undefined;
-}
-
-interface IMenuItemReviewYesSelfProps extends IMenuItemReviewBaseProps {
-    showMyself: true;
-    onDeleted: () => void;
-}
-
-export const MenuItemReview: React.FC<IMenuItemReviewYesSelfProps | IMenuItemReviewNoSelfProps> = ({ review, showMenuItemName = true, showMyself = false, onDeleted = () => {} }) => {
+export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
+    review,
+    showMenuItemName = true,
+    showMyself = false,
+    onDeleted,
+    isSkeleton = false
+}) => {
     const userId = useValueNotifierContext(UserIdContext);
     const { viewsById } = useContext(ApplicationContext);
     const cafeIdsOnPage = useCafeIdsOnPage();
     const view = viewsById.get(review.cafeId);
     const [deleteStage, setDeleteStage] = useState(PromiseStage.notRun);
 
-    if (view == null) {
+    if (!isSkeleton && view == null) {
         return null;
     }
 
@@ -47,17 +46,19 @@ export const MenuItemReview: React.FC<IMenuItemReviewYesSelfProps | IMenuItemRev
         return null;
     }
 
-    const link = getSearchAnchorJumpUrl({
-        cafeId:     review.cafeId,
-        entityType: SearchEntityType.menuItem,
-        name:       normalizeName(review.menuItemName),
-        view,
-        cafeIdsOnPage,
-        date:       new Date()
-    });
+    const link = view == null
+        ? ''
+        : getSearchAnchorJumpUrl({
+            cafeId:     review.cafeId,
+            entityType: SearchEntityType.menuItem,
+            name:       normalizeName(review.menuItemName),
+            view,
+            cafeIdsOnPage,
+            date:       new Date()
+        });
 
     const onDeleteClicked = () => {
-        if (deleteStage === PromiseStage.running) {
+        if (onDeleted == null || deleteStage === PromiseStage.running) {
             return;
         }
 
@@ -71,7 +72,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewYesSelfProps | IMenuItemRev
                 console.log('failed to delete:', err);
                 setDeleteStage(PromiseStage.error);
             });
-    }
+    };
 
     return (
         <div className={classNames('flex-col card', isMe && 'dark-blue')}>
@@ -88,9 +89,20 @@ export const MenuItemReview: React.FC<IMenuItemReviewYesSelfProps | IMenuItemRev
                         )
                     }
                 </span>
-                <Link to={link} className="review-location">
-                    {getViewName({ view, showGroupName: true })}
-                </Link>
+                {
+                    view == null && (
+                        <span>
+                            ...
+                        </span>
+                    )
+                }
+                {
+                    view != null && (
+                        <Link to={link} className="review-location">
+                            {getViewName({ view, showGroupName: true })}
+                        </Link>
+                    )
+                }
             </div>
             <div className="flex flex-around">
                 <Rating
@@ -117,16 +129,20 @@ export const MenuItemReview: React.FC<IMenuItemReviewYesSelfProps | IMenuItemRev
             {
                 isMe && (
                     <div>
-                        <button
-                            className="default-button default-container icon-container"
-                            onClick={onDeleteClicked}
-                            title="Delete this review"
-                            disabled={deleteStage === PromiseStage.running}
-                        >
-                            <span className="material-symbols-outlined">
-                                delete
-                            </span>
-                        </button>
+                        {
+                            onDeleted && (
+                                <button
+                                    className="default-button default-container icon-container"
+                                    onClick={onDeleteClicked}
+                                    title="Delete this review"
+                                    disabled={deleteStage === PromiseStage.running}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        delete
+                                    </span>
+                                </button>
+                            )
+                        }
                     </div>
                 )
             }

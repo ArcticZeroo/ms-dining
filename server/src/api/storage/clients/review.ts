@@ -16,6 +16,24 @@ interface IGetReviewsForUserParams {
 	menuItemId?: string;
 }
 
+const GET_REVIEW_INCLUDES = {
+	user:     {
+		select: {
+			displayName: true
+		}
+	},
+	menuItem: {
+		select: {
+			name: true,
+			cafe: {
+				select: {
+					id: true
+				}
+			}
+		},
+	}
+};
+
 export abstract class ReviewStorageClient {
 	public static async createReviewAsync(review: ICreateReviewItem) {
 		return usePrismaClient(client => client.review.upsert({
@@ -45,23 +63,7 @@ export abstract class ReviewStorageClient {
 	public static async getReviewsForMenuItemAsync(menuItemId: string) {
 		return usePrismaClient(client => client.review.findMany({
 			where:   { menuItemId },
-			include: {
-				user:     {
-					select: {
-						displayName: true
-					}
-				},
-				menuItem: {
-					select: {
-						name: true,
-						cafe: {
-							select: {
-								id: true
-							}
-						}
-					},
-				}
-			}
+			include: GET_REVIEW_INCLUDES
 		}));
 	}
 
@@ -71,23 +73,7 @@ export abstract class ReviewStorageClient {
 				userId,
 				menuItemId
 			},
-			include: {
-				user:     {
-					select: {
-						displayName: true
-					}
-				},
-				menuItem: {
-					select: {
-						name: true,
-						cafe: {
-							select: {
-								id: true
-							}
-						}
-					},
-				}
-			}
+			include: GET_REVIEW_INCLUDES
 		}));
 	}
 
@@ -111,5 +97,16 @@ export abstract class ReviewStorageClient {
 		}));
 
 		return review != null;
+	}
+
+	public static async getRecentReviews(count: number) {
+		return usePrismaClient(client => client.review.findMany({
+			orderBy: {
+				createdAt: 'desc'
+			},
+			distinct: ['menuItemId'],
+			include: GET_REVIEW_INCLUDES,
+			take: count
+		}));
 	}
 }

@@ -442,4 +442,16 @@ export abstract class DiningClient {
             }
         });
     }
+
+    public static async getRecentReviews(): Promise<Array<IReview>> {
+        const response = await makeJsonRequest({
+            path: '/api/dining/menu/reviews/recent'
+        });
+
+        if (!isDuckTypeArray<IReview>(response, { id: 'string', menuItemId: 'string', menuItemName: 'string' })) {
+            throw new Error('Invalid format');
+        }
+
+        return response;
+    }
 }

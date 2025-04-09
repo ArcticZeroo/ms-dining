@@ -4,7 +4,7 @@ import { MenuItemReviewsList } from './menu-item-reviews-list.tsx';
 import { IReviewDataForMenuItem } from '@msdining/common/dist/models/review.ts';
 import React, { useMemo, useState } from 'react';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
-import { Link } from 'react-router-dom';
+import { LogInForReviewButton } from './log-in-for-review-button.tsx';
 
 interface IMenuItemReviewsDataViewProps {
     response: IReviewDataForMenuItem;
@@ -83,13 +83,7 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                         />
                     )
                 }
-                {
-                    !isLoggedIn && (
-                        <Link to="/login" className="default-button default-container flex flex-center">
-                            Log in to leave a review
-                        </Link>
-                    )
-                }
+                <LogInForReviewButton/>
                 <ReviewStats
                     counts={stats.counts}
                     totalCount={stats.totalCount}

@@ -33,6 +33,11 @@ export const HomepageSettings: React.FC<IHomepageSettingsProps> = ({ requireButt
                 description="When enabled, the home page will show suggested searches for food on campus."
                 setting={HomeSettings.showExploreOnHome}/>
             <BooleanSettingInput
+                icon="comment"
+                name="Show Recent Reviews on Homepage"
+                description="When enabled, the home page will show some of the most recent reviews left for menu items."
+                setting={HomeSettings.showRecentReviewsOnHome}/>
+            <BooleanSettingInput
                 icon="map"
                 name="Show Map on Homepage"
                 description="When enabled, the home page will show a map that lets you view nearby cafes and their traveling stations."

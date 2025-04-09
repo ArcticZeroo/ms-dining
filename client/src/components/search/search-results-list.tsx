@@ -50,7 +50,7 @@ const getClassForViewMode = (viewMode: SearchResultsViewMode) => {
     }
 
     if (viewMode === SearchResultsViewMode.horizontalScroll) {
-        return 'flex search-results-horizontal';
+        return 'flex horizontal-scroll';
     }
 }
 

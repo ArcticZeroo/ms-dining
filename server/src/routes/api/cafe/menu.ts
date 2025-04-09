@@ -28,6 +28,7 @@ import { requireAuthenticated } from '../../../middleware/auth.js';
 import { Review } from '@prisma/client';
 import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/dist/models/review.js';
 import { toDateString } from '@msdining/common/dist/util/date-util.js';
+import Duration from '@arcticzeroo/duration';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -249,6 +250,13 @@ export const registerMenuRoutes = (parent: Router) => {
 				menuItemId
 			});
 
+			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
+		});
+
+	router.get('/reviews/recent',
+		memoizeResponseBodyByQueryParams(new Duration({ minutes: 1 })),
+		async ctx => {
+			const reviews = await ReviewStorageClient.getRecentReviews(10);
 			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
 		});
 

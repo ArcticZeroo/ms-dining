@@ -40,10 +40,13 @@ export const LoginPage = () => {
                 <div>
                     <ul>
                         <li>
-                            Sync settings like your favorites across devices
+                            Sync settings like your favorites and homepage views across devices
                         </li>
                         <li>
                             Save reviews for menu items
+                        </li>
+                        <li>
+                            ...eventually in the future, reviews will be used for recommendations 🙂
                         </li>
                     </ul>
                 </div>

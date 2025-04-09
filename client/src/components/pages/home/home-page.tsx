@@ -11,6 +11,7 @@ import { HomeWelcomeMessage } from './home-welcome-message.tsx';
 
 import './home.css';
 import { usePageData } from '../../../hooks/location.ts';
+import { HomeRecentReviews } from './reviews/home-recent-reviews.tsx';
 
 const useShouldShowWelcomeMessage = () => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
@@ -38,6 +39,7 @@ export const HomePage = () => {
             <HomeFavorites/>
             <HomeMap/>
             <HomeExplore/>
+            <HomeRecentReviews/>
             <HomeViews/>
             <HomepageSettings requireButtonToCommitHomepageViews={true}/>
             <MoreSettingsButton/>

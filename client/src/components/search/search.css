@@ -25,7 +25,7 @@
     z-index: var(--z-index-above-content);
 }
 
-.search-results-horizontal {
+.horizontal-scroll {
     overflow-x: auto;
     scrollbar-gutter: stable;
     padding-bottom: var(--constant-padding);
