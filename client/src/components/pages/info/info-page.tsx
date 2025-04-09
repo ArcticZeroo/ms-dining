@@ -21,6 +21,9 @@ export const InfoPage = () => {
                     All data is sourced from the buy-ondemand.com websites, which have no authentication and
                     do not require any Microsoft credentials (they can be accessed by guests from any device on any network).
                     There is no Microsoft-internal data being exposed by this website.
+                    <br/>
+                    Users can optionally sign in, but a microsoft.com account is not required to use this site. Further,
+                    email addresses are not intentionally stored (see below).
                 </div>
             </div>
             <div className="card">
@@ -40,15 +43,42 @@ export const InfoPage = () => {
                 <div className="title">
                     Privacy Information
                 </div>
-                <div className="body">
-                    Google analytics is used in this application only for tracking pageview counts.
-                    <br/>
-                    A randomly-generated user id is also used for custom pageview tracking. Source code for the pageview
-                    tracking is available <a href="https://github.com/arcticzeroo/frozor-analytics" target="_blank">here
-                    on GitHub</a>.
-                    <br/>
-                    Search query strings are cached as vector embeddings in order to speed up similar searches in the future.
-                </div>
+                <article className="body flex-col">
+                    <section>
+                        <div className="bold">
+                            Analytics/User Tracking
+                        </div>
+                        <div>
+                            Google analytics is used in this application only for tracking pageview counts.
+                            <br/>
+                            A randomly-generated user id is also used for custom pageview tracking. Source code for the
+                            pageview
+                            tracking is available <a href="https://github.com/arcticzeroo/frozor-analytics"
+                                target="_blank">here
+                            on GitHub</a>.
+                        </div>
+                    </section>
+                    <section>
+                        <div className="bold">
+                            User Data
+                        </div>
+                        <ul>
+                            <li>
+                                When you search, your query is stored as a vector embedding in order to speed up similar searches in the future.
+                                There might eventually be a feature to show suggested search queries, which will use these embeddings and may show users your exact query.
+                                Please don't type anything sensitive into the search query box.
+                            </li>
+                            <li>
+                                Reviews (number ratings and textual comments) are stored and shown to other users. You can delete them at any time.
+                            </li>
+                            <li>
+                                When you sign in, your 3rd-party user id is stored alongside your display name from that 3rd-party service.
+                                You can change your display name at any time on your profile page.
+                                Please don't put anything inappropriate as your display name. Emoji is ok.
+                            </li>
+                        </ul>
+                    </section>
+                </article>
             </div>
             {
                 isTrackingEnabled && (

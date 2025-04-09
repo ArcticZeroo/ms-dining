@@ -4,7 +4,7 @@ import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { MenuItemReview } from '../../reviews/menu-item-review.tsx';
 import { IReview } from '@msdining/common/dist/models/review';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ReviewStats } from '../../reviews/review-stats.tsx';
 
 interface IReviewStats {
@@ -49,21 +49,26 @@ const useReviewStats = (reviews: Array<IReview> | undefined): IReviewStats => {
 }
 
 export const ProfileReviews = () => {
-    const reviews = useImmediatePromiseState(DiningClient.retrieveMyReviews);
-    const stats = useReviewStats(reviews.value);
+    const response = useImmediatePromiseState(DiningClient.retrieveMyReviews);
+    const stats = useReviewStats(response.value);
+    const [reviews, setReviews] = useState<Array<IReview> | undefined>();
 
-    if (reviews.stage === PromiseStage.error) {
+    useEffect(() => {
+        setReviews(response.value);
+    }, [response.value]);
+
+    if (response.stage === PromiseStage.error) {
         return (
             <div className="card error">
                 <span>
                     Unable to load your reviews!
                 </span>
-                <RetryButton onClick={reviews.run}/>
+                <RetryButton onClick={response.run}/>
             </div>
         );
     }
 
-    if (reviews.value == null) {
+    if (reviews == null) {
         return (
             <div className="card">
                 <span>
@@ -74,20 +79,24 @@ export const ProfileReviews = () => {
         );
     }
 
+    const onReviewDeleted = (id: string) => {
+        setReviews(reviews.filter(review => review.id !== id));
+    }
+
     return (
         <div className="card">
             <div className="title">
                 Your Reviews
             </div>
             {
-                reviews.value.length === 0 && (
+                reviews.length === 0 && (
                     <div>
                         You haven't left any reviews yet. Click on any menu item to leave a review.
                     </div>
                 )
             }
             {
-                reviews.value.length > 0 && (
+                reviews.length > 0 && (
                     <ReviewStats
                         overallRating={stats.overallRating}
                         totalCount={stats.totalCount}
@@ -96,13 +105,16 @@ export const ProfileReviews = () => {
                 )
             }
             {
-                reviews.value.length > 0 && (
+                reviews.length > 0 && (
                     <div className="flex-col">
                         {
-                            reviews.value.map(review => (
+                            reviews.map(review => (
                                 <MenuItemReview
                                     key={review.id}
-                                    review={review}/>
+                                    review={review}
+                                    showMyself={true}
+                                    onDeleted={() => onReviewDeleted(review.id)}
+                                />
                             ))
                         }
                     </div>

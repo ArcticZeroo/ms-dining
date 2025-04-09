@@ -23,7 +23,6 @@ export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ total
                     <MenuItemReview
                         key={review.id}
                         review={review}
-                        showMyself={false}
                     />
                 ))
             }

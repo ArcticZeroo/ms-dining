@@ -1,5 +1,5 @@
 import { IReview } from '@msdining/common/dist/models/review';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
@@ -11,19 +11,31 @@ import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
 import { fromDateString } from '@msdining/common/dist/util/date-util';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeName } from '../../util/string.ts';
-import { Rating } from '@mui/material'
+import { Rating } from '@mui/material';
+import { DiningClient } from '../../api/dining.ts';
+import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
-interface IMenuItemReviewProps {
+interface IMenuItemReviewBaseProps {
     review: IReview;
     showMenuItemName?: boolean;
-    showMyself?: boolean;
 }
 
-export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMenuItemName = true, showMyself = true }) => {
+interface IMenuItemReviewNoSelfProps extends IMenuItemReviewBaseProps {
+    showMyself?: false;
+    onDeleted?: undefined;
+}
+
+interface IMenuItemReviewYesSelfProps extends IMenuItemReviewBaseProps {
+    showMyself: true;
+    onDeleted: () => void;
+}
+
+export const MenuItemReview: React.FC<IMenuItemReviewYesSelfProps | IMenuItemReviewNoSelfProps> = ({ review, showMenuItemName = true, showMyself = false, onDeleted = () => {} }) => {
     const userId = useValueNotifierContext(UserIdContext);
     const { viewsById } = useContext(ApplicationContext);
     const cafeIdsOnPage = useCafeIdsOnPage();
     const view = viewsById.get(review.cafeId);
+    const [deleteStage, setDeleteStage] = useState(PromiseStage.notRun);
 
     if (view == null) {
         return null;
@@ -44,8 +56,25 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMen
         date:       new Date()
     });
 
+    const onDeleteClicked = () => {
+        if (deleteStage === PromiseStage.running) {
+            return;
+        }
+
+        setDeleteStage(PromiseStage.running);
+        DiningClient.deleteReview(review.id)
+            .then(() => {
+                setDeleteStage(PromiseStage.success);
+                onDeleted();
+            })
+            .catch(err => {
+                console.log('failed to delete:', err);
+                setDeleteStage(PromiseStage.error);
+            });
+    }
+
     return (
-        <div className={classNames('flex-col card', isMe && 'blue')}>
+        <div className={classNames('flex-col card', isMe && 'dark-blue')}>
             <div className="flex">
                 <span>
                     <span className="bold">
@@ -82,6 +111,22 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({ review, showMen
                         <span>
                             {review.comment}
                         </span>
+                    </div>
+                )
+            }
+            {
+                isMe && (
+                    <div>
+                        <button
+                            className="default-button default-container icon-container"
+                            onClick={onDeleteClicked}
+                            title="Delete this review"
+                            disabled={deleteStage === PromiseStage.running}
+                        >
+                            <span className="material-symbols-outlined">
+                                delete
+                            </span>
+                        </button>
                     </div>
                 )
             }
