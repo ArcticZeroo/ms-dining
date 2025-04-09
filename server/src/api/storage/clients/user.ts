@@ -4,6 +4,7 @@ import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { IServerUser } from '../../../models/auth.js';
 import { IUpdateUserSettingsInput } from '@msdining/common/dist/models/http.js';
 import { Nullable } from '../../../models/util.js';
+import { logDebug } from '../../../util/log.js';
 
 const ID_DELIMITER = ';';
 
@@ -134,16 +135,24 @@ export abstract class UserStorageClient {
 			data.homepageIds = UserStorageClient._serializeSetting(homepageIds);
 		}
 
-		await usePrismaClient(prismaClient => prismaClient.user.updateMany({
-			where: {
-				id,
-				// If another request with a more recent timestamp beat this one,
-				// then we want to ignore this update entirely.
-				lastSettingsUpdate: {
-					lt: new Date(timestamp)
-				}
-			},
-			data
-		}));
+		await usePrismaClient(async prismaClient => {
+			const user = await prismaClient.user.findUnique({ where: { id }, select: { lastSettingsUpdate: true } });
+
+			if (user == null) {
+				throw new Error('User not found');
+			}
+
+			if (user.lastSettingsUpdate != null && user.lastSettingsUpdate.getTime() >= timestamp) {
+				logDebug('Skipping settings update because server settings are newer');
+				return;
+			}
+
+			await prismaClient.user.update({
+				where: { id },
+				data
+			});
+
+			logDebug('Updated user settings!');
+		});
 	}
 }

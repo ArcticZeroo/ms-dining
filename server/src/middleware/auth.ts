@@ -8,3 +8,12 @@ export const requireAuthenticated: Koa.Middleware = async (ctx, next) => {
 
 	await next();
 }
+
+export const requireNotAuthenticated: Koa.Middleware = async (ctx, next) => {
+	if (ctx.isAuthenticated()) {
+		ctx.redirect('/');
+		return;
+	}
+
+	return next();
+}

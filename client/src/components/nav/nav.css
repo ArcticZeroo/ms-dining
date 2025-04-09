@@ -133,11 +133,6 @@ nav form {
     display: inline;
 }
 
-#site-header span {
-    padding-bottom: var(--default-padding);
-    transition: padding 0.5s ease;
-}
-
 nav.expanded .expandable-nav-list.nav-numbered-cafe-list {
     display: flex;
     flex-wrap: wrap;

@@ -5,7 +5,7 @@ import { hasAuthEnvironmentVariables } from '../../constants/env.js';
 import { logInfo } from '../../util/log.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { UserStorageClient } from '../../api/storage/clients/user.js';
-import { requireAuthenticated } from '../../middleware/auth.js';
+import { requireAuthenticated, requireNotAuthenticated } from '../../middleware/auth.js';
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUserDTO } from '@msdining/common/dist/models/auth.js';
 import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategies.js';
 import { isUpdateUserSettingsInput } from '../../util/typeguard.js';
@@ -36,28 +36,36 @@ export const registerAuthRoutes = (parent: Router) => {
 	passport.use(getMicrosoftStrategy());
 	passport.use(getGoogleStrategy());
 
-	router.get('/microsoft/login', passport.authenticate('microsoft', {
-		prompt:          'select_account',
-		failureRedirect: '/login'
-	}));
+	// In my personal testing, I found that the PWA being installed on the phone means that we double-complete the
+	// auth callback sometimes, which leads to an internal passport error which for some reason doesn't redirect
+	// to a failure page. Instead, I think it should help to just check if we're already authed before asking passport
+	// to do the auth step.
+	router.get('/microsoft/login',
+		requireNotAuthenticated,
+		passport.authenticate('microsoft', {
+			prompt:          'select_account',
+			failureRedirect: '/login'
+		}));
 
-	router.get('/google/login', passport.authenticate('google', {
-		failureRedirect: '/login'
-	}));
+	router.get('/google/login',
+		requireNotAuthenticated,
+		passport.authenticate('google', {
+			failureRedirect: '/login'
+		}));
 
 	router.get('/microsoft/callback',
-		passport.authenticate('microsoft', { failureRedirect: '/login' }),
-		async ctx => {
-			// Successful authentication, redirect home.
-			ctx.redirect('/');
-		});
+		requireNotAuthenticated,
+		passport.authenticate('microsoft', {
+			failureRedirect: '/login',
+			successRedirect: '/'
+		}));
 
 	router.get('/google/callback',
-		passport.authenticate('google', { failureRedirect: '/login' }),
-		async ctx => {
-			// Successful authentication, redirect home.
-			ctx.redirect('/');
-		});
+		requireNotAuthenticated,
+		passport.authenticate('google', {
+			failureRedirect: '/login',
+			successRedirect: '/'
+		}));
 
 	router.get('/me', requireAuthenticated, async ctx => {
 		const user = await getUserOrThrowAsync(ctx);

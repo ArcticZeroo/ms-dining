@@ -77,6 +77,7 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                             comment={localComment}
                             rating={localRating}
                             reviewId={reviewId}
+                            reviewPostedDate={response.myReview?.createdDate}
                             onRatingChanged={setLocalRating}
                             onCommentChanged={setLocalComment}
                             onReviewIdChanged={setReviewId}

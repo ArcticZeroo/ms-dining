@@ -21,6 +21,7 @@ interface IMenuItemReviewProps {
     showMenuItemName?: boolean;
     showMyself: boolean;
     onDeleted?: () => void;
+    stretchSelf?: boolean;
 }
 
 export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
@@ -28,7 +29,8 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     showMenuItemName = true,
     showMyself = false,
     onDeleted,
-    isSkeleton = false
+    isSkeleton = false,
+    stretchSelf = false
 }) => {
     const userId = useValueNotifierContext(UserIdContext);
     const { viewsById } = useContext(ApplicationContext);
@@ -75,7 +77,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     };
 
     return (
-        <div className={classNames('flex-col card', isMe && 'dark-blue')}>
+        <div className={classNames('flex-col card', isMe && 'dark-blue', stretchSelf && 'self-stretch')}>
             <div className="flex">
                 <span>
                     <span className="bold">

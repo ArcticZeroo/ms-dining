@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
-import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { getViewMenuUrlDirect } from '../../util/link.ts';
 import { classNames } from '../../util/react.ts';
+import { NavClosingLink } from '../button/nav-closing-link.tsx';
 
 interface INavViewLinkProps {
     view: CafeView;
@@ -64,9 +65,9 @@ export const NavViewLink: React.FC<INavViewLinkProps> = ({ view, className }) =>
 
     return (
         <li key={view.value.id} className="cafe" title={`Menu for ${view.value.name}`} onClick={onClick}>
-            <NavLink to={getViewMenuUrlDirect(view)} className={classNames(isActive && 'active', className)}>
+            <NavClosingLink to={getViewMenuUrlDirect(view)} className={classNames(isActive && 'active', className)}>
                 {displayValue}
-            </NavLink>
+            </NavClosingLink>
         </li>
     );
 };

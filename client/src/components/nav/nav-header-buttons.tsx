@@ -1,27 +1,26 @@
-import { NavLink } from 'react-router-dom';
 import { SearchBar } from '../search/search-bar.tsx';
-import { AuthInfo } from '../auth/auth-info.tsx';
+import { SiteHeader } from '../auth/site-header.tsx';
+import { NavClosingLink } from '../button/nav-closing-link.tsx';
 
 export const NavListHeaderItems = () => {
     return (
         <>
-            <div id="site-header">
+            <SiteHeader>
                 <img src={'/penguin.svg'} alt="Site Icon"/>
-                <AuthInfo/>
-            </div>
+            </SiteHeader>
             <li>
-                <NavLink to="/settings" className="link-button settings">
+                <NavClosingLink to="/settings" className="link-button settings">
                     <span className="material-symbols-outlined">
                         settings
                     </span>
-                </NavLink>
+                </NavClosingLink>
             </li>
             <li>
-                <NavLink to="/" className="link-button home">
+                <NavClosingLink to="/" className="link-button home">
                     <span className="material-symbols-outlined">
                         home
                     </span>
-                </NavLink>
+                </NavClosingLink>
             </li>
             <SearchBar/>
         </>

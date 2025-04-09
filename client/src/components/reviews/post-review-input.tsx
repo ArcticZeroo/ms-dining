@@ -3,12 +3,14 @@ import { Rating } from '@mui/material';
 import { DiningClient } from '../../api/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/dist/models/http';
+import { fromDateString } from '@msdining/common/dist/util/date-util';
 
 interface IPostReviewInputProps {
     menuItemId: string;
     rating: number;
     comment: string;
     reviewId: string | undefined;
+    reviewPostedDate?: string;
 
     onRatingChanged(rating: number): void;
 
@@ -22,6 +24,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     comment,
     rating,
     reviewId,
+    reviewPostedDate,
     onRatingChanged,
     onReviewIdChanged,
     onCommentChanged
@@ -122,21 +125,15 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     return (
         <div className="flex-col align-center default-container bg-raised-4">
             <div className="flex">
-                {/*{*/}
-                {/*    existingReview && ('Your review')*/}
-                {/*}*/}
-                {/*{*/}
-                {/*    !existingReview && ('Leave a review! Comments are optional.')*/}
-                {/*}*/}
-                {/*{*/}
-                {/*    existingReview && (*/}
-                {/*        <span className="subtitle">*/}
-                {/*            Posted {fromDateString(existingReview.createdDate).toLocaleDateString()}*/}
-                {/*        </span>*/}
-                {/*    )*/}
-                {/*}*/}
                 Leave a review! Comments are optional.
             </div>
+            {
+                reviewPostedDate && (
+                    <div className="subtitle">
+                        Posted on {fromDateString(reviewPostedDate).toLocaleDateString()}
+                    </div>
+                )
+            }
             <Rating
                 name="review-rating"
                 value={stars}
@@ -152,6 +149,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 placeholder="Comments (optional)"
                 value={comment}
                 onChange={onCommentInputChanged}
+                rows={5}
             />
             <div className="flex">
                 <button

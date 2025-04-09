@@ -27,6 +27,7 @@ export const HomeRecentReviewsView = () => {
                             key={review.id}
                             review={review}
                             showMyself={true}
+                            stretchSelf={true}
                         />
                     ))
                 }

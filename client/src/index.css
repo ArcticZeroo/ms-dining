@@ -619,6 +619,11 @@ html, body, #root, .App {
         --default-padding: 0.5rem;
         --cafe-logo-height: 2rem;
     }
+
+    .menu-item-popup-body {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
 /* narrow screens (phone) */
@@ -643,6 +648,9 @@ html, body, #root, .App {
 
     .menu-item-popup-body {
         flex-direction: column;
+        flex-wrap: nowrap;
+        overflow-y: scroll;
+        scrollbar-gutter: stable;
     }
 
     .menu-item-reviews {
