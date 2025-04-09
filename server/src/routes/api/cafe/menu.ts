@@ -2,7 +2,6 @@ import Router from '@koa/router';
 import { IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import {
 	ICreateReviewRequest,
-	IUpdateReviewRequest,
 	MenuResponse,
 	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/dist/models/http.js';
@@ -122,28 +121,6 @@ export const registerMenuRoutes = (parent: Router) => {
 
 		return onReady(cafe, dateString);
 	};
-
-	router.get('/:id',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		memoizeResponseBodyByQueryParams(),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
-
-			let uniquenessData: Map<string, IStationUniquenessData> | null = null;
-			if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
-				uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(cafe.id, dateString);
-			}
-
-			ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
-		}));
-
-	router.get('/:id/overview',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-		memoizeResponseBodyByQueryParams(),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
-			ctx.body = jsonStringifyWithoutNull(overviewStations);
-		}));
 
 	const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
 		const menuItemId = ctx.params.menuItemId;
@@ -295,6 +272,34 @@ export const registerMenuRoutes = (parent: Router) => {
 			await ReviewStorageClient.deleteReviewAsync(reviewId);
 			ctx.status = 204;
 		});
+
+	router.get('/search-ideas',
+		memoizeResponseBodyByQueryParams(),
+		async ctx => {
+			ctx.body = MenuItemStorageClient.topSearchTags;
+		});
+
+	router.get('/:id',
+		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+		memoizeResponseBodyByQueryParams(),
+		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+			const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
+
+			let uniquenessData: Map<string, IStationUniquenessData> | null = null;
+			if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
+				uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(cafe.id, dateString);
+			}
+
+			ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
+		}));
+
+	router.get('/:id/overview',
+		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
+		memoizeResponseBodyByQueryParams(),
+		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+			const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
+			ctx.body = jsonStringifyWithoutNull(overviewStations);
+		}));
 
 	attachRouter(parent, router);
 };

@@ -14,11 +14,25 @@ import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
 import { retrieveThumbnailData } from '../../../worker/client/thumbnail.js';
 
+const TOP_SEARCH_TAGS_COUNT = 50;
+
 export abstract class MenuItemStorageClient {
 	private static readonly _menuItemsById = new Map<string, IMenuItem>();
+	private static readonly _menuIdsBySearchTag = new Map<string, Set<string>>();
+	private static _topSearchTags: string[] | undefined;
 
-	public static resetCache() {
-		this._menuItemsById.clear();
+	static get topSearchTags(): string[] {
+		if (this._topSearchTags == null) {
+			const entries = Array.from(this._menuIdsBySearchTag.entries());
+
+			entries.sort(([, idsA], [, idsB]) => {
+				return idsB.size - idsA.size;
+			});
+
+			this._topSearchTags = entries.slice(0, TOP_SEARCH_TAGS_COUNT).map(([tag]) => tag);
+		}
+
+		return this._topSearchTags;
 	}
 
 	private static _doesExistingModifierMatchServer(existingModifier: MenuItemModifier, existingChoices: MenuItemModifierChoice[], serverModifier: IMenuItemModifier): boolean {
@@ -232,8 +246,8 @@ export abstract class MenuItemStorageClient {
 
 		await MenuItemStorageClient._doSaveMenuItemAsync(menuItem, allowUpdateIfExisting);
 
-		// Require the operation to succeed before adding to cache
-		this._menuItemsById.set(menuItem.id, menuItem);
+		// Require the save operation to succeed before adding to cache
+		this._saveMenuItemIntoCache(menuItem);
 	}
 
 	public static async saveMenuItemSearchTagsAsync(menuItemId: string, searchTags: Set<string>): Promise<void> {
@@ -345,6 +359,17 @@ export abstract class MenuItemStorageClient {
 		};
 	}
 
+	private static _saveMenuItemIntoCache(menuItem: IMenuItem) {
+		this._menuItemsById.set(menuItem.id, menuItem);
+		for (const searchTag of menuItem.searchTags) {
+			const menuItemIds = this._menuIdsBySearchTag.get(searchTag) ?? new Set<string>();
+			menuItemIds.add(menuItem.id);
+			this._menuIdsBySearchTag.set(searchTag, menuItemIds);
+		}
+		// we added new tags, just reset and recompute next time
+		this._topSearchTags = undefined;
+	}
+
 	public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
 		if (!this._menuItemsById.has(id)) {
 			const menuItem = await this._doRetrieveMenuItemAsync(id);
@@ -353,7 +378,7 @@ export abstract class MenuItemStorageClient {
 				return null;
 			}
 
-			this._menuItemsById.set(id, menuItem);
+			this._saveMenuItemIntoCache(menuItem);
 		}
 
 		return this._menuItemsById.get(id)!;
