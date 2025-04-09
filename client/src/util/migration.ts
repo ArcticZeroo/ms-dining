@@ -32,7 +32,8 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 nameOnCard: InternalSettings.nameOnCard.value,
                 postalCode: InternalSettings.postalCode.value,
                 cart: JSON.stringify(InternalSettings.cart.value),
-                hasMigratedToDiningSite: 'true'
+                hasMigratedToDiningSite: 'true',
+                lastRoamingSettingsUpdateTime: '',
             },
             applicationSettings: {
                 shouldUseGroups: ApplicationSettings.shouldUseGroups.value.toString(),
@@ -42,6 +43,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 showCalories: ApplicationSettings.showCalories.value.toString(),
                 showDescriptions: ApplicationSettings.showDescriptions.value.toString(),
                 showTags: ApplicationSettings.showTags.value.toString(),
+                showReviews: ApplicationSettings.showReviews.value.toString(),
                 showSearchTags: ApplicationSettings.showSearchTags.value.toString(),
                 showFavoritesOnHome: ApplicationSettings.showFavoritesOnHome.value.toString(),
                 showPriceInSearch: ApplicationSettings.showPriceInSearch.value.toString(),
