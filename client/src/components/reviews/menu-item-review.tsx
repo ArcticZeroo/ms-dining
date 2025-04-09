@@ -59,7 +59,10 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
             date:       new Date()
         });
 
-    const onDeleteClicked = () => {
+    const onDeleteClicked = (event: React.MouseEvent) => {
+        // we're inside a link; don't use the link when we click here
+        event.preventDefault();
+
         if (onDeleted == null || deleteStage === PromiseStage.running) {
             return;
         }

@@ -122,6 +122,13 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         postReview({ rating, comment });
     };
 
+    const onCommentInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (canSaveComment && event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            onSaveClicked();
+        }
+    }
+
     return (
         <div className="flex-col align-center default-container bg-raised-4">
             <div className="flex">
@@ -149,6 +156,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 placeholder="Comments (optional)"
                 value={comment}
                 onChange={onCommentInputChanged}
+                onKeyDown={onCommentInputKeyDown}
                 rows={5}
             />
             <div className="flex">

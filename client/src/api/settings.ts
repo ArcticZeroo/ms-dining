@@ -129,10 +129,13 @@ interface IRoamingData {
 
 export class StringSetSetting extends Setting<Set<string>> {
     private _roamingStage: PromiseStage = PromiseStage.notRun;
+    public readonly isRoamingEnabled: boolean;
 
     constructor(name: string, roamingData?: IRoamingData) {
         const initialValue = new Set(getStringArraySetting(name));
         super(name, initialValue);
+
+        this.isRoamingEnabled = roamingData != null;
 
         if (roamingData != null) {
             this.addListener(value => {

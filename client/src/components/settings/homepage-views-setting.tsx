@@ -81,6 +81,9 @@ export const HomepageViewsSetting: React.FC<IHomepageViewsSettingProps> = ({ req
                 <div className="setting-description">
 					Select the views that you want to appear on the homepage.
                 </div>
+                <div className="subtitle">
+                    This setting is synced to the server if you are logged in.
+                </div>
             </div>
             {chipsElement}
             {
