@@ -1,3 +1,4 @@
+import Duration from '@arcticzeroo/duration';
 import Koa from 'koa';
 import json from 'koa-json';
 import { registerRoutes } from './routes/register.js';
@@ -19,7 +20,12 @@ const app = new Koa();
 
 if (hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
 	app.keys = [getSessionSecret()];
-	app.use(session({}, app));
+	app.use(session({
+		// Monday - Friday
+		maxAge: new Duration({ days: 5 }).inMilliseconds,
+		rolling: true,
+		renew: true
+	}, app));
 }
 
 app.use(passport.initialize());

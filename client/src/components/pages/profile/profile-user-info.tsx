@@ -1,12 +1,12 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { RetryButton } from '../../button/retry-button.tsx';
-import { AuthProviderBadge } from '../../auth/auth-provider-badge.tsx';
-import { DisplayNameControl } from './display-name-control.tsx';
 import { DiningClient } from '../../../api/dining.ts';
+import { AuthProviderBadge } from '../../auth/auth-provider-badge.tsx';
+import { AuthenticatedFailureCard } from '../../card/authenticated-failure-card.tsx';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
+import { DisplayNameControl } from './display-name-control.tsx';
 
 export const ProfileUserInfo = () => {
-    const { value: user, run: fetchUser, stage } = useImmediatePromiseState(DiningClient.retrieveAuthenticatedUser);
+    const { value: user, run: fetchUser, stage, error } = useImmediatePromiseState(DiningClient.retrieveAuthenticatedUser);
 
     if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {
         return (
@@ -21,13 +21,12 @@ export const ProfileUserInfo = () => {
 
     if (!user) {
         return (
-            <div className="card">
-                <span>
-                    Failed to load your profile!
-                </span>
-                <RetryButton onClick={fetchUser}/>
-            </div>
-        )
+            <AuthenticatedFailureCard
+                message="Failed to load your profile!"
+                error={error}
+                onRetry={fetchUser}
+            />
+        );
     }
 
     return (
