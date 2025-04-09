@@ -2,3 +2,7 @@ a.login-provider {
     background: white;
     color: #212121;
 }
+
+a.login-provider:visited {
+    color: #212121;
+}

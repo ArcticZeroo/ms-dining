@@ -4,6 +4,7 @@ import { PROVIDER_GOOGLE, PROVIDER_MICROSOFT } from '@msdining/common/dist/model
 import { useRequireLoginStatus } from '../../../hooks/auth.ts';
 
 import './login-page.css';
+import { Link } from 'react-router-dom';
 
 export const LoginPage = () => {
     const isPageAllowed = useRequireLoginStatus(false, '/profile');
@@ -32,6 +33,11 @@ export const LoginPage = () => {
                     Sign in with Google
                     <AuthProviderBadge provider={PROVIDER_GOOGLE}/>
                 </a>
+                <div className="subtitle">
+                    Your email is not intentionally stored when you sign in, but your 3rd-party account id will be.
+                    <br/>
+                    Details/privacy policy available at <Link to="/info">the info page.</Link>
+                </div>
             </div>
             <div className="card blue">
                 <div className="title">

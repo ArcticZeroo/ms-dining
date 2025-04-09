@@ -164,6 +164,14 @@ image {
     object-fit: contain;
 }
 
+a {
+    color: white;
+}
+
+a:visited {
+    color: var(--color-almost-white);
+}
+
 .bold {
     font-weight: bold;
 }
