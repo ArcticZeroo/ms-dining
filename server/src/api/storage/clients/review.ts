@@ -1,7 +1,4 @@
 import { usePrismaClient } from '../client.js';
-import { IUpdateReviewRequest } from '@msdining/common/dist/models/http.js';
-import { toDateString } from '@msdining/common/dist/util/date-util.js';
-import { Prisma } from '@prisma/client';
 
 interface ICreateReviewItem {
 	menuItemId: string;
@@ -63,7 +60,10 @@ export abstract class ReviewStorageClient {
 	public static async getReviewsForMenuItemAsync(menuItemId: string) {
 		return usePrismaClient(client => client.review.findMany({
 			where:   { menuItemId },
-			include: GET_REVIEW_INCLUDES
+			include: GET_REVIEW_INCLUDES,
+			orderBy: {
+				createdAt: 'desc'
+			}
 		}));
 	}
 
@@ -73,7 +73,10 @@ export abstract class ReviewStorageClient {
 				userId,
 				menuItemId
 			},
-			include: GET_REVIEW_INCLUDES
+			include: GET_REVIEW_INCLUDES,
+			orderBy: {
+				createdAt: 'desc'
+			}
 		}));
 	}
 
