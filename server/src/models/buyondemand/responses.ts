@@ -21,6 +21,11 @@ export interface ICafeStationCategory {
     categoryId: string;
     name: string;
     items: string[];
+    subCategories?: Array<{
+        subCategoryId: string;
+        name: string;
+        items: string[];
+    }>;
 }
 
 export interface ICafeStationMenu {
@@ -38,6 +43,19 @@ export interface ICafeStationListItem {
         menuId: string;
     };
     menus: Array<ICafeStationMenu>;
+    conceptOptions?: {
+        displayText?: string;
+        onDemandConceptLogo?: string;
+        showLogo?: string;
+        conceptLogo?: string;
+        onDemandDesktopColor?: string;
+        onDemandDesktopBackgroundImage?: string;
+        onDemandShowImage?: string;
+        onDemandMobileColor?: string;
+        conceptBackground?: string;
+        inUse?: string;
+        onDemandDisplayText?: string;
+    };
 }
 
 export interface ICafeMenuItemDetailsResponseModifierOption {
