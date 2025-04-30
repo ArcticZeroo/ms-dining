@@ -273,10 +273,14 @@ export abstract class MenuItemStorageClient {
 		}
 	}
 
-	private static async _retrieveReviewHeaderAsync(id: string): Promise<IMenuItemReviewHeader> {
+	// todo... consider showing a different review count for this vs other cafes.
+	// might not actually be necessary since there is so little data in general.
+	private static async _retrieveReviewHeaderAsync(normalizedName: string): Promise<IMenuItemReviewHeader> {
 		const stats = await usePrismaClient(prismaClient => prismaClient.review.aggregate({
 			where: {
-				menuItemId: id
+				menuItem: {
+					normalizedName
+				}
 			},
 			_count: true,
 			_avg: {
@@ -337,7 +341,7 @@ export abstract class MenuItemStorageClient {
 
 		const [thumbnailData, reviewHeader] = await Promise.all([
 			retrieveThumbnailData(menuItem),
-			MenuItemStorageClient._retrieveReviewHeaderAsync(id)
+			MenuItemStorageClient._retrieveReviewHeaderAsync(menuItem.normalizedName)
 		]);
 
 		return {

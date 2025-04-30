@@ -57,9 +57,13 @@ export abstract class ReviewStorageClient {
 		}));
 	}
 
-	public static async getReviewsForMenuItemAsync(menuItemId: string) {
+	public static async getReviewsForMenuItemAsync(normalizedName: string) {
 		return usePrismaClient(client => client.review.findMany({
-			where:   { menuItemId },
+			where:   {
+				menuItem: {
+					normalizedName
+				}
+			},
 			include: GET_REVIEW_INCLUDES,
 			orderBy: {
 				createdAt: 'desc'

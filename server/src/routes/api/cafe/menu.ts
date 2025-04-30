@@ -29,6 +29,7 @@ import { Review } from '@prisma/client';
 import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/dist/models/review.js';
 import { toDateString } from '@msdining/common/dist/util/date-util.js';
 import Duration from '@arcticzeroo/duration';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -160,7 +161,7 @@ export const registerMenuRoutes = (parent: Router) => {
 			const menuItem = await getMenuItemFromRequest(ctx);
 
 			// todo: limit? paging?
-			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem.id);
+			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(normalizeNameForSearch(menuItem.name));
 
 			const response: IReviewDataForMenuItem = {
 				counts:              {},
@@ -172,12 +173,7 @@ export const registerMenuRoutes = (parent: Router) => {
 			for (const review of reviews) {
 				response.totalCount += 1;
 				response.overallRating += review.rating;
-
-				if (!response.counts.hasOwnProperty(review.rating)) {
-					response.counts[review.rating] = 1;
-				} else {
-					response.counts[review.rating] += 1;
-				}
+				response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
 
 				if (review.comment != null && review.comment.trim().length > 0) {
 					const serializedReview = serializeReview(review);
@@ -185,7 +181,8 @@ export const registerMenuRoutes = (parent: Router) => {
 					response.reviewsWithComments.push(serializedReview as IReviewWithComment);
 				}
 
-				if (userId != null && review.userId === userId) {
+				// Users can review the same item at multiple different cafes.
+				if (review.menuItemId === menuItem.id && userId != null && review.userId === userId) {
 					response.myReview = serializeReview(review);
 				}
 			}
