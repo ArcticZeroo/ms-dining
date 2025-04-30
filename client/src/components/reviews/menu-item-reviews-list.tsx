@@ -5,9 +5,10 @@ import { MenuItemReview } from './menu-item-review.tsx';
 interface IMenuItemReviewsListProps {
     totalCount: number;
     reviewsWithComments: IReviewWithComment[];
+    menuItemId?: string;
 }
 
-export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ totalCount, reviewsWithComments }) => {
+export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ totalCount, reviewsWithComments, menuItemId }) => {
     if (totalCount === 0) {
         return (
             <div className="flex flex-center flex-col">
@@ -23,7 +24,7 @@ export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ total
                     <MenuItemReview
                         key={review.id}
                         review={review}
-                        showMyself={false}
+                        showMyself={review.menuItemId !== menuItemId}
                     />
                 ))
             }

@@ -26,8 +26,8 @@ interface IMenuItemReviewProps {
 
 export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     review,
+    showMyself,
     showMenuItemName = true,
-    showMyself = false,
     onDeleted,
     isSkeleton = false,
     stretchSelf = false
@@ -126,7 +126,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                         <span className="material-symbols-outlined">
                             comment
                         </span>
-                        <span>
+                        <span className="comment">
                             {review.comment}
                         </span>
                     </div>

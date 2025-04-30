@@ -91,10 +91,13 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                     overallRating={stats.overallRating}
                 />
             </div>
-            <MenuItemReviewsList
-                totalCount={stats.totalCount}
-                reviewsWithComments={response.reviewsWithComments}
-            />
+            <div className="flex flex-wrap">
+                <MenuItemReviewsList
+                    totalCount={stats.totalCount}
+                    reviewsWithComments={response.reviewsWithComments}
+                    menuItemId={menuItemId}
+                />
+            </div>
         </div>
     );
 };
