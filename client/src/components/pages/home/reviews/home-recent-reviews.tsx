@@ -6,8 +6,10 @@ import { HomeRecentReviewsView } from './home-recent-reviews-view.tsx';
 export const HomeRecentReviews = () => {
     return (
         <HomeCollapse title="Recent Reviews" featureToggle={HomeSettings.showExploreOnHome}>
-            <LogInForReviewButton/>
-            <HomeRecentReviewsView/>
+            <div className="flex-col">
+                <LogInForReviewButton/>
+                <HomeRecentReviewsView/>
+            </div>
         </HomeCollapse>
     );
 }
