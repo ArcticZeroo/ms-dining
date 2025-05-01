@@ -16,7 +16,7 @@ const getClient = lazy(() => new OpenAI({
 const retrieveChatCompletion = async (question: string) => {
     // todo: handle 429
     const response = await getClient().chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4.1-mini',
         messages: [
             {
                 role: 'user',
@@ -72,9 +72,19 @@ const getThemePrompt = (stationName: string, menuItemsByCategory: Map<string /*c
     [Task Description]
     You are an expert writer. Each day our cafeteria has a rotating menu (for instance: tacos, mac and cheese, 
     chicken/eggplant parmesan, or orange chicken and eggplant at a rotating chinese food station). 
-    Your job is to write a short summary of the rotating menu given the list of items available today.
-    You will be given the station name, the list of categories and the item names/descriptions within those categories. 
-    The summary should be descriptive but brief.
+    
+    Your job is to write a short summary of the rotating menu given the list of items available today. The summary
+    will be used as a bullet point to quickly inform customers about the menu. The purpose of this summary is
+    informational, not promotional. It should avoid marketing language/too many superfluous words and should be concise,
+    but still cover all items on the menu.
+    Don't include anything similar to "Today's menu includes" or "Today's special is" - just get to the point, this is 
+    going to be a bullet point in a list.
+    Menu item descriptions are meant to add context in case the name is not descriptive enough, don't list every 
+    sub-ingredient in a menu item. Again, this is just a bullet point in a list, so keep it short. We don't need to know
+    every ingredient listed for a pad thai - users will be able to click into the station to see details if they care.
+    
+    It should not just be a list of the items unless the menu is very small and there is no clear theme.
+    Avoid repeating the station name directly in the summary.
     [End Task Description]
     
     [Example]
