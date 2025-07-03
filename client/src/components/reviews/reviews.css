@@ -12,3 +12,15 @@
 a.review-location {
     color: unset;
 }
+
+.character-counter {
+    color: var(--color-foreground);
+    align-self: flex-end;
+    font-size: var(--card-subtitle-font-size);
+    font-style: italic;
+    transition: opacity 0.25s ease-in-out, color 0.25s ease-in-out;
+}
+
+.character-counter.warning {
+    color: var(--color-error-light);
+}

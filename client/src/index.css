@@ -612,6 +612,16 @@ html, body, #root, .App {
     background: var(--color-theme-turquoise);
 }
 
+.invisible-by-default {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.invisible-by-default.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
 /* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {
