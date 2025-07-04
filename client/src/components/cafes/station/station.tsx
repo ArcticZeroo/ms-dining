@@ -12,7 +12,7 @@ import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hoo
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getSearchAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
-import { FavoriteSearchableItemButton } from '../../button/favorite-searchable-item-button.tsx';
+import { FavoriteSearchableItemButton } from '../../button/favorite/favorite-searchable-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';

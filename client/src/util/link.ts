@@ -26,6 +26,7 @@ export const getViewMenuUrl = ({ view, viewsById, shouldUseGroups, cafeIdsOnPage
 export const idPrefixByEntityType: Record<SearchEntityType, string> = {
     [SearchEntityType.menuItem]: 'menu-item',
     [SearchEntityType.station]: 'station',
+    [SearchEntityType.cafe]: 'cafe',
 };
 
 interface IScrollAnchorData {

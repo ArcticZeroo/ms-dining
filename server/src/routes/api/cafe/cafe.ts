@@ -36,7 +36,7 @@ export const registerCafeRoutes = (parent: Router) => {
 	const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
 		const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
-		for (const group of diningConfig.groupList) {
+		for (const group of diningConfig.CAFE_GROUP_LIST) {
 			const responseGroup: IDiningCoreGroup = {
 				name:         group.name,
 				id:           group.id,

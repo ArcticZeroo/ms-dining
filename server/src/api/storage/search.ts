@@ -8,13 +8,15 @@ import {
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
 import { Nullable } from '../../models/util.js';
-import { getStationLogoUrl, getThumbnailUrl } from '../../util/cafe.js';
+import { getStationLogoUrl, getThumbnailUrl, getLogoUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
 import { IVectorSearchResult } from '../../models/vector.js';
 import { StationStorageClient } from './clients/station.js';
+import { CafeStorageClient } from './clients/cafe.js';
 import { logDebug } from '../../util/log.js';
+import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../constants/cafes.js';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
@@ -76,7 +78,13 @@ interface IAddResultParamsWithAppearance extends IAddResultParamsBase {
     cafeId: string;
 }
 
-type IAddResultParams = IAddResultParamsWithoutAppearance | IAddResultParamsWithAppearance;
+interface IAddResultParamsForCafe extends IAddResultParamsBase {
+    type: SearchEntityType.cafe;
+    dateString: undefined;
+    cafeId: string;
+}
+
+type IAddResultParams = IAddResultParamsWithoutAppearance | IAddResultParamsWithAppearance | IAddResultParamsForCafe;
 
 interface ISimilarEntitySearchParams {
     entityType: SearchEntityType;
@@ -169,17 +177,21 @@ class SearchResults {
         }
 
         if (cafeId != null) {
-            if (!searchResult.locationDatesByCafeId.has(cafeId)) {
-                searchResult.locationDatesByCafeId.set(cafeId, new Set());
-            }
-            searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
+            if (type === SearchEntityType.cafe) {
+                searchResult.cafeId = cafeId;
+            } else {
+                if (!searchResult.locationDatesByCafeId.has(cafeId)) {
+                    searchResult.locationDatesByCafeId.set(cafeId, new Set());
+                }
+                searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
 
-            if (price != null) {
-                searchResult.priceByCafeId.set(cafeId, price);
-            }
+                if (price != null) {
+                    searchResult.priceByCafeId.set(cafeId, price);
+                }
 
-            if (station != null) {
-                searchResult.stationByCafeId.set(cafeId, station);
+                if (station != null) {
+                    searchResult.stationByCafeId.set(cafeId, station);
+                }
             }
         }
 
@@ -387,6 +399,27 @@ class SearchSession {
             matchReasons.add(SearchMatchReason.title);
         }
 
+        return { matchReasons } as const;
+    }
+
+    getCafeMatch(cafe: { name: string; shortName?: string | number; emoji?: string }, groupName?: string) {
+        const matchReasons = new Set<SearchMatchReason>();
+        
+        // Check cafe name
+        if (this.isMatch(cafe.name, SearchEntityType.cafe)) {
+            matchReasons.add(SearchMatchReason.title);
+        }
+        
+        // Check short name if it exists
+        if (cafe.shortName && this.isMatch(String(cafe.shortName), SearchEntityType.cafe)) {
+            matchReasons.add(SearchMatchReason.title);
+        }
+        
+        // Check group name if provided
+        if (groupName && this.isMatch(groupName, SearchEntityType.cafe)) {
+            matchReasons.add(SearchMatchReason.description);
+        }
+        
         return { matchReasons } as const;
     }
 }
@@ -607,6 +640,42 @@ export abstract class SearchManager {
                                 matchReasons,
                                 matchedModifiers
                             });
+                        }
+                    } else if (entityType === SearchEntityType.cafe) {
+                        // Find the cafe by ID
+                        const cafe = CAFES_BY_ID.get(id);
+                        if (cafe != null) {
+                            logDebug('Adding vector cafe result without appearance', cafe.name);
+
+                            // Find the group this cafe belongs to
+                            const group = CAFE_GROUP_LIST.find(g => g.members.some(member => member.id === cafe.id));
+                            const { matchReasons } = session.getCafeMatch(cafe, group?.name);
+                            
+                            // Get cafe config for logo
+                            const cafeConfig = await CafeStorageClient.retrieveCafeAsync(cafe.id);
+
+                            if (!cafeConfig) {
+                                logDebug('Cafe config not found for vector result', cafe.id);
+                                continue;
+                            }
+
+                            session.registerResult(true /*isMatch*/, {
+                                type:         SearchEntityType.cafe,
+                                dateString:   undefined,
+                                cafeId:       cafe.id,
+                                name:         cafe.name,
+                                description:  undefined,
+                                imageUrl:     getLogoUrl(cafe, cafeConfig),
+                                // No pricing/station data for cafes
+                                price:        undefined,
+                                searchTags:   undefined,
+                                tags:         undefined,
+                                station:      undefined,
+                                matchReasons,
+                                matchedModifiers: new Map()
+                            });
+                        } else {
+                            logDebug('Cafe not found for vector result', id);
                         }
                     }
                 }

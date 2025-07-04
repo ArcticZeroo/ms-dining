@@ -55,6 +55,7 @@
     --color-map-cafe-logo-background: var(--color-almost-white);
     --color-map-loading-background: var(--color-background-raised);
     --color-search-entity-station: #614d7e;
+    --color-search-entity-cafe: #576b7a;
     --color-payment-submit: var(--color-button-cta);
     --color-payment-submit-invalid: var(--color-button-cta-disabled);
     --color-search-filters-button: var(--color-button-cta);

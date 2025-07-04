@@ -193,6 +193,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
                         matchReasons={searchResult.matchReasons}
                         matchedModifiers={searchResult.matchedModifiers}
+                        cafeId={searchResult.cafeId}
                     />
                 );
             });

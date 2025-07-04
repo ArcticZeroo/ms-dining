@@ -1,5 +1,5 @@
 import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
-import { SearchMatchReason } from './search.js';
+import { SearchEntityType, SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
 
 export interface IDiningCoreEntity {
@@ -86,7 +86,7 @@ export type MenuResponse = Array<IStationDTO>;
 export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;
 
 export interface ISearchResponseResult {
-	type: 'menuItem' | 'station';
+	type: SearchEntityType;
 	name: string;
 	description?: string;
 	imageUrl?: string;
@@ -98,6 +98,7 @@ export interface ISearchResponseResult {
 	searchTags?: Array<string>;
 	matchedModifiers: Record<string, Array<string>>;
 	vectorDistance?: number;
+	cafeId?: string;
 }
 
 export interface ICreateReviewRequest {

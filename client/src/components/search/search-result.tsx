@@ -1,5 +1,5 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { SearchMatchReason } from '@msdining/common/dist/models/search';
+import { SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search';
 import { isSameDate } from '@msdining/common/dist/util/date-util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
@@ -8,18 +8,20 @@ import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { CafeView } from '../../models/cafe.ts';
+import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
 import { getSearchUrl } from '../../util/url.ts';
-import { FavoriteSearchableItemButton } from '../button/favorite-searchable-item-button.tsx';
+import { FavoriteSearchableItemButton } from '../button/favorite/favorite-searchable-item-button.tsx';
 import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
 import { SearchResultHits } from './search-result-hits.tsx';
 import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
 import { SearchResultFindButton } from './search-result-find-button.tsx';
-
-import './search.css';
 import { SearchResultVisitHistoryButton } from './schedule/search-result-visit-history-button.tsx';
+import { getViewMenuUrl } from '../../util/link.ts';
+import { FavoriteCafeSearchResultButton } from '../button/favorite/favorite-cafe-search-result-button.tsx';
+import './search.css';
+import { getParentView } from '../../util/view.ts';
 
 interface IEntityDisplayData {
     className: string;
@@ -34,6 +36,10 @@ const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDispl
     [SearchTypes.SearchEntityType.station]:  {
         className: 'entity-station',
         iconName:  'restaurant'
+    },
+    [SearchTypes.SearchEntityType.cafe]:     {
+        className: 'entity-cafe',
+        iconName:  'store'
     }
 };
 
@@ -158,6 +164,7 @@ export interface ISearchResultProps {
     matchReasons?: Set<SearchMatchReason>;
     showOnlyCafeNames?: boolean;
     matchedModifiers?: Map<string, Set<string>>;
+    cafeId?: string; // Should only be set for entity type cafe
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -181,17 +188,17 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     shouldStretchResults = false,
     isSkeleton = false,
     matchReasons = new Set(),
-    showOnlyCafeNames = false
+    showOnlyCafeNames = false,
+    cafeId
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showTags = useValueNotifier(ApplicationSettings.showTags);
     const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const selectedDateNotifier = useContext(SelectedDateContext);
     const selectedDate = useValueNotifier(selectedDateNotifier);
-
-    const isFavoriteItem = useIsFavoriteItem(name, entityType);
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -221,18 +228,63 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
         }
     }
 
-    const favoriteButton = showFavoriteButton && (
-        <div>
-            <FavoriteSearchableItemButton
-                name={name}
-                type={entityType}
-            />
-        </div>
+    const entityView = useMemo(() => {
+        if (entityType !== SearchTypes.SearchEntityType.cafe || !cafeId) {
+            return undefined;
+        }
+
+        return viewsById.get(cafeId);
+    }, [entityType, cafeId, viewsById]);
+
+    const favoriteButton = useMemo(
+        () => {
+            if (entityView) {
+                console.log(entityView);
+                return (
+                    <FavoriteCafeSearchResultButton view={entityView}/>
+                );
+            }
+
+            return showFavoriteButton && (
+                <div>
+                    <FavoriteSearchableItemButton
+                        name={name}
+                        type={entityType}
+                    />
+                </div>
+            );
+        },
+        [showFavoriteButton, name, entityType, entityView]
     );
+
+    const targetFavoriteId = useMemo(
+        () => {
+            if (entityType === SearchTypes.SearchEntityType.cafe && entityView) {
+                return getParentView(viewsById, entityView, shouldUseGroups).value.id;
+            }
+
+            return name; // For menu items and stations, we use the name as the favorite ID
+        },
+        [entityType, entityView, name, shouldUseGroups, viewsById]
+    );
+
+    const isFavoriteItem = useIsFavoriteItem(targetFavoriteId, entityType);
+
+    if (entityType == SearchTypes.SearchEntityType.cafe) {
+        if (!entityView) {
+            console.error('SearchResult component requires entityView for entityType cafe');
+            return null;
+        }
+
+        if (!description && entityView.type === CafeViewType.single && entityView.value.group && !entityView.value.group.alwaysExpand && entityView.value.name !== entityView.value.group.name) {
+            description = entityView.value.group.name;
+        }
+    }
 
     return (
         <div className={classNames(
             'search-result',
+            `search-result-${entityType}`,
             isVisible && 'visible',
             isCompact && 'compact',
             shouldColorForFavorites && isFavoriteItem && 'is-favorite',
@@ -244,7 +296,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     isCompact && favoriteButton
                 }
                 {
-                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name} />
+                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name}/>
                 }
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}
@@ -255,8 +307,8 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     <div className="flex">
                         {!isCompact && favoriteButton}
                         {
-                            !isCompact && (
-                                <SearchResultVisitHistoryButton entityType={entityType} name={name} />
+                            !isCompact && entityType !== SearchEntityType.cafe && (
+                                <SearchResultVisitHistoryButton entityType={entityType} name={name}/>
                             )
                         }
                         <div className="title">
@@ -310,6 +362,24 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     }
                     {
                         isCompact && imageElement
+                    }
+                    {
+                        entityView && (
+                            <Link
+                                to={getViewMenuUrl({
+                                    view: entityView,
+                                    viewsById,
+                                    shouldUseGroups,
+                                })}
+                                className="search-result-link flex default-button default-container flex-center"
+                                title={`Click to view menu for "${name}"`}
+                            >
+                                <span className="material-symbols-outlined">
+                                    restaurant_menu
+                                </span>
+                                View Menu
+                            </Link>
+                        )
                     }
                     {
                         !showSearchButtonInsteadOfLocations && (

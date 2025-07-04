@@ -1,9 +1,9 @@
 import { SEARCH_THREAD_HANDLER } from '../../worker-thread/search.js';
-import { retrieveEmbeddings, retrieveMenuItemEmbeddings, retrieveStationEmbeddings } from '../../openai.js';
+import { retrieveEmbeddings, retrieveMenuItemEmbeddings, retrieveStationEmbeddings, retrieveCafeEmbeddings } from '../../openai.js';
 import { IVectorSearchResult } from '../../../models/vector.js';
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { ICafeStation } from '../../../models/cafe.js';
+import { ICafeStation, ICafe } from '../../../models/cafe.js';
 
 const getQueryEmbedding = async (query: string): Promise<Float32Array> => {
 	const existingEmbedding = await SEARCH_THREAD_HANDLER.sendRequest('getQueryEmbedding', query);
@@ -57,6 +57,15 @@ export const embedStation = async (station: ICafeStation) => {
 	await SEARCH_THREAD_HANDLER.sendRequest('insertSearchEmbedding', {
 		entityType: SearchEntityType.station,
 		id:         station.id,
+		embedding:  new Float32Array(embedding),
+	});
+}
+
+export const embedCafe = async (cafe: ICafe, groupName?: string) => {
+	const embedding = await retrieveCafeEmbeddings(cafe, groupName);
+	await SEARCH_THREAD_HANDLER.sendRequest('insertSearchEmbedding', {
+		entityType: SearchEntityType.cafe,
+		id:         cafe.id,
 		embedding:  new Float32Array(embedding),
 	});
 }

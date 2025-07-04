@@ -8,7 +8,7 @@ import {
     IWaitTimeResponse,
     MenuResponse
 } from '@msdining/common/dist/models/http';
-import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
+import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/dist/models/search';
 import { DebugSettings, InternalSettings } from '../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../models/search.ts';
@@ -206,10 +206,10 @@ export abstract class DiningClient {
         const results: Array<IQuerySearchResult> = [];
 
         for (const serverResult of serverResults) {
+            const entityType = SEARCH_ENTITY_TYPE_NAME_TO_ENUM[serverResult.type];
+
             results.push({
-                entityType: serverResult.type === 'menuItem'
-                    ? SearchTypes.SearchEntityType.menuItem
-                    : SearchTypes.SearchEntityType.station,
+                entityType,
                 name: serverResult.name,
                 description: serverResult.description,
                 imageUrl: serverResult.imageUrl,
@@ -220,7 +220,8 @@ export abstract class DiningClient {
                 tags: serverResult.tags ? new Set(serverResult.tags) : undefined,
                 searchTags: serverResult.searchTags ? new Set(serverResult.searchTags) : undefined,
                 matchedModifiers: DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers),
-                vectorDistance: serverResult.vectorDistance
+                vectorDistance: serverResult.vectorDistance,
+                cafeId: serverResult.cafeId || undefined
             });
         }
 

@@ -11,6 +11,8 @@ export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: S
         return entryType === SearchTypes.SearchEntityType.menuItem;
     case SearchEntityFilterType.station:
         return entryType === SearchTypes.SearchEntityType.station;
+    case SearchEntityFilterType.cafe:
+        return entryType === SearchTypes.SearchEntityType.cafe;
     default:
         console.error('Unknown filter type', filter);
         return false;
@@ -28,6 +30,10 @@ export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<S
 
     if (type === SearchEntityFilterType.station) {
         return tabCounts.get(SearchTypes.SearchEntityType.station) ?? 0;
+    }
+
+    if (type === SearchEntityFilterType.cafe) {
+        return tabCounts.get(SearchTypes.SearchEntityType.cafe) ?? 0;
     }
 
     return 0;

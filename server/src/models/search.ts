@@ -15,6 +15,7 @@ export interface IServerSearchResult {
     searchTags?: Set<string>;
     matchedModifiers: Map<string /*modifierDescription*/, Set<string> /*choiceDescriptions*/>;
     vectorDistance?: number;
+    cafeId?: Nullable<string>;
 }
 
 export interface ICheapItemSearchResult {

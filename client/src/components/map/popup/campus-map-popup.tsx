@@ -9,7 +9,7 @@ import { getViewMenuUrl } from '../../../util/link.ts';
 import { expandAndFlattenView } from '../../../util/view.ts';
 import { CampusMapPopupMember } from './campus-map-popup-member.tsx';
 import { MapPopupViewContext } from '../../../context/map.ts';
-import { FavoriteItemButton } from "../../button/favorite-item-button.tsx";
+import { FavoriteItemButton } from "../../button/favorite/favorite-item-button.tsx";
 
 interface ICampusMapPopupProps {
     view: CafeView;

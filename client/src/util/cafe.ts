@@ -51,9 +51,21 @@ export const getViewName = ({ view, showGroupName, useShortNames = false, includ
     return (useShortNames && view.value.shortName) || view.value.name;
 }
 
-export const getTargetSettingForFavorite = (type: SearchEntityType) => type === SearchEntityType.menuItem
-    ? ApplicationSettings.favoriteItemNames
-    : ApplicationSettings.favoriteStationNames;
+export const getTargetSettingForFavorite = (type: SearchEntityType) => {
+    if (type === SearchEntityType.menuItem) {
+        return ApplicationSettings.favoriteItemNames;
+    }
+
+    if (type === SearchEntityType.station) {
+        return ApplicationSettings.favoriteStationNames;
+    }
+
+    if (type === SearchEntityType.cafe) {
+        return ApplicationSettings.homepageViews;
+    }
+
+    throw new Error(`Unknown entity type: ${type}`);
+};
 
 export const getCafeLocation = (cafe: ICafe): ILocationCoordinates => {
     const location = cafe.location ?? cafe.group?.location;

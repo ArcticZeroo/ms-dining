@@ -13,7 +13,7 @@ export const groupIds = {
 	espresso:              'espresso'
 };
 
-export const groupList: CafeGroup[] = [
+export const CAFE_GROUP_LIST: CafeGroup[] = [
 	{
 		name:         'Individual Cafés',
 		id:           groupIds.individual,
@@ -453,6 +453,6 @@ export const groupList: CafeGroup[] = [
 	},
 ];
 
-export const ALL_CAFES = groupList.flatMap(group => group.members);
+export const ALL_CAFES = CAFE_GROUP_LIST.flatMap(group => group.members);
 
-export const cafesById = new Map(ALL_CAFES.map(cafe => [cafe.id, cafe]));
+export const CAFES_BY_ID = new Map(ALL_CAFES.map(cafe => [cafe.id, cafe]));

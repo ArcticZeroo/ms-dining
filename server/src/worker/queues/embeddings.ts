@@ -1,10 +1,11 @@
 import Duration from '@arcticzeroo/duration';
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { embedMenuItem, embedStation, isEmbeddedEntity } from '../../api/storage/vector/client.js';
-import { ICafeStation } from '../../models/cafe.js';
+import { embedMenuItem, embedStation, embedCafe, isEmbeddedEntity } from '../../api/storage/vector/client.js';
+import { ICafeStation, ICafe } from '../../models/cafe.js';
 import { Nullable } from '../../models/util.js';
 import { WorkerQueue } from './queue.js';
+import { CAFE_GROUP_LIST } from '../../constants/cafes.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 1 });
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 15 });
@@ -22,7 +23,13 @@ interface IEmbeddingsStationWork {
     item: ICafeStation;
 }
 
-type EmbeddingsWorkItem = IEmbeddingsMenuItemWork | IEmbeddingsStationWork;
+interface IEmbeddingsCafeWork {
+    entityType: SearchEntityType.cafe;
+    item: ICafe;
+    groupName: string;
+}
+
+type EmbeddingsWorkItem = IEmbeddingsMenuItemWork | IEmbeddingsStationWork | IEmbeddingsCafeWork;
 
 class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
     constructor() {
@@ -48,8 +55,10 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
 
         if (entry.entityType === SearchEntityType.menuItem) {
             await embedMenuItem(entry.item, entry.categoryName, entry.stationName);
-        } else {
+        } else if (entry.entityType === SearchEntityType.station) {
             await embedStation(entry.item);
+        } else if (entry.entityType === SearchEntityType.cafe) {
+            await embedCafe(entry.item, entry.groupName);
         }
     }
 
@@ -72,6 +81,18 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
                         });
                     }
                 }
+            }
+        }
+    }
+
+    public addFromCafeGroups() {
+        for (const group of CAFE_GROUP_LIST) {
+            for (const cafe of group.members) {
+                this.add({
+                    entityType: SearchEntityType.cafe,
+                    item: cafe,
+                    groupName: group.name,
+                });
             }
         }
     }

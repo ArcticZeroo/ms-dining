@@ -1,7 +1,7 @@
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import OpenAI from 'openai';
 import { getOpenAiKey } from '../constants/env.js';
-import { ICafeStation } from '../models/cafe.js';
+import { ICafeStation, ICafe, CafeGroup } from '../models/cafe.js';
 import { IMenuItemForAi } from '../models/openai.js';
 import { runPromiseWithRetries } from '../util/async.js';
 import { isDev } from '../util/env.js';
@@ -239,4 +239,34 @@ export const retrieveStationEmbeddings = async (station: ICafeStation) => {
         Station Name: ${station.name}
         Station Categories: ${categoryStrings.join('\n')}
     `);
+}
+
+export const retrieveCafeEmbeddings = async (cafe: ICafe, group?: CafeGroup) => {
+    const parts = [`Cafe Name: ${cafe.name}`, `Cafe ID: ${cafe.id}`];
+
+    if (cafe.shortName) {
+        parts.push(`Cafe Short Name: ${cafe.shortName}`);
+    }
+
+    if (group) {
+        parts.push(`Cafe Group: ${group.name}`);
+
+        if (group.shortName) {
+            parts.push(`Cafe Group Short Name: ${group.shortName}`);
+        }
+
+        for (const member of group.members) {
+            if (member.id === cafe.id) {
+                continue; // Skip the current cafe
+            }
+
+            parts.push(`Cafe Group Member: ${member.name} (${member.id})`);
+        }
+    }
+
+    if (cafe.emoji) {
+        parts.push(`Cafe Type Indicator: ${cafe.emoji}`);
+    }
+
+    return retrieveEmbeddings(parts.join('\n'));
 }

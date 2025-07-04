@@ -18,7 +18,7 @@ import { WaitTimeSession } from '../../../api/cafe/session/wait-time.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
-import { cafesById } from '../../../constants/cafes.js';
+import { CAFES_BY_ID } from '../../../constants/cafes.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { ICafe, IMenuItem } from '../../../models/cafe.js';
 import { attachRouter } from '../../../util/koa.js';
@@ -145,7 +145,7 @@ export const registerOrderingRoutes = (parent: Router) => {
                 return ctx.throw(400, 'Invalid cafe id');
             }
 
-            const cafe = cafesById.get(cafeId);
+            const cafe = CAFES_BY_ID.get(cafeId);
             if (cafe == null) {
                 return ctx.throw(400, `Cafe with id ${cafeId} does not exist`);
             }

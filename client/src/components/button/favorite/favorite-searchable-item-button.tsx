@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
-import { getTargetSettingForFavorite } from '../../util/cafe.ts';
+import { getTargetSettingForFavorite } from '../../../util/cafe.ts';
 import { FavoriteItemButton } from "./favorite-item-button.tsx";
 
 interface IFavoriteItemButtonProps {

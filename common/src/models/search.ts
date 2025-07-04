@@ -1,16 +1,25 @@
 export enum SearchEntityType {
     menuItem = 'menuItem',
     station = 'station',
+    cafe = 'cafe',
 }
+
+export const SEARCH_ENTITY_TYPE_NAME_TO_ENUM: { [K in SearchEntityType]: K } = {
+    menuItem: SearchEntityType.menuItem,
+    station:  SearchEntityType.station,
+    cafe:     SearchEntityType.cafe
+};
 
 export const SEARCH_ENTITY_TYPE_TO_DB_ID: { [T in SearchEntityType]: number } = {
     [SearchEntityType.menuItem]: 0,
-    [SearchEntityType.station]:  1
+    [SearchEntityType.station]:  1,
+    [SearchEntityType.cafe]:     2
 };
 
 export const DB_ID_TO_SEARCH_ENTITY_TYPE: { [P in keyof typeof SEARCH_ENTITY_TYPE_TO_DB_ID as typeof SEARCH_ENTITY_TYPE_TO_DB_ID[P]]: P } = {
     0: SearchEntityType.menuItem,
-    1: SearchEntityType.station
+    1: SearchEntityType.station,
+    2: SearchEntityType.cafe
 };
 
 export enum SearchMatchReason {
@@ -27,12 +36,14 @@ export enum SearchMatchReason {
 export const allSearchEntityTypes = [
     SearchEntityType.menuItem,
     SearchEntityType.station,
+    SearchEntityType.cafe,
 ];
 
 export enum SearchEntityFilterType {
     all,
     menuItem,
-    station
+    station,
+    cafe
 }
 
 export interface ISearchResult {

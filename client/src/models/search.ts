@@ -10,12 +10,14 @@ export enum SearchResultsViewMode {
 export const allSearchEntityTypes = [
     SearchTypes.SearchEntityType.menuItem,
     SearchTypes.SearchEntityType.station,
+    SearchTypes.SearchEntityType.cafe,
 ];
 
 export enum SearchEntityFilterType {
     all,
     menuItem,
-    station
+    station,
+    cafe
 }
 
 export interface IQuerySearchResult {
@@ -31,6 +33,7 @@ export interface IQuerySearchResult {
     searchTags?: Set<string>;
     matchedModifiers: Map<string, Set<string>>;
     vectorDistance?: number;
+    cafeId?: string;
 }
 
 export interface ICheapItemSearchResult {

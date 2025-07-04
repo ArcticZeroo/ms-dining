@@ -1,9 +1,9 @@
 import React from 'react';
-import { StringSetSetting } from '../../api/settings.ts';
-import filledIcon from '../../assets/icons/filled/heart.svg';
-import outlinedIcon from '../../assets/icons/outline/heart.svg';
-import { useValueNotifierSetTarget } from '../../hooks/events.ts';
-import { classNames } from '../../util/react.ts';
+import { StringSetSetting } from '../../../api/settings.ts';
+import filledIcon from '../../../assets/icons/filled/heart.svg';
+import outlinedIcon from '../../../assets/icons/outline/heart.svg';
+import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
+import { classNames } from '../../../util/react.ts';
 
 import './favorite-item-button.css';
 

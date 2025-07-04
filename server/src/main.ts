@@ -4,6 +4,7 @@ import { webserverPort } from './constants/config.js';
 import { logDebug, logError, logInfo } from './util/log.js';
 import { createAnalyticsApplications } from './api/tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from './util/env.js';
+import { EMBEDDINGS_WORKER_QUEUE } from './worker/queues/embeddings.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -23,3 +24,7 @@ createAnalyticsApplications()
 
 performMenuBootTasks()
     .catch(err => logError('Could not perform boot tasks:', err));
+
+// Initialize cafe embeddings
+logInfo('Adding cafe embeddings to queue...');
+EMBEDDINGS_WORKER_QUEUE.addFromCafeGroups();

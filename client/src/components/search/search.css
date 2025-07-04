@@ -59,6 +59,10 @@
     background: var(--color-search-entity-station);
 }
 
+.entity-cafe {
+    background: var(--color-search-entity-cafe);
+}
+
 .search-result-info {
     background: var(--color-search-result);
     border-bottom-right-radius: var(--default-padding);
@@ -69,6 +73,11 @@
     padding: var(--default-padding);
     gap: var(--default-padding);
     transition: background-color 0.25s ease;
+}
+
+.search-result .favorite-item-button.is-favorite {
+    /* prevent weird outline since we want gold on gold */
+    background: none;
 }
 
 .search-result.is-favorite .search-result-info {
@@ -153,6 +162,10 @@
     object-fit: cover;
     border-radius: var(--default-padding);
     transition: max-height 0.25s ease;
+}
+
+.search-result-cafe .search-result-image {
+    object-fit: scale-down;
 }
 
 .search-result-description {

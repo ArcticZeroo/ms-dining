@@ -127,7 +127,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                             </span>
                         </button>
                         <div className="search-entity-selector">
-                            <EntityButton name="Menu Items and Stations"
+                            <EntityButton name="Menu Items, Stations, and Cafes"
                                 type={SearchEntityFilterType.all}
                                 onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
                                 {...sharedEntityButtonProps}
@@ -140,6 +140,11 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                             <EntityButton name="Stations Only"
                                 type={SearchEntityFilterType.station}
                                 onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
+                                {...sharedEntityButtonProps}
+                            />
+                            <EntityButton name="Cafes Only"
+                                type={SearchEntityFilterType.cafe}
+                                onClick={() => setEntityFilterType(SearchEntityFilterType.cafe)}
                                 {...sharedEntityButtonProps}
                             />
                         </div>

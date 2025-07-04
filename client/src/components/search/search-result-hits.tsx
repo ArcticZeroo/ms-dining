@@ -47,7 +47,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const shouldShowPriceInSearch = useValueNotifier(ApplicationSettings.showPriceInSearch);
     const cafeIdsOnPage = useCafeIdsOnPage();
 
-    if (locationEntriesInOrder.length === 0) {
+    if (entityType != SearchEntityType.cafe && locationEntriesInOrder.length === 0) {
         return (
             <div className="search-result-hits">
                 <div className="search-result-chip grey">

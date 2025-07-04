@@ -236,6 +236,10 @@ const getTargetFavoriteSetForEntityType = (context: ISearchResultSortingContext,
         return context.favoriteStationNames;
     }
 
+    if (entityType === SearchEntityType.cafe) {
+        return context.homepageViewIds;
+    }
+
     return null;
 };
 
@@ -258,7 +262,8 @@ interface IComputeScoreParams {
 
 const ENTITY_TYPE_MULTIPLIERS: Record<SearchEntityType, number> = {
     [SearchEntityType.menuItem]: 1,
-    [SearchEntityType.station]:  0.8
+    [SearchEntityType.station]:  0.8,
+    [SearchEntityType.cafe]:     0.6
 };
 
 const getDistanceMultiplier = (searchResult: ISearchResult, bestDistance: number) => {
