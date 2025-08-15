@@ -1,6 +1,6 @@
 import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
 import Koa from 'koa';
-import { isAnyCafeCurrentlyUpdating } from '../api/cafe/cache/update.js';
+import { isAnyCafeCurrentlyUpdating } from '../api/cafe/job/update.js';
 
 export const requireNoMenusUpdating: Koa.Middleware = (ctx, next) => {
     if (isAnyCafeCurrentlyUpdating()) {

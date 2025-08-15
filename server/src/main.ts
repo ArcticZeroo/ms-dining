@@ -1,4 +1,4 @@
-import { performMenuBootTasks } from './api/cafe/cache/boot.js';
+import { performMenuBootTasks } from './api/cafe/job/boot.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
 import { logDebug, logError, logInfo } from './util/log.js';

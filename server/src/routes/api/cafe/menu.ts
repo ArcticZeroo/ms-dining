@@ -6,7 +6,7 @@ import {
 	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/dist/models/http.js';
 import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
-import { isAnyCafeCurrentlyUpdating, isCafeCurrentlyUpdating } from '../../../api/cafe/cache/update.js';
+import { isAnyCafeCurrentlyUpdating, isCafeCurrentlyUpdating } from '../../../api/cafe/job/update.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
