@@ -26,7 +26,7 @@ interface IEmbeddingsStationWork {
 interface IEmbeddingsCafeWork {
     entityType: SearchEntityType.cafe;
     item: ICafe;
-    groupName: string;
+    groupId: string;
 }
 
 type EmbeddingsWorkItem = IEmbeddingsMenuItemWork | IEmbeddingsStationWork | IEmbeddingsCafeWork;
@@ -58,7 +58,7 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
         } else if (entry.entityType === SearchEntityType.station) {
             await embedStation(entry.item);
         } else if (entry.entityType === SearchEntityType.cafe) {
-            await embedCafe(entry.item, entry.groupName);
+            await embedCafe(entry.item, entry.groupId);
         }
     }
 
@@ -90,8 +90,8 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
             for (const cafe of group.members) {
                 this.add({
                     entityType: SearchEntityType.cafe,
-                    item: cafe,
-                    groupName: group.name,
+                    item:       cafe,
+                    groupId:    group.id,
                 });
             }
         }
