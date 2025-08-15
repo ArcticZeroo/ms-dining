@@ -37,13 +37,7 @@ export const isAnyCafeCurrentlyUpdating = () => {
 }
 
 export const updateCafes = async (callback: () => Promise<void>) => {
-    await updateLock.acquire();
-
-    try {
-        await callback();
-    } finally {
-        updateLock.release();
-    }
+    await updateLock.acquire(callback);
 };
 
 export class DailyCafeUpdateSession {
