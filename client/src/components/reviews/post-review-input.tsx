@@ -4,8 +4,6 @@ import { DiningClient } from '../../api/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/dist/models/http';
 import { fromDateString } from '@msdining/common/dist/util/date-util';
-import { classNames } from '../../util/react.ts';
-import './reviews.css';
 
 interface IPostReviewInputProps {
     menuItemId: string;
@@ -131,9 +129,6 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         }
     }
 
-    const charactersRemaining = REVIEW_MAX_COMMENT_LENGTH_CHARS - comment.length;
-    const shouldShowCharacterCounter = charactersRemaining <= 100;
-
     return (
         <div className="flex-col align-center default-container bg-raised-4">
             <div className="flex">
@@ -154,21 +149,16 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 size="large"
                 onChange={(_, newValue) => onRatingInputChanged(newValue)}
             />
-            <div className="relative">
-                <textarea
-                    id="review-comment"
-                    className="self-stretch"
-                    disabled={isCurrentlyMakingRequest}
-                    placeholder="Comments (optional)"
-                    value={comment}
-                    onChange={onCommentInputChanged}
-                    onKeyDown={onCommentInputKeyDown}
-                    rows={5}
-                />
-                <div className={classNames('character-counter invisible-by-default', shouldShowCharacterCounter && 'visible', charactersRemaining < 50 && 'warning')}>
-                    {charactersRemaining} characters remaining
-                </div>
-            </div>
+            <textarea
+                id="review-comment"
+                className="self-stretch"
+                disabled={isCurrentlyMakingRequest}
+                placeholder="Comments (optional)"
+                value={comment}
+                onChange={onCommentInputChanged}
+                onKeyDown={onCommentInputKeyDown}
+                rows={5}
+            />
             <div className="flex">
                 <button
                     className="icon-container default-button default-container"
