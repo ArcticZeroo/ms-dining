@@ -15,16 +15,17 @@ import path from 'path';
 import passport from 'koa-passport';
 import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from './constants/env.js';
 import session from 'koa-session';
+import { PrismaSessionStore } from './util/session-store.js';
 
 const app = new Koa();
 
 if (hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
 	app.keys = [getSessionSecret()];
 	app.use(session({
-		// Monday - Friday
-		maxAge: new Duration({ days: 5 }).inMilliseconds,
+		maxAge: new Duration({ days: 180 }).inMilliseconds,
 		rolling: true,
-		renew: true
+		renew: true,
+		store: new PrismaSessionStore()
 	}, app));
 }
 

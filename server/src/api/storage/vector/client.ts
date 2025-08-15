@@ -4,6 +4,7 @@ import { IVectorSearchResult } from '../../../models/vector.js';
 import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { ICafeStation, ICafe } from '../../../models/cafe.js';
+import { CAFE_GROUP_LIST } from '../../../constants/cafes.js';
 
 const getQueryEmbedding = async (query: string): Promise<Float32Array> => {
 	const existingEmbedding = await SEARCH_THREAD_HANDLER.sendRequest('getQueryEmbedding', query);
@@ -61,8 +62,13 @@ export const embedStation = async (station: ICafeStation) => {
 	});
 }
 
-export const embedCafe = async (cafe: ICafe, groupName?: string) => {
-	const embedding = await retrieveCafeEmbeddings(cafe, groupName);
+export const embedCafe = async (cafe: ICafe, groupId?: string) => {
+	const group = CAFE_GROUP_LIST.find(group => group.id === groupId);
+	if (groupId && !group) {
+		throw new Error(`Group with id "${groupId}" not found`);
+	}
+
+	const embedding = await retrieveCafeEmbeddings(cafe, group);
 	await SEARCH_THREAD_HANDLER.sendRequest('insertSearchEmbedding', {
 		entityType: SearchEntityType.cafe,
 		id:         cafe.id,

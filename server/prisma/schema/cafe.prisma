@@ -158,6 +158,7 @@ model User {
   lastSettingsUpdate DateTime?
 
   reviews Review[]
+  sessions Session[]
 
   @@unique([externalId, provider])
 }
@@ -176,4 +177,13 @@ model Review {
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, menuItemId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime? // null means no expiration - at least until we get ordering there's not really a need for expiration
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
