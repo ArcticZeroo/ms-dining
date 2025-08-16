@@ -40,6 +40,7 @@ const padDateValue = (value: number) => value.toString().padStart(2, '0');
 export const toDateString = (date: Date) => `${date.getFullYear()}-${padDateValue(date.getMonth() + 1)}-${padDateValue(date.getDate())}`;
 export const toMaybeDateString = (date?: Date | undefined | null) => date ? toDateString(date) : undefined;
 export const fromDateString = (dateString: string) => new Date(`${dateString}T00:00`);
+export const getTodayDateString = () => toDateString(new Date());
 
 export const fromMaybeDateString = (value: unknown): Date | null => {
     if (typeof value !== 'string') {

@@ -23,6 +23,10 @@ export interface IMenuItemModifier {
 	choices: IMenuItemModifierChoice[];
 }
 
+export interface ICafeUniquenessData {
+	firstAppearance: string; // date string
+}
+
 export interface IStationUniquenessData {
     isTraveling: boolean;
 	daysThisWeek: number;
@@ -31,6 +35,7 @@ export interface IStationUniquenessData {
 	itemDays: Record<number, number>;
     theme: string | undefined;
     themeItemIds: Array<string>;
+	firstAppearance: string; // date string
 }
 
 export interface IMenuItemReviewHeader {
@@ -55,6 +60,7 @@ export interface IMenuItem extends IMenuItemReviewHeader {
     lastUpdateTime?: Nullable<Date>;
     tags: Set<string>;
     searchTags: Set<string>;
+	firstAppearance?: Nullable<Date>;
 }
 
 export interface IMenuItemDTO extends IMenuItemReviewHeader {

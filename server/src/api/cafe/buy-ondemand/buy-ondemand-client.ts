@@ -26,12 +26,29 @@ export const JSON_HEADERS = {
 	'Content-Type': 'application/json'
 };
 
-export class CafeDiscoverySession {
+export class BuyOnDemandClient {
 	#token: string = '';
 	#csrfToken: string = '';
-	public config: ICafeConfig | undefined;
 
-	constructor(public readonly cafe: ICafe) {
+	// will always be set to non-empty value after initialization
+	// ...this is just easier than extracting request logic to a separate class
+	public config: ICafeConfig = {
+		tenantId:         '',
+		contextId:        '',
+		logoName:         '',
+		displayProfileId: '',
+		storeId:          '',
+		externalName:     ''
+	};
+
+	private constructor(public readonly cafe: ICafe) {
+	}
+
+	public static async createAsync(cafe: ICafe): Promise<BuyOnDemandClient> {
+		const client = new BuyOnDemandClient(cafe);
+		await client.#performLoginAsync();
+		await client.#retrieveConfigDataAsync();
+		return client;
 	}
 
 	protected _getUrl(path: string) {
@@ -48,7 +65,7 @@ export class CafeDiscoverySession {
 		};
 	}
 
-	protected async _requestAsync(path: string, options: any = {}, shouldValidateSuccess: boolean = true) {
+	public async requestAsync(path: string, options: any = {}, shouldValidateSuccess: boolean = true) {
 		try {
 			const id = hat();
 
@@ -87,8 +104,8 @@ export class CafeDiscoverySession {
 		}
 	}
 
-	protected async performLoginAsync() {
-		const response = await this._requestAsync('/login/anonymous',
+	async #performLoginAsync() {
+		const response = await this.requestAsync('/login/anonymous',
 			{
 				method: 'GET'
 			});
@@ -107,7 +124,7 @@ export class CafeDiscoverySession {
 		this.#csrfToken = body.csrfToken;
 	}
 
-	protected async retrieveConfigDataAsync() {
+	async #retrieveConfigDataAsync() {
 		try {
 			const cafeFromDatabase = await CafeStorageClient.retrieveCafeAsync(this.cafe.id);
 			if (cafeFromDatabase != null
@@ -127,7 +144,7 @@ export class CafeDiscoverySession {
 			logError('Unable to retrieve cafe from database:', err);
 		}
 
-		const response = await this._requestAsync('/config');
+		const response = await this.requestAsync('/config');
 
 		const json = await response.json();
 
@@ -166,10 +183,5 @@ export class CafeDiscoverySession {
 		} catch (err) {
 			logError('Unable to save cafe to database:', err);
 		}
-	}
-
-	public async initialize() {
-		await this.performLoginAsync();
-		await this.retrieveConfigDataAsync();
 	}
 }

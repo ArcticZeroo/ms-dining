@@ -41,8 +41,6 @@ export const updateCafes = async (callback: () => Promise<void>) => {
 };
 
 export class DailyCafeUpdateSession {
-    public readonly cafeSessionsById = new Map<string, CafeMenuSession>();
-
     constructor(public readonly daysInFuture: number) {
     }
 
@@ -65,13 +63,7 @@ export class DailyCafeUpdateSession {
 
             logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
 
-            const session = new CafeMenuSession(cafe);
-            await session.initialize();
-            const stations = await session.populateMenuAsync(this.daysInFuture);
-
-            this.cafeSessionsById.set(cafe.id, session);
-
-            return stations;
+            return await CafeMenuSession.retrieveMenuAsync(cafe, this.daysInFuture);
         } catch (err) {
             throw new Error(`Failed to discover menu for "${cafe.name}" @ ${cafe.id} (attempt ${attemptIndex}): ${err}`);
         } finally {

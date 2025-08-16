@@ -1,18 +1,28 @@
-import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { IBuyOnDemandWaitTimeResponse, IBuyOnDemandWaitTimeSection } from '../../../models/buyondemand/cart.js';
 import { IWaitTimeResponse } from '@msdining/common/dist/models/http.js';
+import { ICafe } from '../../../models/cafe.js';
 
 const isDuckTypeWaitTimeSection = (data: unknown): data is IBuyOnDemandWaitTimeSection => isDuckType<IBuyOnDemandWaitTimeSection>(data, { minutes: 'number' });
 
-export class WaitTimeSession extends CafeDiscoverySession {
-    public async retrieveWaitTime(itemCount: number): Promise<IWaitTimeResponse> {
-        const config = this.config;
+export class WaitTimeSession {
+    constructor(readonly client: BuyOnDemandClient) {
+    }
+
+    public static async retrieveWaitTime(cafe: ICafe, itemCount: number): Promise<IWaitTimeResponse> {
+        const client = await BuyOnDemandClient.createAsync(cafe);
+        const session = new WaitTimeSession(client);
+        return session.#retrieveWaitTime(itemCount);
+    }
+
+    async #retrieveWaitTime(itemCount: number): Promise<IWaitTimeResponse> {
+        const config = this.client.config;
         if (!config) {
             throw new Error('Cafe config is not set');
         }
 
-        const response = await this._requestAsync(
+        const response = await this.client.requestAsync(
             `/order/${config.tenantId}/${config.contextId}/getWaitTimeForItems`,
             {
                 method:  'POST',

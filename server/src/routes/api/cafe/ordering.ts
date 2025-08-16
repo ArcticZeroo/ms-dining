@@ -162,9 +162,7 @@ export const registerOrderingRoutes = (parent: Router) => {
                 return ctx.throw(400, 'Invalid item count (not a positive number)');
             }
 
-            const session = new WaitTimeSession(cafe);
-            await session.initialize();
-            const waitTime = await session.retrieveWaitTime(itemCount);
+            const waitTime = await WaitTimeSession.retrieveWaitTime(cafe, itemCount);
             ctx.body = JSON.stringify(waitTime);
         }
     );
@@ -176,14 +174,14 @@ export const registerOrderingRoutes = (parent: Router) => {
         const preparePromises: Array<Promise<void>> = [];
 
         const prepareSession = async (cafeId: string, cartData: ICafeCartData) => {
-            const session = new CafeOrderSession(cartData.cafe, cartData.cartItems);
-            orderSessionsByCafeId.set(cafeId, session);
-            await session.initialize();
+            const session = await CafeOrderSession.createAsync(cartData.cafe, cartData.cartItems);
             await session.populateCart();
 
             if (prepareBeforeOrder) {
                 await session.prepareBeforeOrder();
             }
+
+            orderSessionsByCafeId.set(cafeId, session);
         }
 
         for (const [cafeId, cartData] of cartItemsByCafeId) {

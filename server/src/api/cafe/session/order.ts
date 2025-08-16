@@ -1,14 +1,16 @@
 import { ICardData, ICartItem, SubmitOrderStage } from '@msdining/common/dist/models/cart.js';
 import { getPaymentProcessorTimezoneOffset } from '../../../util/date.js';
 import { logDebug, logError } from '../../../util/log.js';
-import { CafeDiscoverySession, JSON_HEADERS } from './discovery.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
-    IAddToOrderResponse, ICardProcessorPaymentFailureResponse,
+    IAddToOrderResponse,
+    ICardProcessorPaymentFailureResponse,
     ICardProcessorPaymentSuccessResponse,
     IOrderLineItem,
-    IRetrieveCardProcessorTokenResponse, isCardProcessorPaymentFailureResponse
+    IRetrieveCardProcessorTokenResponse,
+    isCardProcessorPaymentFailureResponse
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
@@ -66,7 +68,7 @@ interface ICloseOrderParams extends ISubmitOrderProcessedParams {
     submittedPaymentData: ISubmittedPaymentData;
 }
 
-export class CafeOrderSession extends CafeDiscoverySession {
+export class CafeOrderSession {
     #orderingContext: IOrderingContext = {
         onDemandTerminalId: '',
         onDemandEmployeeId: '',
@@ -86,9 +88,13 @@ export class CafeOrderSession extends CafeDiscoverySession {
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
 
-    constructor(cafe: ICafe, cartItems: ICartItem[]) {
-        super(cafe);
+    constructor(public client: BuyOnDemandClient, cartItems: ICartItem[]) {
         this.#cartItems = cartItems;
+    }
+
+    public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
+        const client = await BuyOnDemandClient.createAsync(cafe);
+        return new CafeOrderSession(client, cartItems);
     }
 
     get lastCompletedStage() {
@@ -116,11 +122,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
-        if (!this.config) {
-            throw new Error('Config is not set!');
-        }
-
-        const response = await this._requestAsync(`/sites/${this.config.contextId}`,
+        const response = await this.client.requestAsync(`/sites/${this.client.config.contextId}`,
             {
                 method:  'GET',
                 headers: JSON_HEADERS
@@ -155,14 +157,14 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
-        const existingOrderingContext = await OrderingClient.retrieveOrderingContextAsync(this.cafe.id);
+        const existingOrderingContext = await OrderingClient.retrieveOrderingContextAsync(this.client.cafe.id);
         if (existingOrderingContext != null) {
             return existingOrderingContext;
         }
 
         const orderingContext = await this._requestOrderingContextAsync();
 
-        await OrderingClient.createOrderingContextAsync(this.cafe.id, orderingContext);
+        await OrderingClient.createOrderingContextAsync(this.client.cafe.id, orderingContext);
 
         return orderingContext;
     }
@@ -219,10 +221,6 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _addItemToCart(cartItem: ICartItem) {
-        if (!this.config) {
-            throw new Error('Config is required to add items to the cart!');
-        }
-
         const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(cartItem.itemId);
 
         if (menuItem == null) {
@@ -277,7 +275,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
             onDemandTerminalId: this.#orderingContext.onDemandTerminalId,
             orderTimeZone:      'PST8PDT',
             properties:         {
-                displayProfileId:          this.config.displayProfileId,
+                displayProfileId:          this.client.config.displayProfileId,
                 employeeId:                this.#orderingContext.onDemandEmployeeId,
                 orderNumberNameSpace:      '941', // todo
                 orderNumberSequenceLength: 4,
@@ -339,7 +337,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
             useIgOrderApi:      true,
         };
 
-        const response = await this._requestAsync(`/order/${this.config.tenantId}/${this.config.contextId}/orders`,
+        const response = await this.client.requestAsync(`/order/${this.client.config.tenantId}/${this.client.config.contextId}/orders`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
@@ -347,8 +345,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     {
                         'item':                              {
                             'id':                         menuItem.id,
-                            'contextId':                  this.config.contextId,
-                            'tenantId':                   this.config.tenantId,
+                            'contextId':                  this.client.config.contextId,
+                            'tenantId':                   this.client.config.tenantId,
                             'itemId':                     '1013121',
                             'name':                       'DELI-SIDE-Pear',
                             'isDeleted':                  false,
@@ -624,13 +622,9 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Order totals cannot be zero');
         }
 
-        if (!this.config) {
-            throw new Error('Config is required to get card processor site token!');
-        }
-
         const nowString = (new Date()).toISOString();
 
-        const response = await this._requestAsync(`/iFrame/token/${this.config.tenantId}`,
+        const response = await this.client.requestAsync(`/iFrame/token/${this.client.config.tenantId}`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
@@ -644,14 +638,14 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     transactionAmount:    this.#orderTotalWithTax.toFixed(2),
                     remainingTipAmount:   '0.00',
                     tipAmount:            '0.00',
-                    style:                `https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false`,
+                    style:                `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false`,
                     multiPaymentAmount:   fixed(this.#orderTotalWithTax, 2),
                     isWindCave:           false,
                     isCyberSource:        false,
                     isCyberSourceWallets: false,
                     language:             'en',
-                    contextId:            this.config.contextId,
-                    profileId:            this.config.displayProfileId,
+                    contextId:            this.client.config.contextId,
+                    profileId:            this.client.config.displayProfileId,
                     profitCenterId:       this.#orderingContext.profitCenterId,
                     processButtonText:    'PROCESS',
                     terminalId:           this.#orderingContext.onDemandTerminalId
@@ -670,12 +664,12 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private _getCardProcessorUrl(token: string) {
-        if (!this.config) {
+        if (!this.client.config) {
             throw new Error('Config is required to get card processor url!');
         }
 
         // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
-        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`;
+        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`;
     }
 
     private async _parseCreditProcessorResponse<T>(response: Awaited<ReturnType<typeof fetch>>): Promise<T> {
@@ -747,10 +741,6 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _submitPaymentToCardProcessor(token: string, cardData: ICardData): Promise<ISubmittedPaymentData> {
-        if (!this.config) {
-            throw new Error('Config is required to submit order to card processor!');
-        }
-
         const response = await this._makeCardProcessorRequest(
             token,
             'https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3',
@@ -806,23 +796,19 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _sendPhoneConfirmation(phoneData: PhoneValidResult) {
-        if (!this.config) {
-            throw new Error('Config is required to send phone confirmation!');
-        }
-
-        await this._requestAsync(`/communication/sendSMSReceipt`,
+        await this.client.requestAsync(`/communication/sendSMSReceipt`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    contextId:         this.config.contextId,
+                    contextId:         this.client.config.contextId,
                     orderId:           this.#orderNumber,
                     sendOrderTo:       phoneData.phoneNumber,
                     storeInfo:         {
-                        businessContextId:       this.config.contextId,
-                        tenantId:                this.config.tenantId,
-                        storeInfoId:             this.config.storeId,
-                        storeName:               this.cafe.name,
+                        businessContextId:       this.client.config.contextId,
+                        tenantId:                this.client.config.tenantId,
+                        storeInfoId:             this.client.config.storeId,
+                        storeName:               this.client.cafe.name,
                         timezone:                'PST8PDT',
                         properties:              {
                             selectedLanguage:        'en_US',
@@ -875,11 +861,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
     }
 
     private async _retrieveProfitCenterName(profitCenterId: string): Promise<string> {
-        if (!this.config) {
-            throw new Error('Config is required to retrieve profit center name!');
-        }
-
-        const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/profitCenter/${profitCenterId}`,
+        const response = await this.client.requestAsync(`/sites/${this.client.config.tenantId}/${this.client.config.contextId}/profitCenter/${profitCenterId}`,
             {
                 method: 'GET'
             });
@@ -896,13 +878,9 @@ export class CafeOrderSession extends CafeDiscoverySession {
             throw new Error('Order ID is not set!');
         }
 
-        if (this.config == null) {
-            throw new Error('Config is not set!');
-        }
-
         const nowString = (new Date()).toISOString();
 
-        await this._requestAsync(
+        await this.client.requestAsync(
             `/order/${this.#orderId}/processPaymentAndClosedOrder`,
             {
                 method: 'POST',
@@ -910,7 +888,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     amHereConfig:                    {
                         isCurbsidePickup: false,
                         lateTolerance:    5,
-                        origin:           `https://${this.cafe.id}.buy-ondemand.com`
+                        origin:           `https://${this.client.cafe.id}.buy-ondemand.com`
                     },
                     authorizedAmount:                this.orderTotalWithTax.toString(),
                     calorieTotal:                    {
@@ -918,7 +896,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         maxCalorie:  0
                     },
                     capacitySuggestionPerformed:     false,
-                    contextId:                       this.config.contextId,
+                    contextId:                       this.client.config.contextId,
                     currencyDetails:                 {
                         currencyCode:          'USD',
                         currencyCultureName:   'en-US',
@@ -950,16 +928,16 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         nameString:         `${alias} `
                     },
                     discountInfo:                    [],
-                    displayProfileId:                this.config.displayProfileId,
+                    displayProfileId:                this.client.config.displayProfileId,
                     emailInfo:                       {
                         featureEnabled:     true,
                         customerAddress:    [], // todo, maybe throw an email in here
                         headerText:         'Email receipt',
                         instructionText:    'Please use your MICROSOFT email for receipt & reception ',
-                        receiptFooter:      'Thanks for using msdining.frozor.io!',
+                        receiptFooter:      'Thanks for using dining.frozor.io!',
                         receiptFromAddress: 'noreply@rguest.com',
-                        receiptFromName:    this.cafe.name,
-                        receiptSubject:     `Receipt from ${this.cafe.name}`,
+                        receiptFromName:    this.client.cafe.name,
+                        receiptSubject:     `Receipt from ${this.client.cafe.name}`,
                     },
                     engageAccrualEnabled:            false,
                     firstName:                       alias,
@@ -1002,12 +980,12 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     locizeConfig:                    {
                         currentLanguage:     'en',
                         shouldUseLocizeText: false,
-                        domain:              `${this.cafe.id}.buy-ondemand.com`,
+                        domain:              `${this.client.cafe.id}.buy-ondemand.com`,
                         storeInfo:           {
-                            businessContextId:       this.config.contextId,
-                            tenantId:                this.config.tenantId,
-                            storeInfoId:             this.config.storeId,
-                            storeName:               this.cafe.name,
+                            businessContextId:       this.client.config.contextId,
+                            tenantId:                this.client.config.tenantId,
+                            storeInfoId:             this.client.config.storeId,
+                            storeName:               this.client.cafe.name,
                             timezone:                'PST8PDT',
                             properties:              {
                                 selectedLanguage:        'en_US',
@@ -1089,8 +1067,8 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     order:                           {
                         orderId:      this.#orderId,
                         version:      1,
-                        tenantId:     this.config.tenantId,
-                        contextId:    this.config.contextId,
+                        tenantId:     this.client.config.tenantId,
+                        contextId:    this.client.config.contextId,
                         created:      nowString,
                         lastUpdated:  nowString,
                         orderState:   'OPEN',
@@ -1099,7 +1077,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                         properties:   {
                             orderNumberSequenceLength: '4',
                             profitCenterId:            this.#orderingContext.profitCenterId,
-                            displayProfileId:          this.config.displayProfileId,
+                            displayProfileId:          this.client.config.displayProfileId,
                             orderNumberNameSpace:      this.#orderingContext.onDemandTerminalId,
                             priceLevelId:              this.#orderingContext.storePriceLevel,
                             employeeId:                this.#orderingContext.onDemandEmployeeId,
@@ -1114,15 +1092,15 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     orderVersion:                    1,
                     paymentType:                     null,
                     processPaymentAsExternalPayment: false,
-                    profileId:                       this.config.displayProfileId,
+                    profileId:                       this.client.config.displayProfileId,
                     profitCenterId:                  this.#orderingContext.profitCenterId,
                     profitCenterName:                this.#orderingContext.profitCenterName,
                     receiptInfo:                     {
                         orderData: {
                             orderId:      this.#orderId,
                             version:      1,
-                            tenantId:     this.config.tenantId,
-                            contextId:    this.config.contextId,
+                            tenantId:     this.client.config.tenantId,
+                            contextId:    this.client.config.contextId,
                             created:      nowString,
                             lastUpdated:  nowString,
                             orderState:   'OPEN',
@@ -1135,11 +1113,11 @@ export class CafeOrderSession extends CafeDiscoverySession {
                     scannedItemOrder:                false,
                     scheduledDay:                    0,
                     shouldRefundOnFailure:           true, // false from the real thing
-                    siteId:                          this.config.contextId,
+                    siteId:                          this.client.config.contextId,
                     storePriceLevel:                 this.#orderingContext.storePriceLevel,
                     stripeTransactionData:           null,
                     subtotal:                        this.#orderTotalWithoutTax.toString(),
-                    tenantId:                        this.config.tenantId,
+                    tenantId:                        this.client.config.tenantId,
                     terminalId:                      this.#orderingContext.onDemandTerminalId,
                     tipAmount:                       0,
                     tipPercent:                      0,
@@ -1158,7 +1136,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
                             isCyberSourceWallets: false,
                             language:             'en',
                             apiToken:             this.#cardProcessorToken,
-                            payTenantId:          this.config.tenantId,
+                            payTenantId:          this.client.config.tenantId,
                             accountNumberMasked:  submittedPaymentData.accountNumberMasked,
                             cardIssuer:           submittedPaymentData.cardIssuer,
                             expirationYearMonth:  `${cardData.expirationYear}${cardData.expirationMonth.padStart(2, '0')}`,
@@ -1187,7 +1165,7 @@ export class CafeOrderSession extends CafeDiscoverySession {
         try {
             await callback();
         } catch (err) {
-            logError(`{${this.cafe.name}} Failed after stage ${this.#lastCompletedStage}:`, err);
+            logError(`{${this.client.cafe.name}} Failed after stage ${this.#lastCompletedStage}:`, err);
         }
     }
 

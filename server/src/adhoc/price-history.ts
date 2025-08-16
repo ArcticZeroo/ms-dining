@@ -3,7 +3,7 @@ import { ICafe } from '../models/cafe.js';
 import { usePrismaClient } from '../api/storage/client.js';
 import { ALL_CAFES } from '../constants/cafes.js';
 import * as fs from 'node:fs/promises';
-import { JSON_HEADERS } from '../api/cafe/session/discovery.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { ICafeMenuItemListResponseItem } from '../models/buyondemand/responses.js';
 
@@ -109,16 +109,16 @@ const retrieveAllStationNamesById = async (): Promise<Map<string, string>> => {
 }
 
 class CafePriceHistorySession extends CafeMenuSession {
-	constructor(cafe: ICafe) {
-		super(cafe);
+	constructor(client: BuyOnDemandClient) {
+		super(client, 0 /*daysInFuture*/);
+	}
+
+	public static async createAsync(cafe: ICafe): Promise<CafePriceHistorySession> {
+		return new CafePriceHistorySession(await BuyOnDemandClient.createAsync(cafe));
 	}
 
 	async _hackyRetrieveMenuItemDetailsForStation(stationId: string, stationMenuId: string, itemIds: string[]) {
-		if (!this.config) {
-			throw new Error('Config is required to retrieve menu item details!');
-		}
-
-		const response = await this._requestAsync(`/sites/${this.config.tenantId}/${this.config.contextId}/kiosk-items/get-items`,
+		const response = await this.client.requestAsync(`/sites/${this.client.config.tenantId}/${this.client.config.contextId}/kiosk-items/get-items`,
 			{
 				method:  'POST',
 				headers: JSON_HEADERS,
@@ -151,7 +151,7 @@ class CafePriceHistorySession extends CafeMenuSession {
 
 	async retrieveStationItemPricesAsync(stationId: string, stationMenuId: string, itemIds: Set<string>): Promise<MenuItemPriceMap> {
 		if (itemIds.size === 0) {
-			console.warn(`[${this.cafe.name}] Station ${stationId} has no items to retrieve`);
+			console.warn(`[${this.client.cafe.name}] Station ${stationId} has no items to retrieve`);
 			return new Map();
 		}
 
@@ -179,7 +179,7 @@ class CafePriceHistorySession extends CafeMenuSession {
 		const menuId = stations[0]?.menuId;
 
 		if (!menuId) {
-			console.warn(`Unable to find menu ID for stations in cafe ${this.cafe.name}`);
+			console.warn(`Unable to find menu ID for stations in cafe ${this.client.cafe.name}`);
 			return new Map();
 		}
 
@@ -203,9 +203,7 @@ const retrievePriceHistoryForCafeAsync = async (allCafeItems: AllCafeItemsByStat
 		return new Map();
 	}
 
-	const session = new CafePriceHistorySession(cafe);
-	await session.initialize();
-
+	const session = await CafePriceHistorySession.createAsync(cafe);
 	return await session.retrieveMenuPricesAsync(itemsByStation);
 }
 
