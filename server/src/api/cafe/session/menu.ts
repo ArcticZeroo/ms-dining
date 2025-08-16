@@ -27,7 +27,6 @@ export class CafeMenuSession {
 		return session.#retrieveMenuAsync();
 	}
 
-
 	async #retrieveModifierDetailsAsync(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemModifier>> {
 		// In case parsing is weird, don't treat null as a reason to skip retrieving
 		if (jsonItem.isItemCustomizationEnabled === false) {

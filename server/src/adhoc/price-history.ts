@@ -6,6 +6,7 @@ import * as fs from 'node:fs/promises';
 import { BuyOnDemandClient, JSON_HEADERS } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { ICafeMenuItemListResponseItem } from '../models/buyondemand/responses.js';
+import { retrieveStationListAsync } from '../api/cafe/buy-ondemand/stations.js';
 
 const OUTPUT_FILE_NAME = 'price-history.csv';
 
@@ -108,9 +109,8 @@ const retrieveAllStationNamesById = async (): Promise<Map<string, string>> => {
 	return stationNamesById;
 }
 
-class CafePriceHistorySession extends CafeMenuSession {
-	constructor(client: BuyOnDemandClient) {
-		super(client, 0 /*daysInFuture*/);
+class CafePriceHistorySession {
+	constructor(public readonly client: BuyOnDemandClient, public readonly daysInFuture: number = 0) {
 	}
 
 	public static async createAsync(cafe: ICafe): Promise<CafePriceHistorySession> {
@@ -175,7 +175,7 @@ class CafePriceHistorySession extends CafeMenuSession {
 	}
 
 	async retrieveMenuPricesAsync(itemsByStationId: ItemsByStationMap): Promise<CafeItemPriceMap> {
-		const stations = await this.retrieveStationListAsync();
+		const stations = await retrieveStationListAsync(this.client, this.daysInFuture);
 		const menuId = stations[0]?.menuId;
 
 		if (!menuId) {
