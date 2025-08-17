@@ -1,12 +1,10 @@
 import Router from '@koa/router';
-import { IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { ICafeOverviewStation, IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import {
 	ICreateReviewRequest,
 	MenuResponse,
 	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/dist/models/http.js';
-import { ERROR_BODIES } from '@msdining/common/dist/responses.js';
-import { isAnyCafeCurrentlyUpdating, isCafeCurrentlyUpdating } from '../../../api/cafe/job/update.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
@@ -30,6 +28,8 @@ import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/c
 import { toDateString } from '@msdining/common/dist/util/date-util.js';
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { retrieveDailyCafeMenuAsync } from '../../../api/cache/daily-menu.js';
+import { retrieveUniquenessDataForCafe } from '../../../api/cache/daily-uniqueness.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -112,12 +112,6 @@ export const registerMenuRoutes = (parent: Router) => {
 		const dateString = getDateStringForMenuRequest(ctx);
 		if (dateString == null) {
 			ctx.body = JSON.stringify([]);
-			return;
-		}
-
-		if (isCafeCurrentlyUpdating(dateString, cafe)) {
-			ctx.status = 503;
-			ctx.body = ERROR_BODIES.menusCurrentlyUpdating;
 			return;
 		}
 
@@ -289,12 +283,10 @@ export const registerMenuRoutes = (parent: Router) => {
 		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
 		memoizeResponseBodyByQueryParams(),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const menuStations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString);
-
-			let uniquenessData: Map<string, IStationUniquenessData> | null = null;
-			if (!isAnyCafeCurrentlyUpdating() && menuStations.length > 0) {
-				uniquenessData = await DailyMenuStorageClient.retrieveUniquenessDataForCafe(cafe.id, dateString);
-			}
+			const [menuStations, uniquenessData] = await Promise.all([
+				retrieveDailyCafeMenuAsync(cafe.id, dateString),
+				retrieveUniquenessDataForCafe(cafe.id, dateString)
+			]);
 
 			ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
 		}));
@@ -303,7 +295,16 @@ export const registerMenuRoutes = (parent: Router) => {
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
 		memoizeResponseBodyByQueryParams(),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const overviewStations = await DailyMenuStorageClient.retrieveDailyMenuOverviewAsync(cafe.id, dateString);
+			const [stationHeaders, uniquenessData] = await Promise.all([
+				DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
+				retrieveUniquenessDataForCafe(cafe.id, dateString)
+			]);
+
+			const overviewStations: ICafeOverviewStation[] = stationHeaders.map(station => ({
+				...station,
+				uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+			}));
+
 			ctx.body = jsonStringifyWithoutNull(overviewStations);
 		}));
 

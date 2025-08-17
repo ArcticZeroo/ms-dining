@@ -7,34 +7,15 @@ import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
-import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 import { Lock, Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
-import { saveSessionAsync } from './storage.js';
+import { saveDailyMenuAsync } from './storage.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { CafeMenuSession } from '../session/menu.js';
 
 const updateLock = new Lock();
 export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryDelayMs = 1000;
-
-const dateStringsCurrentlyUpdatingByCafeId = new Map<string /*cafeId*/, Set<string /*dateString*/>>();
-
-const retrieveUpdatingDateStringsForCafe = (cafe: ICafe) => {
-    if (!dateStringsCurrentlyUpdatingByCafeId.has(cafe.id)) {
-        dateStringsCurrentlyUpdatingByCafeId.set(cafe.id, new Set());
-    }
-
-    return dateStringsCurrentlyUpdatingByCafeId.get(cafe.id)!;
-}
-
-export const isCafeCurrentlyUpdating = (dateString: string, cafe: ICafe) => {
-    return dateStringsCurrentlyUpdatingByCafeId.get(cafe.id)?.has(dateString) ?? false;
-}
-
-export const isAnyCafeCurrentlyUpdating = () => {
-    return dateStringsCurrentlyUpdatingByCafeId.size > 0;
-}
 
 export const updateCafes = async (callback: () => Promise<void>) => {
     await updateLock.acquire(callback);
@@ -57,7 +38,7 @@ export class DailyCafeUpdateSession {
         await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
     }
 
-    private async _doDiscoverCafeAsync(cafe: ICafe, attemptIndex: number) {
+    async #discoverCafeAsync(cafe: ICafe, attemptIndex: number) {
         try {
             await cafeSemaphore.acquire();
 
@@ -71,21 +52,15 @@ export class DailyCafeUpdateSession {
         }
     }
 
-    private async discoverCafeAsync(cafe: ICafe) {
+    async #discoverCafeWithRetriesAsync(cafe: ICafe) {
         try {
-            retrieveUpdatingDateStringsForCafe(cafe).add(this.dateString);
-
-            await DailyMenuStorageClient.deleteDailyMenusAsync(this.dateString, cafe.id);
-
             const stations = await runPromiseWithRetries(
-                (attemptIndex) => this._doDiscoverCafeAsync(cafe, attemptIndex),
+                (attemptIndex) => this.#discoverCafeAsync(cafe, attemptIndex),
                 ENVIRONMENT_SETTINGS.cafeDiscoveryRetryCount,
                 cafeDiscoveryRetryDelayMs
             );
 
-            EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations);
-
-            await saveSessionAsync({
+            await saveDailyMenuAsync({
                 cafe,
                 stations,
                 dateString:                this.dateString,
@@ -93,16 +68,6 @@ export class DailyCafeUpdateSession {
             });
         } catch (err) {
             logError(`{${this.dateString}}`, `Failed to populate cafe ${cafe.name}:`, err);
-        } finally {
-            const updatingDateStrings = retrieveUpdatingDateStringsForCafe(cafe);
-
-            updatingDateStrings.delete(this.dateString);
-
-            if (updatingDateStrings.size === 0) {
-                dateStringsCurrentlyUpdatingByCafeId.delete(cafe.id);
-            }
-
-            DailyMenuStorageClient.invalidateUniquenessData(cafe.id);
         }
     }
 
@@ -125,7 +90,7 @@ export class DailyCafeUpdateSession {
                 continue;
             }
 
-            const discoverPromise = this.discoverCafeAsync(cafe);
+            const discoverPromise = this.#discoverCafeWithRetriesAsync(cafe);
 
             cafePromises.push(discoverPromise);
 

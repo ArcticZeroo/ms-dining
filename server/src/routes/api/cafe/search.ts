@@ -7,7 +7,6 @@ import { ISearchQuery } from '@msdining/common/dist/models/search.js';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { requireNoMenusUpdating } from '../../../middleware/menu.js';
 import {
     attachRouter,
     getEntityTypeAndName,
@@ -31,7 +30,6 @@ export const registerSearchRoutes = (parent: Router) => {
     });
 
     router.post('/favorites',
-        requireNoMenusUpdating,
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.searchFavorites),
         async ctx => {
             const queries = ctx.request.body;
@@ -53,7 +51,6 @@ export const registerSearchRoutes = (parent: Router) => {
     };
 
     router.get('/',
-        requireNoMenusUpdating,
         sendVisitFromQueryParamMiddleware('exp', getApplicationNameForSearch),
         memoizeResponseBodyByQueryParams(),
         async ctx => {
@@ -93,7 +90,6 @@ export const registerSearchRoutes = (parent: Router) => {
         });
 
     router.get('/cheap',
-        requireNoMenusUpdating,
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.cheapItems),
         memoizeResponseBodyByQueryParams(),
         async ctx => {
@@ -133,7 +129,6 @@ export const registerSearchRoutes = (parent: Router) => {
         });
 
     router.get('/visit-history',
-        requireNoMenusUpdating,
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.pattern),
         memoizeResponseBodyByQueryParams(),
         async ctx => {

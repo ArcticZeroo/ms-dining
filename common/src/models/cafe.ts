@@ -23,10 +23,6 @@ export interface IMenuItemModifier {
 	choices: IMenuItemModifierChoice[];
 }
 
-export interface ICafeUniquenessData {
-	firstAppearance: string; // date string
-}
-
 export interface IStationUniquenessData {
     isTraveling: boolean;
 	daysThisWeek: number;

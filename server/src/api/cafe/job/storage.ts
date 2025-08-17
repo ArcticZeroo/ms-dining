@@ -3,6 +3,7 @@ import { logError } from '../../../util/log.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
+import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 
 interface ISaveStationParams {
     cafe: ICafe;
@@ -11,7 +12,8 @@ interface ISaveStationParams {
     shouldUpdateExistingItems: boolean;
 }
 
-const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistingItems }: ISaveStationParams) => {
+// Saves only the "static" data for a station (including menu items), but not the daily menu itself.
+const saveStaticStationDataAsync = async ({ cafe, dateString, station, shouldUpdateExistingItems }: ISaveStationParams) => {
     try {
         await StationStorageClient.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
     } catch (err) {
@@ -28,16 +30,6 @@ const saveStationAsync = async ({ cafe, dateString, station, shouldUpdateExistin
             return;
         }
     }
-
-    try {
-        await DailyMenuStorageClient.createDailyStationMenuAsync({
-            cafeId: cafe.id,
-            station,
-            dateString
-        });
-    } catch (err) {
-        logError('Unable to save daily station menu to database:', err);
-    }
 }
 
 interface ISaveSessionParams {
@@ -47,19 +39,27 @@ interface ISaveSessionParams {
     shouldUpdateExistingItems: boolean;
 }
 
-export const saveSessionAsync = async ({
+export const saveDailyMenuAsync = async ({
                                            cafe,
                                            dateString,
                                            stations,
                                            shouldUpdateExistingItems
                                        }: ISaveSessionParams) => {
+    EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations);
+
     // Only update existing items if we're looking at the menu for today
     for (const station of stations) {
-        await saveStationAsync({
+        await saveStaticStationDataAsync({
             station,
             cafe,
             dateString,
             shouldUpdateExistingItems
         });
     }
+
+    await DailyMenuStorageClient.publishDailyStationMenuAsync({
+        cafe,
+        dateString,
+        stations
+    });
 }
