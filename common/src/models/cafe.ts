@@ -57,6 +57,7 @@ export interface IMenuItem extends IMenuItemReviewHeader {
     tags: Set<string>;
     searchTags: Set<string>;
 	firstAppearance?: Nullable<Date>;
+	hasRetrievedThumbnailData?: boolean;
 }
 
 export interface IMenuItemDTO extends IMenuItemReviewHeader {

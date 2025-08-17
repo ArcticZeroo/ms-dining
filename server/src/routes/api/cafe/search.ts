@@ -42,7 +42,7 @@ export const registerSearchRoutes = (parent: Router) => {
 
             const date = DateUtil.fromMaybeDateString(ctx.query.date);
             const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries, date);
-            serializeSearchResults(ctx, searchResultsByIdPerEntityType);
+            await serializeSearchResults(ctx, searchResultsByIdPerEntityType);
         });
 
     const getApplicationNameForSearch = (isExplore: string | undefined) => {
@@ -84,7 +84,7 @@ export const registerSearchRoutes = (parent: Router) => {
                 // and the client hasn't told us to filter out results without appearances (e.g. search ideas)
                 const allowResultsWithoutAppearances = date == null && supportsVersionTag(ctx, VERSION_TAG.searchResultsNotHereThisWeek) && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
                 const results = await SearchManager.searchVector(searchQuery, date, allowResultsWithoutAppearances);
-                serializeSearchResults(ctx, results);
+                await serializeSearchResults(ctx, results);
                 const endTime = Date.now();
                 logDebug(`Search for ${searchQuery} took ${endTime - startTime}ms`);
                 ctx.set('X-Remaining-Embeddings', String(EMBEDDINGS_WORKER_QUEUE.remainingItems));
@@ -95,7 +95,7 @@ export const registerSearchRoutes = (parent: Router) => {
                     isExact
                 );
 
-                serializeSearchResults(ctx, results);
+                await serializeSearchResults(ctx, results);
             }
 
         });

@@ -17,6 +17,8 @@ import { StationStorageClient } from './clients/station.js';
 import { CafeStorageClient } from './clients/cafe.js';
 import { logDebug } from '../../util/log.js';
 import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../constants/cafes.js';
+import { MaybePromise } from '../../models/async.js';
+import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../worker/interface/thumbnail.js';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
@@ -61,7 +63,7 @@ interface IAddResultParamsBase {
     station: Nullable<string>;
     price: Nullable<number>;
     description: Nullable<string>;
-    imageUrl: Nullable<string>;
+    imageUrl: Nullable<string> | (() => MaybePromise<Nullable<string>>);
     tags: Nullable<Set<string>>;
     searchTags: Nullable<Set<string>>;
     matchedModifiers?: Map<string, Set<string>>;
@@ -90,6 +92,13 @@ interface ISimilarEntitySearchParams {
     entityType: SearchEntityType;
     entityName: string;
     date: Date;
+}
+
+const createMenuItemImageUrlGetter = (menuItem: IMenuItem): (() => MaybePromise<Nullable<string>>) => {
+    return async () => {
+        await ensureThumbnailDataHasBeenRetrievedAsync(menuItem);
+        return getThumbnailUrl(menuItem);
+    };
 }
 
 class SearchResults {
@@ -472,8 +481,8 @@ export abstract class SearchManager {
                         price:       menuItem.price,
                         tags:        menuItem.tags,
                         searchTags:  menuItem.searchTags,
-                        imageUrl:    getThumbnailUrl(menuItem),
                         station:     stationData.name,
+                        imageUrl:    createMenuItemImageUrlGetter(menuItem),
                         matchReasons,
                         matchedModifiers
                     });
@@ -585,7 +594,7 @@ export abstract class SearchManager {
                             price:            menuItem.price,
                             tags:             menuItem.tags,
                             searchTags:       menuItem.searchTags,
-                            imageUrl:         getThumbnailUrl(menuItem),
+                            imageUrl:         createMenuItemImageUrlGetter(menuItem),
                             station:          station.name,
                             matchReasons:     matchReasons,
                             matchedModifiers: matchedModifiers,
@@ -758,7 +767,7 @@ export abstract class SearchManager {
                         resultsByPrice.set(menuItem.price, {
                             name:        menuItem.name,
                             description: menuItem.description,
-                            imageUrl:    getThumbnailUrl(menuItem),
+                            imageUrl:    createMenuItemImageUrlGetter(menuItem),
                             price:       menuItem.price,
                             // I guess we'll assume that the calories are the same across cafes with the same menu item
                             // price, since those are presumably the same item? Not sure how to deal with this.

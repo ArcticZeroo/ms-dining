@@ -12,7 +12,6 @@ import { logDebug } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
-import { retrieveThumbnailData } from '../../../worker/client/thumbnail.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
 
@@ -277,20 +276,20 @@ export abstract class MenuItemStorageClient {
 	// might not actually be necessary since there is so little data in general.
 	private static async _retrieveReviewHeaderAsync(normalizedName: string): Promise<IMenuItemReviewHeader> {
 		const stats = await usePrismaClient(prismaClient => prismaClient.review.aggregate({
-			where: {
+			where:  {
 				menuItem: {
 					normalizedName
 				}
 			},
 			_count: true,
-			_avg: {
+			_avg:   {
 				rating: true
 			}
 		}));
 
 		return {
 			totalReviewCount: stats._count,
-			overallRating: stats._avg.rating ?? 0
+			overallRating:    stats._avg.rating ?? 0
 		};
 	}
 
@@ -339,10 +338,7 @@ export abstract class MenuItemStorageClient {
 			});
 		}
 
-		const [thumbnailData, reviewHeader] = await Promise.all([
-			retrieveThumbnailData(menuItem),
-			MenuItemStorageClient._retrieveReviewHeaderAsync(menuItem.normalizedName)
-		]);
+		const reviewHeader = await MenuItemStorageClient._retrieveReviewHeaderAsync(menuItem.normalizedName);
 
 		return {
 			id:             menuItem.id,
@@ -357,8 +353,8 @@ export abstract class MenuItemStorageClient {
 			receiptText:    menuItem.externalReceiptText,
 			tags:           deserializeMenuItemTags(menuItem.tags),
 			searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
+			hasThumbnail:   false,
 			...reviewHeader,
-			...thumbnailData,
 			modifiers
 		};
 	}

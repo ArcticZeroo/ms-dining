@@ -1,5 +1,6 @@
 import { SearchTypes } from '@msdining/common';
 import { Nullable } from './util.js';
+import { MaybePromise } from './async.js';
 
 // Needs to be separate from ISearchResult since we use a set of dateStrings instead of an array of dates.
 export interface IServerSearchResult {
@@ -8,7 +9,7 @@ export interface IServerSearchResult {
     locationDatesByCafeId: Map<string, Set<string>>;
     priceByCafeId: Map<string, number>;
     stationByCafeId: Map<string, string>;
-    imageUrl?: Nullable<string>;
+    imageUrl?: Nullable<string> | (() => MaybePromise<Nullable<string>>);
     name: string;
     description?: Nullable<string>;
     tags?: Set<string>;
@@ -20,7 +21,7 @@ export interface IServerSearchResult {
 
 export interface ICheapItemSearchResult {
     locationDatesByCafeId: Map<string, Set<string>>;
-    imageUrl?: Nullable<string>;
+    imageUrl?: Nullable<string> | (() => MaybePromise<Nullable<string>>);
     name: string;
     description?: Nullable<string>;
     price: number;

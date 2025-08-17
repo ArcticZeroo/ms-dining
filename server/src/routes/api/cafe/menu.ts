@@ -30,6 +30,8 @@ import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { retrieveDailyCafeMenuAsync } from '../../../api/cache/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../api/cache/daily-uniqueness.js';
+import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interface/thumbnail.js';
+import { logDebug } from '../../../util/log.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -44,41 +46,49 @@ export const registerMenuRoutes = (parent: Router) => {
 		prefix: '/menu'
 	});
 
-	const serializeMenuItem = (menuItem: IMenuItem): IMenuItemDTO => ({
-		...menuItem,
-		tags:       Array.from(menuItem.tags),
-		searchTags: Array.from(menuItem.searchTags)
-	});
+	const serializeMenuItem = async (menuItem: IMenuItem): Promise<IMenuItemDTO> => {
+		await ensureThumbnailDataHasBeenRetrievedAsync(menuItem);
 
-	const convertMenuToSerializable = (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): MenuResponse => {
+		return ({
+			...menuItem,
+			tags:       Array.from(menuItem.tags),
+			searchTags: Array.from(menuItem.searchTags)
+		});
+	};
+
+	const convertMenuToSerializable = async (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): Promise<MenuResponse> => {
 		const menusByStation: MenuResponse = [];
 
-		for (const station of menuStations) {
+		const addStation = async (station: ICafeStation): Promise<void> => {
 			const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
 
 			const itemsByCategory: Record<string, Array<IMenuItemDTO>> = {};
 
-			for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
-				const itemsForCategory: IMenuItemDTO[] = [];
+			const serializeCategory = async (categoryName: string, categoryItemIds: string[]) => {
+				const serializedItems: Array<Promise<IMenuItemDTO>> = [];
 
 				for (const itemId of categoryItemIds) {
-					// Expected; Some items are 86-ed
 					if (!station.menuItemsById.has(itemId)) {
+						logDebug(`Menu item with id ${itemId} not found in station ${station.name}. Skipping.`);
 						continue;
 					}
 
-					itemsForCategory.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
+					serializedItems.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
 				}
 
-				if (itemsForCategory.length === 0) {
-					continue;
-				}
-
-				itemsByCategory[categoryName] = itemsForCategory;
+				itemsByCategory[categoryName] = await Promise.all(serializedItems);
 			}
 
+			const categoryPromises: Array<Promise<void>> = [];
+
+			for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
+				categoryPromises.push(serializeCategory(categoryName, categoryItemIds));
+			}
+
+			await Promise.all(categoryPromises);
+
 			if (Object.keys(itemsByCategory).length === 0) {
-				continue;
+				return;
 			}
 
 			menusByStation.push({
@@ -88,6 +98,14 @@ export const registerMenuRoutes = (parent: Router) => {
 				uniqueness: uniquenessDataForStation,
 			});
 		}
+
+		const stationPromises: Array<Promise<void>> = [];
+
+		for (const station of menuStations) {
+			stationPromises.push(addStation(station));
+		}
+
+		await Promise.all(stationPromises);
 
 		return menusByStation;
 	};

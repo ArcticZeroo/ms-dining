@@ -70,17 +70,21 @@ export const serializeMapOfStringToSet = (deserialized: Map<string, Set<string>>
 	return serialized;
 };
 
-const serializeSearchResult = (searchResult: IServerSearchResult, allowModifiers: boolean): ISearchResponseResult => {
+const serializeSearchResult = async (searchResult: IServerSearchResult, allowModifiers: boolean): Promise<ISearchResponseResult> => {
 	const matchReasons = new Set(searchResult.matchReasons);
 	if (!allowModifiers) {
 		matchReasons.delete(SearchMatchReason.modifier);
 	}
 
+	const imageUrl = typeof searchResult.imageUrl === 'function'
+		? await searchResult.imageUrl()
+		: searchResult.imageUrl;
+
 	return ({
 		type:             searchResult.type,
 		name:             searchResult.name,
 		description:      searchResult.description || undefined,
-		imageUrl:         getStationLogoUrl(searchResult.name, searchResult.imageUrl) || undefined,
+		imageUrl:         getStationLogoUrl(searchResult.name, imageUrl) || undefined,
 		locations:        serializeMapOfStringToSet(searchResult.locationDatesByCafeId),
 		prices:           Object.fromEntries(searchResult.priceByCafeId),
 		stations:         Object.fromEntries(searchResult.stationByCafeId),
@@ -93,17 +97,17 @@ const serializeSearchResult = (searchResult: IServerSearchResult, allowModifiers
 	});
 };
 
-export const serializeSearchResults = (ctx: Koa.Context, searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
-	const searchResults = [];
+export const serializeSearchResults = async (ctx: Koa.Context, searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
+	const searchResultPromises: Array<Promise<ISearchResponseResult>> = [];
 	const areModifiersAllowed = supportsVersionTag(ctx, VERSION_TAG.modifiersInSearchResults);
 
 	for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
 		for (const searchResult of searchResultsById.values()) {
-			searchResults.push(serializeSearchResult(searchResult, areModifiersAllowed));
+			searchResultPromises.push(serializeSearchResult(searchResult, areModifiersAllowed));
 		}
 	}
 
-	ctx.body = jsonStringifyWithoutNull(searchResults);
+	ctx.body = jsonStringifyWithoutNull(await Promise.all(searchResultPromises));
 };
 
 export const requireDevKey: Middleware = async (ctx, next) => {

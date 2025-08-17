@@ -62,7 +62,7 @@ export const registerRecommendationsRoutes: RouteBuilder = (parent) => {
 		}
 
 		const rawResults = await SearchManager.searchForSimilarEntities({ entityName, entityType, date });
-		serializeSearchResults(ctx, trimResults(rawResults, limit));
+		await serializeSearchResults(ctx, trimResults(rawResults, limit));
 	});
 
 	router.get('/queries', async ctx => {
