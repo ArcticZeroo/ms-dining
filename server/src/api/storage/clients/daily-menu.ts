@@ -9,6 +9,7 @@ import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { IEntityVisitData } from '@msdining/common/dist/models/pattern.js';
 import { IMenuPublishEvent } from '../../../models/storage-events.js';
 import { STORAGE_EVENTS } from '../events.js';
+import Duration from '@arcticzeroo/duration';
 
 const areMenuItemsByCategoryNameEqual = (a: Map<string, Array<string>>, b: Map<string, Array<string>>) => {
 	if (a.size !== b.size) {
@@ -554,7 +555,10 @@ export abstract class DailyMenuStorageClient {
 		throw new Error('Unsupported entity type');
 	}
 
-	public static async retrieveEntityVisits(entityType: SearchEntityType, entityName: string, startDate: Date, endDate: Date) {
+	public static async retrieveEntityVisits(entityType: SearchEntityType, entityName: string) {
+		const endDate = new Date();
+		const startDate = DateUtil.addDurationToDate(endDate, new Duration({ days: -31 }));
+
 		const visits = await this.retrieveEntityVisitsInner(entityType, entityName, startDate, endDate);
 
 		const seenVisits = new Set<string>();

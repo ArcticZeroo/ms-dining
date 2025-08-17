@@ -26,7 +26,8 @@ for (const cafe of CAFES_BY_ID.values()) {
 
 setInterval(() => {
 	for (const cache of MENU_CACHE_BY_CAFE.values()) {
-		cache.clean();
+		cache.clean()
+			.catch(err => logError(`Failed to clean menu cache: ${err}`));
 	}
 }, MENU_CACHE_CLEANUP_INTERVAL.inMilliseconds);
 
@@ -39,9 +40,13 @@ STORAGE_EVENTS.on('menuPublished', (event) => {
 		return;
 	}
 
-	cache.set(dateString, menu);
-
-	CACHE_EVENTS.emit('menuPublished', event);
+	cache.set(dateString, menu)
+		.then(() => {
+			CACHE_EVENTS.emit('menuPublished', event);
+		})
+		.catch(err => {
+			logError(`Failed to update menu cache for cafe "${cafe.id}" on date "${dateString}": ${err}`);
+		});
 });
 
 export const retrieveDailyCafeMenuAsync = async (cafeId: string, dateString: string): Promise<Array<ICafeStation>> => {

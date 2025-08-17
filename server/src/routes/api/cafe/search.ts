@@ -18,8 +18,7 @@ import {
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug } from '../../../util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
-import Duration from '@arcticzeroo/duration';
-import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
+import { retrieveVisitData } from '../../../api/cache/pattern.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -133,9 +132,7 @@ export const registerSearchRoutes = (parent: Router) => {
         memoizeResponseBodyByQueryParams(),
         async ctx => {
             const [entityType, entityName] = getEntityTypeAndName(ctx);
-            const endingOnDate = DateUtil.fromMaybeDateString(getTrimmedQueryParam(ctx, 'date')) || new Date();
-            const startingOnDate = DateUtil.addDurationToDate(endingOnDate, new Duration({ days: -31 }));
-            ctx.body = await DailyMenuStorageClient.retrieveEntityVisits(entityType, entityName, startingOnDate, endingOnDate);
+            ctx.body = await retrieveVisitData(entityType, entityName);
         });
 
     attachRouter(parent, router);

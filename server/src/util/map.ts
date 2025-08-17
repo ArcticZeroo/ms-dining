@@ -1,53 +1,60 @@
-import { Lock } from 'semaphore-async-await';
-
-interface ILockedMapEntry<V> {
-    lock: Lock;
-    value: V | undefined;
-}
+import { Lock } from '../api/lock.js';
+import { MaybePromise } from '../models/async.js';
 
 export class LockedMap<K, V> {
-    readonly #map: Map<K, ILockedMapEntry<V>> = new Map();
-    #symbol = Symbol();
+    readonly #locks: Map<K, Lock> = new Map();
+    readonly #values: Map<K, V> = new Map();
 
     get size(): number {
-        return this.#map.size;
+        return this.#locks.size;
     }
 
-    async update(key: K, callback: (value: V | undefined) => Promise<V>): Promise<V> {
-        const currentMapSymbol = this.#symbol;
+    entries()  {
+        return this.#values.entries();
+    }
 
-        if (!this.#map.has(key)) {
-            this.#map.set(key, {
-                lock: new Lock(),
-                value: undefined
-            });
+    async has(key: K): Promise<boolean> {
+        if (!this.#locks.has(key)) {
+            return false;
         }
 
-        const entry = this.#map.get(key)!;
+        // There might be a pending delete for the key,
+        // so try to acquire it and then check again.
+        const lock = this.#locks.get(key)!;
+        return lock.acquire(() => this.#locks.has(key));
+    }
 
-        try {
-            await entry.lock.acquire();
+    async update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
+        if (!this.#locks.has(key)) {
+            this.#locks.set(key, new Lock());
+        }
 
-            const newValue = await callback(entry.value);
+        const lock = this.#locks.get(key)!;
 
-            if (currentMapSymbol === this.#symbol) {
-                entry.value = newValue;
+        return lock.acquire(async () => {
+            const value = this.#values.get(key);
+            const newValue = await callback(value);
+
+            if (newValue === undefined) {
+                this.#locks.delete(key);
+                this.#values.delete(key);
+            } else {
+                this.#values.set(key, newValue);
             }
 
             return newValue;
-        } finally {
-            entry.lock.release();
+        });
+    }
+
+    async delete(key: K) {
+        const lock = this.#locks.get(key);
+        if (!lock) {
+            return;
         }
-    }
 
-    delete(key: K) {
-        // Anyone currently waiting on update will still be able to insert into the entry, the entry just will no longer
-        // be referenced here. Maybe in the future we'll throw an error so that update callers don't think it succeeded?
-        this.#map.delete(key);
-    }
-
-    clear() {
-        this.#symbol = Symbol();
-        this.#map.clear();
+        return lock.acquire(() => {
+            this.#locks.delete(key);
+            this.#values.delete(key);
+        });
     }
 }
