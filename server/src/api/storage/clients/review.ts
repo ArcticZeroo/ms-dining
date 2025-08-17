@@ -1,8 +1,11 @@
 import { usePrismaClient } from '../client.js';
+import { STORAGE_EVENTS } from '../events.js';
+import { IMenuItem, IMenuItemReviewHeader } from '@msdining/common/dist/models/cafe.js';
+import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 interface ICreateReviewItem {
 	menuItemId: string;
-	cafeId?: string;
+	menuItemNormalizedName: string;
 	userId: string;
 	rating: number;
 	comment?: string;
@@ -11,6 +14,12 @@ interface ICreateReviewItem {
 interface IGetReviewsForUserParams {
 	userId: string;
 	menuItemId?: string;
+}
+
+interface IMenuItemReviewHeaderWithName {
+	menuItemNormalizedName: string;
+	totalReviewCount: number;
+	overallRating: number;
 }
 
 const GET_REVIEW_INCLUDES = {
@@ -33,12 +42,13 @@ const GET_REVIEW_INCLUDES = {
 
 export abstract class ReviewStorageClient {
 	public static async createReviewAsync(review: ICreateReviewItem) {
-		return usePrismaClient(client => client.review.upsert({
+		const result = await usePrismaClient(client => client.review.upsert({
 			create: {
-				menuItemId: review.menuItemId,
-				userId:     review.userId,
-				rating:     review.rating,
-				comment:    review.comment,
+				menuItemId:             review.menuItemId,
+				menuItemNormalizedName: review.menuItemNormalizedName,
+				userId:                 review.userId,
+				rating:                 review.rating,
+				comment:                review.comment,
 			},
 			update: {
 				rating:    review.rating,
@@ -55,6 +65,14 @@ export abstract class ReviewStorageClient {
 				id: true
 			}
 		}));
+
+		STORAGE_EVENTS.emit('reviewDirty', {
+			menuItemId:             review.menuItemId,
+			menuItemNormalizedName: review.menuItemNormalizedName,
+			userId:                 review.userId
+		});
+
+		return result;
 	}
 
 	public static async getReviewsForMenuItemAsync(normalizedName: string) {
@@ -85,11 +103,19 @@ export abstract class ReviewStorageClient {
 	}
 
 	public static async deleteReviewAsync(reviewId: string) {
-		return usePrismaClient(client => client.review.delete({
+		const result = await usePrismaClient(client => client.review.delete({
 			where: {
 				id: reviewId
 			},
 		}));
+
+		STORAGE_EVENTS.emit('reviewDirty', {
+			menuItemId:             result.menuItemId,
+			menuItemNormalizedName: result.menuItemNormalizedName,
+			userId:                 result.userId
+		});
+
+		return result;
 	}
 
 	public static async isOwnedByUser(reviewId: string, userId: string) {
@@ -108,12 +134,45 @@ export abstract class ReviewStorageClient {
 
 	public static async getRecentReviews(count: number) {
 		return usePrismaClient(client => client.review.findMany({
-			orderBy: {
+			orderBy:  {
 				createdAt: 'desc'
 			},
 			distinct: ['menuItemId'],
-			include: GET_REVIEW_INCLUDES,
-			take: count
+			include:  GET_REVIEW_INCLUDES,
+			take:     count
 		}));
+	}
+
+	public static async getAllReviewHeaders(): Promise<Array<IMenuItemReviewHeaderWithName>> {
+		const results = await usePrismaClient(client => client.review.groupBy({
+			by:     ['menuItemNormalizedName'],
+			_count: true,
+			_avg:   {
+				rating: true
+			}
+		}));
+
+		return results.map(result => ({
+			menuItemNormalizedName: result.menuItemNormalizedName,
+			totalReviewCount:       result._count,
+			overallRating:          result._avg.rating ?? 0,
+		}));
+	}
+
+	public static async getReviewHeader(normalizedName: string): Promise<IMenuItemReviewHeader> {
+		const result = await usePrismaClient(client => client.review.aggregate({
+			where:  {
+				menuItemNormalizedName: normalizedName
+			},
+			_count: true,
+			_avg:   {
+				rating: true
+			},
+		}));
+
+		return {
+			totalReviewCount: result._count,
+			overallRating:    result._avg.rating ?? 0,
+		};
 	}
 }

@@ -1,16 +1,10 @@
 import Router from '@koa/router';
 import { VERSION_TAG } from '@msdining/common/dist/constants/versions.js';
-import {
-	IDiningCoreGroup,
-	IDiningCoreGroupMember,
-	IDiningCoreResponse,
-	IUpdateUserSettingsInput
-} from '@msdining/common/dist/models/http.js';
+import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/dist/models/http.js';
 import { getMinimumDateForMenu, toMaybeDateString } from '@msdining/common/dist/util/date-util.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
 import { getLogoUrl } from '../../../util/cafe.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { attachRouter, getUserIdOrThrow, supportsVersionTag } from '../../../util/koa.js';
@@ -20,9 +14,6 @@ import { registerOrderingRoutes } from './ordering.js';
 import { registerSearchRoutes } from './search.js';
 import { logDebug } from '../../../util/log.js';
 import { UserStorageClient } from '../../../api/storage/clients/user.js';
-import { use } from 'koa-passport';
-import u from 'koa-session/lib/util.js';
-import { isDuckType } from '@arcticzeroo/typeguard';
 
 export const registerCafeRoutes = (parent: Router) => {
 	const router = new Router({

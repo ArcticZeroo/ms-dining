@@ -13,6 +13,12 @@ export interface IMenuPublishEvent {
 	dirtyMenuItemIds: Set<string /*menuItemId*/>;
 }
 
+export interface IReviewDirtyEvent {
+	menuItemId: string;
+	userId: string;
+	menuItemNormalizedName: string;
+}
+
 export const hasAnythingChangedInPublishedMenu = (event: IMenuPublishEvent): boolean => {
 	return (
 		event.dirtyStations.size === 0 &&

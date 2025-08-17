@@ -4,6 +4,8 @@
     "moduleResolution": "nodenext",
     "target": "esnext",
     "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
     "lib": [
       "ESNext",
       "DOM"

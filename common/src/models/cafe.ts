@@ -39,7 +39,7 @@ export interface IMenuItemReviewHeader {
 	overallRating: number;
 }
 
-export interface IMenuItem extends IMenuItemReviewHeader {
+export interface IMenuItem {
     id: string;
 	cafeId: string;
     price: number;

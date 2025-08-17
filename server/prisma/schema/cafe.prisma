@@ -175,6 +175,7 @@ model Review {
 
   menuItemId String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  menuItemNormalizedName String // needed to aggregate since prisma doesn't currently support aggregations on relations
 
   @@unique([userId, menuItemId])
 }

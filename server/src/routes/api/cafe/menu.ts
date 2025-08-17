@@ -232,9 +232,10 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			const review = await ReviewStorageClient.createReviewAsync({
 				userId,
-				menuItemId: menuItem.id,
-				rating:     body.rating,
-				comment:    body.comment?.trim()
+				menuItemId:             menuItem.id,
+				menuItemNormalizedName: normalizeNameForSearch(menuItem.name),
+				rating:                 body.rating,
+				comment:                body.comment?.trim()
 			});
 
 			ctx.body = {

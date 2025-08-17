@@ -12,6 +12,7 @@ import { logDebug } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
+import { getDateStringsForWeek } from '@msdining/common/dist/util/date-util.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
 
@@ -272,27 +273,6 @@ export abstract class MenuItemStorageClient {
 		}
 	}
 
-	// todo... consider showing a different review count for this vs other cafes.
-	// might not actually be necessary since there is so little data in general.
-	private static async _retrieveReviewHeaderAsync(normalizedName: string): Promise<IMenuItemReviewHeader> {
-		const stats = await usePrismaClient(prismaClient => prismaClient.review.aggregate({
-			where:  {
-				menuItem: {
-					normalizedName
-				}
-			},
-			_count: true,
-			_avg:   {
-				rating: true
-			}
-		}));
-
-		return {
-			totalReviewCount: stats._count,
-			overallRating:    stats._avg.rating ?? 0
-		};
-	}
-
 	private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
 		const menuItem = await usePrismaClient(prismaClient => prismaClient.menuItem.findUnique({
 			where:   { id },
@@ -382,6 +362,61 @@ export abstract class MenuItemStorageClient {
 		}
 
 		return this._menuItemsById.get(id)!;
+	}
+
+	public static async retrieveMenuItemsForWeeklyMenuAsync(): Promise<void> {
+		const dateStrings = getDateStringsForWeek();
+
+		const menuResults = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				dateString: {
+					in: dateStrings
+				}
+			},
+			select: {
+				categories: {
+					select: {
+						menuItems: {
+							select: {
+								menuItem:   {
+									include: {
+										modifiers:  {
+											include: {
+												modifier: {
+													include: {
+														choices: true
+													}
+												}
+											},
+											orderBy: {
+												index: 'asc'
+											}
+										},
+										searchTags: {
+											select: {
+												name: true
+											}
+										}
+									}
+								}
+							},
+						}
+					}
+				},
+			}
+		}));
+
+		const menuItemIdsByNormalizedName = new Map<string, Set<string>>();
+
+		for (const { categories } of menuResults) {
+			for (const { menuItems } of categories) {
+				for (const { menuItem } of menuItems) {
+					const menuItemIds = menuItemIdsByNormalizedName.get(menuItem.normalizedName) ?? new Set<string>();
+					menuItemIds.add(menuItem.id);
+					menuItemIdsByNormalizedName.set(menuItem.normalizedName, menuItemIds);
+				}
+			}
+		}
 	}
 
 	public static async batchNormalizeMenuItemNamesAsync(): Promise<void> {
