@@ -44,24 +44,6 @@ interface ICafeMenuOverviewHeader {
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
 export abstract class DailyMenuStorageClient {
-	private static _getDailyMenuItemsCreateDataForCategory(station: ICafeStation, menuItemIds: string[]): Array<{
-		menuItemId: string
-	}> {
-		const createItems: Array<{
-			menuItemId: string
-		}> = [];
-
-		for (const menuItemId of menuItemIds) {
-			if (!station.menuItemsById.has(menuItemId)) {
-				continue;
-			}
-
-			createItems.push({ menuItemId });
-		}
-
-		return createItems;
-	}
-
 	public static async publishDailyStationMenuAsync({ cafe, dateString, stations }: IPublishDailyMenuParams) {
 		const cafeId = cafe.id;
 
@@ -162,7 +144,7 @@ export abstract class DailyMenuStorageClient {
 							create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([name, menuItemIds]) => ({
 								name,
 								menuItems: {
-									create: this._getDailyMenuItemsCreateDataForCategory(station, menuItemIds)
+									create: menuItemIds.map(menuItemId => ({ menuItemId }))
 								}
 							}))
 						}

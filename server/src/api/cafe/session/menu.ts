@@ -243,6 +243,11 @@ export class CafeMenuSession {
 		for (const menuItem of menuItems) {
 			station.menuItemsById.set(menuItem.id, menuItem);
 		}
+
+		// Some items are in the list of items by category but the server doesn't return them, which means they aren't actually on the menu.
+		for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName.entries()) {
+			station.menuItemIdsByCategoryName.set(categoryName, itemIds.filter(itemId => station.menuItemsById.has(itemId)));
+		}
 	}
 
 	async #populateMenuItemsForAllStationsAsync(stations: ICafeStation[], alwaysGetServerItems: boolean) {
