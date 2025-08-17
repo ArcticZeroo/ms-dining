@@ -10,16 +10,10 @@ import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { Lock, Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveDailyMenuAsync } from './storage.js';
-import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { CafeMenuSession } from '../session/menu.js';
 
-const updateLock = new Lock();
 export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryDelayMs = 1000;
-
-export const updateCafes = async (callback: () => Promise<void>) => {
-    await updateLock.acquire(callback);
-};
 
 export class DailyCafeUpdateSession {
     constructor(public readonly daysInFuture: number) {

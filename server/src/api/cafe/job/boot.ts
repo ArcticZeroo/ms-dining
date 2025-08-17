@@ -2,39 +2,39 @@ import { DateUtil } from '@msdining/common';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logInfo } from '../../../util/log.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
-import { DailyCafeUpdateSession, updateCafes } from './update.js';
+import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ALL_CAFES } from '../../../constants/cafes.js';
+
+const repairMissingMenusAsync = async (i: number) => {
+	const date = DateUtil.getNowWithDaysInFuture(i);
+
+	const cafesWithMenuToday = await DailyMenuStorageClient.getCafesAvailableForDayAsync(DateUtil.toDateString(date));
+	if (cafesWithMenuToday.size !== ALL_CAFES.length) {
+		logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}. ${ALL_CAFES.length - cafesWithMenuToday.size} cafe(s) are missing a menu.`);
+		const updateSession = new DailyCafeUpdateSession(i);
+		await updateSession.populateAsync(cafesWithMenuToday);
+	} else {
+		logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
+	}
+}
 
 const repairMissingWeeklyMenusAsync = async () => {
 	if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
 		return;
 	}
 
-	await updateCafes(async () => {
-		let isRepairNeeded = false;
+	logInfo('Repairing missing weekly menus...');
 
-		logInfo('Repairing missing weekly menus...');
-		for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
-			const date = DateUtil.getNowWithDaysInFuture(i);
+	const repairPromises: Array<Promise<void>> = [];
 
-			const cafesWithMenuToday = await DailyMenuStorageClient.getCafesAvailableForDayAsync(DateUtil.toDateString(date));
-			if (cafesWithMenuToday.size !== ALL_CAFES.length) {
-				isRepairNeeded = true;
-				logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}. ${ALL_CAFES.length - cafesWithMenuToday.size} cafe(s) are missing a menu.`);
-				const updateSession = new DailyCafeUpdateSession(i);
-				await updateSession.populateAsync(cafesWithMenuToday);
-			} else {
-				logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
-			}
-		}
+	for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
+		repairPromises.push(repairMissingMenusAsync(i));
+	}
 
-		if (!isRepairNeeded) {
-			logInfo('No missing weekly menus found');
-		}
-	});
+	await Promise.all(repairPromises);
 };
 
 const repairTodaySessionsAsync = async () => {
