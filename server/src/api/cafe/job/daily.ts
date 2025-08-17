@@ -20,8 +20,9 @@ const populateDailySessions = () => {
 };
 
 export const scheduleDailyUpdateJob = () => {
-    // Lunch menus tend to be finalized for the day after ~9am
-    cron.schedule('0 4,10 * * 1,2,3,4,5', () => {
+    // Sync every hour from 5am to 5pm on weekdays
+    // Weekly job handles 9am on weekdays
+    cron.schedule('0 5-8,10-17 * * 1-5', () => {
         populateDailySessions();
     });
 }

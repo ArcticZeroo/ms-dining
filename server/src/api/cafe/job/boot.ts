@@ -7,8 +7,9 @@ import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ALL_CAFES } from '../../../constants/cafes.js';
+import Duration from '@arcticzeroo/duration';
 
-const repairMissingMenusAsync = async (i: number) => {
+const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
 	const date = DateUtil.getNowWithDaysInFuture(i);
 
 	const cafesWithMenuToday = await DailyMenuStorageClient.getCafesAvailableForDayAsync(DateUtil.toDateString(date));
@@ -16,28 +17,37 @@ const repairMissingMenusAsync = async (i: number) => {
 		logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}. ${ALL_CAFES.length - cafesWithMenuToday.size} cafe(s) are missing a menu.`);
 		const updateSession = new DailyCafeUpdateSession(i);
 		await updateSession.populateAsync(cafesWithMenuToday);
-	} else {
-		logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
+		return true;
 	}
+
+	logInfo(`No repair needed for ${DateUtil.toDateString(date)}`);
+	return false;
 }
 
-const repairMissingWeeklyMenusAsync = async () => {
+/**
+ * @returns Whether any repair occurred.
+ */
+const repairMissingWeeklyMenusAsync = async (): Promise<boolean> => {
 	if (ENVIRONMENT_SETTINGS.skipWeeklyRepair) {
-		return;
+		return false;
 	}
 
 	logInfo('Repairing missing weekly menus...');
 
-	const repairPromises: Array<Promise<void>> = [];
+	const repairPromises: Array<Promise<boolean>> = [];
 
 	for (const i of DateUtil.yieldDaysInFutureForThisWeek()) {
 		repairPromises.push(repairMissingMenusAsync(i));
 	}
 
-	await Promise.all(repairPromises);
+	const results = await Promise.all(repairPromises);
+	return results.some(result => result)
 };
 
-const repairTodaySessionsAsync = async () => {
+/**
+ * @returns Whether any repair occurred.
+ */
+const repairTodaySessionsAsync = async (): Promise<boolean> => {
 	const now = new Date();
 
 	// Don't bother repairing today after 2pm if there is already a daily menu;
@@ -49,26 +59,50 @@ const repairTodaySessionsAsync = async () => {
 		if (isAnyMenuAvailableToday) {
 			if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists) {
 				logInfo('Skipping repair of today\'s sessions because the menu already exists and environment settings disable update');
-				return;
+				return false;
 			}
 
 			logInfo('Skipping repair of today\'s sessions because it is after 3pm and there is already a menu for today');
-			return;
+			return false;
 		}
 	}
 
 	await populateDailySessionsAsync();
+	return true;
 };
 
 export const performMenuBootTasks = async () => {
 	await MenuItemStorageClient.batchNormalizeMenuItemNamesAsync();
 
-	await repairTodaySessionsAsync();
-	await repairMissingWeeklyMenusAsync();
+	const didDailyRepair = await repairTodaySessionsAsync();
+	const didWeeklyRepair = await repairMissingWeeklyMenusAsync();
+
+	// In case we just did a repair, schedule the associated job with a delay in case that job is about to run.
+	const scheduleJob = (job: () => void, didRepair: boolean, name: string) => {
+		if (didRepair) {
+			logInfo(`Scheduling ${name} job in 30 minutes due to recent repair`);
+			setTimeout(() => {
+				logInfo(`Scheduling ${name} job after repair delay`);
+				job();
+			}, new Duration({ minutes: 30 }).inMilliseconds);
+		} else {
+			job();
+		}
+	}
 
 	// calculatePatternsInBackground();
 
-	scheduleDailyUpdateJob();
-	scheduleWeeklyUpdateJob();
+	scheduleJob(
+		scheduleDailyUpdateJob,
+		didDailyRepair,
+		'daily update'
+	);
+
+	scheduleJob(
+		scheduleWeeklyUpdateJob,
+		didWeeklyRepair,
+		'weekly update'
+	);
+
 	// scheduleWeeklyPatternJob();
 };
