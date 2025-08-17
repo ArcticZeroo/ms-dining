@@ -49,6 +49,12 @@ STORAGE_EVENTS.on('menuPublished', (event) => {
 		});
 });
 
+// todo: update review headers for all menu items currently in cache
+// this might be expensive, maybe we can live with stuff being stale for a bit
+// CACHE_EVENTS.on('reviewDirty', (event) => {
+//
+// });
+
 export const retrieveDailyCafeMenuAsync = async (cafeId: string, dateString: string): Promise<Array<ICafeStation>> => {
 	const cache = MENU_CACHE_BY_CAFE.get(cafeId);
 

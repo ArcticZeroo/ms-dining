@@ -164,8 +164,6 @@ export class CafeMenuSession {
 			lastUpdateTime:   new Date(jsonItem.lastUpdateTime),
 			tags:             new Set(tags),
 			searchTags:       localItem?.searchTags ?? new Set<string>(),
-			totalReviewCount: localItem?.totalReviewCount ?? 0,
-			overallRating:    localItem?.overallRating ?? 0,
 			modifiers,
 		};
 	}

@@ -53,7 +53,6 @@ export class PrismaSessionStore implements ISessionStore {
         // Only save to database if we have authentication data
         // koa-session calls this with just metadata before authentication
         if (!parsedData.passport?.user) {
-            console.log('No passport data yet, skipping database save');
             return;
         }
 

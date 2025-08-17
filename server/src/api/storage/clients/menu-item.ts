@@ -1,9 +1,4 @@
-import {
-	IMenuItemModifier,
-	IMenuItemModifierChoice,
-	IMenuItemReviewHeader,
-	ModifierChoiceType
-} from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry, PrismaClient } from '@prisma/client';
 import { IMenuItem } from '../../../models/cafe.js';
@@ -318,8 +313,6 @@ export abstract class MenuItemStorageClient {
 			});
 		}
 
-		const reviewHeader = await MenuItemStorageClient._retrieveReviewHeaderAsync(menuItem.normalizedName);
-
 		return {
 			id:             menuItem.id,
 			cafeId:         menuItem.cafeId,
@@ -334,7 +327,6 @@ export abstract class MenuItemStorageClient {
 			tags:           deserializeMenuItemTags(menuItem.tags),
 			searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
 			hasThumbnail:   false,
-			...reviewHeader,
 			modifiers
 		};
 	}

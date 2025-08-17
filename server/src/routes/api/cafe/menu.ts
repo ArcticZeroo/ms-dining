@@ -32,6 +32,7 @@ import { retrieveDailyCafeMenuAsync } from '../../../api/cache/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../api/cache/daily-uniqueness.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interface/thumbnail.js';
 import { logDebug } from '../../../util/log.js';
+import { retrieveReviewHeaderAsync } from '../../../api/cache/reviews.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -47,9 +48,13 @@ export const registerMenuRoutes = (parent: Router) => {
 	});
 
 	const serializeMenuItem = async (menuItem: IMenuItem): Promise<IMenuItemDTO> => {
-		await ensureThumbnailDataHasBeenRetrievedAsync(menuItem);
+		const [reviewHeader] = await Promise.all([
+			retrieveReviewHeaderAsync(normalizeNameForSearch(menuItem.name)),
+			ensureThumbnailDataHasBeenRetrievedAsync(menuItem),
+		]);
 
 		return ({
+			...reviewHeader,
 			...menuItem,
 			tags:       Array.from(menuItem.tags),
 			searchTags: Array.from(menuItem.searchTags)
@@ -307,7 +312,7 @@ export const registerMenuRoutes = (parent: Router) => {
 				retrieveUniquenessDataForCafe(cafe.id, dateString)
 			]);
 
-			ctx.body = jsonStringifyWithoutNull(convertMenuToSerializable(menuStations, uniquenessData));
+			ctx.body = jsonStringifyWithoutNull(await convertMenuToSerializable(menuStations, uniquenessData));
 		}));
 
 	router.get('/:id/overview',
