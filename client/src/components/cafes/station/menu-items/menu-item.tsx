@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItem, IMenuItemWithReviewHeader } from '@msdining/common/dist/models/cafe';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useContext, useMemo } from 'react';
@@ -20,7 +20,7 @@ import { usePopupOpener } from '../../../../hooks/popup.ts';
 import { pluralize } from '../../../../util/string.ts';
 
 export interface IMenuItemProps {
-    menuItem: IMenuItem;
+    menuItem: IMenuItemWithReviewHeader;
 }
 
 const getCaloriesDisplay = (menuItem: IMenuItem) => {

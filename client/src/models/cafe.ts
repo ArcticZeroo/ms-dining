@@ -1,7 +1,5 @@
-import {
-    IDiningCoreGroup, IDiningCoreGroupMember,
-} from '@msdining/common/dist/models/http';
-import { IMenuItem, IStationUniquenessData } from '@msdining/common/dist/models/cafe';
+import { IDiningCoreGroup, IDiningCoreGroupMember, } from '@msdining/common/dist/models/http';
+import { IMenuItemWithReviewHeader, IStationUniquenessData } from '@msdining/common/dist/models/cafe';
 import { Nullable } from '@msdining/common/dist/models/util';
 
 export type ICafeGroup = IDiningCoreGroup;
@@ -24,7 +22,7 @@ export interface ICafeGroupView {
 
 export type CafeView = ICafeSingleView | ICafeGroupView;
 
-export type MenuItemsByCategoryName = Record<string, Array<IMenuItem>>;
+export type MenuItemsByCategoryName = Record<string, Array<IMenuItemWithReviewHeader>>;
 
 export interface ICafeStation {
     name: string;

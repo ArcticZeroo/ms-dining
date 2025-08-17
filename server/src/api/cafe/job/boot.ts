@@ -72,7 +72,8 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 };
 
 export const performMenuBootTasks = async () => {
-	await MenuItemStorageClient.batchNormalizeMenuItemNamesAsync();
+	// Will be needed basically always anyway.
+	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
 
 	const didDailyRepair = await repairTodaySessionsAsync();
 	const didWeeklyRepair = await repairMissingWeeklyMenusAsync();

@@ -60,6 +60,8 @@ export interface IMenuItem {
 	hasRetrievedThumbnailData?: boolean;
 }
 
+export type IMenuItemWithReviewHeader = IMenuItem & IMenuItemReviewHeader;
+
 export interface IMenuItemDTO extends IMenuItemReviewHeader {
     id: string;
     cafeId: string;

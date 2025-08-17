@@ -1,15 +1,68 @@
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
-import { MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry, PrismaClient } from '@prisma/client';
+import {
+	MenuItem,
+	MenuItemModifier,
+	MenuItemModifierChoice,
+	MenuItemModifierEntry,
+	PrismaClient
+} from '@prisma/client';
 import { IMenuItem } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
-import { logDebug } from '../../../util/log.js';
+import { logDebug, logInfo } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
 import { getDateStringsForWeek } from '@msdining/common/dist/util/date-util.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
+
+type DehydratedMenuItem = MenuItem & {
+	modifiers: Array<{
+		modifier: MenuItemModifier & {
+			choices: Array<MenuItemModifierChoice>;
+		}
+	}>;
+	searchTags: Array<{
+		name: string;
+	}>;
+}
+
+const hydrateMenuItem = (menuItem: DehydratedMenuItem) => {
+	const modifiers: IMenuItemModifier[] = [];
+	for (const modifierEntry of menuItem.modifiers) {
+		modifiers.push({
+			id:          modifierEntry.modifier.id,
+			description: modifierEntry.modifier.description,
+			minimum:     modifierEntry.modifier.minimum,
+			maximum:     modifierEntry.modifier.maximum,
+			// Maybe a bad idea?
+			choiceType: modifierEntry.modifier.choiceType as ModifierChoiceType,
+			choices:    modifierEntry.modifier.choices.map(choice => ({
+				id:          choice.id,
+				description: choice.description,
+				price:       choice.price
+			}))
+		});
+	}
+
+	return {
+		id:             menuItem.id,
+		cafeId:         menuItem.cafeId,
+		name:           menuItem.name,
+		description:    menuItem.description,
+		price:          menuItem.price,
+		calories:       menuItem.calories,
+		maxCalories:    menuItem.maxCalories,
+		imageUrl:       menuItem.imageUrl,
+		lastUpdateTime: menuItem.externalLastUpdateTime,
+		receiptText:    menuItem.externalReceiptText,
+		tags:           deserializeMenuItemTags(menuItem.tags),
+		searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
+		hasThumbnail:   false,
+		modifiers
+	};
+}
 
 export abstract class MenuItemStorageClient {
 	private static readonly _menuItemsById = new Map<string, IMenuItem>();
@@ -296,39 +349,7 @@ export abstract class MenuItemStorageClient {
 			return null;
 		}
 
-		const modifiers: IMenuItemModifier[] = [];
-		for (const modifierEntry of menuItem.modifiers) {
-			modifiers.push({
-				id:          modifierEntry.modifier.id,
-				description: modifierEntry.modifier.description,
-				minimum:     modifierEntry.modifier.minimum,
-				maximum:     modifierEntry.modifier.maximum,
-				// Maybe a bad idea?
-				choiceType: modifierEntry.modifier.choiceType as ModifierChoiceType,
-				choices:    modifierEntry.modifier.choices.map(choice => ({
-					id:          choice.id,
-					description: choice.description,
-					price:       choice.price
-				}))
-			});
-		}
-
-		return {
-			id:             menuItem.id,
-			cafeId:         menuItem.cafeId,
-			name:           menuItem.name,
-			description:    menuItem.description,
-			price:          menuItem.price,
-			calories:       menuItem.calories,
-			maxCalories:    menuItem.maxCalories,
-			imageUrl:       menuItem.imageUrl,
-			lastUpdateTime: menuItem.externalLastUpdateTime,
-			receiptText:    menuItem.externalReceiptText,
-			tags:           deserializeMenuItemTags(menuItem.tags),
-			searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
-			hasThumbnail:   false,
-			modifiers
-		};
+		return hydrateMenuItem(menuItem);
 	}
 
 	private static _saveMenuItemIntoCache(menuItem: IMenuItem) {
@@ -398,42 +419,19 @@ export abstract class MenuItemStorageClient {
 			}
 		}));
 
-		const menuItemIdsByNormalizedName = new Map<string, Set<string>>();
+		let menuItemCount = 0;
 
 		for (const { categories } of menuResults) {
 			for (const { menuItems } of categories) {
 				for (const { menuItem } of menuItems) {
-					const menuItemIds = menuItemIdsByNormalizedName.get(menuItem.normalizedName) ?? new Set<string>();
-					menuItemIds.add(menuItem.id);
-					menuItemIdsByNormalizedName.set(menuItem.normalizedName, menuItemIds);
+					const hydratedItem = hydrateMenuItem(menuItem);
+					this._saveMenuItemIntoCache(hydratedItem);
+					menuItemCount++;
 				}
 			}
 		}
-	}
 
-	public static async batchNormalizeMenuItemNamesAsync(): Promise<void> {
-		const now = Date.now();
-
-		await usePrismaClient(async prismaClient => {
-			const pendingItems = await prismaClient.menuItem.findMany({
-				where: {
-					normalizedName: ''
-				}
-			});
-
-			logDebug('Batch normalizing', pendingItems.length, 'menu item names');
-
-			for (const item of pendingItems) {
-				await prismaClient.menuItem.update({
-					where: { id: item.id },
-					data:  {
-						normalizedName: normalizeNameForSearch(item.name)
-					}
-				});
-			}
-		});
-
-		logDebug('Batch normalized menu item names in', Date.now() - now, 'ms');
+		logInfo(`Retrieved ${menuItemCount} menu items for weekly menu on boot`);
 	}
 
 	public static async retrievePendingSearchTagQueueEntries(): Promise<Array<ISearchTagQueueEntry>> {

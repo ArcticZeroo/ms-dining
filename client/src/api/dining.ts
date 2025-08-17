@@ -1,6 +1,6 @@
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { ICafeOverviewStation, IMenuItem } from '@msdining/common/dist/models/cafe';
+import { ICafeOverviewStation, IMenuItem, IMenuItemWithReviewHeader } from '@msdining/common/dist/models/cafe';
 import {
     ICreateReviewRequest,
     IDiningCoreResponse,
@@ -59,7 +59,7 @@ export abstract class DiningClient {
 
         const stations: ICafeStation[] = [];
         for (const responseStation of response) {
-            const menu: Record<string, Array<IMenuItem>> = {};
+            const menu: Record<string, Array<IMenuItemWithReviewHeader>> = {};
             for (const [category, menuItems] of Object.entries(responseStation.menu)) {
                 menu[category] = menuItems.map(dto => ({
                     ...dto,
