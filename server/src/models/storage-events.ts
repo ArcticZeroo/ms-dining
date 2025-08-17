@@ -7,16 +7,15 @@ export interface IMenuPublishEvent {
 	addedStations: Set<string /*stationId*/>;
 	removedStations: Set<string /*stationId*/>;
 	updatedStations: Set<string /*stationId*/>;
+	dirtyStations: Set<string /*stationId*/>;
 	removedMenuItemsByStation: Map<string /*stationId*/, Set<string /*menuItemId*/>>;
 	addedMenuItemsByStation: Map<string /*stationId*/, Set<string /*menuItemId*/>>;
+	dirtyMenuItemIds: Set<string /*menuItemId*/>;
 }
 
 export const hasAnythingChangedInPublishedMenu = (event: IMenuPublishEvent): boolean => {
 	return (
-		event.addedStations.size > 0 ||
-		event.removedStations.size > 0 ||
-		event.updatedStations.size > 0 ||
-		event.removedMenuItemsByStation.size > 0 ||
-		event.addedMenuItemsByStation.size > 0
+		event.dirtyStations.size === 0 &&
+		event.dirtyMenuItemIds.size === 0
 	);
 }

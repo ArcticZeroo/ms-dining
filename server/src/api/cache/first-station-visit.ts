@@ -29,13 +29,12 @@ CACHE_EVENTS.on('menuPublished', event => {
 		return;
 	}
 
-	const dirtyStationIds = new Set<string>([...event.removedStations, ...event.addedStations]);
 	FIRST_STATION_VISIT_CACHE.update(event.cafe.id, async (stationFirstVisits) => {
 		if (!stationFirstVisits) {
 			return new Map();
 		}
 
-		for (const stationId of dirtyStationIds) {
+		for (const stationId of event.dirtyStations) {
 			stationFirstVisits.delete(stationId);
 		}
 

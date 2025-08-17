@@ -51,12 +51,15 @@ export abstract class DailyMenuStorageClient {
 		const publishEvent: IMenuPublishEvent = {
 			cafe,
 			dateString,
-			menu: stations,
-			addedStations:             new Set<string>(),
-			removedStations:           new Set<string>(),
+			menu:            stations,
+			addedStations:   new Set<string>(),
+			removedStations: new Set<string>(),
+			// Stations which were either just added or had their menu items changed. When a station is removed it is -not- considered updated.
 			updatedStations:           new Set<string>(),
+			dirtyStations:             new Set<string>(),
 			removedMenuItemsByStation: new Map<string, Set<string>>(),
-			addedMenuItemsByStation:   new Map<string, Set<string>>()
+			addedMenuItemsByStation:   new Map<string, Set<string>>(),
+			dirtyMenuItemIds: new Set<string>()
 		};
 
 		await usePrismaClient(async (prismaClient) => prismaClient.$transaction(async tx => {
@@ -155,6 +158,17 @@ export abstract class DailyMenuStorageClient {
 				// ...probably do the uniqueness calculation here?
 			}
 		}));
+
+		publishEvent.dirtyStations = new Set([
+			...publishEvent.addedStations,
+			...publishEvent.updatedStations,
+			...publishEvent.removedStations
+		]);
+
+		publishEvent.dirtyMenuItemIds = new Set([
+			...Array.from(publishEvent.addedMenuItemsByStation.values()).flatMap(items => Array.from(items)),
+			...Array.from(publishEvent.removedMenuItemsByStation.values()).flatMap(items => Array.from(items))
+		]);
 
 		STORAGE_EVENTS.emit('menuPublished', publishEvent);
 	}
@@ -579,14 +593,14 @@ export abstract class DailyMenuStorageClient {
 
 	public static async retrieveFirstStationVisitDate(cafeId: string, stationId: string): Promise<Date | null> {
 		const visit = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
-			where:  {
+			where:   {
 				cafeId,
 				stationId
 			},
 			orderBy: {
 				dateString: 'asc'
 			},
-			select: {
+			select:  {
 				dateString: true
 			}
 		}));
