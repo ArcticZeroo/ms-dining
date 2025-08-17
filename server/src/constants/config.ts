@@ -1,7 +1,7 @@
 import path from 'path';
 import { getDirname } from '../util/node.js';
 
-export const webserverHost = 'https://msdining.frozor.io';
+export const webserverHost = 'https://dining.frozor.io';
 
 export const webserverPort = 3002;
 

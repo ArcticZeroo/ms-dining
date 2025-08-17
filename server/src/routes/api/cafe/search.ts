@@ -16,9 +16,11 @@ import {
     supportsVersionTag
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { logDebug } from '../../../util/log.js';
+import { logDebug, logError } from '../../../util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 import { retrieveVisitData } from '../../../api/cache/pattern.js';
+import { Middleware } from 'koa';
+import { SearchQueryClient } from '../../../api/storage/clients/search-query.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -49,8 +51,18 @@ export const registerSearchRoutes = (parent: Router) => {
                : ANALYTICS_APPLICATION_NAMES.search;
     };
 
+    const incrementSearchCountMiddleware: Middleware = (ctx, next) => {
+        const searchQuery = getTrimmedQueryParam(ctx, 'q');
+        if (searchQuery) {
+            SearchQueryClient.incrementSearchCount(searchQuery)
+                .catch(err => logError('Could not increment search count:', err));
+        }
+        return next();
+    }
+
     router.get('/',
         sendVisitFromQueryParamMiddleware('exp', getApplicationNameForSearch),
+        incrementSearchCountMiddleware,
         memoizeResponseBodyByQueryParams(),
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');

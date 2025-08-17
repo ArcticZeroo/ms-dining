@@ -157,7 +157,7 @@ model User {
   homepageIds        String?
   lastSettingsUpdate DateTime?
 
-  reviews Review[]
+  reviews  Review[]
   sessions Session[]
 
   @@unique([externalId, provider])
@@ -180,10 +180,16 @@ model Review {
 }
 
 model Session {
-  id        String   @id
+  id        String    @id
   expiresAt DateTime? // null means no expiration - at least until we get ordering there's not really a need for expiration
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SearchQuery {
+  query     String   @id
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
 }
