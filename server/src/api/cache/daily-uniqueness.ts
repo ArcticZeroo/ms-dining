@@ -79,6 +79,7 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 
 	const metrics = calculateWeeklyUniquenessMetrics(menuEntries);
 	const uniquenessData = new Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>();
+	const firstVisitByStationIdPromises = new Map<string, Promise<Date | null>>();
 
 	// First pass to pre-populate uniqueness data
 	// Avoids weird async logic
@@ -90,6 +91,10 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 
 		for (const station of todayMenu) {
 			todayUniquenessData.set(station.name, getDefaultUniquenessDataForStation());
+
+			if (!firstVisitByStationIdPromises.has(station.id)) {
+				firstVisitByStationIdPromises.set(station.id, retrieveFirstStationVisitDate(station.id));
+			}
 		}
 	}
 
@@ -118,8 +123,6 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 			const tomorrowDateString = toDateString(tomorrowDate);
 			tomorrowItemsByStation = metrics.stationItemsByDay.get(tomorrowDateString);
 		}
-
-		const stationFirstVisitPromises: Array<Promise<void>> = [];
 
 		for (const station of todayMenu) {
 			const stationUniquenessData = todayUniquenessData.get(station.name);
@@ -178,22 +181,16 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 				}
 			}
 
-			const firstVisitDatePromise = retrieveFirstStationVisitDate(cafeId, station.id)
-				.then(date => {
-					if (!date) {
-						logError(`Failed to retrieve first visit date for station ${station.name} in cafe ${cafeId}`);
-						return;
-					}
-
-					stationUniquenessData.firstAppearance = toDateString(date);
-				});
-			stationFirstVisitPromises.push(firstVisitDatePromise);
+			const firstVisit = await firstVisitByStationIdPromises.get(station.id);
+			if (firstVisit) {
+				stationUniquenessData.firstAppearance = toDateString(firstVisit);
+			} else {
+				logError(`Missing first visit for station ${station.name} (${station.id}) in cafe ${cafeId}`);
+			}
 
 			stationUniquenessData.themeItemIds = Array.from(new Set(Array.from(themeItemsByCategory.values()).flatMap(items => items.map(item => item.id))));
 			stationUniquenessData.theme = await StationThemeClient.retrieveThemeAsync(station.name, themeItemsByCategory);
 		}
-
-		await Promise.all(stationFirstVisitPromises);
 	};
 
 	await Promise.all(menuEntries.map(calculateUniquenessDataForDay));

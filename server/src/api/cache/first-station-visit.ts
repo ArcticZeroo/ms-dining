@@ -2,26 +2,16 @@ import { LockedMap } from '../../util/map.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { logError } from '../../util/log.js';
+import { throwError } from '../../util/error.js';
 
-const FIRST_STATION_VISIT_CACHE = new LockedMap<string /*cafeId*/, Map<string /*stationName*/, Date>>();
+const FIRST_STATION_VISIT_CACHE = new LockedMap<string /*stationId*/, Date>();
 
-export const retrieveFirstStationVisitDate = async (cafeId: string, stationId: string): Promise<Date | null> => {
-	const visitMap = await FIRST_STATION_VISIT_CACHE.update(cafeId, async (stationFirstVisits) => {
-		if (!stationFirstVisits) {
-			stationFirstVisits = new Map<string, Date>();
-		}
-
-		if (!stationFirstVisits.has(stationId)) {
-			const firstVisitDate = await DailyMenuStorageClient.retrieveFirstStationVisitDate(cafeId, stationId);
-			if (firstVisitDate != null) {
-				stationFirstVisits.set(stationId, firstVisitDate);
-			}
-		}
-
-		return stationFirstVisits;
+export const retrieveFirstStationVisitDate = async (stationId: string): Promise<Date | null> => {
+	return FIRST_STATION_VISIT_CACHE.update(stationId, async (visit) => {
+		return visit
+			?? await DailyMenuStorageClient.retrieveFirstStationVisitDate(stationId)
+			?? throwError('No first visit date found for station');
 	});
-
-	return visitMap.get(stationId) ?? null;
 }
 
 CACHE_EVENTS.on('menuPublished', event => {
@@ -29,15 +19,6 @@ CACHE_EVENTS.on('menuPublished', event => {
 		return;
 	}
 
-	FIRST_STATION_VISIT_CACHE.update(event.cafe.id, async (stationFirstVisits) => {
-		if (!stationFirstVisits) {
-			return new Map();
-		}
-
-		for (const stationId of event.dirtyStations) {
-			stationFirstVisits.delete(stationId);
-		}
-
-		return stationFirstVisits;
-	}).catch(err => logError(`Failed to clear first station visit cache for cafe "${event.cafe.id}": ${err}`));
+	Promise.all(Array.from(event.dirtyStations).map(stationId => FIRST_STATION_VISIT_CACHE.delete(stationId)))
+		.catch(err => logError(`Failed to clear first station visit cache. Error: ${err}`));
 });

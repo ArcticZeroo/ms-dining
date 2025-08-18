@@ -591,10 +591,32 @@ export abstract class DailyMenuStorageClient {
 		return uniqueVisits;
 	}
 
-	public static async retrieveFirstStationVisitDate(cafeId: string, stationId: string): Promise<Date | null> {
+	// todo: Consider doing this on boot for all cafes?
+	public static async retrieveFirstStationVisitsForCafe(cafeId: string): Promise<Map<string /*stationId*/, Date>> {
+		const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
+			by: ['stationId'],
+			where:  { cafeId },
+			_min: {
+				dateString: true
+			}
+		}));
+
+		const firstVisits = new Map<string, Date>();
+
+		for (const { stationId, _min: { dateString } } of visits) {
+			if (!dateString) {
+				continue;
+			}
+
+			firstVisits.set(stationId, DateUtil.fromDateString(dateString));
+		}
+
+		return firstVisits;
+	}
+
+	public static async retrieveFirstStationVisitDate(stationId: string): Promise<Date | null> {
 		const visit = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
 			where:   {
-				cafeId,
 				stationId
 			},
 			orderBy: {
