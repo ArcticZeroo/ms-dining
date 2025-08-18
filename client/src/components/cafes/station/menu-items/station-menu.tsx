@@ -1,24 +1,26 @@
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React from 'react';
-import { MenuItemsByCategoryName } from '../../../../models/cafe.ts';
+import { ICafeStation, MenuItemsByCategoryName } from '../../../../models/cafe.ts';
 import { StationTheme } from '../station-theme.tsx';
 import { MenuCategory } from './menu-category.tsx';
+import { StationFirstVisit } from '../station-first-visit.tsx';
 
 interface IStationMenuProps {
+    station: ICafeStation;
     normalizedStationName: string;
     menuItemsByCategoryName: MenuItemsByCategoryName;
-    theme: string | undefined;
 }
 
-const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStationMenuProps> = ({
+export const StationMenu: React.FC<IStationMenuProps> = ({
+    station,
     menuItemsByCategoryName,
     normalizedStationName,
-    theme
-}, menuBodyRef) => {
+}) => {
     return (
         // This div wrapper is needed for the table to scroll independently of the header
-        <div className="menu-body" ref={menuBodyRef}>
-            <StationTheme theme={theme}/>
+        <div className="menu-body">
+            <StationFirstVisit firstVisit={station.uniqueness.firstAppearance} />
+            <StationTheme theme={station.uniqueness.theme}/>
             <div className="flex flex-wrap">
                 {
                     Object.entries(menuItemsByCategoryName).map(([categoryName, menuItems], i) => {
@@ -39,5 +41,3 @@ const StationMenuWithRef: React.ForwardRefRenderFunction<HTMLDivElement, IStatio
         </div>
     );
 };
-
-export const StationMenu = React.forwardRef(StationMenuWithRef);

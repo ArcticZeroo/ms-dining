@@ -26,7 +26,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
                 return false;
             }
 
-            return didEntityOpenRecently(view.value);
+            return didEntityOpenRecently(view.value.firstAvailableDate);
         },
         [view]
     );

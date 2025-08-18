@@ -44,7 +44,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
 
     const openedRecently = useMemo(
-        () => didEntityOpenRecently(cafe),
+        () => didEntityOpenRecently(cafe.firstAvailableDate),
         [cafe]
     );
 

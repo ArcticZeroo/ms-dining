@@ -126,9 +126,9 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                         </button>
                     </div>
                     <StationMenu
+                        station={station}
                         normalizedStationName={normalizedName}
                         menuItemsByCategoryName={menu}
-                        theme={station.uniqueness.theme}
                     />
                 </div>
             </StationHeaderHeightContext.Provider>

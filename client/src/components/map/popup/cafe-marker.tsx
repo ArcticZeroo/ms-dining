@@ -37,10 +37,10 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
     const isRecentlyOpened = useMemo(
         () => {
             if (view.type === CafeViewType.group) {
-                return view.value.members.some(didEntityOpenRecently);
+                return view.value.members.some(member => didEntityOpenRecently(member.firstAvailableDate));
             }
 
-            return didEntityOpenRecently(view.value);
+            return didEntityOpenRecently(view.value.firstAvailableDate);
         },
         [view]
     );
