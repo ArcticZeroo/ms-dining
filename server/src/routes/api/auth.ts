@@ -84,6 +84,8 @@ export const registerAuthRoutes = (parent: Router) => {
 			successRedirect: '/'
 		}));
 
+	attachRouter(router, oauthRouter);
+
 	router.get('/me', requireAuthenticated, async ctx => {
 		const user = await getUserOrThrowAsync(ctx);
 
