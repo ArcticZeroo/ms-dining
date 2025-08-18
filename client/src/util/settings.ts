@@ -12,8 +12,6 @@ export const updateRoamingSettingsOnBoot = (user: IDiningCoreResponse['user']) =
 
     let serverNeedsUpdate = roamingSettings == null;
 
-    console.log(InternalSettings.lastRoamingSettingsUpdateTime.value);
-
     if (roamingSettings != null) {
         console.log('server has roaming settings', roamingSettings);
 

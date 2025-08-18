@@ -8,8 +8,13 @@ import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
 import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
+import { didEntityOpenRecently } from '../../../../util/cafe.ts';
 
-const getStationTitle = (station: ICafeOverviewStation) => {
+const getStationTitle = (station: ICafeOverviewStation, didOpenRecently: boolean) => {
+    if (didOpenRecently) {
+        return 'This station is new to this cafe!';
+    }
+
     if (station.uniqueness.isTraveling) {
         return `This station ${
             station.uniqueness.daysThisWeek === 1
@@ -24,6 +29,29 @@ const getStationTitle = (station: ICafeOverviewStation) => {
     }
 
     return undefined;
+};
+
+const getStationBadge = (station: ICafeOverviewStation, didOpenRecently: boolean) => {
+    if (didOpenRecently) {
+        return (
+            '✨'
+        );
+    }
+
+    if (station.uniqueness.isTraveling) {
+        return (
+            <span className="material-symbols-outlined">
+                flight
+            </span>
+        );
+    }
+
+    const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1];
+    if (itemsHereTodayOnlyCount > 0) {
+        return itemsHereTodayOnlyCount;
+    }
+
+    return null;
 };
 
 interface ICafePopupOverviewStationProps {
@@ -41,6 +69,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
 
     const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1];
     const shouldShowBadge = station.uniqueness.isTraveling || itemsHereTodayOnlyCount > 0;
+    const didOpenRecently = didEntityOpenRecently(station.uniqueness.firstAppearance);
 
     return (
         <Link
@@ -52,7 +81,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                 name:       station.name,
                 date:       selectedDate
             })}
-            title={getStationTitle(station)}
+            title={getStationTitle(station, didOpenRecently)}
         >
             <div className="flex flex-between">
                 {
@@ -70,18 +99,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                 {
                     shouldShowBadge ? (
                         <span className="badge flex flex-center">
-                            {
-                                station.uniqueness.isTraveling && (
-                                    <span className="material-symbols-outlined">
-                            flight
-                                    </span>
-                                )
-                            }
-                            {
-                                !station.uniqueness.isTraveling && (
-                                    itemsHereTodayOnlyCount
-                                )
-                            }
+                            {getStationBadge(station, didOpenRecently)}
                         </span>
                     ) : <span/>
                 }

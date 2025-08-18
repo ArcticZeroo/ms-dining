@@ -55,7 +55,7 @@ export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
 
     // Try to downscale the full size image if we can, otherwise just show the full thing
     if (forceImageFallback) {
-        console.log('using image fallback on image', menuItem);
+        console.warn('using image fallback on image', menuItem);
         return (
             <ErrorBoundary fallback={<img {...imageProps}/>}>
                 <DownscaledImage
@@ -70,7 +70,7 @@ export const MenuItemImage: React.FC<IMenuItemImageProps> = ({ menuItem }) => {
         <img
             {...imageProps}
             onError={() => {
-                console.log('falling back for menu item', menuItem, 'with props', imageProps);
+                console.warn('falling back for menu item', menuItem, 'with props', imageProps);
                 setForceImageFallback(true);
             }}
         />

@@ -239,7 +239,6 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const favoriteButton = useMemo(
         () => {
             if (entityView) {
-                console.log(entityView);
                 return (
                     <FavoriteCafeSearchResultButton view={entityView}/>
                 );

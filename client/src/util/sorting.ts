@@ -2,6 +2,7 @@ import { CafeView, ICafe } from '../models/cafe.ts';
 import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
+import { didEntityOpenRecently } from './cafe.ts';
 
 export const normalizeCafeId = (id: string) => {
     return id
@@ -114,7 +115,20 @@ interface IUniquenessSortableStation {
 }
 
 export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStation>(stations: T[]): T[] => {
+    const didOpenRecentlyByName = new Map<string, boolean>();
+    for (const station of stations) {
+        didOpenRecentlyByName.set(station.name, didEntityOpenRecently(station.uniqueness.firstAppearance));
+    }
+
     stations.sort((stationA, stationB) => {
+        const didOpenRecentlyA = didOpenRecentlyByName.get(stationA.name) ?? false;
+        const didOpenRecentlyB = didOpenRecentlyByName.get(stationB.name) ?? false;
+
+        if (didOpenRecentlyA !== didOpenRecentlyB) {
+            // Stations that opened recently should be first.
+            return didOpenRecentlyA ? -1 : 1;
+        }
+
         const uniquenessA = stationA.uniqueness;
         const uniquenessB = stationB.uniqueness;
 
@@ -141,7 +155,7 @@ export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStatio
         // A station that has a theme should go before a station that does not have a theme
         if (uniquenessA.theme == null && uniquenessB.theme != null) {
             return -1;
-        } else if (uniquenessA != null && uniquenessB.theme == null) {
+        } else if (uniquenessA.theme != null && uniquenessB.theme == null) {
             return 1;
         }
 

@@ -74,7 +74,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                 onDeleted();
             })
             .catch(err => {
-                console.log('failed to delete:', err);
+                console.error('failed to delete:', err);
                 setDeleteStage(PromiseStage.error);
             });
     };

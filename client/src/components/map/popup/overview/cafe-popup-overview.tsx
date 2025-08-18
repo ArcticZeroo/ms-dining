@@ -9,6 +9,7 @@ import { ICafe } from '../../../../models/cafe.ts';
 import { sortStationUniquenessInPlace } from '../../../../util/sorting.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { CafePopupOverviewStation } from './cafe-popup-overview-station.tsx';
+import { didEntityOpenRecently } from '../../../../util/cafe.ts';
 
 const TARGET_STATION_MINIMUM = 3;
 
@@ -51,6 +52,11 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
                 }
 
                 if (station.uniqueness.theme != null) {
+                    result.push(station);
+                    continue;
+                }
+
+                if (didEntityOpenRecently(station.uniqueness.firstAppearance)) {
                     result.push(station);
                     continue;
                 }
