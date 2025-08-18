@@ -270,7 +270,7 @@ export const registerMenuRoutes = (parent: Router) => {
 		});
 
 	router.get('/reviews/recent',
-		memoizeResponseBodyByQueryParams(new Duration({ minutes: 1 })),
+		memoizeResponseBodyByQueryParams({ expirationTime: new Duration({ minutes: 1 }), isPublic: true }),
 		async ctx => {
 			const reviews = await ReviewStorageClient.getRecentReviews(10);
 			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
@@ -298,14 +298,14 @@ export const registerMenuRoutes = (parent: Router) => {
 		});
 
 	router.get('/search-ideas',
-		memoizeResponseBodyByQueryParams(),
+		memoizeResponseBodyByQueryParams({ isPublic: true }),
 		async ctx => {
 			ctx.body = MenuItemStorageClient.topSearchTags;
 		});
 
 	router.get('/:id',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		memoizeResponseBodyByQueryParams(),
+		memoizeResponseBodyByQueryParams({ isPublic: true }),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 			const [menuStations, uniquenessData] = await Promise.all([
 				retrieveDailyCafeMenuAsync(cafe.id, dateString),
@@ -317,7 +317,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	router.get('/:id/overview',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-		memoizeResponseBodyByQueryParams(),
+		memoizeResponseBodyByQueryParams({ isPublic: true }),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 			const [stationHeaders, uniquenessData] = await Promise.all([
 				DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),

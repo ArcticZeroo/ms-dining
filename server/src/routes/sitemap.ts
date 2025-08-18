@@ -1,7 +1,6 @@
 import Router from '@koa/router';
 import { generateSitemap } from '../api/sitemap.js';
 import { streamToPromise } from 'sitemap';
-import { memoizeResponseBodyByQueryParams } from '../middleware/cache.js';
 
 export const registerSitemapRoutes = (router: Router) => {
 	router.get('/sitemap.xml',

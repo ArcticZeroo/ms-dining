@@ -27,7 +27,6 @@ if (hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
 	app.keys = [getSessionSecret()];
 	app.use(session({
 		maxAge: new Duration({ days: 180 }).inMilliseconds,
-		rolling: true,
 		renew: true,
 		store: new PrismaSessionStore()
 	}, app));

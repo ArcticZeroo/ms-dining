@@ -9,6 +9,7 @@ import { jsonStringifyWithoutNull } from './serde.js';
 import { getDevKey } from '../constants/env.js';
 import { UserStorageClient } from '../api/storage/clients/user.js';
 import { IServerUser } from '../models/auth.js';
+import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 
 export const attachRouter = (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 
@@ -168,4 +169,9 @@ export const getUserOrThrowAsync = async (ctx: Koa.Context): Promise<IServerUser
 	}
 
 	return user;
+}
+
+export const assignCacheControl = (ctx: Koa.Context, maxAge: DurationOrMilliseconds, isPublic: boolean = false) => {
+	ctx.set('Cache-Control', `${isPublic ? 'public' : 'private'}, max-age=${Duration.fromDurationOrMilliseconds(maxAge).inSeconds}`);
+	ctx.set('Vary', VERSION_TAG_HEADER);
 }

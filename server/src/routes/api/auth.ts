@@ -11,6 +11,10 @@ import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategi
 import { isUpdateUserSettingsInput } from '../../util/typeguard.js';
 import { normalizeDisplayName } from '@msdining/common/dist/util/string-util.js';
 
+const isAuthorizationError = (err: unknown) => {
+	return err instanceof Error && err.constructor.name === 'AuthorizationError';
+}
+
 export const registerAuthRoutes = (parent: Router) => {
 	if (!hasAuthEnvironmentVariables()) {
 		logInfo('Auth environment variables not set, skipping auth routes');
@@ -36,32 +40,45 @@ export const registerAuthRoutes = (parent: Router) => {
 	passport.use(getMicrosoftStrategy());
 	passport.use(getGoogleStrategy());
 
+	const oauthRouter = new Router({});
+
 	// In my personal testing, I found that the PWA being installed on the phone means that we double-complete the
 	// auth callback sometimes, which leads to an internal passport error which for some reason doesn't redirect
 	// to a failure page. Instead, I think it should help to just check if we're already authed before asking passport
 	// to do the auth step.
-	router.get('/microsoft/login',
-		requireNotAuthenticated,
+	oauthRouter.use(requireNotAuthenticated);
+	oauthRouter.use(async (ctx, next) => {
+		try {
+			await next();
+		} catch (err) {
+			if (!isAuthorizationError(err)) {
+				throw err;
+			} else {
+				if (!ctx.headerSent) {
+					ctx.redirect('/login');
+				}
+			}
+		}
+	});
+
+	oauthRouter.get('/microsoft/login',
 		passport.authenticate('microsoft', {
 			prompt:          'select_account',
 			failureRedirect: '/login'
 		}));
 
-	router.get('/google/login',
-		requireNotAuthenticated,
+	oauthRouter.get('/google/login',
 		passport.authenticate('google', {
 			failureRedirect: '/login'
 		}));
 
-	router.get('/microsoft/callback',
-		requireNotAuthenticated,
+	oauthRouter.get('/microsoft/callback',
 		passport.authenticate('microsoft', {
 			failureRedirect: '/login',
 			successRedirect: '/'
 		}));
 
-	router.get('/google/callback',
-		requireNotAuthenticated,
+	oauthRouter.get('/google/callback',
 		passport.authenticate('google', {
 			failureRedirect: '/login',
 			successRedirect: '/'

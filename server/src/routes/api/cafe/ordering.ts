@@ -137,7 +137,7 @@ export const registerOrderingRoutes = (parent: Router) => {
     });
 
     router.get('/wait/:cafeId',
-        memoizeResponseBodyByQueryParams(new Duration({ minutes: 5 })),
+        memoizeResponseBodyByQueryParams({ expirationTime: new Duration({ minutes: 5 }), isPublic: true }),
         async ctx => {
             const cafeId = ctx.params.cafeId;
 
