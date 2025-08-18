@@ -19,6 +19,10 @@ import { PrismaSessionStore } from './util/session-store.js';
 
 const app = new Koa();
 
+// Do this first so that this isn't impacted by auth/doesn't send telemetry
+app.use(mount('/.well-known', serve(path.join(serverStaticPath, '.well-known'))));
+app.use(mount('/static', createStaticRoutingApp()));
+
 if (hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
 	app.keys = [getSessionSecret()];
 	app.use(session({
@@ -38,8 +42,6 @@ app.use(sendUniversalVisitMiddleware);
 
 registerRoutes(app);
 
-app.use(mount('/.well-known', serve(path.join(serverStaticPath, '.well-known'))));
-app.use(mount('/static', createStaticRoutingApp()));
 app.use(mount('/', serve(clientFolderDistPath)));
 
 const spaRouter = new Router();
