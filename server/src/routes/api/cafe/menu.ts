@@ -33,6 +33,7 @@ import { retrieveUniquenessDataForCafe } from '../../../api/cache/daily-uniquene
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interface/thumbnail.js';
 import { logDebug } from '../../../util/log.js';
 import { retrieveReviewHeaderAsync } from '../../../api/cache/reviews.js';
+import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-first-appearance.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -48,16 +49,19 @@ export const registerMenuRoutes = (parent: Router) => {
 	});
 
 	const serializeMenuItem = async (menuItem: IMenuItem): Promise<IMenuItemDTO> => {
-		const [reviewHeader] = await Promise.all([
+		const [reviewHeader, firstAppearance] = await Promise.all([
 			retrieveReviewHeaderAsync(normalizeNameForSearch(menuItem.name)),
+			retrieveFirstMenuItemAppearance(menuItem.id),
 			ensureThumbnailDataHasBeenRetrievedAsync(menuItem),
 		]);
 
 		return ({
 			...reviewHeader,
 			...menuItem,
-			tags:       Array.from(menuItem.tags),
-			searchTags: Array.from(menuItem.searchTags)
+			firstAppearance,
+			lastUpdateTime: menuItem.lastUpdateTime?.getTime(),
+			tags:           Array.from(menuItem.tags),
+			searchTags:     Array.from(menuItem.searchTags)
 		});
 	};
 

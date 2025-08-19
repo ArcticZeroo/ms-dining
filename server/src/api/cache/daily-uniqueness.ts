@@ -16,7 +16,7 @@ import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.j
 import { getDefaultUniquenessDataForStation } from '../../util/cafe.js';
 import { StationThemeClient } from '../storage/clients/station-theme.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
-import { retrieveFirstStationVisitDate } from './first-station-visit.js';
+import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 
 const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>>();
 
@@ -93,7 +93,7 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 			todayUniquenessData.set(station.name, getDefaultUniquenessDataForStation());
 
 			if (!firstVisitByStationIdPromises.has(station.id)) {
-				firstVisitByStationIdPromises.set(station.id, retrieveFirstStationVisitDate(station.id));
+				firstVisitByStationIdPromises.set(station.id, retrieveFirstStationAppearance(station.id));
 			}
 		}
 	}

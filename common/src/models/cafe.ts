@@ -56,7 +56,7 @@ export interface IMenuItem {
     lastUpdateTime?: Nullable<Date>;
     tags: Set<string>;
     searchTags: Set<string>;
-	firstAppearance?: Nullable<Date>;
+	firstAppearance: string;
 	hasRetrievedThumbnailData?: boolean;
 }
 
@@ -76,7 +76,8 @@ export interface IMenuItemDTO extends IMenuItemReviewHeader {
     thumbnailHeight?: number;
     imageUrl?: Nullable<string>;
     description?: Nullable<string>;
-    lastUpdateTime?: Nullable<Date>;
+    lastUpdateTime?: Nullable<number>;
+	firstAppearance: string;
     tags: string[];
     searchTags: string[];
 	pattern?: string;

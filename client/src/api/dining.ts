@@ -63,9 +63,10 @@ export abstract class DiningClient {
             for (const [category, menuItems] of Object.entries(responseStation.menu)) {
                 menu[category] = menuItems.map(dto => ({
                     ...dto,
+                    lastUpdateTime: dto.lastUpdateTime ? new Date(dto.lastUpdateTime) : undefined,
                     tags: new Set(dto.tags),
                     searchTags: new Set(dto.searchTags)
-                }));
+                } satisfies IMenuItem));
             }
 
             stations.push({

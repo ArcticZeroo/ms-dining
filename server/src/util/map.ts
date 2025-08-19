@@ -5,6 +5,15 @@ export class LockedMap<K, V> {
     readonly #locks: Map<K, Lock> = new Map();
     readonly #values: Map<K, V> = new Map();
 
+	constructor(initialState?: Map<K, V>) {
+		if (initialState) {
+			for (const [key, value] of initialState.entries()) {
+				this.#locks.set(key, new Lock());
+				this.#values.set(key, value);
+			}
+		}
+	}
+
     get size(): number {
         return this.#locks.size;
     }

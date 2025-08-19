@@ -10,6 +10,8 @@ import { IEntityVisitData } from '@msdining/common/dist/models/pattern.js';
 import { IMenuPublishEvent } from '../../../models/storage-events.js';
 import { STORAGE_EVENTS } from '../events.js';
 import Duration from '@arcticzeroo/duration';
+import { getAllMenuItemsFirstAppearance } from '@prisma/client/sql';
+import { fromDateString } from '@msdining/common/dist/util/date-util.js';
 
 const areMenuItemsByCategoryNameEqual = (a: Map<string, Array<string>>, b: Map<string, Array<string>>) => {
 	if (a.size !== b.size) {
@@ -92,6 +94,10 @@ export abstract class DailyMenuStorageClient {
 
 			for (const previousStation of previousDailyStationMenus) {
 				publishEvent.removedStations.add(previousStation.stationId);
+				publishEvent.removedMenuItemsByStation.set(
+					previousStation.stationId,
+					new Set(previousStation.categories.flatMap(category => category.menuItems.flatMap(menuItem => menuItem.menuItemId)))
+				);
 			}
 
 			for (const station of stations) {
@@ -632,5 +638,48 @@ export abstract class DailyMenuStorageClient {
 		}
 
 		return DateUtil.fromDateString(visit.dateString);
+	}
+
+	public static async retrieveFirstMenuItemVisitDate(menuItemId: string): Promise<string | null> {
+		const visit = await usePrismaClient(client => client.dailyMenuItem.findFirst({
+			where: {
+				menuItemId
+			},
+			orderBy: {
+				category: {
+					station: {
+						dateString: 'asc'
+					}
+				}
+			},
+			select: {
+				category: {
+					select: {
+						station: {
+							select: {
+								dateString: true
+							}
+						}
+					}
+				}
+			}
+		}));
+
+		if (visit == null) {
+			return null;
+		}
+
+		return visit.category.station.dateString;
+	}
+
+	public static async retrieveAllFirstMenuItemAppearances(): Promise<Map<string /*menuItemId*/, string /*dateString*/>> {
+		const results = await usePrismaClient(client => client.$queryRawTyped(getAllMenuItemsFirstAppearance()));
+		const firstVisitDates = new Map<string, string>();
+		for (const { menuItemId, firstAppearance } of results) {
+			if (menuItemId && firstAppearance) {
+				firstVisitDates.set(menuItemId, firstAppearance);
+			}
+		}
+		return firstVisitDates;
 	}
 }

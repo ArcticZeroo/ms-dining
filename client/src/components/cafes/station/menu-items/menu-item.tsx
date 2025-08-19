@@ -18,6 +18,7 @@ import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
 import { pluralize } from '../../../../util/string.ts';
+import { didEntityOpenRecently } from '../../../../util/cafe.ts';
 
 export interface IMenuItemProps {
     menuItem: IMenuItemWithReviewHeader;
@@ -98,8 +99,14 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         ? `Click to open item details (online ordering enabled)`
         : 'Click to open item details';
 
+    const isRecentlyOpened = useMemo(
+        () => didEntityOpenRecently(menuItem.firstAppearance),
+        [menuItem.firstAppearance]
+    );
+
     return (
-        <div className={classNames('flex-col menu-item pointer', isFavoriteItem && 'is-favorite')}
+        <div
+            className={classNames('flex-col menu-item pointer', isFavoriteItem && 'is-favorite')}
             onClick={onOpenModalClick}
             title={title}
             style={{ backgroundColor: currentHighlightTag?.color }}
@@ -139,6 +146,13 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                     )
                 }
             </div>
+            {
+                isRecentlyOpened && (
+                    <div className="default-container flex flex-center recently-opened-notice">
+                        New to this cafe!
+                    </div>
+                )
+            }
             {
                 showTags && (
                     <MenuItemTags tags={menuItem.tags}/>
