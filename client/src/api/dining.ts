@@ -1,6 +1,6 @@
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { ICafeOverviewStation, IMenuItem, IMenuItemWithReviewHeader } from '@msdining/common/dist/models/cafe';
+import { ICafeOverviewStation, IMenuItemBase, IMenuItem } from '@msdining/common/dist/models/cafe';
 import {
     ICreateReviewRequest,
     IDiningCoreResponse,
@@ -59,14 +59,14 @@ export abstract class DiningClient {
 
         const stations: ICafeStation[] = [];
         for (const responseStation of response) {
-            const menu: Record<string, Array<IMenuItemWithReviewHeader>> = {};
+            const menu: Record<string, Array<IMenuItem>> = {};
             for (const [category, menuItems] of Object.entries(responseStation.menu)) {
                 menu[category] = menuItems.map(dto => ({
                     ...dto,
                     lastUpdateTime: dto.lastUpdateTime ? new Date(dto.lastUpdateTime) : undefined,
                     tags: new Set(dto.tags),
                     searchTags: new Set(dto.searchTags)
-                } satisfies IMenuItem));
+                } satisfies IMenuItemBase));
             }
 
             stations.push({
@@ -161,7 +161,7 @@ export abstract class DiningClient {
         }
     }
 
-    public static getThumbnailUrlForMenuItem(menuItem: IMenuItem) {
+    public static getThumbnailUrlForMenuItem(menuItem: IMenuItemBase) {
         return `/static/menu-items/thumbnail/${menuItem.id}.png`;
     }
 

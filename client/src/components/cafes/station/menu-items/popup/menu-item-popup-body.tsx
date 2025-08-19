@@ -1,11 +1,11 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import React from 'react';
 import { MenuItemModifierPicker } from '../../../../order/menu-item-modifier-picker.tsx';
 import { MenuItemReviewsView } from '../../../../reviews/menu-item-reviews-view.tsx';
 
 interface IMenuItemPopupBodyProps {
-    menuItem: IMenuItem;
+    menuItem: IMenuItemBase;
     notes: string;
     getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>;
     onSelectedChoiceIdsChanged: (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => void;

@@ -1,5 +1,5 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { ICartItemWithMetadata } from '../models/cart.ts';
 
@@ -86,7 +86,7 @@ export const shallowCloneCart = (cart: CartItemsByCafeId) => {
     return newCart;
 }
 
-export const calculatePrice = (menuItem: IMenuItem, selectedChoiceIdsByModifierId: Map<string, Set<string>>, quantity: number = 1): number => {
+export const calculatePrice = (menuItem: IMenuItemBase, selectedChoiceIdsByModifierId: Map<string, Set<string>>, quantity: number = 1): number => {
     let price = menuItem.price;
 
     for (const modifier of menuItem.modifiers) {

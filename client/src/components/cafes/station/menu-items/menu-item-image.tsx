@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import React, { useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { DiningClient } from '../../../../api/dining.ts';
@@ -8,10 +8,10 @@ import { DownscaledImage } from '../../../image/downscaled-image.tsx';
 const menuItemHeightPx = Measurement.fromRem(10).inPixels;
 
 interface IMenuItemImageProps {
-    menuItem: IMenuItem;
+    menuItem: IMenuItemBase;
 }
 
-const getTargetImageUrl = (forceImageFallback: boolean, menuItem: IMenuItem) => {
+const getTargetImageUrl = (forceImageFallback: boolean, menuItem: IMenuItemBase) => {
     if (!forceImageFallback && menuItem.hasThumbnail) {
         return DiningClient.getThumbnailUrlForMenuItem(menuItem);
     }
@@ -26,7 +26,7 @@ const defaultImageProps = {
     loading:   'lazy'
 } as const;
 
-const getImageSizeProps = (menuItem: IMenuItem) => {
+const getImageSizeProps = (menuItem: IMenuItemBase) => {
     // Even if we're using fallback, we should still set these props since we expect the same scale
     if (menuItem.hasThumbnail && menuItem.thumbnailWidth && menuItem.thumbnailHeight) {
         return {

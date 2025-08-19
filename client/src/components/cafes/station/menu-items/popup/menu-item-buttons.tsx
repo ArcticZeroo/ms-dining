@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import { FavoriteSearchableItemButton } from '../../../../button/favorite/favorite-searchable-item-button.tsx';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import React, { useContext, useState } from 'react';
@@ -14,7 +14,7 @@ import { SearchResultVisitHistoryButton } from '../../../../search/schedule/sear
 
 interface IMenuItemButtonsProps {
     cafeId: string;
-    menuItem: IMenuItem;
+    menuItem: IMenuItemBase;
     onClose?: () => void;
 }
 

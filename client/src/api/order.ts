@@ -1,5 +1,5 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import {
     IOrderCompletionResponse,
     ISerializedCartItem,
@@ -110,11 +110,11 @@ export abstract class OrderingClient {
             }
         });
 
-        const data = response as Record<string, Array<IMenuItem>>;
+        const data = response as Record<string, Array<IMenuItemBase>>;
 
-        const foundMenuItemsByCafeId = new Map<string /*cafeId*/, Map<string /*menuItemId*/, IMenuItem>>();
+        const foundMenuItemsByCafeId = new Map<string /*cafeId*/, Map<string /*menuItemId*/, IMenuItemBase>>();
         for (const [cafeId, items] of Object.entries(data)) {
-            const itemsForCafeById = new Map<string, IMenuItem>();
+            const itemsForCafeById = new Map<string, IMenuItemBase>();
 
             for (const menuItem of items) {
                 itemsForCafeById.set(menuItem.id, menuItem);

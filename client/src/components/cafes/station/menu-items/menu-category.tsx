@@ -1,10 +1,10 @@
-import { IMenuItemWithReviewHeader } from '@msdining/common/dist/models/cafe';
+import { IMenuItem } from '@msdining/common/dist/models/cafe';
 import React, { useMemo } from 'react';
 import { MenuItem } from './menu-item.tsx';
 
 export interface IMenuCategoryProps {
     categoryName?: string;
-    menuItems: IMenuItemWithReviewHeader[];
+    menuItems: IMenuItem[];
 }
 
 export const MenuCategory: React.FC<IMenuCategoryProps> = ({

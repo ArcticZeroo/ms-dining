@@ -1,5 +1,5 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { CartContext } from '../../../../../context/cart.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';
@@ -14,7 +14,7 @@ import { useIsOnlineOrderingAllowedForSelectedDate } from '../../../../../hooks/
 import { MenuItemButtons } from './menu-item-buttons.tsx';
 import { usePopupCloserSymbol } from '../../../../../hooks/popup.ts';
 
-const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
+const useIsOrderValid = (menuItem: IMenuItemBase, getSelectedChoiceIdsForModifier: (modifier: CafeTypes.IMenuItemModifier) => Set<string>): boolean => {
     return useMemo(
         () => {
             for (const modifier of menuItem.modifiers) {
@@ -36,7 +36,7 @@ const useIsOrderValid = (menuItem: IMenuItem, getSelectedChoiceIdsForModifier: (
 };
 
 interface IMenuItemPopupProps {
-	menuItem: IMenuItem;
+	menuItem: IMenuItemBase;
 	modalSymbol: symbol;
 	cafeId: string;
 	fromCartItem?: ICartItemWithMetadata;

@@ -1,4 +1,4 @@
-import { IMenuItem, IMenuItemWithReviewHeader } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase, IMenuItem } from '@msdining/common/dist/models/cafe';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
 import React, { useContext, useMemo } from 'react';
@@ -21,10 +21,10 @@ import { pluralize } from '../../../../util/string.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 export interface IMenuItemProps {
-    menuItem: IMenuItemWithReviewHeader;
+    menuItem: IMenuItem;
 }
 
-const getCaloriesDisplay = (menuItem: IMenuItem) => {
+const getCaloriesDisplay = (menuItem: IMenuItemBase) => {
     if (!menuItem.calories || Number(menuItem.calories) < 1) {
         return false;
     }

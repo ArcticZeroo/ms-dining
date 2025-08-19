@@ -1,12 +1,12 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
 import { ISerializedCartItem } from '@msdining/common/dist/models/cart';
 import { CartItemsByCafeId } from '../context/cart.ts';
 
 export interface ICartItemWithMetadata extends CafeTypes.ICartItem {
     id: string;
     cafeId: string;
-    associatedItem: IMenuItem;
+    associatedItem: IMenuItemBase;
     price: number;
 }
 
