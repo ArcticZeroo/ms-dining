@@ -7,7 +7,7 @@ import {
 	MenuItemModifierEntry,
 	PrismaClient
 } from '@prisma/client';
-import { IMenuItem } from '../../../models/cafe.js';
+import { IMenuItemBase } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug, logInfo } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
@@ -28,7 +28,7 @@ type DehydratedMenuItem = MenuItem & {
 	}>;
 }
 
-const hydrateMenuItem = (menuItem: DehydratedMenuItem) => {
+const hydrateMenuItem = (menuItem: DehydratedMenuItem): IMenuItemBase => {
 	const modifiers: IMenuItemModifier[] = [];
 	for (const modifierEntry of menuItem.modifiers) {
 		modifiers.push({
@@ -65,7 +65,7 @@ const hydrateMenuItem = (menuItem: DehydratedMenuItem) => {
 }
 
 export abstract class MenuItemStorageClient {
-	private static readonly _menuItemsById = new Map<string, IMenuItem>();
+	private static readonly _menuItemsById = new Map<string, IMenuItemBase>();
 	private static readonly _menuIdsBySearchTag = new Map<string, Set<string>>();
 	private static _topSearchTags: string[] | undefined;
 
@@ -172,7 +172,7 @@ export abstract class MenuItemStorageClient {
 		}
 	}
 
-	private static async _doSaveMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean): Promise<void> {
+	private static async _doSaveMenuItemAsync(menuItem: IMenuItemBase, allowUpdateIfExisting: boolean): Promise<void> {
 		const lastUpdateTime = menuItem.lastUpdateTime == null || Number.isNaN(menuItem.lastUpdateTime.getTime())
 			? null
 			: menuItem.lastUpdateTime;
@@ -287,7 +287,7 @@ export abstract class MenuItemStorageClient {
 		});
 	}
 
-	public static async saveMenuItemAsync(menuItem: IMenuItem, allowUpdateIfExisting: boolean = false): Promise<void> {
+	public static async saveMenuItemAsync(menuItem: IMenuItemBase, allowUpdateIfExisting: boolean = false): Promise<void> {
 		if (!allowUpdateIfExisting && MenuItemStorageClient._menuItemsById.has(menuItem.id)) {
 			return;
 		}
@@ -321,7 +321,7 @@ export abstract class MenuItemStorageClient {
 		}
 	}
 
-	private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
+	private static async _doRetrieveMenuItemAsync(id: string): Promise<IMenuItemBase | null> {
 		const menuItem = await usePrismaClient(prismaClient => prismaClient.menuItem.findUnique({
 			where:   { id },
 			include: {
@@ -352,7 +352,7 @@ export abstract class MenuItemStorageClient {
 		return hydrateMenuItem(menuItem);
 	}
 
-	private static _saveMenuItemIntoCache(menuItem: IMenuItem) {
+	private static _saveMenuItemIntoCache(menuItem: IMenuItemBase) {
 		this._menuItemsById.set(menuItem.id, menuItem);
 		for (const searchTag of menuItem.searchTags) {
 			const menuItemIds = this._menuIdsBySearchTag.get(searchTag) ?? new Set<string>();
@@ -363,7 +363,7 @@ export abstract class MenuItemStorageClient {
 		this._topSearchTags = undefined;
 	}
 
-	public static async retrieveMenuItemAsync(id: string): Promise<IMenuItem | null> {
+	public static async retrieveMenuItemAsync(id: string): Promise<IMenuItemBase | null> {
 		if (!this._menuItemsById.has(id)) {
 			const menuItem = await this._doRetrieveMenuItemAsync(id);
 

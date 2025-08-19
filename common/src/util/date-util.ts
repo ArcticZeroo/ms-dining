@@ -1,4 +1,5 @@
 import Duration from '@arcticzeroo/duration';
+import { Nullable } from '../models/util.js';
 
 export const addDurationToDate = (date: Date, time: Duration) => {
     const result = new Date(date.getTime());
@@ -325,3 +326,17 @@ export const getSequentialDateGroups = (dates: Date[], minGroupSizeToAvoidBreaku
     return groups;
 };
 
+const RECENT_OPEN_TIME = new Duration({ days: 14 });
+
+export const getIsRecentlyAvailable = (date: Nullable<Date | string>) => {
+	if (!date) {
+		return false;
+	}
+
+	if (typeof date === 'string') {
+		date = fromDateString(date);
+	}
+
+	const timeSinceFirstAvailableMs = Date.now() - date.getTime();
+	return (timeSinceFirstAvailableMs > 0) && (timeSinceFirstAvailableMs <= RECENT_OPEN_TIME.inMilliseconds);
+}

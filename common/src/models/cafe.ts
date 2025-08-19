@@ -32,6 +32,7 @@ export interface IStationUniquenessData {
     theme: string | undefined;
     themeItemIds: Array<string>;
 	firstAppearance: string; // date string
+	recentlyAvailableItemCount: number;
 }
 
 export interface IMenuItemReviewHeader {
@@ -39,7 +40,7 @@ export interface IMenuItemReviewHeader {
 	overallRating: number;
 }
 
-export interface IMenuItem {
+export interface IMenuItemBase {
     id: string;
 	cafeId: string;
     price: number;
@@ -56,11 +57,12 @@ export interface IMenuItem {
     lastUpdateTime?: Nullable<Date>;
     tags: Set<string>;
     searchTags: Set<string>;
-	firstAppearance: string;
 	hasRetrievedThumbnailData?: boolean;
 }
 
-export type IMenuItemWithReviewHeader = IMenuItem & IMenuItemReviewHeader;
+export type IMenuItem = IMenuItemBase & IMenuItemReviewHeader & {
+	firstAppearance: string;
+};
 
 export interface IMenuItemDTO extends IMenuItemReviewHeader {
     id: string;
@@ -83,7 +85,7 @@ export interface IMenuItemDTO extends IMenuItemReviewHeader {
 	pattern?: string;
 }
 
-export type StationMenuByCategoryName = Record<string, Array<IMenuItem>>;
+export type StationMenuByCategoryName = Record<string, Array<IMenuItemBase>>;
 
 export interface ICafeOverviewStation {
     name: string;

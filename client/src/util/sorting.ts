@@ -2,7 +2,7 @@ import { CafeView, ICafe } from '../models/cafe.ts';
 import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
-import { didEntityOpenRecently } from './cafe.ts';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 export const normalizeCafeId = (id: string) => {
     return id
@@ -117,7 +117,7 @@ interface IUniquenessSortableStation {
 export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStation>(stations: T[]): T[] => {
     const didOpenRecentlyByName = new Map<string, boolean>();
     for (const station of stations) {
-        didOpenRecentlyByName.set(station.name, didEntityOpenRecently(station.uniqueness.firstAppearance));
+        didOpenRecentlyByName.set(station.name, getIsRecentlyAvailable(station.uniqueness.firstAppearance));
     }
 
     stations.sort((stationA, stationB) => {
@@ -135,6 +135,11 @@ export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStatio
         if (uniquenessA.isTraveling !== uniquenessB.isTraveling) {
             // Traveling stations should be first.
             return uniquenessA.isTraveling ? -1 : 1;
+        }
+
+        if (uniquenessA.recentlyAvailableItemCount !== uniquenessB.recentlyAvailableItemCount) {
+            // Stations with more recently available items should be first.
+            return uniquenessB.recentlyAvailableItemCount - uniquenessA.recentlyAvailableItemCount;
         }
 
         if (uniquenessA.daysThisWeek !== uniquenessB.daysThisWeek) {

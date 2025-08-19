@@ -1,6 +1,6 @@
 import { BuyOnDemandClient } from '../buy-ondemand/buy-ondemand-client.js';
 import { ICafeMenuItemListResponseItem } from '../../../models/buyondemand/responses.js';
-import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
+import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { logError } from '../../../util/log.js';
 import { TagStorageClient } from '../../storage/clients/tags.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
@@ -27,7 +27,7 @@ export class CafeMenuSession {
 		return session.#retrieveMenuAsync();
 	}
 
-	async #retrieveModifierDetailsAsync(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemModifier>> {
+	async #retrieveModifierDetailsAsync(localItem: IMenuItemBase | undefined, jsonItem: ICafeMenuItemListResponseItem): Promise<Array<IMenuItemModifier>> {
 		// In case parsing is weird, don't treat null as a reason to skip retrieving
 		if (jsonItem.isItemCustomizationEnabled === false) {
 			return [];
@@ -45,7 +45,7 @@ export class CafeMenuSession {
 		}
 	}
 
-	#isAnyModifierWeird(localItem: IMenuItem): boolean {
+	#isAnyModifierWeird(localItem: IMenuItemBase): boolean {
 		return localItem.modifiers.some(modifier => {
 			if (modifier.maximum === 0) {
 				return true;
@@ -68,7 +68,7 @@ export class CafeMenuSession {
 		});
 	}
 
-	#shouldRetrieveModifierDetails(localItem: IMenuItem | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
+	#shouldRetrieveModifierDetails(localItem: IMenuItemBase | undefined, jsonItem: ICafeMenuItemListResponseItem): boolean {
 		if (localItem == null || localItem.lastUpdateTime == null || Number.isNaN(localItem.lastUpdateTime.getTime())) {
 			return true;
 		}
@@ -132,8 +132,8 @@ export class CafeMenuSession {
 		}
 	}
 
-	async #convertBuyOnDemandMenuItem(station: ICafeStation, localItemsById: Map<string, IMenuItem>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItem> {
-		const localItem: IMenuItem | undefined = localItemsById.get(jsonItem.id);
+	async #convertBuyOnDemandMenuItem(station: ICafeStation, localItemsById: Map<string, IMenuItemBase>, jsonItem: ICafeMenuItemListResponseItem): Promise<IMenuItemBase> {
+		const localItem: IMenuItemBase | undefined = localItemsById.get(jsonItem.id);
 
 		const modifiers = await this.#retrieveModifierDetailsAsync(localItem, jsonItem);
 
@@ -168,10 +168,10 @@ export class CafeMenuSession {
 		};
 	}
 
-	async #retrieveMenuItemsFromBuyOnDemandAsync(station: ICafeStation, localItemsById: Map<string, IMenuItem>, itemIds: string[]): Promise<Array<IMenuItem>> {
+	async #retrieveMenuItemsFromBuyOnDemandAsync(station: ICafeStation, localItemsById: Map<string, IMenuItemBase>, itemIds: string[]): Promise<Array<IMenuItemBase>> {
 		const json = await retrieveMenuItemsAsync(this.client, station, itemIds);
 
-		const items: IMenuItem[] = [];
+		const items: IMenuItemBase[] = [];
 
 		// Don't fail to retrieve the whole menu item because some failed
 		const menuItemPromises = json.map(jsonItem => this.#convertBuyOnDemandMenuItem(station, localItemsById, jsonItem));
@@ -186,10 +186,10 @@ export class CafeMenuSession {
 		return items;
 	}
 
-	async #retrieveMenuItemsAsync(station: ICafeStation, itemIds: string[], alwaysGetServerItems: boolean): Promise<Array<IMenuItem>> {
+	async #retrieveMenuItemsAsync(station: ICafeStation, itemIds: string[], alwaysGetServerItems: boolean): Promise<Array<IMenuItemBase>> {
 		const itemIdsToRetrieve = new Set(itemIds);
-		const items: IMenuItem[] = [];
-		const localItemsById = new Map<string, IMenuItem>();
+		const items: IMenuItemBase[] = [];
+		const localItemsById = new Map<string, IMenuItemBase>();
 
 		const retrieveMenuItemDetailsLocallyAsync = async (itemId: string) => {
 			const existingItem = await MenuItemStorageClient.retrieveMenuItemAsync(itemId);

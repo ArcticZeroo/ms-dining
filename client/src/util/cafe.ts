@@ -1,6 +1,5 @@
-import Duration from '@arcticzeroo/duration';
 import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { ILocationCoordinates, Nullable } from '@msdining/common/dist/models/util';
+import { ILocationCoordinates } from '@msdining/common/dist/models/util';
 import { fromDateString, isDateBefore } from '@msdining/common/dist/util/date-util';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
@@ -83,15 +82,3 @@ export const isViewAvailable = (view: CafeView, minMenuDate: Date) => {
 
     return !isDateBefore(fromDateString(view.value.firstAvailableDate), minMenuDate);
 };
-
-const RECENT_OPEN_TIME = new Duration({ days: 14 });
-
-export const didEntityOpenRecently = (firstAvailableDateString: Nullable<string>) => {
-    if (!firstAvailableDateString) {
-        return false;
-    }
-
-    const firstAvailableDate = fromDateString(firstAvailableDateString);
-    const timeSinceFirstAvailableMs = Date.now() - firstAvailableDate.getTime();
-    return (timeSinceFirstAvailableMs > 0) && (timeSinceFirstAvailableMs <= RECENT_OPEN_TIME.inMilliseconds);
-}

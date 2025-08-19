@@ -1,6 +1,6 @@
 import { DateUtil } from '@msdining/common';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
-import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
+import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { isDateValid } from '../../../util/date.js';
 import { logError } from '../../../util/log.js';
 import { usePrismaClient } from '../client.js';
@@ -214,7 +214,7 @@ export abstract class DailyMenuStorageClient {
 			const stationData = dailyStation.station;
 
 			const menuItemIdsByCategoryName = new Map<string, Array<string>>();
-			const menuItemsById = new Map<string, IMenuItem>();
+			const menuItemsById = new Map<string, IMenuItemBase>();
 
 			for (const category of dailyStation.categories) {
 				const menuItemIds: string[] = [];

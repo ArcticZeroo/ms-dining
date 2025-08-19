@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { didEntityOpenRecently } from '../../../util/cafe.ts';
 import { CurrentCafeContext } from '../../../context/menu-item.ts';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 interface IStationFirstVisitProps {
     firstVisit: string;
@@ -10,11 +10,11 @@ export const StationFirstVisit: React.FC<IStationFirstVisitProps> = ({ firstVisi
     const cafe = useContext(CurrentCafeContext);
 
     // If the cafe just opened, this station also just opened, so it would be redundant
-    if (didEntityOpenRecently(cafe.firstAvailableDate)) {
+    if (getIsRecentlyAvailable(cafe.firstAvailableDate)) {
         return null;
     }
 
-    if (!didEntityOpenRecently(firstVisit)) {
+    if (!getIsRecentlyAvailable(firstVisit)) {
         return null;
     }
 

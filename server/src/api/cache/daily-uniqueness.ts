@@ -1,9 +1,9 @@
 import { LockedMap } from '../../util/map.js';
-import { IMenuItem, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import {
 	fromDateString,
-	getFridayForWeek,
+	getFridayForWeek, getIsRecentlyAvailable,
 	getMondayForWeek,
 	isDateOnWeekend,
 	toDateString,
@@ -17,6 +17,7 @@ import { getDefaultUniquenessDataForStation } from '../../util/cafe.js';
 import { StationThemeClient } from '../storage/clients/station-theme.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
+import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
 
 const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>>();
 
@@ -79,7 +80,8 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 
 	const metrics = calculateWeeklyUniquenessMetrics(menuEntries);
 	const uniquenessData = new Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>();
-	const firstVisitByStationIdPromises = new Map<string, Promise<Date | null>>();
+	const firstVisitByStationIdPromises = new Map<string, Promise<Date>>();
+	const firstVisitByMenuItemIdPromises = new Map<string, Promise<string>>();
 
 	// First pass to pre-populate uniqueness data
 	// Avoids weird async logic
@@ -94,6 +96,12 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 
 			if (!firstVisitByStationIdPromises.has(station.id)) {
 				firstVisitByStationIdPromises.set(station.id, retrieveFirstStationAppearance(station.id));
+			}
+
+			for (const menuItem of station.menuItemsById.values()) {
+				if (!firstVisitByMenuItemIdPromises.has(menuItem.id)) {
+					firstVisitByMenuItemIdPromises.set(menuItem.id, retrieveFirstMenuItemAppearance(menuItem.id));
+				}
 			}
 		}
 	}
@@ -148,7 +156,7 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 				continue;
 			}
 
-			const themeItemsByCategory = new Map<string /*categoryName*/, Array<IMenuItem>>();
+			const themeItemsByCategory = new Map<string /*categoryName*/, Array<IMenuItemBase>>();
 
 			const itemsYesterday = yesterdayItemsByStation?.get(station.name);
 			const itemsTomorrow = tomorrowItemsByStation?.get(station.name);
@@ -178,6 +186,15 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 					}
 
 					stationUniquenessData.itemDays[itemDaysAtStation] = (stationUniquenessData.itemDays[itemDaysAtStation] ?? 0) + 1;
+
+					const firstAppearancePromise = firstVisitByMenuItemIdPromises.get(menuItem.id);
+					if (!firstAppearancePromise) {
+						logError(`Missing first appearance for menu item ${menuItem.name} (${menuItem.id}) in cafe ${cafeId}`);
+					} else {
+						if (getIsRecentlyAvailable(await firstAppearancePromise)) {
+							stationUniquenessData.recentlyAvailableItemCount++;
+						}
+					}
 				}
 			}
 

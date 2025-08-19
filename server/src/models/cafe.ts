@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import { ILocationCoordinates } from '@msdining/common/dist/models/util.js';
 import { Nullable } from './util.js';
 
@@ -57,7 +57,7 @@ export interface ICafeStation {
     name: string;
     logoUrl?: string;
     menuItemIdsByCategoryName: Map<string, Array<string>>;
-    menuItemsById: Map<string, IMenuItem>;
+    menuItemsById: Map<string, IMenuItemBase>;
     menuLastUpdateTime?: Date;
 }
 
@@ -66,4 +66,4 @@ export interface IMenuItemTag {
     name: string;
 }
 
-export { IMenuItem };
+export { IMenuItemBase };

@@ -1,6 +1,6 @@
 import { usePrismaClient } from '../client.js';
 import { STORAGE_EVENTS } from '../events.js';
-import { IMenuItem, IMenuItemReviewHeader } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 
 interface ICreateReviewItem {

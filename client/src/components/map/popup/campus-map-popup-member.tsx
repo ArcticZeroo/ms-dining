@@ -5,10 +5,11 @@ import { ApplicationContext } from '../../../context/app.ts';
 import { MapPopupViewContext } from '../../../context/map.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeViewType, ICafe } from '../../../models/cafe.ts';
-import { didEntityOpenRecently, getCafeName } from '../../../util/cafe.ts';
+import { getCafeName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { CafePopupOverview } from './overview/cafe-popup-overview.tsx';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 interface ICampusMapPopupMember {
     cafe: ICafe;
@@ -26,7 +27,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
                 return false;
             }
 
-            return didEntityOpenRecently(view.value.firstAvailableDate);
+            return getIsRecentlyAvailable(view.value.firstAvailableDate);
         },
         [view]
     );

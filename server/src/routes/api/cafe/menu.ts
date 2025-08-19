@@ -8,7 +8,7 @@ import {
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { ICafe, ICafeStation, IMenuItem } from '../../../models/cafe.js';
+import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter, getMaybeUserId, getTrimmedQueryParam, getUserIdOrThrow } from '../../../util/koa.js';
@@ -48,7 +48,7 @@ export const registerMenuRoutes = (parent: Router) => {
 		prefix: '/menu'
 	});
 
-	const serializeMenuItem = async (menuItem: IMenuItem): Promise<IMenuItemDTO> => {
+	const serializeMenuItem = async (menuItem: IMenuItemBase): Promise<IMenuItemDTO> => {
 		const [reviewHeader, firstAppearance] = await Promise.all([
 			retrieveReviewHeaderAsync(normalizeNameForSearch(menuItem.name)),
 			retrieveFirstMenuItemAppearance(menuItem.id),

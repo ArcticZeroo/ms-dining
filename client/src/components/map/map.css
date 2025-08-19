@@ -58,7 +58,6 @@
 
 .cafe-popup .group-member {
     color: white;
-    background: var(--color-map-cafe-popup-group-member-background);
     padding: var(--constant-padding);
     border-radius: var(--constant-padding);
     display: flex;
@@ -126,4 +125,14 @@
     background: var(--color-map-cafe-logo-background);
     border-radius: 0.5rem;
     object-fit: contain;
+}
+
+.cafe-popup a.overview-station {
+    text-decoration: none;
+    background: var(--color-background-raised);
+}
+
+.cafe-popup a.overview-station .recently-opened-notice {
+    width: fit-content;
+    align-self: center;
 }

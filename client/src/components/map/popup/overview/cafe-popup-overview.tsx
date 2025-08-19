@@ -1,6 +1,6 @@
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { ICafeOverviewStation } from '@msdining/common/dist/models/cafe';
-import { toDateString } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable, toDateString } from '@msdining/common/dist/util/date-util';
 import React, { useCallback, useMemo } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
@@ -9,7 +9,6 @@ import { ICafe } from '../../../../models/cafe.ts';
 import { sortStationUniquenessInPlace } from '../../../../util/sorting.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { CafePopupOverviewStation } from './cafe-popup-overview-station.tsx';
-import { didEntityOpenRecently } from '../../../../util/cafe.ts';
 
 const TARGET_STATION_MINIMUM = 3;
 
@@ -33,6 +32,13 @@ interface ICafeMarkerOverviewProps {
     cafe: ICafe;
 }
 
+const isInterestingStation = (station: ICafeOverviewStation): boolean => {
+    return station.uniqueness.isTraveling
+        || station.uniqueness.recentlyAvailableItemCount > 0
+        || station.uniqueness.theme != null
+        || getIsRecentlyAvailable(station.uniqueness.firstAppearance);
+}
+
 export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) => {
     const overviewState = useOverviewData(cafe);
 
@@ -42,32 +48,24 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
     const stationsToShow = useMemo(
         () => {
             const allStations = overviewStations ?? [];
-            const result: ICafeOverviewStation[] = [];
+            const interestingStations: ICafeOverviewStation[] = [];
             const stationsWithUniqueItemsToday: ICafeOverviewStation[] = [];
 
             for (const station of allStations) {
-                if (station.uniqueness.isTraveling) {
-                    result.push(station);
+                if (isInterestingStation(station)) {
+                    interestingStations.push(station);
                     continue;
                 }
 
-                if (station.uniqueness.theme != null) {
-                    result.push(station);
-                    continue;
-                }
-
-                if (didEntityOpenRecently(station.uniqueness.firstAppearance)) {
-                    result.push(station);
-                    continue;
-                }
-
+                // In case we don't have enough interesting stations,
+                // we can give some more interest to stations with unique items today.
                 const uniqueItemsToday = station.uniqueness.itemDays[1];
                 if (uniqueItemsToday > 0) {
                     stationsWithUniqueItemsToday.push(station);
                 }
             }
 
-            const remainingForTargetCount = TARGET_STATION_MINIMUM - result.length;
+            const remainingForTargetCount = TARGET_STATION_MINIMUM - interestingStations.length;
 
             if (remainingForTargetCount > 0 && stationsWithUniqueItemsToday.length > 0) {
                 stationsWithUniqueItemsToday.sort((a, b) => {
@@ -76,12 +74,12 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
                     return uniqueItemsB - uniqueItemsA;
                 });
 
-                result.push(...stationsWithUniqueItemsToday.slice(0, remainingForTargetCount));
+                interestingStations.push(...stationsWithUniqueItemsToday.slice(0, remainingForTargetCount));
             }
 
-            sortStationUniquenessInPlace(result);
+            sortStationUniquenessInPlace(interestingStations);
 
-            return result;
+            return interestingStations;
         },
         [overviewStations]
     );

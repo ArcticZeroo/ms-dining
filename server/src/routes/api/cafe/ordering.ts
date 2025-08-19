@@ -20,7 +20,7 @@ import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { CAFES_BY_ID } from '../../../constants/cafes.js';
 import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
-import { ICafe, IMenuItem } from '../../../models/cafe.js';
+import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { isDuckTypeSerializedCartItem, isValidItemIdsByCafeId, isValidItemsByCafeId } from '../../../util/typeguard.js';
@@ -288,7 +288,7 @@ export const registerOrderingRoutes = (parent: Router) => {
 
             const retrieveItemsForCafe = async (cafeId: string, itemIds: string[]) => {
                 const remainingItemIds = new Set(itemIds);
-                const items: IMenuItem[] = [];
+                const items: IMenuItemBase[] = [];
 
                 const stations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowString);
 

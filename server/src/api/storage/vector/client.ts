@@ -1,7 +1,7 @@
 import { SEARCH_THREAD_HANDLER } from '../../worker-thread/search.js';
 import { retrieveEmbeddings, retrieveMenuItemEmbeddings, retrieveStationEmbeddings, retrieveCafeEmbeddings } from '../../openai.js';
 import { IVectorSearchResult } from '../../../models/vector.js';
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { ICafeStation, ICafe } from '../../../models/cafe.js';
 import { CAFE_GROUP_LIST } from '../../../constants/cafes.js';
@@ -44,7 +44,7 @@ export const searchSimilarEntities = async (entityType: SearchEntityType, id: st
 	return searchVectorRawFromEmbedding(embedding);
 }
 
-export const embedMenuItem = async (menuItem: IMenuItem, categoryName: string, stationName: string) => {
+export const embedMenuItem = async (menuItem: IMenuItemBase, categoryName: string, stationName: string) => {
 	const embedding = await retrieveMenuItemEmbeddings(menuItem, categoryName, stationName);
 	await SEARCH_THREAD_HANDLER.sendRequest('insertSearchEmbedding', {
 		entityType: SearchEntityType.menuItem,

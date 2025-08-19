@@ -6,12 +6,13 @@ import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { ICafe } from '../../models/cafe.ts';
-import { didEntityOpenRecently, getCafeName } from '../../util/cafe.ts';
+import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
@@ -44,7 +45,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
 
     const openedRecently = useMemo(
-        () => didEntityOpenRecently(cafe.firstAvailableDate),
+        () => getIsRecentlyAvailable(cafe.firstAvailableDate),
         [cafe]
     );
 

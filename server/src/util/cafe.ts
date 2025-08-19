@@ -2,7 +2,7 @@ import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { betterLogosByNormalizedName } from '../constants/better-logos.js';
 import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
-import { ICafe, ICafeConfig, IMenuItem } from '../models/cafe.js';
+import { ICafe, ICafeConfig, IMenuItemBase } from '../models/cafe.js';
 import { Nullable } from '../models/util.js';
 import { toDateString } from '@msdining/common/dist/util/date-util.js';
 
@@ -14,7 +14,7 @@ export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
 	return `${getBaseApiUrlWithoutTrailingSlash(cafe)}/image/${config.tenantId}/${config.contextId}/${config.logoName}`;
 };
 
-export const getThumbnailUrl = (menuItem: IMenuItem): Nullable<string> => {
+export const getThumbnailUrl = (menuItem: IMenuItemBase): Nullable<string> => {
 	if (!menuItem.hasThumbnail) {
 		return menuItem.imageUrl;
 	}
@@ -45,5 +45,6 @@ export const getDefaultUniquenessDataForStation = (itemCount: number = 0): IStat
 	itemDays:        { 1: itemCount },
 	themeItemIds:    [],
 	theme:           undefined,
+	recentlyAvailableItemCount: 0,
 	firstAppearance: toDateString(new Date(0)) // Default to epoch start date since this is used to show newly-added stations
 });

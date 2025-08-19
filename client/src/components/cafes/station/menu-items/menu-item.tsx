@@ -18,7 +18,7 @@ import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
 import { pluralize } from '../../../../util/string.ts';
-import { didEntityOpenRecently } from '../../../../util/cafe.ts';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 export interface IMenuItemProps {
     menuItem: IMenuItemWithReviewHeader;
@@ -100,7 +100,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         : 'Click to open item details';
 
     const isRecentlyOpened = useMemo(
-        () => didEntityOpenRecently(menuItem.firstAppearance),
+        () => getIsRecentlyAvailable(menuItem.firstAppearance),
         [menuItem.firstAppearance]
     );
 

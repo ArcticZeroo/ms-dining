@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { md5 } from '../../../util/hash.js';
 import { logError } from '../../../util/log.js';
@@ -36,7 +36,7 @@ abstract class StationThemeLocalClient {
 export abstract class StationThemeClient {
     static #activeThemeRequests = new Map<string /*hash*/, Promise<string | undefined>>();
 
-    static serializeItemsByCategory(itemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>) {
+    static serializeItemsByCategory(itemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>) {
         return Array.from(itemsByCategory.entries())
             .map(([categoryName, items]) => (
                 `${categoryName}=${
@@ -49,11 +49,11 @@ export abstract class StationThemeClient {
             .join(';');
     }
 
-    static #getHash(itemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>): string {
+    static #getHash(itemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>): string {
         return md5(StationThemeClient.serializeItemsByCategory(itemsByCategory));
     }
 
-    static async #initializeTheme(stationName: string, hash: string, itemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>): Promise<string | undefined> {
+    static async #initializeTheme(stationName: string, hash: string, itemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>): Promise<string | undefined> {
         try {
             const theme = await retrieveStationThemeFromAi(stationName, itemsByCategory);
 
@@ -67,7 +67,7 @@ export abstract class StationThemeClient {
         return undefined;
     }
 
-    static async retrieveThemeAsync(stationName: string, itemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>): Promise<string | undefined> {
+    static async retrieveThemeAsync(stationName: string, itemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>): Promise<string | undefined> {
         if (itemsByCategory.size === 0) {
             return undefined;
         }

@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import {
     DB_ID_TO_SEARCH_ENTITY_TYPE,
     ISearchQuery,
@@ -94,7 +94,7 @@ interface ISimilarEntitySearchParams {
     date: Date;
 }
 
-const createMenuItemImageUrlGetter = (menuItem: IMenuItem): (() => MaybePromise<Nullable<string>>) => {
+const createMenuItemImageUrlGetter = (menuItem: IMenuItemBase): (() => MaybePromise<Nullable<string>>) => {
     return async () => {
         await ensureThumbnailDataHasBeenRetrievedAsync(menuItem);
         return getThumbnailUrl(menuItem);
@@ -351,7 +351,7 @@ class SearchSession {
         }
     }
 
-    getMenuItemMatch(menuItem: IMenuItem) {
+    getMenuItemMatch(menuItem: IMenuItemBase) {
         const matchReasons = new Set<SearchMatchReason>();
         const matchedModifiers = new Map<string, Set<string>>();
 

@@ -8,22 +8,26 @@ import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
 import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
-import { didEntityOpenRecently } from '../../../../util/cafe.ts';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
-const getStationTitle = (station: ICafeOverviewStation, didOpenRecently: boolean) => {
+const getStationTitle = ({ uniqueness: { isTraveling, daysThisWeek, recentlyAvailableItemCount, itemDays } }: ICafeOverviewStation, didOpenRecently: boolean) => {
     if (didOpenRecently) {
         return 'This station is new to this cafe!';
     }
 
-    if (station.uniqueness.isTraveling) {
+    if (isTraveling) {
         return `This station ${
-            station.uniqueness.daysThisWeek === 1
+            daysThisWeek === 1
                 ? 'is only here today this week'
                 : 'is traveling here today and may return another day this week'
         }`;
     }
 
-    const uniqueItemsToday = station.uniqueness.itemDays[1];
+    if (recentlyAvailableItemCount > 0) {
+        return `${recentlyAvailableItemCount} ${pluralize('item', recentlyAvailableItemCount)} on this station's menu are new to this cafe`;
+    }
+
+    const uniqueItemsToday = itemDays[1];
     if (uniqueItemsToday > 0) {
         return `${uniqueItemsToday} ${pluralize('item', uniqueItemsToday)} on this station's menu are only available today this week`;
     }
@@ -31,14 +35,14 @@ const getStationTitle = (station: ICafeOverviewStation, didOpenRecently: boolean
     return undefined;
 };
 
-const getStationBadge = (station: ICafeOverviewStation, didOpenRecently: boolean) => {
+const getStationBadge = ({ uniqueness: { isTraveling, recentlyAvailableItemCount, itemDays } }: ICafeOverviewStation, didOpenRecently: boolean) => {
     if (didOpenRecently) {
         return (
             '✨'
         );
     }
 
-    if (station.uniqueness.isTraveling) {
+    if (isTraveling) {
         return (
             <span className="material-symbols-outlined">
                 flight
@@ -46,7 +50,13 @@ const getStationBadge = (station: ICafeOverviewStation, didOpenRecently: boolean
         );
     }
 
-    const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1];
+    if (recentlyAvailableItemCount > 0) {
+        return (
+            '✨'
+        );
+    }
+
+    const itemsHereTodayOnlyCount = itemDays[1];
     if (itemsHereTodayOnlyCount > 0) {
         return itemsHereTodayOnlyCount;
     }
@@ -69,11 +79,11 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
 
     const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1];
     const shouldShowBadge = station.uniqueness.isTraveling || itemsHereTodayOnlyCount > 0;
-    const didOpenRecently = didEntityOpenRecently(station.uniqueness.firstAppearance);
+    const didOpenRecently = getIsRecentlyAvailable(station.uniqueness.firstAppearance);
 
     return (
         <Link
-            className="overview-station"
+            className={"overview-station default-container flex-col"}
             to={getSearchAnchorJumpUrlOnAnotherPage({
                 cafeId:     cafe.id,
                 view:       popupView,
@@ -93,7 +103,14 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                         />
                     )
                 }
-                <span>
+                <span className="flex">
+                    {
+                        didOpenRecently && (
+                            <span className="recently-opened-notice default-container" title="This station is new to this cafe!">
+                                New!
+                            </span>
+                        )
+                    }
                     {station.name}
                 </span>
                 {
@@ -108,6 +125,13 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                 station.uniqueness.theme != null && (
                     <div className="subtitle">
                         {station.uniqueness.theme}
+                    </div>
+                )
+            }
+            {
+                !didOpenRecently && station.uniqueness.recentlyAvailableItemCount > 0 && (
+                    <div className="recently-opened-notice default-container" title={`This station has ${station.uniqueness.recentlyAvailableItemCount} new items`}>
+                        {station.uniqueness.recentlyAvailableItemCount} new {pluralize('item', station.uniqueness.recentlyAvailableItemCount)}
                     </div>
                 )
             }

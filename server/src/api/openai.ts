@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import OpenAI from 'openai';
 import { getOpenAiKey } from '../constants/env.js';
 import { ICafeStation, ICafe, CafeGroup } from '../models/cafe.js';
@@ -67,7 +67,7 @@ const getSearchTagsPrompt = ({ name, description }: IMenuItemForAi) => (
     Tags:`.trim()
 );
 
-const getThemePrompt = (stationName: string, menuItemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>) => (
+const getThemePrompt = (stationName: string, menuItemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>) => (
     `
     [Task Description]
     You are an expert writer. Each day our cafeteria has a rotating menu (for instance: tacos, mac and cheese, 
@@ -164,7 +164,7 @@ export const retrieveMenuItemSearchTagsFromAiWithRetries = async (menuItem: IMen
     runPromiseWithRetries(() => retrieveMenuItemSearchTagsFromAi(menuItem), AI_RETRY_COUNT)
 );
 
-export const retrieveStationThemeFromAi = async (stationName: string, menuItemsByCategory: Map<string /*categoryName*/, Array<IMenuItem>>) => {
+export const retrieveStationThemeFromAi = async (stationName: string, menuItemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>) => {
     const prompt = getThemePrompt(stationName, menuItemsByCategory);
 
     return runPromiseWithRetries(
@@ -185,7 +185,7 @@ export const retrieveStationThemeFromAi = async (stationName: string, menuItemsB
     );
 };
 
-const serializeMenuItemForEmbeddings = (menuItem: IMenuItem): string => {
+const serializeMenuItemForEmbeddings = (menuItem: IMenuItemBase): string => {
     const parts = [
         `Menu Item Name: ${menuItem.name}`,
     ];
@@ -212,7 +212,7 @@ const serializeMenuItemForEmbeddings = (menuItem: IMenuItem): string => {
     return parts.join('\n');
 };
 
-export const retrieveMenuItemEmbeddings = async (menuItem: IMenuItem, categoryName: string, stationName: string) => {
+export const retrieveMenuItemEmbeddings = async (menuItem: IMenuItemBase, categoryName: string, stationName: string) => {
     return retrieveEmbeddings(
         `
         Station Name: ${stationName}

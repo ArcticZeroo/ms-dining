@@ -6,7 +6,7 @@ import { throwError } from '../../util/error.js';
 
 const FIRST_STATION_APPEARANCE_CACHE = new LockedMap<string /*stationId*/, Date>();
 
-export const retrieveFirstStationAppearance = async (stationId: string): Promise<Date | null> => {
+export const retrieveFirstStationAppearance = async (stationId: string): Promise<Date> => {
 	return FIRST_STATION_APPEARANCE_CACHE.update(stationId, async (visit) => {
 		return visit
 			?? await DailyMenuStorageClient.retrieveFirstStationVisitDate(stationId)

@@ -20,7 +20,7 @@ import { StringUtil } from '../../../util/string.js';
 import { fixed } from '../../../util/math.js';
 import { makeRequestWithRetries } from '../../../util/request.js';
 import fetch from 'node-fetch';
-import { ICafe, IMenuItem } from '../../../models/cafe.js';
+import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { phone, PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
@@ -169,7 +169,7 @@ export class CafeOrderSession {
         return orderingContext;
     }
 
-    private _serializeModifiers(cartItem: ICartItem, localMenuItem: IMenuItem): Array<ISerializedModifier> {
+    private _serializeModifiers(cartItem: ICartItem, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
         const modifiersById = new Map(localMenuItem.modifiers.map(modifier => [modifier.id, modifier]));
 
         const modifiers: ISerializedModifier[] = [];

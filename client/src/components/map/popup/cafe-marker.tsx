@@ -4,10 +4,10 @@ import { Marker } from 'react-leaflet';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
-import { didEntityOpenRecently } from '../../../util/cafe.ts';
 import { toLeafletLocation } from '../../../util/coordinates.ts';
 import { classNames } from '../../../util/react.ts';
 import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
+import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
 
 const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: boolean) => `
 <span class="${classNames('cafe-marker-tracker flex flex-center', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened')}" data-id="${view.value.id}">
@@ -37,10 +37,10 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
     const isRecentlyOpened = useMemo(
         () => {
             if (view.type === CafeViewType.group) {
-                return view.value.members.some(member => didEntityOpenRecently(member.firstAvailableDate));
+                return view.value.members.some(member => getIsRecentlyAvailable(member.firstAvailableDate));
             }
 
-            return didEntityOpenRecently(view.value.firstAvailableDate);
+            return getIsRecentlyAvailable(view.value.firstAvailableDate);
         },
         [view]
     );

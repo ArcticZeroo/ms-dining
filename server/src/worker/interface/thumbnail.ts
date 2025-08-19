@@ -1,9 +1,9 @@
 import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
 import { logError } from '../../util/log.js';
-import { IMenuItem } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 
-const retrieveThumbnailData = async (menuItem: IMenuItem): Promise<IThumbnailExistenceData> => {
+const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnailExistenceData> => {
 	try {
 		if (!menuItem.imageUrl) {
 			return {
@@ -41,7 +41,7 @@ const retrieveThumbnailData = async (menuItem: IMenuItem): Promise<IThumbnailExi
 
 // Call this before showing a menu item to the user
 // We do it this way so that we don't have to load thumbnail data in order to just look at search results
-export const ensureThumbnailDataHasBeenRetrievedAsync = async (menuItem: IMenuItem) => {
+export const ensureThumbnailDataHasBeenRetrievedAsync = async (menuItem: IMenuItemBase) => {
 	if (menuItem.hasRetrievedThumbnailData) {
 		return false;
 	}
