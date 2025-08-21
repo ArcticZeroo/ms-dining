@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useValueNotifierContext } from './events.ts';
 import { useEffect } from 'react';
-import { UserIdContext } from '../context/auth.ts';
+import { UserContext } from '../context/auth.ts';
 
 export const useIsLoggedIn = () => {
-    const userId = useValueNotifierContext(UserIdContext);
-    return userId != null;
+    const user = useValueNotifierContext(UserContext);
+    return user != null;
 }
 
 export const useRequireLoginStatus = (shouldBeLoggedIn: boolean, navigateToPageOtherwise = '/') => {
@@ -25,4 +25,20 @@ export const useRequireLoginStatus = (shouldBeLoggedIn: boolean, navigateToPageO
     }, [isLoggedIn, navigate, shouldBeLoggedIn, navigateToPageOtherwise]);
 
     return isAllowed;
+}
+
+export const useHasRole = (requiredRole: string) => {
+    const user = useValueNotifierContext(UserContext);
+    return user != null && user.role === requiredRole;
+}
+
+export const useRequireRole = (requiredRole: string, navigateToPageOtherwise = '/') => {
+    const navigate = useNavigate();
+    const hasRole = useHasRole(requiredRole);
+
+    useEffect(() => {
+        if (!hasRole) {
+            navigate(navigateToPageOtherwise);
+        }
+    }, [hasRole, navigate, navigateToPageOtherwise]);
 }

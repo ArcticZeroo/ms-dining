@@ -120,6 +120,29 @@ export const requireDevKey: Middleware = async (ctx, next) => {
 	await next();
 }
 
+export const requireRole = (role: string): Middleware => {
+	return async (ctx, next) => {
+		if (!ctx.isAuthenticated()) {
+			return ctx.throw(401, 'User not authenticated');
+		}
+
+		const userId = ctx.state.user;
+		const user = await UserStorageClient.getUserAsync({
+			id: userId
+		});
+
+		if (!user) {
+			return ctx.throw(500, 'User not found');
+		}
+
+		if (user.role !== role) {
+			return ctx.throw(403, `User does not have the required role: ${role}`);
+		}
+
+		await next();
+	}
+}
+
 export const getEntityTypeAndName = (ctx: Koa.Context): [SearchEntityType, string] => {
 	const entityTypeRaw = getTrimmedQueryParam(ctx, 'type');
 	const entityName = getTrimmedQueryParam(ctx, 'name');

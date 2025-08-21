@@ -12,7 +12,7 @@ import { ICancellationToken } from '../util/async.ts';
 import { useValueNotifier } from '../hooks/events.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { classNames } from '../util/react.ts';
-import { UserIdContext } from '../context/auth.ts';
+import { UserContext } from '../context/auth.ts';
 import { ValueNotifier } from '../util/events.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
@@ -43,7 +43,6 @@ interface IAppWithDataProps {
 
 const AppWithData: React.FC<IAppWithDataProps> = ({ response }) => {
     const { groups, isTrackingEnabled, user } = response;
-    const userId = user?.id;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
@@ -71,21 +70,21 @@ const AppWithData: React.FC<IAppWithDataProps> = ({ response }) => {
         [isNavVisible]
     );
 
-    const userIdNotifier = useMemo(
-        () => new ValueNotifier(userId),
-        [userId]
+    const userNotifier = useMemo(
+        () => new ValueNotifier(user && { id: user.id, role: user.role }),
+        [user]
     );
 
     return (
         <div className={classNames('App', shouldUseCompactMode && 'compact-view-mode')}>
             <ApplicationContext.Provider value={applicationContext}>
-                <UserIdContext.Provider value={userIdNotifier}>
+                <UserContext.Provider value={userNotifier}>
                     <NavExpansionContext.Provider value={navExpansionContext}>
                         <StaticContextProviders>
                             <PageLayout/>
                         </StaticContextProviders>
                     </NavExpansionContext.Provider>
-                </UserIdContext.Provider>
+                </UserContext.Provider>
             </ApplicationContext.Provider>
         </div>
     );

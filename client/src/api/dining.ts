@@ -456,4 +456,13 @@ export abstract class DiningClient {
 
         return response;
     }
+
+    public static async forceRefreshCafes(forceUseNextWeek: boolean = false): Promise<void> {
+        await makeJsonRequestNoParse({
+            path:    `/api/dev/refresh${forceUseNextWeek ? '?next=true' : ''}`,
+            options: {
+                method: 'POST'
+            }
+        });
+    }
 }

@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
-import { UserIdContext } from '../../context/auth.ts';
+import { UserContext } from '../../context/auth.ts';
 import { classNames } from '../../util/react.ts';
 import { Link } from 'react-router-dom';
 import { getSearchAnchorJumpUrl } from '../../util/link.ts';
@@ -32,7 +32,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     isSkeleton = false,
     stretchSelf = false
 }) => {
-    const userId = useValueNotifierContext(UserIdContext);
+    const userId = useValueNotifierContext(UserContext)?.id;
     const { viewsById } = useContext(ApplicationContext);
     const cafeIdsOnPage = useCafeIdsOnPage();
     const view = viewsById.get(review.cafeId);

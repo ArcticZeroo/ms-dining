@@ -343,6 +343,10 @@ html, body, #root, .App {
     background: var(--color-error);
 }
 
+.default-button.success {
+    background: var(--color-theme-green);
+}
+
 .mono {
     font-family: monospace;
 }

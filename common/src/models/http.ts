@@ -42,12 +42,16 @@ interface IDiningCoreGroupWithLocationOnGroup extends IDiningCoreGroupBase {
 
 export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCoreGroupWithLocationOnGroup;
 
+export interface IUser {
+    id: string;
+    role: string;
+}
+
 // GET /api/dining/
 export interface IDiningCoreResponse {
 	isTrackingEnabled: boolean;
 	groups: IDiningCoreGroup[];
-	user?: {
-		id: string;
+	user?: IUser & {
 		settings?: {
 			favoriteStations: string[];
 			favoriteMenuItems: string[];
