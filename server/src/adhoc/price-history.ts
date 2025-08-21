@@ -1,4 +1,3 @@
-import { CafeMenuSession } from '../api/cafe/session/menu.js';
 import { ICafe } from '../models/cafe.js';
 import { usePrismaClient } from '../api/storage/client.js';
 import { ALL_CAFES } from '../constants/cafes.js';
