@@ -5,7 +5,7 @@ import { Station } from './station.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
-import { sortStationUniquenessInPlace } from "../../../util/sorting.ts";
+import { sortStationUniquenessInPlace } from '../../../util/sorting.ts';
 
 interface IStationListProps {
     stations: CafeMenu;

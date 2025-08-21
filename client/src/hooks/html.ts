@@ -18,7 +18,7 @@ export const useIsElementOnScreen = (element: HTMLElement | null, options?: Inte
                 return;
             }
 
-            const entry = entries[0];
+            const entry = entries[0]!;
             setIsOnScreen(entry.isIntersecting);
         }, options);
 

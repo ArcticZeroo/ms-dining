@@ -27,7 +27,7 @@ const getStationTitle = ({ uniqueness: { isTraveling, daysThisWeek, recentlyAvai
         return `${recentlyAvailableItemCount} ${pluralize('item', recentlyAvailableItemCount)} on this station's menu are new to this cafe`;
     }
 
-    const uniqueItemsToday = itemDays[1];
+    const uniqueItemsToday = itemDays[1] || 0;
     if (uniqueItemsToday > 0) {
         return `${uniqueItemsToday} ${pluralize('item', uniqueItemsToday)} on this station's menu are only available today this week`;
     }
@@ -56,7 +56,7 @@ const getStationBadge = ({ uniqueness: { isTraveling, recentlyAvailableItemCount
         );
     }
 
-    const itemsHereTodayOnlyCount = itemDays[1];
+    const itemsHereTodayOnlyCount = itemDays[1] || 0;
     if (itemsHereTodayOnlyCount > 0) {
         return itemsHereTodayOnlyCount;
     }
@@ -77,7 +77,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
         return null;
     }
 
-    const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1];
+    const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1] || 0;
     const shouldShowBadge = station.uniqueness.isTraveling || itemsHereTodayOnlyCount > 0;
     const didOpenRecently = getIsRecentlyAvailable(station.uniqueness.firstAppearance);
 

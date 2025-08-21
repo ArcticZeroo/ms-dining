@@ -58,7 +58,7 @@ const getMissingDataMessage = (scenario: IScenario, isTotalCount: boolean, days:
 export const AnalyticsView = () => {
     const [currentDaysAgo, setCurrentDaysAgo] = useState(7);
     const [isTotalCount, setIsTotalCount] = useState(false);
-    const [selectedScenario, setSelectedScenario] = useState(STATIC_SCENARIOS[0]);
+    const [selectedScenario, setSelectedScenario] = useState(STATIC_SCENARIOS[0]!);
 
     const retrieveVisitsCallback = useCallback(
         () => AnalyticsClient.retrieveHourlyVisitCountAsync(currentDaysAgo, selectedScenario.scenarioName),

@@ -102,6 +102,10 @@ const useLocationEntries = ({
                 const firstDateA = datesA[0];
                 const firstDateB = datesB[0];
 
+                if (!firstDateA || !firstDateB) {
+                    throw new Error('Cannot sort views due to missing dates');
+                }
+
                 if (DateUtil.isDateBefore(firstDateA, firstDateB)) {
                     return -1;
                 }
@@ -111,8 +115,8 @@ const useLocationEntries = ({
                 }
 
                 // The more "limited time only" locations get to go first
-                const lastDateA = datesA[datesA.length - 1];
-                const lastDateB = datesB[datesB.length - 1];
+                const lastDateA = datesA[datesA.length - 1]!;
+                const lastDateB = datesB[datesB.length - 1]!;
 
                 if (DateUtil.isDateBefore(lastDateA, lastDateB)) {
                     return -1;

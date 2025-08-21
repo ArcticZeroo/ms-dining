@@ -153,8 +153,12 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
     const nowDay = new Date().getDay();
 
     for (const dates of searchResult.locationDatesByCafeId.values()) {
+        if (dates.length === 0) {
+            continue; // No dates, no relevancy
+        }
+
         // These are sorted, so we'll just grab the next most recent one
-        const nextDate = dates[0];
+        const nextDate = dates[0]!;
         const daysFromNow = nextDate.getDay() - nowDay;
         totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
         totalRelevancyScore += (dates.length / 5);

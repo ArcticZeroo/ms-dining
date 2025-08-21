@@ -113,6 +113,10 @@ export const checkMigrationCookie = () => {
 
     const [, encodedMigrationData] = cookie.split('=');
 
+    if (!encodedMigrationData) {
+        return;
+    }
+
     const migrationDataString = decodeURIComponent(encodedMigrationData);
     const migrationData = JSON.parse(migrationDataString) as IMigrationData;
 

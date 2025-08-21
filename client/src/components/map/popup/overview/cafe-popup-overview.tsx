@@ -59,7 +59,7 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
 
                 // In case we don't have enough interesting stations,
                 // we can give some more interest to stations with unique items today.
-                const uniqueItemsToday = station.uniqueness.itemDays[1];
+                const uniqueItemsToday = station.uniqueness.itemDays[1] || 0;
                 if (uniqueItemsToday > 0) {
                     stationsWithUniqueItemsToday.push(station);
                 }

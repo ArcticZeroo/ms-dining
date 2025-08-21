@@ -45,14 +45,18 @@ export const getLocationDatesDisplay = (sortedDates: Date[] | number[]) => {
             return group.map(weekday => nativeDayOfWeekNames[weekday]).join(', ');
         }
 
-        const startDateDisplay = nativeDayOfWeekNames[group[0]];
-        const endDateDisplay = nativeDayOfWeekNames[group[group.length - 1]];
+        const startDateDisplay = nativeDayOfWeekNames[group[0]!];
+        const endDateDisplay = nativeDayOfWeekNames[group[group.length - 1]!];
         return `${startDateDisplay} - ${endDateDisplay}`;
     }).join(', ');
 };
 
 export const getSmallestDate = (dates: Date[]): Date => {
-    let smallestDate = dates[0];
+    if (dates.length === 0) {
+        throw new Error('Cannot get smallest date from an empty array');
+    }
+
+    let smallestDate = dates[0]!;
     for (const date of dates) {
         if (date.getTime() < smallestDate.getTime()) {
             smallestDate = date;
@@ -63,7 +67,11 @@ export const getSmallestDate = (dates: Date[]): Date => {
 }
 
 export const getLargestDate = (dates: Date[]): Date => {
-    let largestDate = dates[0];
+    if (dates.length === 0) {
+        throw new Error('Cannot get largest date from an empty array');
+    }
+
+    let largestDate = dates[0]!;
     for (const date of dates) {
         if (date.getTime() > largestDate.getTime()) {
             largestDate = date;

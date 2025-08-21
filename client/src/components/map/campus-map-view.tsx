@@ -25,7 +25,7 @@ const getMapCenter = (views: CafeView[], viewsById: Map<string, CafeView>) => {
     const cafesInOrder = InternalSettings.lastUsedCafeIds.value;
 
     for (let i = cafesInOrder.length - 1; i >= 0; i--) {
-        const id = cafesInOrder[i];
+        const id = cafesInOrder[i]!;
         const view = viewsById.get(id);
         if (view != null) {
             return getViewLocation(view);

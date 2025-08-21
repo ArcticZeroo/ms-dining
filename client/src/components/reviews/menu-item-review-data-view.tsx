@@ -40,8 +40,8 @@ const useLocalStats = (reviewData: IReviewDataForMenuItem, localRating: number |
 
             for (let i = 1; i <= 10; i++) {
                 if (i in counts) {
-                    totalCount += counts[i];
-                    overallRating += i * counts[i];
+                    totalCount += counts[i]!;
+                    overallRating += i * counts[i]!;
                 }
             }
 

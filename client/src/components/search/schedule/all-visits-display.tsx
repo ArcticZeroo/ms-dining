@@ -37,12 +37,16 @@ export const AllVisitsDisplay: React.FC<IAllVisitsDisplayProps> = ({ pattern }) 
 
     const sequentialVisitGroups = getSequentialDateGroups(pattern.allVisits, 3);
     const visitGroupStrings = sequentialVisitGroups.map(group => {
+        if (group.length === 0) {
+            throw new Error('Unexpected empty group in sequential visit groups');
+        }
+
         if (group.length === 1) {
-            return getDateDisplay(group[0]);
+            return getDateDisplay(group[0]!);
         }
 
         group.sort((a, b) => a.getTime() - b.getTime());
-        return `${getDateDisplay(group[0])} - ${getDateDisplay(group[group.length - 1])}`;
+        return `${getDateDisplay(group[0]!)} - ${getDateDisplay(group[group.length - 1]!)}`;
     });
 
     return (

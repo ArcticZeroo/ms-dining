@@ -42,7 +42,11 @@ export const SearchIdeas = () => {
         []
     );
 
-    const [selectedIdea, setSelectedIdea] = useState(ideas[0]);
+    if (ideas.length === 0) {
+        throw new Error('No ideas.');
+    }
+
+    const [selectedIdea, setSelectedIdea] = useState(ideas[0]!);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const retrieveSearchResultsCallback = useCallback(

@@ -9,6 +9,7 @@ import { MenusCurrentlyUpdatingException } from '../../util/exception.ts';
 import { RetryButton } from '../button/retry-button.tsx';
 import { StationList } from './station/station-list.tsx';
 import { StationListSkeleton } from '../skeleton/station-list-skeleton.tsx';
+import { IngredientsMenuView, parseIngredientsMenu } from './station/ingredients-menu-view.tsx';
 
 const useMenuData = (shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
     const cafe = useContext(CurrentCafeContext);
@@ -35,6 +36,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     shouldCountTowardsLastUsed,
     isExpanded
 }) => {
+    const cafe = useContext(CurrentCafeContext);
     const { value, error, run: retrieveMenu, actualStage } = useMenuData(shouldCountTowardsLastUsed);
 
     useEffect(() => {
@@ -61,6 +63,13 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     }
 
     if (value != null) {
+        if (cafe.id === 'in-gredients' && Date.now() === 0) {
+            const ingredientsMenu = parseIngredientsMenu(value);
+            if (ingredientsMenu != null) {
+                return <IngredientsMenuView menu={ingredientsMenu}/>
+            }
+        }
+
         return <StationList stations={value}/>;
     }
 
