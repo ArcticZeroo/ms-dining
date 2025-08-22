@@ -47,6 +47,10 @@ const onGetSimilarQueries = async ({ query, queryEmbedding }: { query: string, q
 	return db.searchForSimilarQueries(queryEmbedding, query, SIMILAR_QUERY_SEARCH_LIMIT);
 }
 
+const onClearDuplicatedQueries = async () => {
+	return db.clearDuplicatedQueries();
+}
+
 const COMMANDS = {
 	insertSearchEmbedding: onInsertSearchEmbedding,
 	insertQueryEmbedding: onInsertQueryEmbedding,
@@ -56,7 +60,8 @@ const COMMANDS = {
 	getAllEmbeddedEntities: onGetAllEmbeddedEntities,
 	getAllSearchQueries: onGetAllSearchQueries,
 	getSearchEntityEmbedding: onGetSearchEntityEmbedding,
-	getSimilarQueries: onGetSimilarQueries
+	getSimilarQueries: onGetSimilarQueries,
+	clearDuplicatedQueries: onClearDuplicatedQueries,
 };
 
 export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);

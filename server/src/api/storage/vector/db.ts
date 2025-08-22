@@ -95,7 +95,8 @@ const SEARCH_QUERIES_STATEMENT = createPreparedStatementFactory(`
 	SELECT query
 	FROM query_vec
 	WHERE embedding MATCH ? AND QUERY != ?
-	ORDER BY distance LIMIT ?
+	ORDER BY distance
+	LIMIT ?
 `);
 
 const populateAllEmbeddedItems = () => {
@@ -189,4 +190,25 @@ export const searchForSimilarQueries = async (queryEmbedding: Float32Array, quer
 	}
 
 	return results.map(row => row.query);
+}
+
+export const clearDuplicatedQueries = () => {
+	const db = getSearchVectorDatabase();
+
+	// For each group of LOWER(query), delete all but one and make sure that one ends up lowercase
+	db.exec(`
+		DELETE FROM query_vec
+		WHERE rowid NOT IN (
+			SELECT MIN(rowid)
+			FROM query_vec
+			GROUP BY LOWER(query)
+		)
+	`);
+
+	db.exec(`
+		UPDATE query_vec
+		SET query = LOWER(query)
+	`);
+
+	populateAllEmbeddedItems();
 }

@@ -9,10 +9,12 @@ import { EntityButton } from './entity-button.tsx';
 import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import './search-page.css';
-import { SearchWaiting } from "../../search/search-waiting.tsx";
-import { SearchFilters } from "../../search/filters/search-filters.tsx";
-import { classNames } from "../../../util/react.ts";
-import { useAllowedSearchViewIds } from "../../../hooks/search.ts";
+import { SearchWaiting } from '../../search/search-waiting.tsx';
+import { SearchFilters } from '../../search/filters/search-filters.tsx';
+import { classNames, repeatComponent } from '../../../util/react.ts';
+import { useAllowedSearchViewIds, useRecommendedQueries } from '../../../hooks/search.ts';
+import { Link } from 'react-router-dom';
+import { getSearchUrl } from '../../../util/url.js';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -42,10 +44,10 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
 
     const {
         actualStage: actualSearchResultStage,
-        stage: searchResultStage,
-        value: searchResults,
-        error: searchResultsError,
-        run: retrieveSearchResults
+        stage:       searchResultStage,
+        value:       searchResults,
+        error:       searchResultsError,
+        run:         retrieveSearchResults
     } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
     const allSearchResults = useMemo(
@@ -69,11 +71,11 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
     }, [retrieveSearchResults]);
 
     return {
-        actualStage: actualSearchResultStage,
-        stage: searchResultStage,
-        results: allSearchResults,
-        tabCounts: resultCountByEntityType,
-        queryForCurrentResults: queryForCurrentResults,
+        actualStage:               actualSearchResultStage,
+        stage:                     searchResultStage,
+        results:                   allSearchResults,
+        tabCounts:                 resultCountByEntityType,
+        queryForCurrentResults:    queryForCurrentResults,
         areMenusCurrentlyUpdating: searchResultsError != null && searchResultsError instanceof MenusCurrentlyUpdatingException,
         retrieveSearchResults
     };
@@ -94,8 +96,10 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         retrieveSearchResults
     } = useSearchResultsState(queryText);
 
+    const recommendedQueriesState = useRecommendedQueries(queryText);
+
     const sharedEntityButtonProps = {
-        currentFilter: entityFilterType,
+        currentFilter:    entityFilterType,
         totalResultCount: results.length,
         tabCounts,
     } as const;
@@ -105,7 +109,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
     }, [queryText]);
 
     return (
-        <div className="search-page">
+        <div className="search-page flex-col">
             <div className="search-page-header">
                 <div className="search-info flex flex-col default-container">
                     <div className="query flex flex-between default-container">
@@ -180,6 +184,39 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     </div>
                 )
             }
+            <div className="similar-queries flex flex-center flex-wrap">
+                <span>
+                    Similar:
+                </span>
+                {
+                    !recommendedQueriesState.value && (
+                        <>
+                            {
+                                repeatComponent(
+                                    5,
+                                    () => (
+                                        <div className="recommended-query default-container default-button loading-skeleton">
+                                            Loading...
+                                        </div>
+                                    )
+                                )
+                            }
+                        </>
+                    )
+                }
+                {
+                    recommendedQueriesState.value && recommendedQueriesState.value.map(recommendedQuery => (
+                        <Link
+                            key={recommendedQuery}
+                            to={getSearchUrl(recommendedQuery)}
+                            className="recommended-query default-container default-button"
+                            title={`Click to search for "${recommendedQuery}"`}
+                        >
+                            {recommendedQuery}
+                        </Link>
+                    ))
+                }
+            </div>
             {
                 stage === PromiseStage.success && (
                     <SearchResultsList

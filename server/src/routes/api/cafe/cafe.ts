@@ -14,8 +14,8 @@ import { registerOrderingRoutes } from './ordering.js';
 import { registerSearchRoutes } from './search.js';
 import { logDebug } from '../../../util/log.js';
 import { UserStorageClient } from '../../../api/storage/clients/user.js';
-import Duration from '@arcticzeroo/duration';
 import { DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
+import { registerRecommendationsRoutes } from './recommendations.js';
 
 export const registerCafeRoutes = (parent: Router) => {
 	const router = new Router({
@@ -25,6 +25,7 @@ export const registerCafeRoutes = (parent: Router) => {
 	registerMenuRoutes(router);
 	registerSearchRoutes(router);
 	registerOrderingRoutes(router);
+	registerRecommendationsRoutes(router);
 
 	const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
 		const cafeDataById = await CafeStorageClient.retrieveCafesAsync();

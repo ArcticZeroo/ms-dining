@@ -465,4 +465,16 @@ export abstract class DiningClient {
             }
         });
     }
+
+    public static async retrieveRecommendedQueries(query: string): Promise<Array<string>> {
+        const response = await makeJsonRequest({
+            path: `/api/dining/recommendations/queries?q=${encodeURIComponent(query)}`,
+        });
+
+        if (!Array.isArray(response) || response.length === 0 || !response.every(item => typeof item === 'string')) {
+            throw new Error('Invalid response format: expected an array of similar queries');
+        }
+
+        return response;
+    }
 }

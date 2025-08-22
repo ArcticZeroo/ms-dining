@@ -1,9 +1,11 @@
 import { getMinimumDateForMenu } from '@msdining/common/dist/util/date-util';
-import { useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
+import { DiningClient } from '../api/dining.js';
+import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 
 export const useAllowedSearchViewIds = () => {
     const { viewsById } = useContext(ApplicationContext);
@@ -30,4 +32,13 @@ export const useAllowedSearchViewIds = () => {
         },
         [allowedViewIds, shouldUseGroups, viewsById]
     );
+}
+
+export const useRecommendedQueries = (query: string) => {
+    const retrieveQueries = useCallback(
+        () => DiningClient.retrieveRecommendedQueries(query),
+        [query]
+    );
+
+    return useImmediatePromiseState(retrieveQueries);
 }

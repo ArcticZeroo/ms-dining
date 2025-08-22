@@ -125,7 +125,7 @@ export const memoizeResponseBodyByQueryParams = ({ expirationTime = DEFAULT_CACH
     return middleware as IMemoizeController;
 }
 
-export const assignCacheControlMiddleware = (maxAge: DurationOrMilliseconds, isPublic: boolean = false) => {
+export const assignCacheControlMiddleware = (maxAge: DurationOrMilliseconds = DEFAULT_CACHE_EXPIRATION_TIME, isPublic: boolean = false) => {
 	const maxAgeDuration = Duration.fromDurationOrMilliseconds(maxAge);
 
 	return async (ctx: Koa.Context, next: Koa.Next) => {

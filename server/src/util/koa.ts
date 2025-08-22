@@ -198,3 +198,5 @@ export const assignCacheControl = (ctx: Koa.Context, maxAge: DurationOrMilliseco
 	ctx.set('Cache-Control', `${isPublic ? 'public' : 'private'}, max-age=${Duration.fromDurationOrMilliseconds(maxAge).inSeconds}`);
 	ctx.set('Vary', VERSION_TAG_HEADER);
 }
+
+export const CATCH_ALL_PATH = '(.*)';

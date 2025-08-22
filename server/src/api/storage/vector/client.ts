@@ -5,17 +5,24 @@ import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { ICafeStation, ICafe } from '../../../models/cafe.js';
 import { CAFE_GROUP_LIST } from '../../../constants/cafes.js';
+import { Lock } from '../../lock.js';
+
+const QUERY_LOCK = new Lock();
 
 const getQueryEmbedding = async (query: string): Promise<Float32Array> => {
-	const existingEmbedding = await SEARCH_THREAD_HANDLER.sendRequest('getQueryEmbedding', query);
+	query = query.toLowerCase();
 
-	if (existingEmbedding) {
-		return existingEmbedding;
-	}
+	return QUERY_LOCK.acquire(async () => {
+		const existingEmbedding = await SEARCH_THREAD_HANDLER.sendRequest('getQueryEmbedding', query);
 
-	const embedding = new Float32Array(await retrieveEmbeddings(query));
-	await SEARCH_THREAD_HANDLER.sendRequest('insertQueryEmbedding', { embedding, query });
-	return embedding;
+		if (existingEmbedding) {
+			return existingEmbedding;
+		}
+
+		const embedding = new Float32Array(await retrieveEmbeddings(query));
+		await SEARCH_THREAD_HANDLER.sendRequest('insertQueryEmbedding', { embedding, query });
+		return embedding;
+	});
 }
 
 export const searchVectorRawFromEmbedding = async (embedding: Float32Array): Promise<Array<IVectorSearchResult>> => {

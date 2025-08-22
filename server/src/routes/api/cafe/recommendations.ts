@@ -1,7 +1,7 @@
 import Router from '@koa/router';
-import { RouteBuilder } from '../../../models/koa.js';
 import {
-	attachRouter, getEntityTypeAndName,
+	attachRouter,
+	getEntityTypeAndName,
 	getMaybeNumberQueryParam,
 	getTrimmedQueryParam,
 	serializeSearchResults
@@ -11,8 +11,9 @@ import { SearchEntityType } from '@msdining/common/dist/models/search.js';
 import { fromMaybeDateString } from '@msdining/common/dist/util/date-util.js';
 import { IServerSearchResult } from '../../../models/search.js';
 import { getSimilarQueries } from '../../../api/storage/vector/client.js';
+import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
 
-export const registerRecommendationsRoutes: RouteBuilder = (parent) => {
+export const registerRecommendationsRoutes = (parent: Router) => {
 	const router = new Router({
 		prefix: '/recommendations'
 	});
@@ -65,16 +66,18 @@ export const registerRecommendationsRoutes: RouteBuilder = (parent) => {
 		await serializeSearchResults(ctx, trimResults(rawResults, limit));
 	});
 
-	router.get('/queries', async ctx => {
-		const query = getTrimmedQueryParam(ctx, 'q');
+	router.get('/queries',
+		assignCacheControlMiddleware(DEFAULT_CACHE_EXPIRATION_TIME, true /*isPublic*/),
+		async ctx => {
+			const query = getTrimmedQueryParam(ctx, 'q');
 
-		if (!query) {
-			ctx.throw(400, 'Missing query');
-			return;
-		}
+			if (!query) {
+				ctx.throw(400, 'Missing query');
+				return;
+			}
 
-		ctx.body = await getSimilarQueries(query);
-	});
+			ctx.body = await getSimilarQueries(query);
+		});
 
 	attachRouter(parent, router);
 };

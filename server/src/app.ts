@@ -10,12 +10,13 @@ import { createStaticRoutingApp } from './routes/static.js';
 import { sendUniversalVisitMiddleware } from './middleware/analytics.js';
 import { serveSpaHtmlRoute } from './middleware/static.js';
 import Router from '@koa/router';
-import { attachRouter } from './util/koa.js';
+import { attachRouter, CATCH_ALL_PATH } from './util/koa.js';
 import path from 'path';
 import passport from 'koa-passport';
 import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from './constants/env.js';
 import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
+import { logDebug } from './util/log.js';
 
 const app = new Koa();
 
@@ -44,10 +45,11 @@ app.use(sendUniversalVisitMiddleware);
 
 registerRoutes(app);
 
+// Mostly to get assets included for free
 app.use(mount('/', serve(clientFolderDistPath)));
 
 const spaRouter = new Router();
-spaRouter.get('(.*)', serveSpaHtmlRoute(clientIndexHtmlPath));
+spaRouter.get(CATCH_ALL_PATH, serveSpaHtmlRoute(clientIndexHtmlPath));
 attachRouter(app, spaRouter);
 
 export { app };
