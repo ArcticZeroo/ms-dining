@@ -26,7 +26,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.641714,
 					long: -122.130664
-				}
+				},
+				otherServedBuildings: [
+					1, 2, 3, 4, 5, 7, 8, 9
+				]
 			},
 			{
 				name:      'Café 16',
@@ -35,7 +38,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.643507904616044,
 					long: -122.12845125402096
-				}
+				},
+				otherServedBuildings: [
+					3, 4
+				]
 			},
 			{
 				name:      'Café 25',
@@ -53,7 +59,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.644298609820716,
 					long: -122.12196099869949
-				}
+				},
+				otherServedBuildings: [
+					32, 34
+				]
 			},
 			{
 				name:      'Café 34',
@@ -62,7 +71,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.64473336241571,
 					long: -122.1246032387795
-				}
+				},
+				otherServedBuildings: [
+					32, 31
+				]
 			},
 			{
 				name:      'Café 36',
@@ -71,7 +83,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.64063771154742,
 					long: -122.12341603251966
-				}
+				},
+				otherServedBuildings: [
+					31, 32, 37
+				]
 			},
 			{
 				name:      'Café 37',
@@ -80,7 +95,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.6382294573152,
 					long: -122.12598086868739
-				}
+				},
+				otherServedBuildings: [
+					1, 2, 4, 36
+				]
 			},
 			{
 				name:      'Café 40/41',
@@ -89,7 +107,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.63699948153514,
 					long: -122.13287156157851
-				}
+				},
+				otherServedBuildings: [
+					41, 'One Esterra'
+				]
 			},
 			{
 				name:      'Café 43',
@@ -195,7 +216,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				location:  {
 					lat:  47.635412206124535,
 					long: -122.13318512974796
-				}
+				},
+				otherServedBuildings: [
+					40, 41
+				]
 			},
 		]
 	},
@@ -206,6 +230,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			lat:  47.64453785085142,
 			long: -122.1369674720719
 		},
+		otherServedBuildings: [
+			'Studio'
+		],
 		members:  [
 			{
 				name: 'Chandy\'s',
@@ -250,6 +277,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			lat:  47.64139514439134,
 			long: -122.12921998413715
 		},
+		otherServedBuildings: [
+			1, 2, 3, 5, 6, 7, 8, 9, 16
+		],
 		members:   [
 			{
 				name:      'Food Hall 4',
@@ -294,6 +324,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			lat:  47.64057151717557,
 			long: -122.13121841044659
 		},
+		otherServedBuildings: [
+			1, 2, 3, 4, 5, 6, 7, 8
+		],
 		members:   [
 			{
 				name:      'Food Hall 9',
@@ -315,6 +348,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			lat:  47.64159551663974,
 			long: -122.13011468582364
 		},
+		otherServedBuildings: [
+			1, 2, 3, 4, 5, 6, 7, 8, 9
+		],
 		members:   [
 			{
 				name:  'Dote',
@@ -349,6 +385,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				name:      'Boardwalk @ The Commons',
 				shortName: 'Boardwalk',
 				id:        'boardwalk',
+				otherServedBuildings: [
+					'Studio'
+				],
 				location:  {
 					lat:  47.64413039594152,
 					long: -122.13782494045122
@@ -358,6 +397,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				name:      'Craft75 Pub @ Building 6',
 				shortName: 'Craft75',
 				id:        'craft75',
+				otherServedBuildings: [
+					1, 2, 3, 4, 5, 6, 7, 8, 9
+				],
 				location:  {
 					lat:  47.64129449740462,
 					long: -122.13052769248961
@@ -368,6 +410,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				shortName: 'in.gredients',
 				id:        'in-gredients',
 				url:       'https://dining.azurewebsites.net/ingredients/',
+				otherServedBuildings: [
+					31, 32, 34
+				],
 				location:  {
 					lat:  47.644554,
 					long: -122.124415

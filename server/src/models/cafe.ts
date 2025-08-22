@@ -17,6 +17,7 @@ interface ICafeWithoutLocation extends ICafeBase {
 
 interface ICafeWithLocation extends ICafeBase {
     location: ILocationCoordinates;
+	otherServedBuildings?: Array<string | number>;
 }
 
 export type ICafe = ICafeWithoutLocation | ICafeWithLocation;
@@ -38,6 +39,7 @@ interface ICafeGroupWithLocationOnMembers extends IBaseCafeGroup {
 export interface ICafeGroupWithLocationOnGroup extends IBaseCafeGroup {
     location: ILocationCoordinates;
     members: ICafe[];
+	otherServedBuildings?: Array<string | number>;
 }
 
 export type CafeGroup = ICafeGroupWithLocationOnMembers | ICafeGroupWithLocationOnGroup;

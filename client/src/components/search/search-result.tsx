@@ -10,7 +10,7 @@ import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
-import { compareNormalizedCafeIds, compareViewNames, normalizeCafeId } from '../../util/sorting.ts';
+import { compareNormalizedCafeIds, compareViewNames } from '../../util/sorting.ts';
 import { getSearchUrl } from '../../util/url.ts';
 import { FavoriteSearchableItemButton } from '../button/favorite/favorite-searchable-item-button.tsx';
 import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
@@ -22,6 +22,7 @@ import { getViewMenuUrl } from '../../util/link.ts';
 import { FavoriteCafeSearchResultButton } from '../button/favorite/favorite-cafe-search-result-button.tsx';
 import './search.css';
 import { getParentView } from '../../util/view.ts';
+import { normalizeCafeId } from '@msdining/common/dist/util/cafe-util.js';
 
 interface IEntityDisplayData {
     className: string;

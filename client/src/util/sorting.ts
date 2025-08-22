@@ -3,24 +3,7 @@ import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
 import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
-
-export const normalizeCafeId = (id: string) => {
-    return id
-        .toLowerCase()
-        .replace(/^cafe/, '');
-};
-
-const CAFE_NUMBER_REGEX = /(?:caf[eé]|food hall|building) (\d+)/i;
-
-export const getCafeNumber = (name: string) => {
-    const match = name.match(CAFE_NUMBER_REGEX);
-
-    if (match) {
-        return Number(match[1]);
-    }
-
-    return NaN;
-};
+import { getCafeNumber } from '@msdining/common/dist/util/cafe-util.js';
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {
     // Normally I don't like parseInt, but for once

@@ -1,14 +1,15 @@
 import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
 import {
-    DB_ID_TO_SEARCH_ENTITY_TYPE,
-    ISearchQuery,
-    SearchEntityType,
-    SearchMatchReason
+	DB_ID_TO_SEARCH_ENTITY_TYPE,
+	ISearchQuery,
+	SearchEntityType,
+	SearchMatchReason
 } from '@msdining/common/dist/models/search.js';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { getCafeNumber } from '@msdining/common/dist/util/cafe-util.js';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
 import { Nullable } from '../../models/util.js';
-import { getStationLogoUrl, getThumbnailUrl, getLogoUrl } from '../../util/cafe.js';
+import { getLogoUrl, getStationLogoUrl, getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
@@ -19,6 +20,8 @@ import { logDebug } from '../../util/log.js';
 import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../constants/cafes.js';
 import { MaybePromise } from '../../models/async.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../worker/interface/thumbnail.js';
+import { CafeGroup, ICafe } from '../../models/cafe.js';
+import { IDiningCoreGroup } from '@msdining/common/dist/models/http.js';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [
@@ -411,14 +414,19 @@ class SearchSession {
         return { matchReasons } as const;
     }
 
-    getCafeMatch(cafe: { name: string; shortName?: string | number; emoji?: string }, groupName?: string) {
+    getCafeMatch(cafe: { name: string; shortName?: string | number; emoji?: string, id?: string }, groupName?: string) {
         const matchReasons = new Set<SearchMatchReason>();
-        
+
         // Check cafe name
         if (this.isMatch(cafe.name, SearchEntityType.cafe)) {
             matchReasons.add(SearchMatchReason.title);
         }
-        
+
+		const cafeNumber = getCafeNumber(cafe.name);
+		if (!Number.isNaN(cafeNumber) && this.isMatch(String(cafeNumber), SearchEntityType.cafe)) {
+			matchReasons.add(SearchMatchReason.title);
+		}
+
         // Check short name if it exists
         if (cafe.shortName && this.isMatch(String(cafe.shortName), SearchEntityType.cafe)) {
             matchReasons.add(SearchMatchReason.title);
@@ -428,9 +436,48 @@ class SearchSession {
         if (groupName && this.isMatch(groupName, SearchEntityType.cafe)) {
             matchReasons.add(SearchMatchReason.description);
         }
-        
+
+		if (cafe.id && this.isMatch(String(cafe.id), SearchEntityType.cafe)) {
+			matchReasons.add(SearchMatchReason.title);
+		}
+
         return { matchReasons } as const;
     }
+
+	async registerCafe(isMatch: boolean, cafe: ICafe) {
+		const group = CAFE_GROUP_LIST.find(group => group.members.some(member => member.id === cafe.id));
+		if (!group) {
+			logDebug('No group found for cafe', cafe.id);
+			return;
+		}
+
+		// Find the group this cafe belongs to
+		const { matchReasons } = this.getCafeMatch(cafe, group.name);
+
+		// Get cafe config for logo
+		const cafeConfig = await CafeStorageClient.retrieveCafeAsync(cafe.id);
+
+		if (!cafeConfig) {
+			logDebug('Cafe config not found for vector result', cafe.id);
+			return;
+		}
+
+		this.registerResult(isMatch || matchReasons.size > 0, {
+			type:         SearchEntityType.cafe,
+			dateString:   undefined,
+			cafeId:       cafe.id,
+			name:         cafe.name,
+			description:  undefined,
+			imageUrl:     getLogoUrl(cafe, cafeConfig),
+			// No pricing/station data for cafes
+			price:        undefined,
+			searchTags:   undefined,
+			tags:         undefined,
+			station:      undefined,
+			matchReasons,
+			matchedModifiers: new Map()
+		});
+	}
 }
 
 // This is not a storage client because it orchestrates multiple storage clients together,
@@ -604,6 +651,10 @@ export abstract class SearchManager {
             }
         }
 
+		for (const cafe of ALL_CAFES) {
+			await session.registerCafe(false /*isMatch*/, cafe);
+		}
+
         if (allowResultsWithoutAppearances) {
             for (const [entityType, ids] of vectorFoundItemsWithoutAppearances) {
                 for (const id of ids) {
@@ -655,34 +706,7 @@ export abstract class SearchManager {
                         const cafe = CAFES_BY_ID.get(id);
                         if (cafe != null) {
                             logDebug('Adding vector cafe result without appearance', cafe.name);
-
-                            // Find the group this cafe belongs to
-                            const group = CAFE_GROUP_LIST.find(g => g.members.some(member => member.id === cafe.id));
-                            const { matchReasons } = session.getCafeMatch(cafe, group?.name);
-                            
-                            // Get cafe config for logo
-                            const cafeConfig = await CafeStorageClient.retrieveCafeAsync(cafe.id);
-
-                            if (!cafeConfig) {
-                                logDebug('Cafe config not found for vector result', cafe.id);
-                                continue;
-                            }
-
-                            session.registerResult(true /*isMatch*/, {
-                                type:         SearchEntityType.cafe,
-                                dateString:   undefined,
-                                cafeId:       cafe.id,
-                                name:         cafe.name,
-                                description:  undefined,
-                                imageUrl:     getLogoUrl(cafe, cafeConfig),
-                                // No pricing/station data for cafes
-                                price:        undefined,
-                                searchTags:   undefined,
-                                tags:         undefined,
-                                station:      undefined,
-                                matchReasons,
-                                matchedModifiers: new Map()
-                            });
+							await session.registerCafe(true /*isMatch*/, cafe);
                         } else {
                             logDebug('Cafe not found for vector result', id);
                         }
