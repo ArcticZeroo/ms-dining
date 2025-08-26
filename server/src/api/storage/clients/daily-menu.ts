@@ -2,7 +2,7 @@ import { DateUtil } from '@msdining/common';
 import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { isDateValid } from '../../../util/date.js';
-import { logError } from '../../../util/log.js';
+import { logDebug, logError } from '../../../util/log.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import { SearchEntityType } from '@msdining/common/dist/models/search.js';
@@ -11,7 +11,6 @@ import { IMenuPublishEvent } from '../../../models/storage-events.js';
 import { STORAGE_EVENTS } from '../events.js';
 import Duration from '@arcticzeroo/duration';
 import { getAllMenuItemsFirstAppearance } from '@prisma/client/sql';
-import { fromDateString } from '@msdining/common/dist/util/date-util.js';
 
 const areMenuItemsByCategoryNameEqual = (a: Map<string, Array<string>>, b: Map<string, Array<string>>) => {
 	if (a.size !== b.size) {
@@ -159,9 +158,7 @@ export abstract class DailyMenuStorageClient {
 							}))
 						}
 					}
-				})
-
-				// ...probably do the uniqueness calculation here?
+				});
 			}
 		}));
 
@@ -177,6 +174,7 @@ export abstract class DailyMenuStorageClient {
 		]);
 
 		STORAGE_EVENTS.emit('menuPublished', publishEvent);
+		logDebug(`{${dateString} Published daily menu for cafe ${cafeId}`);
 	}
 
 	public static async retrieveDailyMenuAsync(cafeId: string, dateString: string) {
@@ -231,7 +229,9 @@ export abstract class DailyMenuStorageClient {
 					menuItemsById.set(menuItem.id, menuItem);
 				}
 
-				menuItemIdsByCategoryName.set(category.name, menuItemIds);
+				if (menuItemsById.size > 0) {
+					menuItemIdsByCategoryName.set(category.name, menuItemIds);
+				}
 			}
 
 			stations.push({

@@ -212,13 +212,14 @@ export class CafeMenuSession {
 			const serverItems = await this.#retrieveMenuItemsFromBuyOnDemandAsync(station, localItemsById, Array.from(itemIdsToRetrieve));
 
 			for (const item of serverItems) {
-				items.push(item);
-
 				try {
 					await MenuItemStorageClient.saveMenuItemAsync(item, true /*allowUpdateIfExisting*/);
 				} catch (err) {
 					logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
+					continue;
 				}
+
+				items.push(item);
 
 				if (item.searchTags.size === 0) {
 					SEARCH_TAG_WORKER_QUEUE.add({
@@ -243,8 +244,15 @@ export class CafeMenuSession {
 		}
 
 		// Some items are in the list of items by category but the server doesn't return them, which means they aren't actually on the menu.
-		for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName.entries()) {
-			station.menuItemIdsByCategoryName.set(categoryName, itemIds.filter(itemId => station.menuItemsById.has(itemId)));
+		for (const [categoryName, possibleItemIds] of station.menuItemIdsByCategoryName.entries()) {
+			const actualItemIds = possibleItemIds.filter(itemId => station.menuItemsById.has(itemId));
+
+			// if there are no items there today, get rid of the category entirely
+			if (actualItemIds.length === 0) {
+				station.menuItemIdsByCategoryName.delete(categoryName);
+			} else {
+				station.menuItemIdsByCategoryName.set(categoryName, actualItemIds);
+			}
 		}
 	}
 

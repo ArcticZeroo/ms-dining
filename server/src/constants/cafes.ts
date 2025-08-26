@@ -166,7 +166,10 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 					long: -122.14001840124935
 				}
 			},
-			{
+			// Cafe 112 is closed permanently.
+			// It still returns a menu interestingly, so this is probably
+			// a good example for when we do schedules.
+			/*{
 				name:      'Café 112',
 				id:        'cafe112',
 				shortName: 112,
@@ -174,7 +177,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 					lat:  47.640673485809224,
 					long: -122.14114144772182
 				}
-			},
+			},*/
 			{
 				name:      'Café 121',
 				id:        'cafe121',

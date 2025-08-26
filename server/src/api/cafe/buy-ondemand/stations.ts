@@ -34,7 +34,6 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
 	};
 
 	for (const category of menu.categories) {
-
 		if (category.items.length > 0) {
 			addItemsToCategory(category.name, category.items);
 		}
@@ -46,6 +45,10 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
 		// to the parent category
 		if (category.subCategories && category.subCategories.length > 0) {
 			for (const subCategory of category.subCategories) {
+				if (subCategory.items.length === 0) {
+					continue;
+				}
+
 				const subCategoryName = subCategory.name.trim();
 				const targetName = subCategoryName ? `${category.name} - ${subCategoryName}` : category.name;
 				addItemsToCategory(targetName, subCategory.items);
