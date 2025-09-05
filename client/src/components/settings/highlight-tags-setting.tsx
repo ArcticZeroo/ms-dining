@@ -19,8 +19,13 @@ export const HighlightTagsSetting = () => {
                 <div className="setting-chips">
                     {
                         Object.entries(knownTags).map(([tagId, tag]) => (
-                            <label htmlFor={`tag-${tagId}`} className="setting-chip" key={tagId} style={{ backgroundColor: tag.color }}>
-                                {tag.name}
+                            <label htmlFor={`tag-${tagId}`} className="setting-chip flex" key={tagId} style={{ backgroundColor: tag.color }}>
+                                <span>
+                                    {tag.icon}
+                                </span>
+                                <span>
+                                    {tag.name}
+                                </span>
                                 <input type="checkbox"
 								       id={`tag-${tagId}`}
 								       checked={selectedTags.has(tagId)}
@@ -46,7 +51,7 @@ export const HighlightTagsSetting = () => {
                 <div className="setting-description">
 					Menu items with any of these tags will be highlighted in menus.
                     <br/>
-                    Note that the official menus sometimes forget to put these tags on items.
+                    Note that the official menus sometimes forget to put dietary tags on items.
                 </div>
             </div>
             {chipsElement}

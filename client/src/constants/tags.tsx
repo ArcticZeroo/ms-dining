@@ -6,6 +6,8 @@ export interface ITagData {
 	color: string;
 }
 
+const EMISSIONS_TAG_COLOR = '#384c6e';
+
 // The first one hit will be the highlight color.
 export const knownTags: Record<string, ITagData> = {
     'gluten free': {
@@ -22,5 +24,20 @@ export const knownTags: Record<string, ITagData> = {
         name: 'Vegetarian',
         icon: '🥦',
         color: '#7d967d'
+    },
+    'low_circle': {
+        name: 'Low Emissions',
+        icon: '🌎',
+        color: EMISSIONS_TAG_COLOR
+    },
+    'med_circle': {
+        name: 'Medium Emissions',
+        icon: '🌎',
+        color: EMISSIONS_TAG_COLOR
+    },
+    'high_circle': {
+        name: 'High Emissions',
+        icon: '🌎',
+        color: EMISSIONS_TAG_COLOR
     },
 };

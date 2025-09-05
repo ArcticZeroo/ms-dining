@@ -11,7 +11,7 @@ import { requireAuthenticated, requireNotAuthenticated } from '../../middleware/
 import { assignCacheControlMiddleware } from '../../middleware/cache.js';
 import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategies.js';
 import { attachRouter, getUserIdOrThrow, getUserOrThrowAsync } from '../../util/koa.js';
-import { logInfo } from '../../util/log.js';
+import { logError, logInfo } from '../../util/log.js';
 import { isUpdateUserSettingsInput } from '../../util/typeguard.js';
 
 const isAuthorizationError = (err: unknown) => {
@@ -50,6 +50,7 @@ export const registerAuthRoutes = (parent: Router) => {
             if (!isAuthorizationError(err)) {
                 throw err;
             } else {
+				logError(`Authorization error during login:`, err);
                 if (!ctx.headerSent) {
                     ctx.redirect('/login');
                 }
@@ -152,10 +153,12 @@ export const registerAuthRoutes = (parent: Router) => {
             ctx.status = 204;
         });
 
-    router.get('/logout', async ctx => {
-        await ctx.logout();
-        ctx.redirect('/');
-    });
+    router.get('/logout',
+		requireNotAuthenticated,
+		async ctx => {
+			await ctx.logout();
+			ctx.redirect('/');
+		});
 
     attachRouter(parent, router);
 };

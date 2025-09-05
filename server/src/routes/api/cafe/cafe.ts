@@ -118,7 +118,7 @@ export const registerCafeRoutes = (parent: Router) => {
 			]);
 
 			ctx.body = jsonStringifyWithoutNull(response);
-			assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, false /*isPublic*/);
+			// assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, false /*isPublic*/);
 		});
 
 	attachRouter(parent, router);
