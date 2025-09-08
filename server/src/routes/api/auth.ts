@@ -154,7 +154,7 @@ export const registerAuthRoutes = (parent: Router) => {
         });
 
     router.get('/logout',
-		requireNotAuthenticated,
+		requireAuthenticated,
 		async ctx => {
 			await ctx.logout();
 			ctx.redirect('/');

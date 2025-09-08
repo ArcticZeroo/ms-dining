@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const SessionDataSchema = z.object({
     passport: z.object({
-        user: z.string()
+        user: z.string().optional()
     }).optional(),
 }).passthrough();
 
@@ -48,7 +48,7 @@ export class PrismaSessionStore implements ISessionStore {
      * @param maxAge Maximum age in milliseconds (optional for never-expiring sessions)
      */
     async set(sessionId: string, sessionData: unknown, maxAge?: number): Promise<void> {
-        const parsedData = SessionDataSchema.parse(sessionData);
+        const parsedData = SessionDataSchema.parse(sessionData || {});
 
         // Only save to database if we have authentication data
         // koa-session calls this with just metadata before authentication
