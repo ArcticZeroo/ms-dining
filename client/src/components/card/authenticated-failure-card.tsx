@@ -22,7 +22,9 @@ export const AuthenticatedFailureCard: React.FC<IAuthenticatedFailureCardProps> 
                             ? 'Your session has expired since you loaded this page.'
                             : 'You must be logged in to view this content.'
                     }
-                    <Link to="login" className="default-button default-container" />
+                    <Link to="login" className="default-button default-container">
+                        Login
+                    </Link>
                 </span>
             </div>
         );

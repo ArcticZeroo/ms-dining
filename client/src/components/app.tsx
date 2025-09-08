@@ -8,10 +8,18 @@ import { HourglassLoadingSpinner } from './icon/hourglass-loading-spinner.tsx';
 import { HttpException } from '../exception/http.ts';
 import { FullHeightCenteredContainer } from './util/full-height-centered-container.tsx';
 
+const userDataLoader = async () => {
+    try {
+        const user = await DiningClient.retrieveAuthenticatedUser();
+        updateRoamingSettingsOnBoot(user);
+        return user;
+    } catch {
+        return undefined;
+    }
+}
+
 const coreDataLoader = async () => {
-    const coreData = await DiningClient.retrieveCoreData();
-    updateRoamingSettingsOnBoot(coreData.user);
-    return coreData;
+    return Promise.all([DiningClient.retrieveCoreData(), userDataLoader()]);
 };
 
 export const App = () => {
@@ -42,7 +50,8 @@ export const App = () => {
     }
 
     if (responseStatus.value != null) {
-        return <AppWithData response={responseStatus.value}/>;
+        const [coreData, user] = responseStatus.value;
+        return <AppWithData coreData={coreData} user={user} />;
     }
 
     return (

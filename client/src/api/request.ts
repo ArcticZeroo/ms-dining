@@ -18,7 +18,7 @@ export const getDefaultHeaders = (): Record<string, string> => {
     return {
         'X-Visitor-Id': getVisitorId(),
         'Content-Type': 'application/json',
-        [VERSION_TAG_HEADER]: VERSION_TAG.searchResultsNotHereThisWeek.toString(),
+        [VERSION_TAG_HEADER]: VERSION_TAG.userNotInCafeList.toString(),
     };
 }
 

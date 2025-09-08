@@ -3,6 +3,13 @@ export interface IClientUserDTO {
 	displayName: string;
 	provider: string;
 	createdAt: number;
+	role: string;
+	settings?: {
+		favoriteStations: string[];
+		favoriteMenuItems: string[];
+		homepageIds: string[];
+		lastUpdate: number;
+	}
 }
 
 export interface IClientUser {
@@ -10,6 +17,13 @@ export interface IClientUser {
 	displayName: string;
 	provider: string;
 	createdAt: Date;
+	role: string;
+	settings?: {
+		favoriteStations: string[];
+		favoriteMenuItems: string[];
+		homepageIds: string[];
+		lastUpdate: Date;
+	}
 }
 
 export const PROVIDER_MICROSOFT = 'microsoft';

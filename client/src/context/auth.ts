@@ -1,5 +1,5 @@
 import React from 'react';
 import { ValueNotifier } from '../util/events.ts';
-import { IUser } from '@msdining/common/dist/models/http';
+import { IClientUser } from '@msdining/common/dist/models/auth.js';
 
-export const UserContext = React.createContext(new ValueNotifier<IUser | undefined>(undefined));
+export const UserContext = React.createContext(new ValueNotifier<IClientUser | undefined>(undefined));

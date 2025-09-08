@@ -112,9 +112,13 @@ export const registerCafeRoutes = (parent: Router) => {
 				groups:            []
 			};
 
+			const userDataPromise: Promise<void> = supportsVersionTag(ctx, VERSION_TAG.userNotInCafeList)
+				? Promise.resolve()
+				: populateUserDataAsync(ctx, response);
+
 			await Promise.all([
 				populateCafesAsync(ctx, response),
-				populateUserDataAsync(ctx, response)
+				userDataPromise
 			]);
 
 			ctx.body = jsonStringifyWithoutNull(response);

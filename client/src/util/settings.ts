@@ -1,9 +1,9 @@
-import { IDiningCoreResponse } from '@msdining/common/dist/models/http.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { DiningClient } from '../api/dining.ts';
 import { isSameSet } from './set.ts';
+import { IClientUser } from '@msdining/common/dist/models/auth.js';
 
-export const updateRoamingSettingsOnBoot = (user: IDiningCoreResponse['user']) => {
+export const updateRoamingSettingsOnBoot = (user: IClientUser) => {
     if (user == null) {
         return;
     }
@@ -15,7 +15,7 @@ export const updateRoamingSettingsOnBoot = (user: IDiningCoreResponse['user']) =
     if (roamingSettings != null) {
         console.log('server has roaming settings', roamingSettings);
 
-        if (Number.isNaN(InternalSettings.lastRoamingSettingsUpdateTime.value.getTime()) || roamingSettings.lastUpdate === 0) {
+        if (Number.isNaN(InternalSettings.lastRoamingSettingsUpdateTime.value.getTime()) || roamingSettings.lastUpdate.getTime() === 0) {
             // Another client has updated settings on the service but this client never has.
             // We should merge so that this client doesn't lose data.
             console.log('server has roaming settings but client does not, merging');
@@ -31,7 +31,7 @@ export const updateRoamingSettingsOnBoot = (user: IDiningCoreResponse['user']) =
             serverNeedsUpdate = initialFavoriteMenuItemsCount !== ApplicationSettings.favoriteItemNames.value.size
                 || initialFavoriteStationCount !== ApplicationSettings.favoriteStationNames.value.size
                 || initialHomepageIdsCount !== ApplicationSettings.homepageViews.value.size;
-        } else if (InternalSettings.lastRoamingSettingsUpdateTime.value.getTime() < roamingSettings.lastUpdate) {
+        } else if (InternalSettings.lastRoamingSettingsUpdateTime.value.getTime() < roamingSettings.lastUpdate.getTime()) {
             // Otherwise, we want to be able to respect removals across clients. Last writer wins.
             console.log('server has roaming settings but client has is out of date, using server settings');
 

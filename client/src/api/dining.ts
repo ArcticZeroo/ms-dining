@@ -64,8 +64,8 @@ export abstract class DiningClient {
                 menu[category] = menuItems.map(dto => ({
                     ...dto,
                     lastUpdateTime: dto.lastUpdateTime ? new Date(dto.lastUpdateTime) : undefined,
-                    tags: new Set(dto.tags),
-                    searchTags: new Set(dto.searchTags)
+                    tags:           new Set(dto.tags),
+                    searchTags:     new Set(dto.searchTags)
                 } satisfies IMenuItemBase));
             }
 
@@ -155,7 +155,7 @@ export abstract class DiningClient {
             }
 
             await DiningClient.retrieveCafeMenu({
-                id: cafe.id,
+                id:                         cafe.id,
                 shouldCountTowardsLastUsed: false
             });
         }
@@ -211,18 +211,18 @@ export abstract class DiningClient {
 
             results.push({
                 entityType,
-                name: serverResult.name,
-                description: serverResult.description,
-                imageUrl: serverResult.imageUrl,
+                name:                  serverResult.name,
+                description:           serverResult.description,
+                imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                priceByCafeId: new Map(Object.entries(serverResult.prices)),
-                stationByCafeId: new Map(Object.entries(serverResult.stations)),
-                matchReasons: new Set(serverResult.matchReasons),
-                tags: serverResult.tags ? new Set(serverResult.tags) : undefined,
-                searchTags: serverResult.searchTags ? new Set(serverResult.searchTags) : undefined,
-                matchedModifiers: DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers),
-                vectorDistance: serverResult.vectorDistance,
-                cafeId: serverResult.cafeId || undefined
+                priceByCafeId:         new Map(Object.entries(serverResult.prices)),
+                stationByCafeId:       new Map(Object.entries(serverResult.stations)),
+                matchReasons:          new Set(serverResult.matchReasons),
+                tags:                  serverResult.tags ? new Set(serverResult.tags) : undefined,
+                searchTags:            serverResult.searchTags ? new Set(serverResult.searchTags) : undefined,
+                matchedModifiers:      DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers),
+                vectorDistance:        serverResult.vectorDistance,
+                cafeId:                serverResult.cafeId || undefined
             });
         }
 
@@ -281,11 +281,11 @@ export abstract class DiningClient {
         }
 
         const response = await makeJsonRequest({
-            path: `/api/dining/search/favorites${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`,
+            path:    `/api/dining/search/favorites${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`,
             options: {
-                method: 'POST',
+                method:  'POST',
                 headers: JSON_HEADERS,
-                body: JSON.stringify(remoteQueries)
+                body:    JSON.stringify(remoteQueries)
             }
         });
 
@@ -311,13 +311,13 @@ export abstract class DiningClient {
 
         for (const serverResult of serverResults) {
             results.push({
-                name: serverResult.name,
-                description: serverResult.description,
-                imageUrl: serverResult.imageUrl,
+                name:                  serverResult.name,
+                description:           serverResult.description,
+                imageUrl:              serverResult.imageUrl,
                 locationDatesByCafeId: DiningClient._deserializeLocationDatesByCafeId(serverResult.locations),
-                price: serverResult.price,
-                minCalories: serverResult.minCalories,
-                maxCalories: serverResult.maxCalories,
+                price:                 serverResult.price,
+                minCalories:           serverResult.minCalories,
+                maxCalories:           serverResult.maxCalories,
             });
         }
 
@@ -349,34 +349,55 @@ export abstract class DiningClient {
     }
 
     public static async retrieveAuthenticatedUser(): Promise<IClientUser> {
-        const user = await makeJsonRequest({
+        const dto = await makeJsonRequest({
             path: `/api/auth/me`
         });
 
-        if (!isDuckType<IClientUserDTO>(user, { id: 'string', displayName: 'string', provider: 'string', createdAt: 'number' })) {
+        if (!isDuckType<IClientUserDTO>(dto, {
+            id:          'string',
+            displayName: 'string',
+            provider:    'string',
+            createdAt:   'number'
+        })) {
             throw new Error('Invalid response format: missing email or displayName');
         }
 
-        return {
-            id: user.id,
-            displayName: user.displayName,
-            provider: user.provider,
-            createdAt: new Date(user.createdAt)
+        const clientUser: IClientUser = {
+            id:          dto.id,
+            displayName: dto.displayName,
+            provider:    dto.provider,
+            role:        dto.role,
+            createdAt:   new Date(dto.createdAt),
         };
+
+        if (dto.settings) {
+            clientUser.settings = {
+                ...dto.settings,
+                lastUpdate: new Date(dto.settings.lastUpdate)
+            };
+        }
+
+        return clientUser;
     }
 
     public static async updateMyDisplayName(displayName: string): Promise<void> {
         await makeJsonRequestNoParse({
-            path: '/api/auth/me/name',
+            path:    '/api/auth/me/name',
             options: {
                 method: 'PATCH',
-                body: JSON.stringify({ displayName })
+                body:   JSON.stringify({ displayName })
             }
         });
     }
 
     private static _deserializeReviews(reviews: unknown): Array<IReview> {
-        if (!isDuckTypeArray<IReview>(reviews, { id: 'string', userId: 'string', userDisplayName: 'string', rating: 'number', createdDate: 'string' })) {
+        if (!isDuckTypeArray<IReview>(reviews, {
+            id:              'string',
+            userId:          'string',
+            userDisplayName: 'string',
+            rating:          'number',
+            createdDate:     'string'
+        })) {
             throw new Error('Invalid response format: missing reviews or in wrong format');
         }
 
@@ -388,7 +409,12 @@ export abstract class DiningClient {
             path: `/api/dining/menu/menu-items/${menuItemId}/reviews`
         });
 
-        if (!isDuckType<IReviewDataForMenuItem>(response, { overallRating: 'number', totalCount: 'number', counts: 'object', reviewsWithComments: 'object' })) {
+        if (!isDuckType<IReviewDataForMenuItem>(response, {
+            overallRating:       'number',
+            totalCount:          'number',
+            counts:              'object',
+            reviewsWithComments: 'object'
+        })) {
             throw new Error('Reviews not in the correct format');
         }
 
@@ -405,10 +431,10 @@ export abstract class DiningClient {
 
     public static async updateSettings(settings: Omit<IUpdateUserSettingsInput, 'timestamp'>): Promise<void> {
         await makeJsonRequestNoParse({
-            path: '/api/auth/me/settings',
+            path:    '/api/auth/me/settings',
             options: {
                 method: 'PATCH',
-                body: JSON.stringify({
+                body:   JSON.stringify({
                     ...settings,
                     timestamp: Date.now()
                 })
@@ -422,10 +448,10 @@ export abstract class DiningClient {
         }
 
         const response = await makeJsonRequest({
-            path: `/api/dining/menu/menu-items/${menuItemId}/reviews`,
+            path:    `/api/dining/menu/menu-items/${menuItemId}/reviews`,
             options: {
                 method: 'PUT',
-                body: JSON.stringify(request)
+                body:   JSON.stringify(request)
             }
         });
 
@@ -438,7 +464,7 @@ export abstract class DiningClient {
 
     public static async deleteReview(reviewId: string): Promise<void> {
         await makeJsonRequestNoParse({
-            path: `/api/dining/menu/reviews/${reviewId}`,
+            path:    `/api/dining/menu/reviews/${reviewId}`,
             options: {
                 method: 'DELETE'
             }

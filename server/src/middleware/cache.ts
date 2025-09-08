@@ -133,3 +133,8 @@ export const assignCacheControlMiddleware = (maxAge: DurationOrMilliseconds = DE
 		await next();
 	};
 }
+
+export const doNotCacheMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
+	ctx.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+	await next();
+}

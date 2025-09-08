@@ -1,31 +1,16 @@
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../api/dining.ts';
 import { AuthProviderBadge } from '../../auth/auth-provider-badge.tsx';
-import { AuthenticatedFailureCard } from '../../card/authenticated-failure-card.tsx';
-import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { DisplayNameControl } from './display-name-control.tsx';
+import { UserContext } from '../../../context/auth.js';
+import { useValueNotifierContext } from '../../../hooks/events.js';
 
 export const ProfileUserInfo = () => {
-    const { value: user, run: fetchUser, stage, error } = useImmediatePromiseState(DiningClient.retrieveAuthenticatedUser);
-
-    if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {
-        return (
-            <div className="card">
-                <span>
-                    Loading your profile...
-                </span>
-                <HourglassLoadingSpinner/>
-            </div>
-        )
-    }
+    const user = useValueNotifierContext(UserContext);
 
     if (!user) {
         return (
-            <AuthenticatedFailureCard
-                message="Failed to load your profile!"
-                error={error}
-                onRetry={fetchUser}
-            />
+            <div className="error card">
+                Your user info isn't available. Please log out and log back in.
+            </div>
         );
     }
 

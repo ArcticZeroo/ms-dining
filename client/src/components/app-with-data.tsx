@@ -14,6 +14,7 @@ import { ApplicationSettings } from '../constants/settings.ts';
 import { classNames } from '../util/react.ts';
 import { UserContext } from '../context/auth.ts';
 import { ValueNotifier } from '../util/events.ts';
+import { IClientUser } from '@msdining/common/dist/models/auth.js';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -38,11 +39,12 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
 };
 
 interface IAppWithDataProps {
-    response: IDiningCoreResponse;
+    coreData: IDiningCoreResponse;
+    user: IClientUser | undefined;
 }
 
-const AppWithData: React.FC<IAppWithDataProps> = ({ response }) => {
-    const { groups, isTrackingEnabled, user } = response;
+const AppWithData: React.FC<IAppWithDataProps> = ({ coreData, user }) => {
+    const { groups, isTrackingEnabled } = coreData;
 
     // TODO: Consider the possibility of filtering viewsById based on useGroups to avoid calls to isViewVisible
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
@@ -71,7 +73,7 @@ const AppWithData: React.FC<IAppWithDataProps> = ({ response }) => {
     );
 
     const userNotifier = useMemo(
-        () => new ValueNotifier(user && { id: user.id, role: user.role }),
+        () => new ValueNotifier(user),
         [user]
     );
 

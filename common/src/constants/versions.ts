@@ -3,6 +3,7 @@ export const VERSION_TAG = {
 	modifiersInSearchResults: 1,
 	unreleasedCafes: 2,
 	searchResultsNotHereThisWeek: 3,
+    userNotInCafeList: 4
 };
 
 export const VERSION_TAG_HEADER = 'X-Client-Version-Tag';
