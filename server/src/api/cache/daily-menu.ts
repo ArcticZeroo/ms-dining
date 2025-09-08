@@ -59,7 +59,7 @@ export const retrieveDailyCafeMenuAsync = async (cafeId: string, dateString: str
 	const cache = MENU_CACHE_BY_CAFE.get(cafeId);
 
 	if (!cache) {
-		throw new Error(`No cache found for cafe with ID "${cafeId}"`);
+		return [];
 	}
 
 	return cache.get(dateString);
