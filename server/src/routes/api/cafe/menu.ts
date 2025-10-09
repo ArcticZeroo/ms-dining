@@ -7,7 +7,7 @@ import {
 } from '@msdining/common/dist/models/http.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
+import { memoizeResponseBody, memoizeResponseBodyWithResetOnMenuUpdate } from '../../../middleware/cache.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
@@ -174,9 +174,11 @@ export const registerMenuRoutes = (parent: Router) => {
 		createdDate:     toDateString(review.createdAt),
 	});
 
+	const reviewCacheController = memoizeResponseBody({ expirationTime: new Duration({ minutes: 5 }), isPublic: true });
+
 	router.get('/menu-items/:menuItemId/reviews',
 		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.getReviews),
-		// todo... figure out how to memo and deal with updates.
+		reviewCacheController,
 		async ctx => {
 			const userId = getMaybeUserId(ctx);
 			const menuItem = await getMenuItemFromRequest(ctx);
@@ -250,6 +252,8 @@ export const registerMenuRoutes = (parent: Router) => {
 			ctx.body = {
 				id: review.id
 			};
+
+			reviewCacheController.clearCache();
 		});
 
 	router.get('/reviews/mine',
@@ -274,7 +278,7 @@ export const registerMenuRoutes = (parent: Router) => {
 		});
 
 	router.get('/reviews/recent',
-		memoizeResponseBodyByQueryParams({ expirationTime: new Duration({ minutes: 1 }), isPublic: true }),
+		reviewCacheController,
 		async ctx => {
 			const reviews = await ReviewStorageClient.getRecentReviews(10);
 			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
@@ -299,17 +303,18 @@ export const registerMenuRoutes = (parent: Router) => {
 			const reviewId = await validateReviewOwnershipAsync(ctx);
 			await ReviewStorageClient.deleteReviewAsync(reviewId);
 			ctx.status = 204;
+			reviewCacheController.clearCache();
 		});
 
 	router.get('/search-ideas',
-		memoizeResponseBodyByQueryParams({ isPublic: true }),
+		memoizeResponseBody({ isPublic: true }),
 		async ctx => {
 			ctx.body = MenuItemStorageClient.topSearchTags;
 		});
 
 	router.get('/:id',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		memoizeResponseBodyByQueryParams({ isPublic: true }),
+		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 			const [menuStations, uniquenessData] = await Promise.all([
 				retrieveDailyCafeMenuAsync(cafe.id, dateString),
@@ -321,7 +326,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	router.get('/:id/overview',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-		memoizeResponseBodyByQueryParams({ isPublic: true }),
+		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 			const [stationHeaders, uniquenessData] = await Promise.all([
 				DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),

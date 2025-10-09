@@ -6,7 +6,7 @@ import { VERSION_TAG } from '@msdining/common/dist/constants/versions.js';
 import { ISearchQuery } from '@msdining/common/dist/models/search.js';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
+import { memoizeResponseBody } from '../../../middleware/cache.js';
 import {
     attachRouter,
     getEntityTypeAndName,
@@ -63,7 +63,7 @@ export const registerSearchRoutes = (parent: Router) => {
     router.get('/',
         sendVisitFromQueryParamMiddleware('exp', getApplicationNameForSearch),
         incrementSearchCountMiddleware,
-        memoizeResponseBodyByQueryParams({ isPublic: true }),
+        memoizeResponseBody({ isPublic: true }),
         async ctx => {
             const searchQuery = getTrimmedQueryParam(ctx, 'q');
             const isExact = getTrimmedQueryParam(ctx, 'e') === 'true';
@@ -102,7 +102,7 @@ export const registerSearchRoutes = (parent: Router) => {
 
     router.get('/cheap',
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.cheapItems),
-        memoizeResponseBodyByQueryParams({ isPublic: true }),
+        memoizeResponseBody({ isPublic: true }),
         async ctx => {
             const maxPriceRaw = ctx.query.max;
             const minPriceRaw = ctx.query.min;
@@ -141,7 +141,7 @@ export const registerSearchRoutes = (parent: Router) => {
 
     router.get('/visit-history',
         sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.pattern),
-        memoizeResponseBodyByQueryParams({ isPublic: true }),
+        memoizeResponseBody({ isPublic: true }),
         async ctx => {
             const [entityType, entityName] = getEntityTypeAndName(ctx);
             ctx.body = await retrieveVisitData(entityType, entityName);

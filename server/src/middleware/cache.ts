@@ -1,6 +1,7 @@
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import Koa from 'koa';
 import { assignCacheControl, getVersionTag } from '../util/koa.js';
+import { CACHE_EVENTS } from '../api/storage/events.js';
 
 interface ICacheEntry {
     expirationTime: number;
@@ -70,7 +71,13 @@ interface IMemoizeResponseBodyByQueryParams {
 	isPublic?: boolean;
 }
 
-export const memoizeResponseBodyByQueryParams = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_TIME, isPublic = false }: IMemoizeResponseBodyByQueryParams = {}): IMemoizeController => {
+/**
+ * Memoize the response body based on the request path and query parameters (including version tag).
+ * Should not be used for any authenticated route.
+ * @param expirationTime - how long to cache the response body
+ * @param isPublic - whether to mark the response as public cacheable in the Cache-Control header
+ */
+export const memoizeResponseBody = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_TIME, isPublic = false }: IMemoizeResponseBodyByQueryParams = {}): IMemoizeController => {
     const cache = new ExpiringCache(Duration.fromDurationOrMilliseconds(expirationTime));
 
     const serializeQueryParams = (ctx: Koa.Context) => {
@@ -123,6 +130,25 @@ export const memoizeResponseBodyByQueryParams = ({ expirationTime = DEFAULT_CACH
 	};
 
     return middleware as IMemoizeController;
+}
+
+interface IMemoizeResponseBodyWithResetOnMenuUpdateParams extends IMemoizeResponseBodyByQueryParams {
+	cafeId?: string;
+	dateString?: string;
+}
+
+export const memoizeResponseBodyWithResetOnMenuUpdate = ({ cafeId, dateString, ...params }: IMemoizeResponseBodyWithResetOnMenuUpdateParams = {}) => {
+	const controller = memoizeResponseBody(params);
+
+	CACHE_EVENTS.on('menuPublished', (event) => {
+		if ((cafeId && event.cafe.id !== cafeId) || (dateString && event.dateString !== dateString)) {
+			return;
+		}
+
+		controller.clearCache();
+	});
+
+	return controller;
 }
 
 export const assignCacheControlMiddleware = (maxAge: DurationOrMilliseconds = DEFAULT_CACHE_EXPIRATION_TIME, isPublic: boolean = false) => {

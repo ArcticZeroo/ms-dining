@@ -19,7 +19,7 @@ import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { CAFES_BY_ID } from '../../../constants/cafes.js';
-import { memoizeResponseBodyByQueryParams } from '../../../middleware/cache.js';
+import { memoizeResponseBody } from '../../../middleware/cache.js';
 import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
@@ -137,7 +137,7 @@ export const registerOrderingRoutes = (parent: Router) => {
     });
 
     router.get('/wait/:cafeId',
-        memoizeResponseBodyByQueryParams({ expirationTime: new Duration({ minutes: 5 }), isPublic: true }),
+        memoizeResponseBody({ expirationTime: new Duration({ minutes: 5 }), isPublic: true }),
         async ctx => {
             const cafeId = ctx.params.cafeId;
 
