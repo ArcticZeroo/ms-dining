@@ -94,7 +94,7 @@ const GET_SEARCH_ENTITY_STATEMENT = createPreparedStatementFactory(`
 const SEARCH_QUERIES_STATEMENT = createPreparedStatementFactory(`
 	SELECT DISTINCT(query)
 	FROM query_vec
-	WHERE embedding MATCH ? AND QUERY != ? AND k = ?
+	WHERE embedding MATCH ? AND LOWER(QUERY) != ? AND k = ?
 	ORDER BY distance
 `);
 
@@ -183,7 +183,7 @@ export const getSearchEntityEmbedding = (entityType: SearchEntityType, id: strin
 
 export const searchForSimilarQueries = async (queryEmbedding: Float32Array, query: string, limit: number) => {
 	// random dupes seem to appear, and I can't figure out why, so we just double the limit and slice later
-	const results = SEARCH_QUERIES_STATEMENT().all(queryEmbedding, query, limit * 2);
+	const results = SEARCH_QUERIES_STATEMENT().all(queryEmbedding, query.toLowerCase(), limit * 2);
 
 	if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
 		throw new Error('Invalid search results');
