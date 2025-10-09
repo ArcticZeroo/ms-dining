@@ -11,3 +11,8 @@ export const parseNumber = (value: string | null | undefined, defaultValue: numb
 
     return parsed;
 }
+
+export const truncateFloat = (value: number, decimalPlaces: number) => {
+	const factor = Math.pow(10, decimalPlaces);
+	return Math.trunc(value * factor) / factor;
+}

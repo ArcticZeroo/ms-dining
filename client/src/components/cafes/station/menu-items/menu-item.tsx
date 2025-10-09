@@ -19,6 +19,7 @@ import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
 import { pluralize } from '../../../../util/string.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { truncateFloat } from '@msdining/common/dist/util/number-util.js';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -161,7 +162,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             {
                 showReviews && menuItem.totalReviewCount > 0 && (
                     <span>
-                        {menuItem.overallRating / 2} ⭐ ({menuItem.totalReviewCount} {pluralize('review', menuItem.totalReviewCount)})
+                        {truncateFloat(menuItem.overallRating / 2, 2)} ⭐ ({menuItem.totalReviewCount} {pluralize('review', menuItem.totalReviewCount)})
                     </span>
                 )
             }
