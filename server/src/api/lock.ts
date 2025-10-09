@@ -37,7 +37,7 @@ export class Lock {
 	}
 }
 
-export class LockMap {
+export class MultiLock {
 	readonly #locksById = new Map<string, Lock>();
 
 	async acquire<T = void>(id: string, work: () => MaybePromise<T>): Promise<T> {

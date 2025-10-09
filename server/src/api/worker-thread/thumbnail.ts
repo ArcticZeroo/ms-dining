@@ -7,10 +7,10 @@ import { IImageMetadata, retrieveImageMetadataAsync } from '../../util/image.js'
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem } from '../cafe/image/thumbnail.js';
-import { LockMap } from '../lock.js';
+import { MultiLock } from '../lock.js';
 
 const thumbnailDataByMenuItemId = new Map<string, IImageMetadata>();
-const THUMBNAIL_SEMAPHORE_BY_ID = new LockMap();
+const THUMBNAIL_SEMAPHORE_BY_ID = new MultiLock();
 
 const loadExistingThumbnailsOnBoot = async () => {
 	console.time('thumbnail loading on boot');
