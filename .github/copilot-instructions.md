@@ -7,6 +7,8 @@ The project is made up of three packages:
 - Client: the react frontend
 - Server: the Koa backend, with a Prisma database.
 
+IMPORTANT: Before searching code always query memory. It will save you time. Make sure to ALWAYS ingest any new information you find out into memory as well.
+
 # Code Change Guidance
 
 Always make a checklist with your plan before making changes.
