@@ -30,7 +30,7 @@ export const knownTags: Record<string, ITagData> = {
         icon: '🌎',
         color: EMISSIONS_TAG_COLOR
     },
-    'med_circle': {
+    'medium_circle': {
         name: 'Medium Emissions',
         icon: '🌎',
         color: EMISSIONS_TAG_COLOR
