@@ -4,6 +4,14 @@ export enum SearchEntityType {
     cafe = 'cafe',
 }
 
+export const searchEntityTypeFromString = (rawString: string): SearchEntityType => {
+	const result = SearchEntityType[rawString as keyof typeof SearchEntityType];
+	if (!result) {
+		throw new Error(`Invalid SearchEntityType string: ${rawString}`);
+	}
+	return result;
+}
+
 export const SEARCH_ENTITY_TYPE_NAME_TO_ENUM: { [K in SearchEntityType]: K } = {
     menuItem: SearchEntityType.menuItem,
     station:  SearchEntityType.station,

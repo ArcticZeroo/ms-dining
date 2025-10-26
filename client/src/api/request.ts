@@ -67,7 +67,7 @@ export const makeJsonRequestWithSchema = async <T extends ZodType>({
     path,
     options,
     schema
-}) => {
+}: IMakeJsonRequestWithSchemaParams<T>) => {
     const json = await makeJsonRequest<unknown>({ path, options });
     return schema.parse(json);
 }

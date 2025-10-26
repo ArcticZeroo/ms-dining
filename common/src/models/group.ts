@@ -5,6 +5,8 @@ export const GroupMemberSchema = z.object({
     name: z.string(),
     id: z.string(),
     type: z.enum(SearchEntityType),
+	imageUrl: z.string().optional(),
+	metadata: z.string().optional()
 });
 
 export type IGroupMember = z.infer<typeof GroupMemberSchema>;
