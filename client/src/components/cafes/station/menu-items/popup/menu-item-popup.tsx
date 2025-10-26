@@ -1,5 +1,5 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { CartContext } from '../../../../../context/cart.ts';
 import { ICartItemWithMetadata } from '../../../../../models/cart.ts';

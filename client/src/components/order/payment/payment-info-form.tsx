@@ -1,4 +1,4 @@
-import { ICardData } from '@msdining/common/dist/models/cart';
+import { ICardData } from '@msdining/common/models/cart';
 import React, { useContext, useMemo, useState } from 'react';
 import { InternalSettings } from '../../../constants/settings.ts';
 import { CardNumberContext } from '../../../context/payment.ts';

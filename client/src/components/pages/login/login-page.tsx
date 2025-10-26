@@ -1,6 +1,6 @@
 import { usePageData } from '../../../hooks/location.ts';
 import { AuthProviderBadge } from '../../auth/auth-provider-badge.tsx';
-import { PROVIDER_GOOGLE, PROVIDER_MICROSOFT } from '@msdining/common/dist/models/auth';
+import { PROVIDER_GOOGLE, PROVIDER_MICROSOFT } from '@msdining/common/models/auth';
 import { useRequireLoginStatus } from '../../../hooks/auth.ts';
 
 import './login-page.css';

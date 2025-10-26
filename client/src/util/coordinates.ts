@@ -1,4 +1,4 @@
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { ILocationCoordinates } from '@msdining/common/models/util';
 import { getPercentileIndex } from "./stats.ts";
 
 const EARTH_RADIUS_KM = 6371.137;

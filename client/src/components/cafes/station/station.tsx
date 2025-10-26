@@ -1,5 +1,5 @@
-import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { ApplicationSettings } from '../../../constants/settings.ts';

@@ -1,4 +1,4 @@
-import { IDiningCoreResponse } from '@msdining/common/dist/models/http.ts';
+import { IDiningCoreResponse } from '@msdining/common/models/http.ts';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DiningClient } from '../api/dining.ts';
 import { StaticContextProviders } from './context/static-context-providers.tsx';

@@ -1,5 +1,5 @@
-import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/dist/constants/versions';
-import { ERROR_BODIES } from '@msdining/common/dist/responses';
+import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
+import { ERROR_BODIES } from '@msdining/common/responses';
 
 import { getVisitorId } from '../constants/settings.ts';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';

@@ -1,6 +1,6 @@
-import { IDiningCoreGroup, IDiningCoreGroupMember, } from '@msdining/common/dist/models/http';
-import { IMenuItem, IStationUniquenessData } from '@msdining/common/dist/models/cafe';
-import { Nullable } from '@msdining/common/dist/models/util';
+import { IDiningCoreGroup, IDiningCoreGroupMember, } from '@msdining/common/models/http';
+import { IMenuItem, IStationUniquenessData } from '@msdining/common/models/cafe';
+import { Nullable } from '@msdining/common/models/util';
 
 export type ICafeGroup = IDiningCoreGroup;
 export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };

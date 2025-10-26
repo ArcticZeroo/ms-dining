@@ -1,4 +1,4 @@
-import { SUBMIT_ORDER_STAGES_IN_ORDER, SubmitOrderStage } from '@msdining/common/dist/models/cart';
+import { SUBMIT_ORDER_STAGES_IN_ORDER, SubmitOrderStage } from '@msdining/common/models/cart';
 import React from 'react';
 
 const LAST_COMPLETED_STAGE_NICE_TEXT = {

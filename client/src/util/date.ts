@@ -1,4 +1,4 @@
-import { nativeDayOfWeekNames } from '@msdining/common/dist/util/date-util';
+import { nativeDayOfWeekNames } from '@msdining/common/util/date-util';
 
 export const getDateDisplay = (date: Date) => date.toLocaleDateString(undefined, {
     weekday: 'long',

@@ -8,7 +8,8 @@ export abstract class StationStorageClient {
 		const dataWithoutId: Omit<Station, 'id'> = {
 			name:    station.name,
 			menuId:  station.menuId,
-			logoUrl: station.logoUrl || null
+			logoUrl: station.logoUrl || null,
+			groupId: null
 		};
 
 		const data: Station = {

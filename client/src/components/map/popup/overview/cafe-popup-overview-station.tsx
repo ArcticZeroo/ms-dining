@@ -1,5 +1,5 @@
-import { ICafeOverviewStation } from '@msdining/common/dist/models/cafe';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { ICafeOverviewStation } from '@msdining/common/models/cafe';
+import { SearchEntityType } from '@msdining/common/models/search';
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPopupViewContext } from '../../../../context/map.ts';
@@ -8,7 +8,7 @@ import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
 import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 const getStationTitle = ({ uniqueness: { isTraveling, daysThisWeek, recentlyAvailableItemCount, itemDays } }: ICafeOverviewStation, didOpenRecently: boolean) => {
     if (didOpenRecently) {

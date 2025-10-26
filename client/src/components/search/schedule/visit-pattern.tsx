@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
-import { calculatePattern, IPatternData } from '@msdining/common/dist/util/pattern-util';
+import { calculatePattern, IPatternData } from '@msdining/common/util/pattern-util';
 import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { pluralizeWithCount } from '../../../util/string.ts';
-import { nativeDayOfWeekNames } from '@msdining/common/dist/util/date-util';
+import { nativeDayOfWeekNames } from '@msdining/common/util/date-util';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';

@@ -1,8 +1,8 @@
 import { CafeView, ICafe } from '../models/cafe.ts';
 import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
-import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { IStationUniquenessData } from '@msdining/common/models/cafe';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getCafeNumber } from '@msdining/common/util/cafe-util';
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {

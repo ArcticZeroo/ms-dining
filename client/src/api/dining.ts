@@ -1,14 +1,14 @@
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { ICafeOverviewStation, IMenuItemBase, IMenuItem } from '@msdining/common/dist/models/cafe';
+import { ICafeOverviewStation, IMenuItemBase, IMenuItem } from '@msdining/common/models/cafe';
 import {
     ICreateReviewRequest,
     IDiningCoreResponse,
     ISearchResponseResult, IUpdateUserSettingsInput,
     IWaitTimeResponse,
     MenuResponse
-} from '@msdining/common/dist/models/http';
-import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/dist/models/search';
+} from '@msdining/common/models/http';
+import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/models/search';
 import { DebugSettings, InternalSettings } from '../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../models/search.ts';
@@ -16,9 +16,9 @@ import { ICancellationToken, pause } from '../util/async.ts';
 import { sortCafesInPriorityOrder } from '../util/sorting.ts';
 import { FavoritesCache } from './cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from './request.ts';
-import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
-import { IClientUser, IClientUserDTO } from '@msdining/common/dist/models/auth';
-import { IReview, IReviewDataForMenuItem } from '@msdining/common/dist/models/review';
+import { IEntityVisitData } from '@msdining/common/models/pattern';
+import { IClientUser, IClientUserDTO } from '@msdining/common/models/auth';
+import { IReview, IReviewDataForMenuItem } from '@msdining/common/models/review';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 

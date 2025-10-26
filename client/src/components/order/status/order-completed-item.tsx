@@ -2,7 +2,7 @@ import {
     IOrderCompletionData,
     SUBMIT_ORDER_STAGES_IN_ORDER,
     SubmitOrderStage
-} from '@msdining/common/dist/models/cart';
+} from '@msdining/common/models/cart';
 import React, { useMemo } from 'react';
 import { CafeView } from '../../../models/cafe.ts';
 import { classNames } from '../../../util/react.ts';

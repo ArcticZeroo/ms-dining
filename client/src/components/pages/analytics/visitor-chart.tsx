@@ -2,7 +2,7 @@ import { Bar } from 'react-chartjs-2';
 import React, { useCallback, useMemo } from 'react';
 import 'chart.js/auto';
 import 'chartjs-adapter-luxon';
-import { IHourlyVisitCount } from "@msdining/common/dist/models/analytics";
+import { IHourlyVisitCount } from "@msdining/common/models/analytics";
 
 interface ILineDataPoint {
     x: string;

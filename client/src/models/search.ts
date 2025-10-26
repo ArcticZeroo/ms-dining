@@ -1,5 +1,5 @@
 import { SearchTypes } from '@msdining/common';
-import { SearchMatchReason } from '@msdining/common/dist/models/search';
+import { SearchMatchReason } from '@msdining/common/models/search';
 
 export enum SearchResultsViewMode {
     horizontalScroll,

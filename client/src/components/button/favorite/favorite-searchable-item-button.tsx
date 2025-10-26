@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getTargetSettingForFavorite } from '../../../util/cafe.ts';
 import { FavoriteItemButton } from "./favorite-item-button.tsx";
 

@@ -1,4 +1,4 @@
-import { isSameDate } from '@msdining/common/dist/util/date-util';
+import { isSameDate } from '@msdining/common/util/date-util';
 import { useEffect, useMemo } from 'react';
 import { CafeDatePicker } from '../components/cafes/date/date-picker.tsx';
 import { ApplicationSettings } from '../constants/settings.ts';

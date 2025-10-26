@@ -1,6 +1,6 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { ISearchQuery } from '@msdining/common/dist/models/search';
-import { getFridayForWeek, getMondayForWeek, isDateInRangeInclusive } from '@msdining/common/dist/util/date-util';
+import { ISearchQuery } from '@msdining/common/models/search';
+import { getFridayForWeek, getMondayForWeek, isDateInRangeInclusive } from '@msdining/common/util/date-util';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../../../api/dining.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';

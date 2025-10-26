@@ -1,6 +1,6 @@
-import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
+import { ISearchQuery, SearchEntityType } from '@msdining/common/models/search';
 import { IQuerySearchResult } from '../../models/search.ts';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 export class FavoritesCache {
     // entity type -> normalized name -> entity

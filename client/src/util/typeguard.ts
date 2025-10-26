@@ -1,5 +1,5 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { ISerializedModifier } from '@msdining/common/dist/models/cart';
+import { ISerializedModifier } from '@msdining/common/models/cart';
 import { ISerializedCartItemWithName } from '../models/cart.ts';
 
 export const isDuckTypeSerializedModifier = (data: unknown): data is ISerializedModifier => {

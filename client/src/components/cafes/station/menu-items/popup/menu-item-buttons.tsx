@@ -1,6 +1,6 @@
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { FavoriteSearchableItemButton } from '../../../../button/favorite/favorite-searchable-item-button.tsx';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { SearchEntityType } from '@msdining/common/models/search';
 import React, { useContext, useState } from 'react';
 import { navigateToSearch } from '../../../../../util/search.ts';
 import { getParentView } from '../../../../../util/view.ts';

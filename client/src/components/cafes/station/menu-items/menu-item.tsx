@@ -1,6 +1,6 @@
-import { IMenuItemBase, IMenuItem } from '@msdining/common/dist/models/cafe';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { IMenuItemBase, IMenuItem } from '@msdining/common/models/cafe';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
@@ -18,7 +18,7 @@ import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
 import { pluralize } from '../../../../util/string.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { truncateFloat } from '@msdining/common/util/number-util';
 
 export interface IMenuItemProps {

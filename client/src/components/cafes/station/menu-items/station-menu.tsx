@@ -1,4 +1,4 @@
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import React from 'react';
 import { ICafeStation, MenuItemsByCategoryName } from '../../../../models/cafe.ts';
 import { StationTheme } from '../station-theme.tsx';

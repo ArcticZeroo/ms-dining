@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { CurrentCafeContext } from '../../../context/menu-item.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 interface IStationFirstVisitProps {
     firstVisit: string;

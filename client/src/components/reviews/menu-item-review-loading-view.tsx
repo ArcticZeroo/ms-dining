@@ -1,6 +1,6 @@
 import React from 'react';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { IReviewDataForMenuItem } from '@msdining/common/dist/models/review';
+import { IReviewDataForMenuItem } from '@msdining/common/models/review';
 import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
 import { RetryButton } from '../button/retry-button.tsx';
 import { MenuItemReviewDataView } from './menu-item-review-data-view.tsx';

@@ -3,7 +3,7 @@ import {
     getScenarioForCafeMenu,
     getScenarioForMenuOverview,
     SCENARIO_NAMES
-} from '@msdining/common/dist/constants/analytics';
+} from '@msdining/common/constants/analytics';
 
 export interface IScenario {
     label: string;

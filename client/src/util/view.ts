@@ -1,4 +1,4 @@
-import { ILocationCoordinates, Nullable } from '@msdining/common/dist/models/util';
+import { ILocationCoordinates, Nullable } from '@msdining/common/models/util';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { getCafeLocation, isViewAvailable } from './cafe.ts';
 

@@ -1,4 +1,4 @@
-import { ILocationCoordinates } from '@msdining/common/dist/models/util.ts';
+import { ILocationCoordinates } from '@msdining/common/models/util.ts';
 import { ValueNotifier } from '../../util/events.ts';
 import Duration from '@arcticzeroo/duration';
 import { ApplicationSettings } from '../../constants/settings.ts';

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { OrderingClient } from '../../api/order.ts';
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
-import { IPriceResponse } from '@msdining/common/dist/models/http';
+import { IPriceResponse } from '@msdining/common/models/http';
 
 export const OrderPriceInlineTable = () => {
     const cart = useValueNotifierContext(CartContext);

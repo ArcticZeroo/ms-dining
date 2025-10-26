@@ -1,6 +1,6 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
-import { ISerializedCartItem } from '@msdining/common/dist/models/cart';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { ISerializedCartItem } from '@msdining/common/models/cart';
 import { CartItemsByCafeId } from '../context/cart.ts';
 
 export interface ICartItemWithMetadata extends CafeTypes.ICartItem {

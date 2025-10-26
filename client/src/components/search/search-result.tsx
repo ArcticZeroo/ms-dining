@@ -1,6 +1,6 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search';
-import { isSameDate } from '@msdining/common/dist/util/date-util';
+import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
+import { isSameDate } from '@msdining/common/util/date-util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../constants/settings.ts';

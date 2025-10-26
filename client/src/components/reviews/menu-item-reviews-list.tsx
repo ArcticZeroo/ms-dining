@@ -1,4 +1,4 @@
-import { IReviewWithComment } from '@msdining/common/dist/models/review';
+import { IReviewWithComment } from '@msdining/common/models/review';
 import React from 'react';
 import { MenuItemReview } from './menu-item-review.tsx';
 

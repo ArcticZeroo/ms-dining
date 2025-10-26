@@ -12,7 +12,7 @@ import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);

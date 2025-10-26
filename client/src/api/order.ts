@@ -1,12 +1,12 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import {
     IOrderCompletionResponse,
     ISerializedCartItem,
     ISerializedModifier,
     ISubmitOrderItems
-} from '@msdining/common/dist/models/cart';
-import { IPriceResponse } from '@msdining/common/dist/models/http.ts';
+} from '@msdining/common/models/cart';
+import { IPriceResponse } from '@msdining/common/models/http.ts';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { isValidOrderCompletionResponse } from '../util/order.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';

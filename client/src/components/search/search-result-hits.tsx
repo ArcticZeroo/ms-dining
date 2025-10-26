@@ -9,8 +9,8 @@ import { ApplicationSettings } from '../../constants/settings.ts';
 import React, { useContext } from 'react';
 import { SelectedDateContext } from '../../context/time.ts';
 import { ApplicationContext } from '../../context/app.ts';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { isSameDate } from '@msdining/common/dist/util/date-util';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { isSameDate } from '@msdining/common/util/date-util';
 import { classNames } from '../../util/react.ts';
 import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
 

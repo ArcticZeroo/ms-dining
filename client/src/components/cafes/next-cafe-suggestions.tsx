@@ -1,4 +1,4 @@
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
+import { ILocationCoordinates } from '@msdining/common/models/util';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PassiveUserLocationNotifier } from '../../api/location/user-location.ts';

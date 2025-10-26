@@ -1,10 +1,10 @@
-import { ISearchResult, SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search';
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { ISearchResult, SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
+import { ILocationCoordinates } from '@msdining/common/models/util';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import {
     findLongestNonSequentialSubstringLength,
     findLongestSequentialSubstringLength
-} from '@msdining/common/dist/util/string-util';
+} from '@msdining/common/util/string-util';
 import { CafeView, CafeViewType } from '../models/cafe.ts';
 import { IQuerySearchResult } from '../models/search.ts';
 import { getCafeLocation } from './cafe.ts';

@@ -1,4 +1,4 @@
-import { IMenuItem } from '@msdining/common/dist/models/cafe';
+import { IMenuItem } from '@msdining/common/models/cafe';
 import React, { useMemo } from 'react';
 import { MenuItem } from './menu-item.tsx';
 

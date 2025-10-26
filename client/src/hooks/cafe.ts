@@ -1,6 +1,6 @@
-import { ISearchQuery, SearchEntityType } from '@msdining/common/dist/models/search';
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util';
+import { ISearchQuery, SearchEntityType } from '@msdining/common/models/search';
+import { ILocationCoordinates } from '@msdining/common/models/util';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { useCallback, useMemo } from 'react';
 import { StringSetSetting } from '../api/settings.ts';
 import { ApplicationSettings, DebugSettings } from '../constants/settings.ts';

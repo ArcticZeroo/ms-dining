@@ -1,4 +1,4 @@
-import { Nullable } from "@msdining/common/dist/models/util";
+import { Nullable } from "@msdining/common/models/util";
 
 export const queryForScrollAnchor = (id: string) => document.querySelector(`[href="#${id}"]`);
 

@@ -1,5 +1,5 @@
 import { ISearchResultProps, SearchResult } from './search-result.tsx';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { SearchEntityType } from '@msdining/common/models/search';
 import React from 'react';
 
 type SearchResultSkeletonProps = Omit<Partial<ISearchResultProps>, 'isSkeleton'>;

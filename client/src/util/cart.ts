@@ -1,5 +1,5 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { ICartItemWithMetadata } from '../models/cart.ts';
 

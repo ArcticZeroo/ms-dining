@@ -1,4 +1,4 @@
-import { getMinimumDateForMenu } from '@msdining/common/dist/util/date-util';
+import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
 import { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';

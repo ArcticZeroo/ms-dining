@@ -2,7 +2,7 @@ import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promi
 import { DiningClient } from '../../../../api/dining.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { MenuItemReview } from '../../../reviews/menu-item-review.tsx';
-import { toDateString } from '@msdining/common/dist/util/date-util';
+import { toDateString } from '@msdining/common/util/date-util';
 
 export const HomeRecentReviewsView = () => {
     const response = useImmediatePromiseState(DiningClient.getRecentReviews);

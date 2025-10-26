@@ -1,5 +1,5 @@
 import React from 'react';
-import { PROVIDER_GOOGLE, PROVIDER_MICROSOFT } from '@msdining/common/dist/models/auth';
+import { PROVIDER_GOOGLE, PROVIDER_MICROSOFT } from '@msdining/common/models/auth';
 
 interface IAuthProviderBadgeProps {
     provider: string;

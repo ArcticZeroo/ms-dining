@@ -3,7 +3,7 @@ import { DiningClient } from '../../../api/dining.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { MenuItemReview } from '../../reviews/menu-item-review.tsx';
-import { IReview } from '@msdining/common/dist/models/review';
+import { IReview } from '@msdining/common/models/review';
 import { useEffect, useMemo, useState } from 'react';
 import { ReviewStats } from '../../reviews/review-stats.tsx';
 

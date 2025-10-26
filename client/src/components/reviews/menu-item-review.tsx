@@ -1,4 +1,4 @@
-import { IReview } from '@msdining/common/dist/models/review';
+import { IReview } from '@msdining/common/models/review';
 import React, { useContext, useState } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
@@ -8,8 +8,8 @@ import { classNames } from '../../util/react.ts';
 import { Link } from 'react-router-dom';
 import { getSearchAnchorJumpUrl } from '../../util/link.ts';
 import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
-import { fromDateString } from '@msdining/common/dist/util/date-util';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { fromDateString } from '@msdining/common/util/date-util';
+import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeName } from '../../util/string.ts';
 import { Rating } from '@mui/material';
 import { DiningClient } from '../../api/dining.ts';

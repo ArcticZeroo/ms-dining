@@ -9,7 +9,7 @@ import { RetryButton } from '../../button/retry-button.tsx';
 import { ScenarioDropdown } from './scenario-dropdown.tsx';
 import { VolumeTypeButton } from './volume-type-button.tsx';
 import { HourglassLoadingSpinner } from "../../icon/hourglass-loading-spinner.tsx";
-import { SCENARIO_NAMES } from "@msdining/common/dist/constants/analytics";
+import { SCENARIO_NAMES } from "@msdining/common/constants/analytics";
 import { AnalyticsLoadingChart } from "./analytics-loading-chart.tsx";
 
 const TOTAL_REQUEST_VOLUME_IMPLEMENTED_DATE = new Date('2024-06-17');

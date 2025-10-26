@@ -2,8 +2,8 @@ import React, { useCallback, useState } from 'react';
 import { Rating } from '@mui/material';
 import { DiningClient } from '../../api/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/dist/models/http';
-import { fromDateString } from '@msdining/common/dist/util/date-util';
+import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
+import { fromDateString } from '@msdining/common/util/date-util';
 
 interface IPostReviewInputProps {
     menuItemId: string;

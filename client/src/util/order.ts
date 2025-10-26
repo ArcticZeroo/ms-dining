@@ -1,5 +1,5 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { IOrderCompletionData, IOrderCompletionResponse } from '@msdining/common/dist/models/cart';
+import { IOrderCompletionData, IOrderCompletionResponse } from '@msdining/common/models/cart';
 
 export const isValidOrderCompletionResponse = (expectedCafeIds: Set<string>, orderData: unknown): orderData is IOrderCompletionResponse => {
     if (!orderData || typeof orderData !== 'object') {

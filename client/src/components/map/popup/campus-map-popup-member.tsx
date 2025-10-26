@@ -9,7 +9,7 @@ import { getCafeName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
 import { CafePopupOverview } from './overview/cafe-popup-overview.tsx';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 interface ICampusMapPopupMember {
     cafe: ICafe;

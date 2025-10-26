@@ -7,7 +7,7 @@ import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { toLeafletLocation } from '../../../util/coordinates.ts';
 import { classNames } from '../../../util/react.ts';
 import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: boolean) => `
 <span class="${classNames('cafe-marker-tracker flex flex-center', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened')}" data-id="${view.value.id}">

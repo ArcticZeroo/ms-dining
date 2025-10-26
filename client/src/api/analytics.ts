@@ -1,4 +1,4 @@
-import { IHourlyVisitCount } from "@msdining/common/dist/models/analytics";
+import { IHourlyVisitCount } from "@msdining/common/models/analytics";
 
 export abstract class AnalyticsClient {
     public static async retrieveHourlyVisitCountAsync(days: number, scenario?: string): Promise<IHourlyVisitCount[]> {

@@ -1,10 +1,10 @@
 import React, { useCallback, useContext, useMemo } from 'react';
-import { SearchEntityType } from '@msdining/common/dist/models/search';
+import { SearchEntityType } from '@msdining/common/models/search';
 import { IRunnablePromiseState, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../../api/dining.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { IEntityVisitData } from '@msdining/common/dist/models/pattern';
+import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { VisitPattern } from './visit-pattern.tsx';
 import { ApplicationContext } from '../../../context/app.ts';
 import { CafeView } from '../../../models/cafe.ts';

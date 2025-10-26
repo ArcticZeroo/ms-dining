@@ -1,7 +1,7 @@
 import React from 'react';
-import { IPatternData } from '@msdining/common/dist/util/pattern-util';
+import { IPatternData } from '@msdining/common/util/pattern-util';
 import { getLargestDate } from '../../../util/date.ts';
-import { getSequentialDateGroups } from '@msdining/common/dist/util/date-util';
+import { getSequentialDateGroups } from '@msdining/common/util/date-util';
 import { pluralize } from '../../../util/string.ts';
 
 const getDateDisplay = (date: Date) => date.toLocaleDateString(undefined, {

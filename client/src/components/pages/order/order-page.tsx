@@ -1,5 +1,5 @@
 import { PromiseStage, useMaybeExistingPromiseState } from '@arcticzeroo/react-promise-hook';
-import { IOrderCompletionResponse } from '@msdining/common/dist/models/cart';
+import { IOrderCompletionResponse } from '@msdining/common/models/cart';
 import { useState } from 'react';
 import { OrderingClient } from '../../../api/order.ts';
 import { DebugSettings } from '../../../constants/settings.ts';

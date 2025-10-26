@@ -1,4 +1,4 @@
-import { IOrderCompletionResponse } from '@msdining/common/dist/models/cart';
+import { IOrderCompletionResponse } from '@msdining/common/models/cart';
 import React, { useContext } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { OrderCompletedItem } from './order-completed-item.tsx';

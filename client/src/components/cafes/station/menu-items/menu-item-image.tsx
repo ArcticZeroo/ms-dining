@@ -1,4 +1,4 @@
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import React, { useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { DiningClient } from '../../../../api/dining.ts';

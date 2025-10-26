@@ -1,6 +1,6 @@
-import { SearchEntityType } from '@msdining/common/dist/models/search';
-import { ILocationCoordinates } from '@msdining/common/dist/models/util';
-import { fromDateString, isDateBefore } from '@msdining/common/dist/util/date-util';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { ILocationCoordinates } from '@msdining/common/models/util';
+import { fromDateString, isDateBefore } from '@msdining/common/util/date-util';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { CafeView, CafeViewType, ICafe } from '../models/cafe.ts';
 import { stringWithSpaceIfExists } from './string.ts';

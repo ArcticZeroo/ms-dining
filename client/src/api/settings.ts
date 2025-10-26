@@ -1,7 +1,7 @@
 import { ValueNotifier } from '../util/events.ts';
 import { ISerializedCartItemsByCafeId } from '../models/cart.ts';
 import { isDuckTypeSerializedCartItem } from '../util/typeguard.ts';
-import { IUpdateUserSettingsInput } from '@msdining/common/dist/models/http';
+import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
 import { DiningClient } from './dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
