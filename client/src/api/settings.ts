@@ -2,7 +2,7 @@ import { ValueNotifier } from '../util/events.ts';
 import { ISerializedCartItemsByCafeId } from '../models/cart.ts';
 import { isDuckTypeSerializedCartItem } from '../util/typeguard.ts';
 import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
-import { DiningClient } from './dining.ts';
+import { DiningClient } from './client/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
 export const ARRAY_DELIMITER = ';';

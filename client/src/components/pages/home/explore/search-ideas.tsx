@@ -2,7 +2,7 @@ import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { randomSortInPlace } from '../../../../util/random.ts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { DiningClient } from '../../../../api/dining.ts';
+import { DiningClient } from '../../../../api/client/dining.ts';
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchResultsList } from '../../../search/search-results-list.tsx';
 import { SearchEntityFilterType, SearchResultsViewMode } from '../../../../models/search.ts';

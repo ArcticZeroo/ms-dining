@@ -1,6 +1,6 @@
 import { IDiningCoreResponse } from '@msdining/common/models/http.ts';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DiningClient } from '../api/dining.ts';
+import { DiningClient } from '../api/client/dining.ts';
 import { StaticContextProviders } from './context/static-context-providers.tsx';
 import { ApplicationContext } from '../context/app.ts';
 import { NavExpansionContext } from '../context/nav.ts';

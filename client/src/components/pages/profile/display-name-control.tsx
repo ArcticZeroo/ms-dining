@@ -1,7 +1,7 @@
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUser } from '@msdining/common/models/auth';
 import React, { useEffect, useState } from 'react';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../api/dining.ts';
+import { DiningClient } from '../../../api/client/dining.ts';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { classNames } from '../../../util/react.ts';
 import { normalizeDisplayName } from '@msdining/common/util/string-util';

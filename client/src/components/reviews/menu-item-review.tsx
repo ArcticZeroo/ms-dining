@@ -12,7 +12,7 @@ import { fromDateString } from '@msdining/common/util/date-util';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeName } from '../../util/string.ts';
 import { Rating } from '@mui/material';
-import { DiningClient } from '../../api/dining.ts';
+import { DiningClient } from '../../api/client/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
 interface IMenuItemReviewProps {

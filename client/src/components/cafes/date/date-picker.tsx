@@ -1,7 +1,7 @@
 import { SelectedDateContext } from '../../../context/time.ts';
 import React, { useContext, useMemo } from 'react';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { DiningClient } from '../../../api/dining.ts';
+import { DiningClient } from '../../../api/client/dining.ts';
 
 import { FutureMenuOutOfDateNotice } from '../../notice/future-menu-out-of-date-notice.tsx';
 import { DateUtil } from '@msdining/common';

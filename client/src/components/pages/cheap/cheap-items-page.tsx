@@ -1,6 +1,6 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { DiningClient } from '../../../api/dining.ts';
+import { DiningClient } from '../../../api/client/dining.ts';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { ICheapItemSearchResult } from '../../../models/search.ts';

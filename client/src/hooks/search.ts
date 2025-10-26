@@ -4,7 +4,7 @@ import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { isViewVisible } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
-import { DiningClient } from '../api/dining.js';
+import { DiningClient } from '../api/client/dining.js';
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 
 export const useAllowedSearchViewIds = () => {

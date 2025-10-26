@@ -1,7 +1,7 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { useCallback, useEffect, useMemo } from 'react';
-import { DiningClient } from '../../api/dining.ts';
+import { DiningClient } from '../../api/client/dining.ts';
 import { CartContext } from '../../context/cart.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
 

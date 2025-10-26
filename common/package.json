@@ -18,7 +18,8 @@
   "dependencies": {
     "@arcticzeroo/duration": "^2.0.2",
     "@arcticzeroo/typeguard": "^1.0.0",
-    "credit-card-type": "^10.0.0"
+    "credit-card-type": "^10.0.0",
+    "zod": "^4.1.12"
   },
   "exports": {
     "./package.json": "./package.json",

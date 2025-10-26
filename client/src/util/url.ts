@@ -1,5 +1,5 @@
 import { DateUtil } from "@msdining/common";
-import { DiningClient } from '../api/dining.ts';
+import { DiningClient } from '../api/client/dining.ts';
 
 export const addDateToUrl = (date: Date) => {
     const url = new URL(window.location.href);

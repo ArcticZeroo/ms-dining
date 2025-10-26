@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { DiningClient } from '../../api/dining.ts';
+import { DiningClient } from '../../api/client/dining.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { CartContext, CartHydrationContext, CartItemsByCafeId } from '../../context/cart.ts';
 import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';

@@ -1,5 +1,5 @@
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
-import { DiningClient } from '../api/dining.ts';
+import { DiningClient } from '../api/client/dining.ts';
 import { isSameSet } from './set.ts';
 import { IClientUser } from '@msdining/common/models/auth';
 

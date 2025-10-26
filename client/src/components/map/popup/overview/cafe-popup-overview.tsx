@@ -2,7 +2,7 @@ import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { ICafeOverviewStation } from '@msdining/common/models/cafe';
 import { getIsRecentlyAvailable, toDateString } from '@msdining/common/util/date-util';
 import React, { useCallback, useMemo } from 'react';
-import { DiningClient } from '../../../../api/dining.ts';
+import { DiningClient } from '../../../../api/client/dining.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';

@@ -1,7 +1,7 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchTypes } from '@msdining/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DiningClient } from '../../../api/dining.ts';
+import { DiningClient } from '../../../api/client/dining.ts';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';

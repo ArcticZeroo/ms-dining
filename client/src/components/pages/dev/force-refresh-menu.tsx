@@ -1,7 +1,7 @@
 import { classNames } from '../../../util/react.js';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.js';
-import { DiningClient } from '../../../api/dining.js';
+import { DiningClient } from '../../../api/client/dining.js';
 
 export const ForceRefreshMenu = () => {
     const refreshState = useDelayedPromiseState(DiningClient.forceRefreshCafes);

@@ -1,5 +1,5 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../api/dining.ts';
+import { DiningClient } from '../api/client/dining.ts';
 import { updateRoamingSettingsOnBoot } from '../util/settings.ts';
 import AppWithData from './app-with-data.tsx';
 import { RetryButton } from './button/retry-button.tsx';

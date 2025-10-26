@@ -1,5 +1,5 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../../api/dining.ts';
+import { DiningClient } from '../../../../api/client/dining.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { MenuItemReview } from '../../../reviews/menu-item-review.tsx';
 import { toDateString } from '@msdining/common/util/date-util';

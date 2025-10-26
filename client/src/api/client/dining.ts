@@ -9,13 +9,13 @@ import {
     MenuResponse
 } from '@msdining/common/models/http';
 import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/models/search';
-import { DebugSettings, InternalSettings } from '../constants/settings.ts';
-import { CafeMenu, CafeView, ICafe, ICafeStation } from '../models/cafe.ts';
-import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../models/search.ts';
-import { ICancellationToken, pause } from '../util/async.ts';
-import { sortCafesInPriorityOrder } from '../util/sorting.ts';
-import { FavoritesCache } from './cache/favorites.ts';
-import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from './request.ts';
+import { DebugSettings, InternalSettings } from '../../constants/settings.ts';
+import { CafeMenu, CafeView, ICafe, ICafeStation } from '../../models/cafe.ts';
+import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../../models/search.ts';
+import { ICancellationToken, pause } from '../../util/async.ts';
+import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
+import { FavoritesCache } from '../cache/favorites.ts';
+import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from '../request.ts';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/models/auth';
 import { IReview, IReviewDataForMenuItem } from '@msdining/common/models/review';

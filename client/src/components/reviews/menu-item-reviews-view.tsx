@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../api/dining.ts';
+import { DiningClient } from '../../api/client/dining.ts';
 import { MenuItemReviewsLoadingView } from './menu-item-review-loading-view.tsx';
 
 import './reviews.css';

@@ -1,6 +1,6 @@
 import { IDelayedPromiseState, PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import React, { useCallback, useContext, useEffect } from 'react';
-import { DiningClient } from '../../api/dining.ts';
+import { DiningClient } from '../../api/client/dining.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';

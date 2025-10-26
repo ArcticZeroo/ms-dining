@@ -1,5 +1,5 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../api/dining.ts';
+import { DiningClient } from '../../../api/client/dining.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { MenuItemReview } from '../../reviews/menu-item-review.tsx';

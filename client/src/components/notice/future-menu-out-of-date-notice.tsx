@@ -1,6 +1,6 @@
 import Duration from '@arcticzeroo/duration';
 import { useCallback, useEffect, useState } from 'react';
-import { DiningClient } from '../../api/dining.ts';
+import { DiningClient } from '../../api/client/dining.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
 import { classNames } from '../../util/react.ts';

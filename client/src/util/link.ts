@@ -1,7 +1,7 @@
 import { DateUtil } from '@msdining/common';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { DiningClient } from '../api/dining.ts';
+import { DiningClient } from '../api/client/dining.ts';
 import { CafeView } from '../models/cafe.ts';
 import { getParentView } from './view.ts';
 
