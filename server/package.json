@@ -13,7 +13,7 @@
     "@types/passport-microsoft": "^1.0.3",
     "cross-env": "^7.0.3",
     "prisma": "^6.0.0",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "undici": "^5.24.0"
   },
   "workspaces": [

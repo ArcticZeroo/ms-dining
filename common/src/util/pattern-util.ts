@@ -100,7 +100,7 @@ export const calculatePattern = (visitDateStrings: string[]): IPatternData => {
 	}
 
 	pattern.isEveryWeekday = getIsEveryWeekday(pattern);
-	pattern.nextExpectedVisit = calculateNextExpectedVisit(pattern);
+	pattern.nextExpectedVisit = calculateNextExpectedVisit(pattern) || undefined;
 
 	return pattern;
 }

@@ -17,6 +17,7 @@ import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIAB
 import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
 import { logDebug } from './util/log.js';
+import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 
 const app = new Koa();
 
@@ -42,6 +43,7 @@ app.use(passport.session());
 app.use(json());
 app.use(bodyParser());
 app.use(sendUniversalVisitMiddleware);
+app.use(treatZodErrorsAsBadRequest);
 
 registerRoutes(app);
 

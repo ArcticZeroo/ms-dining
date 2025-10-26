@@ -90,7 +90,7 @@ describe('DateUtil', () => {
 
             describe(`when starting on ${nativeDayOfWeekNames[now.getDay()]}`, () => {
                 for (const [weekday, expectedDays] of Object.entries(expectedTable[i])) {
-                    it(`should return ${expectedDays} for ${nativeDayOfWeekNames[weekday]}`, () => {
+                    it(`should return ${expectedDays} for ${nativeDayOfWeekNames[weekday as keyof typeof nativeDayOfWeekNames]}`, () => {
                         const result = getDaysUntilNextWeekday(now, Number(weekday));
                         assert.equal(result, expectedDays);
                     });
@@ -179,7 +179,7 @@ describe('DateUtil', () => {
 
             describe(`when starting on ${nativeDayOfWeekNames[now.getDay()]}`, () => {
                 for (const [weekday, expectedDays] of Object.entries(expectedTable[i])) {
-                    it(`should return ${expectedDays} for ${nativeDayOfWeekNames[weekday]}`, () => {
+                    it(`should return ${expectedDays} for ${nativeDayOfWeekNames[weekday as keyof typeof nativeDayOfWeekNames]}`, () => {
                         const result = getDaysSinceLastWeekday(now, Number(weekday));
                         assert.equal(result, expectedDays);
                     });

@@ -37,7 +37,9 @@ const menuItemToGroupMember = (menuItem: IMenuItemBase): IGroupMember => ({
 	name:     menuItem.name,
 	type:     SearchEntityType.menuItem,
 	imageUrl: menuItem.imageUrl || undefined,
-	metadata: `Cafe: ${menuItem.cafeId}`
+	metadata: {
+		cafe: menuItem.cafeId
+	}
 });
 
 const stationToGroupMember = (station: Station): IGroupMember => ({
@@ -139,28 +141,28 @@ export abstract class GroupStorageClient {
 		return Array.from(results.values()).flatMap(map => Array.from(map.entries()));
 	}
 
-	static async #getMenuItemCandidatesForGroup(group: CrossCafeGroup): Promise<Array<IGroupMember>> {
+	static async #getMenuItemCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
 		const results = await usePrismaClient(async prisma => {
-			return prisma.$queryRawTyped(getMenuItemGroupCandidatesForGroup(group.id));
+			return prisma.$queryRawTyped(getMenuItemGroupCandidatesForGroup(groupId));
 		});
 
 		return extractMenuItemsAsync(results);
 	}
 
-	static async #getStationCandidatesForGroup(group: CrossCafeGroup): Promise<Array<IGroupMember>> {
+	static async #getStationCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
 		const results = await usePrismaClient(async prisma => {
-			return prisma.$queryRawTyped(getStationGroupCandidatesForGroup(group.id));
+			return prisma.$queryRawTyped(getStationGroupCandidatesForGroup(groupId));
 		});
 
 		return extractStationsAsync(results);
 	}
 
-	public static async getCandidatesForGroup(group: CrossCafeGroup): Promise<Array<IGroupMember>> {
+	public static async getCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
 		const candidates: Array<IGroupMember> = [];
 
 		const [menuItemCandidates, stationCandidates] = await Promise.all([
-			this.#getMenuItemCandidatesForGroup(group),
-			this.#getStationCandidatesForGroup(group)
+			this.#getMenuItemCandidatesForGroup(groupId),
+			this.#getStationCandidatesForGroup(groupId)
 		]);
 
 		candidates.push(
