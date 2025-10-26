@@ -24,7 +24,7 @@ export const DevPage = () => {
                 Dev Settings
             </div>
             <div className="flex">
-                <div className="tab-selector flex flex-col">
+                <div className="tab-selector flex-col flex-start">
                     {
                         tabNames.map(tabName => (
                             <button

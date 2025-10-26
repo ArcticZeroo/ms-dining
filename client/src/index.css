@@ -443,6 +443,10 @@ html, body, #root, .App {
     justify-content: center;
 }
 
+.flex-start {
+    justify-content: flex-start;
+}
+
 .flex-center {
     align-items: center;
     justify-content: center;
