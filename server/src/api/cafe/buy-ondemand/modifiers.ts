@@ -1,6 +1,6 @@
 import { ICafeMenuItemDetailsResponse } from '../../../models/buyondemand/responses.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { IMenuItemModifier, ModifierChoices, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemModifier, ModifierChoices, ModifierChoiceType } from '@msdining/common/models/cafe';
 import { BuyOnDemandClient } from './buy-ondemand-client.js';
 
 const mapModifierChoiceType = (jsonChoiceType: string): ModifierChoiceType => {

@@ -1,4 +1,4 @@
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import OpenAI from 'openai';
 import { getOpenAiKey } from '../constants/env.js';
 import { ICafeStation, ICafe, CafeGroup } from '../models/cafe.js';

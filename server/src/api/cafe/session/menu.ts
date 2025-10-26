@@ -11,7 +11,7 @@ import { retrieveStationListAsync } from '../buy-ondemand/stations.js';
 import { retrieveTagDefinitionsAsync } from '../buy-ondemand/tags.js';
 import { retrieveMenuItemsAsync } from '../buy-ondemand/menu-items.js';
 import { retrieveModifiersForMenuItemAsync } from '../buy-ondemand/modifiers.js';
-import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemModifier } from '@msdining/common/models/cafe';
 
 const tagLock = new Lock();
 

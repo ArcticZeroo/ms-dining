@@ -1,14 +1,14 @@
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { IEntityVisitData } from '@msdining/common/dist/models/pattern.js';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
-import { calculatePattern, IPatternData } from '@msdining/common/dist/util/pattern-util.js';
+import { calculatePattern, IPatternData } from '@msdining/common/util/pattern-util';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../models/storage-events.js';
 import { StationStorageClient } from '../storage/clients/station.js';
 import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { logError } from '../../util/log.js';
 
 // todo: consider making a form of LockedMap which has nonexclusive and exclusive reads so that we don't need the invalidation promise

@@ -1,5 +1,5 @@
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { md5 } from '../../../util/hash.js';
 import { logError } from '../../../util/log.js';
 import { localeCompareSortAsc } from '../../../util/sort.js';

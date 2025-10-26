@@ -2,7 +2,7 @@ import Duration from '@arcticzeroo/duration';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import Router, { RouterContext } from '@koa/router';
 import { DateUtil } from '@msdining/common';
-import { IMenuItemModifier } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemModifier } from '@msdining/common/models/cafe';
 import {
     ICardData,
     ICartItem,
@@ -10,8 +10,8 @@ import {
     ISubmitOrderItems,
     ISubmitOrderRequest,
     SubmitOrderStage
-} from '@msdining/common/dist/models/cart.js';
-import { toDateString } from '@msdining/common/dist/util/date-util.js';
+} from '@msdining/common/models/cart';
+import { toDateString } from '@msdining/common/util/date-util';
 import { phone } from 'phone';
 import { CafeOrderSession } from '../../../api/cafe/session/order.js';
 import { WaitTimeSession } from '../../../api/cafe/session/wait-time.js';

@@ -1,5 +1,5 @@
 import { usePrismaClient } from '../client.js';
-import { isSameDate, toDateString } from '@msdining/common/dist/util/date-util.js';
+import { isSameDate, toDateString } from '@msdining/common/util/date-util';
 import { Lock } from 'semaphore-async-await';
 import { IOrderingContext } from '../../../models/cart.js';
 import { Nullable } from '../../../models/util.js';

@@ -1,5 +1,5 @@
 import { LockedMap } from '../../util/map.js';
-import { IMenuItemBase, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { CACHE_EVENTS } from '../storage/events.js';
 import {
 	fromDateString,
@@ -8,11 +8,11 @@ import {
 	isDateOnWeekend,
 	toDateString,
 	yieldDaysInRange
-} from '@msdining/common/dist/util/date-util.js';
+} from '@msdining/common/util/date-util';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../models/storage-events.js';
 import { logError } from '../../util/log.js';
 import { ICafeStation } from '../../models/cafe.js';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getDefaultUniquenessDataForStation } from '../../util/cafe.js';
 import { StationThemeClient } from '../storage/clients/station-theme.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';

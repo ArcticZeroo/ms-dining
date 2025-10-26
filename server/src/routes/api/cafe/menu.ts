@@ -1,10 +1,10 @@
 import Router from '@koa/router';
-import { ICafeOverviewStation, IMenuItemDTO, IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
+import { ICafeOverviewStation, IMenuItemDTO, IStationUniquenessData } from '@msdining/common/models/cafe';
 import {
 	ICreateReviewRequest,
 	MenuResponse,
 	REVIEW_MAX_COMMENT_LENGTH_CHARS
-} from '@msdining/common/dist/models/http.js';
+} from '@msdining/common/models/http';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBody, memoizeResponseBodyWithResetOnMenuUpdate } from '../../../middleware/cache.js';
@@ -17,17 +17,17 @@ import {
 	ANALYTICS_APPLICATION_NAMES,
 	getApplicationNameForCafeMenu,
 	getApplicationNameForMenuOverview,
-} from '@msdining/common/dist/constants/analytics.js';
+} from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { ReviewStorageClient } from '../../../api/storage/clients/review.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { Review } from '@prisma/client';
-import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/dist/models/review.js';
-import { toDateString } from '@msdining/common/dist/util/date-util.js';
+import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/models/review';
+import { toDateString } from '@msdining/common/util/date-util';
 import Duration from '@arcticzeroo/duration';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { retrieveDailyCafeMenuAsync } from '../../../api/cache/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../api/cache/daily-uniqueness.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interface/thumbnail.js';

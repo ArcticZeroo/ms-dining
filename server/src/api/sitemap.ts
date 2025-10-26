@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { logError } from '../util/log.js';
 import { SearchQueryClient } from './storage/clients/search-query.js';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 const addMenu = (sitemap: SitemapStream, site: CafeGroup | ICafe) => {
     sitemap.write({ url: `/menu/${site.id}`, changefreq: 'daily', priority: 0.9 });

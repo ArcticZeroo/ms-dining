@@ -1,10 +1,10 @@
-import { IStationUniquenessData } from '@msdining/common/dist/models/cafe.js';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { IStationUniquenessData } from '@msdining/common/models/cafe';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { betterLogosByNormalizedName } from '../constants/better-logos.js';
 import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
 import { ICafe, ICafeConfig, IMenuItemBase } from '../models/cafe.js';
 import { Nullable } from '../models/util.js';
-import { toDateString } from '@msdining/common/dist/util/date-util.js';
+import { toDateString } from '@msdining/common/util/date-util';
 
 export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
 	if (!config?.logoName) {

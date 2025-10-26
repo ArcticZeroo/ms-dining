@@ -1,6 +1,6 @@
 import Duration from '@arcticzeroo/duration';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { SearchEntityType } from '@msdining/common/models/search';
 import { embedMenuItem, embedStation, embedCafe, isEmbeddedEntity } from '../../api/storage/vector/client.js';
 import { ICafeStation, ICafe } from '../../models/cafe.js';
 import { Nullable } from '../../models/util.js';

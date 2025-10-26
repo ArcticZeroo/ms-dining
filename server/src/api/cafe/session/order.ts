@@ -1,4 +1,4 @@
-import { ICardData, ICartItem, SubmitOrderStage } from '@msdining/common/dist/models/cart.js';
+import { ICardData, ICartItem, SubmitOrderStage } from '@msdining/common/models/cart';
 import { getPaymentProcessorTimezoneOffset } from '../../../util/date.js';
 import { logDebug, logError } from '../../../util/log.js';
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';

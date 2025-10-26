@@ -4,7 +4,7 @@ import {
 	DB_ID_TO_SEARCH_ENTITY_TYPE,
 	SEARCH_ENTITY_TYPE_TO_DB_ID,
 	SearchEntityType
-} from '@msdining/common/dist/models/search.js';
+} from '@msdining/common/models/search';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../util/typeguard.js';
 

@@ -1,4 +1,4 @@
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
+import { SearchEntityType } from '@msdining/common/models/search';
 import * as db from '../storage/vector/db.js';
 import { WorkerThreadCommandHandler } from './commanding.js';
 

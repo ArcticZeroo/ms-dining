@@ -1,5 +1,5 @@
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
-import { ILocationCoordinates } from '@msdining/common/dist/models/util.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { ILocationCoordinates } from '@msdining/common/models/util';
 import { Nullable } from './util.js';
 
 interface ICafeBase {

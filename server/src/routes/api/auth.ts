@@ -1,7 +1,7 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
-import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUserDTO } from '@msdining/common/dist/models/auth.js';
-import { normalizeDisplayName } from '@msdining/common/dist/util/string-util.js';
+import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUserDTO } from '@msdining/common/models/auth';
+import { normalizeDisplayName } from '@msdining/common/util/string-util';
 import { Middleware } from 'koa';
 import passport from 'koa-passport';
 import { UserStorageClient } from '../../api/storage/clients/user.js';

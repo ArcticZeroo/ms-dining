@@ -1,7 +1,7 @@
 import Router from '@koa/router';
-import { VERSION_TAG } from '@msdining/common/dist/constants/versions.js';
-import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/dist/models/http.js';
-import { getMinimumDateForMenu, toMaybeDateString } from '@msdining/common/dist/util/date-util.js';
+import { VERSION_TAG } from '@msdining/common/constants/versions';
+import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/models/http';
+import { getMinimumDateForMenu, toMaybeDateString } from '@msdining/common/util/date-util';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';

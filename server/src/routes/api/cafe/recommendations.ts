@@ -7,8 +7,8 @@ import {
 	serializeSearchResults
 } from '../../../util/koa.js';
 import { SearchManager } from '../../../api/storage/search.js';
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { fromMaybeDateString } from '@msdining/common/dist/util/date-util.js';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { fromMaybeDateString } from '@msdining/common/util/date-util';
 import { IServerSearchResult } from '../../../models/search.js';
 import { getSimilarQueries } from '../../../api/storage/vector/client.js';
 import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';

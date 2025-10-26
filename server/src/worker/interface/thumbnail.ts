@@ -1,7 +1,7 @@
 import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
 import { logError } from '../../util/log.js';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 
 const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnailExistenceData> => {
 	try {

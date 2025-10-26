@@ -3,7 +3,7 @@ import { expandAndFlattenView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { IStationUniquenessData } from '@msdining/common/dist/models/cafe';
 import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
-import { getCafeNumber } from '@msdining/common/dist/util/cafe-util.js';
+import { getCafeNumber } from '@msdining/common/util/cafe-util';
 
 export const compareNormalizedCafeIds = (normalizedA: string, normalizedB: string) => {
     // Normally I don't like parseInt, but for once

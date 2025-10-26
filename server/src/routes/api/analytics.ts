@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import { attachRouter } from '../../util/koa.js';
 import { RouteBuilder } from '../../models/koa.js';
 import { getVisitsAsync } from '../../api/tracking/visitors.js';
-import { ANALYTICS_APPLICATION_NAMES, getApplicationNameForScenario } from '@msdining/common/dist/constants/analytics.js';
+import { ANALYTICS_APPLICATION_NAMES, getApplicationNameForScenario } from '@msdining/common/constants/analytics';
 
 export const registerAnalyticsRoutes: RouteBuilder = (parent) => {
     const router = new Router({

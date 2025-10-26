@@ -1,12 +1,12 @@
 import { DateUtil } from '@msdining/common';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { isDateValid } from '../../../util/date.js';
 import { logDebug, logError } from '../../../util/log.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
-import { IEntityVisitData } from '@msdining/common/dist/models/pattern.js';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IMenuPublishEvent } from '../../../models/storage-events.js';
 import { STORAGE_EVENTS } from '../events.js';
 import Duration from '@arcticzeroo/duration';

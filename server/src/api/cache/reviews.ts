@@ -1,4 +1,4 @@
-import { IMenuItemReviewHeader } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../../util/map.js';

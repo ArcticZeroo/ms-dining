@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 import Koa, { Middleware } from 'koa';
-import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/dist/constants/versions.js';
+import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
 import { IServerSearchResult } from '../models/search.js';
-import { ISearchResponseResult } from '@msdining/common/dist/models/http.js';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/dist/models/search.js';
+import { ISearchResponseResult } from '@msdining/common/models/http';
+import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
 import { getStationLogoUrl } from './cafe.js';
 import { jsonStringifyWithoutNull } from './serde.js';
 import { getDevKey } from '../constants/env.js';

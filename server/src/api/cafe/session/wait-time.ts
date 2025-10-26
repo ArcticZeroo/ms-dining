@@ -1,7 +1,7 @@
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { IBuyOnDemandWaitTimeResponse, IBuyOnDemandWaitTimeSection } from '../../../models/buyondemand/cart.js';
-import { IWaitTimeResponse } from '@msdining/common/dist/models/http.js';
+import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ICafe } from '../../../models/cafe.js';
 
 const isDuckTypeWaitTimeSection = (data: unknown): data is IBuyOnDemandWaitTimeSection => isDuckType<IBuyOnDemandWaitTimeSection>(data, { minutes: 'number' });

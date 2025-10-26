@@ -14,7 +14,7 @@ import { ApplicationSettings } from '../constants/settings.ts';
 import { classNames } from '../util/react.ts';
 import { UserContext } from '../context/auth.ts';
 import { ValueNotifier } from '../util/events.ts';
-import { IClientUser } from '@msdining/common/dist/models/auth.js';
+import { IClientUser } from '@msdining/common/models/auth';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);

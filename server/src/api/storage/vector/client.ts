@@ -1,8 +1,8 @@
 import { SEARCH_THREAD_HANDLER } from '../../worker-thread/search.js';
 import { retrieveEmbeddings, retrieveMenuItemEmbeddings, retrieveStationEmbeddings, retrieveCafeEmbeddings } from '../../openai.js';
 import { IVectorSearchResult } from '../../../models/vector.js';
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
-import { SearchEntityType } from '@msdining/common/dist/models/search.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { SearchEntityType } from '@msdining/common/models/search';
 import { ICafeStation, ICafe } from '../../../models/cafe.js';
 import { CAFE_GROUP_LIST } from '../../../constants/cafes.js';
 import { Lock } from '../../lock.js';

@@ -1,12 +1,12 @@
-import { IMenuItemBase } from '@msdining/common/dist/models/cafe.js';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
 import {
 	DB_ID_TO_SEARCH_ENTITY_TYPE,
 	ISearchQuery,
 	SearchEntityType,
 	SearchMatchReason
-} from '@msdining/common/dist/models/search.js';
-import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
-import { getCafeNumber } from '@msdining/common/dist/util/cafe-util.js';
+} from '@msdining/common/models/search';
+import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { getCafeNumber } from '@msdining/common/util/cafe-util';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
 import { Nullable } from '../../models/util.js';
 import { getLogoUrl, getStationLogoUrl, getThumbnailUrl } from '../../util/cafe.js';
@@ -21,7 +21,7 @@ import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../constants/cafes.j
 import { MaybePromise } from '../../models/async.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../worker/interface/thumbnail.js';
 import { CafeGroup, ICafe } from '../../models/cafe.js';
-import { IDiningCoreGroup } from '@msdining/common/dist/models/http.js';
+import { IDiningCoreGroup } from '@msdining/common/models/http';
 
 // Items that are indeed cheap, but are not food/entree options
 const CHEAP_ITEM_IGNORE_TERMS = [

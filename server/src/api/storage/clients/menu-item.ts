@@ -1,5 +1,5 @@
-import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/dist/models/cafe.js';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/models/cafe';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import {
 	MenuItem,
 	MenuItemModifier,
@@ -13,7 +13,7 @@ import { logDebug, logInfo } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient } from '../client.js';
-import { getDateStringsForWeek } from '@msdining/common/dist/util/date-util.js';
+import { getDateStringsForWeek } from '@msdining/common/util/date-util';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
 

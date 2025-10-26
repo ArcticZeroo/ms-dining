@@ -1,6 +1,6 @@
 import { ICafe } from '../../models/cafe.js';
 import { isCafeAvailable } from '../../util/date.js';
-import { fromDateString } from '@msdining/common/dist/util/date-util.js';
+import { fromDateString } from '@msdining/common/util/date-util';
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 

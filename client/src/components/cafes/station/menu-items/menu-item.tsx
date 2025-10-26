@@ -19,7 +19,7 @@ import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
 import { pluralize } from '../../../../util/string.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/dist/util/date-util';
-import { truncateFloat } from '@msdining/common/dist/util/number-util.js';
+import { truncateFloat } from '@msdining/common/util/number-util';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;

@@ -1,4 +1,4 @@
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 export const betterLogosByNormalizedName = {
     [normalizeNameForSearch('Seoul Bowl')]: '/seoulbowl.webp'

@@ -22,7 +22,7 @@ import { getViewMenuUrl } from '../../util/link.ts';
 import { FavoriteCafeSearchResultButton } from '../button/favorite/favorite-cafe-search-result-button.tsx';
 import './search.css';
 import { getParentView } from '../../util/view.ts';
-import { normalizeCafeId } from '@msdining/common/dist/util/cafe-util.js';
+import { normalizeCafeId } from '@msdining/common/util/cafe-util';
 
 interface IEntityDisplayData {
     className: string;

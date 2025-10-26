@@ -1,9 +1,9 @@
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
 import { DateUtil, NumberUtil } from '@msdining/common';
-import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/dist/constants/analytics.js';
-import { VERSION_TAG } from '@msdining/common/dist/constants/versions.js';
-import { ISearchQuery } from '@msdining/common/dist/models/search.js';
+import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
+import { VERSION_TAG } from '@msdining/common/constants/versions';
+import { ISearchQuery } from '@msdining/common/models/search';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { memoizeResponseBody } from '../../../middleware/cache.js';

@@ -1,7 +1,7 @@
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { DiningClient } from '../api/dining.ts';
 import { isSameSet } from './set.ts';
-import { IClientUser } from '@msdining/common/dist/models/auth.js';
+import { IClientUser } from '@msdining/common/models/auth';
 
 export const updateRoamingSettingsOnBoot = (user: IClientUser) => {
     if (user == null) {

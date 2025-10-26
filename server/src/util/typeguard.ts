@@ -1,7 +1,7 @@
-import { ISerializedCartItem, ISerializedModifier, ISubmitOrderItems } from '@msdining/common/dist/models/cart.js';
+import { ISerializedCartItem, ISerializedModifier, ISubmitOrderItems } from '@msdining/common/models/cart';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { IFetchEmbeddingQueryResult, IVectorSearchResult } from '../models/vector.js';
-import { IUpdateUserSettingsInput } from '@msdining/common/dist/models/http.js';
+import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
 
 export const isDuckTypeModifier = (data: unknown): data is ISerializedModifier => {
     if (!isDuckType<ISerializedModifier>(data, { modifierId: 'string', choiceIds: 'object' })) {

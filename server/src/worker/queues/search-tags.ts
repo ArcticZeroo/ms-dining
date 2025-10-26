@@ -1,5 +1,5 @@
 import Duration from '@arcticzeroo/duration';
-import { normalizeNameForSearch } from '@msdining/common/dist/util/search-util.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { retrieveMenuItemSearchTagsFromAiWithRetries } from '../../api/openai.js';
 import { MenuItemStorageClient } from '../../api/storage/clients/menu-item.js';
 import { Nullable } from '../../models/util.js';

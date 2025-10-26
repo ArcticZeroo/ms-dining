@@ -1,4 +1,4 @@
-import { fromDateString } from '@msdining/common/dist/util/date-util.js';
+import { fromDateString } from '@msdining/common/util/date-util';
 import { CafeGroup, ICafe } from '../models/cafe.js';
 
 export const getBaseApiUrlWithoutTrailingSlash = ({ id }: ICafe) => `https://${id}.buy-ondemand.com/api`;
