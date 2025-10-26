@@ -1,0 +1,7 @@
+.member-toggle .member {
+    background: var(--color-error-light);
+}
+
+.member-toggle .member.active {
+    background: var(--color-theme-green);
+}

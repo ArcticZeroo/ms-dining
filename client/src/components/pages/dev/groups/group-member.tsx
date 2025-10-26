@@ -11,7 +11,7 @@ export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
     const displayData = entityDisplayDataByType[member.type];
 
     return (
-        <div className="card">
+        <>
             <span className={classNames(displayData.className, 'default-container flex flex-center')}>
                 <span className='material-symbols-outlined'>
                     {displayData.iconName}
@@ -36,6 +36,6 @@ export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
                     </>
                 )
             }
-        </div>
+        </>
     );
 }
