@@ -143,6 +143,8 @@ export const requireRole = (role: string): Middleware => {
 	}
 }
 
+export const requireAdmin = requireRole('admin');
+
 export const getEntityTypeAndName = (ctx: Koa.Context): [SearchEntityType, string] => {
 	const entityTypeRaw = getTrimmedQueryParam(ctx, 'type');
 	const entityName = getTrimmedQueryParam(ctx, 'name');

@@ -24,6 +24,18 @@ export const ProfileUserInfo = () => {
                     <AuthProviderBadge provider={user.provider}/>
                 </div>
             </div>
+            {
+                user.role !== 'user' && (
+                    <div className="card">
+                        <div className="title">
+                            Your Role
+                        </div>
+                        <div>
+                            {user.role}
+                        </div>
+                    </div>
+                )
+            }
             <div className="card">
                 <div className="title">
                     Display Name

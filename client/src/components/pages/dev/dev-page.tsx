@@ -2,10 +2,11 @@ import { useRequireRole } from '../../../hooks/auth.js';
 import { classNames } from '../../../util/react.js';
 import React, { useState } from 'react';
 import { ForceRefreshMenu } from './force-refresh-menu.js';
+import { GroupsView } from './groups/groups-view.js';
 
 const tabs = {
     'Refresh Menu': <ForceRefreshMenu/>,
-    'Groups': <div>todo</div>
+    'Groups': <GroupsView/>
 } satisfies Record<string, React.ReactNode>;
 
 type TabName = keyof typeof tabs;

@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { GroupStorageClient } from '../../../api/storage/clients/groups.js';
-import { attachRouter, requireRole } from '../../../util/koa.js';
+import { attachRouter, requireAdmin, requireRole } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
 	AddGroupMembersRequestSchema,
@@ -29,9 +29,17 @@ export const registerGroupsRoutes = (parent: Router) => {
 			ctx.body = jsonStringifyWithoutNull(groups);
 		});
 
+	// GET /api/dining/groups/candidates - Get suggested groups to create (zero context)
+	router.get('/candidates',
+		requireAdmin,
+		async ctx => {
+			const candidates = await GroupStorageClient.getGroupCandidatesZeroContext();
+			ctx.body = jsonStringifyWithoutNull(candidates);
+		});
+
 	// POST /api/dining/groups - Create a new group
 	router.post('/',
-		requireRole('dev'),
+		requireAdmin,
 		async ctx => {
 			const { name, entityType, initialMembers } = CreateGroupRequestSchema.parse(ctx.request.body);
 
@@ -46,7 +54,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 
 	// PATCH /api/dining/groups/:id - Rename a group
 	router.patch('/:id',
-		requireRole('dev'),
+		requireAdmin,
 		async ctx => {
 			const groupId = requireGroupIdParam(ctx);
 			const { name } = RenameGroupRequestSchema.parse(ctx.request.body);
@@ -56,7 +64,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 
 	// DELETE /api/dining/groups/:id - Delete a group
 	router.delete('/:id',
-		requireRole('dev'),
+		requireAdmin,
 		async ctx => {
 			const groupId = requireGroupIdParam(ctx);
 			await GroupStorageClient.deleteGroup(groupId);
@@ -65,7 +73,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 
 	// POST /api/dining/groups/:id/members - Add members to a group
 	router.post('/:id/members',
-		requireRole('dev'),
+		requireAdmin,
 		async ctx => {
 			const groupId = requireGroupIdParam(ctx);
 			const { memberIds } = AddGroupMembersRequestSchema.parse(ctx.request.body);
@@ -75,7 +83,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 
 	// GET /api/dining/groups/:id/candidates - Get candidate members for a group
 	router.get('/:id/candidates',
-		requireRole('dev'),
+		requireAdmin,
 		async ctx => {
 			const groupId = requireGroupIdParam(ctx);
 			const candidates = await GroupStorageClient.getCandidatesForGroup(groupId);

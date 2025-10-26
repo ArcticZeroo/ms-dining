@@ -23,26 +23,7 @@ import { FavoriteCafeSearchResultButton } from '../button/favorite/favorite-cafe
 import './search.css';
 import { getParentView } from '../../util/view.ts';
 import { normalizeCafeId } from '@msdining/common/util/cafe-util';
-
-interface IEntityDisplayData {
-    className: string;
-    iconName: string;
-}
-
-const entityDisplayDataByType: Record<SearchTypes.SearchEntityType, IEntityDisplayData> = {
-    [SearchTypes.SearchEntityType.menuItem]: {
-        className: 'entity-menu-item',
-        iconName:  'lunch_dining'
-    },
-    [SearchTypes.SearchEntityType.station]:  {
-        className: 'entity-station',
-        iconName:  'restaurant'
-    },
-    [SearchTypes.SearchEntityType.cafe]:     {
-        className: 'entity-cafe',
-        iconName:  'store'
-    }
-};
+import { entityDisplayDataByType } from '../../constants/search.js';
 
 const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
     const locationEntries = Array.from(locationDatesByCafeId.entries());

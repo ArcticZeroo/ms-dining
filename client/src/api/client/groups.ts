@@ -14,6 +14,7 @@ import { z } from 'zod';
 
 const GroupListResponseSchema = z.array(GroupDataSchema);
 const GroupMembersResponseSchema = z.array(GroupMemberSchema);
+const GroupCandidatesZeroContextResponseSchema = z.array(z.tuple([z.string(), z.array(GroupMemberSchema)]));
 
 export const retrieveGroupList = async (): Promise<Array<IGroupData>> => {
     return makeJsonRequestWithSchema({
@@ -70,4 +71,13 @@ export const retrieveGroupCandidates = async (groupId: string): Promise<Array<IG
         path: `/api/dining/groups/${groupId}/candidates`,
         schema: GroupMembersResponseSchema
     });
+}
+
+export const retrieveGroupCandidatesZeroContext = async (): Promise<Map<string, Array<IGroupMember>>> => {
+    const candidates = await makeJsonRequestWithSchema({
+        path: '/api/dining/groups/candidates',
+        schema: GroupCandidatesZeroContextResponseSchema
+    });
+
+    return new Map(candidates);
 }
