@@ -6,8 +6,9 @@
     --color-theme-purple-dark: #3a499d;
     --color-theme-purple-light: #5E76FF;
     --color-theme-turquoise: #319890;
-    --color-theme-turquoise-light: #61d5cc;
-    --color-theme-turquoise-dark: #00796B;
+    --color-theme-turquoise-light: #62dcd2;
+    --color-theme-turquoise-dark: #00675b;
+    --color-theme-turquoise-disabled: #417873;
     --color-theme-green: #58886D;
     --color-theme-green-light: #7fb094;
     --color-theme-green-dark: #4d6959;
@@ -108,9 +109,9 @@
     --color-nav-active: var(--color-theme-light);
     --color-semi-transparent-cover: rgba(0, 0, 0, 0.5);
     --color-semi-transparent-popover: color-mix(in srgb, var(--color-foreground), 75% transparent);
-    --color-button-radio-option: var(--color-theme-turquoise);
-    --color-button-radio-selected: var(--color-theme-turquoise-light);
-    --color-button-radio-disabled: var(--color-theme-turquoise-dark);
+    --color-button-radio-option: var(--color-theme-turquoise-dark);
+    --color-button-radio-selected: var(--color-theme-turquoise);
+    --color-button-radio-disabled: var(--color-theme-turquoise-disabled);
 
     --constant-padding: 0.5rem;
     --constant-mini-padding: 0.25rem;
@@ -749,4 +750,24 @@ html, body, #root, .App {
 .auth-provider-icon {
     width: 2rem;
     height: 2rem;
+}
+
+.tab-selector {
+    display: flex;
+    gap: var(--default-padding);
+    padding: var(--default-padding);
+    background: var(--color-background-raised-2);
+    border-radius: var(--default-padding);
+}
+
+.tab-selector .tab-option {
+    padding: var(--default-padding) 2rem var(--default-padding) 2rem;
+    border: none;
+    border-radius: var(--default-padding);
+    background: var(--color-button-radio-option);
+    transition: background-color 0.2s ease-in-out;
+}
+
+.tab-selector .tab-option:hover, .tab-selector .tab-option.active {
+    background: var(--color-button-radio-selected);
 }

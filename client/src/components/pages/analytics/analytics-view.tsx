@@ -91,12 +91,12 @@ export const AnalyticsView = () => {
     return (
         <div className="body flex-col">
             <div className="flex flex-wrap">
-                <div id="days-ago-selector" className="default-border-radius">
+                <div className="tab-selector default-border-radius">
                     {
                         DAY_OPTIONS.map(daysAgoOption => (
                             <button
                                 key={daysAgoOption}
-                                className={classNames('days-ago-option', daysAgoOption === currentDaysAgo && 'active')}
+                                className={classNames('tab-option', daysAgoOption === currentDaysAgo && 'active')}
                                 onClick={() => setCurrentDaysAgo(daysAgoOption)}>
                                 {daysAgoOption} {pluralize('Day', daysAgoOption)}
                             </button>

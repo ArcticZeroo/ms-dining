@@ -23,13 +23,13 @@ export const DevPage = () => {
                 Dev Settings
             </div>
             <div className="flex">
-                <div className="dev-page-tabs flex flex-col">
+                <div className="tab-selector flex flex-col">
                     {
                         tabNames.map(tabName => (
                             <button
                                 key={tabName}
                                 className={classNames(
-                                    'dev-page-tab default-button default-container',
+                                    'tab-option default-button default-container self-stretch',
                                     currentTab === tabName && 'active'
                                 )}
                                 onClick={() => setCurrentTab(tabName)}
