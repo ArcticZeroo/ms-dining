@@ -1,13 +1,35 @@
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { retrieveGroupList } from '../../../../api/client/groups.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { RetryButton } from '../../../button/retry-button.js';
+import { GroupListItem } from './group-list-item.js';
+import { useContext, useEffect, useState } from 'react';
+import { GroupEventsContext } from '../../../../context/groups.js';
+import { IGroupData } from '@msdining/common/models/group';
 
 export const GroupList = () => {
-    const { value: groupList, error, run: retry } = useImmediatePromiseState(retrieveGroupList);
+    const groupEvents = useContext(GroupEventsContext);
+    const { stage, value: groupListResponse, error, run: runRetrieveGroupList } = useImmediatePromiseState(retrieveGroupList);
+    const [localGroupList, setLocalGroupList] = useState<Array<IGroupData>>([]);
 
-    if (groupList) {
-        if (groupList.length === 0) {
+    useEffect(() => {
+        setLocalGroupList(groupListResponse ?? []);
+    }, [groupListResponse]);
+
+    groupEvents.on('updateGroupList', () => {
+        runRetrieveGroupList();
+    });
+
+    groupEvents.on('groupCreated', (group: IGroupData) => {
+        setLocalGroupList([...localGroupList, group]);
+    });
+
+    groupEvents.on('groupDeleted', (groupId: string) => {
+        setLocalGroupList(localGroupList.filter(group => group.id !== groupId));
+    });
+
+    if (stage === PromiseStage.success) {
+        if (localGroupList.length === 0) {
             return (
                 <span>
                     No groups currently exist.
@@ -17,12 +39,8 @@ export const GroupList = () => {
 
         return (
             <div className="flex-col">
-                {groupList.map((group) => (
-                    <div key={group.id} className="card default-container">
-                        <span>
-                            {group.name}
-                        </span>
-                    </div>
+                {localGroupList.map((group) => (
+                    <GroupListItem key={group.id} group={group}/>
                 ))}
             </div>
         );
@@ -34,7 +52,7 @@ export const GroupList = () => {
                 <span>
                     Failed to load groups
                 </span>
-                <RetryButton onClick={retry}/>
+                <RetryButton onClick={runRetrieveGroupList}/>
             </div>
         );
     }

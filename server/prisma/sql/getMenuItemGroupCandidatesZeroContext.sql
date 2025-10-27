@@ -1,6 +1,6 @@
 SELECT MenuItem.id
 FROM MenuItem
-WHERE normalizedName IN (
+WHERE MenuItem.groupId IS NULL AND normalizedName IN (
   SELECT normalizedName
   FROM MenuItem
   GROUP BY normalizedName

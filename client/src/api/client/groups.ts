@@ -73,11 +73,9 @@ export const retrieveGroupCandidates = async (groupId: string): Promise<Array<IG
     });
 }
 
-export const retrieveGroupCandidatesZeroContext = async (): Promise<Map<string, Array<IGroupMember>>> => {
-    const candidates = await makeJsonRequestWithSchema({
+export const retrieveGroupCandidatesZeroContext = async (): Promise<Array<[string, Array<IGroupMember>]>> => {
+    return await makeJsonRequestWithSchema({
         path: '/api/dining/groups/candidates',
         schema: GroupCandidatesZeroContextResponseSchema
     });
-
-    return new Map(candidates);
 }

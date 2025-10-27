@@ -76,3 +76,37 @@ export abstract class RefCountedValueNotifier<T> extends ValueNotifier<T> {
         return wasRemoved;
     }
 }
+
+export type EventMap = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [event: string]: (...args: any[]) => void;
+}
+
+export class TypedEventEmitter<TEvents extends EventMap> {
+    private readonly _listeners: Map<keyof TEvents, Set<TEvents[keyof TEvents]>> = new Map();
+
+    on<TKey extends keyof TEvents>(event: TKey, listener: TEvents[TKey]) {
+        const listenersForEvent = this._listeners.get(event) || new Set();
+        this._listeners.set(event, listenersForEvent);
+        listenersForEvent.add(listener);
+    }
+
+    off<TKey extends keyof TEvents>(event: TKey, listener: TEvents[TKey]) {
+        const listenersForEvent = this._listeners.get(event);
+        if (listenersForEvent == null) {
+            return;
+        }
+
+        listenersForEvent.delete(listener);
+        if (listenersForEvent.size === 0) {
+            this._listeners.delete(event);
+        }
+    }
+
+    emit<TKey extends keyof TEvents>(event: TKey, ...args: Parameters<TEvents[TKey]>) {
+        const listenersForEvent = this._listeners.get(event) ?? [];
+        for (const listener of listenersForEvent) {
+            listener(...args);
+        }
+    }
+}

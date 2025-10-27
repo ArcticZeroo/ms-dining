@@ -1,31 +1,71 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { IGroupMember } from '@msdining/common/models/group';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import { GroupMember } from './group-member.js';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { createGroup } from '../../../../api/client/groups.js';
+import { addGroupMembers, createGroup } from '../../../../api/client/groups.js';
 import { classNames } from '../../../../util/react.js';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
+import { GroupEventsContext } from '../../../../context/groups.js';
 
 interface IGroupCandidateProps {
     name: string;
     members: IGroupMember[];
+    onAcceptedAll: () => void;
 }
 
-export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members }) => {
+export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members, onAcceptedAll }) => {
+    const groupEvents = useContext(GroupEventsContext);
+    const [possibleMemberIds, setPossibleMemberIds] = useState<ReadonlySet<string>>(new Set());
     const [acceptedMemberIds, setAcceptedMemberIds] = useState<ReadonlySet<string>>(() => new Set(members.map((member) => member.id)));
+    const [groupId, setGroupId] = useState<string | null>(null);
 
-    const { actualStage: acceptStage, run: acceptGroup } = useDelayedPromiseState(useCallback(() => {
-        return createGroup({
-            name,
-            entityType:     members[0]!.type,
-            initialMembers: members.map(member => member.id)
-        });
-    }, [name, members]));
+    useEffect(() => {
+        const newPossibleMemberIds = new Set(members.map((member) => member.id));
+        setPossibleMemberIds(newPossibleMemberIds);
+        setAcceptedMemberIds(new Set(Array.from(newPossibleMemberIds).filter((id) => newPossibleMemberIds.has(id))));
+    }, [members]);
+
+    const isAcceptingAll = possibleMemberIds.size > 0 && acceptedMemberIds.size === possibleMemberIds.size;
+
+    const { actualStage: acceptStage, run: acceptGroup } = useDelayedPromiseState(useCallback(async () => {
+        if (groupId) {
+            await addGroupMembers(groupId, Array.from(acceptedMemberIds));
+        } else {
+            const type = members[0]!.type;
+
+            const { id } = await createGroup({
+                name,
+                entityType:     type,
+                initialMembers: Array.from(acceptedMemberIds)
+            });
+
+            groupEvents.emit('groupCreated', {
+                id,
+                name,
+                type,
+                members: members.filter((member) => acceptedMemberIds.has(member.id))
+            });
+
+            setGroupId(id);
+        }
+
+        if (isAcceptingAll) {
+            setPossibleMemberIds(new Set());
+            onAcceptedAll();
+        } else {
+            setPossibleMemberIds(new Set(Array.from(possibleMemberIds).filter((id) => !acceptedMemberIds.has(id))));
+        }
+
+        setAcceptedMemberIds(new Set());
+    }, [groupId, isAcceptingAll, acceptedMemberIds, members, name, groupEvents, onAcceptedAll, possibleMemberIds]));
 
     const canAccept = acceptStage === PromiseStage.notRun || acceptStage === PromiseStage.error;
 
-    const onAcceptGroupClicked = () => {
+    const onAcceptGroupClicked = (event: React.MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+
         if (!canAccept) {
             return;
         }
@@ -52,10 +92,10 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members }
     return (
         <Accordion key={`${members[0]!.type}-${name}`}>
             <AccordionSummary>
-                {name} ({members.length})
-            </AccordionSummary>
-            <AccordionDetails>
-                <div className="flex-col">
+                <div className="flex flex-between">
+                    <div>
+                        {name} ({members.length})
+                    </div>
                     <div className="flex">
                         <button
                             className={classNames('default-container default-button flex flex-center', promiseStageToButtonClass(acceptStage), !canAccept && 'disabled')}
@@ -63,15 +103,20 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members }
                             disabled={!canAccept}
                         >
                             <span>
-                                Accept {acceptedMemberIds.size === members.length && 'all '}{acceptedMemberIds.size} into group called "{name}"
+                                Accept {isAcceptingAll && 'all '}{acceptedMemberIds.size} into group called "{name}"
                             </span>
                             <span className="material-symbols-outlined">
                                 group_add
                             </span>
                         </button>
                     </div>
-                    <div className="flex flex-wrap member-toggle">
-                        {members.map(member => (
+
+                </div>
+            </AccordionSummary>
+            <AccordionDetails>
+                <div className="flex flex-wrap member-toggle">
+                    {members.map(member => (
+                        possibleMemberIds.has(member.id) && (
                             <button
                                 key={member.id}
                                 className={classNames('card default-button member', acceptedMemberIds.has(member.id) && 'active', !canAccept && 'disabled')}
@@ -80,8 +125,7 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members }
                             >
                                 <GroupMember member={member}/>
                             </button>
-                        ))}
-                    </div>
+                        )))}
                 </div>
             </AccordionDetails>
         </Accordion>
