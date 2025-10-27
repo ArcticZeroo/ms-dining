@@ -40,4 +40,12 @@ export abstract class StationStorageClient {
 			where: { id: stationId }
 		}));
 	}
+
+	public static async retrieveAllStationsWithoutGroup(): Promise<Array<Station>> {
+		return usePrismaClient(prismaClient => prismaClient.station.findMany({
+			where: {
+				groupId: null
+			}
+		}));
+	}
 }

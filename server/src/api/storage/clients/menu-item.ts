@@ -490,4 +490,18 @@ export abstract class MenuItemStorageClient {
 			return new Set(menuItem.searchTags.map(tag => tag.name));
 		});
 	}
+
+	public static async retrieveAllMenuItemsWithoutGroup(): Promise<Array<IMenuItemBase>> {
+		const menuItemIds = await usePrismaClient(prismaClient => prismaClient.menuItem.findMany({
+			where:  {
+				groupId: null
+			},
+			select: {
+				id: true
+			}
+		}));
+
+		const menuItems = await Promise.all(menuItemIds.map(({ id }) => this.retrieveMenuItemAsync(id)));
+		return menuItems.filter((item): item is IMenuItemBase => item != null);
+	}
 }

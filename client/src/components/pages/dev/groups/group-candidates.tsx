@@ -4,22 +4,14 @@ import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GroupCandidate } from './group-candidate.js';
 import { useEffect, useState } from 'react';
-import { IGroupMember } from '@msdining/common/models/group';
-import { getRandomId } from '../../../../util/id.js';
-
-interface ICandidateData {
-    id: string;
-    name: string;
-    members: Array<IGroupMember>;
-}
+import { IGroupData } from '@msdining/common/models/group';
 
 export const GroupCandidates = () => {
     const { stage, value: candidates, error, run: retry } = useImmediatePromiseState(retrieveGroupCandidatesZeroContext);
-    const [localCandidates, setLocalCandidates] = useState<Array<ICandidateData>>([]);
+    const [localCandidates, setLocalCandidates] = useState<Array<IGroupData>>([]);
 
     useEffect(() => {
-        const newCandidates = candidates ?? [];
-        setLocalCandidates(newCandidates.map(([name, members]) => ({ name, members, id: getRandomId() })));
+        setLocalCandidates(candidates ?? []);
     }, [candidates]);
 
     if (error) {
@@ -48,13 +40,12 @@ export const GroupCandidates = () => {
         return (
             <div className="flex-col">
                 {
-                    candidateEntries.map(({ name, members, id }) => (
+                    candidateEntries.map((group) => (
                         <GroupCandidate
-                            key={`${members[0]?.type}-${name}`}
-                            name={name}
-                            members={members}
+                            key={`${group.type}-${group.name}`}
+                            group={group}
                             onAcceptedAll={() => {
-                                setLocalCandidates(localCandidates.filter(localCandidate => localCandidate.id !== id));
+                                setLocalCandidates(localCandidates.filter(localCandidate => localCandidate.id !== group.id));
                             }}
                         />
                     ))

@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { IGroupMember } from '@msdining/common/models/group';
+import { IGroupData } from '@msdining/common/models/group';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import { GroupMember } from './group-member.js';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
@@ -9,12 +9,11 @@ import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { GroupEventsContext } from '../../../../context/groups.js';
 
 interface IGroupCandidateProps {
-    name: string;
-    members: IGroupMember[];
+    group: IGroupData;
     onAcceptedAll: () => void;
 }
 
-export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members, onAcceptedAll }) => {
+export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group: { name, members, type }, onAcceptedAll }) => {
     const groupEvents = useContext(GroupEventsContext);
     const [possibleMemberIds, setPossibleMemberIds] = useState<ReadonlySet<string>>(new Set());
     const [acceptedMemberIds, setAcceptedMemberIds] = useState<ReadonlySet<string>>(() => new Set(members.map((member) => member.id)));
@@ -32,8 +31,6 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ name, members, 
         if (groupId) {
             await addGroupMembers(groupId, Array.from(acceptedMemberIds));
         } else {
-            const type = members[0]!.type;
-
             const { id } = await createGroup({
                 name,
                 entityType:     type,

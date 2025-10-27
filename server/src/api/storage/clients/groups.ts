@@ -13,6 +13,7 @@ import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
 import { IGroupData, IGroupMember } from '@msdining/common/models/group';
 import { PrismaLikeClient } from '../../../models/prisma.js';
+import hat from 'hat';
 
 interface IResultWithId {
 	id: string;
@@ -103,12 +104,21 @@ export abstract class GroupStorageClient {
 		return Array.from(stationsByNormalizedName.values());
 	}
 
-	public static async getGroupCandidatesZeroContext(): Promise<Array<[string /*suggestedGroupName*/, Array<IGroupMember>]>> {
-		const results = new Map<SearchEntityType, Map<string /*suggestedGroupName*/, Array<IGroupMember>>>();
+	public static async getGroupCandidatesZeroContext(): Promise<Array<IGroupData>> {
+		const results: IGroupData[] = [];
 		const [menuItemCandidates, stationCandidates] = await Promise.all([
 			this.#getMenuItemCandidatesZeroContext(),
 			this.#getStationCandidatesZeroContext()
 		]);
+
+		const mapResultsToGroups = (type: SearchEntityType, map: Map<string /*suggestedGroupName*/, Array<IGroupMember>>): Array<IGroupData> => {
+			return Array.from(map.entries()).map(([suggestedGroupName, members]) => ({
+				name: suggestedGroupName,
+				id: hat(),
+				type,
+				members,
+			} satisfies IGroupData));
+		}
 
 		const menuItemResults = new Map<string /*suggestedGroupName*/, Array<IGroupMember>>();
 		for (const menuItemGroup of menuItemCandidates) {
@@ -120,9 +130,7 @@ export abstract class GroupStorageClient {
 			menuItemResults.set(suggestedGroupName, menuItemGroup);
 		}
 
-		if (menuItemResults.size > 0) {
-			results.set(SearchEntityType.menuItem, menuItemResults);
-		}
+		results.push(...mapResultsToGroups(SearchEntityType.menuItem, menuItemResults));
 
 		const stationResults = new Map<string /*suggestedGroupName*/, Array<IGroupMember>>();
 		for (const stationGroup of stationCandidates) {
@@ -134,11 +142,9 @@ export abstract class GroupStorageClient {
 			stationResults.set(suggestedGroupName, stationGroup);
 		}
 
-		if (stationResults.size > 0) {
-			results.set(SearchEntityType.station, stationResults);
-		}
+		results.push(...mapResultsToGroups(SearchEntityType.station, stationResults));
 
-		return Array.from(results.values()).flatMap(map => Array.from(map.entries()));
+		return results;
 	}
 
 	static async #getMenuItemCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
