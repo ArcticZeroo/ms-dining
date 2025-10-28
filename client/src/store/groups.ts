@@ -38,7 +38,7 @@ class GroupStore {
 
     async renameGroup(groupId: string, newName: string) {
         await renameGroup(groupId, newName);
-        await this._groups.update((current) => {
+        await this._groups.updateExisting((current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             const group = updatedMap.get(groupId);
             if (group) {
@@ -51,7 +51,7 @@ class GroupStore {
 
     async deleteGroup(groupId: string) {
         await deleteGroup(groupId);
-        await this._groups.update((current) => {
+        await this._groups.updateExisting((current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             updatedMap.delete(groupId);
             return updatedMap;
@@ -65,9 +65,6 @@ class GroupStore {
             initialMembers: Array.from(memberIds)
         });
 
-        const zeroContextCandidates = await this.zeroContextCandidates.value.promise;
-        const groups = await this.groups.value.promise;
-
         const newGroupMembers: IGroupMember[] = [];
         const newCandidateMembers: IGroupMember[] = [];
         for (const member of candidate.members) {
@@ -78,18 +75,24 @@ class GroupStore {
             }
         }
 
-        const updatedCandidates = new Map<string, IGroupData>(zeroContextCandidates);
-        updatedCandidates.delete(candidate.id);
-        if (newCandidateMembers.length > 0) {
-            // Create a new candidate with the remaining members - they would make up a new group if accepted
-            const newId = getRandomId();
-            updatedCandidates.set(newId, { ...candidate, id: newId, members: newCandidateMembers });
+        if (this._zeroContextCandidates.hasBeenRun) {
+            const zeroContextCandidates = await this.zeroContextCandidates.value.promise;
+            const updatedCandidates = new Map<string, IGroupData>(zeroContextCandidates);
+            updatedCandidates.delete(candidate.id);
+            if (newCandidateMembers.length > 0) {
+                // Create a new candidate with the remaining members - they would make up a new group if accepted
+                const newId = getRandomId();
+                updatedCandidates.set(newId, { ...candidate, id: newId, members: newCandidateMembers });
+            }
+            this._zeroContextCandidates.set(updatedCandidates);
         }
-        this._zeroContextCandidates.set(updatedCandidates);
 
-        const updatedGroups = new Map<string, IGroupData>(groups);
-        updatedGroups.set(id, { ...candidate, id, members: newGroupMembers });
-        this._groups.set(updatedGroups);
+        if (this._groups.hasBeenRun) {
+            const groups = await this.groups.value.promise;
+            const updatedGroups = new Map<string, IGroupData>(groups);
+            updatedGroups.set(id, { ...candidate, id, members: newGroupMembers });
+            this._groups.set(updatedGroups);
+        }
     }
 }
 
