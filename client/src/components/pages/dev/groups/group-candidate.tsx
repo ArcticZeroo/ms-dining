@@ -1,61 +1,26 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IGroupData } from '@msdining/common/models/group';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
-import { GroupMember } from './group-member.js';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { addGroupMembers, createGroup } from '../../../../api/client/groups.js';
-import { classNames } from '../../../../util/react.js';
+import React, { useCallback, useState } from 'react';
+import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
-import { GroupEventsContext } from '../../../../context/groups.js';
+import { classNames } from '../../../../util/react.js';
+import { GroupMember } from './group-member.js';
 
 interface IGroupCandidateProps {
     group: IGroupData;
-    onAcceptedAll: () => void;
 }
 
-export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group: { name, members, type }, onAcceptedAll }) => {
-    const groupEvents = useContext(GroupEventsContext);
-    const [possibleMemberIds, setPossibleMemberIds] = useState<ReadonlySet<string>>(new Set());
-    const [acceptedMemberIds, setAcceptedMemberIds] = useState<ReadonlySet<string>>(() => new Set(members.map((member) => member.id)));
-    const [groupId, setGroupId] = useState<string | null>(null);
+export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group }) => {
+    const { name, type, members: possibleMembers } = group;
+    const [acceptedMemberIds, setAcceptedMemberIds] = useState<ReadonlySet<string>>(() => new Set(possibleMembers.map((member) => member.id)));
 
-    useEffect(() => {
-        const newPossibleMemberIds = new Set(members.map((member) => member.id));
-        setPossibleMemberIds(newPossibleMemberIds);
-        setAcceptedMemberIds(new Set(Array.from(newPossibleMemberIds).filter((id) => newPossibleMemberIds.has(id))));
-    }, [members]);
-
-    const isAcceptingAll = possibleMemberIds.size > 0 && acceptedMemberIds.size === possibleMemberIds.size;
+    const isAcceptingAll = possibleMembers.length > 0 && acceptedMemberIds.size === possibleMembers.length;
 
     const { actualStage: acceptStage, run: acceptGroup } = useDelayedPromiseState(useCallback(async () => {
-        if (groupId) {
-            await addGroupMembers(groupId, Array.from(acceptedMemberIds));
-        } else {
-            const { id } = await createGroup({
-                name,
-                entityType:     type,
-                initialMembers: Array.from(acceptedMemberIds)
-            });
-
-            groupEvents.emit('groupCreated', {
-                id,
-                name,
-                type,
-                members: members.filter((member) => acceptedMemberIds.has(member.id))
-            });
-
-            setGroupId(id);
-        }
-
-        if (isAcceptingAll) {
-            setPossibleMemberIds(new Set());
-            onAcceptedAll();
-        } else {
-            setPossibleMemberIds(new Set(Array.from(possibleMemberIds).filter((id) => !acceptedMemberIds.has(id))));
-        }
-
+        await GROUP_STORE.acceptCandidateMembers(group, acceptedMemberIds);
         setAcceptedMemberIds(new Set());
-    }, [groupId, isAcceptingAll, acceptedMemberIds, members, name, groupEvents, onAcceptedAll, possibleMemberIds]));
+    }, [acceptedMemberIds, group]));
 
     const canAccept = acceptStage === PromiseStage.notRun || acceptStage === PromiseStage.error;
 
@@ -87,11 +52,11 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group: { name, 
     };
 
     return (
-        <Accordion key={`${members[0]!.type}-${name}`}>
+        <Accordion key={`${type}-${name}`}>
             <AccordionSummary>
                 <div className="flex flex-between">
                     <div>
-                        {name} ({members.length})
+                        {name} ({possibleMembers.length})
                     </div>
                     <div className="flex">
                         <button
@@ -112,8 +77,8 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group: { name, 
             </AccordionSummary>
             <AccordionDetails>
                 <div className="flex flex-wrap member-toggle">
-                    {members.map(member => (
-                        possibleMemberIds.has(member.id) && (
+                    {
+                        possibleMembers.map(member => (
                             <button
                                 key={member.id}
                                 className={classNames('card default-button member', acceptedMemberIds.has(member.id) && 'active', !canAccept && 'disabled')}
@@ -122,7 +87,8 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group: { name, 
                             >
                                 <GroupMember member={member}/>
                             </button>
-                        )))}
+                        ))
+                    }
                 </div>
             </AccordionDetails>
         </Accordion>

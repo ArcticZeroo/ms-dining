@@ -1,23 +1,22 @@
-import { IGroupData } from '@msdining/common/models/group';
-import React, { useCallback, useContext } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
-import { GroupMember } from './group-member.js';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { deleteGroup } from '../../../../api/client/groups.js';
-import { classNames } from '../../../../util/react.js';
+import { IGroupData } from '@msdining/common/models/group';
+import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
+import React, { useCallback } from 'react';
+import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
-import { GroupEventsContext } from '../../../../context/groups.js';
+import { classNames } from '../../../../util/react.js';
+import { GroupMember } from './group-member.js';
 
 interface IGroupListItemProps {
     group: IGroupData;
 }
 
 export const GroupListItem: React.FC<IGroupListItemProps> = ({ group }) => {
-    const groupEvents = useContext(GroupEventsContext);
-    const { actualStage: deleteStage, run: deleteGroupCallback } = useDelayedPromiseState(useCallback(async () => {
-        await deleteGroup(group.id)
-        groupEvents.emit('groupDeleted', group.id);
-    }, [groupEvents, group.id]));
+    const { actualStage: deleteStage, run: deleteGroupCallback } = useDelayedPromiseState(useCallback(
+        () => GROUP_STORE.deleteGroup(group.id),
+        [group.id]
+    ));
+
     const canDelete = deleteStage !== PromiseStage.running && deleteStage !== PromiseStage.success;
 
     const onDeleteClicked = (event: React.MouseEvent) => {

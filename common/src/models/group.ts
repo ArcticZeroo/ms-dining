@@ -18,7 +18,7 @@ export const GroupDataSchema = z.object({
     name: z.string(),
     type: allSearchEntityTypesEnum,
     members: z.array(GroupMemberSchema)
-})
+});
 
 export type IGroupData = z.infer<typeof GroupDataSchema>;
 

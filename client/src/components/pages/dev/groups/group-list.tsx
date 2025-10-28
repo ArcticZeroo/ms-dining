@@ -1,43 +1,14 @@
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { retrieveGroupList } from '../../../../api/client/groups.js';
-import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
+import { useValueNotifier } from '../../../../hooks/events.ts';
+import { GROUP_STORE } from '../../../../store/groups.ts';
 import { RetryButton } from '../../../button/retry-button.js';
+import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GroupListItem } from './group-list-item.js';
-import { useContext, useEffect, useState } from 'react';
-import { GroupEventsContext } from '../../../../context/groups.js';
-import { IGroupData } from '@msdining/common/models/group';
-
-const useGroupList = () => {
-    const groupEvents = useContext(GroupEventsContext);
-    const { stage, value: groupListResponse, error, run: runRetrieveGroupList } = useImmediatePromiseState(retrieveGroupList);
-    const [localGroupList, setLocalGroupList] = useState<Array<IGroupData>>([]);
-
-    useEffect(() => {
-        setLocalGroupList(groupListResponse ?? []);
-    }, [groupListResponse]);
-
-    groupEvents.on('updateGroupList', () => {
-        runRetrieveGroupList();
-    });
-
-    groupEvents.on('groupCreated', (group: IGroupData) => {
-        setLocalGroupList([...localGroupList, group]);
-    });
-
-    groupEvents.on('groupDeleted', (groupId: string) => {
-        setLocalGroupList(localGroupList.filter(group => group.id !== groupId));
-    });
-
-    return { stage: stage, groupList: localGroupList, error, runRetrieveGroupList };
-}
 
 export const GroupList = () => {
-    const { stage: groupListLoadingStage, groupList, error, runRetrieveGroupList } = useGroupList();
+    const { value: groupList, error, run: runRetrieveGroupList } = useValueNotifier(GROUP_STORE.groups);
 
-    // const { stage, value: groupListResponse, error, run: runRetrieveGroupList } = useImmediatePromiseState(retrieveItemsWithoutGroup);
-
-    if (groupListLoadingStage === PromiseStage.success) {
-        if (groupList.length === 0) {
+    if (groupList) {
+        if (groupList.size === 0) {
             return (
                 <span>
                     No groups currently exist.
@@ -47,9 +18,11 @@ export const GroupList = () => {
 
         return (
             <div className="flex-col">
-                {groupList.map((group) => (
-                    <GroupListItem key={group.id} group={group}/>
-                ))}
+                {
+                    Array.from(groupList.values()).map((group) => (
+                        <GroupListItem key={group.id} group={group}/>
+                    ))
+                }
             </div>
         );
     }

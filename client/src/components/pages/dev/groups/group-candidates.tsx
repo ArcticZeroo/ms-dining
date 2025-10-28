@@ -1,18 +1,11 @@
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { retrieveGroupCandidatesZeroContext } from '../../../../api/client/groups.js';
+import { useValueNotifier } from '../../../../hooks/events.ts';
+import { GROUP_STORE } from '../../../../store/groups.ts';
 import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GroupCandidate } from './group-candidate.js';
-import { useEffect, useState } from 'react';
-import { IGroupData } from '@msdining/common/models/group';
 
 export const GroupCandidates = () => {
-    const { stage, value: candidates, error, run: retry } = useImmediatePromiseState(retrieveGroupCandidatesZeroContext);
-    const [localCandidates, setLocalCandidates] = useState<Array<IGroupData>>([]);
-
-    useEffect(() => {
-        setLocalCandidates(candidates ?? []);
-    }, [candidates]);
+    const { value: candidates, error } = useValueNotifier(GROUP_STORE.groups);
 
     if (error) {
         return (
@@ -20,13 +13,13 @@ export const GroupCandidates = () => {
                 <span>
                     Unable to load group candidates. Please try again.
                 </span>
-                <RetryButton onClick={retry}/>
+                <RetryButton onClick={() => GROUP_STORE.refreshGroups()}/>
             </div>
         );
     }
 
-    if (stage === PromiseStage.success) {
-        if (localCandidates.length === 0) {
+    if (candidates) {
+        if (candidates.size === 0) {
             return (
                 <div>
                     There are no group candidates at this time.
@@ -34,7 +27,7 @@ export const GroupCandidates = () => {
             );
         }
 
-        const candidateEntries = [...localCandidates];
+        const candidateEntries = [...candidates.values()];
         candidateEntries.sort((a, b) => a.name.localeCompare(b.name));
 
         return (
@@ -44,9 +37,6 @@ export const GroupCandidates = () => {
                         <GroupCandidate
                             key={`${group.type}-${group.name}`}
                             group={group}
-                            onAcceptedAll={() => {
-                                setLocalCandidates(localCandidates.filter(localCandidate => localCandidate.id !== group.id));
-                            }}
                         />
                     ))
                 }
