@@ -1,3 +1,24 @@
+class ListenerManager<TArgs extends Array<unknown>> {
+    readonly #listeners: Array<TListener<TArgs>> = [];
+
+    addListener(listener: TListener<TArgs>) {
+        this.#listeners.push(listener);
+    }
+
+    removeListener(listener: TListener<TArgs>) {
+        const index = this.#listeners.indexOf(listener);
+        if (index >= 0) {
+            this.#listeners.splice(index, 1);
+        }
+    }
+
+    notify(...args: TArgs) {
+        for (const listener of this.#listeners) {
+            listener(...args);
+        }
+    }
+}
+
 export class ValueNotifier<T> {
     protected readonly _listeners: Set<(value: T, oldValue: T) => void> = new Set();
 
@@ -108,5 +129,90 @@ export class TypedEventEmitter<TEvents extends EventMap> {
         for (const listener of listenersForEvent) {
             listener(...args);
         }
+    }
+}
+
+type TListener<TArgs extends unknown[]> = (...args: TArgs) => void;
+
+export class ValueNotifierMap<TKey, TValue> {
+    readonly #value: Map<TKey, TValue> = new Map();
+
+    readonly #entryAddedListeners = new ListenerManager<[TKey, TValue]>();
+    readonly #entryRemovedListeners = new ListenerManager<[TKey, TValue]>();
+    readonly #entryUpdatedListeners = new ListenerManager<[TKey, TValue /*value*/, TValue /*oldValue*/]>();
+
+    constructor(initialData?: Iterable<readonly [TKey, TValue]>, public readonly shouldAlsoSendUpdateForAdd: boolean = false) {
+        if (initialData != null) {
+            for (const [key, value] of initialData) {
+                this.#value.set(key, value);
+            }
+        }
+    }
+
+    set(key: TKey, value: TValue) {
+        const oldValue = this.#value.get(key);
+        this.#value.set(key, value);
+
+        if (oldValue == null) {
+            this.#entryAddedListeners.notify(key, value);
+
+            if (this.shouldAlsoSendUpdateForAdd) {
+                this.#entryUpdatedListeners.notify(key, value, value);
+            }
+        } else {
+            this.#entryUpdatedListeners.notify(key, value, oldValue);
+        }
+    }
+
+    delete(key: TKey) {
+        const oldValue = this.#value.get(key);
+        if (oldValue != null) {
+            this.#value.delete(key);
+            this.#entryRemovedListeners.notify(key, oldValue);
+        }
+    }
+
+    clear() {
+        const removedEntries = [...this.#value];
+        this.#value.clear();
+        for (const [key, value] of removedEntries) {
+            this.#entryRemovedListeners.notify(key, value);
+        }
+    }
+
+    get(key: TKey) {
+        return this.#value.get(key);
+    }
+
+    has(key: TKey) {
+        return this.#value.has(key);
+    }
+
+    get size() {
+        return this.#value.size;
+    }
+
+    keys() {
+        return this.#value.keys();
+    }
+
+    values() {
+        return this.#value.values();
+    }
+
+    entries() {
+        return this.#value.entries();
+    }
+
+    addEntryAddedListener(listener: TListener<[TKey, TValue]>) {
+        this.#entryAddedListeners.addListener(listener);
+    }
+
+    addEntryRemovedListener(listener: TListener<[TKey, TValue]>) {
+        this.#entryRemovedListeners.addListener(listener);
+    }
+
+    addEntryUpdatedListener(listener: TListener<[TKey, TValue, TValue]>) {
+        this.#entryUpdatedListeners.addListener(listener);
     }
 }

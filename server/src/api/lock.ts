@@ -1,6 +1,5 @@
 import * as SemaphoreModule from 'semaphore-async-await';
 import { MaybePromise } from '../models/async.js';
-import { logDebug } from '../util/log.js';
 
 export class Lock {
 	#queue: Array<() => void> = [];

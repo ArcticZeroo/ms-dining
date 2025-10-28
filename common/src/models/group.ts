@@ -25,7 +25,7 @@ export type IGroupData = z.infer<typeof GroupDataSchema>;
 // Request/Response schemas for API
 export const CreateGroupRequestSchema = z.object({
     name: z.string().min(1),
-    entityType: allSearchEntityTypesEnum,
+    type: allSearchEntityTypesEnum,
     initialMembers: z.array(z.string()).optional()
 });
 

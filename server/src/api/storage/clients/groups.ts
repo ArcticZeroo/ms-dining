@@ -19,21 +19,21 @@ interface IResultWithId {
 	id: string;
 }
 
-const extractMenuItemsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
+export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
 	const menuItems = await Promise.all(results.map(result => MenuItemStorageClient.retrieveMenuItemAsync(result.id)));
 	return menuItems
 		.filter((item): item is IMenuItemBase => item !== null)
 		.map(menuItemToGroupMember);
 }
 
-const extractStationsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
+export const extractStationsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
 	const stations = await Promise.all(results.map((result) => StationStorageClient.retrieveStationAsync(result.id)));
 	return stations
 		.filter((station): station is Station => station !== null)
 		.map(stationToGroupMember);
 }
 
-const menuItemToGroupMember = (menuItem: IMenuItemBase): IGroupMember => ({
+export const menuItemToGroupMember = (menuItem: IMenuItemBase): IGroupMember => ({
 	id:       menuItem.id,
 	name:     menuItem.name,
 	type:     SearchEntityType.menuItem,
@@ -43,7 +43,7 @@ const menuItemToGroupMember = (menuItem: IMenuItemBase): IGroupMember => ({
 	}
 });
 
-const stationToGroupMember = (station: Station): IGroupMember => ({
+export const stationToGroupMember = (station: Station): IGroupMember => ({
 	id:       station.id,
 	name:     station.name,
 	type:     SearchEntityType.station,

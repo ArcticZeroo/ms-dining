@@ -78,3 +78,10 @@ export const retrieveGroupCandidatesZeroContext = async (): Promise<Array<IGroup
         schema: GroupListResponseSchema
     });
 }
+
+export const retrieveItemsWithoutGroup = async (): Promise<Array<IGroupData>> => {
+    return await makeJsonRequestWithSchema({
+        path: '/api/dining/groups/all-items',
+        schema: GroupMemberSchema
+    });
+}

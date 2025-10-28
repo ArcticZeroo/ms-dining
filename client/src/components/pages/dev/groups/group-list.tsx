@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from 'react';
 import { GroupEventsContext } from '../../../../context/groups.js';
 import { IGroupData } from '@msdining/common/models/group';
 
-export const GroupList = () => {
+const useGroupList = () => {
     const groupEvents = useContext(GroupEventsContext);
     const { stage, value: groupListResponse, error, run: runRetrieveGroupList } = useImmediatePromiseState(retrieveGroupList);
     const [localGroupList, setLocalGroupList] = useState<Array<IGroupData>>([]);
@@ -28,8 +28,16 @@ export const GroupList = () => {
         setLocalGroupList(localGroupList.filter(group => group.id !== groupId));
     });
 
-    if (stage === PromiseStage.success) {
-        if (localGroupList.length === 0) {
+    return { stage: stage, groupList: localGroupList, error, runRetrieveGroupList };
+}
+
+export const GroupList = () => {
+    const { stage: groupListLoadingStage, groupList, error, runRetrieveGroupList } = useGroupList();
+
+    // const { stage, value: groupListResponse, error, run: runRetrieveGroupList } = useImmediatePromiseState(retrieveItemsWithoutGroup);
+
+    if (groupListLoadingStage === PromiseStage.success) {
+        if (groupList.length === 0) {
             return (
                 <span>
                     No groups currently exist.
@@ -39,7 +47,7 @@ export const GroupList = () => {
 
         return (
             <div className="flex-col">
-                {localGroupList.map((group) => (
+                {groupList.map((group) => (
                     <GroupListItem key={group.id} group={group}/>
                 ))}
             </div>

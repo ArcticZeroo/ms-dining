@@ -1,12 +1,18 @@
 import Router from '@koa/router';
-import { GroupStorageClient } from '../../../api/storage/clients/groups.js';
+import {
+	GroupStorageClient,
+	menuItemToGroupMember,
+	stationToGroupMember
+} from '../../../api/storage/clients/groups.js';
 import { attachRouter, requireAdmin, requireRole } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
 	AddGroupMembersRequestSchema,
-	CreateGroupRequestSchema,
+	CreateGroupRequestSchema, IGroupMember,
 	RenameGroupRequestSchema
 } from '@msdining/common/models/group';
+import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
+import { StationStorageClient } from '../../../api/storage/clients/station.js';
 
 export const registerGroupsRoutes = (parent: Router) => {
 	const router = new Router({
@@ -41,11 +47,11 @@ export const registerGroupsRoutes = (parent: Router) => {
 	router.post('/',
 		requireAdmin,
 		async ctx => {
-			const { name, entityType, initialMembers } = CreateGroupRequestSchema.parse(ctx.request.body);
+			const { name, type, initialMembers } = CreateGroupRequestSchema.parse(ctx.request.body);
 
 			const group = await GroupStorageClient.createGroup(
 				name,
-				entityType,
+				type,
 				initialMembers
 			);
 
@@ -88,6 +94,21 @@ export const registerGroupsRoutes = (parent: Router) => {
 			const groupId = requireGroupIdParam(ctx);
 			const candidates = await GroupStorageClient.getCandidatesForGroup(groupId);
 			ctx.body = jsonStringifyWithoutNull(candidates);
+		});
+
+	// GET /api/dining/groups/all-items - Get all items without a group
+	router.get('/all-items',
+		requireAdmin,
+		async ctx => {
+			const [menuItems, stations] = await Promise.all([
+				MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
+				StationStorageClient.retrieveAllStationsWithoutGroup()
+			]);
+
+			ctx.body = jsonStringifyWithoutNull([
+				...menuItems.map(menuItemToGroupMember),
+				...stations.map(stationToGroupMember)
+			] satisfies IGroupMember[]);
 		});
 
 	attachRouter(parent, router);
