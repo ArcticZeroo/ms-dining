@@ -5,8 +5,8 @@ import React, { useCallback } from 'react';
 import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
-import { GroupMember } from './group-member.js';
 import { GroupAddMembers } from './group-add-members.js';
+import { GroupListItemMember } from './group-list-item-member.js';
 
 interface IGroupListItemProps {
     group: IGroupData;
@@ -50,12 +50,11 @@ export const GroupListItem: React.FC<IGroupListItemProps> = ({ group }) => {
                 <div className="flex flex-wrap">
                     {
                         group.members.map((member) => (
-                            <div className="card">
-                                <GroupMember
-                                    key={member.id}
-                                    member={member}
-                                />
-                            </div>
+                            <GroupListItemMember
+                                key={`${member.type}-${member.id}`}
+                                groupId={group.id}
+                                member={member}
+                            />
                         ))
                     }
                 </div>

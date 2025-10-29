@@ -70,6 +70,33 @@ class GroupStore {
         });
     }
 
+    async deleteGroupMember(groupId: string, memberId: string) {
+        await GroupClient.deleteGroupMember(groupId, memberId);
+
+        const removedMembers: IGroupMember[] = [];
+
+        await this._groups.updateExisting(async (current) => {
+            const updatedMap = new Map<string, IGroupData>(current);
+            const group = updatedMap.get(groupId);
+            if (group) {
+                const remainingMembers: IGroupMember[] = [];
+                for (const member of group.members) {
+                    if (memberId === member.id) {
+                        removedMembers.push(member);
+                    } else {
+                        remainingMembers.push(member);
+                    }
+                }
+                updatedMap.set(groupId, { ...group, members: remainingMembers });
+
+                return updatedMap;
+            }
+            return current;
+        });
+
+        await this.#addToAllItemsWithoutGroup(removedMembers);
+    }
+
     async deleteGroup(groupId: string) {
         await GroupClient.deleteGroup(groupId);
         await this._groups.updateExisting(async (current) => {
@@ -77,16 +104,7 @@ class GroupStore {
 
             const group = updatedMap.get(groupId);
             if (group) {
-                await this._allItemsWithoutGroup.updateExisting((currentItems) => {
-                    const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
-                    for (const member of group.members) {
-                        if (!newItemsWithoutGroup.has(member.type)) {
-                            newItemsWithoutGroup.set(member.type, new Map<string, IGroupMember>());
-                        }
-                        newItemsWithoutGroup.get(member.type)!.set(member.id, member);
-                    }
-                    return newItemsWithoutGroup;
-                });
+                await this.#addToAllItemsWithoutGroup(group.members);
             }
 
             updatedMap.delete(groupId);
@@ -102,6 +120,19 @@ class GroupStore {
                 if (itemsById) {
                     itemsById.delete(member.id);
                 }
+            }
+            return newItemsWithoutGroup;
+        });
+    }
+
+    async #addToAllItemsWithoutGroup(members: IGroupMember[]) {
+        await this._allItemsWithoutGroup.updateExisting((currentItems) => {
+            const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
+            for (const member of members) {
+                if (!newItemsWithoutGroup.has(member.type)) {
+                    newItemsWithoutGroup.set(member.type, new Map<string, IGroupMember>());
+                }
+                newItemsWithoutGroup.get(member.type)!.set(member.id, member);
             }
             return newItemsWithoutGroup;
         });

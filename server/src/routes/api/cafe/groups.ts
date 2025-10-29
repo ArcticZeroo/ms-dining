@@ -111,5 +111,19 @@ export const registerGroupsRoutes = (parent: Router) => {
 			] satisfies IGroupMember[]);
 		});
 
+	router.delete('/:id/members/:memberId',
+		requireAdmin,
+		async ctx => {
+			const groupId = requireGroupIdParam(ctx);
+			const memberId = ctx.params.memberId;
+			if (!memberId) {
+				ctx.throw(400, 'Missing member id');
+				return;
+			}
+
+			await GroupStorageClient.deleteMembersFromGroup(groupId, [memberId]);
+			ctx.status = 204;
+		});
+
 	attachRouter(parent, router);
 };

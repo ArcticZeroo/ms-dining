@@ -253,9 +253,9 @@ export abstract class GroupStorageClient {
 		return getGroupResultMembers(groupResult);
 	}
 
-	static async #setGroupMembersInternal(prima: PrismaLikeClient, groupId: string, memberIds: Array<string>, entityType: SearchEntityType): Promise<void> {
+	static async #setGroupMembersInternal(prisma: PrismaLikeClient, groupId: string | null, memberIds: Array<string>, entityType: SearchEntityType): Promise<void> {
 		if (entityType === SearchEntityType.station) {
-			await prima.station.updateMany({
+			await prisma.station.updateMany({
 				where: {
 					id: {
 						in: memberIds
@@ -266,7 +266,7 @@ export abstract class GroupStorageClient {
 				}
 			});
 		} else if (entityType === SearchEntityType.menuItem) {
-			await prima.menuItem.updateMany({
+			await prisma.menuItem.updateMany({
 				where: {
 					id: {
 						in: memberIds
@@ -350,6 +350,25 @@ export abstract class GroupStorageClient {
 					name: newName
 				}
 			});
+		});
+	}
+
+	public static async deleteMembersFromGroup(groupId: string, memberIds: Array<string>): Promise<void> {
+		await usePrismaClient(async prisma => {
+			const group = await prisma.crossCafeGroup.findUnique({
+				where:   {
+					id: groupId
+				},
+				select: {
+					entityType: true
+				}
+			});
+
+			if (!group) {
+				throw new Error(`Group with ID ${groupId} not found`);
+			}
+
+			await this.#setGroupMembersInternal(prisma, null, memberIds, searchEntityTypeFromString(group.entityType));
 		});
 	}
 }

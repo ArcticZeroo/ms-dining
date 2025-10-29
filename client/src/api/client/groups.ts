@@ -54,6 +54,15 @@ export const deleteGroup = async (groupId: string): Promise<void> => {
     });
 }
 
+export const deleteGroupMember = async (groupId: string, memberId: string): Promise<void> => {
+    await makeJsonRequestNoParse({
+        path: `/api/dining/groups/${groupId}/members/${memberId}`,
+        options: {
+            method: 'DELETE'
+        }
+    });
+}
+
 export const addGroupMembers = async (groupId: string, memberIds: Array<string>): Promise<void> => {
     await makeJsonRequestNoParse({
         path: `/api/dining/groups/${groupId}/members`,
