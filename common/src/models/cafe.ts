@@ -43,6 +43,7 @@ export interface IMenuItemReviewHeader {
 export interface IMenuItemBase {
     id: string;
 	cafeId: string;
+	stationId: string;
     price: number;
     name: string;
     receiptText?: Nullable<string>;

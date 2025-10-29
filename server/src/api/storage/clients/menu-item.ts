@@ -48,6 +48,7 @@ const hydrateMenuItem = (menuItem: DehydratedMenuItem): IMenuItemBase => {
 
 	return {
 		id:             menuItem.id,
+		stationId:      menuItem.stationId,
 		cafeId:         menuItem.cafeId,
 		name:           menuItem.name,
 		description:    menuItem.description,
@@ -191,6 +192,7 @@ export abstract class MenuItemStorageClient {
 
 		const dataWithoutId = {
 			cafeId:                 menuItem.cafeId,
+			stationId:              menuItem.stationId,
 			name:                   menuItem.name.trim(),
 			normalizedName:         normalizeNameForSearch(menuItem.name),
 			imageUrl:               menuItem.imageUrl || null,
@@ -391,7 +393,7 @@ export abstract class MenuItemStorageClient {
 					select: {
 						menuItems: {
 							select: {
-								menuItem:   {
+								menuItem: {
 									include: {
 										modifiers:  {
 											include: {

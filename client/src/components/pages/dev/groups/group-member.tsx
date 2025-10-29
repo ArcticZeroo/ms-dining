@@ -28,8 +28,11 @@ export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
                     <>
                         {
                             Object.entries(member.metadata).map(([key, value]) => (
-                                <div key={key}>
-                                    <span>{key}</span>: {String(value)}
+                                <div key={key} className="flex flex-between">
+                                    <span>{key}</span>
+                                    <span>
+                                        {key === 'stationLogoUrl' ? <img src={value} alt="station logo url" style={{ maxWidth: '3rem' }}/> : String(value)}
+                                    </span>
                                 </div>
                             ))
                         }

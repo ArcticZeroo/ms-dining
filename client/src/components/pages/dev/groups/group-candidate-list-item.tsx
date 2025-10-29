@@ -7,11 +7,11 @@ import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupMember } from './group-member.js';
 
-interface IGroupCandidateProps {
+interface IGroupCandidateListItemProps {
     group: IGroupData;
 }
 
-export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group }) => {
+export const GroupCandidateListItem: React.FC<IGroupCandidateListItemProps> = ({ group }) => {
     const { name, type, members: possibleMembers } = group;
     const [acceptedMemberIds, setAcceptedMemberIds] = useState<ReadonlySet<string>>(() => new Set(possibleMembers.map((member) => member.id)));
 
@@ -22,7 +22,8 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group }) => {
         setAcceptedMemberIds(new Set());
     }, [acceptedMemberIds, group]));
 
-    const canAccept = acceptStage === PromiseStage.notRun || acceptStage === PromiseStage.error;
+    const canAccept = acceptStage !== PromiseStage.running && acceptedMemberIds.size > 0;
+    const canSelectMembers = acceptStage !== PromiseStage.running;
 
     const onAcceptGroupClicked = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -36,7 +37,7 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group }) => {
     };
 
     const onToggleMemberAccepted = (memberId: string) => {
-        if (!canAccept) {
+        if (!canSelectMembers) {
             return;
         }
 
@@ -81,9 +82,9 @@ export const GroupCandidate: React.FC<IGroupCandidateProps> = ({ group }) => {
                         possibleMembers.map(member => (
                             <button
                                 key={member.id}
-                                className={classNames('card default-button member', acceptedMemberIds.has(member.id) && 'active', !canAccept && 'disabled')}
+                                className={classNames('card default-button member', acceptedMemberIds.has(member.id) && 'active', !canSelectMembers && 'disabled')}
                                 onClick={() => onToggleMemberAccepted(member.id)}
-                                disabled={!canAccept}
+                                disabled={!canSelectMembers}
                             >
                                 <GroupMember member={member}/>
                             </button>

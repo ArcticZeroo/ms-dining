@@ -1,6 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import React from 'react';
-import { GroupCandidates } from './group-candidates.js';
+import { GroupCandidateList } from './group-candidate-list.js';
 import { GroupList } from './group-list.js';
 import './groups.css';
 
@@ -20,7 +20,7 @@ export const GroupsView: React.FC = () => {
                     Group Candidates
                 </AccordionSummary>
                 <AccordionDetails>
-                    <GroupCandidates/>
+                    <GroupCandidateList/>
                 </AccordionDetails>
             </Accordion>
         </>

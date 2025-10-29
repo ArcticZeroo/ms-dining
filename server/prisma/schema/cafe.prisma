@@ -50,6 +50,9 @@ model MenuItem {
   cafeId String
   cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
 
+  stationId String
+  station   Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
   dailyMenuItems DailyMenuItem[]
   modifiers      MenuItemModifierEntry[]
   searchTags     SearchTag[]
@@ -112,6 +115,7 @@ model Station {
   group   CrossCafeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   dailyStations DailyStation[]
+  menuItems     MenuItem[]
 }
 
 model DailyStation {

@@ -106,7 +106,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 			]);
 
 			ctx.body = jsonStringifyWithoutNull([
-				...menuItems.map(menuItemToGroupMember),
+				...await Promise.all(menuItems.map(menuItemToGroupMember)),
 				...stations.map(stationToGroupMember)
 			] satisfies IGroupMember[]);
 		});

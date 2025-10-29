@@ -21,9 +21,11 @@ interface IResultWithId {
 
 export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
 	const menuItems = await Promise.all(results.map(result => MenuItemStorageClient.retrieveMenuItemAsync(result.id)));
-	return menuItems
-		.filter((item): item is IMenuItemBase => item !== null)
-		.map(menuItemToGroupMember);
+	return Promise.all(
+		menuItems
+			.filter((item): item is IMenuItemBase => item !== null)
+			.map(menuItemToGroupMember)
+	);
 }
 
 export const extractStationsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
@@ -33,15 +35,21 @@ export const extractStationsAsync = async (results: Array<IResultWithId>): Promi
 		.map(stationToGroupMember);
 }
 
-export const menuItemToGroupMember = (menuItem: IMenuItemBase): IGroupMember => ({
-	id:       menuItem.id,
-	name:     menuItem.name,
-	type:     SearchEntityType.menuItem,
-	imageUrl: menuItem.imageUrl || undefined,
-	metadata: {
-		cafe: menuItem.cafeId
-	}
-});
+export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IGroupMember> => {
+	const station = await StationStorageClient.retrieveStationAsync(menuItem.stationId);
+
+	return ({
+		id:       menuItem.id,
+		name:     menuItem.name,
+		type:     SearchEntityType.menuItem,
+		imageUrl: menuItem.imageUrl || undefined,
+		metadata: {
+			cafe: menuItem.cafeId,
+			stationName: station?.name || '',
+			stationLogoUrl: station?.logoUrl || ''
+		}
+	});
+};
 
 export const stationToGroupMember = (station: Station): IGroupMember => ({
 	id:       station.id,
@@ -114,7 +122,7 @@ export abstract class GroupStorageClient {
 		const mapResultsToGroups = (type: SearchEntityType, map: Map<string /*suggestedGroupName*/, Array<IGroupMember>>): Array<IGroupData> => {
 			return Array.from(map.entries()).map(([suggestedGroupName, members]) => ({
 				name: suggestedGroupName,
-				id: hat(),
+				id:   hat(),
 				type,
 				members,
 			} satisfies IGroupData));
@@ -253,7 +261,7 @@ export abstract class GroupStorageClient {
 						in: memberIds
 					}
 				},
-				data: {
+				data:  {
 					groupId
 				}
 			});
@@ -264,7 +272,7 @@ export abstract class GroupStorageClient {
 						in: memberIds
 					}
 				},
-				data: {
+				data:  {
 					groupId
 				}
 			});
@@ -275,7 +283,7 @@ export abstract class GroupStorageClient {
 		await usePrismaClient(async prisma => {
 			await prisma.$transaction(async tx => {
 				const group = await tx.crossCafeGroup.findUnique({
-					where: {
+					where:   {
 						id: groupId
 					},
 					include: {

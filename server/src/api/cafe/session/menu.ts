@@ -109,10 +109,10 @@ export class CafeMenuSession {
 			this.#retrievedTagStationIds.add(station.id);
 
 			const buyOnDemandTags = await retrieveTagDefinitionsAsync({
-				client: this.client,
+				client:       this.client,
 				daysInFuture: this.daysInFuture,
-				stationId: station.id,
-				menuId: station.menuId
+				stationId:    station.id,
+				menuId:       station.menuId
 			});
 
 			await TagStorageClient.createTags(
@@ -151,19 +151,20 @@ export class CafeMenuSession {
 		// API, consider buy-ondemand to be the source of truth so if something
 		// is missing then we should clear it from the local item as well.
 		return {
-			id:               jsonItem.id,
-			cafeId:           this.client.cafe.id,
-			price:            Number(jsonItem.amount || 0),
-			name:             jsonItem.displayText,
-			calories:         Number(jsonItem.properties.calories || 0),
-			maxCalories:      Number(jsonItem.properties.maxCalories || 0),
-			hasThumbnail:     false,
-			imageUrl:         jsonItem.image,
-			description:      jsonItem.description,
-			receiptText:      jsonItem.receiptText,
-			lastUpdateTime:   new Date(jsonItem.lastUpdateTime),
-			tags:             new Set(tags),
-			searchTags:       localItem?.searchTags ?? new Set<string>(),
+			id:             jsonItem.id,
+			cafeId:         this.client.cafe.id,
+			stationId:      station.id,
+			price:          Number(jsonItem.amount || 0),
+			name:           jsonItem.displayText,
+			calories:       Number(jsonItem.properties.calories || 0),
+			maxCalories:    Number(jsonItem.properties.maxCalories || 0),
+			hasThumbnail:   false,
+			imageUrl:       jsonItem.image,
+			description:    jsonItem.description,
+			receiptText:    jsonItem.receiptText,
+			lastUpdateTime: new Date(jsonItem.lastUpdateTime),
+			tags:           new Set(tags),
+			searchTags:     localItem?.searchTags ?? new Set<string>(),
 			modifiers,
 		};
 	}
