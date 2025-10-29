@@ -5,7 +5,7 @@ import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner
 import { GroupCandidate } from './group-candidate.js';
 
 export const GroupCandidates = () => {
-    const { value: candidates, error } = useValueNotifier(GROUP_STORE.groups);
+    const { value: candidates, error } = useValueNotifier(GROUP_STORE.zeroContextCandidates);
 
     if (error) {
         return (

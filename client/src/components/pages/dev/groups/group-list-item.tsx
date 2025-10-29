@@ -6,6 +6,7 @@ import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupMember } from './group-member.js';
+import { GroupAddMembers } from './group-add-members.js';
 
 interface IGroupListItemProps {
     group: IGroupData;
@@ -58,6 +59,21 @@ export const GroupListItem: React.FC<IGroupListItemProps> = ({ group }) => {
                         ))
                     }
                 </div>
+                <Accordion>
+                    <AccordionSummary>
+                        <div className="flex flex-center">
+                            <span className="material-symbols-outlined">
+                                person_add
+                            </span>
+                            <span>
+                                Search For New Group Members
+                            </span>
+                        </div>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <GroupAddMembers group={group}/>
+                    </AccordionDetails>
+                </Accordion>
             </AccordionDetails>
         </Accordion>
     );

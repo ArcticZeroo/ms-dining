@@ -4,7 +4,7 @@ import { ERROR_BODIES } from '@msdining/common/responses';
 import { getVisitorId } from '../constants/settings.ts';
 import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
 import { HttpException } from '../exception/http.ts';
-import { ZodType } from 'zod';
+import z, { ZodType } from 'zod';
 
 interface IMakeRequestParamsBase {
     path: string;
@@ -67,7 +67,7 @@ export const makeJsonRequestWithSchema = async <T extends ZodType>({
     path,
     options,
     schema
-}: IMakeJsonRequestWithSchemaParams<T>) => {
+}: IMakeJsonRequestWithSchemaParams<T>): Promise<z.output<T>> => {
     const json = await makeJsonRequest<unknown>({ path, options });
     return schema.parse(json);
 }

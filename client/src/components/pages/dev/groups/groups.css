@@ -5,3 +5,7 @@
 .member-toggle .member.active {
     background: var(--color-theme-green);
 }
+
+.all-items-scroller {
+    max-width: 50rem;
+}

@@ -632,6 +632,10 @@ html, body, #root, .App {
     opacity: 1;
 }
 
+.max-width-100 {
+    max-width: 100%;
+}
+
 /* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {

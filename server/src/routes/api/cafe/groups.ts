@@ -96,8 +96,8 @@ export const registerGroupsRoutes = (parent: Router) => {
 			ctx.body = jsonStringifyWithoutNull(candidates);
 		});
 
-	// GET /api/dining/groups/all-items - Get all items without a group
-	router.get('/all-items',
+	// GET /api/dining/groups/all-items-without-group - Get all items without a group
+	router.get('/all-items-without-group',
 		requireAdmin,
 		async ctx => {
 			const [menuItems, stations] = await Promise.all([
