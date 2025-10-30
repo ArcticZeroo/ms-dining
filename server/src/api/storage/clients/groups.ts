@@ -286,9 +286,8 @@ export abstract class GroupStorageClient {
 					where:   {
 						id: groupId
 					},
-					include: {
-						menuItems: true,
-						stations:  true
+					select: {
+						entityType: true
 					}
 				});
 
@@ -296,17 +295,7 @@ export abstract class GroupStorageClient {
 					throw new Error(`Group with ID ${groupId} not found`);
 				}
 
-				const targetMemberIds = new Set(group.entityType === SearchEntityType.menuItem
-					? group.menuItems.map(item => item.id)
-					: group.stations.map(station => station.id));
-
-				const newMemberIds = memberIds.filter(id => !targetMemberIds.has(id));
-
-				if (newMemberIds.length === 0) {
-					return;
-				}
-
-				await this.#setGroupMembersInternal(tx, groupId, newMemberIds, searchEntityTypeFromString(group.entityType));
+				await this.#setGroupMembersInternal(tx, groupId, memberIds, searchEntityTypeFromString(group.entityType));
 			});
 		});
 	}
