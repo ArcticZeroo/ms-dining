@@ -74,7 +74,7 @@ export const addGroupMembers = async (groupId: string, memberIds: Array<string>)
     });
 }
 
-export const retrieveGroupCandidates = async (groupId: string): Promise<Array<IGroupMember>> => {
+export const retrieveCandidatesForExistingGroup = async (groupId: string): Promise<Array<IGroupMember>> => {
     return makeJsonRequestWithSchema({
         path: `/api/dining/groups/${groupId}/candidates`,
         schema: GroupMembersResponseSchema

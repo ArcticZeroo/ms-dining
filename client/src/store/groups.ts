@@ -3,6 +3,7 @@ import * as GroupClient from '../api/client/groups.js';
 import { getRandomId } from '../util/id.ts';
 import { LazyResource } from './lazy.js';
 import { SearchEntityType } from '@msdining/common/models/search';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 const resourceFactory = {
     async groups(): Promise<Map<string, IGroupData>> {
@@ -40,6 +41,7 @@ class GroupStore {
     private _groups = new LazyResource(resourceFactory.groups);
     private _zeroContextCandidates = new LazyResource(resourceFactory.zeroContextCandidates);
     private _allItemsWithoutGroup = new LazyResource(resourceFactory.allItemsWithoutGroup);
+    private _candidatesForExistingGroups = new Map<string /*groupId*/, LazyResource<Array<IGroupMember>>>();
 
     get groups() {
         return this._groups.get();
@@ -51,6 +53,17 @@ class GroupStore {
 
     get allItemsWithoutGroup() {
         return this._allItemsWithoutGroup.get();
+    }
+
+    getCandidatesForExistingGroup(groupId: string) {
+        if (!this._candidatesForExistingGroups.has(groupId)) {
+            this._candidatesForExistingGroups.set(
+                groupId,
+                new LazyResource(() => GroupClient.retrieveCandidatesForExistingGroup(groupId))
+            );
+        }
+
+        return this._candidatesForExistingGroups.get(groupId)!.get();
     }
 
     refreshGroups() {
@@ -74,12 +87,12 @@ class GroupStore {
         await GroupClient.deleteGroupMember(groupId, memberId);
 
         const removedMembers: IGroupMember[] = [];
+        const remainingMembers: IGroupMember[] = [];
 
         await this._groups.updateExisting(async (current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             const group = updatedMap.get(groupId);
             if (group) {
-                const remainingMembers: IGroupMember[] = [];
                 for (const member of group.members) {
                     if (memberId === member.id) {
                         removedMembers.push(member);
@@ -94,17 +107,20 @@ class GroupStore {
             return current;
         });
 
-        await this.#addToAllItemsWithoutGroup(removedMembers);
+        await this.#onItemsRemovedFromGroup(groupId, removedMembers, remainingMembers);
     }
 
     async deleteGroup(groupId: string) {
         await GroupClient.deleteGroup(groupId);
+
+        this._candidatesForExistingGroups.delete(groupId);
+
         await this._groups.updateExisting(async (current) => {
             const updatedMap = new Map<string, IGroupData>(current);
 
             const group = updatedMap.get(groupId);
             if (group) {
-                await this.#addToAllItemsWithoutGroup(group.members);
+                await this.#onItemsRemovedFromGroup(group.id, group.members, [] /*remainingMembers*/);
             }
 
             updatedMap.delete(groupId);
@@ -112,7 +128,7 @@ class GroupStore {
         });
     }
 
-    async #removeFromAllItemsWithoutGroup(members: IGroupMember[]) {
+    async #onItemsAssignedToGroup(groupId: string, members: IGroupMember[]) {
         await this._allItemsWithoutGroup.updateExisting((currentItems) => {
             const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
             for (const member of members) {
@@ -123,12 +139,19 @@ class GroupStore {
             }
             return newItemsWithoutGroup;
         });
+
+        const groupMemberSuggestions = this._candidatesForExistingGroups.get(groupId);
+        if (groupMemberSuggestions) {
+            await groupMemberSuggestions.updateExisting((currentMembers) => {
+                return currentMembers.filter(member => !members.some(addedMember => addedMember.id === member.id));
+            });
+        }
     }
 
-    async #addToAllItemsWithoutGroup(members: IGroupMember[]) {
+    async #onItemsRemovedFromGroup(groupId: string, removedMembers: IGroupMember[], remainingMembers: IGroupMember[]) {
         await this._allItemsWithoutGroup.updateExisting((currentItems) => {
             const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
-            for (const member of members) {
+            for (const member of removedMembers) {
                 if (!newItemsWithoutGroup.has(member.type)) {
                     newItemsWithoutGroup.set(member.type, new Map<string, IGroupMember>());
                 }
@@ -136,6 +159,18 @@ class GroupStore {
             }
             return newItemsWithoutGroup;
         });
+
+        const groupMemberSuggestions = this._candidatesForExistingGroups.get(groupId);
+        if (groupMemberSuggestions && remainingMembers.length > 0) {
+            const suggestionsToAdd = removedMembers.filter((removedMember) => {
+                const removedMemberName = normalizeNameForSearch(removedMember.name);
+                return remainingMembers.some((remainingMember) => normalizeNameForSearch(remainingMember.name) === removedMemberName);
+            });
+
+            await groupMemberSuggestions.updateExisting((currentMembers) => {
+                return [...currentMembers, ...suggestionsToAdd];
+            });
+        }
     }
 
     async addGroupMembers(groupId: string, members: IGroupMember[]) {
@@ -155,7 +190,7 @@ class GroupStore {
             return current;
         });
 
-        await this.#removeFromAllItemsWithoutGroup(members);
+        await this.#onItemsAssignedToGroup(groupId, members);
     }
 
     async acceptCandidateMembers(candidate: IGroupData, memberIds: ReadonlySet<string>) {
@@ -192,7 +227,7 @@ class GroupStore {
             return updatedGroups;
         });
 
-        await this.#removeFromAllItemsWithoutGroup(newGroupMembers);
+        await this.#onItemsAssignedToGroup(id, newGroupMembers);
     }
 }
 

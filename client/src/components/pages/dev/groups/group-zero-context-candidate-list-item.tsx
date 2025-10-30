@@ -12,7 +12,7 @@ interface IGroupCandidateListItemProps {
     group: IGroupData;
 }
 
-export const GroupCandidateListItem: React.FC<IGroupCandidateListItemProps> = ({ group }) => {
+export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItemProps> = ({ group }) => {
     const { name, type, members: possibleMembers } = group;
     const [acceptedMemberIds, setAcceptedMemberIds] = useState<ReadonlySet<string>>(() => new Set(possibleMembers.map((member) => member.id)));
 

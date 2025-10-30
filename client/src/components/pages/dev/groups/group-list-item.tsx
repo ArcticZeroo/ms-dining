@@ -61,21 +61,7 @@ export const GroupListItem: React.FC<IGroupListItemProps> = ({ group }) => {
                             ))
                         }
                     </div>
-                    <Accordion>
-                        <AccordionSummary>
-                            <div className="flex flex-center">
-                                <span className="material-symbols-outlined">
-                                    person_add
-                                </span>
-                                <span>
-                                    Search For New Group Members
-                                </span>
-                            </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <GroupAddMembers group={group}/>
-                        </AccordionDetails>
-                    </Accordion>
+                    <GroupAddMembers group={group}/>
                 </div>
             </AccordionDetails>
         </Accordion>

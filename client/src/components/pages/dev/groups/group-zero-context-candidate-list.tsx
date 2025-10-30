@@ -2,9 +2,9 @@ import { useValueNotifier } from '../../../../hooks/events.ts';
 import { GROUP_STORE } from '../../../../store/groups.ts';
 import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
-import { GroupCandidateListItem } from './group-candidate-list-item.js';
+import { GroupZeroContextCandidateListItem } from './group-zero-context-candidate-list-item.js';
 
-export const GroupCandidateList = () => {
+export const GroupZeroContextCandidateList = () => {
     const { value: candidates, error } = useValueNotifier(GROUP_STORE.zeroContextCandidates);
 
     if (error) {
@@ -34,7 +34,7 @@ export const GroupCandidateList = () => {
             <div className="flex-col">
                 {
                     candidateEntries.map((group) => (
-                        <GroupCandidateListItem
+                        <GroupZeroContextCandidateListItem
                             key={`${group.type}-${group.name}`}
                             group={group}
                         />
