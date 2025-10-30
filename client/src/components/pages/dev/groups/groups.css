@@ -1,5 +1,5 @@
 .member-toggle .member {
-    background: var(--color-error-light);
+    background: var(--color-error);
 }
 
 .member-toggle .member.active {

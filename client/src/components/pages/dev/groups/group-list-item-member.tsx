@@ -3,6 +3,8 @@ import { GroupMember } from './group-member.js';
 import React, { useCallback } from 'react';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { GROUP_STORE } from '../../../../store/groups.js';
+import { classNames } from '../../../../util/react.js';
+import { promiseStageToButtonClass } from '../../../../util/async.js';
 
 interface IGroupListItemMemberProps {
     groupId: string;
@@ -10,7 +12,7 @@ interface IGroupListItemMemberProps {
 }
 
 export const GroupListItemMember: React.FC<IGroupListItemMemberProps> = ({ groupId, member }) => {
-    const { actualStage: deleteStage, run: deleteGroupMember } = useDelayedPromiseState(useCallback(
+    const { actualStage: deleteStage, error, run: deleteGroupMember } = useDelayedPromiseState(useCallback(
         () => GROUP_STORE.deleteGroupMember(groupId, member.id),
         [groupId, member.id]
     ));
@@ -30,8 +32,10 @@ export const GroupListItemMember: React.FC<IGroupListItemMemberProps> = ({ group
                 member={member}
             />
             <button
-                className="material-symbols-outlined icon-container default-button default-container"
+                className={classNames("material-symbols-outlined icon-container default-button default-container", promiseStageToButtonClass(deleteStage))}
                 onClick={onDeleteClicked}
+                disabled={!canDelete}
+                title={error}
             >
                 delete
             </button>

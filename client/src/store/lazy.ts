@@ -15,7 +15,7 @@ export class LazyResource<T> {
         stage: PromiseStage.notRun,
         value: undefined,
         error: undefined,
-        promise: Promise.reject(new Error('Promise not yet started'))
+        promise: Promise.reject(new Error('Promise not yet started')).catch()
     });
 
     constructor(factory: () => MaybePromise<T>) {
@@ -31,10 +31,6 @@ export class LazyResource<T> {
     }
 
     async _runFactory(promise: Promise<T>) {
-        if (!(this._state instanceof ValueNotifier)) {
-            return;
-        }
-
         const mySymbol = Symbol();
         this._idSymbol = mySymbol;
 

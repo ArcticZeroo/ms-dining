@@ -47,32 +47,34 @@ export const GroupListItem: React.FC<IGroupListItemProps> = ({ group }) => {
                 </div>
             </AccordionSummary>
             <AccordionDetails>
-                <div className="flex flex-wrap">
-                    {
-                        group.members.map((member) => (
-                            <GroupListItemMember
-                                key={`${member.type}-${member.id}`}
-                                groupId={group.id}
-                                member={member}
-                            />
-                        ))
-                    }
+                <div className="flex-col">
+                    <div className="flex flex-wrap">
+                        {
+                            group.members.map((member) => (
+                                <GroupListItemMember
+                                    key={`${member.type}-${member.id}`}
+                                    groupId={group.id}
+                                    member={member}
+                                />
+                            ))
+                        }
+                    </div>
+                    <Accordion>
+                        <AccordionSummary>
+                            <div className="flex flex-center">
+                                <span className="material-symbols-outlined">
+                                    person_add
+                                </span>
+                                <span>
+                                    Search For New Group Members
+                                </span>
+                            </div>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <GroupAddMembers group={group}/>
+                        </AccordionDetails>
+                    </Accordion>
                 </div>
-                <Accordion>
-                    <AccordionSummary>
-                        <div className="flex flex-center">
-                            <span className="material-symbols-outlined">
-                                person_add
-                            </span>
-                            <span>
-                                Search For New Group Members
-                            </span>
-                        </div>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <GroupAddMembers group={group}/>
-                    </AccordionDetails>
-                </Accordion>
             </AccordionDetails>
         </Accordion>
     );

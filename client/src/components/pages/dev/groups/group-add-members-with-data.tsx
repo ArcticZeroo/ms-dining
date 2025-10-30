@@ -134,7 +134,7 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
                     {visibleItemsWithoutGroup.length} matching query / {allItemsCount} available
                 </span>
             </div>
-            <div className="flex member-toggle horizontal-scroll all-items-scroller">
+            <div className="flex member-toggle flex-wrap">
                 {
                     selectedMembers.size > 0 &&
                     Array.from(selectedMembers).flatMap(([type, memberIds]) => {
@@ -151,11 +151,11 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
 
                             return (
                                 <button
+                                    key={`${type}-${memberId}`}
                                     className={classNames('card selected-button member active')}
                                     onClick={() => toggleSelection(member)}
                                 >
                                     <GroupMember
-                                        key={`${type}-${memberId}`}
                                         member={member}
                                     />
                                 </button>
@@ -164,7 +164,7 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
                     })
                 }
                 {
-                    visibleItemsWithoutGroup.length > 0 && visibleItemsWithoutGroup.map((member) =>
+                    visibleItemsWithoutGroup.length > 0 && visibleItemsWithoutGroup.slice(0, 100).map((member) =>
                         (
                             <button
                                 key={`${member.type}-${member.id}`}
