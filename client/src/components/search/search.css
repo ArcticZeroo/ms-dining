@@ -50,14 +50,17 @@
 
 .entity-menu-item {
     background: var(--color-search-entity-menu-item);
+    color: white;
 }
 
 .entity-station {
     background: var(--color-search-entity-station);
+    color: white;
 }
 
 .entity-cafe {
     background: var(--color-search-entity-cafe);
+    color: white;
 }
 
 .search-result-info {

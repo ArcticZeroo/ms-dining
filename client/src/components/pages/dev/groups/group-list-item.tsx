@@ -7,6 +7,7 @@ import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupAddMembers } from './group-add-members.js';
 import { GroupListItemMember } from './group-list-item-member.js';
+import { GroupTypeIcon } from './group-type-icon.js';
 
 interface IGroupListItemProps {
     group: IGroupData;
@@ -34,6 +35,7 @@ export const GroupListItem: React.FC<IGroupListItemProps> = ({ group }) => {
         <Accordion key={group.id}>
             <AccordionSummary>
                 <div className="flex flex-between">
+                    <GroupTypeIcon type={group.type}/>
                     <span>
                         {group.name} ({group.members.length} members)
                     </span>

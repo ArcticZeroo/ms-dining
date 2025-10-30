@@ -12,76 +12,75 @@ interface IGroupAddMembersWithDataProps {
     allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>>;
 }
 
-const cloneSelectedMembers = (selectedMemberIds: Map<SearchEntityType, Set<string>>): Map<SearchEntityType, Set<string>> => {
-    return new Map(
-        Array.from(selectedMemberIds.entries()).map(([type, ids]) => [type, new Set(ids)])
-    );
-};
-
-const useVisibleItemsWithoutGroup = (selectedMembers: Map<SearchEntityType, Set<string>>, allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>>, substringQuery: string): IGroupMember[] => {
+const useVisibleItemsWithoutGroup = (groupType: SearchEntityType, selectedMembers: Set<string>, allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>>, substringQuery: string): IGroupMember[] => {
     return useMemo(() => {
         const lowerSubstringQuery = substringQuery.trim().toLowerCase();
         if (lowerSubstringQuery.length === 0) {
             return [];
         }
 
+        const allItemsForGroupType = allItemsWithoutGroup.get(groupType);
+        if (!allItemsForGroupType) {
+            return [];
+        }
+
         const visibleItems: IGroupMember[] = [];
 
-        for (const [type, membersById] of allItemsWithoutGroup.entries()) {
-            for (const [memberId, member] of membersById.entries()) {
-                const isSelected = selectedMembers.get(type)?.has(memberId) ?? false;
-                if (isSelected) {
-                    continue;
-                }
-
-                if (member.name.toLowerCase().includes(lowerSubstringQuery)) {
-                    visibleItems.push(member);
-                    continue;
-                }
-
-                if (member.metadata) {
-                    for (const [key, value] of Object.entries(member.metadata)) {
-                        if (key.toLowerCase().includes(lowerSubstringQuery) || value.toLowerCase().includes(lowerSubstringQuery)) {
-                            visibleItems.push(member);
-                            break;
-                        }
-                    }
-                }
+        for (const [memberId, member] of allItemsForGroupType) {
+            const isSelected = selectedMembers.has(memberId) ?? false;
+            if (isSelected) {
+                continue;
             }
+
+            if (member.name.toLowerCase().includes(lowerSubstringQuery)) {
+                visibleItems.push(member);
+                // continue;
+            }
+            //
+            // if (member.metadata) {
+            //     for (const [key, value] of Object.entries(member.metadata)) {
+            //         if (key.toLowerCase().includes(lowerSubstringQuery) || value.toLowerCase().includes(lowerSubstringQuery)) {
+            //             visibleItems.push(member);
+            //             break;
+            //         }
+            //     }
+            // }
         }
 
         return visibleItems;
-    }, [allItemsWithoutGroup, selectedMembers, substringQuery]);
+    }, [allItemsWithoutGroup, groupType, selectedMembers, substringQuery]);
 };
 
 export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = ({ group, allItemsWithoutGroup }) => {
     const [substringQuery, setSubstringQuery] = useState<string>('');
-    const [selectedMembers, setSelectedMembers] = useState<Map<SearchEntityType, Set<string>>>(new Map());
-    const selectedCount = Array.from(selectedMembers.values()).reduce((sum, memberIds) => sum + memberIds.size, 0);
-    const allItemsCount = Array.from(allItemsWithoutGroup.values()).reduce((sum, membersById) => sum + membersById.size, 0);
-    const visibleItemsWithoutGroup = useVisibleItemsWithoutGroup(selectedMembers, allItemsWithoutGroup, substringQuery);
-
-    const { stage: addStage, run: addMembers } = useDelayedPromiseState(useCallback(async () => {
-        const members: IGroupMember[] = [];
-
-        for (const [type, memberIds] of selectedMembers.entries()) {
-            const availableMembersOfType = allItemsWithoutGroup.get(type);
-            if (!availableMembersOfType) {
-                console.error('No available members of type', type, 'when adding to group');
-                continue;
+    const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
+    const selectedCount = selectedMemberIds.size;
+    const availableItemsOfType = allItemsWithoutGroup.get(group.type);
+    const allItemsCount = availableItemsOfType?.size ?? 0;
+    const visibleItemsWithoutGroup = useVisibleItemsWithoutGroup(group.type, selectedMemberIds, allItemsWithoutGroup, substringQuery);
+    const selectedMembers = useMemo(
+        () => {
+            if (!availableItemsOfType) {
+                return [];
             }
 
-            for (const memberId of memberIds) {
-                if (availableMembersOfType.has(memberId)) {
-                    members.push(availableMembersOfType.get(memberId)!);
+            const members: IGroupMember[] = [];
+            for (const memberId of selectedMemberIds) {
+                const member = availableItemsOfType.get(memberId);
+                if (member) {
+                    members.push(member);
                 } else {
-                    console.error('Member ID', memberId, 'of type', type, 'not found in available members when adding to group');
+                    console.error(`Selected member ID ${memberId} of type ${group.type} not found in available members`);
                 }
             }
-        }
+            return members;
+        },
+        [availableItemsOfType, group.type, selectedMemberIds]
+    );
 
-        return GROUP_STORE.addGroupMembers(group.id, members);
-    }, [allItemsWithoutGroup, group.id, selectedMembers]));
+    const { stage: addStage, run: addMembers } = useDelayedPromiseState(useCallback(async () => {
+        return GROUP_STORE.addGroupMembers(group.id, selectedMembers);
+    }, [group.id, selectedMembers]));
 
     if (allItemsWithoutGroup.size === 0) {
         return (
@@ -99,22 +98,14 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
             return;
         }
 
-        const newSelectedMembers = cloneSelectedMembers(selectedMembers);
-        const memberIdsForType = newSelectedMembers.get(member.type) || new Set<string>();
-
-        if (memberIdsForType.has(member.id)) {
-            memberIdsForType.delete(member.id);
-            if (memberIdsForType.size === 0) {
-                newSelectedMembers.delete(member.type);
-            } else {
-                newSelectedMembers.set(member.type, memberIdsForType);
-            }
+        const newSelectedMembers = new Set(selectedMemberIds);
+        if (newSelectedMembers.has(member.id)) {
+            newSelectedMembers.delete(member.id);
         } else {
-            memberIdsForType.add(member.id);
-            newSelectedMembers.set(member.type, memberIdsForType);
+            newSelectedMembers.add(member.id);
         }
 
-        setSelectedMembers(newSelectedMembers);
+        setSelectedMemberIds(newSelectedMembers);
     };
 
     return (
@@ -136,31 +127,19 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
             </div>
             <div className="flex member-toggle flex-wrap">
                 {
-                    selectedMembers.size > 0 &&
-                    Array.from(selectedMembers).flatMap(([type, memberIds]) => {
-                        const availableMembersOfType = allItemsWithoutGroup.get(type);
-                        if (!availableMembersOfType) {
-                            return [];
-                        }
-
-                        return Array.from(memberIds).map((memberId) => {
-                            const member = availableMembersOfType.get(memberId);
-                            if (!member) {
-                                return null;
-                            }
-
-                            return (
-                                <button
-                                    key={`${type}-${memberId}`}
-                                    className={classNames('card selected-button member active')}
-                                    onClick={() => toggleSelection(member)}
-                                >
-                                    <GroupMember
-                                        member={member}
-                                    />
-                                </button>
-                            );
-                        });
+                    selectedMemberIds.size > 0 &&
+                    Array.from(selectedMembers).map((member) => {
+                        return (
+                            <button
+                                key={`${member.type}-${member.id}`}
+                                className={classNames('card selected-button member active')}
+                                onClick={() => toggleSelection(member)}
+                            >
+                                <GroupMember
+                                    member={member}
+                                />
+                            </button>
+                        );
                     })
                 }
                 {

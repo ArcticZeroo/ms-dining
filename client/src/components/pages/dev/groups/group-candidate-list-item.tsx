@@ -6,6 +6,7 @@ import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupMember } from './group-member.js';
+import { GroupTypeIcon } from './group-type-icon.js';
 
 interface IGroupCandidateListItemProps {
     group: IGroupData;
@@ -55,7 +56,8 @@ export const GroupCandidateListItem: React.FC<IGroupCandidateListItemProps> = ({
     return (
         <Accordion key={`${type}-${name}`}>
             <AccordionSummary>
-                <div className="flex flex-between">
+                <div className="flex">
+                    <GroupTypeIcon type={group.type}/>
                     <div>
                         {name} ({possibleMembers.length})
                     </div>
