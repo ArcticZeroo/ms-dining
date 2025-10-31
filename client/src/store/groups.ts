@@ -129,6 +129,28 @@ class GroupStore {
     }
 
     async #onItemsAssignedToGroup(groupId: string, members: IGroupMember[]) {
+        await this._zeroContextCandidates.updateExisting((currentZeroContextCandidates) => {
+            const updatedCandidates = new Map<string, IGroupData>(currentZeroContextCandidates);
+
+            let didAnythingChange = false;
+            for (const [candidateId, candidate] of currentZeroContextCandidates.entries()) {
+                const newMembers = candidate.members.filter(member => !members.some(addedMember => addedMember.id === member.id));
+                if (newMembers.length === 0) {
+                    didAnythingChange = true;
+                    updatedCandidates.delete(candidateId);
+                } else if (newMembers.length < candidate.members.length) {
+                    didAnythingChange = true;
+                    updatedCandidates.set(candidateId, { ...candidate, members: newMembers });
+                }
+            }
+
+            if (didAnythingChange) {
+                return updatedCandidates;
+            }
+
+            return currentZeroContextCandidates;
+        });
+
         await this._allItemsWithoutGroup.updateExisting((currentItems) => {
             const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
             for (const member of members) {
