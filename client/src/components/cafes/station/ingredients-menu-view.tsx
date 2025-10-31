@@ -1,6 +1,6 @@
 import React from 'react';
 import { ICafeStation } from '../../../models/cafe.ts';
-import { IMenuItem } from '@msdining/common/models/cafe.ts';
+import { IMenuItem } from '@msdining/common/models/cafe';
 
 interface IIngredientsMenu {
     starterChoices: IMenuItem[];

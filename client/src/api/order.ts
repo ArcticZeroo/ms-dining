@@ -6,7 +6,7 @@ import {
     ISerializedModifier,
     ISubmitOrderItems
 } from '@msdining/common/models/cart';
-import { IPriceResponse } from '@msdining/common/models/http.ts';
+import { IPriceResponse } from '@msdining/common/models/http';
 import { CartItemsByCafeId } from '../context/cart.ts';
 import { isValidOrderCompletionResponse } from '../util/order.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';

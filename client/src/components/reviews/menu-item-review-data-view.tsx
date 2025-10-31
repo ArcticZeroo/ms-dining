@@ -1,7 +1,7 @@
 import { PostReviewInput } from './post-review-input.tsx';
 import { ReviewStats } from './review-stats.tsx';
 import { MenuItemReviewsList } from './menu-item-reviews-list.tsx';
-import { IReviewDataForMenuItem } from '@msdining/common/models/review.ts';
+import { IReviewDataForMenuItem } from '@msdining/common/models/review';
 import React, { useMemo, useState } from 'react';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { LogInForReviewButton } from './log-in-for-review-button.tsx';

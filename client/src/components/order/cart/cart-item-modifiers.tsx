@@ -1,4 +1,4 @@
-import { IMenuItemModifier } from '@msdining/common/models/cafe.ts';
+import { IMenuItemModifier } from '@msdining/common/models/cafe';
 import React from 'react';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
 

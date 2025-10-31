@@ -68,6 +68,7 @@ export type IMenuItem = IMenuItemBase & IMenuItemReviewHeader & {
 export interface IMenuItemDTO extends IMenuItemReviewHeader {
     id: string;
     cafeId: string;
+    stationId: string;
     price: number;
     name: string;
     receiptText?: Nullable<string>;
