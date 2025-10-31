@@ -12,6 +12,7 @@ model Cafe {
   dailyStations         DailyStation[]
   dailyOrderingContexts DailyCafeOrderingContext[]
   menuItems             MenuItem[]
+  stations              Station[]
 }
 
 // Represents a group of menu items or stations that are identical across multiple cafes
@@ -113,6 +114,9 @@ model Station {
 
   groupId String?
   group   CrossCafeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
 
   dailyStations DailyStation[]
   menuItems     MenuItem[]

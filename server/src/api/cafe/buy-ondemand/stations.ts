@@ -3,16 +3,21 @@ import { ICafeStation } from '../../../models/cafe.js';
 import { ICafeStationListItem } from '../../../models/buyondemand/responses.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 
-const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafeStationListItem): ICafeStation  => {
+const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafeStationListItem): ICafeStation => {
+	const url = stationJson.image
+		? new URL(stationJson.image, `https://${client.cafe.id}.buy-ondemand.com`)
+		: undefined;
+
 	const station: ICafeStation = {
-		id: stationJson.id,
+		id:     stationJson.id,
+		cafeId: client.cafe.id,
 		// Prioritize conceptOptions.displayText as it contains the correct display name for the station
 		// (e.g. in some cases before we have seen "Masala Fresh" in conceptOptions.displayText which was
 		// correct, while the name field was "What The Pho" which was incorrect).
 		// Some station names are just a space, e.g. the station for the sandwich place in the commons
 		// This is confusing for users in some cases, so let's just replace it with the cafe name
 		name:                      stationJson.conceptOptions?.displayText?.trim() || stationJson.name.trim() || client.cafe.name,
-		logoUrl:                   stationJson.image,
+		logoUrl:                   url?.href,
 		menuId:                    stationJson.priceLevelConfig.menuId,
 		menuLastUpdateTime:        new Date(0),
 		menuItemIdsByCategoryName: new Map(),

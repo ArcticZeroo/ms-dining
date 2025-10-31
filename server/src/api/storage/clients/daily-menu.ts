@@ -60,7 +60,7 @@ export abstract class DailyMenuStorageClient {
 			dirtyStations:             new Set<string>(),
 			removedMenuItemsByStation: new Map<string, Set<string>>(),
 			addedMenuItemsByStation:   new Map<string, Set<string>>(),
-			dirtyMenuItemIds: new Set<string>()
+			dirtyMenuItemIds:          new Set<string>()
 		};
 
 		await usePrismaClient(async (prismaClient) => prismaClient.$transaction(async tx => {
@@ -242,6 +242,7 @@ export abstract class DailyMenuStorageClient {
 				menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
 										? dailyStation.externalLastUpdateTime
 										: undefined,
+				cafeId,
 				menuItemsById,
 				menuItemIdsByCategoryName
 			});
@@ -600,9 +601,9 @@ export abstract class DailyMenuStorageClient {
 	// todo: Consider doing this on boot for all cafes?
 	public static async retrieveFirstStationVisitsForCafe(cafeId: string): Promise<Map<string /*stationId*/, Date>> {
 		const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
-			by: ['stationId'],
-			where:  { cafeId },
-			_min: {
+			by:    ['stationId'],
+			where: { cafeId },
+			_min:  {
 				dateString: true
 			}
 		}));
@@ -642,7 +643,7 @@ export abstract class DailyMenuStorageClient {
 
 	public static async retrieveFirstMenuItemVisitDate(menuItemId: string): Promise<string | null> {
 		const visit = await usePrismaClient(client => client.dailyMenuItem.findFirst({
-			where: {
+			where:   {
 				menuItemId
 			},
 			orderBy: {
@@ -652,7 +653,7 @@ export abstract class DailyMenuStorageClient {
 					}
 				}
 			},
-			select: {
+			select:  {
 				category: {
 					select: {
 						station: {

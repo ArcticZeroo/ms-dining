@@ -56,6 +56,7 @@ export interface ICafeConfig {
 export interface ICafeStation {
     id: string;
     menuId: string;
+	cafeId: string;
     name: string;
     logoUrl?: string;
     menuItemIdsByCategoryName: Map<string, Array<string>>;
