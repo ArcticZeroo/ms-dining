@@ -7,7 +7,7 @@ export const GroupZeroContextCandidateList= () => {
     const { value: candidates } = useValueNotifier(GROUP_STORE.zeroContextCandidates);
     const candidateCount = useMemo(
         () => candidates
-            ? Array.from(candidates.values()).reduce((sum, group) => sum + group.members.length, 0)
+            ? Array.from(candidates.values()).length
             : undefined,
         [candidates]
     );
