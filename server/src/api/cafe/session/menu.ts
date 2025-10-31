@@ -147,6 +147,10 @@ export class CafeMenuSession {
 			}
 		}
 
+		const imageUrl = jsonItem.image
+			? new URL(jsonItem.image, `https://${this.client.cafe.id}.buy-ondemand.com`)
+			: undefined;
+
 		// Don't use localItem for properties that are native to the buy-ondemand
 		// API, consider buy-ondemand to be the source of truth so if something
 		// is missing then we should clear it from the local item as well.
@@ -159,7 +163,7 @@ export class CafeMenuSession {
 			calories:       Number(jsonItem.properties.calories || 0),
 			maxCalories:    Number(jsonItem.properties.maxCalories || 0),
 			hasThumbnail:   false,
-			imageUrl:       jsonItem.image,
+			imageUrl:       imageUrl?.href,
 			description:    jsonItem.description,
 			receiptText:    jsonItem.receiptText,
 			lastUpdateTime: new Date(jsonItem.lastUpdateTime),
