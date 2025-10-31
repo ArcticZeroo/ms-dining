@@ -3,6 +3,7 @@ import { classNames } from '../../../util/react.js';
 import React, { useState } from 'react';
 import { ForceRefreshMenu } from './force-refresh-menu.js';
 import { GroupsView } from './groups/groups-view.js';
+import './dev-page.css';
 
 const tabs = {
     'Refresh Menu': <ForceRefreshMenu/>,

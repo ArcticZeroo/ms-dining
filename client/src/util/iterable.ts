@@ -13,3 +13,7 @@ export const tryGetUniversalValue = <T>(values: Iterable<T>): T | null => {
     }
     return null;
 }
+
+export const sum = (values: Iterable<number>): number => {
+    return Array.from(values).reduce((a, b) => a + b, 0);
+}

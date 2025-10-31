@@ -9,3 +9,9 @@
 .all-items-scroller {
     max-width: 50rem;
 }
+
+.group-list-vertical-scroll {
+    max-height: 75vh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
