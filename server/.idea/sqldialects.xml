@@ -2,6 +2,7 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/prisma/migrations/20250408182350_menu_item_cafe/migration.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/prisma/sql/getAllMenuItemsWithBadImageUrl.sql" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/prisma/sql/getMenuItemGroupCandidatesForGroup.sql" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/prisma/sql/getMenuItemGroupCandidatesZeroContext.sql" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/prisma/sql/getStationGroupCandidatesForGroup.sql" dialect="SQLite" />
