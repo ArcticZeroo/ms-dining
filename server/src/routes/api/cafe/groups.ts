@@ -4,22 +4,25 @@ import {
 	menuItemToGroupMember,
 	stationToGroupMember
 } from '../../../api/storage/clients/groups.js';
-import { attachRouter, requireAdmin, requireRole } from '../../../util/koa.js';
+import { attachRouter, requireAdmin } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
 	AddGroupMembersRequestSchema,
-	CreateGroupRequestSchema, IGroupMember,
+	CreateGroupRequestSchema,
+	IGroupMember,
 	RenameGroupRequestSchema
 } from '@msdining/common/models/group';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';
+import { doNotCacheMiddleware } from '../../../middleware/cache.js';
+import { Context } from 'koa';
 
 export const registerGroupsRoutes = (parent: Router) => {
 	const router = new Router({
 		prefix: '/groups'
 	});
 
-	const requireGroupIdParam = (ctx: Router.RouterContext) => {
+	const requireGroupIdParam = (ctx: Context) => {
 		const groupId = ctx.params.id;
 		if (!groupId) {
 			ctx.throw(400, 'Missing group id');
@@ -30,6 +33,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 
 	// GET /api/dining/groups - Get all groups
 	router.get('/',
+		doNotCacheMiddleware,
 		async ctx => {
 			const groups = await GroupStorageClient.getGroups();
 			ctx.body = jsonStringifyWithoutNull(groups);
@@ -38,6 +42,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 	// GET /api/dining/groups/candidates - Get suggested groups to create (zero context)
 	router.get('/candidates',
 		requireAdmin,
+		doNotCacheMiddleware,
 		async ctx => {
 			const candidates = await GroupStorageClient.getGroupCandidatesZeroContext();
 			ctx.body = jsonStringifyWithoutNull(candidates);
@@ -90,6 +95,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 	// GET /api/dining/groups/:id/candidates - Get candidate members for a group
 	router.get('/:id/candidates',
 		requireAdmin,
+		doNotCacheMiddleware,
 		async ctx => {
 			const groupId = requireGroupIdParam(ctx);
 			const candidates = await GroupStorageClient.getCandidatesForGroup(groupId);
@@ -99,6 +105,7 @@ export const registerGroupsRoutes = (parent: Router) => {
 	// GET /api/dining/groups/all-items-without-group - Get all items without a group
 	router.get('/all-items-without-group',
 		requireAdmin,
+		doNotCacheMiddleware,
 		async ctx => {
 			const [menuItems, stations] = await Promise.all([
 				MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
