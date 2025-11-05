@@ -17,7 +17,8 @@ export const GroupDataSchema = z.object({
     id: z.string(),
     name: z.string(),
     type: allSearchEntityTypesEnum,
-    members: z.array(GroupMemberSchema)
+    members: z.array(GroupMemberSchema),
+	notes: z.string().optional()
 });
 
 export type IGroupData = z.infer<typeof GroupDataSchema>;
@@ -37,11 +38,12 @@ export const CreateGroupResponseSchema = z.object({
 
 export type ICreateGroupResponse = z.infer<typeof CreateGroupResponseSchema>;
 
-export const RenameGroupRequestSchema = z.object({
-    name: z.string().min(1)
+export const UpdateGroupRequest = z.object({
+    name: z.string().optional(),
+	notes: z.string().optional()
 });
 
-export type IRenameGroupRequest = z.infer<typeof RenameGroupRequestSchema>;
+export type IUpdateGroupRequest = z.infer<typeof UpdateGroupRequest>;
 
 export const AddGroupMembersRequestSchema = z.object({
     memberIds: z.array(z.string()).min(1)

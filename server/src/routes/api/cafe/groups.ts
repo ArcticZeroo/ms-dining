@@ -10,12 +10,13 @@ import {
 	AddGroupMembersRequestSchema,
 	CreateGroupRequestSchema,
 	IGroupMember,
-	RenameGroupRequestSchema
+	UpdateGroupRequest
 } from '@msdining/common/models/group';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';
 import { doNotCacheMiddleware } from '../../../middleware/cache.js';
 import { Context } from 'koa';
+import { treatPrismaNotFoundAs404 } from '../../../middleware/prisma.js';
 
 export const registerGroupsRoutes = (parent: Router) => {
 	const router = new Router({
@@ -66,10 +67,11 @@ export const registerGroupsRoutes = (parent: Router) => {
 	// PATCH /api/dining/groups/:id - Rename a group
 	router.patch('/:id',
 		requireAdmin,
+		treatPrismaNotFoundAs404('Group not found'),
 		async ctx => {
 			const groupId = requireGroupIdParam(ctx);
-			const { name } = RenameGroupRequestSchema.parse(ctx.request.body);
-			await GroupStorageClient.renameGroup(groupId, name);
+			const body = UpdateGroupRequest.parse(ctx.request.body);
+			await GroupStorageClient.updateGroup(groupId, body);
 			ctx.status = 204;
 		});
 

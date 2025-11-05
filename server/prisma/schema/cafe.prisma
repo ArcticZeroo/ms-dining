@@ -24,6 +24,7 @@ model CrossCafeGroup {
   id         String @id @default(uuid())
   name       String
   entityType String
+  notes      String?
 
   menuItems MenuItem[]
   stations  Station[]

@@ -11,7 +11,7 @@ import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { StationStorageClient } from './station.js';
 import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
-import { IGroupData, IGroupMember } from '@msdining/common/models/group';
+import { IGroupData, IGroupMember, IUpdateGroupRequest } from '@msdining/common/models/group';
 import { PrismaLikeClient } from '../../../models/prisma.js';
 import hat from 'hat';
 
@@ -44,8 +44,8 @@ export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IG
 		type:     SearchEntityType.menuItem,
 		imageUrl: menuItem.imageUrl || undefined,
 		metadata: {
-			cafe: menuItem.cafeId,
-			stationName: station?.name || '',
+			cafe:           menuItem.cafeId,
+			stationName:    station?.name || '',
 			stationLogoUrl: station?.logoUrl || ''
 		}
 	});
@@ -197,6 +197,7 @@ export abstract class GroupStorageClient {
 					id:         true,
 					name:       true,
 					entityType: true,
+					notes:      true,
 					menuItems:  {
 						select: {
 							id: true
@@ -215,9 +216,10 @@ export abstract class GroupStorageClient {
 			const members = await getGroupResultMembers(groupResult);
 
 			return {
-				id:   groupResult.id,
-				name: groupResult.name,
-				type: SearchEntityType[groupResult.entityType as keyof typeof SearchEntityType],
+				id:    groupResult.id,
+				name:  groupResult.name,
+				notes: groupResult.notes || undefined,
+				type:  SearchEntityType[groupResult.entityType as keyof typeof SearchEntityType],
 				members
 			} satisfies IGroupData;
 		}));
@@ -283,7 +285,7 @@ export abstract class GroupStorageClient {
 		await usePrismaClient(async prisma => {
 			await prisma.$transaction(async tx => {
 				const group = await tx.crossCafeGroup.findUnique({
-					where:   {
+					where:  {
 						id: groupId
 					},
 					select: {
@@ -329,14 +331,14 @@ export abstract class GroupStorageClient {
 		});
 	}
 
-	public static async renameGroup(id: string, newName: string): Promise<void> {
+	public static async updateGroup(id: string, update: IUpdateGroupRequest): Promise<void> {
 		await usePrismaClient(async prisma => {
 			return prisma.crossCafeGroup.update({
 				where: {
 					id
 				},
 				data:  {
-					name: newName
+					...update
 				}
 			});
 		});
@@ -345,7 +347,7 @@ export abstract class GroupStorageClient {
 	public static async deleteMembersFromGroup(groupId: string, memberIds: Array<string>): Promise<void> {
 		await usePrismaClient(async prisma => {
 			const group = await prisma.crossCafeGroup.findUnique({
-				where:   {
+				where:  {
 					id: groupId
 				},
 				select: {
