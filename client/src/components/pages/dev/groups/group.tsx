@@ -1,6 +1,5 @@
 import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IGroupData } from '@msdining/common/models/group';
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import { GROUP_STORE } from '../../../../store/groups.ts';
 import { canUseControllingButton, promiseStageToButtonClass } from '../../../../util/async.js';
@@ -8,6 +7,9 @@ import { classNames } from '../../../../util/react.js';
 import { GroupAddMembers } from './group-add-members.js';
 import { GroupListItemMember } from './group-member/group-list-item-member.js';
 import { GroupTypeIcon } from './group-type-icon.js';
+import { CollapsibleContainer } from '../../../collapsible/collapsible-container.js';
+import { CollapsibleHeader } from '../../../collapsible/collapsible-header.js';
+import { CollapsibleBody } from '../../../collapsible/collapsible-body.js';
 
 interface IGroupProps {
     group: IGroupData;
@@ -90,105 +92,107 @@ export const Group: React.FC<IGroupProps> = ({ group }) => {
     const editControls = useEditControls(group);
 
     return (
-        <Accordion key={group.id}>
-            <AccordionSummary>
-                <div className="flex flex-between">
-                    <GroupTypeIcon type={group.type}/>
-                    <div className="flex-col flex-center">
+        <div className="default-container bg-raised-2 flex-col">
+            <CollapsibleContainer>
+                <CollapsibleHeader>
+                    <div className="flex flex-between">
+                        <GroupTypeIcon type={group.type}/>
+                        <div className="flex-col flex-center">
+                            {
+                                editControls.isEditing && (
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={editControls.name}
+                                            onChange={(e) => editControls.onNameChanged(e.target.value)}
+                                            placeholder="Group Name"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={editControls.notes}
+                                            onChange={(e) => editControls.onNotesChanged(e.target.value)}
+                                            placeholder="Notes"
+                                        />
+                                    </>
+                                )
+                            }
+                            {
+                                !editControls.isEditing && (
+                                    <>
+                                        <span>{group.name}</span>
+                                        {
+                                            group.notes && (
+                                                <span className="subtitle">
+                                                    {group.notes}
+                                                </span>
+                                            )
+                                        }
+                                    </>
+                                )
+                            }
+                        </div>
+                        <span className="badge">
+                            {group.members.length}
+                        </span>
                         {
                             editControls.isEditing && (
                                 <>
-                                    <input
-                                        type="text"
-                                        value={editControls.name}
-                                        onChange={(e) => editControls.onNameChanged(e.target.value)}
-                                        placeholder="Group Name"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={editControls.notes}
-                                        onChange={(e) => editControls.onNotesChanged(e.target.value)}
-                                        placeholder="Notes"
-                                    />
+                                    <button
+                                        className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(editControls.updateStage))}
+                                        disabled={!editControls.canSaveOrCancelEditing}
+                                        onClick={editControls.onSaveClicked}
+                                    >
+                                        check
+                                    </button>
+                                    <button
+                                        className="material-symbols-outlined default-button default-container icon-container"
+                                        disabled={!editControls.canSaveOrCancelEditing}
+                                        onClick={editControls.onCancelClicked}
+                                    >
+                                        close
+                                    </button>
                                 </>
                             )
                         }
                         {
                             !editControls.isEditing && (
                                 <>
-                                    <span>{group.name}</span>
-                                    {
-                                        group.notes && (
-                                            <span className="subtitle">
-                                                {group.notes}
-                                            </span>
-                                        )
-                                    }
+                                    <button
+                                        className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(deleteControls.deleteStage))}
+                                        disabled={!deleteControls.canUseDeleteButton}
+                                        onClick={deleteControls.onDeleteClicked}
+                                    >
+                                        delete
+                                    </button>
+                                    <button
+                                        className="material-symbols-outlined default-button default-container icon-container"
+                                        disabled={!deleteControls.canUseDeleteButton}
+                                        onClick={editControls.onEditClicked}
+                                    >
+                                        edit
+                                    </button>
                                 </>
                             )
                         }
                     </div>
-                    <span className="badge">
-                        {group.members.length}
-                    </span>
-                    {
-                        editControls.isEditing && (
-                            <>
-                                <button
-                                    className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(editControls.updateStage))}
-                                    disabled={!editControls.canSaveOrCancelEditing}
-                                    onClick={editControls.onSaveClicked}
-                                >
-                                    check
-                                </button>
-                                <button
-                                    className="material-symbols-outlined default-button default-container icon-container"
-                                    disabled={!editControls.canSaveOrCancelEditing}
-                                    onClick={editControls.onCancelClicked}
-                                >
-                                    close
-                                </button>
-                            </>
-                        )
-                    }
-                    {
-                        !editControls.isEditing && (
-                            <>
-                                <button
-                                    className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(deleteControls.deleteStage))}
-                                    disabled={!deleteControls.canUseDeleteButton}
-                                    onClick={deleteControls.onDeleteClicked}
-                                >
-                                    delete
-                                </button>
-                                <button
-                                    className="material-symbols-outlined default-button default-container icon-container"
-                                    disabled={!deleteControls.canUseDeleteButton}
-                                    onClick={editControls.onEditClicked}
-                                >
-                                    edit
-                                </button>
-                            </>
-                        )
-                    }
-                </div>
-            </AccordionSummary>
-            <AccordionDetails>
-                <div className="flex-col">
-                    <div className="flex flex-wrap">
-                        {
-                            group.members.map((member) => (
-                                <GroupListItemMember
-                                    key={`${member.type}-${member.id}`}
-                                    groupId={group.id}
-                                    member={member}
-                                />
-                            ))
-                        }
+                </CollapsibleHeader>
+                <CollapsibleBody>
+                    <div className="flex-col">
+                        <div className="flex flex-wrap">
+                            {
+                                group.members.map((member) => (
+                                    <GroupListItemMember
+                                        key={`${member.type}-${member.id}`}
+                                        groupId={group.id}
+                                        member={member}
+                                    />
+                                ))
+                            }
+                        </div>
+                        <GroupAddMembers group={group}/>
                     </div>
-                    <GroupAddMembers group={group}/>
-                </div>
-            </AccordionDetails>
-        </Accordion>
+                </CollapsibleBody>
+            </CollapsibleContainer>
+        </div>
     );
 };

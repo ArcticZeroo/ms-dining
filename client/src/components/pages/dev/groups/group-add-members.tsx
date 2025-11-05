@@ -7,8 +7,10 @@ import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GroupAddMembersWithData } from './group-add-members-with-data.js';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import { pluralize } from '../../../../util/string.js';
+import { CollapsibleContainer } from '../../../collapsible/collapsible-container.js';
+import { CollapsibleHeader } from '../../../collapsible/collapsible-header.js';
+import { CollapsibleBody } from '../../../collapsible/collapsible-body.js';
 
 interface IGroupAddMembersProps {
     group: IGroupData;
@@ -75,8 +77,8 @@ export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
     }
 
     return (
-        <Accordion>
-            <AccordionSummary>
+        <CollapsibleContainer>
+            <CollapsibleHeader>
                 <div className="flex flex-center">
                     <span className="material-symbols-outlined">
                         person_add
@@ -85,8 +87,8 @@ export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
                         {title}
                     </span>
                 </div>
-            </AccordionSummary>
-            <AccordionDetails>
+            </CollapsibleHeader>
+            <CollapsibleBody>
                 <GroupAddMembersBody
                     group={group}
                     allItemsWithoutGroup={allItemsWithoutGroup}
@@ -95,7 +97,7 @@ export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
                     candidatesForGroupStage={candidatesForGroupStage}
                     onRetryClicked={onRetryClicked}
                 />
-            </AccordionDetails>
-        </Accordion>
+            </CollapsibleBody>
+        </CollapsibleContainer>
     );
 };

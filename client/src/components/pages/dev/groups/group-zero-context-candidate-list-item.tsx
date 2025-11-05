@@ -1,12 +1,14 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IGroupData } from '@msdining/common/models/group';
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupMember } from './group-member/group-member.js';
 import { GroupTypeIcon } from './group-type-icon.js';
+import { CollapsibleContainer } from '../../../collapsible/collapsible-container.js';
+import { CollapsibleHeader } from '../../../collapsible/collapsible-header.js';
+import { CollapsibleBody } from '../../../collapsible/collapsible-body.js';
 
 interface IGroupCandidateListItemProps {
     group: IGroupData;
@@ -54,8 +56,8 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
     };
 
     return (
-        <Accordion key={`${type}-${name}`}>
-            <AccordionSummary>
+        <CollapsibleContainer key={`${type}-${name}`}>
+            <CollapsibleHeader>
                 <div className="flex">
                     <GroupTypeIcon type={group.type}/>
                     <div>
@@ -77,8 +79,8 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
                     </div>
 
                 </div>
-            </AccordionSummary>
-            <AccordionDetails>
+            </CollapsibleHeader>
+            <CollapsibleBody>
                 <div className="flex flex-wrap member-toggle">
                     {
                         possibleMembers.map(member => (
@@ -93,7 +95,7 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
                         ))
                     }
                 </div>
-            </AccordionDetails>
-        </Accordion>
+            </CollapsibleBody>
+        </CollapsibleContainer>
     );
 };
