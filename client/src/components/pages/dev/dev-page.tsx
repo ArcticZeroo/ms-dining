@@ -1,13 +1,16 @@
 import { useRequireRole } from '../../../hooks/auth.js';
 import { classNames } from '../../../util/react.js';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { ForceRefreshMenu } from './force-refresh-menu.js';
-import { GroupsView } from './groups/groups-view.js';
+import { GroupList } from './groups/group-list.js';
+import { GroupZeroContextCandidateList } from './groups/group-zero-context-candidate-list.js';
 import './dev-page.css';
+import { ScrollTopContext } from '../../../context/scroll.js';
 
 const tabs = {
     'Refresh Menu': <ForceRefreshMenu/>,
-    'Groups': <GroupsView/>
+    'Group List': <GroupList/>,
+    'Group Candidates': <GroupZeroContextCandidateList/>
 } satisfies Record<string, React.ReactNode>;
 
 type TabName = keyof typeof tabs;
@@ -18,14 +21,20 @@ export const DevPage = () => {
     useRequireRole('admin');
 
     const [currentTab, setCurrentTab] = useState<TabName>('Refresh Menu');
+    const scrollToTop = useContext(ScrollTopContext);
+
+    const onTabChange = (tabName: TabName) => {
+        setCurrentTab(tabName);
+        scrollToTop();
+    }
 
     return (
         <div className="card" id="dev-page">
-            <div className="title">
-                Dev Settings
-            </div>
-            <div className="flex">
-                <div className="tab-selector flex-col flex-start">
+            <div className="flex sticky-header bg-card-background">
+                <div className="title">
+                    Dev Settings
+                </div>
+                <div className="tab-selector flex">
                     {
                         tabNames.map(tabName => (
                             <button
@@ -34,13 +43,15 @@ export const DevPage = () => {
                                     'tab-option default-button default-container self-stretch',
                                     currentTab === tabName && 'active'
                                 )}
-                                onClick={() => setCurrentTab(tabName)}
+                                onClick={() => onTabChange(tabName)}
                             >
                                 {tabName}
                             </button>
                         ))
                     }
                 </div>
+            </div>
+            <div className="flex height-100">
                 <div className="dev-page-tab-content">
                     {tabs[currentTab]}
                 </div>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { ScrollTopButton } from '../button/scroll-top-button.tsx';
 import { Nav } from '../nav/nav.tsx';
@@ -9,6 +9,7 @@ import { useValueNotifierContext } from '../../hooks/events.ts';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
 import { useLocationHash } from '../../hooks/location.ts';
+import { ScrollTopContext } from '../../context/scroll.js';
 
 const useScrollSaver = (scrollTopRef: React.MutableRefObject<number | undefined>, shouldStopScroll: boolean) => {
     // This is a hack to let us figure out state changes before React is aware of them
@@ -58,8 +59,12 @@ export const PageLayout = () => {
 
     const pageBodyDivRef = useScrollTracker(shouldStopScroll);
 
+    const onScrollToTop = useCallback(() => {
+        pageBodyDivRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [pageBodyDivRef]);
+
     return (
-        <>
+        <ScrollTopContext.Provider value={onScrollToTop}>
             <PopupContainer/>
             <Nav/>
             <div className={classNames('content', shouldStopScroll && 'noscroll')}
@@ -67,6 +72,6 @@ export const PageLayout = () => {
                 <Outlet/>
                 {!shouldStopScroll && <ScrollTopButton containerRef={pageBodyDivRef}/>}
             </div>
-        </>
+        </ScrollTopContext.Provider>
     );
 };

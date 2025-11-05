@@ -222,6 +222,10 @@ a:visited {
     color: var(--color-almost-white);
 }
 
+.bg-card-background {
+    background: var(--color-card-background);
+}
+
 .bg-raised {
     background: var(--color-background-raised);
 }
@@ -778,4 +782,14 @@ html, body, #root, .App {
 
 .tab-selector .tab-option:hover, .tab-selector .tab-option.active {
     background: var(--color-button-radio-selected);
+}
+
+.height-100 {
+    height: 100%;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-above-content);
 }

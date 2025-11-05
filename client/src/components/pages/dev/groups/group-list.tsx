@@ -8,11 +8,11 @@ export const GroupList = () => {
     const titleSuffix = groupList ? ` (${groupList.size})` : '';
 
     return (
-        <>
+        <div className="flex-col">
             <div>
                 Group List{titleSuffix}
             </div>
             <GroupListBody/>
-        </>
+        </div>
     );
 }

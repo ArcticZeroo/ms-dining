@@ -59,7 +59,7 @@ export const GroupListWithData: React.FC<IGroupListWithDataProps> = ({ groups })
                     })
                 }
             </div>
-            <div className="flex-col group-list-vertical-scroll">
+            <div className="flex-col">
                 {
                     groupsForSelectedType.map((group) => (
                         <Group key={group.id} group={group}/>
