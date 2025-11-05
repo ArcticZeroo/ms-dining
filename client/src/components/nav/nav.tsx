@@ -1,17 +1,18 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { NavExpansionContext } from '../../context/nav.ts';
-
-import './nav.css';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
 import { NavCafeList } from './nav-cafe-list.tsx';
 import { NavListHeaderItems } from './nav-header-buttons.tsx';
+import './nav.css';
+import { useIsAdmin } from '../../hooks/auth.js';
 
 export const Nav: React.FC = () => {
     const location = useLocation();
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
     const deviceType = useDeviceType();
+    const isAdmin = useIsAdmin();
 
     useEffect(() => {
         setIsExpanded(false);
@@ -61,6 +62,17 @@ export const Nav: React.FC = () => {
                         </span>
                     </NavLink>
                 </li>
+                {
+                    isAdmin && (
+                        <li>
+                            <NavLink to="/dev" className="link-button dev" title="Developer Page">
+                                <span className="material-symbols-outlined">
+                                    build
+                                </span>
+                            </NavLink>
+                        </li>
+                    )
+                }
             </ul>
         </nav>
     );

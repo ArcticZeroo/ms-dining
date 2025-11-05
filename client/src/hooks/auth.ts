@@ -42,3 +42,5 @@ export const useRequireRole = (requiredRole: string, navigateToPageOtherwise = '
         }
     }, [hasRole, navigate, navigateToPageOtherwise]);
 }
+
+export const useIsAdmin = () => useHasRole('admin');

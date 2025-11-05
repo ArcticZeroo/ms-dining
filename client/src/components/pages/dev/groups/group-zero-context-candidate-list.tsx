@@ -18,11 +18,11 @@ export const GroupZeroContextCandidateList= () => {
     }
 
     return (
-        <>
+        <div className="flex-col">
             <div>
                 {title}
             </div>
             <GroupZeroContextCandidateListBody/>
-        </>
+        </div>
     );
 }
