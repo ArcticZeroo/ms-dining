@@ -12,8 +12,10 @@ import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/ca
 import { logDebug, logInfo } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { getDateStringsForWeek } from '@msdining/common/util/date-util';
+import { menuItemToGroupMember } from './groups.js';
+import { PrismaLikeClient } from '../../../models/prisma.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
 
@@ -58,6 +60,7 @@ const hydrateMenuItem = (menuItem: DehydratedMenuItem): IMenuItemBase => {
 		imageUrl:       menuItem.imageUrl,
 		lastUpdateTime: menuItem.externalLastUpdateTime,
 		receiptText:    menuItem.externalReceiptText,
+		groupId:        menuItem.groupId,
 		tags:           deserializeMenuItemTags(menuItem.tags),
 		searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
 		hasThumbnail:   false,
@@ -99,7 +102,7 @@ export abstract class MenuItemStorageClient {
 			});
 	}
 
-	private static async _doCreateModifierChoiceAsync(prismaClient: PrismaClient, modifier: IMenuItemModifier, choice: IMenuItemModifierChoice): Promise<void> {
+	private static async _doCreateModifierChoiceAsync(prismaClient: PrismaLikeClient, modifier: IMenuItemModifier, choice: IMenuItemModifierChoice): Promise<void> {
 		const existingChoice = await prismaClient.menuItemModifierChoice.findUnique({
 			where: { id: choice.id }
 		});
@@ -126,7 +129,7 @@ export abstract class MenuItemStorageClient {
 		}
 	}
 
-	private static async _doCreateSingleModifierAsync(prismaClient: PrismaClient, modifier: IMenuItemModifier): Promise<void> {
+	private static async _doCreateSingleModifierAsync(prismaClient: PrismaLikeClient, modifier: IMenuItemModifier): Promise<void> {
 		const existingModifier = await prismaClient.menuItemModifier.findUnique({
 			where:   { id: modifier.id },
 			include: { choices: true }
@@ -188,7 +191,7 @@ export abstract class MenuItemStorageClient {
 			});
 		}
 
-		const modifierIdsToAdd = new Set(modifierEntriesById.keys());
+		const modifierIdsToCreate = new Set(modifierEntriesById.keys());
 
 		const dataWithoutId = {
 			cafeId:                 menuItem.cafeId,
@@ -210,7 +213,7 @@ export abstract class MenuItemStorageClient {
 			...dataWithoutId
 		};
 
-		await usePrismaClient(async prismaClient => {
+		await usePrismaTransaction(async prismaClient => {
 			// This is kind of messy, but I've chosen this after considering other options.
 			// We are many:many, and we don't want to just clear all the modifiers themselves,
 			// since that will either throw foreign key errors or sever the connection to other menu items
@@ -238,21 +241,21 @@ export abstract class MenuItemStorageClient {
 
 				if (existingItem != null) {
 					// Menu items should have only a few modifiers, this complexity is fine.
-					const modifierIdsToRemove: string[] = [];
+					const modifierIdsRemovedFromThisItem: string[] = [];
 					for (const existingModifier of existingItem.modifiers) {
-						if (!modifierIdsToAdd.has(existingModifier.modifierId)) {
-							modifierIdsToRemove.push(existingModifier.modifierId);
+						if (!modifierIdsToCreate.has(existingModifier.modifierId)) {
+							modifierIdsRemovedFromThisItem.push(existingModifier.modifierId);
 						} else {
-							modifierIdsToAdd.delete(existingModifier.modifierId);
+							modifierIdsToCreate.delete(existingModifier.modifierId);
 						}
 					}
 
-					if (modifierIdsToRemove.length > 0) {
+					if (modifierIdsRemovedFromThisItem.length > 0) {
 						await prismaClient.menuItemModifierEntry.deleteMany({
 							where: {
 								menuItemId: menuItem.id,
 								modifierId: {
-									in: modifierIdsToRemove
+									in: modifierIdsRemovedFromThisItem
 								}
 							}
 						});
@@ -280,10 +283,24 @@ export abstract class MenuItemStorageClient {
 				}
 			}
 
-			if (modifierIdsToAdd.size > 0) {
-				const modifierEntriesToAdd = Array.from(modifierIdsToAdd).map(modifierId => modifierEntriesById.get(modifierId)!);
+			if (modifierIdsToCreate.size > 0) {
+				const existingItems = await prismaClient.menuItemModifierEntry.findMany({
+					where: {
+						modifierId: {
+							in: Array.from(modifierIdsToCreate)
+						}
+					},
+					select: {
+						modifierId: true
+					}
+				});
+
+				for (const existingItem of existingItems) {
+					modifierIdsToCreate.delete(existingItem.modifierId);
+				}
+
 				await prismaClient.menuItemModifierEntry.createMany({
-					data: modifierEntriesToAdd
+					data: Array.from(modifierIdsToCreate).map(modifierId => modifierEntriesById.get(modifierId)!)
 				});
 			}
 		});

@@ -365,6 +365,7 @@ export abstract class DailyMenuStorageClient {
 					select: {
 						name:    true,
 						logoUrl: true,
+						groupId: true,
 					}
 				},
 				categories: {

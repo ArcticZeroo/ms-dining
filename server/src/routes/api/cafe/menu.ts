@@ -184,7 +184,7 @@ export const registerMenuRoutes = (parent: Router) => {
 			const menuItem = await getMenuItemFromRequest(ctx);
 
 			// todo: limit? paging?
-			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(normalizeNameForSearch(menuItem.name));
+			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem);
 
 			const response: IReviewDataForMenuItem = {
 				counts:              {},

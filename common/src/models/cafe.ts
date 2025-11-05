@@ -42,6 +42,7 @@ export interface IMenuItemReviewHeader {
 
 export interface IMenuItemBase {
     id: string;
+	groupId: Nullable<string>;
 	cafeId: string;
 	stationId: string;
     price: number;

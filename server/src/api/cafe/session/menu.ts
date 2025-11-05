@@ -156,6 +156,7 @@ export class CafeMenuSession {
 		// is missing then we should clear it from the local item as well.
 		return {
 			id:             jsonItem.id,
+			groupId:        localItem?.groupId,
 			cafeId:         this.client.cafe.id,
 			stationId:      station.id,
 			price:          Number(jsonItem.amount || 0),
@@ -217,12 +218,13 @@ export class CafeMenuSession {
 			const serverItems = await this.#retrieveMenuItemsFromBuyOnDemandAsync(station, localItemsById, Array.from(itemIdsToRetrieve));
 
 			for (const item of serverItems) {
-				try {
-					await MenuItemStorageClient.saveMenuItemAsync(item, true /*allowUpdateIfExisting*/);
-				} catch (err) {
-					logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
-					continue;
-				}
+				// we save menu items at the end of the process now
+				// try {
+				// 	await MenuItemStorageClient.saveMenuItemAsync(item, true /*allowUpdateIfExisting*/);
+				// } catch (err) {
+				// 	logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
+				// 	continue;
+				// }
 
 				items.push(item);
 

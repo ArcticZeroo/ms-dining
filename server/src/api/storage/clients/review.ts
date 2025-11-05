@@ -2,6 +2,7 @@ import { usePrismaClient } from '../client.js';
 import { STORAGE_EVENTS } from '../events.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { Prisma } from '@prisma/client';
 
 interface ICreateReviewItem {
 	menuItemId: string;
@@ -75,13 +76,25 @@ export abstract class ReviewStorageClient {
 		return result;
 	}
 
-	public static async getReviewsForMenuItemAsync(normalizedName: string) {
-		return usePrismaClient(client => client.review.findMany({
-			where:   {
-				menuItem: {
-					normalizedName
+	public static async getReviewsForMenuItemAsync(menuItem: IMenuItemBase) {
+		const whereCondition: Prisma.ReviewWhereInput = {};
+		if (menuItem.groupId) {
+			whereCondition.OR = [
+				{
+					menuItemId: menuItem.id
+				},
+				{
+					menuItem: {
+						groupId: menuItem.groupId
+					}
 				}
-			},
+			];
+		} else {
+			whereCondition.menuItemId = menuItem.id;
+		}
+
+		return usePrismaClient(client => client.review.findMany({
+			where:   whereCondition,
 			include: GET_REVIEW_INCLUDES,
 			orderBy: {
 				createdAt: 'desc'

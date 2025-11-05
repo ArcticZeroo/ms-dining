@@ -255,6 +255,15 @@ export abstract class GroupStorageClient {
 		return getGroupResultMembers(groupResult);
 	}
 
+	static async #updateGroupIdForCachedMenuItems(groupId: string | null, memberIds: Array<string>) {
+		const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
+		for (const menuItem of menuItems) {
+			if (menuItem) {
+				menuItem.groupId = groupId;
+			}
+		}
+	}
+
 	static async #setGroupMembersInternal(prisma: PrismaLikeClient, groupId: string | null, memberIds: Array<string>, entityType: SearchEntityType): Promise<void> {
 		if (entityType === SearchEntityType.station) {
 			await prisma.station.updateMany({
@@ -268,16 +277,19 @@ export abstract class GroupStorageClient {
 				}
 			});
 		} else if (entityType === SearchEntityType.menuItem) {
-			await prisma.menuItem.updateMany({
-				where: {
-					id: {
-						in: memberIds
+			await Promise.all([
+				this.#updateGroupIdForCachedMenuItems(groupId, memberIds),
+				prisma.menuItem.updateMany({
+					where: {
+						id: {
+							in: memberIds
+						}
+					},
+					data:  {
+						groupId
 					}
-				},
-				data:  {
-					groupId
-				}
-			});
+				})
+			]);
 		}
 	}
 
