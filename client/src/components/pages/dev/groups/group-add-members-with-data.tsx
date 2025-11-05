@@ -124,7 +124,8 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
     );
 
     const { stage: addStage, run: addMembers } = useDelayedPromiseState(useCallback(async () => {
-        return GROUP_STORE.addGroupMembers(group.id, selectedMembers);
+        await GROUP_STORE.addGroupMembers(group.id, selectedMembers);
+        setSelectedMemberIds(new Set());
     }, [group.id, selectedMembers]));
 
     if (allItemsWithoutGroup.size === 0) {
