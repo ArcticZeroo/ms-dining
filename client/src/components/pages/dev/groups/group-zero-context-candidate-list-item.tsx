@@ -5,7 +5,7 @@ import React, { useCallback, useState } from 'react';
 import { GROUP_STORE } from '../../../../store/groups.ts';
 import { promiseStageToButtonClass } from '../../../../util/async.js';
 import { classNames } from '../../../../util/react.js';
-import { GroupMember } from './group-member.js';
+import { GroupMember } from './group-member/group-member.js';
 import { GroupTypeIcon } from './group-type-icon.js';
 
 interface IGroupCandidateListItemProps {

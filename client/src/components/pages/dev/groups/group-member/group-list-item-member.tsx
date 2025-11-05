@@ -2,9 +2,9 @@ import { IGroupMember } from '@msdining/common/models/group';
 import { GroupMember } from './group-member.js';
 import React, { useCallback } from 'react';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { GROUP_STORE } from '../../../../store/groups.js';
-import { classNames } from '../../../../util/react.js';
-import { promiseStageToButtonClass } from '../../../../util/async.js';
+import { GROUP_STORE } from '../../../../../store/groups.js';
+import { classNames } from '../../../../../util/react.js';
+import { promiseStageToButtonClass } from '../../../../../util/async.js';
 
 interface IGroupListItemMemberProps {
     groupId: string;

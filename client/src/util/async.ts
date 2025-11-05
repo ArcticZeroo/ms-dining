@@ -20,3 +20,7 @@ export const promiseStageToButtonClass = (stage: PromiseStage): string => {
 
     throw new Error('Unknown PromiseStage value');
 };
+
+export const canUseControllingButton = (stage: PromiseStage): boolean => {
+    return stage === PromiseStage.notRun || stage === PromiseStage.error;
+}

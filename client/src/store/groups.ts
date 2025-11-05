@@ -1,4 +1,4 @@
-import { IGroupData, IGroupMember } from '@msdining/common/models/group';
+import { IGroupData, IGroupMember, IUpdateGroupRequest } from '@msdining/common/models/group';
 import * as GroupClient from '../api/client/groups.js';
 import { getRandomId } from '../util/id.ts';
 import { LazyResource } from './lazy.js';
@@ -70,13 +70,23 @@ class GroupStore {
         this._groups.get(true /*forceRefresh*/);
     }
 
-    async renameGroup(groupId: string, newName: string) {
-        await GroupClient.renameGroup(groupId, newName);
+    async updateGroup(groupId: string, { name, notes }: IUpdateGroupRequest) {
+        await GroupClient.updateGroup(groupId, { name, notes });
         await this._groups.updateExisting((current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             const group = updatedMap.get(groupId);
             if (group) {
-                updatedMap.set(groupId, { ...group, name: newName });
+                const newGroup = { ...group };
+
+                if (name != null) {
+                    newGroup.name = name;
+                }
+
+                if (notes != null) {
+                    newGroup.notes = notes;
+                }
+
+                updatedMap.set(groupId, newGroup);
                 return updatedMap;
             }
             return current;

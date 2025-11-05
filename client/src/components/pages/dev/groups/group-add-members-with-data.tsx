@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { IGroupData, IGroupMember } from '@msdining/common/models/group';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { GroupMember } from './group-member.js';
+import { GroupMember } from './group-member/group-member.js';
 import { classNames } from '../../../../util/react.js';
 import { pluralize } from '../../../../util/string.js';
 import { GROUP_STORE } from '../../../../store/groups.js';

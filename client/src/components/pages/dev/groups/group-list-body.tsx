@@ -1,4 +1,4 @@
-import { GroupListItem } from './group-list-item.js';
+import { Group } from './group.js';
 import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { useValueNotifier } from '../../../../hooks/events.js';
@@ -20,7 +20,7 @@ export const GroupListBody = () => {
             <div className="flex-col group-list-vertical-scroll">
                 {
                     Array.from(groupList.values()).map((group) => (
-                        <GroupListItem key={group.id} group={group}/>
+                        <Group key={group.id} group={group}/>
                     ))
                 }
             </div>

@@ -7,7 +7,7 @@ import {
     ICreateGroupResponse,
     IGroupData,
     IGroupMember,
-    IRenameGroupRequest
+    IUpdateGroupRequest
 } from '@msdining/common/models/group';
 import { JSON_HEADERS, makeJsonRequestNoParse, makeJsonRequestWithSchema } from '../request.js';
 import { z } from 'zod';
@@ -34,13 +34,13 @@ export const createGroup = async (request: ICreateGroupRequest): Promise<ICreate
     });
 }
 
-export const renameGroup = async (groupId: string, newName: string): Promise<void> => {
+export const updateGroup = async (groupId: string, update: IUpdateGroupRequest): Promise<void> => {
     await makeJsonRequestNoParse({
         path: `/api/dining/groups/${groupId}`,
         options: {
             method: 'PATCH',
             headers: JSON_HEADERS,
-            body: JSON.stringify({ name: newName } satisfies IRenameGroupRequest)
+            body: JSON.stringify(update satisfies IUpdateGroupRequest)
         }
     });
 }
