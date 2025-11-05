@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import {
 	getMenuItemGroupCandidatesForGroup,
 	getMenuItemGroupCandidatesZeroContext,
@@ -234,14 +234,12 @@ export abstract class GroupStorageClient {
 				select: {
 					menuItems: {
 						select: {
-							id:   true,
-							name: true
+							id:   true
 						}
 					},
 					stations:  {
 						select: {
-							id:   true,
-							name: true
+							id:   true
 						}
 					}
 				}
@@ -357,7 +355,7 @@ export abstract class GroupStorageClient {
 	}
 
 	public static async deleteMembersFromGroup(groupId: string, memberIds: Array<string>): Promise<void> {
-		await usePrismaClient(async prisma => {
+		await usePrismaTransaction(async prisma => {
 			const group = await prisma.crossCafeGroup.findUnique({
 				where:  {
 					id: groupId
@@ -372,6 +370,32 @@ export abstract class GroupStorageClient {
 			}
 
 			await this.#setGroupMembersInternal(prisma, null, memberIds, searchEntityTypeFromString(group.entityType));
+
+			const remainingMembers = await prisma.crossCafeGroup.findUnique({
+				where:  {
+					id: groupId
+				},
+				select: {
+					menuItems: {
+						select: {
+							id:   true
+						}
+					},
+					stations:  {
+						select: {
+							id:   true
+						}
+					}
+				}
+			});
+
+			if (!remainingMembers || (remainingMembers.menuItems.length === 0 && remainingMembers.stations.length === 0)) {
+				await prisma.crossCafeGroup.delete({
+					where: {
+						id: groupId
+					}
+				});
+			}
 		});
 	}
 }
