@@ -42,7 +42,7 @@ export interface IMenuItemReviewHeader {
 
 export interface IMenuItemBase {
     id: string;
-	groupId: Nullable<string>;
+	groupId?: Nullable<string>;
 	cafeId: string;
 	stationId: string;
     price: number;
@@ -86,6 +86,7 @@ export interface IMenuItemDTO extends IMenuItemReviewHeader {
     tags: string[];
     searchTags: string[];
 	pattern?: string;
+    groupId?: Nullable<string>;
 }
 
 export type StationMenuByCategoryName = Record<string, Array<IMenuItemBase>>;
