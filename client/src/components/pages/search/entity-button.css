@@ -16,6 +16,7 @@
     cursor: pointer;
     flex-grow: 1;
     align-self: stretch;
+    color: var(--color-almost-white);
 }
 
 .entity-button.active {

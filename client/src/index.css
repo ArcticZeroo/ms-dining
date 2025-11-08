@@ -187,6 +187,18 @@ a:visited {
     color: var(--color-card-foreground);
 }
 
+.card .card {
+    background: var(--color-background-raised-2);
+}
+
+.card .card .card {
+    background: var(--color-background-raised-3);
+}
+
+.card .card .card .card {
+    background: var(--color-background-raised-4);
+}
+
 .card.error, .error-card {
     --color-card-background: var(--color-error);
     --color-card-foreground: white;

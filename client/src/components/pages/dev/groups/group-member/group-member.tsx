@@ -38,7 +38,7 @@ interface IGroupMemberProps {
 
 export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
     return (
-        <div className="flex-col align-center">
+        <div className="flex-col align-center flex-around">
             {
                 member.imageUrl && <img src={member.imageUrl} loading="lazy" alt={`Member image URL for ${member.name} (${member.id})`} style={{ maxWidth: '5rem' }}/>
             }

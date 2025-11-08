@@ -5,16 +5,16 @@ import { DiningClient } from '../../../api/client/dining.ts';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
-import { EntityButton } from './entity-button.tsx';
 import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
-import './search-page.css';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { SearchFilters } from '../../search/filters/search-filters.tsx';
 import { classNames, repeatComponent } from '../../../util/react.ts';
 import { useAllowedSearchViewIds, useRecommendedQueries } from '../../../hooks/search.ts';
 import { Link } from 'react-router-dom';
 import { getSearchUrl } from '../../../util/url.js';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { EntityTypeSelector } from './entity-type-selector.js';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
@@ -24,7 +24,7 @@ interface ISearchResultsState {
     actualStage: PromiseStage;
     stage: PromiseStage;
     results: IQuerySearchResult[];
-    tabCounts: Map<SearchTypes.SearchEntityType, number>;
+    tabCounts: Map<SearchEntityType, number>;
     queryForCurrentResults: string;
     areMenusCurrentlyUpdating: boolean;
     retrieveSearchResults: () => void;
@@ -98,12 +98,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
 
     const recommendedQueriesState = useRecommendedQueries(queryText);
 
-    const sharedEntityButtonProps = {
-        currentFilter:    entityFilterType,
-        totalResultCount: results.length,
-        tabCounts,
-    } as const;
-
     useEffect(() => {
         setEntityFilterType(SearchEntityFilterType.all);
     }, [queryText]);
@@ -130,28 +124,12 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                                 Filters
                             </span>
                         </button>
-                        <div className="search-entity-selector">
-                            <EntityButton name="Menu Items, Stations, and Cafes"
-                                type={SearchEntityFilterType.all}
-                                onClick={() => setEntityFilterType(SearchEntityFilterType.all)}
-                                {...sharedEntityButtonProps}
-                            />
-                            <EntityButton name="Menu Items Only"
-                                type={SearchEntityFilterType.menuItem}
-                                onClick={() => setEntityFilterType(SearchEntityFilterType.menuItem)}
-                                {...sharedEntityButtonProps}
-                            />
-                            <EntityButton name="Stations Only"
-                                type={SearchEntityFilterType.station}
-                                onClick={() => setEntityFilterType(SearchEntityFilterType.station)}
-                                {...sharedEntityButtonProps}
-                            />
-                            <EntityButton name="Cafes Only"
-                                type={SearchEntityFilterType.cafe}
-                                onClick={() => setEntityFilterType(SearchEntityFilterType.cafe)}
-                                {...sharedEntityButtonProps}
-                            />
-                        </div>
+                        <EntityTypeSelector
+                            selectedType={entityFilterType}
+                            onSelectedTypeChanged={setEntityFilterType}
+                            showTypesWithZeroCount={true}
+                            tabCounts={tabCounts}
+                        />
                     </div>
                     {
                         isFilterMenuOpen && (

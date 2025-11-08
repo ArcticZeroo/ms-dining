@@ -6,17 +6,18 @@ import { classNames } from '../../../../util/react.js';
 import { pluralize } from '../../../../util/string.js';
 import { GROUP_STORE } from '../../../../store/groups.js';
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { AllItemsWithoutGroupByType } from '../../../../models/groups.js';
 
 interface IGroupAddMembersWithDataProps {
     group: IGroupData;
-    allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>>;
+    allItemsWithoutGroup: AllItemsWithoutGroupByType;
     suggestedCandidates: IGroupMember[];
 }
 
 interface IUseVisibleItemsWithoutGroupParams {
     groupType: SearchEntityType;
     selectedMemberIds: Set<string>;
-    allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>>;
+    allItemsWithoutGroup: AllItemsWithoutGroupByType;
     substringQuery: string;
     suggestedCandidateIds: Set<string>;
 }
@@ -53,17 +54,8 @@ const useVisibleItemsWithoutGroup = ({
 
             if (member.name.toLowerCase().includes(lowerSubstringQuery)) {
                 visibleItems.push(member);
-                // continue;
+                continue;
             }
-            //
-            // if (member.metadata) {
-            //     for (const [key, value] of Object.entries(member.metadata)) {
-            //         if (key.toLowerCase().includes(lowerSubstringQuery) || value.toLowerCase().includes(lowerSubstringQuery)) {
-            //             visibleItems.push(member);
-            //             break;
-            //         }
-            //     }
-            // }
         }
 
         return visibleItems;
