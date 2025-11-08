@@ -83,11 +83,11 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
     suggestedCandidates
 }) => {
     const [substringQuery, setSubstringQuery] = useState<string>('');
-    const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
     const suggestedCandidateIds = useMemo(
         () => new Set(suggestedCandidates.map(candidate => candidate.id)),
         [suggestedCandidates]
     );
+    const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(() => new Set(suggestedCandidateIds));
 
     const selectedCount = selectedMemberIds.size;
     const availableItemsOfType = allItemsWithoutGroup.get(group.type);

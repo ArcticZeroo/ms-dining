@@ -86,7 +86,7 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
                         possibleMembers.map(member => (
                             <button
                                 key={member.id}
-                                className={classNames('card default-button member', acceptedMemberIds.has(member.id) && 'active', !canSelectMembers && 'disabled')}
+                                className={classNames('card pointer member', acceptedMemberIds.has(member.id) && 'active', !canSelectMembers && 'disabled')}
                                 onClick={() => onToggleMemberAccepted(member.id)}
                                 disabled={!canSelectMembers}
                             >

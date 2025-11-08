@@ -11,20 +11,23 @@ const CafeDisplay: React.FC<ICafeDisplayProps> = ({ cafeId }) => {
     const { viewsById } = useContext(ApplicationContext);
     const cafeView = viewsById.get(cafeId);
 
-    if (!cafeView) {
-        return <span>Unknown Cafe ({cafeId})</span>;
-    }
-
     return (
-        <span>
-            Cafe:
-            {
-                getViewName({
-                    view: cafeView,
-                    showGroupName: true,
-                    includeEmoji: true
-                })
-            } 
+        <span className="flex">
+            <span>
+                Cafe:
+            </span>
+            <span>
+                {
+                    !cafeView && `Unknown (${cafeId})`
+                }
+                {
+                    cafeView && getViewName({
+                        view: cafeView,
+                        showGroupName: true,
+                        includeEmoji: true
+                    })
+                } 
+            </span>
         </span>
     );
 }

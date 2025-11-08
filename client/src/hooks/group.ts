@@ -20,14 +20,50 @@ export const useSuggestedGroupMembers = (group: IGroupData) => {
 
             const suggestions: IGroupMember[] = [];
             for (const normalizedName of normalizedNames) {
-                const items = allItemsWithoutGroupByNormalizedName.get(normalizedName);
-                if (items) {
-                    suggestions.push(...items);
+                const items = allItemsWithoutGroupByNormalizedName.get(normalizedName) ?? [];
+                for (const item of items) {
+                    if (item.type === group.type) {
+                        suggestions.push(item);
+                    }
                 }
             }
 
             return suggestions;
         },
-        [allItemsWithoutGroupByNormalizedName, normalizedNames]
+        [allItemsWithoutGroupByNormalizedName, group.type, normalizedNames]
+    );
+}
+
+export const useSuggestedGroupMembersForAllGroups = (groups: IGroupData[]) => {
+    const allItemsWithoutGroupByNormalizedName = useValueNotifier(GROUP_STORE.allItemsWithoutGroupByNormalizedName);
+    return useMemo(
+        () => {
+            if (!allItemsWithoutGroupByNormalizedName) {
+                return new Map<string, Array<IGroupMember>>();
+            }
+
+            const groupSuggestionsById = new Map<string, Array<IGroupMember>>();
+
+            for (const group of groups) {
+                const normalizedNames = new Set(
+                    group.members.map(member => normalizeNameForSearch(member.name))
+                );
+
+                const suggestions: IGroupMember[] = [];
+                for (const normalizedName of normalizedNames) {
+                    const items = allItemsWithoutGroupByNormalizedName.get(normalizedName) ?? [];
+                    for (const item of items) {
+                        if (item.type === group.type) {
+                            suggestions.push(item);
+                        }
+                    }
+                }
+
+                groupSuggestionsById.set(group.id, suggestions);
+            }
+
+            return groupSuggestionsById;
+        },
+        [allItemsWithoutGroupByNormalizedName, groups]
     );
 }

@@ -4,13 +4,13 @@ import React, { useContext, useState } from 'react';
 import { ForceRefreshMenu } from './force-refresh-menu.js';
 import { GroupList } from './groups/group-list.js';
 import { GroupZeroContextCandidateList } from './groups/group-zero-context-candidate-list.js';
-import './dev-page.css';
 import { ScrollTopContext } from '../../../context/scroll.js';
+import './dev-page.css';
 
 const tabs = {
     'Refresh Menu': <ForceRefreshMenu/>,
     'Group List': <GroupList/>,
-    'Group Candidates': <GroupZeroContextCandidateList/>
+    'Suggested Groups': <GroupZeroContextCandidateList/>
 } satisfies Record<string, React.ReactNode>;
 
 type TabName = keyof typeof tabs;

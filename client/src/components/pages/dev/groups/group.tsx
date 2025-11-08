@@ -10,11 +10,11 @@ import { GroupTypeIcon } from './group-type-icon.js';
 import { CollapsibleContainer } from '../../../collapsible/collapsible-container.js';
 import { CollapsibleHeader } from '../../../collapsible/collapsible-header.js';
 import { CollapsibleBody } from '../../../collapsible/collapsible-body.js';
-import { useSuggestedGroupMembers } from '../../../../hooks/group.js';
 import { pluralize } from '../../../../util/string.js';
 
 interface IGroupProps {
     group: IGroupData;
+    suggestedMemberCount: number;
 }
 
 const useAccordionButtonHandler = (handler?: (event: React.MouseEvent) => void) => {
@@ -89,10 +89,9 @@ const useDeleteControls = (group: IGroupData) => {
     };
 };
 
-export const Group: React.FC<IGroupProps> = ({ group }) => {
+export const Group: React.FC<IGroupProps> = ({ group, suggestedMemberCount }) => {
     const deleteControls = useDeleteControls(group);
     const editControls = useEditControls(group);
-    const suggestedMembers = useSuggestedGroupMembers(group);
 
     return (
         <div className="default-container bg-raised-2 flex-col">
@@ -140,9 +139,9 @@ export const Group: React.FC<IGroupProps> = ({ group }) => {
                             </span>
                         </div>
                         {
-                            suggestedMembers.length > 0 && (
+                            suggestedMemberCount > 0 && (
                                 <span className="text-badge">
-                                    {suggestedMembers.length} Suggested {pluralize('Member', suggestedMembers.length)}
+                                    {suggestedMemberCount} Suggested {pluralize('Member', suggestedMemberCount)}
                                 </span>
                             )
                         }

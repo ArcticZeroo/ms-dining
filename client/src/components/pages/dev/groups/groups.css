@@ -1,4 +1,5 @@
 .member-toggle .member {
+    transition: background-color 0.25s ease;
     background: var(--color-error);
 }
 
