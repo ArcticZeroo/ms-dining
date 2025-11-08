@@ -8,6 +8,7 @@ export const GroupMemberSchema = z.object({
     id: z.string(),
     type: allSearchEntityTypesEnum,
 	imageUrl: z.string().optional(),
+	cafeId: z.string(),
 	metadata: z.record(z.string(), z.string()).optional()
 });
 

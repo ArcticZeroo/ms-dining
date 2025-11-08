@@ -43,8 +43,8 @@ export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IG
 		name:     menuItem.name,
 		type:     SearchEntityType.menuItem,
 		imageUrl: menuItem.imageUrl || undefined,
+		cafeId:   menuItem.cafeId,
 		metadata: {
-			cafe:           menuItem.cafeId,
 			stationName:    station?.name || '',
 			stationLogoUrl: station?.logoUrl || ''
 		}
@@ -55,7 +55,8 @@ export const stationToGroupMember = (station: Station): IGroupMember => ({
 	id:       station.id,
 	name:     station.name,
 	type:     SearchEntityType.station,
-	imageUrl: station.logoUrl || undefined
+	cafeId:   station.cafeId,
+	imageUrl: station.logoUrl || undefined,
 });
 
 interface IGroupResult {
@@ -234,12 +235,12 @@ export abstract class GroupStorageClient {
 				select: {
 					menuItems: {
 						select: {
-							id:   true
+							id: true
 						}
 					},
 					stations:  {
 						select: {
-							id:   true
+							id: true
 						}
 					}
 				}
@@ -378,12 +379,12 @@ export abstract class GroupStorageClient {
 				select: {
 					menuItems: {
 						select: {
-							id:   true
+							id: true
 						}
 					},
 					stations:  {
 						select: {
-							id:   true
+							id: true
 						}
 					}
 				}

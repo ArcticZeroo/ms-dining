@@ -1,12 +1,39 @@
 import { IGroupMember } from '@msdining/common/models/group';
-import React from 'react';
+import React, { useContext } from 'react';
+import { ApplicationContext } from '../../../../../context/app.js';
+import { getViewName } from '../../../../../util/cafe.js';
+
+interface ICafeDisplayProps {
+    cafeId: string;
+}
+
+const CafeDisplay: React.FC<ICafeDisplayProps> = ({ cafeId }) => {
+    const { viewsById } = useContext(ApplicationContext);
+    const cafeView = viewsById.get(cafeId);
+
+    if (!cafeView) {
+        return <span>Unknown Cafe ({cafeId})</span>;
+    }
+
+    return (
+        <span>
+            Cafe:
+            {
+                getViewName({
+                    view: cafeView,
+                    showGroupName: true,
+                    includeEmoji: true
+                })
+            } 
+        </span>
+    );
+}
 
 interface IGroupMemberProps {
     member: IGroupMember;
 }
 
 export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
-
     return (
         <div className="flex-col align-center">
             {
@@ -15,6 +42,7 @@ export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
             <span>
                 {member.name}
             </span>
+            <CafeDisplay cafeId={member.cafeId}/>
             {
                 member.metadata && (
                     <>
