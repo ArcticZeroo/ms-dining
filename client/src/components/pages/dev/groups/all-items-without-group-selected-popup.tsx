@@ -74,6 +74,22 @@ export const AllItemsWithoutGroupSelectedPopup: React.FC<IAllItemsWithoutGroupSe
             </option>
         )), [groupList]);
 
+    const onClearSelectionClicked = useCallback(() => {
+        if (!canCommit) {
+            return;
+        }
+
+        onClearSelection();
+    }, [canCommit, onClearSelection]);
+
+    const onGroupNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!canCommit || existingGroupId) {
+            return;
+        }
+
+        setGroupName(event.target.value);
+    }, [canCommit, existingGroupId]);
+
     return (
         <div className="flex-col card" id="floating-create-group">
             <div className="title">
@@ -100,7 +116,7 @@ export const AllItemsWithoutGroupSelectedPopup: React.FC<IAllItemsWithoutGroupSe
                     </div>
                 )
             }
-            <div className="flex flex-center">
+            <div className={classNames("flex flex-center", existingGroupId && 'greyed-out-not-allowed')}>
                 <span>
                     Name this group:
                 </span>
@@ -108,12 +124,14 @@ export const AllItemsWithoutGroupSelectedPopup: React.FC<IAllItemsWithoutGroupSe
                     type="text"
                     placeholder="Group name"
                     value={groupName}
-                    onChange={(event) => setGroupName(event.target.value)}
+                    onChange={onGroupNameChange}
+                    disabled={existingGroupId != null}
                 />
             </div>
             <button
                 className={classNames('default-button default-container', promiseStageToButtonClass(commitStage))}
                 onClick={onCommitClicked}
+                disabled={!canCommit}
             >
                 {
                     existingGroupId ? 'Add to Group' : 'Create New Group'
@@ -121,7 +139,8 @@ export const AllItemsWithoutGroupSelectedPopup: React.FC<IAllItemsWithoutGroupSe
             </button>
             <button
                 className="default-button default-container"
-                onClick={onClearSelection}
+                onClick={onClearSelectionClicked}
+                disabled={!canCommit}
             >
                 Deselect Items (Cancel)
             </button>
