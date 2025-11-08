@@ -5,7 +5,6 @@ import './groups.css';
 
 export const GroupList = () => {
     const { value: groupList } = useValueNotifier(GROUP_STORE.groups);
-
     const titleSuffix = groupList ? ` (${groupList.size})` : '';
 
     return (

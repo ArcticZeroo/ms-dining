@@ -33,6 +33,7 @@ const useGroupsForFilter = (groupsByType: Map<SearchEntityType, Array<IGroupData
                 groups.push(...groupsForType);
             }
         }
+        groups.sort((a, b) => a.name.localeCompare(b.name));
         return groups;
     }, [filter, groupsByType]);
 }
