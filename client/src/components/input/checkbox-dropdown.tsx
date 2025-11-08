@@ -48,7 +48,7 @@ export const CheckboxDropdown: React.FC<ICheckboxDropdownProps> = ({
 
     return (
         <Dropdown onClose={onClose}>
-            <div className="relative">
+            <div className="relative flex-col">
                 <div className="flex flex-around buttons">
                     { buttons }
                     <button onClick={onSelectAll} className="default-container shrink-padding">

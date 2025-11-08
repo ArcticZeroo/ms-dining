@@ -54,7 +54,7 @@ export const SearchAllowedViews: React.FC = () => {
                                 {
                                     homepageViewIds.size > 0 && (
                                         <button onClick={onSelectHomeOnly} className="default-container shrink-padding">
-                                        Select Home Only
+                                            Select Home Only
                                         </button>
                                     )
                                 }

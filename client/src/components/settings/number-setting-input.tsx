@@ -88,7 +88,7 @@ export const NumberSettingInput: React.FC<INumberSettingInputProps> = ({
     return (
         <label
             className={classNames(
-                'setting-input setting-chip number-setting',
+                'setting-input setting-chip number-setting self-stretch',
                 !areRequiredSettingsEnabled && 'disabled',
                 isAtLimit && 'at-limit',
                 !isValid && 'invalid'

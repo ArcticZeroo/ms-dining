@@ -68,7 +68,7 @@
     align-items: center;
     background: var(--color-setting-chip);
     border-radius: var(--default-padding);
-    padding: var(--default-padding);
+    padding: var(--constant-padding) var(--default-padding);
     gap: var(--constant-padding);
 }
 

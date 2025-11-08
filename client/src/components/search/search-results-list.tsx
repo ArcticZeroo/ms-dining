@@ -167,10 +167,17 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
 
             const searchResultElements = entriesInOrder.map(searchResult => {
                 const isPriceAllowed = !enablePriceFilters || Array.from(searchResult.priceByCafeId.values()).some(getIsPriceAllowed);
-                const locationDatesByCafeId = filterLocations(searchResult, expandedAllowedViewIds);
+                const filteredLocationDatesByCafeId = filterLocations(searchResult, expandedAllowedViewIds);
 
-                if (!isPriceAllowed || (searchResult.locationDatesByCafeId.size !== 0 && locationDatesByCafeId.size === 0)) {
+                if (!isPriceAllowed || (searchResult.locationDatesByCafeId.size !== 0 && filteredLocationDatesByCafeId.size === 0)) {
                     filterHiddenResultCount++;
+                }
+
+                // Search results show up but with "Not available this week" if there are no hits, since we do matching
+                // that allows hits for items by name even if they are not available at any location. But if we are filtering
+                // by view and there are no locations in the allowed views, we should just hide the result entirely.
+                if (expandedAllowedViewIds.size > 0 && filteredLocationDatesByCafeId.size === 0) {
+                    return null;
                 }
 
                 return (
@@ -179,7 +186,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         isVisible={isPriceAllowed && matchesEntityFilter(filter, searchResult.entityType)}
                         name={searchResult.name}
                         description={searchResult.description}
-                        locationDatesByCafeId={locationDatesByCafeId}
+                        locationDatesByCafeId={filteredLocationDatesByCafeId}
                         priceByCafeId={searchResult.priceByCafeId}
                         stationByCafeId={searchResult.stationByCafeId}
                         imageUrl={searchResult.imageUrl}

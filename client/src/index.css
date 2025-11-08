@@ -445,6 +445,10 @@ html, body, #root, .App {
     gap: var(--default-padding);
 }
 
+.flex.constant-padding {
+    gap: var(--constant-padding);
+}
+
 .flex-inline {
     display: inline-flex;
     align-items: center;
@@ -546,7 +550,7 @@ html, body, #root, .App {
 }
 
 .default-container {
-    padding: var(--default-padding);
+    padding: var(--constant-padding) var(--default-padding);
     border-radius: var(--default-padding);
 }
 
@@ -664,7 +668,7 @@ html, body, #root, .App {
 /* wide screens (tablet, computer) */
 @media screen and (min-width: 801px) {
     :root {
-        --default-padding: 1rem;
+        --default-padding: 0.75rem;
         --cafe-logo-height: 4rem;
     }
 
