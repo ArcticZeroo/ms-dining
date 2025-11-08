@@ -46,7 +46,7 @@ export const HomeCollapse: React.FC<IHomeCollapseProps> = ({ title, children, fe
                 </span>
                 <span/>
             </div>
-            <div className="collapse-body">
+            <div className="collapse-body flex-col">
                 {children}
             </div>
         </div>

@@ -1,9 +1,9 @@
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
+import './map.css';
 
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { InternalSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
@@ -11,7 +11,6 @@ import { useVisibleViews } from '../../hooks/views.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { calculateCenter, toLeafletLocation } from '../../util/coordinates.ts';
 import { getViewLocation } from '../../util/view.ts';
-import './map.css';
 import { CafeMarker } from './popup/cafe-marker.tsx';
 import { CampusMapPopup } from './popup/campus-map-popup.tsx';
 import { CampusMapControls } from "./campus-map-controls.tsx";

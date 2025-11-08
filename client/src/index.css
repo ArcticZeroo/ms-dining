@@ -352,6 +352,10 @@ html, body, #root, .App {
     transition: background-color 0.125s ease;
 }
 
+.default-button.no-bg {
+    background: none;
+}
+
 .default-button:disabled {
     filter: grayscale(0.25) brightness(0.75);
 }
@@ -822,4 +826,8 @@ html, body, #root, .App {
 .greyed-out-not-allowed {
     filter: grayscale(20%) brightness(75%);
     cursor: not-allowed;
+}
+
+.tip {
+    background: var(--color-theme-blue);
 }
