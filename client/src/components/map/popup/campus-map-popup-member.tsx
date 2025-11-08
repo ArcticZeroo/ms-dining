@@ -47,7 +47,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
             {
                 popupView.type === CafeViewType.group && (
                 // Intentionally getting the URL for the cafe's view instead of the popup
-                    <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="flex">
+                    <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="flex default-button default-container">
                         {
                             cafe.logoUrl && (
                                 <img src={cafe.logoUrl}

@@ -81,7 +81,7 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
                                     })}
                                     className="default-button default-container text-center view-menu"
                                 >
-                                    View Menu
+                                    View Entire Menu
                                 </Link>
                             </div>
                         )
