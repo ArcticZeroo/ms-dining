@@ -58,8 +58,8 @@ export const VisitPattern: React.FC<IVisitPatternProps> = ({ view, visits }) => 
     const url = getViewMenuUrl({ view, viewsById, shouldUseGroups, cafeIdsOnPage });
 
     return (
-        <div className="flex flex-col shrink-padding default-container bg-raised-2">
-            <Link to={url} className="default-button default-container"
+        <div className="shrink-padding card align-center">
+            <Link to={url} className="default-button default-container self-stretch text-center"
                 onClick={closePopup}>
                 { getViewName({ view, showGroupName: true }) }
             </Link>
