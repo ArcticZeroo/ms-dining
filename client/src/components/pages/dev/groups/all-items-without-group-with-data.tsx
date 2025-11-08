@@ -17,10 +17,6 @@ const useQueryResults = (allItemsWithoutGroup: AllItemsWithoutGroupByType, filte
     return useMemo(
         () => {
             const getResults = () => {
-                if (!query) {
-                    return Array.from(allItemsWithoutGroup.values()).flatMap(itemsForType => Array.from(itemsForType.values()));
-                }
-
                 const results: IGroupMember[] = [];
                 const normalizedQuery = normalizeNameForSearch(query);
                 for (const [entityType, itemsForType] of allItemsWithoutGroup) {
@@ -29,7 +25,7 @@ const useQueryResults = (allItemsWithoutGroup: AllItemsWithoutGroupByType, filte
                     }
 
                     for (const item of itemsForType.values()) {
-                        if (normalizeNameForSearch(item.name).includes(normalizedQuery)) {
+                        if (!normalizedQuery || normalizeNameForSearch(item.name).includes(normalizedQuery)) {
                             results.push(item);
                         }
                     }
