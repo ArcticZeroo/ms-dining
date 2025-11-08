@@ -9,8 +9,9 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
 		: undefined;
 
 	const station: ICafeStation = {
-		id:     stationJson.id,
-		cafeId: client.cafe.id,
+		id:      stationJson.id,
+		cafeId:  client.cafe.id,
+		groupId: undefined,
 		// Prioritize conceptOptions.displayText as it contains the correct display name for the station
 		// (e.g. in some cases before we have seen "Masala Fresh" in conceptOptions.displayText which was
 		// correct, while the name field was "What The Pho" which was incorrect).

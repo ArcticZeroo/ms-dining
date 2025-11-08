@@ -12,6 +12,10 @@ export abstract class StationStorageClient {
 			logoUrl: station.logoUrl || null
 		} satisfies Prisma.StationUpdateArgs['data'];
 
+		if (station.groupId) {
+			(updateData as Prisma.StationUpdateArgs['data']).groupId = station.groupId;
+		}
+
 		const createData = {
 			id: station.id,
 			...updateData,

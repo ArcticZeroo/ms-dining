@@ -190,7 +190,8 @@ export abstract class DailyMenuStorageClient {
 					select: {
 						name:    true,
 						logoUrl: true,
-						menuId:  true
+						menuId:  true,
+						groupId: true
 					}
 				},
 				categories:             {
@@ -239,6 +240,7 @@ export abstract class DailyMenuStorageClient {
 				menuId:             stationData.menuId,
 				logoUrl:            stationData.logoUrl || undefined,
 				name:               stationData.name,
+				groupId:            stationData.groupId,
 				menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
 										? dailyStation.externalLastUpdateTime
 										: undefined,
