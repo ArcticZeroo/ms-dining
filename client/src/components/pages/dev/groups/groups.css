@@ -1,8 +1,14 @@
 .member-toggle .member {
     transition: background-color 0.25s ease;
-    background: var(--color-error);
 }
 
 .member-toggle .member.active {
     background: var(--color-theme-green);
+}
+
+#floating-create-group {
+    position: absolute;
+    bottom: var(--default-padding);
+    right: var(--default-padding);
+    background: var(--color-theme-background-accent);
 }

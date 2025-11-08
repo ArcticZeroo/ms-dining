@@ -8,6 +8,8 @@ import { IGroupMember } from '@msdining/common/models/group';
 import { matchesEntityFilter } from '../../../../util/search.js';
 import { pluralize } from '../../../../util/string.js';
 import { GroupMember } from './group-member/group-member.js';
+import { classNames } from '../../../../util/react.js';
+import { AllItemsWithoutGroupSelectedPopup } from './all-items-without-group-selected-popup.js';
 
 interface IAllItemsWithoutGroupWithDataProps {
     allItemsWithoutGroup: AllItemsWithoutGroupByType;
@@ -41,9 +43,48 @@ const useQueryResults = (allItemsWithoutGroup: AllItemsWithoutGroupByType, filte
     );
 }
 
+const useSelectedMembers = () => {
+    const [selectedMembers, setSelectedMembers] = useState<Map<string, IGroupMember>>(new Map());
+    const [selectedType, setSelectedType] = useState<SearchEntityType | null>(null);
+
+    const toggleSelectedItem = (item: IGroupMember) => {
+        if (selectedType && selectedType !== item.type) {
+            return;
+        }
+
+        const newSelectedMembers = new Map(selectedMembers);
+        if (newSelectedMembers.has(item.id)) {
+            newSelectedMembers.delete(item.id);
+        } else {
+            newSelectedMembers.set(item.id, item);
+        }
+
+        if (newSelectedMembers.size === 0) {
+            setSelectedType(null);
+        } else {
+            setSelectedType(item.type);
+        }
+
+        setSelectedMembers(newSelectedMembers);
+    }
+
+    const clearSelection = () => {
+        setSelectedMembers(new Map());
+        setSelectedType(null);
+    }
+
+    return {
+        selectedMembers,
+        selectedType,
+        toggleSelectedItem,
+        clearSelection
+    };
+}
+
 export const AllItemsWithoutGroupWithData: React.FC<IAllItemsWithoutGroupWithDataProps> = ({ allItemsWithoutGroup }) => {
     const [filter, setFilter] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
     const [query, setQuery] = useState<string>('');
+    const { selectedMembers, selectedType, toggleSelectedItem, clearSelection } = useSelectedMembers();
 
     const [tabCounts, totalCount] = useMemo(
         () => {
@@ -79,18 +120,34 @@ export const AllItemsWithoutGroupWithData: React.FC<IAllItemsWithoutGroupWithDat
             <div>
                 Showing {queryResults.length} of {totalCount} {pluralize('item', totalCount)}
             </div>
-            <div className="flex flex-wrap">
+            <div className="flex flex-wrap member-toggle">
                 {
-                    queryResults.map((item) => (
-                        <div className="card self-stretch">
-                            <GroupMember
-                                key={`${item.type}-${item.id}`}
-                                member={item}
-                            />
-                        </div>
-                    ))
+                    queryResults.map((item) => {
+                        const isDisabled = selectedType != null && selectedType !== item.type;
+                        return (
+                            <button
+                                className={classNames('card self-stretch member', !isDisabled && 'pointer', selectedMembers.has(item.id) && 'active')}
+                                onClick={() => toggleSelectedItem(item)}
+                                disabled={isDisabled}
+                            >
+                                <GroupMember
+                                    key={`${item.type}-${item.id}`}
+                                    member={item}
+                                />
+                            </button>
+                        );
+                    })
                 }
             </div>
+            {
+                selectedMembers.size > 0 && (
+                    <AllItemsWithoutGroupSelectedPopup
+                        selectedMembers={selectedMembers}
+                        selectedType={selectedType!}
+                        onClearSelection={clearSelection}
+                    />
+                )
+            }
         </div>
     );
 }

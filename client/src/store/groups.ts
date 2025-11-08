@@ -222,6 +222,28 @@ class GroupStore {
         await this.#onItemsAssignedToGroup(members);
     }
 
+    async createGroup(name: string, type: SearchEntityType, initialMembers: Array<IGroupMember>) {
+        const memberIds = new Set(initialMembers.map(member => member.id));
+        const { id } =  await GroupClient.createGroup({
+            name,
+            type,
+            initialMembers: Array.from(memberIds)
+        });
+
+        await this.#groups.updateExisting((current) => {
+            const updatedMap = new Map<string, IGroupData>(current);
+            updatedMap.set(id, {
+                id,
+                name,
+                type,
+                members: initialMembers
+            });
+            return updatedMap;
+        });
+
+        await this.#onItemsAssignedToGroup(initialMembers);
+    }
+
     async acceptCandidateMembers(candidate: IGroupData, memberIds: ReadonlySet<string>) {
         const { id } = await GroupClient.createGroup({
             name:           candidate.name,
