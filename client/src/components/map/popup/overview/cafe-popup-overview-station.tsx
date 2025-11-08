@@ -115,7 +115,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                 </span>
                 {
                     shouldShowBadge ? (
-                        <span className="badge flex flex-center">
+                        <span className="number-badge flex flex-center">
                             {getStationBadge(station, didOpenRecently)}
                         </span>
                     ) : <span/>

@@ -11,6 +11,7 @@ import { pluralize } from '../../../../util/string.js';
 import { CollapsibleContainer } from '../../../collapsible/collapsible-container.js';
 import { CollapsibleHeader } from '../../../collapsible/collapsible-header.js';
 import { CollapsibleBody } from '../../../collapsible/collapsible-body.js';
+import { useSuggestedGroupMembers } from '../../../../hooks/group.js';
 
 interface IGroupAddMembersProps {
     group: IGroupData;
@@ -21,11 +22,10 @@ interface IGroupAddMembersBodyProps {
     allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>> | undefined;
     suggestedCandidates: IGroupMember[] | undefined;
     allItemsWithoutGroupStage: PromiseStage;
-    candidatesForGroupStage: PromiseStage;
     onRetryClicked: () => void;
 }
 
-const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allItemsWithoutGroup, suggestedCandidates, allItemsWithoutGroupStage, candidatesForGroupStage, onRetryClicked }) => {
+const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allItemsWithoutGroup, suggestedCandidates, allItemsWithoutGroupStage, onRetryClicked }) => {
     if (allItemsWithoutGroup && suggestedCandidates) {
         return (
             <GroupAddMembersWithData
@@ -36,7 +36,7 @@ const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allIt
         );
     }
 
-    if (allItemsWithoutGroupStage === PromiseStage.error || candidatesForGroupStage === PromiseStage.error) {
+    if (allItemsWithoutGroupStage === PromiseStage.error) {
         return (
             <div>
                 <span>
@@ -59,17 +59,13 @@ const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allIt
 
 export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
     const { stage: allItemsWithoutGroupStage, value: allItemsWithoutGroup, run: retryGetAllItemsWithoutGroup } = useValueNotifier(GROUP_STORE.allItemsWithoutGroup);
-    const { stage: candidatesForGroupStage, value: suggestedCandidates, run: retryGetCandidatesForGroup } = useValueNotifier(GROUP_STORE.getCandidatesForExistingGroup(group.id));
+    const suggestedCandidates = useSuggestedGroupMembers(group);
 
     const onRetryClicked = useCallback(() => {
         if (allItemsWithoutGroupStage === PromiseStage.error) {
             retryGetAllItemsWithoutGroup();
         }
-        
-        if (candidatesForGroupStage === PromiseStage.error) {
-            retryGetCandidatesForGroup();
-        }
-    }, [allItemsWithoutGroupStage, candidatesForGroupStage, retryGetAllItemsWithoutGroup, retryGetCandidatesForGroup]);
+    }, [allItemsWithoutGroupStage, retryGetAllItemsWithoutGroup]);
 
     let title = 'Search For New Group Members';
     if (suggestedCandidates && suggestedCandidates.length > 0) {
@@ -94,7 +90,6 @@ export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
                     allItemsWithoutGroup={allItemsWithoutGroup}
                     suggestedCandidates={suggestedCandidates}
                     allItemsWithoutGroupStage={allItemsWithoutGroupStage}
-                    candidatesForGroupStage={candidatesForGroupStage}
                     onRetryClicked={onRetryClicked}
                 />
             </CollapsibleBody>

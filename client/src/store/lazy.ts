@@ -1,63 +1,71 @@
 import { IRunnablePromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { MaybePromise } from '../models/async.js';
-import { ValueNotifier } from '../util/events.ts';
+import { ListenerCallback, ListenerManager, ValueNotifier } from '../util/events.ts';
 
 export interface ILazyPromiseState<T> extends IRunnablePromiseState<T> {
     promise: Promise<T>;
 }
 
+type LazyResourceListenerArgs<T> = [ILazyPromiseState<T>];
+type LazyResourceListenerCallback<T> = ListenerCallback<LazyResourceListenerArgs<T>>;
+
 export class LazyResource<T> {
-    private _idSymbol = Symbol();
-    private readonly _factory: () => MaybePromise<T>;
-    private readonly _runForPromiseState = () => this.get(true /*forceRefresh*/);
-    private _state: ValueNotifier<ILazyPromiseState<T>> | undefined = undefined;
+    #idSymbol = Symbol();
+    readonly #factory: () => MaybePromise<T>;
+    readonly #runForPromiseState = () => this.get(true /*forceRefresh*/);
+    readonly #listeners = new ListenerManager<LazyResourceListenerArgs<T>>();
+    #state: ValueNotifier<ILazyPromiseState<T>> | undefined = undefined;
 
     constructor(factory: () => MaybePromise<T>) {
-        this._factory = factory;
+        this.#factory = factory;
     }
 
     get hasBeenRun(): boolean {
-        return this._state != null && this._state.value.stage !== PromiseStage.notRun;
+        return this.#state != null && this.#state.value.stage !== PromiseStage.notRun;
     }
 
-    async _factoryAsPromise() {
-        return this._factory();
+    async #getFactoryAsPromise() {
+        return this.#factory();
     }
 
     #assignState(state: ILazyPromiseState<T>): void {
-        if (!this._state) {
-            this._state = new ValueNotifier<ILazyPromiseState<T>>(state);
+        if (!this.#state) {
+            this.#state = new ValueNotifier<ILazyPromiseState<T>>(state);
+            this.#state.addListener((newState) => {
+                this.#listeners.notify(newState);
+            });
+            this.#listeners.notify(state);
         } else {
-            this._state.value = state;
+            this.#state.value = state;
         }
     }
 
-    async _runFactory(promise: Promise<T>) {
+    async #runFactory(promise: Promise<T>) {
         const mySymbol = Symbol();
-        this._idSymbol = mySymbol;
+        this.#idSymbol = mySymbol;
 
         try {
             const result = await promise;
 
             // A newer run has started, ignore this result
-            if (this._idSymbol !== mySymbol) {
+            if (this.#idSymbol !== mySymbol) {
                 return;
             }
 
             this.#assignState({
-                run: this._runForPromiseState,
+                run: this.#runForPromiseState,
                 stage: PromiseStage.success,
                 value: result,
                 error: undefined,
                 promise
             });
         } catch (error) {
-            if (this._idSymbol !== mySymbol) {
+            if (this.#idSymbol !== mySymbol) {
                 return;
             }
 
             this.#assignState({
-                run: this._runForPromiseState,
+                run: this.#runForPromiseState,
                 stage: PromiseStage.error,
                 value: undefined,
                 error,
@@ -68,29 +76,29 @@ export class LazyResource<T> {
 
     get(forceRefresh: boolean = false): ValueNotifier<ILazyPromiseState<T>> {
         if (forceRefresh || !this.hasBeenRun) {
-            const promise = this._factoryAsPromise();
+            const promise = this.#getFactoryAsPromise();
             this.#assignState({
-                run: this._runForPromiseState,
+                run: this.#runForPromiseState,
                 stage: PromiseStage.running,
                 value: undefined,
                 error: undefined,
                 promise
             });
 
-            this._runFactory(promise)
+            this.#runFactory(promise)
                 .catch(err => console.error('Could not run factory in lazy resource:', err));
         }
 
-        if (!this._state) {
+        if (!this.#state) {
             throw new Error('Lazy resource should have state after running factory');
         }
 
-        return this._state;
+        return this.#state;
     }
 
     set(value: T) {
         this.#assignState({
-            run:     this._runForPromiseState,
+            run:     this.#runForPromiseState,
             stage:   PromiseStage.success,
             value,
             error:   undefined,
@@ -111,5 +119,18 @@ export class LazyResource<T> {
 
     async updateExisting(work: (value: T) => MaybePromise<T>) {
         await this.update(work, true /*skipUpdateIfNotRun*/);
+    }
+
+    async getExisting(): Promise<T | undefined> {
+        if (!this.hasBeenRun) {
+            return undefined;
+        }
+
+        const currentState = this.get();
+        return currentState.value.promise;
+    }
+
+    addLazyListener(listener: LazyResourceListenerCallback<T>): () => void {
+        return this.#listeners.addListener(listener);
     }
 }

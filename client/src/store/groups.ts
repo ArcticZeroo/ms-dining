@@ -3,7 +3,7 @@ import * as GroupClient from '../api/client/groups.js';
 import { getRandomId } from '../util/id.ts';
 import { LazyResource } from './lazy.js';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { ValueNotifier } from '../util/events.js';
 
 const resourceFactory = {
     async groups(): Promise<Map<string, IGroupData>> {
@@ -38,41 +38,59 @@ const cloneAllItemsWithoutGroup = (original: Map<SearchEntityType, Map<string, I
 };
 
 class GroupStore {
-    private _groups = new LazyResource(resourceFactory.groups);
-    private _zeroContextCandidates = new LazyResource(resourceFactory.zeroContextCandidates);
-    private _allItemsWithoutGroup = new LazyResource(resourceFactory.allItemsWithoutGroup);
-    private _candidatesForExistingGroups = new Map<string /*groupId*/, LazyResource<Array<IGroupMember>>>();
+    readonly #groups = new LazyResource(resourceFactory.groups);
+    readonly #zeroContextCandidates = new LazyResource(resourceFactory.zeroContextCandidates);
+    readonly #allItemsWithoutGroup = new LazyResource(resourceFactory.allItemsWithoutGroup);
+    readonly #allItemsWithoutGroupByNormalizedName = new ValueNotifier<Map<string /*groupId*/, Array<IGroupMember>>>(new Map());
+
+    constructor() {
+        this.#allItemsWithoutGroup.addLazyListener(({ value: allItemsWithoutGroup }) => {
+            if (!allItemsWithoutGroup) {
+                if (this.#allItemsWithoutGroupByNormalizedName.value.size > 0) {
+                    this.#allItemsWithoutGroupByNormalizedName.value = new Map();
+                }
+                return;
+            }
+
+            const allItemsByNormalizedName = new Map<string /*normalizedName*/, Array<IGroupMember>>();
+            for (const itemsById of allItemsWithoutGroup.values()) {
+                for (const item of itemsById.values()) {
+                    const normalizedName = item.name.toLowerCase();
+                    if (!allItemsByNormalizedName.has(normalizedName)) {
+                        allItemsByNormalizedName.set(normalizedName, []);
+                    }
+                    allItemsByNormalizedName.get(normalizedName)!.push(item);
+                }
+            }
+
+            this.#allItemsWithoutGroupByNormalizedName.value = allItemsByNormalizedName;
+        });
+    }
 
     get groups() {
-        return this._groups.get();
+        return this.#groups.get();
     }
 
     get zeroContextCandidates() {
-        return this._zeroContextCandidates.get();
+        return this.#zeroContextCandidates.get();
     }
 
     get allItemsWithoutGroup() {
-        return this._allItemsWithoutGroup.get();
+        return this.#allItemsWithoutGroup.get();
     }
 
-    getCandidatesForExistingGroup(groupId: string) {
-        if (!this._candidatesForExistingGroups.has(groupId)) {
-            this._candidatesForExistingGroups.set(
-                groupId,
-                new LazyResource(() => GroupClient.retrieveCandidatesForExistingGroup(groupId))
-            );
-        }
-
-        return this._candidatesForExistingGroups.get(groupId)!.get();
+    get allItemsWithoutGroupByNormalizedName() {
+        this.#allItemsWithoutGroup.get();
+        return this.#allItemsWithoutGroupByNormalizedName;
     }
 
     refreshGroups() {
-        this._groups.get(true /*forceRefresh*/);
+        this.#groups.get(true /*forceRefresh*/);
     }
 
     async updateGroup(groupId: string, { name, notes }: IUpdateGroupRequest) {
         await GroupClient.updateGroup(groupId, { name, notes });
-        await this._groups.updateExisting((current) => {
+        await this.#groups.updateExisting((current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             const group = updatedMap.get(groupId);
             if (group) {
@@ -99,7 +117,7 @@ class GroupStore {
         const removedMembers: IGroupMember[] = [];
         const remainingMembers: IGroupMember[] = [];
 
-        await this._groups.updateExisting(async (current) => {
+        await this.#groups.updateExisting(async (current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             const group = updatedMap.get(groupId);
             if (group) {
@@ -117,20 +135,18 @@ class GroupStore {
             return current;
         });
 
-        await this.#onItemsRemovedFromGroup(groupId, removedMembers, remainingMembers);
+        await this.#onItemsRemovedFromGroup(removedMembers);
     }
 
     async deleteGroup(groupId: string) {
         await GroupClient.deleteGroup(groupId);
 
-        this._candidatesForExistingGroups.delete(groupId);
-
-        await this._groups.updateExisting(async (current) => {
+        await this.#groups.updateExisting(async (current) => {
             const updatedMap = new Map<string, IGroupData>(current);
 
             const group = updatedMap.get(groupId);
             if (group) {
-                await this.#onItemsRemovedFromGroup(group.id, group.members, [] /*remainingMembers*/);
+                await this.#onItemsRemovedFromGroup(group.members);
             }
 
             updatedMap.delete(groupId);
@@ -138,8 +154,8 @@ class GroupStore {
         });
     }
 
-    async #onItemsAssignedToGroup(groupId: string, members: IGroupMember[]) {
-        await this._zeroContextCandidates.updateExisting((currentZeroContextCandidates) => {
+    async #onItemsAssignedToGroup(members: IGroupMember[]) {
+        await this.#zeroContextCandidates.updateExisting((currentZeroContextCandidates) => {
             const updatedCandidates = new Map<string, IGroupData>(currentZeroContextCandidates);
 
             let didAnythingChange = false;
@@ -161,7 +177,7 @@ class GroupStore {
             return currentZeroContextCandidates;
         });
 
-        await this._allItemsWithoutGroup.updateExisting((currentItems) => {
+        await this.#allItemsWithoutGroup.updateExisting((currentItems) => {
             const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
             for (const member of members) {
                 const itemsById = newItemsWithoutGroup.get(member.type);
@@ -171,17 +187,10 @@ class GroupStore {
             }
             return newItemsWithoutGroup;
         });
-
-        const groupMemberSuggestions = this._candidatesForExistingGroups.get(groupId);
-        if (groupMemberSuggestions) {
-            await groupMemberSuggestions.updateExisting((currentMembers) => {
-                return currentMembers.filter(member => !members.some(addedMember => addedMember.id === member.id));
-            });
-        }
     }
 
-    async #onItemsRemovedFromGroup(groupId: string, removedMembers: IGroupMember[], remainingMembers: IGroupMember[]) {
-        await this._allItemsWithoutGroup.updateExisting((currentItems) => {
+    async #onItemsRemovedFromGroup(removedMembers: IGroupMember[]) {
+        await this.#allItemsWithoutGroup.updateExisting((currentItems) => {
             const newItemsWithoutGroup = cloneAllItemsWithoutGroup(currentItems);
             for (const member of removedMembers) {
                 if (!newItemsWithoutGroup.has(member.type)) {
@@ -191,25 +200,13 @@ class GroupStore {
             }
             return newItemsWithoutGroup;
         });
-
-        const groupMemberSuggestions = this._candidatesForExistingGroups.get(groupId);
-        if (groupMemberSuggestions && remainingMembers.length > 0) {
-            const suggestionsToAdd = removedMembers.filter((removedMember) => {
-                const removedMemberName = normalizeNameForSearch(removedMember.name);
-                return remainingMembers.some((remainingMember) => normalizeNameForSearch(remainingMember.name) === removedMemberName);
-            });
-
-            await groupMemberSuggestions.updateExisting((currentMembers) => {
-                return [...currentMembers, ...suggestionsToAdd];
-            });
-        }
     }
 
     async addGroupMembers(groupId: string, members: IGroupMember[]) {
         const memberIds = new Set(members.map(member => member.id));
         await GroupClient.addGroupMembers(groupId, Array.from(memberIds));
 
-        await this._groups.updateExisting((current) => {
+        await this.#groups.updateExisting((current) => {
             const updatedMap = new Map<string, IGroupData>(current);
             const group = updatedMap.get(groupId);
             if (group) {
@@ -222,13 +219,13 @@ class GroupStore {
             return current;
         });
 
-        await this.#onItemsAssignedToGroup(groupId, members);
+        await this.#onItemsAssignedToGroup(members);
     }
 
     async acceptCandidateMembers(candidate: IGroupData, memberIds: ReadonlySet<string>) {
         const { id } = await GroupClient.createGroup({
-            name: candidate.name,
-            type: candidate.type,
+            name:           candidate.name,
+            type:           candidate.type,
             initialMembers: Array.from(memberIds)
         });
 
@@ -242,7 +239,7 @@ class GroupStore {
             }
         }
 
-        await this._zeroContextCandidates.updateExisting((currentZeroContextCandidates) => {
+        await this.#zeroContextCandidates.updateExisting((currentZeroContextCandidates) => {
             const updatedCandidates = new Map<string, IGroupData>(currentZeroContextCandidates);
             updatedCandidates.delete(candidate.id);
             if (newCandidateMembers.length > 0) {
@@ -253,13 +250,13 @@ class GroupStore {
             return updatedCandidates;
         });
 
-        await this._groups.updateExisting((currentGroups) => {
+        await this.#groups.updateExisting((currentGroups) => {
             const updatedGroups = new Map<string, IGroupData>(currentGroups);
             updatedGroups.set(id, { ...candidate, id, members: newGroupMembers });
             return updatedGroups;
         });
 
-        await this.#onItemsAssignedToGroup(id, newGroupMembers);
+        await this.#onItemsAssignedToGroup(newGroupMembers);
     }
 }
 

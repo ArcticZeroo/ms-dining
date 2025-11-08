@@ -37,7 +37,7 @@ export const SearchAllowedViews: React.FC = () => {
                 <span>
                     Allowed Cafes
                 </span>
-                <span className="badge">
+                <span className="number-badge">
                     {allowedViewCount}
                 </span>
             </button>

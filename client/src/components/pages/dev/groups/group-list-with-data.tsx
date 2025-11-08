@@ -51,7 +51,7 @@ export const GroupListWithData: React.FC<IGroupListWithDataProps> = ({ groups })
                                 <span>
                                     {displayData.displayName}
                                 </span>
-                                <span className="badge">
+                                <span className="number-badge">
                                     {groupsForType.length}
                                 </span>
                             </button>

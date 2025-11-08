@@ -1,11 +1,12 @@
-class ListenerManager<TArgs extends Array<unknown>> {
-    readonly #listeners: Array<TListener<TArgs>> = [];
+export class ListenerManager<TArgs extends Array<unknown>> {
+    readonly #listeners: Array<ListenerCallback<TArgs>> = [];
 
-    addListener(listener: TListener<TArgs>) {
+    addListener(listener: ListenerCallback<TArgs>) {
         this.#listeners.push(listener);
+        return () => this.removeListener(listener);
     }
 
-    removeListener(listener: TListener<TArgs>) {
+    removeListener(listener: ListenerCallback<TArgs>) {
         const index = this.#listeners.indexOf(listener);
         if (index >= 0) {
             this.#listeners.splice(index, 1);
@@ -132,7 +133,7 @@ export class TypedEventEmitter<TEvents extends EventMap> {
     }
 }
 
-type TListener<TArgs extends unknown[]> = (...args: TArgs) => void;
+export type ListenerCallback<TArgs extends unknown[]> = (...args: TArgs) => void;
 
 export class ValueNotifierMap<TKey, TValue> {
     readonly #value: Map<TKey, TValue> = new Map();
@@ -204,15 +205,15 @@ export class ValueNotifierMap<TKey, TValue> {
         return this.#value.entries();
     }
 
-    addEntryAddedListener(listener: TListener<[TKey, TValue]>) {
+    addEntryAddedListener(listener: ListenerCallback<[TKey, TValue]>) {
         this.#entryAddedListeners.addListener(listener);
     }
 
-    addEntryRemovedListener(listener: TListener<[TKey, TValue]>) {
+    addEntryRemovedListener(listener: ListenerCallback<[TKey, TValue]>) {
         this.#entryRemovedListeners.addListener(listener);
     }
 
-    addEntryUpdatedListener(listener: TListener<[TKey, TValue, TValue]>) {
+    addEntryUpdatedListener(listener: ListenerCallback<[TKey, TValue, TValue]>) {
         this.#entryUpdatedListeners.addListener(listener);
     }
 }

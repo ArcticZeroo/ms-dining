@@ -10,6 +10,8 @@ import { GroupTypeIcon } from './group-type-icon.js';
 import { CollapsibleContainer } from '../../../collapsible/collapsible-container.js';
 import { CollapsibleHeader } from '../../../collapsible/collapsible-header.js';
 import { CollapsibleBody } from '../../../collapsible/collapsible-body.js';
+import { useSuggestedGroupMembers } from '../../../../hooks/group.js';
+import { pluralize } from '../../../../util/string.js';
 
 interface IGroupProps {
     group: IGroupData;
@@ -90,90 +92,102 @@ const useDeleteControls = (group: IGroupData) => {
 export const Group: React.FC<IGroupProps> = ({ group }) => {
     const deleteControls = useDeleteControls(group);
     const editControls = useEditControls(group);
+    const suggestedMembers = useSuggestedGroupMembers(group);
 
     return (
         <div className="default-container bg-raised-2 flex-col">
             <CollapsibleContainer>
                 <CollapsibleHeader>
-                    <div className="flex flex-between">
-                        <GroupTypeIcon type={group.type}/>
-                        <div className="flex-col flex-center">
+                    <div className="flex flex-between flex-grow">
+                        <div className="flex">
+                            <GroupTypeIcon type={group.type}/>
+                            <div className="flex-col flex-center">
+                                {
+                                    editControls.isEditing && (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={editControls.name}
+                                                onChange={(e) => editControls.onNameChanged(e.target.value)}
+                                                placeholder="Group Name"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={editControls.notes}
+                                                onChange={(e) => editControls.onNotesChanged(e.target.value)}
+                                                placeholder="Notes"
+                                            />
+                                        </>
+                                    )
+                                }
+                                {
+                                    !editControls.isEditing && (
+                                        <>
+                                            <span>{group.name}</span>
+                                            {
+                                                group.notes && (
+                                                    <span className="subtitle">
+                                                        {group.notes}
+                                                    </span>
+                                                )
+                                            }
+                                        </>
+                                    )
+                                }
+                            </div>
+                            <span className="text-badge">
+                                {group.members.length} {pluralize('Member', group.members.length)}
+                            </span>
+                        </div>
+                        {
+                            suggestedMembers.length > 0 && (
+                                <span className="text-badge">
+                                    {suggestedMembers.length} Suggested {pluralize('Member', suggestedMembers.length)}
+                                </span>
+                            )
+                        }
+                        <div className="flex">
                             {
                                 editControls.isEditing && (
                                     <>
-                                        <input
-                                            type="text"
-                                            value={editControls.name}
-                                            onChange={(e) => editControls.onNameChanged(e.target.value)}
-                                            placeholder="Group Name"
-                                        />
-                                        <input
-                                            type="text"
-                                            value={editControls.notes}
-                                            onChange={(e) => editControls.onNotesChanged(e.target.value)}
-                                            placeholder="Notes"
-                                        />
+                                        <button
+                                            className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(editControls.updateStage))}
+                                            disabled={!editControls.canSaveOrCancelEditing}
+                                            onClick={editControls.onSaveClicked}
+                                        >
+                                            check
+                                        </button>
+                                        <button
+                                            className="material-symbols-outlined default-button default-container icon-container"
+                                            disabled={!editControls.canSaveOrCancelEditing}
+                                            onClick={editControls.onCancelClicked}
+                                        >
+                                            close
+                                        </button>
                                     </>
                                 )
                             }
                             {
                                 !editControls.isEditing && (
                                     <>
-                                        <span>{group.name}</span>
-                                        {
-                                            group.notes && (
-                                                <span className="subtitle">
-                                                    {group.notes}
-                                                </span>
-                                            )
-                                        }
+                                        <button
+                                            className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(deleteControls.deleteStage))}
+                                            disabled={!deleteControls.canUseDeleteButton}
+                                            onClick={deleteControls.onDeleteClicked}
+                                        >
+                                            delete
+                                        </button>
+                                        <button
+                                            className="material-symbols-outlined default-button default-container icon-container"
+                                            disabled={!deleteControls.canUseDeleteButton}
+                                            onClick={editControls.onEditClicked}
+                                        >
+                                            edit
+                                        </button>
                                     </>
                                 )
                             }
                         </div>
-                        <span className="badge">
-                            {group.members.length}
-                        </span>
-                        {
-                            editControls.isEditing && (
-                                <>
-                                    <button
-                                        className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(editControls.updateStage))}
-                                        disabled={!editControls.canSaveOrCancelEditing}
-                                        onClick={editControls.onSaveClicked}
-                                    >
-                                        check
-                                    </button>
-                                    <button
-                                        className="material-symbols-outlined default-button default-container icon-container"
-                                        disabled={!editControls.canSaveOrCancelEditing}
-                                        onClick={editControls.onCancelClicked}
-                                    >
-                                        close
-                                    </button>
-                                </>
-                            )
-                        }
-                        {
-                            !editControls.isEditing && (
-                                <>
-                                    <button
-                                        className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(deleteControls.deleteStage))}
-                                        disabled={!deleteControls.canUseDeleteButton}
-                                        onClick={deleteControls.onDeleteClicked}
-                                    >
-                                        delete
-                                    </button>
-                                    <button
-                                        className="material-symbols-outlined default-button default-container icon-container"
-                                        disabled={!deleteControls.canUseDeleteButton}
-                                        onClick={editControls.onEditClicked}
-                                    >
-                                        edit
-                                    </button>
-                                </>
-                            )
-                        }
                     </div>
                 </CollapsibleHeader>
                 <CollapsibleBody>

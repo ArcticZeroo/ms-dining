@@ -122,7 +122,7 @@ export const CheapItemsPage: React.FC = () => {
         <div className="search-page">
             <div className="search-info default-border-radius">
                 <div className="query default-container flex flex-between">
-                    <span className="icon-sized badge">
+                    <span className="icon-sized number-badge">
                         {
                             stage === PromiseStage.success
                                 ? results.length

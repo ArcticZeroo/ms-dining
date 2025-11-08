@@ -107,7 +107,7 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                                 {station.name}
                                 {
                                     station.uniqueness.isTraveling && (
-                                        <span className="badge" title="This station is traveling today. It won't be here tomorrow.">
+                                        <span className="number-badge" title="This station is traveling today. It won't be here tomorrow.">
                                             <span className="material-symbols-outlined">
                                                 flight
                                             </span>
@@ -116,7 +116,7 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                                 }
                                 {
                                     !station.uniqueness.isTraveling && (station.uniqueness.itemDays[1] || 0) > 0 && (
-                                        <span className="badge" title="Unique items available today only">
+                                        <span className="number-badge" title="Unique items available today only">
                                             {String(station.uniqueness.itemDays[1])}
                                         </span>
                                     )

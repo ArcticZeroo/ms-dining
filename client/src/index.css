@@ -592,7 +592,7 @@ html, body, #root, .App {
     height: var(--map-height);
 }
 
-.badge {
+.number-badge {
     background: var(--color-badge);
     padding: 0.125rem;
     width: 1.75rem;
@@ -606,10 +606,19 @@ html, body, #root, .App {
     color: var(--color-almost-white);
 }
 
-.badge > * {
+.number-badge > * {
     width: 1rem;
     height: 1rem;
     font-size: 1rem;
+}
+
+.text-badge {
+    background: var(--color-badge);
+    padding: 0.125rem 0.5rem 0.125rem 0.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+    border-radius: var(--constant-padding);
+    color: var(--color-almost-white);
 }
 
 .default-border-radius {
