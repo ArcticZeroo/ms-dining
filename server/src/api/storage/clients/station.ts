@@ -1,34 +1,33 @@
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { usePrismaClient } from '../client.js';
-import { Station } from '@prisma/client';
+import { Prisma, Station } from '@prisma/client';
 import { ICafeStation } from '../../../models/cafe.js';
 
 export abstract class StationStorageClient {
 	public static async createStationAsync(station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
-		const dataWithoutId: Omit<Station, 'id'> = {
+		const updateData = {
 			name:    station.name,
 			menuId:  station.menuId,
 			cafeId:  station.cafeId,
-			logoUrl: station.logoUrl || null,
-			groupId: null
-		};
+			logoUrl: station.logoUrl || null
+		} satisfies Prisma.StationUpdateArgs['data'];
 
-		const data: Station = {
+		const createData = {
 			id: station.id,
-			...dataWithoutId,
-		};
+			...updateData,
+		} satisfies Prisma.StationCreateArgs['data'];
 
 		if (allowUpdateIfExisting) {
 			await usePrismaClient(prismaClient => prismaClient.station.upsert({
 				where:  { id: station.id },
-				update: dataWithoutId,
-				create: data
+				update: updateData,
+				create: createData
 			}));
 			return;
 		}
 
 		try {
-			await usePrismaClient(prismaClient => prismaClient.station.create({ data }));
+			await usePrismaClient(prismaClient => prismaClient.station.create({ data: createData }));
 		} catch (err) {
 			if (!isUniqueConstraintFailedError(err)) {
 				throw err;
