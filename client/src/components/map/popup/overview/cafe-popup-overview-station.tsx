@@ -9,6 +9,7 @@ import { ICafe } from '../../../../models/cafe.ts';
 import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
+import { classNames } from '../../../../util/react.js';
 
 const getStationTitle = ({ uniqueness: { isTraveling, daysThisWeek, recentlyAvailableItemCount, itemDays } }: ICafeOverviewStation, didOpenRecently: boolean) => {
     if (didOpenRecently) {
@@ -38,27 +39,32 @@ const getStationTitle = ({ uniqueness: { isTraveling, daysThisWeek, recentlyAvai
 const getStationBadge = ({ uniqueness: { isTraveling, recentlyAvailableItemCount, itemDays } }: ICafeOverviewStation, didOpenRecently: boolean) => {
     if (didOpenRecently) {
         return (
-            '✨'
+            '✨ Opened Recently'
         );
     }
 
     if (isTraveling) {
         return (
-            <span className="material-symbols-outlined">
-                flight
-            </span>
+            <>
+                <span className="material-symbols-outlined">
+                    flight
+                </span>
+                <span>
+                    Traveling Station
+                </span>
+            </>
         );
     }
 
     if (recentlyAvailableItemCount > 0) {
         return (
-            '✨'
+            '✨ New Items'
         );
     }
 
     const itemsHereTodayOnlyCount = itemDays[1] || 0;
     if (itemsHereTodayOnlyCount > 0) {
-        return itemsHereTodayOnlyCount;
+        return `${itemsHereTodayOnlyCount} Traveling ${pluralize('Item', itemsHereTodayOnlyCount)}`;
     }
 
     return null;
@@ -73,53 +79,37 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
     const popupView = useContext(MapPopupViewContext);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    if (!popupView) {
-        return null;
-    }
-
-    const itemsHereTodayOnlyCount = station.uniqueness.itemDays[1] || 0;
-    const shouldShowBadge = station.uniqueness.isTraveling || itemsHereTodayOnlyCount > 0;
     const didOpenRecently = getIsRecentlyAvailable(station.uniqueness.firstAppearance);
+    const badge = getStationBadge(station, didOpenRecently);
+    console.log(station, didOpenRecently, badge);
 
-    return (
-        <Link
-            className={"overview-station default-container flex-col"}
-            to={getSearchAnchorJumpUrlOnAnotherPage({
-                cafeId:     cafe.id,
-                view:       popupView,
-                entityType: SearchEntityType.station,
-                name:       station.name,
-                date:       selectedDate
-            })}
-            title={getStationTitle(station, didOpenRecently)}
-        >
+    const children = (
+        <>
             <div className="flex flex-between">
-                {
-                    station.logoUrl && (
-                        <img
-                            src={station.logoUrl}
-                            alt={`${station.name} logo`}
-                            className="logo-small"
-                        />
-                    )
-                }
                 <span className="flex">
                     {
-                        didOpenRecently && (
-                            <span className="recently-opened-notice default-container" title="This station is new to this cafe!">
-                                New!
-                            </span>
+                        station.logoUrl && (
+                            <img
+                                src={station.logoUrl}
+                                alt={`${station.name} logo`}
+                                className="logo-small"
+                            />
                         )
                     }
-                    {station.name}
+                    <span className="flex">
+                        {
+                            didOpenRecently && (
+                                <span className="recently-opened-notice default-container" title="This station is new to this cafe!">
+                                New!
+                                </span>
+                            )
+                        }
+                        {station.name}
+                    </span>
                 </span>
-                {
-                    shouldShowBadge ? (
-                        <span className="number-badge flex flex-center">
-                            {getStationBadge(station, didOpenRecently)}
-                        </span>
-                    ) : <span/>
-                }
+                <span className={classNames('flex flex-center', badge && 'text-badge')}>
+                    {badge}
+                </span>
             </div>
             {
                 station.uniqueness.theme != null && (
@@ -135,6 +125,33 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
                     </div>
                 )
             }
+        </>
+    );
+
+    if (!popupView) {
+        return (
+            <div
+                className="overview-station default-container flex-col"
+                title={getStationTitle(station, didOpenRecently)}
+            >
+                {children}
+            </div>
+        );
+    }
+
+    return (
+        <Link
+            className={"overview-station default-container flex-col"}
+            to={getSearchAnchorJumpUrlOnAnotherPage({
+                cafeId:     cafe.id,
+                view:       popupView,
+                entityType: SearchEntityType.station,
+                name:       station.name,
+                date:       selectedDate
+            })}
+            title={getStationTitle(station, didOpenRecently)}
+        >
+            {children}
         </Link>
     );
 };

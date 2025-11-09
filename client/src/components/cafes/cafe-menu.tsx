@@ -14,6 +14,11 @@ import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
+import { usePopupOpener } from '../../hooks/popup.js';
+import { CafePopupOverview } from '../map/popup/overview/cafe-popup-overview.js';
+import { Modal } from '../popup/modal.js';
+
+const menuOverviewSymbol = Symbol();
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
@@ -33,6 +38,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     }) => {
     useTrackThisCafeOnPage(cafe.id);
 
+    const openPopup = usePopupOpener();
     const deviceType = useDeviceType();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
@@ -74,6 +80,23 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
             collapsedCafeIdsNotifier.delete(cafe.id);
         }
     };
+
+    const onOpenMenuOverviewClicked = () => {
+        openPopup({
+            id: menuOverviewSymbol,
+            body: (
+                <Modal
+                    title="Menu Overview"
+                    body={
+                        <CafePopupOverview
+                            cafe={cafe}
+                            showMessageForNoStations={true}
+                        />
+                    }
+                />
+            )
+        });
+    }
 
     return (
         <CurrentCafeContext.Provider value={cafe}>
@@ -136,6 +159,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                         <button
                                             className="default-button default-container flex"
                                             title="Click to view menu overview"
+                                            onClick={onOpenMenuOverviewClicked}
                                         >
                                             <span className="material-symbols-outlined">
                                                 menu_book_2

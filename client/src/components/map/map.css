@@ -119,7 +119,7 @@
     background: var(--color-map-cafe-popup-close-button);
 }
 
-.campus-map-container .logo-small {
+.logo-small {
     width: 2rem;
     height: 2rem;
     background: var(--color-map-cafe-logo-background);
@@ -127,12 +127,12 @@
     object-fit: contain;
 }
 
-.cafe-popup a.overview-station {
+a.overview-station {
     text-decoration: none;
     background: var(--color-background-raised);
 }
 
-.cafe-popup a.overview-station .recently-opened-notice {
+a.overview-station .recently-opened-notice {
     width: fit-content;
     align-self: center;
 }

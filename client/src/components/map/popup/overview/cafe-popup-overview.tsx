@@ -9,6 +9,7 @@ import { ICafe } from '../../../../models/cafe.ts';
 import { sortStationUniquenessInPlace } from '../../../../util/sorting.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { CafePopupOverviewStation } from './cafe-popup-overview-station.tsx';
+import { RetryButton } from '../../../button/retry-button.js';
 
 const TARGET_STATION_MINIMUM = 3;
 
@@ -30,6 +31,7 @@ const useOverviewData = (cafe: ICafe) => {
 
 interface ICafeMarkerOverviewProps {
     cafe: ICafe;
+    showMessageForNoStations?: boolean;
 }
 
 const isInterestingStation = (station: ICafeOverviewStation): boolean => {
@@ -39,11 +41,8 @@ const isInterestingStation = (station: ICafeOverviewStation): boolean => {
         || getIsRecentlyAvailable(station.uniqueness.firstAppearance);
 }
 
-export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) => {
-    const overviewState = useOverviewData(cafe);
-
-    const overviewStations = overviewState.value;
-    const isLoading = overviewStations == null && !overviewState.error;
+export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe, showMessageForNoStations = false }) => {
+    const { value: overviewStations, error, run } = useOverviewData(cafe);
 
     const stationsToShow = useMemo(
         () => {
@@ -84,37 +83,56 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
         [overviewStations]
     );
 
-    if (!isLoading && stationsToShow.length === 0) {
-        return null;
+    if (error) {
+        return (
+            <div>
+                <span>
+                    Unable to load overview.
+                </span>
+                <RetryButton onClick={run}/>
+            </div>
+        );
+    }
+    
+    if (overviewStations) {
+        if (stationsToShow.length === 0) {
+            if (showMessageForNoStations) {
+                return (
+                    <div>
+                        <span>
+                            No stations available today.
+                        </span>
+                    </div>
+                );
+            }
+            return null;
+        }
+
+        return (
+            stationsToShow.length > 0 && (
+                <div key={cafe.id} className="flex-col">
+                    <span>
+                            Interesting stations today:
+                    </span>
+                    <span className="flex-col">
+                        {
+                            stationsToShow.map(station => (
+                                <CafePopupOverviewStation
+                                    key={station.name}
+                                    cafe={cafe}
+                                    station={station}
+                                />
+                            ))
+                        }
+                    </span>
+                </div>
+            )
+        );
     }
 
     return (
         <div>
-            {
-                isLoading && (
-                    <HourglassLoadingSpinner/>
-                )
-            }
-            {
-                !isLoading && stationsToShow.length > 0 && (
-                    <div key={cafe.id} className="flex-col">
-                        <span>
-                            Interesting stations today:
-                        </span>
-                        <span className="flex-col">
-                            {
-                                stationsToShow.map(station => (
-                                    <CafePopupOverviewStation
-                                        key={station.name}
-                                        cafe={cafe}
-                                        station={station}
-                                    />
-                                ))
-                            }
-                        </span>
-                    </div>
-                )
-            }
+            <HourglassLoadingSpinner/>
         </div>
     );
 };
