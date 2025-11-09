@@ -175,8 +175,8 @@
 }
 
 .collapsible-cafe.expanded .collapse-toggle {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    /*border-bottom-left-radius: 0;*/
+    /*border-bottom-right-radius: 0;*/
 }
 
 .collapsible-cafe .collapse-toggle .corner {
@@ -202,9 +202,14 @@
 }
 
 .collapsible-cafe .cafe-header-controls {
-    background: var(--color-theme-background-accent);
-    border-bottom-left-radius: var(--default-padding);
-    border-bottom-right-radius: var(--default-padding);
+    /*border-bottom-left-radius: var(--default-padding);*/
+    /*border-bottom-right-radius: var(--default-padding);*/
+}
+
+.collapsible-cafe .cafe-header-controls button, .collapsible-cafe .cafe-header-controls a {
+    background: var(--color-header);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .collapsible-cafe .cafe-order-link {
