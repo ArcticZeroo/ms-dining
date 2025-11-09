@@ -133,14 +133,14 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                 </div>
                                 <span className="corner recently-opened">
                                     {
-                                        /*openedRecently &&*/ <span className="default-container recently-opened-notice">New!</span>
+                                        openedRecently && <span className="default-container recently-opened-notice">New!</span>
                                     }
                                 </span>
                             </div>
                             {
                                 !isCollapsed && (
                                     <div
-                                        className="flex flex-around flex-wrap force-base-font-size cafe-header-controls bg-raised-2"
+                                        className="flex flex-around flex-wrap force-base-font-size cafe-header-controls"
                                         ref={buttonContainer}
                                     >
                                         <a

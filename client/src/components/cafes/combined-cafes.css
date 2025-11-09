@@ -202,6 +202,7 @@
 }
 
 .collapsible-cafe .cafe-header-controls {
+    background: var(--color-theme-background-accent);
     border-bottom-left-radius: var(--default-padding);
     border-bottom-right-radius: var(--default-padding);
 }
