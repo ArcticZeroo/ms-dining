@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
@@ -13,6 +13,7 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
+import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
@@ -32,10 +33,12 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     }) => {
     useTrackThisCafeOnPage(cafe.id);
 
+    const deviceType = useDeviceType();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
+    const buttonContainer = useRef<HTMLDivElement>(null);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
@@ -55,7 +58,13 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
         }
     }, [collapsedCafeIdsNotifier, cafe.id]);
 
-    const toggleIsExpanded = () => {
+    const toggleIsExpanded = (event: React.MouseEvent) => {
+        // Click originated from button container; don't toggle collapse
+        if (buttonContainer.current?.contains(event.target as Node)) {
+            event.preventDefault();
+            return;
+        }
+
         const isNowCollapsed = !isCollapsed;
 
         if (isNowCollapsed) {
@@ -82,14 +91,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                         key={cafe.id}
                     >
                         <div className="cafe-header" ref={setCafeHeaderElement}>
-                            <a className="cafe-order-link"
-                                href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
-                                target="_blank">
-                                <span className="material-symbols-outlined">
-                                open_in_new
-                                </span>
-                            </a>
-                            <button className="collapse-toggle" onClick={toggleIsExpanded}>
+                            <div role="button" className="collapse-toggle" onClick={toggleIsExpanded}>
                                 <span className="corner logo-container">
                                     {
                                         showCafeLogo && (
@@ -100,16 +102,51 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                         )
                                     }
                                 </span>
-                                <span className="cafe-name">
-                                    {cafeName}
-                                    <ExpandIcon isExpanded={!isCollapsed}/>
-                                </span>
+                                <div className="flex-col constant-gap">
+                                    <span className="cafe-name">
+                                        {cafeName}
+                                        <ExpandIcon isExpanded={!isCollapsed}/>
+                                    </span>
+                                </div>
                                 <span className="corner recently-opened">
                                     {
-                                        openedRecently && <span className="default-container recently-opened-notice">New!</span>
+                                        /*openedRecently &&*/ <span className="default-container recently-opened-notice">New!</span>
                                     }
                                 </span>
-                            </button>
+                            </div>
+                            {
+                                !isCollapsed && (
+                                    <div
+                                        className="flex flex-around flex-wrap force-base-font-size cafe-header-controls bg-raised-2"
+                                        ref={buttonContainer}
+                                    >
+                                        <a
+                                            className="default-button default-container flex"
+                                            href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
+                                            target="_blank"
+                                            title="Click to open online ordering menu at buy-ondemand.com"
+                                        >
+                                            <span className="material-symbols-outlined">
+                                                captive_portal
+                                            </span>
+                                            <span>
+                                                Order{deviceType === DeviceType.Desktop && ' Online'}
+                                            </span>
+                                        </a>
+                                        <button
+                                            className="default-button default-container flex"
+                                            title="Click to view menu overview"
+                                        >
+                                            <span className="material-symbols-outlined">
+                                                menu_book_2
+                                            </span>
+                                            <span>
+                                                {deviceType === DeviceType.Desktop && 'Menu '}Overview
+                                            </span>
+                                        </button>
+                                    </div>
+                                )
+                            }
                         </div>
                         <CafeMenuBody
                             isExpanded={!isCollapsed}

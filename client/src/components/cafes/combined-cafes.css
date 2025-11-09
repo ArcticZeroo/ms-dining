@@ -153,10 +153,10 @@
 
 .collapsible-cafe .cafe-header {
     display: flex;
+    flex-direction: column;
     position: sticky;
     top: calc(var(--default-padding) * -1);
     z-index: var(--z-index-above-content-2);
-    gap: var(--default-padding);
     background: var(--color-background);
 }
 
@@ -168,6 +168,15 @@
     width: var(--default-padding);
     margin: 0;
     padding: 0;
+}
+
+.collapsible-cafe .collapse-toggle {
+    border-radius: var(--constant-padding);
+}
+
+.collapsible-cafe.expanded .collapse-toggle {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .collapsible-cafe .collapse-toggle .corner {
@@ -190,6 +199,11 @@
     height: var(--cafe-logo-height);
     transition: height 0.125s ease;
     border-radius: var(--default-padding);
+}
+
+.collapsible-cafe .cafe-header-controls {
+    border-bottom-left-radius: var(--default-padding);
+    border-bottom-right-radius: var(--default-padding);
 }
 
 .collapsible-cafe .cafe-order-link {

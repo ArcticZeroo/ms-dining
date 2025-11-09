@@ -341,6 +341,10 @@ html, body, #root, .App {
     gap: var(--default-padding);
 }
 
+.constant-gap {
+    gap: var(--constant-padding);
+}
+
 .material-symbols-outlined {
     user-select: none;
 }
@@ -830,4 +834,12 @@ html, body, #root, .App {
 
 .tip {
     background: var(--color-theme-blue);
+}
+
+.force-base-font-size {
+    font-size: initial;
+}
+
+.force-base-font-size *:not(.material-symbols-outlined) {
+    font-size: initial;
 }
