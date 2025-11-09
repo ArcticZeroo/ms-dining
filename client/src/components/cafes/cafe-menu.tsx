@@ -86,7 +86,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
             id: menuOverviewSymbol,
             body: (
                 <Modal
-                    title="Menu Overview"
+                    title={`Menu Overview for ${cafeName}`}
                     body={
                         <CafePopupOverview
                             cafe={cafe}
