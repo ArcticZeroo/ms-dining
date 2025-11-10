@@ -61,40 +61,27 @@ export const CafePopupOverviewWithData: React.FC<ICafePopupOverviewWithDataProps
         [overviewStations]
     );
 
-    if (interestingStations.length === 0) {
-        if (showAllStationsIfNoneInteresting) {
-            return (
-                <div className="flex-col">
-                    <span>
-                        No new or rotating items today. Here's all available stations:
-                    </span>
-                    <span className="flex-col">
-                        {
-                            overviewStations.map(station => (
-                                <CafePopupOverviewStation
-                                    key={station.name}
-                                    cafe={cafe}
-                                    station={station}
-                                />
-                            ))
-                        }
-                    </span>
-                </div>
-            );
-        }
-        
+    if (interestingStations.length === 0 && !showAllStationsIfNoneInteresting) {
         return null;
     }
+
+    const title = interestingStations.length > 0
+        ? 'Interesting stations today:'
+        : 'No new or rotating items today. Here\'s all available stations:';
+
+    const targetStations = interestingStations.length > 0
+        ? interestingStations
+        : overviewStations;
 
     return (
         interestingStations.length > 0 && (
             <div className="flex-col">
                 <span>
-                    Interesting stations today:
+                    {title}
                 </span>
                 <span className="flex-col">
                     {
-                        interestingStations.map(station => (
+                        targetStations.map(station => (
                             <CafePopupOverviewStation
                                 key={station.name}
                                 cafe={cafe}
