@@ -113,7 +113,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
             {
                 station.uniqueness.theme != null && (
                     <div className="subtitle">
-                        {station.uniqueness.theme}
+                        Rotating items: {station.uniqueness.theme}
                     </div>
                 )
             }
