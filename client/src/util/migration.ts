@@ -63,12 +63,14 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 searchAllowedViewIds: serializeIterableStringSetting(ApplicationSettings.searchAllowedViewIds.value),
                 minimumPrice: ApplicationSettings.minimumPrice.value.toString(),
                 maximumPrice: ApplicationSettings.maximumPrice.value.toString(),
+                hasHiddenMapClickTip: ApplicationSettings.hasHiddenMapClickTip.value.toString(),
             },
             debugSettings: {
                 allowOnlineOrdering: DebugSettings.allowOnlineOrdering.value.toString(),
                 suppressExperimentalOnlineOrderingWarning: DebugSettings.suppressExperimentalOnlineOrderingWarning.value.toString(),
                 verboseLogging: DebugSettings.verboseLogging.value.toString(),
                 noVectorSearch: DebugSettings.noVectorSearch.value.toString(),
+                ingredientsMenuExperience: DebugSettings.ingredientsMenuExperience.value.toString(),
             },
             homeSettings: {
                 showExploreOnHome: HomeSettings.showExploreOnHome.value.toString(),
