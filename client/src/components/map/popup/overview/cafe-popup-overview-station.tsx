@@ -64,7 +64,7 @@ const getStationBadge = ({ uniqueness: { isTraveling, recentlyAvailableItemCount
 
     const itemsHereTodayOnlyCount = itemDays[1] || 0;
     if (itemsHereTodayOnlyCount > 0) {
-        return `${itemsHereTodayOnlyCount} Rotating ${pluralize('Item', itemsHereTodayOnlyCount)}`;
+        return `${itemsHereTodayOnlyCount} Traveling ${pluralize('Item', itemsHereTodayOnlyCount)}`;
     }
 
     return null;

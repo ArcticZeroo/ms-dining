@@ -843,3 +843,11 @@ html, body, #root, .App {
 .force-base-font-size *:not(.material-symbols-outlined) {
     font-size: initial;
 }
+
+.grid-justify-start {
+    justify-self: start;
+}
+
+.grid-justify-end {
+    justify-self: end;
+}

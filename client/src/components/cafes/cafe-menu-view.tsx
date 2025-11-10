@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
@@ -13,15 +13,11 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
-import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
-import { usePopupOpener } from '../../hooks/popup.js';
-import { Modal } from '../popup/modal.js';
 import { IDelayedPromiseState, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SelectedDateContext } from '../../context/time.js';
 import { DiningClient } from '../../api/client/dining.js';
-import { CafePopupOverviewWithData } from './cafe-popup-overview-with-data.js';
-
-const menuOverviewSymbol = Symbol();
+import { CafeMenuControls } from './cafe-menu-controls.js';
+import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 
 const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
@@ -56,13 +52,11 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     }) => {
     useTrackThisCafeOnPage(cafe.id);
 
-    const openPopup = usePopupOpener();
     const deviceType = useDeviceType();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
-    const buttonContainer = useRef<HTMLDivElement>(null);
     const menuData = useMenuData(cafe, shouldCountTowardsLastUsed);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
@@ -71,11 +65,6 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     const isCollapsed = useValueNotifierSetTarget(collapsedCafeIdsNotifier, cafe.id);
 
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
-
-    const isOverviewDisabled = menuData.value && menuData.value.length === 0;
-    const overviewTitle = isOverviewDisabled
-        ? 'There are no stations on the menu today.'
-        : 'Click to view menu overview';
 
     const openedRecently = useMemo(
         () => getIsRecentlyAvailable(cafe.firstAvailableDate),
@@ -88,13 +77,7 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
         }
     }, [collapsedCafeIdsNotifier, cafe.id]);
 
-    const toggleIsExpanded = (event: React.MouseEvent) => {
-        // Click originated from button container; don't toggle collapse
-        if (buttonContainer.current?.contains(event.target as Node)) {
-            event.preventDefault();
-            return;
-        }
-
+    const toggleIsExpanded = () => {
         const isNowCollapsed = !isCollapsed;
 
         if (isNowCollapsed) {
@@ -104,29 +87,6 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
             collapsedCafeIdsNotifier.delete(cafe.id);
         }
     };
-
-    const onOpenMenuOverviewClicked = () => {
-        const stations = menuData.value;
-        if (!stations || stations.length === 0) {
-            return;
-        }
-
-        openPopup({
-            id: menuOverviewSymbol,
-            body: (
-                <Modal
-                    title={`Menu Overview for ${cafeName}`}
-                    body={
-                        <CafePopupOverviewWithData
-                            cafe={cafe}
-                            overviewStations={stations}
-                            showAllStationsIfNoneInteresting={true}
-                        />
-                    }
-                />
-            )
-        });
-    }
 
     return (
         <CurrentCafeContext.Provider value={cafe}>
@@ -145,7 +105,7 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
                     >
                         <div className="cafe-header" ref={setCafeHeaderElement}>
                             <div role="button" className="collapse-toggle" onClick={toggleIsExpanded}>
-                                <span className="corner logo-container">
+                                <span className="grid-justify-start">
                                     {
                                         showCafeLogo && (
                                             <img src={cafe.logoUrl}
@@ -161,45 +121,26 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
                                         <ExpandIcon isExpanded={!isCollapsed}/>
                                     </span>
                                 </div>
-                                <span className="corner recently-opened">
+                                <span className="flex grid-justify-end">
+                                    {
+                                        deviceType === DeviceType.Desktop && (
+                                            <CafeMenuControls
+                                                cafeName={cafeName}
+                                                menuData={menuData}
+                                            />
+                                        )
+                                    }
                                     {
                                         openedRecently && <span className="default-container recently-opened-notice">New!</span>
                                     }
                                 </span>
                             </div>
                             {
-                                !isCollapsed && (
-                                    <div
-                                        className="flex flex-around flex-wrap force-base-font-size cafe-header-controls"
-                                        ref={buttonContainer}
-                                    >
-                                        <a
-                                            className="default-button default-container flex"
-                                            href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
-                                            target="_blank"
-                                            title="Click to open online ordering menu at buy-ondemand.com"
-                                        >
-                                            <span className="material-symbols-outlined">
-                                                captive_portal
-                                            </span>
-                                            <span>
-                                                Order{deviceType === DeviceType.Desktop && ' Online'}
-                                            </span>
-                                        </a>
-                                        <button
-                                            className="default-button default-container flex"
-                                            title={overviewTitle}
-                                            onClick={onOpenMenuOverviewClicked}
-                                            disabled={isOverviewDisabled}
-                                        >
-                                            <span className="material-symbols-outlined">
-                                                menu_book_2
-                                            </span>
-                                            <span>
-                                                {deviceType === DeviceType.Desktop && 'Menu '}Overview
-                                            </span>
-                                        </button>
-                                    </div>
+                                deviceType === DeviceType.Mobile && !isCollapsed && (
+                                    <CafeMenuControls
+                                        cafeName={cafeName}
+                                        menuData={menuData}
+                                    />
                                 )
                             }
                         </div>

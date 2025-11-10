@@ -73,24 +73,18 @@ export const CafePopupOverviewWithData: React.FC<ICafePopupOverviewWithDataProps
         ? interestingStations
         : overviewStations;
 
-    return (
-        interestingStations.length > 0 && (
-            <div className="flex-col">
-                <span>
-                    {title}
-                </span>
-                <span className="flex-col">
-                    {
-                        targetStations.map(station => (
-                            <CafePopupOverviewStation
-                                key={station.name}
-                                cafe={cafe}
-                                station={station}
-                            />
-                        ))
-                    }
-                </span>
-            </div>
-        )
-    );
+    return <div className="flex-col">
+        <span>
+            {title}
+        </span>
+        <span className="flex-col">
+            {
+                targetStations.map(station => <CafePopupOverviewStation
+                    key={station.name}
+                    cafe={cafe}
+                    station={station}
+                />)
+            }
+        </span>
+    </div>;
 }
