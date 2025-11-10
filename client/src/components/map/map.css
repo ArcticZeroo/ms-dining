@@ -118,21 +118,3 @@
 .cafe-popup .close-button {
     background: var(--color-map-cafe-popup-close-button);
 }
-
-.logo-small {
-    width: 2rem;
-    height: 2rem;
-    background: var(--color-map-cafe-logo-background);
-    border-radius: 0.5rem;
-    object-fit: contain;
-}
-
-a.overview-station {
-    text-decoration: none;
-    background: var(--color-background-raised);
-}
-
-a.overview-station .recently-opened-notice {
-    width: fit-content;
-    align-self: center;
-}

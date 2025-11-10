@@ -64,7 +64,7 @@ const getStationBadge = ({ uniqueness: { isTraveling, recentlyAvailableItemCount
 
     const itemsHereTodayOnlyCount = itemDays[1] || 0;
     if (itemsHereTodayOnlyCount > 0) {
-        return `${itemsHereTodayOnlyCount} Traveling ${pluralize('Item', itemsHereTodayOnlyCount)}`;
+        return `${itemsHereTodayOnlyCount} Rotating ${pluralize('Item', itemsHereTodayOnlyCount)}`;
     }
 
     return null;
@@ -81,7 +81,6 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
 
     const didOpenRecently = getIsRecentlyAvailable(station.uniqueness.firstAppearance);
     const badge = getStationBadge(station, didOpenRecently);
-    console.log(station, didOpenRecently, badge);
 
     const children = (
         <>
@@ -131,7 +130,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
     if (!popupView) {
         return (
             <div
-                className="overview-station default-container flex-col"
+                className="card overview-station default-container flex-col"
                 title={getStationTitle(station, didOpenRecently)}
             >
                 {children}
@@ -141,7 +140,7 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
 
     return (
         <Link
-            className={"overview-station default-container flex-col"}
+            className={"card overview-station default-container flex-col"}
             to={getSearchAnchorJumpUrlOnAnotherPage({
                 cafeId:     cafe.id,
                 view:       popupView,

@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierContext, useValueNotifierSetTarget } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
-import { ICafe } from '../../models/cafe.ts';
+import { CafeMenu, ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
@@ -15,8 +15,11 @@ import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 import { usePopupOpener } from '../../hooks/popup.js';
-import { CafePopupOverview } from '../map/popup/overview/cafe-popup-overview.js';
 import { Modal } from '../popup/modal.js';
+import { IDelayedPromiseState, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { SelectedDateContext } from '../../context/time.js';
+import { DiningClient } from '../../api/client/dining.js';
+import { CafePopupOverviewWithData } from './cafe-popup-overview-with-data.js';
 
 const menuOverviewSymbol = Symbol();
 
@@ -24,13 +27,28 @@ const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
 };
 
-interface ICollapsibleCafeMenuProps {
+const useMenuData = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
+
+    const retrieveMenu = useCallback(
+        () => DiningClient.retrieveCafeMenu({
+            id: cafe.id,
+            date: selectedDate,
+            shouldCountTowardsLastUsed
+        }),
+        [cafe, selectedDate, shouldCountTowardsLastUsed]
+    );
+
+    return useDelayedPromiseState(retrieveMenu);
+}
+
+interface ICafeMenuViewProps {
 	cafe: ICafe;
 	showGroupName: boolean;
 	shouldCountTowardsLastUsed: boolean;
 }
 
-export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
+export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     {
         cafe,
         showGroupName,
@@ -45,6 +63,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
     const buttonContainer = useRef<HTMLDivElement>(null);
+    const menuData = useMenuData(cafe, shouldCountTowardsLastUsed);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
@@ -52,6 +71,11 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     const isCollapsed = useValueNotifierSetTarget(collapsedCafeIdsNotifier, cafe.id);
 
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
+
+    const isOverviewDisabled = menuData.value && menuData.value.length === 0;
+    const overviewTitle = isOverviewDisabled
+        ? 'There are no stations on the menu today.'
+        : 'Click to view menu overview';
 
     const openedRecently = useMemo(
         () => getIsRecentlyAvailable(cafe.firstAvailableDate),
@@ -82,15 +106,21 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
     };
 
     const onOpenMenuOverviewClicked = () => {
+        const stations = menuData.value;
+        if (!stations || stations.length === 0) {
+            return;
+        }
+
         openPopup({
             id: menuOverviewSymbol,
             body: (
                 <Modal
                     title={`Menu Overview for ${cafeName}`}
                     body={
-                        <CafePopupOverview
+                        <CafePopupOverviewWithData
                             cafe={cafe}
-                            showMessageForNoStations={true}
+                            overviewStations={stations}
+                            showAllStationsIfNoneInteresting={true}
                         />
                     }
                 />
@@ -158,8 +188,9 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                                         </a>
                                         <button
                                             className="default-button default-container flex"
-                                            title="Click to view menu overview"
+                                            title={overviewTitle}
                                             onClick={onOpenMenuOverviewClicked}
+                                            disabled={isOverviewDisabled}
                                         >
                                             <span className="material-symbols-outlined">
                                                 menu_book_2
@@ -174,7 +205,7 @@ export const CafeMenu: React.FC<ICollapsibleCafeMenuProps> = (
                         </div>
                         <CafeMenuBody
                             isExpanded={!isCollapsed}
-                            shouldCountTowardsLastUsed={shouldCountTowardsLastUsed}
+                            menuData={menuData}
                         />
                     </div>
                 </div>

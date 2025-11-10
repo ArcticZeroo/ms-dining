@@ -1,43 +1,24 @@
-import { IDelayedPromiseState, PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import React, { useCallback, useContext, useEffect } from 'react';
-import { DiningClient } from '../../api/client/dining.ts';
+import { IDelayedPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
+import React, { useContext, useEffect } from 'react';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { SelectedDateContext } from '../../context/time.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
-import { CafeMenu } from '../../models/cafe.ts';
 import { MenusCurrentlyUpdatingException } from '../../util/exception.ts';
 import { RetryButton } from '../button/retry-button.tsx';
 import { StationList } from './station/station-list.tsx';
 import { StationListSkeleton } from '../skeleton/station-list-skeleton.tsx';
 import { IngredientsMenuView, parseIngredientsMenu } from './station/ingredients-menu-view.tsx';
-
-const useMenuData = (shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
-    const cafe = useContext(CurrentCafeContext);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-
-    const retrieveMenu = useCallback(
-        () => DiningClient.retrieveCafeMenu({
-            id: cafe.id,
-            date: selectedDate,
-            shouldCountTowardsLastUsed
-        }),
-        [cafe, selectedDate, shouldCountTowardsLastUsed]
-    );
-
-    return useDelayedPromiseState(retrieveMenu);
-}
+import { DebugSettings } from '../../constants/settings.js';
+import { CafeMenu } from '../../models/cafe.js';
 
 interface ICollapsibleCafeMenuBodyProps {
-    shouldCountTowardsLastUsed: boolean;
     isExpanded: boolean;
+    menuData: IDelayedPromiseState<CafeMenu>;
 }
 
 export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
-    shouldCountTowardsLastUsed,
-    isExpanded
+    isExpanded,
+    menuData: { value, error, run: retrieveMenu, actualStage }
 }) => {
     const cafe = useContext(CurrentCafeContext);
-    const { value, error, run: retrieveMenu, actualStage } = useMenuData(shouldCountTowardsLastUsed);
 
     useEffect(() => {
         retrieveMenu();
@@ -63,7 +44,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     }
 
     if (value != null) {
-        if (cafe.id === 'in-gredients' && Date.now() === 0) {
+        if (cafe.id === 'in-gredients' && DebugSettings.ingredientsMenuExperience.value) {
             const ingredientsMenu = parseIngredientsMenu(value);
             if (ingredientsMenu != null) {
                 return <IngredientsMenuView menu={ingredientsMenu}/>
