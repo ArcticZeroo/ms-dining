@@ -8,6 +8,8 @@ import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ALL_CAFES } from '../../../constants/cafes.js';
 import Duration from '@arcticzeroo/duration';
+import { SearchEntityType } from '@msdining/common/models/search';
+import { pruneExpiredDailyStationEmbeddings, deleteAllByEntityType } from '../../storage/vector/client.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
 	const date = DateUtil.getNowWithDaysInFuture(i);
@@ -74,6 +76,13 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 export const performMenuBootTasks = async () => {
 	// Will be needed basically always anyway.
 	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
+
+	// Remove legacy static station embeddings (replaced by daily station embeddings)
+	await deleteAllByEntityType(SearchEntityType.station);
+
+	// Prune daily station embeddings outside the rolling window (last week + this week + next week)
+	const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
+	await pruneExpiredDailyStationEmbeddings(validDateStrings);
 
 	const didDailyRepair = await repairTodaySessionsAsync();
 	const didWeeklyRepair = await repairMissingWeeklyMenusAsync();

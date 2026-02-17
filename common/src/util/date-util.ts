@@ -204,6 +204,28 @@ export const getDateStringsForWeek = (): string[] => {
     return Array.from(yieldDaysInFutureForThisWeek()).map(i => toDateString(getNowWithDaysInFuture(i)));
 }
 
+// Returns weekday date strings for last week + this week + next week (rolling 3-week window)
+export const getDateStringsForRollingWindow = (): string[] => {
+    const now = new Date();
+    const dateStrings: string[] = [];
+
+    // Go back to last week's Monday
+    const daysSinceMonday = (now.getDay() + 6) % 7; // 0=Mon -> 0, 1=Tue -> 1, ..., 6=Sun -> 6
+    const lastMonday = new Date(now);
+    lastMonday.setDate(now.getDate() - daysSinceMonday - 7);
+
+    // Generate 3 weeks of weekday dates (Mon-Fri)
+    for (let week = 0; week < 3; week++) {
+        for (let day = 0; day < 5; day++) {
+            const date = new Date(lastMonday);
+            date.setDate(lastMonday.getDate() + (week * 7) + day);
+            dateStrings.push(toDateString(date));
+        }
+    }
+
+    return dateStrings;
+}
+
 const getSundayForWeek = (date: Date): Date => {
     const result = new Date(date.getTime());
     result.setDate(result.getDate() - result.getDay());

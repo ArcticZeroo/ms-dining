@@ -91,6 +91,22 @@ const GET_SEARCH_ENTITY_STATEMENT = createPreparedStatementFactory(`
 	WHERE id = ? AND entity_type = CAST(? AS INTEGER)
 `);
 
+const DELETE_SEARCH_ENTITY_STATEMENT = createPreparedStatementFactory(`
+	DELETE FROM search_vec
+	WHERE id = ? AND entity_type = CAST(? AS INTEGER)
+`);
+
+const ALL_EMBEDDED_IDS_BY_TYPE_STATEMENT = createPreparedStatementFactory(`
+	SELECT id
+	FROM search_vec
+	WHERE entity_type = CAST(? AS INTEGER)
+`);
+
+const DELETE_ALL_BY_TYPE_STATEMENT = createPreparedStatementFactory(`
+	DELETE FROM search_vec
+	WHERE entity_type = CAST(? AS INTEGER)
+`);
+
 const SEARCH_QUERIES_STATEMENT = createPreparedStatementFactory(`
 	SELECT DISTINCT(query)
 	FROM query_vec
@@ -131,9 +147,27 @@ const markEmbeddedItem = (entityType: SearchEntityType, id: string) => {
 	ALL_EMBEDDED_ITEMS.get(entityType)!.add(id);
 }
 
+const unmarkEmbeddedItem = (entityType: SearchEntityType, id: string) => {
+	ALL_EMBEDDED_ITEMS.get(entityType)?.delete(id);
+}
+
 export const insertSearchEntityEmbedding = (embedding: Float32Array, id: string, entityType: SearchEntityType) => {
 	INSERT_SEARCH_ENTITY_STATEMENT().run(embedding, id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
 	markEmbeddedItem(entityType, id);
+}
+
+export const deleteSearchEntityEmbedding = (entityType: SearchEntityType, id: string) => {
+	DELETE_SEARCH_ENTITY_STATEMENT().run(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+	unmarkEmbeddedItem(entityType, id);
+}
+
+export const getAllEmbeddedIdsByType = (entityType: SearchEntityType): Set<string> => {
+	return ALL_EMBEDDED_ITEMS.get(entityType) ?? new Set();
+}
+
+export const deleteAllByEntityType = (entityType: SearchEntityType) => {
+	DELETE_ALL_BY_TYPE_STATEMENT().run(SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+	ALL_EMBEDDED_ITEMS.delete(entityType);
 }
 
 export const insertQueryEmbedding = (embedding: Float32Array, query: string) => {

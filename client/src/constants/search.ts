@@ -21,5 +21,11 @@ export const entityDisplayDataByType: Record<SearchEntityType, IEntityDisplayDat
         className: 'entity-cafe',
         iconName:  'store',
         displayName: 'Cafe',
-    }
+    },
+    // dailyStation is server-internal; mapped to station before reaching the client
+    [SearchEntityType.dailyStation]: {
+        className: 'entity-station',
+        iconName:  'restaurant',
+        displayName: 'Station',
+    },
 };

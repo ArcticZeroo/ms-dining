@@ -2,6 +2,7 @@ export enum SearchEntityType {
     menuItem = 'menuItem',
     station = 'station',
     cafe = 'cafe',
+    dailyStation = 'dailyStation',
 }
 
 export const searchEntityTypeFromString = (rawString: string): SearchEntityType => {
@@ -13,21 +14,24 @@ export const searchEntityTypeFromString = (rawString: string): SearchEntityType 
 }
 
 export const SEARCH_ENTITY_TYPE_NAME_TO_ENUM: { [K in SearchEntityType]: K } = {
-    menuItem: SearchEntityType.menuItem,
-    station:  SearchEntityType.station,
-    cafe:     SearchEntityType.cafe
+    menuItem:     SearchEntityType.menuItem,
+    station:      SearchEntityType.station,
+    cafe:         SearchEntityType.cafe,
+    dailyStation: SearchEntityType.dailyStation,
 };
 
 export const SEARCH_ENTITY_TYPE_TO_DB_ID: { [T in SearchEntityType]: number } = {
-    [SearchEntityType.menuItem]: 0,
-    [SearchEntityType.station]:  1,
-    [SearchEntityType.cafe]:     2
+    [SearchEntityType.menuItem]:     0,
+    [SearchEntityType.station]:      1,
+    [SearchEntityType.cafe]:         2,
+    [SearchEntityType.dailyStation]: 3,
 };
 
 export const DB_ID_TO_SEARCH_ENTITY_TYPE: { [P in keyof typeof SEARCH_ENTITY_TYPE_TO_DB_ID as typeof SEARCH_ENTITY_TYPE_TO_DB_ID[P]]: P } = {
     0: SearchEntityType.menuItem,
     1: SearchEntityType.station,
-    2: SearchEntityType.cafe
+    2: SearchEntityType.cafe,
+    3: SearchEntityType.dailyStation,
 };
 
 export enum SearchMatchReason {

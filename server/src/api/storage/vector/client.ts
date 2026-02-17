@@ -69,6 +69,53 @@ export const embedStation = async (station: ICafeStation) => {
 	});
 }
 
+export const DAILY_STATION_ID_SEPARATOR = '::';
+
+export const makeDailyStationId = (stationId: string, dateString: string) =>
+	`${stationId}${DAILY_STATION_ID_SEPARATOR}${dateString}`;
+
+export const parseDailyStationId = (compositeId: string) => {
+	const separatorIndex = compositeId.indexOf(DAILY_STATION_ID_SEPARATOR);
+	if (separatorIndex === -1) {
+		throw new Error(`Invalid daily station ID: ${compositeId}`);
+	}
+	return {
+		stationId:  compositeId.slice(0, separatorIndex),
+		dateString: compositeId.slice(separatorIndex + DAILY_STATION_ID_SEPARATOR.length),
+	};
+};
+
+export const embedDailyStation = async (station: ICafeStation, dateString: string) => {
+	const embedding = await retrieveStationEmbeddings(station);
+	await SEARCH_THREAD_HANDLER.sendRequest('insertSearchEmbedding', {
+		entityType: SearchEntityType.dailyStation,
+		id:         makeDailyStationId(station.id, dateString),
+		embedding:  new Float32Array(embedding),
+	});
+}
+
+export const deleteSearchEmbedding = async (entityType: SearchEntityType, id: string) => {
+	await SEARCH_THREAD_HANDLER.sendRequest('deleteSearchEmbedding', { entityType, id });
+}
+
+export const getAllEmbeddedIdsByType = async (entityType: SearchEntityType): Promise<Set<string>> => {
+	return SEARCH_THREAD_HANDLER.sendRequest('getAllEmbeddedIdsByType', entityType);
+}
+
+export const deleteAllByEntityType = async (entityType: SearchEntityType) => {
+	await SEARCH_THREAD_HANDLER.sendRequest('deleteAllByEntityType', entityType);
+}
+
+export const pruneExpiredDailyStationEmbeddings = async (validDateStrings: Set<string>) => {
+	const allDailyStationIds = await getAllEmbeddedIdsByType(SearchEntityType.dailyStation);
+	for (const compositeId of allDailyStationIds) {
+		const { dateString } = parseDailyStationId(compositeId);
+		if (!validDateStrings.has(dateString)) {
+			await deleteSearchEmbedding(SearchEntityType.dailyStation, compositeId);
+		}
+	}
+}
+
 export const embedCafe = async (cafe: ICafe, groupId?: string) => {
 	const group = CAFE_GROUP_LIST.find(group => group.id === groupId);
 	if (groupId && !group) {

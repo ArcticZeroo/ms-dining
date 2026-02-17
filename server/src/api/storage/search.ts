@@ -572,16 +572,21 @@ export abstract class SearchManager {
 				throw new Error(`Invalid entity type: ${result.entity_type}`);
 			}
 
-			if (!vectorFoundItems.has(entityType)) {
-				vectorFoundItems.set(entityType, new Map());
+			// Normalize dailyStation into the station maps using its composite ID
+			const mapKey = entityType === SearchEntityType.dailyStation
+				? SearchEntityType.dailyStation
+				: entityType;
+
+			if (!vectorFoundItems.has(mapKey)) {
+				vectorFoundItems.set(mapKey, new Map());
 			}
 
-			if (!vectorFoundItemsWithoutAppearances.has(entityType)) {
-				vectorFoundItemsWithoutAppearances.set(entityType, new Set());
+			if (!vectorFoundItemsWithoutAppearances.has(mapKey)) {
+				vectorFoundItemsWithoutAppearances.set(mapKey, new Set());
 			}
 
-			vectorFoundItems.get(entityType)!.set(result.id, result.distance);
-			vectorFoundItemsWithoutAppearances.get(entityType)!.add(result.id);
+			vectorFoundItems.get(mapKey)!.set(result.id, result.distance);
+			vectorFoundItemsWithoutAppearances.get(mapKey)!.add(result.id);
 		}
 
 		const getVectorDistanceAndMarkSeen = (entityType: SearchEntityType, id: string) => {
@@ -594,7 +599,10 @@ export abstract class SearchManager {
 		};
 
 		for (const { dateString, cafeId, station, stationId, categories } of menus) {
-			const stationDistance = getVectorDistanceAndMarkSeen(SearchEntityType.station, stationId);
+			// Look up daily station distance using the composite stationId::dateString key
+			const dailyStationCompositeId = vectorClient.makeDailyStationId(stationId, dateString);
+			const stationDistance = getVectorDistanceAndMarkSeen(SearchEntityType.dailyStation, dailyStationCompositeId)
+				?? getVectorDistanceAndMarkSeen(SearchEntityType.station, stationId);
 			const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
 
 			session.registerResult(
@@ -664,8 +672,11 @@ export abstract class SearchManager {
 		if (allowResultsWithoutAppearances) {
 			for (const [entityType, ids] of vectorFoundItemsWithoutAppearances) {
 				for (const id of ids) {
-					if (entityType === SearchEntityType.station) {
-						const station = await StationStorageClient.retrieveStationAsync(id);
+					if (entityType === SearchEntityType.station || entityType === SearchEntityType.dailyStation) {
+						const stationId = entityType === SearchEntityType.dailyStation
+							? vectorClient.parseDailyStationId(id).stationId
+							: id;
+						const station = await StationStorageClient.retrieveStationAsync(stationId);
 						if (station != null) {
 							logDebug('Adding vector station result without appearance', station.name);
 							const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
@@ -685,7 +696,7 @@ export abstract class SearchManager {
 								station:     undefined
 							});
 						} else {
-							logDebug('Station not found for vector result', id);
+							logDebug('Station not found for vector result', stationId);
 						}
 					} else if (entityType === SearchEntityType.menuItem) {
 						// todo: find the last appearance maybe? would be nice to have cafe/station data.

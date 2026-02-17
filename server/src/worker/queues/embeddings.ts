@@ -1,7 +1,7 @@
 import Duration from '@arcticzeroo/duration';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { embedMenuItem, embedStation, embedCafe, isEmbeddedEntity } from '../../api/storage/vector/client.js';
+import { embedMenuItem, embedDailyStation, embedCafe, isEmbeddedEntity, makeDailyStationId } from '../../api/storage/vector/client.js';
 import { ICafeStation, ICafe } from '../../models/cafe.js';
 import { Nullable } from '../../models/util.js';
 import { WorkerQueue } from './queue.js';
@@ -18,9 +18,10 @@ interface IEmbeddingsMenuItemWork {
     categoryName: string;
 }
 
-interface IEmbeddingsStationWork {
-    entityType: SearchEntityType.station;
+interface IEmbeddingsDailyStationWork {
+    entityType: SearchEntityType.dailyStation;
     item: ICafeStation;
+    dateString: string;
 }
 
 interface IEmbeddingsCafeWork {
@@ -29,7 +30,7 @@ interface IEmbeddingsCafeWork {
     groupId: string;
 }
 
-type EmbeddingsWorkItem = IEmbeddingsMenuItemWork | IEmbeddingsStationWork | IEmbeddingsCafeWork;
+type EmbeddingsWorkItem = IEmbeddingsMenuItemWork | IEmbeddingsDailyStationWork | IEmbeddingsCafeWork;
 
 class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
     constructor() {
@@ -43,11 +44,15 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
     }
 
     protected getKey(entry: EmbeddingsWorkItem): string {
+        if (entry.entityType === SearchEntityType.dailyStation) {
+            return makeDailyStationId(entry.item.id, entry.dateString);
+        }
         return entry.item.id;
     }
 
     async doWorkAsync(entry: EmbeddingsWorkItem): Promise<void | Nullable<symbol>> {
-        const isEmbedded = await isEmbeddedEntity(entry.entityType, entry.item.id);
+        const id = this.getKey(entry);
+        const isEmbedded = await isEmbeddedEntity(entry.entityType, id);
 
         if (isEmbedded) {
             return WorkerQueue.QUEUE_SKIP_ENTRY;
@@ -55,18 +60,19 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
 
         if (entry.entityType === SearchEntityType.menuItem) {
             await embedMenuItem(entry.item, entry.categoryName, entry.stationName);
-        } else if (entry.entityType === SearchEntityType.station) {
-            await embedStation(entry.item);
+        } else if (entry.entityType === SearchEntityType.dailyStation) {
+            await embedDailyStation(entry.item, entry.dateString);
         } else if (entry.entityType === SearchEntityType.cafe) {
             await embedCafe(entry.item, entry.groupId);
         }
     }
 
-    public addFromMenu(stations: ICafeStation[]) {
+    public addFromMenu(stations: ICafeStation[], dateString: string) {
         for (const station of stations) {
             this.add({
-                entityType: SearchEntityType.station,
+                entityType: SearchEntityType.dailyStation,
                 item:       station,
+                dateString,
             });
 
             for (const [category, menuItemIds] of station.menuItemIdsByCategoryName) {

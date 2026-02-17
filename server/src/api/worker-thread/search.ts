@@ -51,6 +51,18 @@ const onClearDuplicatedQueries = async () => {
 	return db.clearDuplicatedQueries();
 }
 
+const onDeleteSearchEmbedding = async ({ entityType, id }: { entityType: SearchEntityType, id: string }) => {
+	db.deleteSearchEntityEmbedding(entityType, id);
+}
+
+const onGetAllEmbeddedIdsByType = async (entityType: SearchEntityType) => {
+	return db.getAllEmbeddedIdsByType(entityType);
+}
+
+const onDeleteAllByEntityType = async (entityType: SearchEntityType) => {
+	db.deleteAllByEntityType(entityType);
+}
+
 const COMMANDS = {
 	insertSearchEmbedding: onInsertSearchEmbedding,
 	insertQueryEmbedding: onInsertQueryEmbedding,
@@ -62,6 +74,9 @@ const COMMANDS = {
 	getSearchEntityEmbedding: onGetSearchEntityEmbedding,
 	getSimilarQueries: onGetSimilarQueries,
 	clearDuplicatedQueries: onClearDuplicatedQueries,
+	deleteSearchEmbedding: onDeleteSearchEmbedding,
+	getAllEmbeddedIdsByType: onGetAllEmbeddedIdsByType,
+	deleteAllByEntityType: onDeleteAllByEntityType,
 };
 
 export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);
