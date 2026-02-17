@@ -1,0 +1,46 @@
+.ingredients-menu-view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+    padding: var(--default-padding);
+    background: var(--color-card-background);
+    color: var(--color-card-foreground);
+    border-radius: var(--constant-padding);
+}
+
+.card.ingredients-info-banner {
+    flex-direction: row;
+}
+
+.ingredients-price-callout {
+    text-align: center;
+    font-size: 1.15em;
+    font-weight: 600;
+    padding: 0.5rem;
+}
+
+.ingredients-course-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--constant-mini-padding);
+}
+
+.ingredients-course-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0 var(--default-padding);
+    border-bottom: 1px solid var(--color-background-raised-3);
+    padding-bottom: 0.5rem;
+}
+
+.ingredients-course-title {
+    margin: 0;
+    font-size: 1.25em;
+}
+
+.ingredients-course-subtitle {
+    font-size: 0.85em;
+    opacity: 0.7;
+    font-style: italic;
+}

@@ -16,7 +16,7 @@ const getClient = lazy(() => new OpenAI({
 const retrieveChatCompletion = async (question: string) => {
     // todo: handle 429
     const response = await getClient().chat.completions.create({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-5.2',
         messages: [
             {
                 role: 'user',

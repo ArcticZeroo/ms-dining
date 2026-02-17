@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npx tsc --project ../common/tsconfig.json && tsc && vite build",
+    "test": "npx tsx --test src/test/**/*.test.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

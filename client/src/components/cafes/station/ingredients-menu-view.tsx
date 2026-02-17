@@ -1,95 +1,81 @@
 import React from 'react';
-import { ICafeStation } from '../../../models/cafe.ts';
 import { IMenuItem } from '@msdining/common/models/cafe';
+import { formatPrice } from '../../../util/cart.ts';
+import { MenuItem } from './menu-items/menu-item.tsx';
+import { IIngredientsMenu } from './ingredients-menu-parsing.ts';
+import './ingredients-menu-view.css';
 
-interface IIngredientsMenu {
-    starterChoices: IMenuItem[];
-    mainChoices: IMenuItem[];
-    dessertChoices: IMenuItem[];
-    mocktailOffering?: IMenuItem[];
-    additionalOfferings: IMenuItem[];
+export { parseIngredientsMenu } from './ingredients-menu-parsing.ts';
+export type { IIngredientsMenu } from './ingredients-menu-parsing.ts';
+
+interface ICourseMenuSectionProps {
+    title: string;
+    subtitle?: string;
+    items: IMenuItem[];
 }
 
-export const parseIngredientsMenu = (stations: ICafeStation[]): IIngredientsMenu | null => {
-    if (stations.length !== 1) {
+const CourseMenuSection: React.FC<ICourseMenuSectionProps> = ({ title, subtitle, items }) => {
+    if (items.length === 0) {
         return null;
     }
 
-    const station = stations[0]!;
-    const threeCourseMealMenuItems = station.menu['3 Course Meal'];
-
-    if (!threeCourseMealMenuItems || threeCourseMealMenuItems.length === 0) {
-        return null;
-    }
-
-    const starterChoiceModifier = threeCourseMealMenuItems[0]!.modifiers.find(modifier => modifier.description.includes('Starter Choice'));
-    const dessertChoiceModifier = threeCourseMealMenuItems[0]!.modifiers.find(modifier => modifier.description.includes('Dessert Choice'));
-
-    if (!starterChoiceModifier || !dessertChoiceModifier) {
-        return null;
-    }
-
-    return {
-        mainChoices: threeCourseMealMenuItems,
-        starterChoices: [],
-        dessertChoices: [],
-        mocktailOffering: [],
-        additionalOfferings: [],
-    }
-}
+    return (
+        <div className="ingredients-course-section">
+            <div className="ingredients-course-header">
+                <h3 className="ingredients-course-title">{title}</h3>
+                {subtitle && <span className="ingredients-course-subtitle">{subtitle}</span>}
+            </div>
+            <div className="menu-category-items">
+                {items.map(item => (
+                    <MenuItem key={item.id} menuItem={item}/>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 interface IMenuForIngredientsProps {
     menu: IIngredientsMenu;
 }
 
+export const IngredientsInfoBanner: React.FC = () => (
+    <div className="card default-margin-bottom ingredients-info-banner">
+        <span className="material-symbols-outlined">info</span>
+        <span>
+            in.gredients is a 3-course restaurant inside Café 34.
+            Reservations are generally required, but you may be able to get a walk-up table if you&apos;re lucky.
+            There are bar seats over by the salad bar that can&apos;t be reserved and are easier to get without a reservation.
+        </span>
+    </div>
+);
+
 export const IngredientsMenuView: React.FC<IMenuForIngredientsProps> = ({ menu }) => {
     return (
         <div className="ingredients-menu-view">
-            <h2>Ingredients Menu</h2>
-            <div className="menu-section">
-                <h3>Starters</h3>
-                <ul>
-                    {menu.starterChoices.map(item => (
-                        <li key={item.id}>{item.name}</li>
-                    ))}
-                </ul>
+            <IngredientsInfoBanner/>
+            <div className="ingredients-price-callout">
+                {formatPrice(menu.price)} for a 3-course meal (starter + entrée + dessert)
             </div>
-            <div className="menu-section">
-                <h3>Main Courses</h3>
-                <ul>
-                    {menu.mainChoices.map(item => (
-                        <li key={item.id}>{item.name}</li>
-                    ))}
-                </ul>
-            </div>
-            <div className="menu-section">
-                <h3>Desserts</h3>
-                <ul>
-                    {menu.dessertChoices.map(item => (
-                        <li key={item.id}>{item.name}</li>
-                    ))}
-                </ul>
-            </div>
-            {menu.mocktailOffering && menu.mocktailOffering.length > 0 && (
-                <div className="menu-section">
-                    <h3>Mocktails</h3>
-                    <ul>
-                        {menu.mocktailOffering.map(item => (
-                            <li key={item.id}>{item.name}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-            {menu.additionalOfferings.length > 0 && (
-                <div className="menu-section">
-                    <h3>Additional Offerings</h3>
-                    <ul>
-                        {menu.additionalOfferings.map(item => (
-                            <li key={item.id}>{item.name}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <CourseMenuSection
+                title="Starters"
+                subtitle="Choose one with your meal"
+                items={menu.starterChoices}
+            />
+            <CourseMenuSection
+                title="Entrées"
+                subtitle="Choose one"
+                items={menu.mainChoices}
+            />
+            <CourseMenuSection
+                title="Desserts"
+                subtitle="Choose one with your meal"
+                items={menu.dessertChoices}
+            />
+            <CourseMenuSection
+                title="Additional Offerings"
+                subtitle="Available à la carte"
+                items={menu.additionalOfferings}
+            />
         </div>
     );
-}
+};

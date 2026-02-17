@@ -5,9 +5,10 @@ import { MenusCurrentlyUpdatingException } from '../../util/exception.ts';
 import { RetryButton } from '../button/retry-button.tsx';
 import { StationList } from './station/station-list.tsx';
 import { StationListSkeleton } from '../skeleton/station-list-skeleton.tsx';
-import { IngredientsMenuView, parseIngredientsMenu } from './station/ingredients-menu-view.tsx';
+import { IngredientsInfoBanner, IngredientsMenuView, parseIngredientsMenu } from './station/ingredients-menu-view.tsx';
 import { DebugSettings } from '../../constants/settings.js';
 import { CafeMenu } from '../../models/cafe.js';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 interface ICollapsibleCafeMenuBodyProps {
     isExpanded: boolean;
@@ -19,6 +20,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     menuData: { value, error, run: retrieveMenu, actualStage }
 }) => {
     const cafe = useContext(CurrentCafeContext);
+    const ingredientsMenuExperience = useValueNotifier(DebugSettings.ingredientsMenuExperience);
 
     useEffect(() => {
         retrieveMenu();
@@ -44,14 +46,21 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     }
 
     if (value != null) {
-        if (cafe.id === 'in-gredients' && DebugSettings.ingredientsMenuExperience.value) {
+        const isIngredients = cafe.id === 'in-gredients';
+
+        if (isIngredients && ingredientsMenuExperience) {
             const ingredientsMenu = parseIngredientsMenu(value);
             if (ingredientsMenu != null) {
-                return <IngredientsMenuView menu={ingredientsMenu}/>
+                return <IngredientsMenuView menu={ingredientsMenu}/>;
             }
         }
 
-        return <StationList stations={value}/>;
+        return (
+            <>
+                {isIngredients && <IngredientsInfoBanner/>}
+                <StationList stations={value}/>
+            </>
+        );
     }
 
     return (
