@@ -3,6 +3,7 @@ import { STORAGE_EVENTS } from '../events.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { Prisma } from '@prisma/client';
+import { getReviewHeadersByGroupId } from '@prisma/client/sql';
 
 interface ICreateReviewItem {
 	menuItemId: string;
@@ -10,6 +11,7 @@ interface ICreateReviewItem {
 	userId: string;
 	rating: number;
 	comment?: string;
+	groupId?: string | null;
 }
 
 interface IGetReviewsForUserParams {
@@ -17,11 +19,28 @@ interface IGetReviewsForUserParams {
 	menuItemId?: string;
 }
 
-interface IMenuItemReviewHeaderWithName {
-	menuItemNormalizedName: string;
+interface IMenuItemReviewHeaderWithEntityKey {
+	entityKey: string;
 	totalReviewCount: number;
 	overallRating: number;
 }
+
+const ENTITY_KEY_GROUP_PREFIX = 'group:';
+const ENTITY_KEY_NAME_PREFIX = 'name:';
+
+export const getReviewEntityKey = (menuItem: IMenuItemBase): string => {
+	if (menuItem.groupId) {
+		return ENTITY_KEY_GROUP_PREFIX + menuItem.groupId;
+	}
+	return ENTITY_KEY_NAME_PREFIX + normalizeNameForSearch(menuItem.name);
+};
+
+export const getReviewEntityKeyFromParts = (groupId: string | null | undefined, normalizedName: string): string => {
+	if (groupId) {
+		return ENTITY_KEY_GROUP_PREFIX + groupId;
+	}
+	return ENTITY_KEY_NAME_PREFIX + normalizedName;
+};
 
 const GET_REVIEW_INCLUDES = {
 	user:     {
@@ -70,7 +89,8 @@ export abstract class ReviewStorageClient {
 		STORAGE_EVENTS.emit('reviewDirty', {
 			menuItemId:             review.menuItemId,
 			menuItemNormalizedName: review.menuItemNormalizedName,
-			userId:                 review.userId
+			userId:                 review.userId,
+			groupId:                review.groupId
 		});
 
 		return result;
@@ -79,18 +99,10 @@ export abstract class ReviewStorageClient {
 	public static async getReviewsForMenuItemAsync(menuItem: IMenuItemBase) {
 		const whereCondition: Prisma.ReviewWhereInput = {};
 		if (menuItem.groupId) {
-			whereCondition.OR = [
-				{
-					menuItemId: menuItem.id
-				},
-				{
-					menuItem: {
-						groupId: menuItem.groupId
-					}
-				}
-			];
+			whereCondition.menuItem = { groupId: menuItem.groupId };
 		} else {
-			whereCondition.menuItemId = menuItem.id;
+			whereCondition.menuItemNormalizedName = normalizeNameForSearch(menuItem.name);
+			whereCondition.menuItem = { groupId: null };
 		}
 
 		return usePrismaClient(client => client.review.findMany({
@@ -117,15 +129,23 @@ export abstract class ReviewStorageClient {
 
 	public static async deleteReviewAsync(reviewId: string) {
 		const result = await usePrismaClient(client => client.review.delete({
-			where: {
+			where:   {
 				id: reviewId
 			},
+			include: {
+				menuItem: {
+					select: {
+						groupId: true
+					}
+				}
+			}
 		}));
 
 		STORAGE_EVENTS.emit('reviewDirty', {
 			menuItemId:             result.menuItemId,
 			menuItemNormalizedName: result.menuItemNormalizedName,
-			userId:                 result.userId
+			userId:                 result.userId,
+			groupId:                result.menuItem.groupId
 		});
 
 		return result;
@@ -156,9 +176,13 @@ export abstract class ReviewStorageClient {
 		}));
 	}
 
-	public static async getAllReviewHeaders(): Promise<Array<IMenuItemReviewHeaderWithName>> {
+	// Returns review headers for non-grouped items only, keyed by normalized name
+	public static async getAllReviewHeaders(): Promise<Array<IMenuItemReviewHeaderWithEntityKey>> {
 		const results = await usePrismaClient(client => client.review.groupBy({
 			by:     ['menuItemNormalizedName'],
+			where:  {
+				menuItem: { groupId: null }
+			},
 			_count: true,
 			_avg:   {
 				rating: true
@@ -166,16 +190,47 @@ export abstract class ReviewStorageClient {
 		}));
 
 		return results.map(result => ({
-			menuItemNormalizedName: result.menuItemNormalizedName,
-			totalReviewCount:       result._count,
-			overallRating:          result._avg.rating ?? 0,
+			entityKey:        ENTITY_KEY_NAME_PREFIX + result.menuItemNormalizedName,
+			totalReviewCount: result._count,
+			overallRating:    result._avg.rating ?? 0,
 		}));
 	}
 
-	public static async getReviewHeader(normalizedName: string): Promise<IMenuItemReviewHeader> {
+	// Returns review headers for grouped items, keyed by groupId
+	public static async getAllReviewHeadersByGroupId(): Promise<Array<IMenuItemReviewHeaderWithEntityKey>> {
+		const results = await usePrismaClient(client => client.$queryRawTyped(getReviewHeadersByGroupId()));
+
+		return results.map(result => ({
+			entityKey:        ENTITY_KEY_GROUP_PREFIX + result.groupId,
+			totalReviewCount: Number(result.reviewCount),
+			overallRating:    result.averageRating ?? 0,
+		}));
+	}
+
+	// Cache miss: fetch header for a single non-grouped normalized name
+	public static async getReviewHeaderByName(normalizedName: string): Promise<IMenuItemReviewHeader> {
 		const result = await usePrismaClient(client => client.review.aggregate({
 			where:  {
-				menuItemNormalizedName: normalizedName
+				menuItemNormalizedName: normalizedName,
+				menuItem:              { groupId: null }
+			},
+			_count: true,
+			_avg:   {
+				rating: true
+			},
+		}));
+
+		return {
+			totalReviewCount: result._count,
+			overallRating:    result._avg.rating ?? 0,
+		};
+	}
+
+	// Cache miss: fetch header for a single groupId
+	public static async getReviewHeaderByGroupId(groupId: string): Promise<IMenuItemReviewHeader> {
+		const result = await usePrismaClient(client => client.review.aggregate({
+			where:  {
+				menuItem: { groupId }
 			},
 			_count: true,
 			_avg:   {

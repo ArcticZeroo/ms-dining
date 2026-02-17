@@ -50,7 +50,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	const serializeMenuItem = async (menuItem: IMenuItemBase): Promise<IMenuItemDTO> => {
 		const [reviewHeader, firstAppearance] = await Promise.all([
-			retrieveReviewHeaderAsync(normalizeNameForSearch(menuItem.name)),
+			retrieveReviewHeaderAsync(menuItem),
 			retrieveFirstMenuItemAppearance(menuItem.id),
 			ensureThumbnailDataHasBeenRetrievedAsync(menuItem),
 		]);
@@ -246,7 +246,8 @@ export const registerMenuRoutes = (parent: Router) => {
 				menuItemId:             menuItem.id,
 				menuItemNormalizedName: normalizeNameForSearch(menuItem.name),
 				rating:                 body.rating,
-				comment:                body.comment?.trim()
+				comment:                body.comment?.trim(),
+				groupId:                menuItem.groupId
 			});
 
 			ctx.body = {

@@ -17,6 +17,12 @@ export interface IReviewDirtyEvent {
 	menuItemId: string;
 	userId: string;
 	menuItemNormalizedName: string;
+	groupId?: string | null;
+}
+
+export interface IGroupMembershipDirtyEvent {
+	groupId: string;
+	memberNormalizedNames: string[];
 }
 
 export const hasAnythingChangedInPublishedMenu = (event: IMenuPublishEvent): boolean => {
