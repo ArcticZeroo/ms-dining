@@ -31,7 +31,7 @@ interface ICafeMarkerOverviewProps {
 }
 
 
-export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) => {
+export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe, showMessageForNoStations = false }) => {
     const { value: overviewStations, error, run } = useOverviewData(cafe);
 
     if (error) {
@@ -50,6 +50,7 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe }) 
             <CafePopupOverviewWithData
                 cafe={cafe}
                 overviewStations={overviewStations}
+                showAllStationsIfNoneInteresting={showMessageForNoStations}
             />
         );
     }

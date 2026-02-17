@@ -7,12 +7,15 @@ import { NavCafeList } from './nav-cafe-list.tsx';
 import { NavListHeaderItems } from './nav-header-buttons.tsx';
 import './nav.css';
 import { useIsAdmin } from '../../hooks/auth.js';
+import { DebugSettings } from '../../constants/settings.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 export const Nav: React.FC = () => {
     const location = useLocation();
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
     const deviceType = useDeviceType();
     const isAdmin = useIsAdmin();
+    const isMapPageEnabled = useValueNotifier(DebugSettings.enableMapPage);
 
     useEffect(() => {
         setIsExpanded(false);
@@ -62,6 +65,17 @@ export const Nav: React.FC = () => {
                         </span>
                     </NavLink>
                 </li>
+                {
+                    isMapPageEnabled && (
+                        <li>
+                            <NavLink to="/map" className="link-button info" title="Map Page">
+                                <span className="material-symbols-outlined">
+                                    map
+                                </span>
+                            </NavLink>
+                        </li>
+                    )
+                }
                 {
                     isAdmin && (
                         <li>

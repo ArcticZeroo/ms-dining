@@ -67,6 +67,7 @@ export const DebugSettings = {
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),
     noVectorSearch:                            new BooleanSetting('noVectorSearch', false /*defaultValue*/),
     ingredientsMenuExperience:                 new BooleanSetting('ingredientsMenuExperience', false /*defaultValue*/),
+    enableMapPage:                             new BooleanSetting('enableMapPage', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

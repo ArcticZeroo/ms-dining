@@ -52,6 +52,24 @@
     --color-icon-border: var(--color-favorite);
 }
 
+@keyframes marker-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker.is-highlighted {
+    --color-icon-background: #1a6b3a;
+    --color-icon-border: #2ecc71;
+    box-shadow: 0 0 8px 3px rgba(46, 204, 113, 0.6);
+    animation: marker-bounce 0.6s ease-in-out infinite;
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker.is-selected {
+    --color-icon-background: #1a4a7a;
+    --color-icon-border: var(--color-theme);
+    box-shadow: 0 0 10px 4px rgba(52, 136, 224, 0.6);
+}
+
 .cafe-popup .group-member-list {
     width: 100%;
 }

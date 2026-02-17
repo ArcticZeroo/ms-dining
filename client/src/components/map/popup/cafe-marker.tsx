@@ -9,8 +9,8 @@ import { classNames } from '../../../util/react.ts';
 import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
-const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: boolean) => `
-<span class="${classNames('cafe-marker-tracker flex flex-center', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened')}" data-id="${view.value.id}">
+const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: boolean, isHighlighted: boolean, isSelected: boolean) => `
+<span class="${classNames('cafe-marker-tracker flex flex-center', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened', isHighlighted && 'is-highlighted', isSelected && 'is-selected')}" data-id="${view.value.id}">
     ${getViewEmoji(view)}
 </span>
 `;
@@ -18,9 +18,11 @@ const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: 
 interface ICafeMarkerProps {
     view: CafeView;
     onClick(view: CafeView): void;
+    isHighlighted?: boolean;
+    isSelected?: boolean;
 }
 
-export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
+export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, isHighlighted = false, isSelected = false }) => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -46,8 +48,8 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick }) => {
     );
 
     const iconHtml = useMemo(
-        () => getIconHtml(view, isHomepageView, isRecentlyOpened),
-        [view, isHomepageView, isRecentlyOpened]
+        () => getIconHtml(view, isHomepageView, isRecentlyOpened, isHighlighted, isSelected),
+        [view, isHomepageView, isRecentlyOpened, isHighlighted, isSelected]
     );
 
     const onContextMenu = (event: L.LeafletMouseEvent) => {

@@ -19,6 +19,7 @@ import { removeSourceQueryParamIfNeeded } from './util/telemetry.ts';
 import { App } from './components/app.tsx';
 import './index.css';
 import { LazyDevPage } from './components/pages/dev/lazy-dev-page.js';
+import { MapPage } from './components/pages/map/map-page.tsx';
 
 const startApp = () => {
     const router = createBrowserRouter(
@@ -35,6 +36,7 @@ const startApp = () => {
                 <Route path="/profile" element={<ProfilePage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/dev" element={<LazyDevPage/>}/>
+                <Route path="/map" element={<MapPage/>}/>
                 <Route index={true} element={<HomePage/>}/>
                 <Route path="*" element={<NotFoundPage/>}/>
             </Route>

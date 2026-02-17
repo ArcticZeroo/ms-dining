@@ -71,6 +71,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 verboseLogging: DebugSettings.verboseLogging.value.toString(),
                 noVectorSearch: DebugSettings.noVectorSearch.value.toString(),
                 ingredientsMenuExperience: DebugSettings.ingredientsMenuExperience.value.toString(),
+                enableMapPage: DebugSettings.enableMapPage.value.toString(),
             },
             homeSettings: {
                 showExploreOnHome: HomeSettings.showExploreOnHome.value.toString(),
