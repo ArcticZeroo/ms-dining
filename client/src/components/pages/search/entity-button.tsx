@@ -30,7 +30,7 @@ export const EntityButton: React.FC<IEntityButtonProps> = ({
         [tabCounts, totalResultCount, type]
     );
 
-    if (!showIfEmpty && tabCount === 0) {
+    if (!showIfEmpty && (tabCount === 0 || (type !== SearchEntityFilterType.all && tabCount === totalResultCount))) {
         return null;
     }
 
