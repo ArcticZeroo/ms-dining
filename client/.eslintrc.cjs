@@ -16,6 +16,7 @@ module.exports = {
             {allowConstantExport: true},
         ],
         'no-mixed-spaces-and-tabs': 'off',
-        'indent': ['error', 4]
+        'indent': ['error', 4],
+        'curly': ['error', 'all']
     },
 }
