@@ -57,6 +57,7 @@ export const ApplicationSettings = {
     } /*roamingData*/),
     highlightTagNames:             new StringSetSetting('highlightTagNames'),
     searchAllowedViewIds:          new StringSetSetting('searchAllowedViewIds'),
+    showModifierMinPrice:          new BooleanSetting('showModifierMinPrice', true /*defaultValue*/),
     minimumPrice:                  new NumberSetting('minimumPrice', 0),
     maximumPrice:                  new NumberSetting('maximumPrice', 10),
 } as const;

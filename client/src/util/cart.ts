@@ -101,3 +101,46 @@ export const calculatePrice = (menuItem: IMenuItemBase, selectedChoiceIdsByModif
 
     return price * quantity;
 };
+
+export const getModifierMinCost = (modifier: CafeTypes.IMenuItemModifier): number => {
+    if (modifier.minimum <= 0 || modifier.choices.length === 0) {
+        return 0;
+    }
+
+    const sortedPrices = modifier.choices.map(choice => choice.price).sort((priceA, priceB) => priceA - priceB);
+    let total = 0;
+    for (let i = 0; i < Math.min(modifier.minimum, sortedPrices.length); i++) {
+        total += sortedPrices[i]!;
+    }
+    return total;
+};
+
+export const getMinRequiredPrice = (menuItem: IMenuItemBase): number => {
+    let price = menuItem.price;
+    for (const modifier of menuItem.modifiers) {
+        price += getModifierMinCost(modifier);
+    }
+    return price;
+};
+
+export const hasModifierPriceBeyondMinimum = (menuItem: IMenuItemBase): boolean => {
+    for (const modifier of menuItem.modifiers) {
+        const prices = modifier.choices.map(choice => choice.price);
+        if (modifier.minimum === 0) {
+            // Optional modifier: any non-zero price means price can increase
+            if (prices.some(price => price > 0)) {
+                return true;
+            }
+        } else {
+            // Required modifier: price can increase if choices have different prices
+            if (Math.max(...prices) > Math.min(...prices)) {
+                return true;
+            }
+            // Or if you can select more than the minimum and any choice has a price
+            if (modifier.maximum > modifier.minimum && prices.some(price => price > 0)) {
+                return true;
+            }
+        }
+    }
+    return false;
+};

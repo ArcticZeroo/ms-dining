@@ -8,7 +8,7 @@ import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../..
 import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
-import { formatPrice } from '../../../../util/cart.ts';
+import { formatPrice, getMinRequiredPrice, hasModifierPriceBeyondMinimum } from '../../../../util/cart.ts';
 import { getSearchAnchorId } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';
 import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
@@ -59,6 +59,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
     const showTags = useValueNotifier(ApplicationSettings.showTags);
     const showReviews = useValueNotifier(ApplicationSettings.showReviews);
+    const showModifierMinPrice = useValueNotifier(ApplicationSettings.showModifierMinPrice);
     const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
     const caloriesDisplay = getCaloriesDisplay(menuItem);
     const isFavoriteItem = useIsFavoriteItem(menuItem.name, SearchEntityType.menuItem);
@@ -137,7 +138,8 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             }
             <div className="flex">
                 <span>
-                    {formatPrice(menuItem.price)}
+                    {formatPrice(showModifierMinPrice ? getMinRequiredPrice(menuItem) : menuItem.price)}
+                    {showModifierMinPrice && hasModifierPriceBeyondMinimum(menuItem) && '+'}
                 </span>
                 {
                     showCalories && (

@@ -52,6 +52,12 @@ export const MenuSettings = () => (
             </div>
         </div>
         <BooleanSettingInput
+            icon="attach_money"
+            setting={ApplicationSettings.showModifierMinPrice}
+            name="Show Modifier Prices"
+            description="When enabled, menu item prices include the cost of required modifiers and show a + if additional paid options are available."
+        />
+        <BooleanSettingInput
             icon="list"
             setting={ApplicationSettings.showStationOverviews}
             name="Show Station Overviews"
