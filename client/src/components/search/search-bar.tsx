@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { SearchQueryContext } from '../../context/search.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { navigateToSearch } from '../../util/search.ts';
-import { NavExpansionContext } from "../../context/nav.ts";
+import { NavExpansionContext } from '../../context/nav.ts';
 
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
