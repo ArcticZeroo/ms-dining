@@ -29,13 +29,21 @@ CREATE VIRTUAL TABLE IF NOT EXISTS query_vec USING vec0(
 )
 `);
 
+			// Schema versioning: bump when search_vec schema changes.
+			// Partition key on entity_type allows filtered vector searches (e.g. menu items only).
+			const SEARCH_VEC_SCHEMA_VERSION = 2;
+			db.exec(`CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value INTEGER)`);
+			const row = db.prepare('SELECT value FROM schema_meta WHERE key = ?').get('search_vec_version') as { value: number } | undefined;
+			if (!row || row.value !== SEARCH_VEC_SCHEMA_VERSION) {
+				db.exec('DROP TABLE IF EXISTS search_vec');
+				db.prepare('INSERT OR REPLACE INTO schema_meta (key, value) VALUES (?, ?)').run('search_vec_version', SEARCH_VEC_SCHEMA_VERSION);
+			}
+
 			db.exec(`
     CREATE VIRTUAL TABLE IF NOT EXISTS search_vec USING vec0(
         embedding float[1536],
-
-        -- Auxiliary Columns - These cannot be searched but show up in the results
         +id TEXT,
-        +entity_type INTEGER,
+        entity_type INTEGER PARTITION KEY
     )
 `);
 		}
@@ -77,6 +85,14 @@ const SEARCH_STATEMENT = createPreparedStatementFactory(`
     SELECT id, entity_type, distance
     FROM search_vec
     WHERE embedding MATCH ?
+    ORDER BY distance LIMIT ?
+`);
+
+const SEARCH_BY_TYPE_STATEMENT = createPreparedStatementFactory(`
+    SELECT id, entity_type, distance
+    FROM search_vec
+    WHERE embedding MATCH ?
+    AND entity_type = CAST(? AS INTEGER)
     ORDER BY distance LIMIT ?
 `);
 
@@ -194,6 +210,16 @@ export const searchVectorRaw = async (queryEmbedding: Float32Array, limit: numbe
 	return results;
 };
 
+export const searchVectorRawByType = async (queryEmbedding: Float32Array, entityType: SearchEntityType, limit: number) => {
+	const results = SEARCH_BY_TYPE_STATEMENT().all(queryEmbedding, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType], limit);
+
+	if (!isValidVectorSearchResultArray(results)) {
+		throw new Error('Invalid search results');
+	}
+
+	return results;
+};
+
 export const getAllSearchQueries = () => {
 	const statement = getSearchVectorDatabase().prepare('SELECT query FROM query_vec');
 	const results = statement.all();
@@ -205,11 +231,17 @@ export const getAllSearchQueries = () => {
 	return new Set(results.map(row => row.query));
 }
 
-export const getSearchEntityEmbedding = (entityType: SearchEntityType, id: string) => {
+export const getSearchEntityEmbedding = (entityType: SearchEntityType, id: string): Float32Array | null => {
 	const result = GET_SEARCH_ENTITY_STATEMENT().get(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
 
 	if (isValidEmbeddingResult(result)) {
-		return result.embedding;
+		const raw = result.embedding;
+		// sqlite-vec returns raw bytes as Uint8Array despite the type; wrap as Float32Array
+		if (raw.BYTES_PER_ELEMENT !== 4) {
+			const bytes = raw as unknown as Uint8Array;
+			return new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
+		}
+		return raw;
 	}
 
 	return null;

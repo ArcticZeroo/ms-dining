@@ -31,6 +31,10 @@ const onGetSearchResults = async ({ query }: { query: Float32Array }) => {
 	return db.searchVectorRaw(query, VECTOR_SEARCH_ITEM_LIMIT);
 }
 
+const onGetSearchResultsByType = async ({ query, entityType, limit }: { query: Float32Array, entityType: SearchEntityType, limit: number }) => {
+	return db.searchVectorRawByType(query, entityType, limit);
+}
+
 const onGetAllEmbeddedEntities = async () => {
 	return db.getAllEmbeddedEntities();
 }
@@ -69,6 +73,7 @@ const COMMANDS = {
 	getIsSearchEntityEmbedded: onGetIsSearchEntityEmbedded,
 	getQueryEmbedding: onGetQueryEmbedding,
 	getSearchResults: onGetSearchResults,
+	getSearchResultsByType: onGetSearchResultsByType,
 	getAllEmbeddedEntities: onGetAllEmbeddedEntities,
 	getAllSearchQueries: onGetAllSearchQueries,
 	getSearchEntityEmbedding: onGetSearchEntityEmbedding,

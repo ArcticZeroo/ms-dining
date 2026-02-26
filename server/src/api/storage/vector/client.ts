@@ -29,6 +29,10 @@ export const searchVectorRawFromEmbedding = async (embedding: Float32Array): Pro
 	return SEARCH_THREAD_HANDLER.sendRequest('getSearchResults', { query: embedding });
 }
 
+export const searchVectorRawByType = async (embedding: Float32Array, entityType: SearchEntityType, limit: number): Promise<Array<IVectorSearchResult>> => {
+	return SEARCH_THREAD_HANDLER.sendRequest('getSearchResultsByType', { query: embedding, entityType, limit });
+}
+
 export const searchVectorRawFromQuery = async (query: string): Promise<Array<IVectorSearchResult>> => {
 	const embedding = await getQueryEmbedding(query);
 	return searchVectorRawFromEmbedding(embedding);
