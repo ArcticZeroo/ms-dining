@@ -1,9 +1,11 @@
 import { usePrismaClient } from '../client.js';
 import { STORAGE_EVENTS } from '../events.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
+import { getEntityKey, getEntityKeyFromParts, ENTITY_KEY_GROUP_PREFIX, ENTITY_KEY_NAME_PREFIX } from '@msdining/common/util/entity-key';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { Prisma } from '@prisma/client';
 import { getReviewHeadersByGroupId } from '@prisma/client/sql';
+import { IServerReview } from '../../../models/review.js';
 
 interface ICreateReviewItem {
 	menuItemId: string;
@@ -25,22 +27,9 @@ interface IMenuItemReviewHeaderWithEntityKey {
 	overallRating: number;
 }
 
-const ENTITY_KEY_GROUP_PREFIX = 'group:';
-const ENTITY_KEY_NAME_PREFIX = 'name:';
+export const getReviewEntityKey = (menuItem: IMenuItemBase): string => getEntityKey(menuItem);
 
-export const getReviewEntityKey = (menuItem: IMenuItemBase): string => {
-	if (menuItem.groupId) {
-		return ENTITY_KEY_GROUP_PREFIX + menuItem.groupId;
-	}
-	return ENTITY_KEY_NAME_PREFIX + normalizeNameForSearch(menuItem.name);
-};
-
-export const getReviewEntityKeyFromParts = (groupId: string | null | undefined, normalizedName: string): string => {
-	if (groupId) {
-		return ENTITY_KEY_GROUP_PREFIX + groupId;
-	}
-	return ENTITY_KEY_NAME_PREFIX + normalizedName;
-};
+export const getReviewEntityKeyFromParts = getEntityKeyFromParts;
 
 const GET_REVIEW_INCLUDES = {
 	user:     {
@@ -50,8 +39,9 @@ const GET_REVIEW_INCLUDES = {
 	},
 	menuItem: {
 		select: {
-			name: true,
-			cafe: {
+			name:    true,
+			groupId: true,
+			cafe:    {
 				select: {
 					id: true
 				}
@@ -96,7 +86,7 @@ export abstract class ReviewStorageClient {
 		return result;
 	}
 
-	public static async getReviewsForMenuItemAsync(menuItem: IMenuItemBase) {
+	public static async getReviewsForMenuItemAsync(menuItem: IMenuItemBase): Promise<IServerReview[]> {
 		const whereCondition: Prisma.ReviewWhereInput = {};
 		if (menuItem.groupId) {
 			whereCondition.menuItem = { groupId: menuItem.groupId };
@@ -114,7 +104,7 @@ export abstract class ReviewStorageClient {
 		}));
 	}
 
-	public static async getReviewsForUserAsync({ userId, menuItemId }: IGetReviewsForUserParams) {
+	public static async getReviewsForUserAsync({ userId, menuItemId }: IGetReviewsForUserParams): Promise<IServerReview[]> {
 		return usePrismaClient(client => client.review.findMany({
 			where:   {
 				userId,
@@ -165,7 +155,7 @@ export abstract class ReviewStorageClient {
 		return review != null;
 	}
 
-	public static async getRecentReviews(count: number) {
+	public static async getRecentReviews(count: number): Promise<IServerReview[]> {
 		return usePrismaClient(client => client.review.findMany({
 			orderBy:  {
 				createdAt: 'desc'

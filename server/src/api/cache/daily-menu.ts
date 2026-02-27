@@ -3,12 +3,10 @@ import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
 import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
-import { setInterval } from 'node:timers';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { logError } from '../../util/log.js';
 
 const MENU_CACHE_TIME = new Duration({ minutes: 5 });
-const MENU_CACHE_CLEANUP_INTERVAL = new Duration({ minutes: 1 });
 
 const MENU_CACHE_BY_CAFE = new Map<string /*cafeId*/, ExpiringCacheMap<string /*dateString*/, Array<ICafeStation>>>();
 
@@ -23,13 +21,6 @@ for (const cafe of CAFES_BY_ID.values()) {
 		cache
 	);
 }
-
-setInterval(() => {
-	for (const cache of MENU_CACHE_BY_CAFE.values()) {
-		cache.clean()
-			.catch(err => logError(`Failed to clean menu cache: ${err}`));
-	}
-}, MENU_CACHE_CLEANUP_INTERVAL.inMilliseconds);
 
 STORAGE_EVENTS.on('menuPublished', (event) => {
 	const { cafe, dateString, menu } = event;

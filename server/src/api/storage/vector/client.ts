@@ -55,6 +55,15 @@ export const searchSimilarEntities = async (entityType: SearchEntityType, id: st
 	return searchVectorRawFromEmbedding(embedding);
 }
 
+export const searchSimilarEntitiesByType = async (entityType: SearchEntityType, id: string, limit: number): Promise<Array<IVectorSearchResult>> => {
+	const embedding = await getSearchEntityEmbedding(entityType, id);
+	if (!embedding) {
+		return [];
+	}
+
+	return searchVectorRawByType(embedding, entityType, limit);
+}
+
 export const embedMenuItem = async (menuItem: IMenuItemBase, categoryName: string, stationName: string) => {
 	const embedding = await retrieveMenuItemEmbeddings(menuItem, categoryName, stationName);
 	await SEARCH_THREAD_HANDLER.sendRequest('insertSearchEmbedding', {

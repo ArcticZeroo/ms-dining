@@ -504,3 +504,4 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 export const ALL_CAFES = CAFE_GROUP_LIST.flatMap(group => group.members);
 
 export const CAFES_BY_ID = new Map(ALL_CAFES.map(cafe => [cafe.id, cafe]));
+export const GROUPS_BY_ID = new Map(CAFE_GROUP_LIST.map(group => [group.id, group]));

@@ -2,18 +2,30 @@ import Duration from '@arcticzeroo/duration';
 import Router from '@koa/router';
 import { DateUtil } from '@msdining/common';
 import { ICafe } from '../models/cafe.js';
+import { getTrimmedQueryParam } from './koa.js';
 
 const MENU_REQUEST_DAYS_WINDOW = 30;
 
-export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
-    const queryDateRaw = ctx.query.date;
+export const isDateStringWithinMenuWindow = (dateString: string): boolean => {
+    const date = DateUtil.fromDateString(dateString);
 
-    if (!queryDateRaw || typeof queryDateRaw !== 'string') {
+    if (Number.isNaN(date.getTime())) {
+        return false;
+    }
+
+    const timeFromNowMs = Math.abs(Date.now() - date.getTime());
+    const daysFromNow = new Duration({ milliseconds: timeFromNowMs }).inDays;
+
+    return daysFromNow <= MENU_REQUEST_DAYS_WINDOW;
+};
+
+export const getDateForMenuRequest = (ctx: Router.RouterContext): Date | null => {
+    const queryDateRaw = getTrimmedQueryParam(ctx, 'date');
+    if (!queryDateRaw) {
         return null;
     }
 
     const date = DateUtil.fromDateString(queryDateRaw);
-
     if (Number.isNaN(date.getTime())) {
         return null;
     }
@@ -25,7 +37,12 @@ export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string |
         return null;
     }
 
-    return DateUtil.toDateString(date);
+    return date;
+};
+
+export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
+    const date = getDateForMenuRequest(ctx);
+    return date ? DateUtil.toDateString(date) : null;
 };
 
 export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {

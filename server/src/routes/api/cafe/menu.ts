@@ -23,7 +23,7 @@ import { ReviewStorageClient } from '../../../api/storage/clients/review.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { requireAuthenticated } from '../../../middleware/auth.js';
-import { Review } from '@prisma/client';
+import { IServerReview } from '../../../models/review.js';
 import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/models/review';
 import { toDateString } from '@msdining/common/util/date-util';
 import Duration from '@arcticzeroo/duration';
@@ -159,10 +159,7 @@ export const registerMenuRoutes = (parent: Router) => {
 		return menuItem;
 	}
 
-	const serializeReview = (review: Review & {
-		user: { displayName: string },
-		menuItem: { name: string, cafe: { id: string } }
-	}): IReview => ({
+	const serializeReview = (review: IServerReview): IReview => ({
 		id:              review.id,
 		userId:          review.userId,
 		userDisplayName: review.user.displayName,

@@ -1,6 +1,6 @@
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
-import { DateUtil, NumberUtil } from '@msdining/common';
+import { NumberUtil } from '@msdining/common';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { ISearchQuery } from '@msdining/common/models/search';
@@ -21,6 +21,7 @@ import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 import { retrieveVisitData } from '../../../api/cache/pattern.js';
 import { Middleware } from 'koa';
 import { SearchQueryClient } from '../../../api/storage/clients/search-query.js';
+import { getDateForMenuRequest } from '../../../util/date.js';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -40,7 +41,7 @@ export const registerSearchRoutes = (parent: Router) => {
                 return;
             }
 
-            const date = DateUtil.fromMaybeDateString(ctx.query.date);
+            const date = getDateForMenuRequest(ctx);
             const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries, date);
             await serializeSearchResults(ctx, searchResultsByIdPerEntityType);
         });
@@ -74,7 +75,7 @@ export const registerSearchRoutes = (parent: Router) => {
                 return;
             }
 
-            const date = DateUtil.fromMaybeDateString(ctx.query.date);
+            const date = getDateForMenuRequest(ctx);
 
             // Temporary while we prove out vector search. Eventually we should be able to get exact queries.
             if (isVectorSearchAllowed && !isExact) {
@@ -115,7 +116,7 @@ export const registerSearchRoutes = (parent: Router) => {
                              ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
                              : DEFAULT_MIN_PRICE;
 
-            const date = DateUtil.fromMaybeDateString(ctx.query.date);
+            const date = getDateForMenuRequest(ctx);
 
             const cheapItems = await SearchManager.searchForCheapItems({
                 minPrice,

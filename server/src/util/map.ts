@@ -66,4 +66,15 @@ export class LockedMap<K, V> {
             this.#values.delete(key);
         });
     }
+
+    async deleteWhere(shouldDelete: (key: K, value: V) => boolean): Promise<void> {
+        const keysToDelete: K[] = [];
+        for (const [key, value] of this.#values.entries()) {
+            if (shouldDelete(key, value)) {
+                keysToDelete.push(key);
+            }
+        }
+
+        await Promise.all(keysToDelete.map(key => this.delete(key)));
+    }
 }

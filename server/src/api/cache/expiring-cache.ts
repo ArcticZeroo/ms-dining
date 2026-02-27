@@ -1,5 +1,7 @@
 import { LockedMap } from '../../util/map.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
+import { setInterval } from 'node:timers';
+import { logError } from '../../util/log.js';
 
 interface ICacheItem<TValue> {
 	value: TValue;
@@ -14,6 +16,11 @@ export class ExpiringCacheMap<TKey, TValue> {
 	constructor(expirationTime: DurationOrMilliseconds, fetchItem: (key: TKey) => Promise<TValue>) {
 		this.#expirationTimeMs = Duration.fromDurationOrMilliseconds(expirationTime).inMilliseconds;
 		this.#fetchItem = fetchItem;
+
+		setInterval(() => {
+			this.clean()
+				.catch(error => logError('Failed to clean expiring cache:', error));
+		}, this.#expirationTimeMs * 2);
 	}
 
 	async clean(): Promise<void> {

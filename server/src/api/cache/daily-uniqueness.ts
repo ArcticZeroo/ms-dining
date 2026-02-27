@@ -18,6 +18,9 @@ import { StationThemeClient } from '../storage/clients/station-theme.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
+import { isDateStringWithinMenuWindow } from '../../util/date.js';
+import { setInterval } from 'node:timers';
+import Duration from '@arcticzeroo/duration';
 
 const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>>();
 
@@ -252,3 +255,28 @@ CACHE_EVENTS.on('menuPublished', (event: IMenuPublishEvent) => {
 	retrieveUniquenessDataForCafe(event.cafe.id, event.dateString, true /*forceUpdate*/)
 		.catch(err => logError('Failed to update uniqueness data on menu publish:', err));
 });
+
+const UNIQUENESS_CLEANUP_INTERVAL = new Duration({ minutes: 10 });
+
+const cleanOldUniquenessData = async () => {
+	for (const cafeId of Array.from(UNIQUENESS_DATA.entries()).map(([key]) => key)) {
+		await UNIQUENESS_DATA.update(cafeId, (cafeData) => {
+			if (!cafeData) {
+				return undefined;
+			}
+
+			for (const dateString of cafeData.keys()) {
+				if (!isDateStringWithinMenuWindow(dateString)) {
+					cafeData.delete(dateString);
+				}
+			}
+
+			return cafeData.size > 0 ? cafeData : undefined;
+		});
+	}
+};
+
+setInterval(() => {
+	cleanOldUniquenessData()
+		.catch(err => logError('Failed to clean old uniqueness data:', err));
+}, UNIQUENESS_CLEANUP_INTERVAL.inMilliseconds);
