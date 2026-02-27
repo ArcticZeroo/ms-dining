@@ -9,7 +9,7 @@ export enum RecommendationSectionType {
 
 export const RECOMMENDATION_SECTION_DISPLAY_NAMES: Record<RecommendationSectionType, string> = {
     [RecommendationSectionType.favorites]:             'Your Favorites',
-    [RecommendationSectionType.newAtFavorites]:        'New at Your Favorites',
+    [RecommendationSectionType.newAtFavorites]:        'New / Traveling At Your Favorites',
     [RecommendationSectionType.basedOnReviews]:        'Based on Your Reviews',
     [RecommendationSectionType.trySomethingDifferent]: 'Try Something Different',
     [RecommendationSectionType.hiddenGems]:            'Hidden Gems',

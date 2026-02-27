@@ -59,9 +59,7 @@ export const getNewItemsForCafe = async (cafeId: string, dateString: string): Pr
 			let reason: string | undefined;
 
 			if (uniqueness?.isTraveling) {
-				reason = uniqueness.theme
-					? `Traveling: ${uniqueness.theme}`
-					: 'Traveling station';
+				reason = 'Traveling';
 			} else if (themeItemIdSet.has(menuItem.id)) {
 				reason = 'Rotating today';
 			}
