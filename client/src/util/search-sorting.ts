@@ -9,6 +9,7 @@ import { CafeView, CafeViewType } from '../models/cafe.ts';
 import { IQuerySearchResult } from '../models/search.ts';
 import { getCafeLocation } from './cafe.ts';
 import { getDistanceBetweenCoordinates } from './coordinates.ts';
+import { verboseLog } from './logging.ts';
 import { getParentView } from './view.ts';
 
 export interface ISearchResultSortingContext {
@@ -121,6 +122,10 @@ const getCafeLocationScore = (cafeId: string, context: ISearchResultSortingConte
 const getCafeHitsRelevancyTotalScore = (searchResult: ISearchResult, context: ISearchResultSortingContext) => {
     const cafeIds = new Set(Array.from(searchResult.locationDatesByCafeId.keys()));
 
+    if (cafeIds.size === 0) {
+        return 0;
+    }
+
     let totalRelevancyScore = 0;
     let bestPriorityScore = 0;
     let bestHomepageScore = 0;
@@ -163,6 +168,10 @@ const getDateRelevancyScore = (searchResult: ISearchResult) => {
         totalRelevancyScore += (0.75 ** Math.abs(daysFromNow));
         totalRelevancyScore += (dates.length / 5);
         totalDateCount += dates.length;
+    }
+
+    if (totalDateCount === 0) {
+        return 0;
     }
 
     return (5 /*days of the week*/ * totalRelevancyScore / totalDateCount) + totalDateCount;
@@ -307,10 +316,26 @@ const computeScore = ({ searchResult, doSubstringScore, bestDistance, context }:
 };
 
 enum MatchType {
-    perfect = 3,
-    substring = 2,
+    perfect = 4,
+    substring = 3,
+    partial = 2,
     fuzzy = 1
 }
+
+const PARTIAL_MATCH_THRESHOLD = 0.5;
+
+const matchTypeName = (matchType: MatchType): string => {
+    switch (matchType) {
+    case MatchType.perfect:
+        return 'perfect';
+    case MatchType.substring:
+        return 'substring';
+    case MatchType.partial:
+        return 'partial';
+    case MatchType.fuzzy:
+        return 'fuzzy';
+    }
+};
 
 const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: SearchMatchReason): Iterable<string> => {
     switch (matchReason) {
@@ -327,6 +352,21 @@ const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: Sea
     default:
         throw new Error(`Unexpected match reason: ${matchReason}`);
     }
+};
+
+const isPartialMatch = (currentMatchType: MatchType, text: string, queryText: string): boolean => {
+    if (currentMatchType >= MatchType.partial) {
+        return false;
+    }
+
+    const normalizedText = text.trim().toLowerCase();
+    const sequentialLength = findLongestSequentialSubstringLength(normalizedText, queryText);
+    const ratio = sequentialLength / queryText.length;
+    if (ratio >= PARTIAL_MATCH_THRESHOLD) {
+        verboseLog(`[search-sort] partial match: "${text}" (sequential: ${sequentialLength}/${queryText.length} = ${ratio.toFixed(2)})`);
+        return true;
+    }
+    return false;
 };
 
 const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMatchRegex: RegExp): MatchType => {
@@ -348,8 +388,15 @@ const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMat
             // We might find a perfect match for another match reason later
             if (targetText.includes(queryText)) {
                 matchType = MatchType.substring;
+            } else if (isPartialMatch(matchType, targetText, queryText)) {
+                matchType = MatchType.partial;
             }
         }
+    }
+
+    // For vector-only results with empty matchReasons, check the title directly
+    if (isPartialMatch(matchType, searchResult.name, queryText)) {
+        matchType = MatchType.partial;
     }
 
     return matchType;
@@ -418,6 +465,14 @@ export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], co
 
         return metadataB.score - metadataA.score;
     });
+
+    verboseLog(
+        `[search-sort] query="${context.queryText}" results:\n` +
+        searchResults.map((result, index) => {
+            const metadata = getMetadata(result);
+            return `  ${index + 1}. [${matchTypeName(metadata.matchType)}] (score: ${metadata.score.toFixed(2)}) ${result.name}`;
+        }).join('\n')
+    );
 
     return searchResults;
 };
