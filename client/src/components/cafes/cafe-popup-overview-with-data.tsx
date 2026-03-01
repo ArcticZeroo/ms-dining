@@ -19,12 +19,20 @@ interface ICafePopupOverviewWithDataProps {
     cafe: ICafe;
     overviewStations: ICafeOverviewStation[];
     showAllStationsIfNoneInteresting?: boolean;
+    showAllStations?: boolean;
 }
 
-export const CafePopupOverviewWithData: React.FC<ICafePopupOverviewWithDataProps> = ({ cafe, overviewStations, showAllStationsIfNoneInteresting = false }) => {
+export const CafePopupOverviewWithData: React.FC<ICafePopupOverviewWithDataProps> = ({ cafe, overviewStations, showAllStationsIfNoneInteresting = false, showAllStations = false }) => {
     const interestingStations = useMemo(
         () => {
             const allStations = overviewStations ?? [];
+
+            if (showAllStations) {
+                const sorted = [...allStations];
+                sortStationUniquenessInPlace(sorted);
+                return sorted;
+            }
+
             const interestingStations: ICafeOverviewStation[] = [];
             const stationsWithUniqueItemsToday: ICafeOverviewStation[] = [];
 
@@ -58,16 +66,18 @@ export const CafePopupOverviewWithData: React.FC<ICafePopupOverviewWithDataProps
 
             return interestingStations;
         },
-        [overviewStations]
+        [overviewStations, showAllStations]
     );
 
     if (interestingStations.length === 0 && !showAllStationsIfNoneInteresting) {
         return null;
     }
 
-    const title = interestingStations.length > 0
-        ? 'Interesting stations today:'
-        : 'No new or rotating items today. Here\'s all available stations:';
+    const title = showAllStations
+        ? 'Stations today:'
+        : interestingStations.length > 0
+            ? 'Interesting stations today:'
+            : 'No new or rotating items today. Here\'s all available stations:';
 
     const targetStations = interestingStations.length > 0
         ? interestingStations
