@@ -18,18 +18,21 @@ export const CafeViewPage: React.FC = () => {
 
     const ids = oneOrManyIds.split('+');
     const views: CafeView[] = [];
+    const resolvedIds: string[] = [];
+    let needsRedirect = false;
+
     for (const id of new Set(ids)) {
         const view = viewsById.get(id);
         if (view != null) {
             views.push(view);
-        }
-    }
 
-    if (ids.length !== views.length) {
-        return <Navigate
-            to={`/menu/${views.map(view => view.value.id).join('+')}`}
-            replace={true}
-        />;
+            // Cafes can have aliases, so redirect to the actual ID if an alias was used. This also serves to filter out any invalid IDs.
+            const resolvedId = view.value.id;
+            resolvedIds.push(resolvedId);
+            if (resolvedId !== id) {
+                needsRedirect = true;
+            }
+        }
     }
 
     if (views.length === 0) {
@@ -38,6 +41,14 @@ export const CafeViewPage: React.FC = () => {
                 None of the following views were found: {ids.join(', ')}
             </div>
         );
+    }
+
+    // Redirect if any ID was an alias or if some IDs were invalid
+    if (needsRedirect || ids.length !== views.length) {
+        return <Navigate
+            to={`/menu/${resolvedIds.join('+')}`}
+            replace={true}
+        />;
     }
 
     return (
