@@ -1,8 +1,6 @@
 import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
-import { ERROR_BODIES } from '@msdining/common/responses';
 
 import { getVisitorId } from '../constants/settings.ts';
-import { MenusCurrentlyUpdatingException } from '../util/exception.ts';
 import { HttpException } from '../exception/http.ts';
 import z, { ZodType } from 'zod';
 
@@ -38,13 +36,6 @@ export const makeJsonRequestNoParse = async ({
     });
 
     if (!response.ok) {
-        if (response.status === 503) {
-            const body = await response.text();
-            if (body === ERROR_BODIES.menusCurrentlyUpdating) {
-                throw new MenusCurrentlyUpdatingException();
-            }
-        }
-
         throw new HttpException(response.status);
     }
 

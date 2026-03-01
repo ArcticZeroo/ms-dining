@@ -9,7 +9,6 @@ import { CheapItemResult } from './cheap-item-result.tsx';
 import { SelectedDateContext } from '../../../context/time.ts';
 import { setPageData } from '../../../util/title.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
-import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { SearchResultSkeleton } from '../../search/search-result-skeleton.tsx';
 import { SearchWaiting } from "../../search/search-waiting.tsx";
@@ -104,15 +103,6 @@ export const CheapItemsPage: React.FC = () => {
                 Could not load cheap items.
                 <br/>
                 {String(error)}
-                {
-                    (error != null && error instanceof MenusCurrentlyUpdatingException) && (
-                        <>
-                            <br/>
-                            Menus are currently updating. Please try again soon!
-                            <br/>
-                        </>
-                    )
-                }
                 <RetryButton onClick={retry}/>
             </div>
         );

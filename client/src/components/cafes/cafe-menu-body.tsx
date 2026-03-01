@@ -1,14 +1,14 @@
 import { IDelayedPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import React, { useContext, useEffect } from 'react';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { MenusCurrentlyUpdatingException } from '../../util/exception.ts';
 import { RetryButton } from '../button/retry-button.tsx';
 import { StationList } from './station/station-list.tsx';
 import { StationListSkeleton } from '../skeleton/station-list-skeleton.tsx';
-import { IngredientsInfoBanner, IngredientsMenuView, parseIngredientsMenu } from './station/ingredients-menu-view.tsx';
+import { IngredientsInfoBanner, IngredientsMenuView } from './station/ingredients-menu-view.tsx';
 import { DebugSettings } from '../../constants/settings.js';
 import { CafeMenu } from '../../models/cafe.js';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { parseIngredientsMenu } from './station/ingredients-menu-parsing.js';
 
 interface ICollapsibleCafeMenuBodyProps {
     isExpanded: boolean;
@@ -31,14 +31,9 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
     }
 
     if (error != null) {
-        const isMenusCurrentlyUpdating = error instanceof MenusCurrentlyUpdatingException;
-        const errorText = isMenusCurrentlyUpdating
-            ? 'The menu for this cafe is currently updating. Please check back soon!'
-            : 'Failed to load menu.';
-
         return (
             <div className="cafe-error centered-content collapse-body">
-                {errorText}
+                Failed to load menu.
                 <br/>
                 <RetryButton onClick={retrieveMenu} isDisabled={actualStage !== PromiseStage.error}/>
             </div>
