@@ -6,7 +6,7 @@ import {
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
-import { IAvailableMenuItem, toRecommendationItem } from '../../../../util/recommendation.js';
+import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { selectWithVariety, weightedRandomSample } from '../../../../util/random.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import {
@@ -46,18 +46,19 @@ export const getBasedOnReviews = async (
 
 	const reviewedItemIds = new Set(reviews.map(review => review.menuItemId));
 	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem)));
-	const availableItems = await context.getAvailableItems();
-	const availableByEntityKey = new Map<string, IAvailableMenuItem>();
-	const availableById = new Map<string, IAvailableMenuItem>();
-	for (const item of availableItems) {
+
+	const allMenuItems = await context.getAllMenuItems();
+	const candidatesByEntityKey = new Map<string, IMenuItemCandidate>();
+	const candidatesById = new Map<string, IMenuItemCandidate>();
+	for (const item of allMenuItems) {
 		const entityKey = getEntityKey(item.menuItem);
 		if (!reviewedItemIds.has(item.menuItem.id) && !reviewedEntityKeys.has(entityKey)) {
-			availableByEntityKey.set(entityKey, item);
-			availableById.set(item.menuItem.id, item);
+			candidatesByEntityKey.set(entityKey, item);
+			candidatesById.set(item.menuItem.id, item);
 		}
 	}
 
-	if (availableByEntityKey.size === 0) {
+	if (candidatesByEntityKey.size === 0) {
 		return null;
 	}
 
@@ -67,6 +68,7 @@ export const getBasedOnReviews = async (
 		3,
 		context.random,
 	);
+
 	const candidates = new Map<string, { item: IRecommendationItem; distance: number }>();
 
 	// Vector search from each seed in parallel
@@ -86,7 +88,7 @@ export const getBasedOnReviews = async (
 
 	for (const { review, results } of searchResults) {
 		for (const result of results) {
-			const menuItem = availableById.get(result.id);
+			const menuItem = candidatesById.get(result.id);
 			if (!menuItem) {
 				continue;
 			}
@@ -113,9 +115,9 @@ export const getBasedOnReviews = async (
 		selectedCandidates.map(async ({ item }) => {
 			try {
 				const entityKey = getEntityKey(item);
-				const available = availableByEntityKey.get(entityKey);
-				const header = available
-					? await retrieveReviewHeaderAsync(available.menuItem).catch(() => null)
+				const candidate = candidatesByEntityKey.get(entityKey);
+				const header = candidate
+					? await retrieveReviewHeaderAsync(candidate.menuItem).catch(() => null)
 					: null;
 				return { ...item, overallRating: header?.overallRating, totalReviewCount: header?.totalReviewCount };
 			} catch {

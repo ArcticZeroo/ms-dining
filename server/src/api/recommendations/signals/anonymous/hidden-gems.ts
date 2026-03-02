@@ -6,7 +6,7 @@ import {
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
-import { IAvailableMenuItem, toRecommendationItem, computePopularityScore } from '../../../../util/recommendation.js';
+import { IMenuItemCandidate, toRecommendationItem, computePopularityScore } from '../../../../util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import {
 	searchSimilarEntitiesByType,
@@ -39,28 +39,28 @@ export const getHiddenGems = async (
 	context: IRecommendationContext,
 	count: number = ITEMS_PER_SECTION,
 ): Promise<IRecommendationSection | null> => {
-	const availableItems = await context.getAvailableItems();
+	const availableItems = await context.getAllMenuItems();
 
 	// Find the top-rated items to use as seeds (parallel header fetch)
 	const headerResults = await Promise.allSettled(
-		availableItems.map(async (available) => {
-			const header = await retrieveReviewHeaderAsync(available.menuItem);
-			return { available, header };
+		availableItems.map(async (item) => {
+			const header = await retrieveReviewHeaderAsync(item.menuItem);
+			return { item, header };
 		})
 	);
 
-	const seeds: Array<{ available: IAvailableMenuItem; header: { overallRating: number; totalReviewCount: number } }> = [];
-	const gemCandidatesByEntityKey = new Map<string, IAvailableMenuItem>();
-	const gemCandidatesById = new Map<string, IAvailableMenuItem>();
+	const seeds: Array<{ item: IMenuItemCandidate; header: { overallRating: number; totalReviewCount: number } }> = [];
+	const gemCandidatesByEntityKey = new Map<string, IMenuItemCandidate>();
+	const gemCandidatesById = new Map<string, IMenuItemCandidate>();
 
 	for (const result of headerResults) {
 		if (result.status !== 'fulfilled') {
 			continue;
 		}
-		const { available, header } = result.value;
+		const { item, header } = result.value;
 		// Would like to require a certain number of reviews, but we don't have a ton of reviews in total yet
 		if (/*header.totalReviewCount >= 3 && */header.overallRating >= POSITIVE_REVIEW_THRESHOLD) {
-			seeds.push({ available, header });
+			seeds.push({ item, header });
 		}
 	}
 
@@ -72,31 +72,31 @@ export const getHiddenGems = async (
 	const topSeeds = seeds.slice(0, TOP_RATED_SEED_COUNT);
 
 	// Build gem candidates from header results
-	const seedEntityKeys = new Set(topSeeds.map(seed => getEntityKey(seed.available.menuItem)));
+	const seedEntityKeys = new Set(topSeeds.map(seed => getEntityKey(seed.item.menuItem)));
 	for (const result of headerResults) {
 		if (result.status !== 'fulfilled') {
 			// No review data = hidden gem candidate
 			continue;
 		}
-		const { available, header } = result.value;
-		const entityKey = getEntityKey(available.menuItem);
+		const { item, header } = result.value;
+		const entityKey = getEntityKey(item.menuItem);
 		if (seedEntityKeys.has(entityKey) || gemCandidatesByEntityKey.has(entityKey)) {
 			continue;
 		}
 		if (header.totalReviewCount <= HIDDEN_GEM_MAX_REVIEW_COUNT) {
-			gemCandidatesByEntityKey.set(entityKey, available);
-			gemCandidatesById.set(available.menuItem.id, available);
+			gemCandidatesByEntityKey.set(entityKey, item);
+			gemCandidatesById.set(item.menuItem.id, item);
 		}
 	}
 
 	// Also add items that failed header fetch (no review data = hidden gem candidate)
 	for (let i = 0; i < headerResults.length; i++) {
 		if (headerResults[i]!.status === 'rejected') {
-			const available = availableItems[i]!;
-			const entityKey = getEntityKey(available.menuItem);
+			const item = availableItems[i]!;
+			const entityKey = getEntityKey(item.menuItem);
 			if (!seedEntityKeys.has(entityKey) && !gemCandidatesByEntityKey.has(entityKey)) {
-				gemCandidatesByEntityKey.set(entityKey, available);
-				gemCandidatesById.set(available.menuItem.id, available);
+				gemCandidatesByEntityKey.set(entityKey, item);
+				gemCandidatesById.set(item.menuItem.id, item);
 			}
 		}
 	}
@@ -112,7 +112,7 @@ export const getHiddenGems = async (
 			try {
 				return {
 					seed,
-					results: await searchSimilarEntitiesByType(SearchEntityType.menuItem, seed.available.menuItem.id, VECTOR_SEARCH_LIMIT),
+					results: await searchSimilarEntitiesByType(SearchEntityType.menuItem, seed.item.menuItem.id, VECTOR_SEARCH_LIMIT),
 				};
 			} catch (error) {
 				log.error('Error finding hidden gems for seed:', error);
@@ -135,7 +135,7 @@ export const getHiddenGems = async (
 					item:     toRecommendationItem(
 						candidate,
 						1 - result.distance,
-						`Similar to ${seed.available.menuItem.name}`,
+						`Similar to ${seed.item.menuItem.name}`,
 					),
 					distance: result.distance,
 				});

@@ -43,7 +43,7 @@ export const computeRecommendations = async (
 		homepageIds,
 		cafeIdFilter,
 		random,
-		getAvailableItems:  lazy(() => getAllAvailableItems(dateString, cafeIdFilter)),
+		getAllMenuItems:    lazy(() => getAllAvailableItems(dateString, cafeIdFilter)),
 		getUserReviews:     lazy(() => userId
 			? ReviewStorageClient.getReviewsForUserAsync({ userId })
 			: Promise.resolve([])),

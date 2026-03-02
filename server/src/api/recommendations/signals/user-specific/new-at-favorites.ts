@@ -7,7 +7,7 @@ import {
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { CAFES_BY_ID } from '../../../../constants/cafes.js';
-import { IAvailableMenuItem, toRecommendationItem } from '../../../../util/recommendation.js';
+import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { seededShuffle } from '../../../../util/random.js';
 import { retrieveDailyCafeMenuAsync } from '../../../cache/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../cache/daily-uniqueness.js';
@@ -16,7 +16,7 @@ import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { IRecommendationContext, ITEMS_PER_SECTION } from '../../shared.js';
 
 interface INewAtFavoritesCandidate {
-	available: IAvailableMenuItem;
+	item: IMenuItemCandidate;
 	reason: string;
 }
 
@@ -81,7 +81,7 @@ export const getNewItemsForCafe = async (cafeId: string, dateString: string): Pr
 
 			seenEntityKeys.add(entityKey);
 			candidates.push({
-				available: { menuItem, cafeId, cafeName: cafe.name, stationName: station.name },
+				item: { menuItem, cafeId, cafeName: cafe.name, stationName: station.name },
 				reason,
 			});
 		}
@@ -89,13 +89,13 @@ export const getNewItemsForCafe = async (cafeId: string, dateString: string): Pr
 
 	// Batch review header lookups
 	const headerResults = await Promise.allSettled(
-		candidates.map(({ available }) => retrieveReviewHeaderAsync(available.menuItem))
+		candidates.map(({ item }) => retrieveReviewHeaderAsync(item.menuItem))
 	);
 
-	return candidates.map(({ available, reason }, index) => {
+	return candidates.map(({ item, reason }, index) => {
 		const headerResult = headerResults[index]!;
 		const header = headerResult.status === 'fulfilled' ? headerResult.value : null;
-		return toRecommendationItem(available, 1, reason, header);
+		return toRecommendationItem(item, 1, reason, header);
 	});
 };
 

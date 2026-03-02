@@ -2,7 +2,7 @@ import { IRecommendationItem, IRecommendationSection } from '@msdining/common/mo
 import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { IServerReview } from '../../models/review.js';
 import { getNamespaceLogger } from '../../util/log.js';
-import { IAvailableMenuItem } from '../../util/recommendation.js';
+import { IMenuItemCandidate } from '../../util/recommendation.js';
 import { retrieveDailyCafeMenuAsync } from '../cache/daily-menu.js';
 
 export const log = getNamespaceLogger('recommendations');
@@ -20,7 +20,7 @@ export interface IRecommendationContext {
 	homepageIds: string[];
 	cafeIdFilter?: string;
 	random: () => number;
-	getAvailableItems: () => Promise<IAvailableMenuItem[]>;
+	getAllMenuItems: () => Promise<IMenuItemCandidate[]>;
 	getUserReviews: () => Promise<IServerReview[]>;
 	getNewItemsForCafe: (cafeId: string) => Promise<IRecommendationItem[]>;
 }
@@ -31,9 +31,9 @@ export const withErrorHandling = (name: string, promise: Promise<IRecommendation
 		return null;
 	});
 
-export const getAllAvailableItems = async (dateString: string, cafeIdFilter?: string): Promise<IAvailableMenuItem[]> => {
+export const getAllAvailableItems = async (dateString: string, cafeIdFilter?: string): Promise<IMenuItemCandidate[]> => {
 	const cafeIds = cafeIdFilter ? [cafeIdFilter] : Array.from(CAFES_BY_ID.keys());
-	const items: IAvailableMenuItem[] = [];
+	const items: IMenuItemCandidate[] = [];
 
 	const menus = await Promise.all(
 		cafeIds.map(async (cafeId) => {

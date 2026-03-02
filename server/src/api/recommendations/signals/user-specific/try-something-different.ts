@@ -6,7 +6,7 @@ import {
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
-import { IAvailableMenuItem, toRecommendationItem } from '../../../../util/recommendation.js';
+import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { selectWithVariety } from '../../../../util/random.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import {
@@ -76,7 +76,7 @@ export const getTrySomethingDifferent = async (
 
 	const reviewedItemIds = new Set(reviews.map(review => review.menuItemId));
 	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem)));
-	const availableItems = await context.getAvailableItems();
+	const availableItems = await context.getAllMenuItems();
 	const availableById = new Map(availableItems.map(item => [item.menuItem.id, item]));
 
 	// Negatively-reviewed item embeddings for penalty (parallel)
@@ -94,16 +94,16 @@ export const getTrySomethingDifferent = async (
 
 	// Sort by DESCENDING distance from centroid (most different first)
 	// Apply penalty for similarity to negatively-reviewed items
-	const scored: Array<{ available: IAvailableMenuItem; score: number }> = [];
+	const scored: Array<{ item: IMenuItemCandidate; score: number }> = [];
 	for (const result of results) {
-		const available = availableById.get(result.id);
-		if (!available) {
+		const item = availableById.get(result.id);
+		if (!item) {
 			continue;
 		}
 		if (reviewedItemIds.has(result.id)) {
 			continue;
 		}
-		if (reviewedEntityKeys.has(getEntityKey(available.menuItem))) {
+		if (reviewedEntityKeys.has(getEntityKey(item.menuItem))) {
 			continue;
 		}
 
@@ -128,7 +128,7 @@ export const getTrySomethingDifferent = async (
 			}
 		}
 
-		scored.push({ available, score });
+		scored.push({ item, score });
 	}
 
 	// Only include items with decent community ratings, collect a larger pool for variety
@@ -136,21 +136,21 @@ export const getTrySomethingDifferent = async (
 	const topScored = scored.sort((a, b) => b.score - a.score).slice(0, qualityPoolSize);
 
 	const headerResults = await Promise.allSettled(
-		topScored.map(async ({ available }) => retrieveReviewHeaderAsync(available.menuItem))
+		topScored.map(async ({ item }) => retrieveReviewHeaderAsync(item.menuItem))
 	);
 
 	const qualityFiltered: IRecommendationItem[] = [];
 	for (let i = 0; i < topScored.length; i++) {
-		const { available, score } = topScored[i]!;
+		const { item, score } = topScored[i]!;
 		const headerResult = headerResults[i]!;
 
 		if (headerResult.status === 'fulfilled') {
 			const header = headerResult.value;
 			if (header.totalReviewCount === 0 || header.overallRating >= 5) {
-				qualityFiltered.push(toRecommendationItem(available, score, 'Something different', header));
+				qualityFiltered.push(toRecommendationItem(item, score, undefined /*reason*/, header));
 			}
 		} else {
-			qualityFiltered.push(toRecommendationItem(available, score, 'Something different'));
+			qualityFiltered.push(toRecommendationItem(item, score));
 		}
 	}
 
