@@ -1,7 +1,7 @@
 import React from 'react';
 import { range } from '../../util/range.ts';
 import { Measurement } from '../../util/measurement.ts';
-import { pluralize } from '../../util/string.ts';
+import { formatReviewScore } from '../../util/reviews.js';
 
 const MAX_BAR_WIDTH = Measurement.fromRem(15);
 const MIN_BAR_WIDTH = Measurement.fromRem(0.25);
@@ -16,8 +16,7 @@ export const ReviewStats: React.FC<IReviewStatsProps> = ({ overallRating, totalC
     return (
         <>
             <div className="flex flex-center">
-                {(overallRating / 2).toFixed(2)} ⭐
-                ({totalCount} {pluralize('review', totalCount)})
+                {formatReviewScore(overallRating, totalCount)}
             </div>
             <div className="default-container bg-raised-4">
                 {
