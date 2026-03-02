@@ -1,7 +1,7 @@
 import React, { JSX } from 'react';
 import { classNames } from '../../util/react.js';
 
-interface ITabOption {
+export interface ITabOption {
     name: string;
     id: string;
 }

@@ -1,6 +1,6 @@
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { ICafeOverviewStation, IMenuItemBase, IMenuItem } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, IMenuItemBase, IMenuItem, IMenuOverviewSummary } from '@msdining/common/models/cafe';
 import {
     ICreateReviewRequest,
     IDiningCoreResponse,
@@ -9,6 +9,8 @@ import {
     MenuResponse
 } from '@msdining/common/models/http';
 import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/models/search';
+import { IAutocompleteSuggestion, IAutocompleteResponse } from '@msdining/common/models/search';
+import { IRecommendationsResponse } from '@msdining/common/models/recommendation';
 import { DebugSettings, InternalSettings } from '../../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../../models/search.ts';
@@ -143,6 +145,14 @@ export abstract class DiningClient {
         return overviewPromise;
     }
 
+    public static async retrieveMenuOverviewSummary(cafeOrViewId: string, dateString: string): Promise<IMenuOverviewSummary> {
+        const response = await makeJsonRequest({
+            path: `/api/dining/menu/${cafeOrViewId}/overview-summary?date=${dateString}`
+        });
+
+        return response as IMenuOverviewSummary;
+    }
+
     public static async retrieveRecentMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
         console.log('Retrieving cafe menus...');
         const priorityOrder = sortCafesInPriorityOrder(cafes, viewsById);
@@ -222,7 +232,9 @@ export abstract class DiningClient {
                 searchTags:            serverResult.searchTags ? new Set(serverResult.searchTags) : undefined,
                 matchedModifiers:      DiningClient._deserializeMatchedModifiers(serverResult.matchedModifiers),
                 vectorDistance:        serverResult.vectorDistance,
-                cafeId:                serverResult.cafeId || undefined
+                cafeId:                serverResult.cafeId || undefined,
+                overallRating:         serverResult.overallRating,
+                totalReviewCount:      serverResult.totalReviewCount,
             });
         }
 
@@ -492,6 +504,18 @@ export abstract class DiningClient {
         });
     }
 
+    public static async retrieveAutocompleteSuggestions(query: string): Promise<IAutocompleteSuggestion[]> {
+        const response = await makeJsonRequest<IAutocompleteResponse>({
+            path: `/api/dining/search/autocomplete?q=${encodeURIComponent(query)}`,
+        });
+
+        if (!isDuckType<IAutocompleteResponse>(response, { results: 'object' })) {
+            throw new Error('Invalid autocomplete response format');
+        }
+
+        return response.results;
+    }
+
     public static async retrieveRecommendedQueries(query: string): Promise<Array<string>> {
         const response = await makeJsonRequest({
             path: `/api/dining/recommendations/queries?q=${encodeURIComponent(query)}`,
@@ -502,5 +526,20 @@ export abstract class DiningClient {
         }
 
         return response;
+    }
+
+    public static async retrieveRecommendations(dateString: string, homepageIds?: Iterable<string>, cafeId?: string): Promise<IRecommendationsResponse> {
+        const params = new URLSearchParams({ date: dateString });
+        const homepageIdsList = homepageIds ? Array.from(homepageIds) : [];
+        if (homepageIdsList.length > 0) {
+            params.set('homepageIds', homepageIdsList.join(','));
+        }
+        if (cafeId) {
+            params.set('cafeId', cafeId);
+        }
+
+        return makeJsonRequest<IRecommendationsResponse>({
+            path: `/api/dining/recommendations/for-you?${params.toString()}`,
+        });
     }
 }

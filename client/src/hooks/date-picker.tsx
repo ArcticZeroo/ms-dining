@@ -41,5 +41,6 @@ export const useDateForSearch = () => {
     }
 
     // If we don't provide a date, we'll get results for the whole week
+    // todo: this breaks on weekends/eow?
     return undefined;
 }

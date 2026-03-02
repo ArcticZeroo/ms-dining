@@ -15,6 +15,7 @@ const SETTING_DISPLAY_NAMES: Record<string, string> = {
     [DebugSettings.noVectorSearch.name]:                           'Disable Vector Search',
     [DebugSettings.ingredientsMenuExperience.name]:                'in.gredients 3-Course Menu',
     [DebugSettings.enableMapPage.name]:                            'Enable Map Page',
+    [DebugSettings.recommendations.name]:                          'Enable Recommendations',
 };
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {

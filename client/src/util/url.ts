@@ -1,5 +1,6 @@
 import { DateUtil } from "@msdining/common";
 import { DiningClient } from '../api/client/dining.ts';
+import { DebugSettings } from '../constants/settings.js';
 
 export const addDateToUrl = (date: Date) => {
     const url = new URL(window.location.href);
@@ -27,4 +28,7 @@ export const getInitialDateFromUrl = () => {
     return DiningClient.getTodayDateForMenu();
 }
 
-export const getSearchUrl = (query: string) => `/search?q=${encodeURIComponent(query)}`;
+export const getSearchUrl = (query: string) => {
+    const pageTarget = DebugSettings.enableMapPage.value ? 'map' : 'search';
+    return `/${pageTarget}?q=${encodeURIComponent(query)}`;
+}

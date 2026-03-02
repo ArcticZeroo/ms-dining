@@ -73,6 +73,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 noVectorSearch: DebugSettings.noVectorSearch.value.toString(),
                 ingredientsMenuExperience: DebugSettings.ingredientsMenuExperience.value.toString(),
                 enableMapPage: DebugSettings.enableMapPage.value.toString(),
+                recommendations: DebugSettings.recommendations.value.toString(),
             },
             homeSettings: {
                 showExploreOnHome: HomeSettings.showExploreOnHome.value.toString(),

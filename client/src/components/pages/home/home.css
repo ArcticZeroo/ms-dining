@@ -5,6 +5,21 @@
     justify-content: center;
 }
 
+.home-recommendations-results {
+    gap: var(--default-padding);
+}
+
+.recommendation-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--constant-padding);
+    opacity: 0.8;
+}
+
+.recommendation-section-items {
+    gap: var(--default-padding);
+}
+
 .remove-button {
     background: none;
     color: var(--color-almost-white);

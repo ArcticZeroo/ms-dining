@@ -7,7 +7,6 @@ import { SelectedDateContext } from '../../../../context/time.ts';
 import { useDateForSearch } from '../../../../hooks/date-picker.tsx';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { IQuerySearchResult } from '../../../../models/search.ts';
-import { MenusCurrentlyUpdatingException } from '../../../../util/exception.ts';
 import { isAnyDateToday } from '../../../../util/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
@@ -92,11 +91,6 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                 <div className="error-card">
                     <span>
                         Could not load favorites.
-                        {
-                            error instanceof MenusCurrentlyUpdatingException && (
-                                ' Menus are currently updating. Please try again soon!'
-                            )
-                        }
                     </span>
                     <span className="centered-content">
                         <RetryButton onClick={retry} isDisabled={actualStage !== PromiseStage.error}/>

@@ -19,6 +19,8 @@ export const HomeFavoriteResult: React.FC<IHomeFavoriteResultProps> = ({ result,
             isCompact={true}
             showFavoriteButton={true}
             shouldColorForFavorites={false}
+            overallRating={result.overallRating}
+            totalReviewCount={result.totalReviewCount}
         />
     );
 };
