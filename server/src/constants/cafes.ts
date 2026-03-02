@@ -23,6 +23,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				name:      'Food Hall 6',
 				id:        'foodhall6',
 				shortName: 6,
+				aliases:   ['fh6'],
 				location:  {
 					lat:  47.641714,
 					long: -122.130664
@@ -104,6 +105,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				name:      'Café 40/41',
 				id:        'cafe40-41',
 				shortName: 40,
+				aliases:   ['41', '40/41', '40-41'],
 				location:  {
 					lat:  47.63699948153514,
 					long: -122.13287156157851
@@ -205,8 +207,9 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 				}
 			},
 			{
-				name:     'Café Studio H',
-				id:       'cafestudioh',
+				name:      'Café Studio H',
+				shortName: 'H',
+				id:        'cafestudioh',
 				location: {
 					lat:  47.64372822879307,
 					long: -122.14103953027507
@@ -215,6 +218,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			{
 				name:      'One Esterra Food Hall',
 				shortName: 'One Esterra',
+				aliases:   ['oe', '1e'],
 				id:        'one-esterra',
 				location:  {
 					lat:  47.635412206124535,
@@ -276,6 +280,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 		name:      'Food Hall 4',
 		id:        groupIds.building4,
 		shortName: 4,
+		aliases:   ['fh4'],
 		location:  {
 			lat:  47.64139514439134,
 			long: -122.12921998413715
@@ -323,6 +328,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 		name:      'Food Hall 9',
 		id:        groupIds.building9,
 		shortName: 9,
+		aliases:   ['fh9'],
 		location:  {
 			lat:  47.64057151717557,
 			long: -122.13121841044659
@@ -387,6 +393,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			{
 				name:      'Boardwalk @ The Commons',
 				shortName: 'Boardwalk',
+				aliases:   ['bw'],
 				id:        'boardwalk',
 				otherServedBuildings: [
 					'Studio'
@@ -431,7 +438,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 		members:      [
 			{
 				name:      'Studio A Espresso',
-				shortName: 'Studio A',
+				shortName: 'A',
 				id:        'studioa',
 				emoji:     '☕',
 				location:  {
@@ -451,7 +458,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			},
 			{
 				name:      'Studio D Espresso ',
-				shortName: 'Studio D',
+				shortName: 'D',
 				id:        'studiod',
 				emoji:     '☕',
 				location:  {
@@ -471,7 +478,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			},
 			{
 				name:      'Building 3 Espresso',
-				shortName: 'B3',
+				shortName: 3,
 				id:        'b3espresso',
 				emoji:     '☕',
 				location:  {
@@ -481,7 +488,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 			},
 			{
 				name:      'Building 7 Espresso',
-				shortName: 'B7',
+				shortName: 7,
 				id:        'b7espresso',
 				emoji:     '☕',
 				location:  {

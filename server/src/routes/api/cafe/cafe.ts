@@ -37,6 +37,7 @@ export const registerCafeRoutes = (parent: Router) => {
 				name:         group.name,
 				id:           group.id,
 				shortName:    group.shortName,
+				aliases:      group.aliases,
 				alwaysExpand: group.alwaysExpand ?? false,
 				members:      [],
 				location:     group.location
@@ -61,6 +62,7 @@ export const registerCafeRoutes = (parent: Router) => {
 					name:               cafe.name,
 					id:                 cafe.id,
 					shortName:          cafe.shortName,
+					aliases:            cafe.aliases,
 					url:                cafe.url,
 					logoUrl:            getLogoUrl(cafe, cafeData),
 					location:           cafe.location,

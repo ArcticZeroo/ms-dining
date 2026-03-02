@@ -6,6 +6,7 @@ interface ICafeBase {
     name: string;
     id: string;
     shortName?: number | string;
+    aliases?: string[];
     firstAvailable?: Date;
     url?: string;
     emoji?: string;
@@ -26,6 +27,7 @@ interface IBaseCafeGroup {
     id: string;
     name: string;
     shortName?: number | string;
+    aliases?: string[];
     // Some groups are just there for categorization when we don't group (e.g. restaurants, individual cafes)
     // and we don't actually want to group them in the nav bar.
     alwaysExpand?: boolean;
