@@ -52,4 +52,11 @@ export abstract class StationStorageClient {
 			}
 		}));
 	}
+
+	public static async retrieveAllStationNamesAsync(): Promise<string[]> {
+		const stations = await usePrismaClient(prismaClient => prismaClient.station.findMany({
+			select: { name: true }
+		}));
+		return stations.map(station => station.name);
+	}
 }

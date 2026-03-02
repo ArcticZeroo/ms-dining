@@ -77,3 +77,13 @@ export interface ISearchQuery {
     text: string;
     type?: SearchEntityType;
 }
+
+export interface IAutocompleteSuggestion {
+    entityType: SearchEntityType;
+    name: string;
+    cafeId?: string;
+}
+
+export interface IAutocompleteResponse {
+    results: IAutocompleteSuggestion[];
+}

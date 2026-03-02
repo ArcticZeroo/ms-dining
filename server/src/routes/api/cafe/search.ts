@@ -6,7 +6,7 @@ import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { ISearchQuery } from '@msdining/common/models/search';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
-import { memoizeResponseBody } from '../../../middleware/cache.js';
+import { assignCacheControlMiddleware, memoizeResponseBody } from '../../../middleware/cache.js';
 import {
     attachRouter,
     getEntityTypeAndName,
@@ -22,6 +22,8 @@ import { retrieveVisitData } from '../../../api/cache/pattern.js';
 import { Middleware } from 'koa';
 import { SearchQueryClient } from '../../../api/storage/clients/search-query.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
+import { searchAutocomplete } from '../../../api/cache/autocomplete.js';
+import Duration from '@arcticzeroo/duration';
 
 const DEFAULT_MAX_PRICE = 15;
 const DEFAULT_MIN_PRICE = 1;
@@ -146,6 +148,18 @@ export const registerSearchRoutes = (parent: Router) => {
         async ctx => {
             const [entityType, entityName] = getEntityTypeAndName(ctx);
             ctx.body = await retrieveVisitData(entityType, entityName);
+        });
+
+    router.get('/autocomplete',
+        assignCacheControlMiddleware(new Duration({ seconds: 30 }), true /*isPublic*/),
+        async ctx => {
+            const query = getTrimmedQueryParam(ctx, 'q');
+            if (!query) {
+                ctx.throw(400, 'Missing query');
+                return;
+            }
+
+            ctx.body = { results: searchAutocomplete(query) };
         });
 
     attachRouter(parent, router);

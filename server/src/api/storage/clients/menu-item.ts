@@ -1,12 +1,6 @@
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import {
-	MenuItem,
-	MenuItemModifier,
-	MenuItemModifierChoice,
-	MenuItemModifierEntry,
-	PrismaClient
-} from '@prisma/client';
+import { MenuItem, MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry } from '@prisma/client';
 import { IMenuItemBase } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug, logInfo } from '../../../util/log.js';
@@ -14,7 +8,6 @@ import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { getDateStringsForWeek } from '@msdining/common/util/date-util';
-import { menuItemToGroupMember } from './groups.js';
 import { PrismaLikeClient } from '../../../models/prisma.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
@@ -72,6 +65,10 @@ export abstract class MenuItemStorageClient {
 	private static readonly _menuItemsById = new Map<string, IMenuItemBase>();
 	private static readonly _menuIdsBySearchTag = new Map<string, Set<string>>();
 	private static _topSearchTags: string[] | undefined;
+
+	static get cachedMenuItemNames(): Iterable<string> {
+		return Array.from(this._menuItemsById.values(), item => item.name);
+	}
 
 	static get topSearchTags(): string[] {
 		if (this._topSearchTags == null) {

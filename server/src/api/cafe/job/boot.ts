@@ -10,6 +10,7 @@ import { ALL_CAFES } from '../../../constants/cafes.js';
 import Duration from '@arcticzeroo/duration';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { pruneExpiredDailyStationEmbeddings, deleteAllByEntityType } from '../../storage/vector/client.js';
+import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
 	const date = DateUtil.getNowWithDaysInFuture(i);
@@ -115,4 +116,6 @@ export const performMenuBootTasks = async () => {
 	);
 
 	// scheduleWeeklyPatternJob();
+
+	await seedAutocompleteFromDatabaseAsync();
 };
