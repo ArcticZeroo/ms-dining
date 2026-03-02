@@ -180,6 +180,11 @@
     white-space: pre-wrap;
 }
 
+.search-result-review-score {
+    font-size: 0.85em;
+    opacity: 0.85;
+}
+
 .search-result-fields .search-result-field {
     display: flex;
     align-items: center;

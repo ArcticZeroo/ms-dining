@@ -7,7 +7,7 @@ import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { RetryButton } from '../../../button/retry-button.js';
-import { CafePopupOverviewWithData } from '../../../cafes/cafe-popup-overview-with-data.js';
+import { CafeOverviewWithData } from '../../../cafes/cafe-overview-with-data.js';
 
 const useOverviewData = (cafe: ICafe) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
@@ -25,13 +25,13 @@ const useOverviewData = (cafe: ICafe) => {
     return useImmediatePromiseState(retrieveOverviews);
 };
 
-interface ICafeMarkerOverviewProps {
+interface ICafeOverviewProps {
     cafe: ICafe;
     showMessageForNoStations?: boolean;
+    showAllStations?: boolean;
 }
 
-
-export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe, showMessageForNoStations = false }) => {
+export const CafeOverview: React.FC<ICafeOverviewProps> = ({ cafe, showMessageForNoStations = false, showAllStations = false }) => {
     const { value: overviewStations, error, run } = useOverviewData(cafe);
 
     if (error) {
@@ -47,10 +47,11 @@ export const CafePopupOverview: React.FC<ICafeMarkerOverviewProps> = ({ cafe, sh
 
     if (overviewStations) {
         return (
-            <CafePopupOverviewWithData
+            <CafeOverviewWithData
                 cafe={cafe}
                 overviewStations={overviewStations}
                 showAllStationsIfNoneInteresting={showMessageForNoStations}
+                showAllStations={showAllStations}
             />
         );
     }

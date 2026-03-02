@@ -15,14 +15,14 @@ const isInterestingStation = (station: ICafeOverviewStation): boolean => {
         || getIsRecentlyAvailable(station.uniqueness.firstAppearance);
 }
 
-interface ICafePopupOverviewWithDataProps {
+interface ICafeOverviewWithDataProps {
     cafe: ICafe;
     overviewStations: ICafeOverviewStation[];
     showAllStationsIfNoneInteresting?: boolean;
     showAllStations?: boolean;
 }
 
-export const CafePopupOverviewWithData: React.FC<ICafePopupOverviewWithDataProps> = ({ cafe, overviewStations, showAllStationsIfNoneInteresting = false, showAllStations = false }) => {
+export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ cafe, overviewStations, showAllStationsIfNoneInteresting = false, showAllStations = false }) => {
     const interestingStations = useMemo(
         () => {
             const allStations = overviewStations ?? [];

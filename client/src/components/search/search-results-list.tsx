@@ -172,6 +172,8 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         matchReasons={searchResult.matchReasons}
                         matchedModifiers={searchResult.matchedModifiers}
                         cafeId={searchResult.cafeId}
+                        overallRating={searchResult.overallRating}
+                        totalReviewCount={searchResult.totalReviewCount}
                     />
                 );
             });

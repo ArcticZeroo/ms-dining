@@ -34,6 +34,8 @@ export interface IQuerySearchResult {
     matchedModifiers: Map<string, Set<string>>;
     vectorDistance?: number;
     cafeId?: string;
+    overallRating?: number;
+    totalReviewCount?: number;
 }
 
 export interface ICheapItemSearchResult {

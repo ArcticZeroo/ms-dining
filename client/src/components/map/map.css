@@ -34,12 +34,17 @@
     --color-icon-border: #225970;
     padding: 0.25rem;
     border-radius: 100%;
-    /*background: var(--color-button-background);*/
     width: 1rem;
     height: 1rem;
+    min-width: 1rem;
+    min-height: 1rem;
+    max-width: 1rem;
+    max-height: 1rem;
     font-size: 1.2em;
+    overflow: hidden;
     background: var(--color-icon-background);
     border: 0.25rem solid var(--color-icon-border);
+    font-weight: bold;
 }
 
 .campus-map .leaflet-div-icon .cafe-marker-tracker.recently-opened:not(.is-homepage-view) {
@@ -48,13 +53,25 @@
 }
 
 .campus-map .leaflet-div-icon .cafe-marker-tracker.is-homepage-view {
-    --color-icon-background: var(--color-favorite-light);
-    --color-icon-border: var(--color-favorite);
+    --color-icon-background: var(--color-favorite);
+    --color-icon-border: var(--color-favorite-light);
 }
 
 @keyframes marker-bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker.is-selected {
+    --color-icon-background: #1a4a7a;
+    --color-icon-border: var(--color-theme);
+    box-shadow: 0 0 10px 4px rgba(52, 136, 224, 0.6);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker.is-filter-selected {
+    --color-icon-background: #7a4a1a;
+    --color-icon-border: #f0a050;
+    box-shadow: 0 0 8px 3px rgba(240, 160, 80, 0.6);
 }
 
 .campus-map .leaflet-div-icon .cafe-marker-tracker.is-highlighted {
@@ -64,14 +81,56 @@
     animation: marker-bounce 0.6s ease-in-out infinite;
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.is-selected {
-    --color-icon-background: #1a4a7a;
-    --color-icon-border: var(--color-theme);
-    box-shadow: 0 0 10px 4px rgba(52, 136, 224, 0.6);
+.campus-map .leaflet-div-icon .cafe-marker-tracker.is-dimmed {
+    opacity: 0.35;
+    filter: grayscale(0.8);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.campus-map .leaflet-div-icon .cafe-name-label {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 0.25rem;
+    color: white;
+    font-size: 1em;
+    font-weight: 500;
+    padding: 0.0625rem 0.25rem;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.campus-map .cafe-name-label.leaflet-tooltip {
+    display: none;
+}
+
+.cafe-marker-tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.cafe-marker-tooltip .tooltip-details {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+    gap: 0.125rem;
+}
+
+.cafe-marker-tooltip .tooltip-hint {
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-top: 0.125rem;
 }
 
 .cafe-popup .group-member-list {
     width: 100%;
+    overflow-y: scroll;
 }
 
 .cafe-popup .group-member {

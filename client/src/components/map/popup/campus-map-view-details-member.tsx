@@ -2,21 +2,22 @@ import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { MapPopupViewContext } from '../../../context/map.ts';
+import { MapSelectedViewContext } from '../../../context/map.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeViewType, ICafe } from '../../../models/cafe.ts';
 import { getCafeName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
-import { CafePopupOverview } from './overview/cafe-popup-overview.tsx';
+import { CafeOverview } from './overview/cafe-overview.tsx';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
-interface ICampusMapPopupMember {
+interface ICampusMapViewDetailsMember {
     cafe: ICafe;
+    showAllStations?: boolean;
 }
 
-export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) => {
-    const popupView = useContext(MapPopupViewContext);
+export const CampusMapViewDetailsMember: React.FC<ICampusMapViewDetailsMember> = ({ cafe, showAllStations = false }) => {
+    const outerView = useContext(MapSelectedViewContext);
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -32,7 +33,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
         [view]
     );
 
-    if (!popupView || !view) {
+    if (!outerView || !view) {
         return null;
     }
 
@@ -45,7 +46,7 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
     return (
         <div className={classNames('group-member flex-col flex-center', openedRecently && 'recently-opened')}>
             {
-                popupView.type === CafeViewType.group && (
+                outerView.type === CafeViewType.group && (
                 // Intentionally getting the URL for the cafe's view instead of the popup
                     <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="flex default-button default-container">
                         {
@@ -68,8 +69,9 @@ export const CampusMapPopupMember: React.FC<ICampusMapPopupMember> = ({ cafe }) 
                     </span>
                 )
             }
-            <CafePopupOverview
+            <CafeOverview
                 cafe={cafe}
+                showAllStations={showAllStations}
             />
         </div>
     );

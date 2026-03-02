@@ -1,28 +1,41 @@
 import L from 'leaflet';
 import React, { useMemo } from 'react';
-import { Marker } from 'react-leaflet';
+import { Marker, Tooltip } from 'react-leaflet';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
+import { MarkerLabelMode } from '../../../util/map.ts';
 import { toLeafletLocation } from '../../../util/coordinates.ts';
 import { classNames } from '../../../util/react.ts';
-import { getViewEmoji, getViewLocation } from '../../../util/view.ts';
+import { getViewLocation, getViewMarkerLabel } from '../../../util/view.ts';
+import { getViewName } from '../../../util/cafe.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
+import { CafeMarkerTooltipContent } from './cafe-marker-tooltip-content.tsx';
 
-const getIconHtml = (view: CafeView, isHomepageView: boolean, isRecentlyOpened: boolean, isHighlighted: boolean, isSelected: boolean) => `
-<span class="${classNames('cafe-marker-tracker flex flex-center', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened', isHighlighted && 'is-highlighted', isSelected && 'is-selected')}" data-id="${view.value.id}">
-    ${getViewEmoji(view)}
-</span>
+const getIconHtml = (view: CafeView, labelText: string | null, isHomepageView: boolean, isRecentlyOpened: boolean, isHighlighted: boolean, isSelected: boolean, isFilterSelected: boolean, isDimmed: boolean) => {
+    const { text, isNumber, isShortText } = getViewMarkerLabel(view);
+    return `
+<div class="cafe-marker-container">
+    <span class="${classNames('cafe-marker-tracker flex flex-center', (isNumber || isShortText) && 'has-number', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened', isHighlighted && 'is-highlighted', isSelected && 'is-selected', isFilterSelected && 'is-filter-selected', isDimmed && 'is-dimmed')}" data-id="${view.value.id}">
+        ${text}
+    </span>
+    ${labelText != null ? `<span class="cafe-name-label">${labelText}</span>` : ''}
+</div>
 `;
+};
 
 interface ICafeMarkerProps {
     view: CafeView;
-    onClick(view: CafeView): void;
+    onClick(view: CafeView, isMultiSelect: boolean): void;
+    labelMode?: MarkerLabelMode;
     isHighlighted?: boolean;
     isSelected?: boolean;
+    isFilterSelected?: boolean;
+    showTooltip?: boolean;
+    isDimmed?: boolean;
 }
 
-export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, isHighlighted = false, isSelected = false }) => {
+export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMode = 'none', isHighlighted = false, isSelected = false, isFilterSelected = false, showTooltip = false, isDimmed = false }) => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -47,9 +60,34 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, isHighli
         [view]
     );
 
+    const labelText = useMemo(() => {
+        if (labelMode === 'none') {
+            return null;
+        }
+
+        const markerLabel = getViewMarkerLabel(view);
+
+        // Numbered cafes never need labels — the number in the bubble is enough
+        if (markerLabel.isNumber) {
+            return null;
+        }
+
+        // Short text labels (H, A, D) only get full name labels, not short ones
+        if (labelMode === 'short' && markerLabel.isShortText) {
+            return null;
+        }
+
+        return getViewName({
+            view,
+            showGroupName: false,
+            useShortNames: labelMode === 'short',
+            includeEmoji:  false
+        });
+    }, [view, labelMode]);
+
     const iconHtml = useMemo(
-        () => getIconHtml(view, isHomepageView, isRecentlyOpened, isHighlighted, isSelected),
-        [view, isHomepageView, isRecentlyOpened, isHighlighted, isSelected]
+        () => getIconHtml(view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed),
+        [view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed]
     );
 
     const onContextMenu = (event: L.LeafletMouseEvent) => {
@@ -67,10 +105,15 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, isHighli
             position={toLeafletLocation(getViewLocation(view))}
             icon={L.divIcon({ html: iconHtml })}
             eventHandlers={{
-                click: () => onClick(view),
+                click: (event: L.LeafletMouseEvent) => onClick(view, event.originalEvent.ctrlKey || event.originalEvent.metaKey),
                 contextmenu: onContextMenu
             }}
-            title={`Click to open overview for ${view.value.name}, or right click to toggle this view on your homepage.`}
-        />
+        >
+            {showTooltip && (
+                <Tooltip direction="top" offset={[0, -10]} sticky={false}>
+                    <CafeMarkerTooltipContent view={view}/>
+                </Tooltip>
+            )}
+        </Marker>
     );
 };

@@ -2,7 +2,7 @@ import { ICafeOverviewStation } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPopupViewContext } from '../../../../context/map.ts';
+import { MapSelectedViewContext } from '../../../../context/map.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { ICafe } from '../../../../models/cafe.ts';
@@ -76,7 +76,7 @@ interface ICafePopupOverviewStationProps {
 }
 
 export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> = ({ cafe, station }) => {
-    const popupView = useContext(MapPopupViewContext);
+    const popupView = useContext(MapSelectedViewContext);
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const didOpenRecently = getIsRecentlyAvailable(station.uniqueness.firstAppearance);

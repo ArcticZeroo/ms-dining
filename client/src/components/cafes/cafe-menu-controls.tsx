@@ -1,7 +1,7 @@
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 import React, { useContext } from 'react';
 import { Modal } from '../popup/modal.js';
-import { CafePopupOverviewWithData } from './cafe-popup-overview-with-data.js';
+import { CafeOverviewWithData } from './cafe-overview-with-data.js';
 import { CafeMenu } from '../../models/cafe.js';
 import { IDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { usePopupOpener } from '../../hooks/popup.js';
@@ -36,7 +36,7 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
                 <Modal
                     title={`Menu Overview for ${cafeName}`}
                     body={
-                        <CafePopupOverviewWithData
+                        <CafeOverviewWithData
                             cafe={cafe}
                             overviewStations={stations}
                             showAllStationsIfNoneInteresting={true}

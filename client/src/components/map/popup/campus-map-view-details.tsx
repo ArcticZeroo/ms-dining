@@ -7,17 +7,17 @@ import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { expandAndFlattenView } from '../../../util/view.ts';
-import { CampusMapPopupMember } from './campus-map-popup-member.tsx';
-import { MapPopupViewContext } from '../../../context/map.ts';
-import { FavoriteItemButton } from "../../button/favorite/favorite-item-button.tsx";
+import { CampusMapViewDetailsMember } from './campus-map-view-details-member.tsx';
+import { MapSelectedViewContext } from '../../../context/map.ts';
+import { FavoriteItemButton } from '../../button/favorite/favorite-item-button.tsx';
 
 interface ICampusMapPopupProps {
     view: CafeView;
-
+    showAllStations?: boolean;
     onClose(): void;
 }
 
-export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }) => {
+export const CampusMapViewDetails: React.FC<ICampusMapPopupProps> = ({ view, showAllStations = false, onClose }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -36,9 +36,9 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
     };
 
     return (
-        <MapPopupViewContext.Provider value={view}>
+        <MapSelectedViewContext.Provider value={view}>
             <div className="cafe-popup flex flex-center default-padding fade-in" onClick={onPaddingClicked}>
-                <div className="body flex-col height-full default-container" onClick={onContentClicked}>
+                <div className="body flex-col default-container" onClick={onContentClicked}>
                     <div className="flex flex-between">
                         <FavoriteItemButton
                             setting={ApplicationSettings.homepageViews}
@@ -63,9 +63,10 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
                     <div className="group-member-list flex flex-wrap flex-center">
                         {
                             cafesInView.map(cafe => (
-                                <CampusMapPopupMember
+                                <CampusMapViewDetailsMember
                                     key={cafe.id}
                                     cafe={cafe}
+                                    showAllStations={showAllStations}
                                 />
                             ))
                         }
@@ -88,6 +89,6 @@ export const CampusMapPopup: React.FC<ICampusMapPopupProps> = ({ view, onClose }
                     }
                 </div>
             </div>
-        </MapPopupViewContext.Provider>
+        </MapSelectedViewContext.Provider>
     );
 };

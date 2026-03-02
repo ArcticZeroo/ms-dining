@@ -24,6 +24,7 @@ import './search.css';
 import { getParentView } from '../../util/view.ts';
 import { normalizeCafeId } from '@msdining/common/util/cafe-util';
 import { entityDisplayDataByType } from '../../constants/search.js';
+import { formatReviewScore } from '../../util/reviews.js';
 
 const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
     const locationEntries = Array.from(locationDatesByCafeId.entries());
@@ -122,7 +123,7 @@ const useLocationEntries = ({
     );
 };
 
-interface ISearchResultField {
+export interface ISearchResultField {
     key: string;
     iconName: string;
     value: React.ReactNode;
@@ -151,6 +152,8 @@ export interface ISearchResultProps {
     showOnlyCafeNames?: boolean;
     matchedModifiers?: Map<string, Set<string>>;
     cafeId?: string; // Should only be set for entity type cafe
+    overallRating?: number;
+    totalReviewCount?: number;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -175,7 +178,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     isSkeleton = false,
     matchReasons = new Set(),
     showOnlyCafeNames = false,
-    cafeId
+    cafeId,
+    overallRating,
+    totalReviewCount,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -183,6 +188,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const showReviews = useValueNotifier(ApplicationSettings.showReviews);
     const selectedDateNotifier = useContext(SelectedDateContext);
     const selectedDate = useValueNotifier(selectedDateNotifier);
 
@@ -303,6 +309,13 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                             {
                                 !isCompact && description &&
                                 <div className="search-result-description">{description}</div>
+                            }
+                            {
+                                showReviews && overallRating != null && totalReviewCount != null && totalReviewCount > 0 && (
+                                    <div className="search-result-review-score">
+                                        {formatReviewScore(overallRating, totalReviewCount)}
+                                    </div>
+                                )
                             }
                             {
                                 tags && (showTags || matchReasons.has(SearchMatchReason.tags)) && (
