@@ -18,6 +18,8 @@ export const fuzzySearch = (source: string, search: string) => {
 // We don't want to normalize numbers out of names because those indicate different items
 export const normalizeNameForSearch = (name: string) => name
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .replace(/^the /i, '')
-    .replaceAll(/(\W|\s|\s+\s|\sand\s)/ig, '');
+    .replaceAll(/(\band\b|\W)/ig, '');
