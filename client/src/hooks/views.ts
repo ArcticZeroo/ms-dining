@@ -22,6 +22,12 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
             viewsById.set(group.id, groupView);
             viewsInOrder.push(groupView);
 
+            if (group.aliases) {
+                for (const alias of group.aliases) {
+                    viewsById.set(alias, groupView);
+                }
+            }
+
             for (const cafe of group.members) {
                 cafe.group = group;
 
@@ -33,6 +39,12 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
                 viewsById.set(cafe.id, cafeView);
                 viewsInOrder.push(cafeView);
                 cafes.push(cafe);
+
+                if (cafe.aliases) {
+                    for (const alias of cafe.aliases) {
+                        viewsById.set(alias, cafeView);
+                    }
+                }
             }
         }
 

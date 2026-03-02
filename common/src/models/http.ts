@@ -6,6 +6,7 @@ export interface IDiningCoreEntity {
 	name: string;
 	id: string;
 	shortName?: number | string;
+	aliases?: string[];
 	firstAvailableDate?: string;
 }
 
