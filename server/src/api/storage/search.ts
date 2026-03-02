@@ -165,6 +165,7 @@ class SearchResults {
 				description,
 				imageUrl,
 				vectorDistance,
+				groupId:               groupId || undefined,
 				tags:                  tags || undefined,
 				searchTags:            searchTags || undefined,
 				locationDatesByCafeId: new Map<string, Set<string>>(),

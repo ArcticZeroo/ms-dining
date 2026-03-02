@@ -10,6 +10,7 @@ import { getDevKey } from '../constants/env.js';
 import { UserStorageClient } from '../api/storage/clients/user.js';
 import { IServerUser } from '../models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
+import { retrieveReviewHeaderByPartsAsync } from '../api/cache/reviews.js';
 
 export const attachRouter = (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 
@@ -81,6 +82,17 @@ const serializeSearchResult = async (searchResult: IServerSearchResult, allowMod
 		? await searchResult.imageUrl()
 		: searchResult.imageUrl;
 
+	let overallRating: number | undefined;
+	let totalReviewCount: number | undefined;
+
+	if (searchResult.type === SearchEntityType.menuItem) {
+		const reviewHeader = await retrieveReviewHeaderByPartsAsync(searchResult.groupId, searchResult.name);
+		if (reviewHeader.totalReviewCount > 0) {
+			overallRating = reviewHeader.overallRating;
+			totalReviewCount = reviewHeader.totalReviewCount;
+		}
+	}
+
 	return ({
 		type:             searchResult.type,
 		name:             searchResult.name,
@@ -94,7 +106,9 @@ const serializeSearchResult = async (searchResult: IServerSearchResult, allowMod
 		matchedModifiers: allowModifiers ? serializeMapOfStringToSet(searchResult.matchedModifiers) : {},
 		matchReasons:     Array.from(matchReasons),
 		vectorDistance:   searchResult.vectorDistance,
-		cafeId:           searchResult.cafeId || undefined
+		cafeId:           searchResult.cafeId || undefined,
+		overallRating,
+		totalReviewCount,
 	});
 };
 

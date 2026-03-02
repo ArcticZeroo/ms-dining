@@ -62,3 +62,18 @@ export const retrieveReviewHeaderAsync = async (menuItem: IMenuItemBase): Promis
 			return ReviewStorageClient.getReviewHeaderByName(normalizeNameForSearch(menuItem.name));
 		});
 }
+
+export const retrieveReviewHeaderByPartsAsync = async (groupId: string | null | undefined, name: string): Promise<IMenuItemReviewHeader> => {
+	const entityKey = getReviewEntityKeyFromParts(groupId, normalizeNameForSearch(name));
+	return REVIEW_DATA_BY_ENTITY_KEY.update(
+		entityKey,
+		async (header) => {
+			if (header != null) {
+				return header;
+			}
+			if (groupId) {
+				return ReviewStorageClient.getReviewHeaderByGroupId(groupId);
+			}
+			return ReviewStorageClient.getReviewHeaderByName(normalizeNameForSearch(name));
+		});
+}

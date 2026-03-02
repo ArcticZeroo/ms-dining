@@ -104,6 +104,8 @@ export interface ISearchResponseResult {
 	matchedModifiers: Record<string, Array<string>>;
 	vectorDistance?: number;
 	cafeId?: string;
+	overallRating?: number;
+	totalReviewCount?: number;
 }
 
 export interface ICreateReviewRequest {
