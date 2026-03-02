@@ -21,16 +21,50 @@ export const MyComponent: React.FC<IMyComponentProps> = ({ prop1, prop2 = false 
 ### Promise Handling
 Use `@arcticzeroo/react-promise-hook` for async operations:
 ```typescript
-const responseStatus = useImmediatePromiseState(asyncFunction);
-// or
+// Runs immediately on mount (and when the callback identity changes):
+const response = useImmediatePromiseState(asyncFunction);
+
+// Runs only when you call run() explicitly:
 const { value, error, run } = useDelayedPromiseState(asyncFunction);
+```
+
+**You MUST handle all three states**: loading, error, and success. Never skip loading or error handling.
+
+- **Error state**: Check `response.stage === PromiseStage.error` and render an error message with a `<RetryButton onClick={response.run}/>`.
+- **Loading state**: Check that the value is still `null`/`undefined` and render a loading indicator (e.g. `<HourglassLoadingSpinner/>` or a skeleton).
+- **Success state**: Render the data only after confirming the value is available.
+
+Both hooks return `{ stage, value, error, run }`. Always import `PromiseStage` alongside the hook.
+
+#### Example (useImmediatePromiseState)
+```tsx
+import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { RetryButton } from '../button/retry-button.tsx';
+import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
+
+const response = useImmediatePromiseState(fetchData);
+
+if (response.stage === PromiseStage.error) {
+    return (
+        <div className="card error">
+            <span>Unable to load data!</span>
+            <RetryButton onClick={response.run}/>
+        </div>
+    );
+}
+
+if (response.value == null) {
+    return <HourglassLoadingSpinner/>;
+}
+
+return <MyDataView data={response.value}/>;
 ```
 
 ### Error Handling in Components
 Follow the pattern in `app.tsx` for error boundaries:
 - Check for `HttpException` with specific status codes
 - Provide specific error messages for server errors (500) vs network errors
-- Always include retry buttons and email contact for persistent issues
+- Always include retry buttons
 
 ### API Client
 API clients are in `src/api/`:
