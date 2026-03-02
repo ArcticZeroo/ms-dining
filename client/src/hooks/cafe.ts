@@ -29,10 +29,13 @@ const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
 };
 
 export const useFavoriteQueries = () => {
-    return [
-        ...useQueries(ApplicationSettings.favoriteItemNames, SearchEntityType.menuItem),
-        ...useQueries(ApplicationSettings.favoriteStationNames, SearchEntityType.station),
-    ];
+    const itemNameQueries = useQueries(ApplicationSettings.favoriteItemNames, SearchEntityType.menuItem);
+    const stationNameQueries = useQueries(ApplicationSettings.favoriteStationNames, SearchEntityType.station);
+
+    return useMemo(() => [
+        ...itemNameQueries,
+        ...stationNameQueries
+    ], [itemNameQueries, stationNameQueries]);
 };
 
 export const useIsFavoriteItem = (name: string, type: SearchEntityType) => {
