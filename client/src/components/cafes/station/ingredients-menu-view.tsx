@@ -5,9 +5,6 @@ import { MenuItem } from './menu-items/menu-item.tsx';
 import { IIngredientsMenu } from './ingredients-menu-parsing.ts';
 import './ingredients-menu-view.css';
 
-export { parseIngredientsMenu } from './ingredients-menu-parsing.ts';
-export type { IIngredientsMenu } from './ingredients-menu-parsing.ts';
-
 interface ICourseMenuSectionProps {
     title: string;
     subtitle?: string;
