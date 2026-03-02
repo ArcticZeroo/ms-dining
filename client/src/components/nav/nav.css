@@ -12,6 +12,8 @@ nav {
 nav #sticky-header-list {
     top: 0;
     position: sticky;
+    z-index: var(--z-index-above-content);
+    overflow: visible;
 }
 
 nav ul {
