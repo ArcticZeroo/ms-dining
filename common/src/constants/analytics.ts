@@ -5,8 +5,11 @@ export const getApplicationNameForScenario = (scenario: string) => `${primary}-$
 export const getScenarioForCafeMenu = (cafeId: string) => `${cafeId}-menu`;
 export const getScenarioForMenuOverview = (cafeId: string) => `${cafeId}-overview`;
 
+export const getScenarioForMenuOverviewSummary = (id: string) => `${id}-overview-summary`;
+
 export const getApplicationNameForCafeMenu = (cafeId: string) => getApplicationNameForScenario(getScenarioForCafeMenu(cafeId));
 export const getApplicationNameForMenuOverview = (cafeId: string) => getApplicationNameForScenario(getScenarioForMenuOverview(cafeId));
+export const getApplicationNameForMenuOverviewSummary = (id: string) => getApplicationNameForScenario(getScenarioForMenuOverviewSummary(id));
 
 export const SCENARIO_NAMES = {
 	poster:          'poster',

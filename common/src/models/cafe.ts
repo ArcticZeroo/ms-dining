@@ -97,4 +97,12 @@ export interface ICafeOverviewStation {
     uniqueness: IStationUniquenessData;
 }
 
+export interface IMenuOverviewSummary {
+    total: number;
+    traveling: number;
+    newStations: number;
+    newItems: number;
+    rotating: number;
+}
+
 export * from './cart.js';

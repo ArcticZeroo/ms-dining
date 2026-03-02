@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { ICafeOverviewStation, IMenuItemDTO, IStationUniquenessData } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, IMenuItemDTO, IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
 import {
 	ICreateReviewRequest,
 	MenuResponse,
@@ -9,7 +9,7 @@ import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBody, memoizeResponseBodyWithResetOnMenuUpdate } from '../../../middleware/cache.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
-import { getDefaultUniquenessDataForStation, getStationLogoUrl } from '../../../util/cafe.js';
+import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import { attachRouter, getMaybeUserId, getTrimmedQueryParam, getUserIdOrThrow } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
@@ -17,6 +17,7 @@ import {
 	ANALYTICS_APPLICATION_NAMES,
 	getApplicationNameForCafeMenu,
 	getApplicationNameForMenuOverview,
+	getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { ReviewStorageClient } from '../../../api/storage/clients/review.js';
@@ -34,6 +35,7 @@ import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interf
 import { logDebug } from '../../../util/log.js';
 import { retrieveReviewHeaderAsync } from '../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-first-appearance.js';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -321,6 +323,67 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			ctx.body = jsonStringifyWithoutNull(await convertMenuToSerializable(menuStations, uniquenessData));
 		}));
+
+	router.get('/:id/overview-summary',
+		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverviewSummary),
+		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+		async ctx => {
+			const id = ctx.params.id?.toLowerCase();
+			if (!id) {
+				return ctx.throw(400, 'Missing id');
+			}
+
+			const cafes = resolveViewToCafes(id);
+			if (!cafes) {
+				return ctx.throw(404, 'View not found');
+			}
+
+			const dateString = getDateStringForMenuRequest(ctx);
+			if (dateString == null) {
+				ctx.body = JSON.stringify({ total: 0, traveling: 0, newStations: 0, newItems: 0, rotating: 0 });
+				return;
+			}
+
+			const allOverviewStations = await Promise.all(
+				cafes.map(async (cafe) => {
+					const [stationHeaders, uniquenessData] = await Promise.all([
+						DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
+						retrieveUniquenessDataForCafe(cafe.id, dateString)
+					]);
+
+					return stationHeaders.map(station => ({
+						uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+					}));
+				})
+			);
+
+			const stations = allOverviewStations.flat();
+
+			const summary: IMenuOverviewSummary = {
+				total:       stations.length,
+				traveling:   0,
+				newStations: 0,
+				newItems:    0,
+				rotating:    0,
+			};
+
+			for (const { uniqueness } of stations) {
+				if (uniqueness.isTraveling) {
+					summary.traveling++;
+				}
+				if (getIsRecentlyAvailable(uniqueness.firstAppearance)) {
+					summary.newStations++;
+				}
+				if (uniqueness.recentlyAvailableItemCount > 0) {
+					summary.newItems++;
+				}
+				if (uniqueness.theme != null) {
+					summary.rotating++;
+				}
+			}
+
+			ctx.body = JSON.stringify(summary);
+		});
 
 	router.get('/:id/overview',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
