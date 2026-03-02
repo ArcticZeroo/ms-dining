@@ -7,13 +7,17 @@ The project is made up of three packages:
 - Client: the react frontend
 - Server: the Koa backend, with a Prisma database.
 
-IMPORTANT: Before searching code always query memory. It will save you time. Make sure to ALWAYS ingest any new information you find out into memory as well.
-
 # Code Change Guidance
 
 Always make a checklist with your plan before making changes.
 
 If you find important learnings during development, consider documenting them in this file for future reference.
+
+## General Guidance
+
+- Avoid duplicating code wherever possible. Look for opportunities to share code
+- Try to avoid huge multi-purpose functions where possible. Try to move out individual logical parts into helpers so that the big functions are more readable
+- No obvious self-evident comments
 
 ## General JavaScript Guidance
 
@@ -63,8 +67,8 @@ This is a **monorepo** with workspace dependencies:
 - Server build: `npx tsc --project ../common/tsconfig.json && npx tsc`
 
 ### Environment
-- Development server runs on port 3002 (Koa backend)
-- Client dev server proxies `/api` and `/static` to backend
+- Server runs on **port 3002** (Koa backend). If the server is running, you can test API endpoints directly via `http://localhost:3002/api/dining/...`
+- Client dev server runs on **port 5173** (Vite) and proxies `/api` and `/static` to the backend
 - Use `NODE_ENV=dev` for development mode
 
 When working on this codebase, always consider these patterns and use the established conventions rather than creating new approaches.
