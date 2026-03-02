@@ -9,7 +9,7 @@ module.exports = {
     ],
     ignorePatterns: ['dist', '.eslintrc.cjs'],
     parser: '@typescript-eslint/parser',
-    plugins: ['react-refresh'],
+    plugins: ['react-refresh', 'msdining'],
     rules: {
         'react-refresh/only-export-components': [
             'warn',
@@ -17,6 +17,8 @@ module.exports = {
         ],
         'no-mixed-spaces-and-tabs': 'off',
         'indent': ['error', 4],
-        'curly': ['error', 'all']
+        'curly': ['error', 'all'],
+        'brace-style': ['error', '1tbs', { allowSingleLine: false }],
+        'msdining/require-promise-state-stage': 'error',
     },
 }
