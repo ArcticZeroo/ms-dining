@@ -40,7 +40,7 @@ export const getParentView = (viewsById: Map<string, CafeView>, view: CafeView, 
     return parentView;
 };
 
-export const isViewVisible = (view: Nullable<CafeView>, shouldUseGroups: boolean, minMenuDate: Date) => {
+export const isViewVisibleForNav = (view: Nullable<CafeView>, shouldUseGroups: boolean, minMenuDate: Date): boolean => {
     if (view == null) {
         return false;
     }
@@ -86,6 +86,19 @@ export const getViewLocation = (view: CafeView): ILocationCoordinates => {
 export const getViewEmoji = (view: CafeView) => view.type === CafeViewType.single && view.value.emoji
     ? view.value.emoji
     : '🍴';
+
+export const getViewMarkerLabel = (view: CafeView): { text: string; isNumber: boolean; isShortText: boolean } => {
+    const shortName = view.value.shortName;
+    if (typeof shortName === 'number') {
+        return { text: shortName.toString(), isNumber: true, isShortText: false };
+    }
+
+    if (typeof shortName === 'string' && shortName.length <= 2) {
+        return { text: shortName, isNumber: false, isShortText: true };
+    }
+
+    return { text: getViewEmoji(view), isNumber: false, isShortText: false };
+};
 
 // Intended for cases like Food Hall 4
 export const getViewPrimaryCafe = (view: CafeView): ICafe | undefined => view.type === CafeViewType.single

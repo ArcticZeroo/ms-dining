@@ -1,4 +1,4 @@
-import { IMenuItemBase, IMenuItem } from '@msdining/common/models/cafe';
+import { IMenuItem, IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import React, { useContext, useMemo } from 'react';
@@ -17,9 +17,8 @@ import { MenuItemTags } from './menu-item-tags.tsx';
 import { MenuItemPopup } from './popup/menu-item-popup.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
 import { usePopupOpener } from '../../../../hooks/popup.ts';
-import { pluralize } from '../../../../util/string.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
-import { truncateFloat } from '@msdining/common/util/number-util';
+import { formatReviewScore } from '../../../../util/reviews.js';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
@@ -164,7 +163,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
             {
                 showReviews && menuItem.totalReviewCount > 0 && (
                     <span>
-                        {truncateFloat(menuItem.overallRating / 2, 2)} ⭐ ({menuItem.totalReviewCount} {pluralize('review', menuItem.totalReviewCount)})
+                        {formatReviewScore(menuItem.overallRating, menuItem.totalReviewCount)}
                     </span>
                 )
             }

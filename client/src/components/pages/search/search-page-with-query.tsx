@@ -5,7 +5,6 @@ import { DiningClient } from '../../../api/client/dining.ts';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
-import { MenusCurrentlyUpdatingException } from '../../../util/exception.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { SearchFilters } from '../../search/filters/search-filters.tsx';
@@ -26,7 +25,6 @@ interface ISearchResultsState {
     results: IQuerySearchResult[];
     tabCounts: Map<SearchEntityType, number>;
     queryForCurrentResults: string;
-    areMenusCurrentlyUpdating: boolean;
     retrieveSearchResults: () => void;
 }
 
@@ -46,7 +44,6 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
         actualStage: actualSearchResultStage,
         stage:       searchResultStage,
         value:       searchResults,
-        error:       searchResultsError,
         run:         retrieveSearchResults
     } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
 
@@ -76,7 +73,6 @@ const useSearchResultsState = (query: string): ISearchResultsState => {
         results:                   allSearchResults,
         tabCounts:                 resultCountByEntityType,
         queryForCurrentResults:    queryForCurrentResults,
-        areMenusCurrentlyUpdating: searchResultsError != null && searchResultsError instanceof MenusCurrentlyUpdatingException,
         retrieveSearchResults
     };
 };
@@ -92,7 +88,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         results,
         tabCounts,
         queryForCurrentResults,
-        areMenusCurrentlyUpdating,
         retrieveSearchResults
     } = useSearchResultsState(queryText);
 
@@ -144,13 +139,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                         <p>
                             Error loading search results!
                         </p>
-                        {
-                            areMenusCurrentlyUpdating && (
-                                <p>
-                                    Menus are currently updating. Please try again soon!
-                                </p>
-                            )
-                        }
                         {
                             // If we hit retry, actualStage will change but stage will stay error
                             actualStage === PromiseStage.error && (

@@ -1,7 +1,8 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { NavigateFunction } from 'react-router-dom';
-import { SearchEntityFilterType } from '../models/search.ts';
+import { IQuerySearchResult, SearchEntityFilterType } from '../models/search.ts';
 import { getSearchUrl } from './url.ts';
+import { formatPrice } from './cart.js';
 
 export const matchesEntityFilter = (filter: SearchEntityFilterType, entryType: SearchTypes.SearchEntityType) => {
     switch (filter) {
@@ -57,4 +58,24 @@ export const isAnyDateToday = (locationEntriesByCafeId: Map<string, Date[]>, tod
 
 export const isSearchResultVisible = (locationEntriesByCafeId: Map<string, Date[]>, allowFutureMenus: boolean, selectedDate: Date) => {
     return allowFutureMenus || isAnyDateToday(locationEntriesByCafeId, selectedDate);
+}
+
+export const formatSearchResultPrice = (result: IQuerySearchResult) => {
+    const prices = Array.from(result.priceByCafeId.values());
+    if (prices.length === 0) {
+        return null;
+    }
+
+    let min = prices[0]!;
+    let max = prices[0]!;
+    for (const price of prices) {
+        min = Math.min(min, price);
+        max = Math.max(max, price);
+    }
+
+    if (min === max) {
+        return formatPrice(min);
+    }
+
+    return `${formatPrice(min)}-${formatPrice(max, false /*addCurrencySign*/)}`;
 }

@@ -4,7 +4,7 @@ import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { sortViews } from '../util/sorting.ts';
-import { isViewVisible } from '../util/view.ts';
+import { isViewVisibleForNav } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
 
 export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
@@ -52,7 +52,7 @@ export const useViewDataFromResponse = (groups: ICafeGroup[]) => {
     }, [groups]);
 };
 
-export const useVisibleViews = (shouldUseGroups: boolean) => {
+export const useVisibleViewsForNav = (shouldUseGroups: boolean) => {
     const { viewsInOrder } = useContext(ApplicationContext);
 
     return useMemo(() => {
@@ -60,7 +60,7 @@ export const useVisibleViews = (shouldUseGroups: boolean) => {
 
         const minMenuDate = getMinimumDateForMenu();
         for (const view of viewsInOrder) {
-            if (isViewVisible(view, shouldUseGroups, minMenuDate)) {
+            if (isViewVisibleForNav(view, shouldUseGroups, minMenuDate)) {
                 visibleViews.push(view);
             }
         }
@@ -71,7 +71,7 @@ export const useVisibleViews = (shouldUseGroups: boolean) => {
 
 export const useViewsForNav = () => {
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    return useVisibleViews(shouldUseGroups);
+    return useVisibleViewsForNav(shouldUseGroups);
 };
 
 export const useHomepageViews = () => {
@@ -90,7 +90,7 @@ export const useHomepageViews = () => {
                 const view = viewsById.get(viewId)!;
 
                 // If the user selected a single view that should be a group, don't show it
-                if (isViewVisible(view, shouldUseGroups, minMenuDate)) {
+                if (isViewVisibleForNav(view, shouldUseGroups, minMenuDate)) {
                     availableViews.push(view);
                 }
             }

@@ -36,7 +36,7 @@ export const getCafeName = ({ cafe, showGroupName, useShortNames = false, includ
     return `${targetNameWithEmoji} @ ${groupName}`;
 };
 
-export const getViewName = ({ view, showGroupName, useShortNames = false, includeEmoji = true }: IGetViewNameParams) => {
+export const getViewName = ({ view, showGroupName, useShortNames = false, includeEmoji = true }: IGetViewNameParams): string => {
     if (view.type === CafeViewType.single) {
         return getCafeName({
             cafe: view.value,
@@ -46,7 +46,7 @@ export const getViewName = ({ view, showGroupName, useShortNames = false, includ
         });
     }
 
-    return (useShortNames && view.value.shortName) || view.value.name;
+    return (useShortNames && String(view.value.shortName)) || view.value.name;
 }
 
 export const getTargetSettingForFavorite = (type: SearchEntityType) => {
