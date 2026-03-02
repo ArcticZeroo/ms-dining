@@ -6,7 +6,7 @@ import {
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { Nullable } from '@msdining/common/models/util';
 
-export interface IAvailableMenuItem {
+export interface IMenuItemCandidate {
 	menuItem: IMenuItemBase;
 	cafeId: string;
 	cafeName: string;
@@ -14,22 +14,22 @@ export interface IAvailableMenuItem {
 }
 
 export const toRecommendationItem = (
-	available: IAvailableMenuItem,
+	item: IMenuItemCandidate,
 	score: number,
 	reason?: string,
 	reviewHeader?: Nullable<IMenuItemReviewHeader>,
 ): IRecommendationItem => ({
-	menuItemId:       available.menuItem.id,
-	name:             available.menuItem.name,
-	groupId:          available.menuItem.groupId ?? undefined,
-	description:      available.menuItem.description ?? undefined,
-	imageUrl:         available.menuItem.imageUrl ?? undefined,
-	price:            available.menuItem.price,
-	calories:         available.menuItem.calories,
-	cafeId:           available.cafeId,
-	cafeName:         available.cafeName,
-	stationName:      available.stationName,
-	tags:             available.menuItem.tags.size > 0 ? Array.from(available.menuItem.tags) : undefined,
+	menuItemId:       item.menuItem.id,
+	name:             item.menuItem.name,
+	groupId:          item.menuItem.groupId ?? undefined,
+	description:      item.menuItem.description ?? undefined,
+	imageUrl:         item.menuItem.imageUrl ?? undefined,
+	price:            item.menuItem.price,
+	calories:         item.menuItem.calories,
+	cafeId:           item.cafeId,
+	cafeName:         item.cafeName,
+	stationName:      item.stationName,
+	tags:             item.menuItem.tags.size > 0 ? Array.from(item.menuItem.tags) : undefined,
 	overallRating:    reviewHeader?.overallRating,
 	totalReviewCount: reviewHeader?.totalReviewCount,
 	reason,

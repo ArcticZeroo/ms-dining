@@ -4,7 +4,7 @@ import {
 	toRecommendationItem,
 	deduplicateItems,
 	computePopularityScore,
-	IAvailableMenuItem,
+	IMenuItemCandidate,
 } from '../../util/recommendation.js';
 import { RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
@@ -24,7 +24,7 @@ const makeMenuItem = (overrides: Partial<IMenuItemBase> = {}): IMenuItemBase => 
 	...overrides,
 });
 
-const makeAvailable = (overrides: Partial<IAvailableMenuItem> = {}): IAvailableMenuItem => ({
+const makeAvailable = (overrides: Partial<IMenuItemCandidate> = {}): IMenuItemCandidate => ({
 	menuItem:    makeMenuItem(),
 	cafeId:      'cafe-1',
 	cafeName:    'Test Cafe',
@@ -34,14 +34,14 @@ const makeAvailable = (overrides: Partial<IAvailableMenuItem> = {}): IAvailableM
 
 describe('toRecommendationItem', () => {
 	it('maps available menu item fields correctly', () => {
-		const available = makeAvailable({
+		const item = makeAvailable({
 			menuItem: makeMenuItem({ id: 'burger-1', name: 'Cheeseburger', price: 8.50, calories: 650 }),
 			cafeId: 'cafe-a',
 			cafeName: 'Cafe Alpha',
 			stationName: 'Grill',
 		});
 
-		const result = toRecommendationItem(available, 0.85, 'Popular');
+		const result = toRecommendationItem(item, 0.85, 'Popular');
 
 		assert.equal(result.menuItemId, 'burger-1');
 		assert.equal(result.name, 'Cheeseburger');
@@ -55,11 +55,11 @@ describe('toRecommendationItem', () => {
 	});
 
 	it('converts tags from Set to Array', () => {
-		const available = makeAvailable({
+		const item = makeAvailable({
 			menuItem: makeMenuItem({ tags: new Set(['vegan', 'gluten-free']) }),
 		});
 
-		const result = toRecommendationItem(available, 1);
+		const result = toRecommendationItem(item, 1);
 		assert.ok(result.tags);
 		assert.equal(result.tags.length, 2);
 		assert.ok(result.tags.includes('vegan'));
@@ -67,20 +67,20 @@ describe('toRecommendationItem', () => {
 	});
 
 	it('returns undefined tags when set is empty', () => {
-		const available = makeAvailable({
+		const item = makeAvailable({
 			menuItem: makeMenuItem({ tags: new Set() }),
 		});
 
-		const result = toRecommendationItem(available, 1);
+		const result = toRecommendationItem(item, 1);
 		assert.equal(result.tags, undefined);
 	});
 
 	it('converts null description/imageUrl to undefined', () => {
-		const available = makeAvailable({
+		const item = makeAvailable({
 			menuItem: makeMenuItem({ description: null, imageUrl: null }),
 		});
 
-		const result = toRecommendationItem(available, 1);
+		const result = toRecommendationItem(item, 1);
 		assert.equal(result.description, undefined);
 		assert.equal(result.imageUrl, undefined);
 	});

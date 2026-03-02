@@ -56,7 +56,7 @@ export const getAnonymousSectionsAsync = async (dateString: string, cafeIdFilter
 			cafeIdFilter,
 			userId:             null,
 			homepageIds:        [],
-			getAvailableItems:  lazy(() => getAllAvailableItems(dateString, cafeIdFilter)),
+			getAllMenuItems:    lazy(() => getAllAvailableItems(dateString, cafeIdFilter)),
 			random:             () => throwError('Random function should not be called for anonymous recommendations'),
 			getUserReviews:     () => Promise.resolve([]),
 			getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
