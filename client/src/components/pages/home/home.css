@@ -16,8 +16,9 @@
     opacity: 0.8;
 }
 
-.recommendation-section-items {
-    gap: var(--default-padding);
+.recommendation-section-items .search-result {
+    align-self: stretch;
+    min-width: 16rem;
 }
 
 .remove-button {

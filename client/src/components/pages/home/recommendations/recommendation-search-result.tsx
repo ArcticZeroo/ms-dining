@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { IRecommendationItem } from '@msdining/common/models/recommendation';
 import { SearchResult, ISearchResultField } from '../../../search/search-result.tsx';
+import { DiningClient } from '../../../../api/client/dining.js';
+import { RecommendationReason } from './recommendation-reason.js';
 
 interface IRecommendationSearchResultProps {
     item: IRecommendationItem;
@@ -9,7 +11,7 @@ interface IRecommendationSearchResultProps {
 
 export const RecommendationSearchResult: React.FC<IRecommendationSearchResultProps> = ({ item }) => {
     const locationDatesByCafeId = useMemo(
-        () => new Map([[item.cafeId, [] as Date[]]]),
+        () => new Map([[item.cafeId, [DiningClient.getTodayDateForMenu()]]]),
         [item.cafeId]
     );
 
@@ -33,8 +35,8 @@ export const RecommendationSearchResult: React.FC<IRecommendationSearchResultPro
         if (item.reason) {
             fields.push({
                 key:      'reason',
-                iconName: 'lightbulb',
-                value:    item.reason,
+                iconName: 'lightbulb_2',
+                value:    <RecommendationReason reason={item.reason}/>
             });
         }
         return fields;

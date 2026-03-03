@@ -10,7 +10,7 @@ interface IFavoritesSectionViewProps {
 }
 
 export const FavoritesSectionView: React.FC<IFavoritesSectionViewProps> = ({ favorites }) => {
-    const { stage, results, actualStage, retry } = favorites;
+    const { stage, results, retry } = favorites;
 
     if (stage === PromiseStage.error) {
         return (
@@ -19,7 +19,7 @@ export const FavoritesSectionView: React.FC<IFavoritesSectionViewProps> = ({ fav
                     Could not load favorites.
                 </span>
                 <span className="centered-content">
-                    <RetryButton onClick={retry} isDisabled={actualStage !== PromiseStage.error}/>
+                    <RetryButton onClick={retry} isDisabled={stage !== PromiseStage.error}/>
                 </span>
             </div>
         );

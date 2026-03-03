@@ -93,6 +93,7 @@
     max-width: 25rem;
     max-height: 8rem;
     justify-content: center;
+    overflow-y: scroll;
 }
 
 .search-result.compact {

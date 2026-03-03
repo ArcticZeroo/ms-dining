@@ -91,7 +91,6 @@ export const HomeRecommendationsView: React.FC = () => {
     const {
         stage: recommendationsStage,
         value: recommendationsValue,
-        actualStage: recommendationsActualStage,
         run: recommendationsRun,
     } = useRecommendations();
 
@@ -118,14 +117,14 @@ export const HomeRecommendationsView: React.FC = () => {
                 <div className="error-card">
                     <span>Could not load recommendations.</span>
                     <span className="centered-content">
-                        <RetryButton onClick={recommendationsRun} isDisabled={recommendationsActualStage !== PromiseStage.error}/>
+                        <RetryButton onClick={recommendationsRun} isDisabled={recommendationsStage !== PromiseStage.error}/>
                     </span>
                 </div>
             );
         }
 
         return <RecommendationSectionItemsSkeleton/>;
-    }, [favorites, recommendationsValue, recommendationsStage, recommendationsActualStage, recommendationsRun]);
+    }, [favorites, recommendationsValue, recommendationsStage, recommendationsRun]);
 
     return (
         <HomeCollapse
