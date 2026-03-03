@@ -228,6 +228,18 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
 					40, 41
 				]
 			},
+			{
+				name:      'Café Millennium E',
+				shortName: 'Millennium E',
+				id:        'cafemille',
+				location:  {
+					lat:  47.677291,
+					long: -122.092037
+				},
+				otherServedBuildings: [
+					'Millennium A', 'Millennium B', 'Millennium C', 'Millennium D', 'Millennium F'
+				]
+			},
 		]
 	},
 	{
