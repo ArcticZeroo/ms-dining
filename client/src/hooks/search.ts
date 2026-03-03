@@ -2,10 +2,11 @@ import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
 import { useCallback, useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
-import { isViewVisibleForNav } from '../util/view.ts';
+import { getAllSingleCafesInView, isViewVisibleForNav } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
 import { DiningClient } from '../api/client/dining.js';
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { CafeView } from '../models/cafe.js';
 
 export const useAllowedSearchViewIds = () => {
     const { viewsById } = useContext(ApplicationContext);
@@ -41,4 +42,29 @@ export const useRecommendedQueries = (query: string) => {
     );
 
     return useImmediatePromiseState(retrieveQueries);
+}
+
+export const useExpandedViewIds = (allowedViewIds: Set<string>, viewsById: Map<string, CafeView>) => {
+    return useMemo(
+        (): Set<string> => {
+            if (allowedViewIds.size === 0) {
+                return new Set();
+            }
+
+            const viewIds = new Set(allowedViewIds);
+            for (const allowedViewId of allowedViewIds) {
+                const view = viewsById.get(allowedViewId);
+                if (view == null) {
+                    continue;
+                }
+
+                for (const cafe of getAllSingleCafesInView(view, viewsById)) {
+                    viewIds.add(cafe.id);
+                }
+            }
+
+            return viewIds;
+        },
+        [allowedViewIds, viewsById]
+    );
 }

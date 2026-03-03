@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import './map.css';
 
 import React from 'react';
-import { useMarkerLabelModes } from '../../hooks/map.ts';
+import { useMapPageOverviewSelectedView, useMapSearchFilterViews, useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { CafeMarker } from './popup/cafe-marker.tsx';
 import { GenericMapView } from './generic-map-view.js';
@@ -24,13 +24,14 @@ const viewMatchesCafeIds = (view: CafeView, cafeIds: Set<string>): boolean => {
 interface IFullMapMarkersProps {
     onSelectView(view: CafeView, isMultiSelect: boolean): void;
     highlightedCafeIds?: Set<string>;
-    selectedCafeIds?: Set<string>;
     searchResultCafeIds?: Set<string>;
 }
 
-const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highlightedCafeIds, selectedCafeIds, searchResultCafeIds }) => {
+const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highlightedCafeIds, searchResultCafeIds }) => {
     const { views, labelModes } = useMarkerLabelModes();
     const hasActiveSearch = searchResultCafeIds != null && searchResultCafeIds.size > 0;
+    const { allowedViewIds } = useMapSearchFilterViews();
+    const overviewSelectedView = useMapPageOverviewSelectedView();
 
     return (
         <>
@@ -39,7 +40,7 @@ const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highligh
                     return null;
                 }
 
-                const isViewSelected = selectedCafeIds != null && selectedCafeIds.has(view.value.id);
+                const isViewSelected = overviewSelectedView?.value.id === view.value.id || allowedViewIds.has(view.value.id);
                 return (
                     <CafeMarker
                         key={view.value.id}
@@ -60,7 +61,6 @@ const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highligh
 interface IFullMapViewProps {
     onSelectView(view: CafeView, isMultiSelect: boolean): void;
     highlightedCafeIds?: Set<string>;
-    selectedCafeIds?: Set<string>;
     searchResultCafeIds?: Set<string>;
 }
 

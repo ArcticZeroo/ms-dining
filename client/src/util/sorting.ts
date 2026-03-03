@@ -1,5 +1,5 @@
 import { CafeView, ICafe } from '../models/cafe.ts';
-import { expandAndFlattenView } from './view.ts';
+import { getAllSingleCafesInView } from './view.ts';
 import { ApplicationSettings, InternalSettings } from '../constants/settings.ts';
 import { IStationUniquenessData } from '@msdining/common/models/cafe';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
@@ -56,7 +56,7 @@ export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, 
     const homepageCafeIds = new Set(
         Array.from(homepageViewIds)
             .filter(viewId => viewsById.has(viewId))
-            .flatMap(viewId => expandAndFlattenView(viewId, viewsById))
+            .flatMap(viewId => getAllSingleCafesInView(viewId, viewsById))
             .map(cafe => cafe.id)
     );
 

@@ -1,11 +1,17 @@
-import React, { Suspense, useCallback, useContext, useMemo } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useMapSearch, useMapHighlight } from '../../../hooks/map.js';
+import React, { Suspense, useCallback, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-    MapSearchContext, MapHighlightContext,
-    useMapSearchContext, useMapHighlightContext
+    useMapHighlight,
+    useMapPageOverviewSelectedView,
+    useMapSearch,
+    useMapSearchFilterViews
+} from '../../../hooks/map.js';
+import {
+    MapHighlightContext,
+    MapSearchContext,
+    useMapHighlightContext,
+    useMapSearchContext
 } from '../../../context/map.js';
-import { ApplicationContext } from '../../../context/app.js';
 import { classNames } from '../../../util/react.js';
 import { MapSearchResultDetail } from './map-search-result-detail.js';
 import { CampusMapViewSkeleton } from '../../map/campus-map-view-skeleton.js';
@@ -18,86 +24,84 @@ const FullMapView = React.lazy(() => import('../../map/full-map-view.tsx'));
 
 const MapPageViewContent = () => {
     const navigate = useNavigate();
-    const { viewId } = useParams<{ viewId: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const query = searchParams.get('q') ?? '';
-    const { viewsById } = useContext(ApplicationContext);
 
     const { searchResultCafeIds } = useMapSearchContext();
     const { selectedSearchResult, effectiveHighlightedCafeIds, onCloseDetail } = useMapHighlightContext();
 
-    const selectedView = viewId ? viewsById.get(viewId) : undefined;
+    const { selectedViewIds } = useMapSearchFilterViews();
+    const overviewSelectedView = useMapPageOverviewSelectedView();
 
     const pageTitle = useMemo(() => {
         if (query) {
             return `Map - Search for "${query}"`;
         }
-        if (selectedView) {
-            return `Map - ${getViewName({ view: selectedView, showGroupName: true })}`;
+
+        if (overviewSelectedView) {
+            return `Map - ${getViewName({
+                view: overviewSelectedView,
+                showGroupName: true,
+                includeEmoji: true
+            })}`;
         }
+
         return 'Map';
-    }, [query, selectedView]);
+    }, [overviewSelectedView, query]);
 
     usePageData(pageTitle, 'View cafes and search for menu items on the campus map.');
-
-    const selectedCafeIds = useMemo(() => {
-        // Overview mode: single view selected via URL
-        if (viewId) {
-            const view = viewsById.get(viewId);
-            if (view) {
-                return new Set([view.value.id]);
-            }
-        }
-
-        // Search filter mode: views selected via ?views= query param
-        const viewsParam = searchParams.get('views');
-        if (viewsParam) {
-            return new Set(viewsParam.split('+').filter(id => viewsById.has(id)));
-        }
-
-        return new Set<string>();
-    }, [viewId, searchParams, viewsById]);
 
     const onSelectView = useCallback((view: CafeView, isMultiSelect: boolean) => {
         if (query.length > 0) {
             // Search mode: toggle filter via ?views= query param
             setSearchParams(prev => {
                 const next = new URLSearchParams(prev);
-                const currentViews = prev.get('views')?.split('+').filter(id => viewsById.has(id)) ?? [];
-                const viewIndex = currentViews.indexOf(view.value.id);
+
+                const newSelectedViewIds = new Set(selectedViewIds);
 
                 if (isMultiSelect) {
-                    if (viewIndex >= 0) {
-                        currentViews.splice(viewIndex, 1);
+                    if (newSelectedViewIds.has(view.value.id)) {
+                        newSelectedViewIds.delete(view.value.id);
                     } else {
-                        currentViews.push(view.value.id);
+                        newSelectedViewIds.add(view.value.id);
                     }
                 } else {
-                    if (viewIndex >= 0 && currentViews.length === 1) {
-                        next.delete('views');
-                        return next;
+                    // Not multi-select, so there are three options:
+                    // 1. We were just in multi-select and are clicking one cafe that was already selected, so keep only that one
+                    // 2. We are not in multi-select and are clicking the only-selected cafe, so we want to deselect it
+                    // 3. We were clicking a cafe that was not selected before, so keep only that one
+                    
+                    if (newSelectedViewIds.size > 1 && newSelectedViewIds.has(view.value.id)) {
+                        // Case 1: Keep only the clicked cafe
+                        newSelectedViewIds.clear();
+                        newSelectedViewIds.add(view.value.id);
+                    } else if (newSelectedViewIds.size === 1 && newSelectedViewIds.has(view.value.id)) {
+                        // Case 2: Deselect the only selected cafe
+                        newSelectedViewIds.clear();
+                    } else {
+                        // Case 3: Keep only the clicked cafe
+                        newSelectedViewIds.clear();
+                        newSelectedViewIds.add(view.value.id);
                     }
-                    currentViews.length = 0;
-                    currentViews.push(view.value.id);
                 }
 
-                if (currentViews.length === 0) {
+                if (newSelectedViewIds.size === 0) {
                     next.delete('views');
                 } else {
-                    next.set('views', currentViews.join('+'));
+                    next.set('views', Array.from(newSelectedViewIds).join('+'));
                 }
                 return next;
             }, { replace: true });
         } else {
             // No search: navigate to overview
-            const isAlreadySelected = viewId === view.value.id;
+            const isAlreadySelected = overviewSelectedView?.value.id === view.value.id;
             if (isAlreadySelected) {
                 navigate('/map');
             } else {
                 navigate(`/map/overview/${view.value.id}`);
             }
         }
-    }, [query, viewId, navigate, setSearchParams, viewsById]);
+    }, [query.length, setSearchParams, selectedViewIds, overviewSelectedView?.value.id, navigate]);
 
     return (
         <>
@@ -112,7 +116,6 @@ const MapPageViewContent = () => {
                     <FullMapView
                         onSelectView={onSelectView}
                         highlightedCafeIds={effectiveHighlightedCafeIds}
-                        selectedCafeIds={selectedCafeIds}
                         searchResultCafeIds={searchResultCafeIds}
                     />
                 </Suspense>
@@ -126,7 +129,7 @@ export const MapPageView = () => {
     const query = searchParams.get('q') ?? '';
 
     const {
-        sortedResults, visibleResults, searchResultCafeIds,
+        allResults, entityFilteredResults, searchResultCafeIds,
         entityFilter, setEntityFilter,
         searchResultStage, retrySearch
     } = useMapSearch(query);
@@ -135,14 +138,14 @@ export const MapPageView = () => {
 
     const searchContextValue = useMemo(() => ({
         query,
-        sortedResults,
-        visibleResults,
+        sortedResults: allResults,
+        visibleResults: entityFilteredResults,
         searchResultCafeIds,
         entityFilter,
         setEntityFilter,
         stage: searchResultStage,
         retry: retrySearch
-    }), [query, sortedResults, visibleResults, searchResultCafeIds, entityFilter, setEntityFilter, searchResultStage, retrySearch]);
+    }), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, searchResultStage, retrySearch]);
 
     return (
         <MapSearchContext.Provider value={searchContextValue}>

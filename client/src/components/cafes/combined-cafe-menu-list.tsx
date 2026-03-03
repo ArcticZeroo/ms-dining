@@ -1,7 +1,7 @@
 import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { CafeView } from '../../models/cafe.ts';
-import { expandAndFlattenView, getViewLocation } from '../../util/view.ts';
+import { getAllSingleCafesInView, getViewLocation } from '../../util/view.ts';
 import { CartPopup } from '../order/cart/cart-popup.tsx';
 import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CafeMenuView } from './cafe-menu-view.tsx';
@@ -22,7 +22,7 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
     const { viewsById } = useContext(ApplicationContext);
 
     const cafes = useMemo(
-        () => Array.from(views).flatMap(view => expandAndFlattenView(view, viewsById)),
+        () => Array.from(views).flatMap(view => getAllSingleCafesInView(view, viewsById)),
         [views, viewsById]
     );
     

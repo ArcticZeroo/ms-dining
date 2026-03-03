@@ -6,7 +6,7 @@ import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
-import { expandAndFlattenView } from '../../../util/view.ts';
+import { getAllSingleCafesInView } from '../../../util/view.ts';
 import { CampusMapViewDetailsMember } from './campus-map-view-details-member.tsx';
 import { MapSelectedViewContext } from '../../../context/map.ts';
 import { FavoriteItemButton } from '../../button/favorite/favorite-item-button.tsx';
@@ -22,7 +22,7 @@ export const CampusMapViewDetails: React.FC<ICampusMapPopupProps> = ({ view, sho
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
     const cafesInView = useMemo(
-        () => expandAndFlattenView(view, viewsById),
+        () => getAllSingleCafesInView(view, viewsById),
         [view, viewsById]
     );
 

@@ -7,8 +7,8 @@ export const MapSelectedViewContext = React.createContext<CafeView | null>(null)
 
 interface IMapSearchContext {
     query: string;
-    sortedResults?: IQuerySearchResult[];
-    visibleResults?: IQuerySearchResult[];
+    allResults?: IQuerySearchResult[];
+    entityFilteredResults?: IQuerySearchResult[];
     searchResultCafeIds?: Set<string>;
     entityFilter: SearchEntityFilterType;
     setEntityFilter: Dispatch<SetStateAction<SearchEntityFilterType>>;

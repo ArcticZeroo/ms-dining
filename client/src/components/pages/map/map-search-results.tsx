@@ -20,7 +20,7 @@ interface IMapSearchResultsProps {
 }
 
 export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, isFilteredToHomeCafes, onFilterToHomeCafes }) => {
-    const { query, sortedResults: allResults, entityFilter, setEntityFilter, stage, retry } = useMapSearchContext();
+    const { query, allResults: allResults, entityFilter, setEntityFilter, stage, retry } = useMapSearchContext();
     const { selectedSearchResult, setSelectedSearchResult, setHighlightedCafeIds } = useMapHighlightContext();
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const hasHomeCafes = homepageViewIds.size > 0;

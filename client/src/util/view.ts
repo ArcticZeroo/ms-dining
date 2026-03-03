@@ -2,7 +2,7 @@ import { ILocationCoordinates, Nullable } from '@msdining/common/models/util';
 import { CafeView, CafeViewType, ICafe, ICafeGroup } from '../models/cafe.ts';
 import { getCafeLocation, isViewAvailable } from './cafe.ts';
 
-export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<string, CafeView>): Array<ICafe> => {
+export const getAllSingleCafesInView = (view: CafeView | string, viewsById: Map<string, CafeView>): Array<ICafe> => {
     if (typeof view === 'string') {
         const possibleView = viewsById.get(view);
         if (!possibleView) {
@@ -15,7 +15,7 @@ export const expandAndFlattenView = (view: CafeView | string, viewsById: Map<str
         return [view.value];
     }
 
-    return view.value.members.flatMap(cafe => expandAndFlattenView(cafe.id, viewsById));
+    return view.value.members.flatMap(cafe => getAllSingleCafesInView(cafe.id, viewsById));
 };
 
 const isGroupVisibleWithGroupsAllowed = (group: ICafeGroup) => group.members.length > 0 && !group.alwaysExpand;

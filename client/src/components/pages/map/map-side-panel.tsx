@@ -1,15 +1,16 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { MapSidePanelHome } from './map-side-panel-home.tsx';
 import { MapSidePanelOverview } from './map-side-panel-overview.tsx';
 import { MapSidePanelSearch } from './map-side-panel-search.tsx';
+import { useMapPageOverviewSelectedView } from '../../../hooks/map.js';
 
 export const MapSidePanel = () => {
-    const { viewId } = useParams<{ viewId: string }>();
+    const overviewSelectedView = useMapPageOverviewSelectedView();
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') ?? '';
 
-    if (viewId) {
-        return <MapSidePanelOverview/>;
+    if (overviewSelectedView) {
+        return <MapSidePanelOverview view={overviewSelectedView}/>;
     }
 
     if (query.length > 0) {

@@ -9,7 +9,7 @@ import { pluralize } from '../../util/string.ts';
 import { SearchResult } from './search-result.tsx';
 import { sortSearchResultsInPlace } from '../../util/search-sorting.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
-import { expandAndFlattenView } from "../../util/view.ts";
+import { useExpandedViewIds } from '../../hooks/search.js';
 
 const getClassForViewMode = (viewMode: SearchResultsViewMode) => {
     if (viewMode === SearchResultsViewMode.vertical) {
@@ -77,28 +77,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const getIsPriceAllowed = useIsPriceAllowed();
 
-    const expandedAllowedViewIds = useMemo(
-        (): Set<string> => {
-            if (allowedViewIds.size === 0) {
-                return new Set();
-            }
-            
-            const viewIds = new Set(allowedViewIds);
-            for (const allowedViewId of allowedViewIds) {
-                const view = viewsById.get(allowedViewId);
-                if (view == null) {
-                    continue;
-                }
-
-                for (const cafe of expandAndFlattenView(view, viewsById)) {
-                    viewIds.add(cafe.id);
-                }
-            }
-            
-            return viewIds;
-        },
-        [allowedViewIds, viewsById]
-    );
+    const expandedAllowedViewIds = useExpandedViewIds(allowedViewIds, viewsById);
 
     if (isCompact == null) {
         isCompact = shouldUseCompactMode;
