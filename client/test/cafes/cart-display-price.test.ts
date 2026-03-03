@@ -5,7 +5,7 @@ import {
     getMinRequiredPrice,
     getModifierMinCost,
     hasModifierPriceBeyondMinimum,
-} from '../../util/cart.ts';
+} from '../../src/util/cart.ts';
 
 const makeChoice = (id: string, price: number): IMenuItemModifierChoice => ({
     id,

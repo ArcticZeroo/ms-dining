@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import * as assert from 'node:assert';
-import { parseIngredientsMenu } from '../../components/cafes/station/ingredients-menu-parsing.ts';
-import { ICafeStation } from '../../models/cafe.ts';
+import { parseIngredientsMenu } from '../../src/components/cafes/station/ingredients-menu-parsing.ts';
+import { ICafeStation } from '../../src/models/cafe.ts';
 import { IMenuItem, IMenuItemModifier } from '@msdining/common/models/cafe';
 
 const makeModifier = (description: string, choices: string[]): IMenuItemModifier => ({

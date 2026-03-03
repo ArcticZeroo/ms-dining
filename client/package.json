@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npx tsc --project ../common/tsconfig.json && tsc && vite build",
-    "test": "npx tsx --test src/test/**/*.test.ts",
+    "test": "npx tsx --test test/**/*.test.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@arcticzeroo/eslint-config": "^1.0.7",
     "@types/leaflet": "^1.9.12",
+    "@types/node": "^25.3.3",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
