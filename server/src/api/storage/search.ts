@@ -22,29 +22,7 @@ import { MaybePromise } from '../../models/async.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../worker/interface/thumbnail.js';
 import { ICafe } from '../../models/cafe.js';
 
-// Items that are indeed cheap, but are not food/entree options
-const CHEAP_ITEM_IGNORE_TERMS = [
-	'side',
-	'coffee',
-	'espresso',
-	'latte',
-	'drink',
-	'dessert',
-	'snack',
-	'tea',
-	'sweet',
-	'sweet street',
-	'starbucks',
-	'mocktail',
-	'soda',
-	'french press',
-	'cold brew',
-	'bakery'
-];
-
-const CHEAP_ITEM_IGNORE_STRING = `(${CHEAP_ITEM_IGNORE_TERMS.join('|')})s?`;
-const CHEAP_ITEM_WORDS_REGEX = new RegExp(`\\b${CHEAP_ITEM_IGNORE_STRING}\\b`, 'i');
-const CHEAP_ITEM_SUBSTRING_REGEX = new RegExp(`${CHEAP_ITEM_IGNORE_STRING}`, 'i');
+import { NON_ENTREE_FILTER } from '../../util/menu-item-filter.js';
 
 interface IMultiQuerySearchParams {
 	queries: Array<ISearchQuery>;
@@ -770,12 +748,12 @@ export abstract class SearchManager {
 		const resultsByItemNameByPrice = new Map<string, Map<number, ICheapItemSearchResult>>();
 
 		for (const dailyStation of dailyStations) {
-			if (CHEAP_ITEM_WORDS_REGEX.test(dailyStation.station.name)) {
+			if (NON_ENTREE_FILTER.matchesStationOrCategory(dailyStation.station.name)) {
 				continue;
 			}
 
 			for (const category of dailyStation.categories) {
-				if (CHEAP_ITEM_WORDS_REGEX.test(category.name)) {
+				if (NON_ENTREE_FILTER.matchesStationOrCategory(category.name)) {
 					continue;
 				}
 
@@ -795,11 +773,11 @@ export abstract class SearchManager {
 						continue;
 					}
 
-					if (CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.name)) {
+					if (NON_ENTREE_FILTER.matchesItemText(menuItem.name)) {
 						continue;
 					}
 
-					if (menuItem.description && CHEAP_ITEM_SUBSTRING_REGEX.test(menuItem.description)) {
+					if (menuItem.description && NON_ENTREE_FILTER.matchesItemText(menuItem.description)) {
 						continue;
 					}
 

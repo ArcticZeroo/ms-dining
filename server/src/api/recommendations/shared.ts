@@ -2,6 +2,7 @@ import { IRecommendationItem, IRecommendationSection } from '@msdining/common/mo
 import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { IServerReview } from '../../models/review.js';
 import { getNamespaceLogger } from '../../util/log.js';
+import { ACCOMPANIMENT_FILTER } from '../../util/menu-item-filter.js';
 import { IMenuItemCandidate } from '../../util/recommendation.js';
 import { retrieveDailyCafeMenuAsync } from '../cache/daily-menu.js';
 
@@ -48,8 +49,28 @@ export const getAllAvailableItems = async (dateString: string, cafeIdFilter?: st
 
 	for (const cafeMenus of menus) {
 		for (const { cafeId, cafeName, station } of cafeMenus) {
-			for (const menuItem of station.menuItemsById.values()) {
-				items.push({ menuItem, cafeId, cafeName, stationName: station.name });
+			if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(station.name)) {
+				continue;
+			}
+
+			for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
+				if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(categoryName)) {
+					continue;
+				}
+
+				for (const itemId of itemIds) {
+					const menuItem = station.menuItemsById.get(itemId);
+					if (!menuItem) {
+						continue;
+					}
+					if (ACCOMPANIMENT_FILTER.matchesItemText(menuItem.name)) {
+						continue;
+					}
+					if (ACCOMPANIMENT_FILTER.matchesSearchTags(menuItem.searchTags)) {
+						continue;
+					}
+					items.push({ menuItem, cafeId, cafeName, stationName: station.name });
+				}
 			}
 		}
 	}
