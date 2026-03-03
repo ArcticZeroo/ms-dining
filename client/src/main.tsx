@@ -7,10 +7,10 @@ import { NotFoundPage } from './components/pages/not-found/not-found-page.tsx';
 import { SearchPage } from './components/pages/search/search-page.tsx';
 import { HomePage } from './components/pages/home/home-page.tsx';
 import { InfoPage } from './components/pages/info/info-page.tsx';
-import { AnalyticsPage } from './components/pages/analytics/analytics-page.tsx';
+import { LazyAnalyticsPage } from './components/pages/analytics/lazy-analytics-page.tsx';
 import { ErrorPage } from './components/pages/error/error-page.tsx';
 import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
-import { OrderPage } from './components/pages/order/order-page.tsx';
+import { LazyOrderPage } from './components/pages/order/lazy-order-page.tsx';
 import { LocationTestPage } from './components/pages/location-test/location-test-page.tsx';
 import { checkMigrationCookie, doMigrationAndRedirectToDiningSite } from './util/migration.ts';
 import { ProfilePage } from './components/pages/profile/profile-page.tsx';
@@ -31,8 +31,8 @@ const startApp = () => {
                 <Route path="/search" element={<SearchPage/>}/>
                 <Route path="/cheap" element={<CheapItemsPage/>}/>
                 <Route path="/info" element={<InfoPage/>}/>
-                <Route path="/order" element={<OrderPage/>}/>
-                <Route path="/analytics" element={<AnalyticsPage/>}/>
+                <Route path="/order" element={<LazyOrderPage/>}/>
+                <Route path="/analytics" element={<LazyAnalyticsPage/>}/>
                 <Route path="/location-test" element={<LocationTestPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
