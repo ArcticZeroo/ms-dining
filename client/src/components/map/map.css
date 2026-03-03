@@ -29,9 +29,17 @@
     justify-content: center;
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker {
+.campus-map .leaflet-div-icon .cafe-marker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+    position: relative;
     --color-icon-background: #112841;
     --color-icon-border: #225970;
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-tracker {
     padding: 0.25rem;
     border-radius: 100%;
     width: 1rem;
@@ -47,14 +55,23 @@
     font-weight: bold;
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.recently-opened:not(.is-homepage-view) {
+.campus-map .leaflet-div-icon .cafe-marker-container.recently-opened:not(.is-homepage-view) {
     --color-icon-background: var(--color-theme-turquoise-dark);
     --color-icon-border: var(--color-theme-turquoise);
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.is-homepage-view {
+.campus-map .leaflet-div-icon .cafe-marker-container.is-homepage-view {
     --color-icon-background: var(--color-favorite);
     --color-icon-border: var(--color-favorite-light);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-container .cafe-marker-emoji {
+    position: absolute;
+    bottom: -0.55rem;
+    right: -0.55rem;
+    background: var(--color-icon-background);
+    border: 0.125rem solid var(--color-icon-border);
+    border-radius: 100%;
 }
 
 @keyframes marker-bounce {
@@ -86,13 +103,6 @@
     filter: grayscale(0.8);
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.125rem;
-}
-
 .campus-map .leaflet-div-icon .cafe-name-label {
     background: rgba(0, 0, 0, 0.7);
     border-radius: 0.25rem;
@@ -102,6 +112,8 @@
     padding: 0.0625rem 0.25rem;
     white-space: nowrap;
     pointer-events: none;
+    position: absolute;
+    top: calc(100% + 0.25rem);
 }
 
 .campus-map .cafe-name-label.leaflet-tooltip {

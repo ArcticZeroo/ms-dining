@@ -64,3 +64,5 @@ export const repeat = (value: string, count: number) => {
     }
     return pieces.join('');
 }
+
+export const emptyIfFalsy = (value: unknown): string => !value ? '' : String(value);

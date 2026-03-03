@@ -87,14 +87,21 @@ export const getViewEmoji = (view: CafeView) => view.type === CafeViewType.singl
     ? view.value.emoji
     : '🍴';
 
-export const getViewMarkerLabel = (view: CafeView): { text: string; isNumber: boolean; isShortText: boolean } => {
+interface IViewMarkerLabelData {
+    text: string;
+    isNumber: boolean;
+    isShortText: boolean;
+    emojiBadge?: string;
+}
+
+export const getViewMarkerLabel = (view: CafeView): IViewMarkerLabelData => {
     const shortName = view.value.shortName;
     if (typeof shortName === 'number') {
-        return { text: shortName.toString(), isNumber: true, isShortText: false };
+        return { text: String(shortName), isNumber: true, isShortText: false, emojiBadge: getViewEmoji(view) };
     }
 
     if (typeof shortName === 'string' && shortName.length <= 2) {
-        return { text: shortName, isNumber: false, isShortText: true };
+        return { text: shortName, isNumber: false, isShortText: true, emojiBadge: getViewEmoji(view) };
     }
 
     return { text: getViewEmoji(view), isNumber: false, isShortText: false };

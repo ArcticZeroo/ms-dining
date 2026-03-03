@@ -20,9 +20,11 @@ export const HomeMap = () => {
             <CampusMapClickTip/>
             <LazyCampusMapView/>
             {isMapPageEnabled && (
-                <Link to="/map" className="default-button default-container text-center" style={{ marginTop: 'var(--constant-padding)' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '1em', marginRight: '0.25rem' }}>open_in_full</span>
-                    Open Full Map
+                <Link to="/map" className="default-button flex flex-center default-container">
+                    <span className="material-symbols-outlined">open_in_full</span>
+                    <span>
+                        Open Full Map
+                    </span>
                 </Link>
             )}
         </HomeCollapse>

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
@@ -9,6 +9,7 @@ import './nav.css';
 import { useIsAdmin } from '../../hooks/auth.js';
 import { DebugSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { NavClosingLink } from '../button/nav-closing-link.tsx';
 
 export const Nav: React.FC = () => {
     const location = useLocation();
@@ -52,38 +53,38 @@ export const Nav: React.FC = () => {
             <NavCafeList/>
             <ul className="expandable-nav-list default-background">
                 <li>
-                    <NavLink to="/cheap" className="link-button info" title="Cheap Items Page">
+                    <NavClosingLink to="/cheap" className="link-button info" title="Cheap Items Page">
                         <span className="material-symbols-outlined">
                             attach_money
                         </span>
-                    </NavLink>
+                    </NavClosingLink>
                 </li>
                 <li>
-                    <NavLink to="/info" className="link-button info" title="Info Page">
+                    <NavClosingLink to="/info" className="link-button info" title="Info Page">
                         <span className="material-symbols-outlined">
                             info
                         </span>
-                    </NavLink>
+                    </NavClosingLink>
                 </li>
                 {
                     isMapPageEnabled && (
                         <li>
-                            <NavLink to="/map" className="link-button info" title="Map Page">
+                            <NavClosingLink to="/map" className="link-button info" title="Map Page">
                                 <span className="material-symbols-outlined">
                                     map
                                 </span>
-                            </NavLink>
+                            </NavClosingLink>
                         </li>
                     )
                 }
                 {
                     isAdmin && (
                         <li>
-                            <NavLink to="/dev" className="link-button dev" title="Developer Page">
+                            <NavClosingLink to="/dev" className="link-button dev" title="Developer Page">
                                 <span className="material-symbols-outlined">
                                     build
                                 </span>
-                            </NavLink>
+                            </NavClosingLink>
                         </li>
                     )
                 }

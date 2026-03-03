@@ -7,6 +7,7 @@ import {
     useMapSearchFilterViews
 } from '../../../hooks/map.js';
 import {
+    IMapSearchContext,
     MapHighlightContext,
     MapSearchContext,
     useMapHighlightContext,
@@ -138,14 +139,14 @@ export const MapPageView = () => {
 
     const searchContextValue = useMemo(() => ({
         query,
-        sortedResults: allResults,
-        visibleResults: entityFilteredResults,
-        searchResultCafeIds,
         entityFilter,
         setEntityFilter,
+        allResults: allResults ?? [],
+        entityFilteredResults: entityFilteredResults ?? [],
+        searchResultCafeIds: searchResultCafeIds ?? new Set<string>(),
         stage: searchResultStage,
         retry: retrySearch
-    }), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, searchResultStage, retrySearch]);
+    } satisfies IMapSearchContext), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, searchResultStage, retrySearch]);
 
     return (
         <MapSearchContext.Provider value={searchContextValue}>

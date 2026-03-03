@@ -14,13 +14,13 @@ import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../button/retry-button.js';
 
 interface IMapSearchResultsProps {
-    results?: IQuerySearchResult[];
+    results: IQuerySearchResult[];
     isFilteredToHomeCafes: boolean;
     onFilterToHomeCafes(): void;
 }
 
 export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, isFilteredToHomeCafes, onFilterToHomeCafes }) => {
-    const { query, allResults: allResults, entityFilter, setEntityFilter, stage, retry } = useMapSearchContext();
+    const { query, allResults, entityFilter, setEntityFilter, stage, retry } = useMapSearchContext();
     const { selectedSearchResult, setSelectedSearchResult, setHighlightedCafeIds } = useMapHighlightContext();
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const hasHomeCafes = homepageViewIds.size > 0;
@@ -51,7 +51,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
         );
     }
 
-    if (!results) {
+    if (stage === PromiseStage.running) {
         return (
             <div className="panel-content map-search-status flex-col">
                 <HourglassLoadingSpinner/>
@@ -60,7 +60,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
         );
     }
 
-    if (allResults && allResults.length === 0) {
+    if (allResults.length === 0) {
         return (
             <div className="panel-content map-search-status flex-col">
                 <span className="subtitle">No results for "{query}"</span>

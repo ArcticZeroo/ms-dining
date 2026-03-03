@@ -11,15 +11,31 @@ import { getViewLocation, getViewMarkerLabel } from '../../../util/view.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { CafeMarkerTooltipContent } from './cafe-marker-tooltip-content.tsx';
+import { emptyIfFalsy } from '../../../util/string.js';
 
-const getIconHtml = (view: CafeView, labelText: string | null, isHomepageView: boolean, isRecentlyOpened: boolean, isHighlighted: boolean, isSelected: boolean, isFilterSelected: boolean, isDimmed: boolean) => {
-    const { text, isNumber, isShortText } = getViewMarkerLabel(view);
+const HOMEPAGE_VIEW_Z_INDEX = 1000;
+
+interface IViewIconHtmlOptions {
+    view: CafeView;
+    labelText: string | null;
+    isHomepageView: boolean;
+    isRecentlyOpened: boolean;
+    isHighlighted: boolean;
+    isSelected: boolean;
+    isFilterSelected: boolean;
+    isDimmed: boolean;
+}
+
+const getIconHtml = ({ view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed }: IViewIconHtmlOptions) => {
+    const { text, isNumber, isShortText, emojiBadge } = getViewMarkerLabel(view);
+
     return `
-<div class="cafe-marker-container">
-    <span class="${classNames('cafe-marker-tracker flex flex-center', (isNumber || isShortText) && 'has-number', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened', isHighlighted && 'is-highlighted', isSelected && 'is-selected', isFilterSelected && 'is-filter-selected', isDimmed && 'is-dimmed')}" data-id="${view.value.id}">
+<div class="${classNames('cafe-marker-container', (isNumber || isShortText) && 'has-number', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened', isHighlighted && 'is-highlighted', isSelected && 'is-selected', isFilterSelected && 'is-filter-selected', isDimmed && 'is-dimmed')}">
+    <div class="cafe-marker-tracker flex flex-center" data-id="${view.value.id}">
         ${text}
-    </span>
-    ${labelText != null ? `<span class="cafe-name-label">${labelText}</span>` : ''}
+    </div>
+    ${emptyIfFalsy(emojiBadge && `<div class="cafe-marker-emoji">${emojiBadge}</div>`)}
+    ${emptyIfFalsy(labelText && `<div class="cafe-name-label">${labelText}</div>`)}
 </div>
 `;
 };
@@ -86,7 +102,7 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMod
     }, [view, labelMode]);
 
     const iconHtml = useMemo(
-        () => getIconHtml(view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed),
+        () => getIconHtml({ view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed }),
         [view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed]
     );
 
@@ -108,6 +124,7 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMod
                 click: (event: L.LeafletMouseEvent) => onClick(view, event.originalEvent.ctrlKey || event.originalEvent.metaKey),
                 contextmenu: onContextMenu
             }}
+            zIndexOffset={isHomepageView ? HOMEPAGE_VIEW_Z_INDEX : 0}
         >
             {showTooltip && (
                 <Tooltip direction="top" offset={[0, -10]} sticky={false}>

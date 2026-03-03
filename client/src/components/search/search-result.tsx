@@ -2,7 +2,7 @@ import { DateUtil, SearchTypes } from '@msdining/common';
 import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
 import { isSameDate } from '@msdining/common/util/date-util';
 import React, { useContext, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SelectedDateContext } from '../../context/time.ts';
@@ -25,6 +25,7 @@ import { getParentView } from '../../util/view.ts';
 import { normalizeCafeId } from '@msdining/common/util/cafe-util';
 import { entityDisplayDataByType } from '../../constants/search.js';
 import { formatReviewScore } from '../../util/reviews.js';
+import { navigateToSearch } from '../../util/search.js';
 
 const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
     const locationEntries = Array.from(locationDatesByCafeId.entries());
@@ -191,6 +192,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const showReviews = useValueNotifier(ApplicationSettings.showReviews);
     const selectedDateNotifier = useContext(SelectedDateContext);
     const selectedDate = useValueNotifier(selectedDateNotifier);
+    const navigate = useNavigate();
 
     const entityDisplayData = entityDisplayDataByType[entityType];
 
@@ -232,7 +234,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
         () => {
             if (entityView) {
                 return (
-                    <FavoriteCafeSearchResultButton view={entityView}/>
+                    <FavoriteCafeSearchResultButton 
+                        view={entityView}
+                    />
                 );
             }
 
@@ -272,6 +276,10 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
         }
     }
 
+    const onNavigateToSearchClicked = () => {
+        navigateToSearch(navigate, name);
+    }
+
     return (
         <div className={classNames(
             'search-result',
@@ -288,6 +296,19 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                 }
                 {
                     isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name}/>
+                }
+                {
+                    isCompact && (
+                        <button
+                            className="default-container icon-container"
+                            title={`Click to search for "${name}"`}
+                            onClick={onNavigateToSearchClicked}
+                        >
+                            <span className="material-symbols-outlined">
+                                search
+                            </span>
+                        </button>
+                    )
                 }
                 <span className="material-symbols-outlined">
                     {entityDisplayData.iconName}

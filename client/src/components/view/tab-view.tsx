@@ -37,7 +37,7 @@ export const TabView: React.FC<ITabViewProps> = ({ options, renderTab, selectedT
                     ))
                 }
             </div>
-            {options.length > 0 && renderTab(selectedTabId)}
+            {options.length > 0 && <React.Fragment key={selectedTabId}>{renderTab(selectedTabId)}</React.Fragment>}
         </div>
     );
 }

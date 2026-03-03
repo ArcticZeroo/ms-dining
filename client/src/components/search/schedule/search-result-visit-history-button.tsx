@@ -31,7 +31,7 @@ export const SearchResultVisitHistoryButton: React.FC<ISearchResultVisitHistoryP
 
     return (
         <button
-            className="search-result-schedule-button flex flex-center default-container"
+            className="flex flex-center default-container icon-container pointer"
             onClick={openSchedule}
             title={`Click to view visit history for "${name}"`}>
             <span className="material-symbols-outlined">
