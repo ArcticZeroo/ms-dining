@@ -8,7 +8,8 @@
     "build": "npx tsc --project ../common/tsconfig.json && tsc && vite build",
     "test": "npx tsx --test test/**/*.test.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "analyze": "vite build --mode analyze && start stats.html"
   },
   "workspaces": [
     "../common"
@@ -49,6 +50,7 @@
     "eslint-plugin-msdining": "file:./eslint-plugin-msdining",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "rollup-plugin-visualizer": "^7.0.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
   }

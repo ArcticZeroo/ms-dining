@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import { visualizer } from 'rollup-plugin-visualizer';
+import type { PluginOption } from 'vite';
 
 const defaultLocalProxy = {
     target:       'http://localhost:3002',
@@ -21,9 +23,15 @@ const defaultLocalProxy = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     plugins: [
-        react()
+        react(),
+        mode === 'analyze' && visualizer({
+            filename: 'stats.html',
+            gzipSize: true,
+            brotliSize: true,
+            template: 'treemap',
+        }) as PluginOption,
     ],
     server:  {
         proxy: {
@@ -41,4 +49,4 @@ export default defineConfig({
             }
         }
     }
-});
+}));
