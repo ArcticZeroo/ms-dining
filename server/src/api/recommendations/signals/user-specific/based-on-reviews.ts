@@ -48,17 +48,17 @@ export const getBasedOnReviews = async (
 	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem)));
 
 	const allMenuItems = await context.getAllMenuItems();
-	const candidatesByEntityKey = new Map<string, IMenuItemCandidate>();
-	const candidatesById = new Map<string, IMenuItemCandidate>();
+	const unreviewedMenuItemsByEntityKey = new Map<string, IMenuItemCandidate>();
+	const unreviewedMenuItemsById = new Map<string, IMenuItemCandidate>();
 	for (const item of allMenuItems) {
 		const entityKey = getEntityKey(item.menuItem);
 		if (!reviewedItemIds.has(item.menuItem.id) && !reviewedEntityKeys.has(entityKey)) {
-			candidatesByEntityKey.set(entityKey, item);
-			candidatesById.set(item.menuItem.id, item);
+			unreviewedMenuItemsByEntityKey.set(entityKey, item);
+			unreviewedMenuItemsById.set(item.menuItem.id, item);
 		}
 	}
 
-	if (candidatesByEntityKey.size === 0) {
+	if (unreviewedMenuItemsByEntityKey.size === 0) {
 		return null;
 	}
 
@@ -88,7 +88,7 @@ export const getBasedOnReviews = async (
 
 	for (const { review, results } of searchResults) {
 		for (const result of results) {
-			const menuItem = candidatesById.get(result.id);
+			const menuItem = unreviewedMenuItemsById.get(result.id);
 			if (!menuItem) {
 				continue;
 			}
@@ -115,7 +115,7 @@ export const getBasedOnReviews = async (
 		selectedCandidates.map(async ({ item }) => {
 			try {
 				const entityKey = getEntityKey(item);
-				const candidate = candidatesByEntityKey.get(entityKey);
+				const candidate = unreviewedMenuItemsByEntityKey.get(entityKey);
 				const header = candidate
 					? await retrieveReviewHeaderAsync(candidate.menuItem).catch(() => null)
 					: null;
