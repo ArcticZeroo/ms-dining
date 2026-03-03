@@ -11,7 +11,7 @@ import { useCafeIdsOnPage } from '../../hooks/cafes-on-page.ts';
 import { fromDateString } from '@msdining/common/util/date-util';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeName } from '../../util/string.ts';
-import { Rating } from '@mui/material';
+import { StarRating } from './star-rating.tsx';
 import { DiningClient } from '../../api/client/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
@@ -111,8 +111,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                 </span>
             </div>
             <div className="flex flex-around">
-                <Rating
-                    precision={0.5}
+                <StarRating
                     value={review.rating / 2}
                     readOnly={true}
                 />

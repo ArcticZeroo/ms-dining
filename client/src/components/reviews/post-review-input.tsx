@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Rating } from '@mui/material';
+import { StarRating } from './star-rating.tsx';
 import { DiningClient } from '../../api/client/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
@@ -141,13 +141,11 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                     </div>
                 )
             }
-            <Rating
-                name="review-rating"
+            <StarRating
                 value={stars}
                 disabled={isCurrentlyMakingRequest}
-                precision={0.5}
                 size="large"
-                onChange={(_, newValue) => onRatingInputChanged(newValue)}
+                onChange={(newValue) => onRatingInputChanged(newValue)}
             />
             <textarea
                 id="review-comment"
