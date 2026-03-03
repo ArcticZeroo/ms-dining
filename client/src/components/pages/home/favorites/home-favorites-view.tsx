@@ -20,7 +20,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     const selectedDate = useValueNotifierContext(SelectedDateContext);
     const title = useTitleWithSelectedDate('Favorites Across Campus');
 
-    const { stage, results, actualStage, error, retry } = useFavoriteSearchResults(queries);
+    const { stage, results, actualStage, retry } = useFavoriteSearchResults(queries);
 
     const areFavoritesAllowedForSelectedDay = useMemo(
         () => {
@@ -78,7 +78,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                 }
             </div>
         );
-    }, [stage, results, error, actualStage, retry, selectedDate]);
+    }, [stage, results, actualStage, retry, selectedDate]);
 
     if (!areFavoritesAllowedForSelectedDay) {
         return null;
