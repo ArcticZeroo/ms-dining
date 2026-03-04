@@ -4,7 +4,7 @@ import { classNames } from '../../util/react.ts';
 import './scroll-top-button.css';
 
 export interface IScrollTopButtonProps {
-    containerRef: React.RefObject<HTMLElement>;
+    containerRef: React.RefObject<HTMLElement | null>;
 }
 
 export const ScrollTopButton: React.FC<IScrollTopButtonProps> = ({ containerRef }) => {
