@@ -1,3 +1,8 @@
+import 'leaflet-defaulticon-compatibility';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet/dist/leaflet.css';
+import './map.css';
+
 import { useVisibleViewsForNav } from '../../hooks/views.js';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.js';

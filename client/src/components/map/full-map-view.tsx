@@ -1,8 +1,3 @@
-import 'leaflet-defaulticon-compatibility';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
-import 'leaflet/dist/leaflet.css';
-import './map.css';
-
 import React from 'react';
 import { useMapPageOverviewSelectedView, useMapSearchFilterViews, useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';

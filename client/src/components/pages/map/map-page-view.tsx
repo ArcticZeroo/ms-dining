@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     useMapHighlight,
@@ -15,13 +15,11 @@ import {
 } from '../../../context/map.js';
 import { classNames } from '../../../util/react.js';
 import { MapSearchResultDetail } from './map-search-result-detail.js';
-import { CampusMapViewSkeleton } from '../../map/campus-map-view-skeleton.js';
 import { MapSidePanel } from './map-side-panel.js';
 import { CafeView } from '../../../models/cafe.js';
 import { usePageData } from '../../../hooks/location.js';
 import { getViewName } from '../../../util/cafe.js';
-
-const FullMapView = React.lazy(() => import('../../map/full-map-view.tsx'));
+import FullMapView from '../../map/full-map-view.js';
 
 const MapPageViewContent = () => {
     const navigate = useNavigate();
@@ -113,13 +111,11 @@ const MapPageViewContent = () => {
                 />
             )}
             <div className="map-area">
-                <Suspense fallback={<CampusMapViewSkeleton/>}>
-                    <FullMapView
-                        onSelectView={onSelectView}
-                        highlightedCafeIds={effectiveHighlightedCafeIds}
-                        searchResultCafeIds={searchResultCafeIds}
-                    />
-                </Suspense>
+                <FullMapView
+                    onSelectView={onSelectView}
+                    highlightedCafeIds={effectiveHighlightedCafeIds}
+                    searchResultCafeIds={searchResultCafeIds}
+                />
             </div>
         </>
     );
