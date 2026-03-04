@@ -15,7 +15,7 @@ export interface IMenuPublishEvent {
 
 export interface IReviewDirtyEvent {
 	menuItemId: string;
-	userId: string;
+	userId: string | null;
 	menuItemNormalizedName: string;
 	groupId?: string | null;
 }

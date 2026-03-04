@@ -74,7 +74,15 @@ export class LazyResource<T> {
         }
     }
 
+    #lastAccessed: number = 0;
+
+    get lastAccessed(): number {
+        return this.#lastAccessed;
+    }
+
     get(forceRefresh: boolean = false): ValueNotifier<ILazyPromiseState<T>> {
+        this.#lastAccessed = Date.now();
+
         if (forceRefresh || !this.hasBeenRun) {
             const promise = this.#getFactoryAsPromise();
             this.#assignState({

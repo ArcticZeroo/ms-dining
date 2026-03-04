@@ -4,7 +4,7 @@ import { ICafeOverviewStation, IMenuItemBase, IMenuItem, IMenuOverviewSummary } 
 import {
     ICreateReviewRequest,
     IDiningCoreResponse,
-    ISearchResponseResult, IUpdateUserSettingsInput,
+    ISearchResponseResult, IUpdateReviewRequest, IUpdateUserSettingsInput,
     IWaitTimeResponse,
     MenuResponse
 } from '@msdining/common/models/http';
@@ -479,6 +479,17 @@ export abstract class DiningClient {
             path:    `/api/dining/menu/reviews/${reviewId}`,
             options: {
                 method: 'DELETE'
+            }
+        });
+    }
+
+    public static async updateReview(reviewId: string, request: IUpdateReviewRequest): Promise<void> {
+        await makeJsonRequestNoParse({
+            path:    `/api/dining/menu/reviews/${reviewId}`,
+            options: {
+                method:  'PATCH',
+                body:    JSON.stringify(request),
+                headers: JSON_HEADERS
             }
         });
     }

@@ -21,6 +21,18 @@
     min-width: 16rem;
 }
 
+.home-map-container {
+    position: relative;
+}
+
+.home-map-open-button {
+    position: absolute;
+    bottom: var(--default-padding);
+    right: var(--default-padding);
+    z-index: var(--z-index-leaflet-buttons);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
 .remove-button {
     background: none;
     color: var(--color-almost-white);

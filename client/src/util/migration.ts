@@ -74,6 +74,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 ingredientsMenuExperience: DebugSettings.ingredientsMenuExperience.value.toString(),
                 enableMapPage: DebugSettings.enableMapPage.value.toString(),
                 recommendations: DebugSettings.recommendations.value.toString(),
+                showAdminReviewControls: DebugSettings.showAdminReviewControls.value.toString(),
             },
             homeSettings: {
                 showExploreOnHome: HomeSettings.showExploreOnHome.value.toString(),

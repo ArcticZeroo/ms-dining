@@ -70,6 +70,8 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
             }
             <MenuItemReviewsView
                 menuItemId={menuItem.id}
+                menuItemName={menuItem.name}
+                cafeId={menuItem.cafeId}
             />
         </div>
     );

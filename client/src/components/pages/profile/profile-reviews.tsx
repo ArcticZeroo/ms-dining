@@ -1,11 +1,12 @@
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../api/client/dining.ts';
+import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { MenuItemReview } from '../../reviews/menu-item-review.tsx';
 import { IReview } from '@msdining/common/models/review';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ReviewStats } from '../../reviews/review-stats.tsx';
+import { REVIEW_STORE } from '../../../store/reviews.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 
 interface IReviewStats {
     counts: Record<number, number>;
@@ -49,21 +50,16 @@ const useReviewStats = (reviews: Array<IReview> | undefined): IReviewStats => {
 }
 
 export const ProfileReviews = () => {
-    const response = useImmediatePromiseState(DiningClient.retrieveMyReviews);
-    const stats = useReviewStats(response.value);
-    const [reviews, setReviews] = useState<Array<IReview> | undefined>();
+    const { stage, value: reviews, run } = useValueNotifier(REVIEW_STORE.myReviews);
+    const stats = useReviewStats(reviews);
 
-    useEffect(() => {
-        setReviews(response.value);
-    }, [response.value]);
-
-    if (response.stage === PromiseStage.error) {
+    if (stage === PromiseStage.error) {
         return (
             <div className="card error">
                 <span>
                     Unable to load your reviews!
                 </span>
-                <RetryButton onClick={response.run}/>
+                <RetryButton onClick={run}/>
             </div>
         );
     }
@@ -77,10 +73,6 @@ export const ProfileReviews = () => {
                 <HourglassLoadingSpinner/>
             </div>
         );
-    }
-
-    const onReviewDeleted = (id: string) => {
-        setReviews(reviews.filter(review => review.id !== id));
     }
 
     return (
@@ -113,7 +105,6 @@ export const ProfileReviews = () => {
                                     key={review.id}
                                     review={review}
                                     showMyself={true}
-                                    onDeleted={() => onReviewDeleted(review.id)}
                                 />
                             ))
                         }

@@ -9,6 +9,8 @@ import { LogInForReviewButton } from './log-in-for-review-button.tsx';
 interface IMenuItemReviewsDataViewProps {
     response: IReviewDataForMenuItem;
     menuItemId: string;
+    menuItemName: string;
+    cafeId: string;
 }
 
 interface IReviewStats {
@@ -59,7 +61,7 @@ const useLocalStats = (reviewData: IReviewDataForMenuItem, localRating: number |
     );
 };
 
-export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = ({ response, menuItemId }) => {
+export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = ({ response, menuItemId, menuItemName, cafeId }) => {
     const [localComment, setLocalComment] = useState<string>(response.myReview?.comment ?? '');
     const [localRating, setLocalRating] = useState<number>(response.myReview?.rating ?? 0);
     const [reviewId, setReviewId] = useState<string | undefined>(response.myReview?.id);
@@ -74,6 +76,8 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                     isLoggedIn && (
                         <PostReviewInput
                             menuItemId={menuItemId}
+                            menuItemName={menuItemName}
+                            cafeId={cafeId}
                             comment={localComment}
                             rating={localRating}
                             reviewId={reviewId}

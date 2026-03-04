@@ -1,6 +1,6 @@
 export interface IReview {
 	id: string;
-	userId: string;
+	userId?: string;
 	userDisplayName: string;
 	menuItemId: string;
 	menuItemName: string;

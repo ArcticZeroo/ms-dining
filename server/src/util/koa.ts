@@ -210,6 +210,16 @@ export const getUserOrThrowAsync = async (ctx: Koa.Context): Promise<IServerUser
 	return user;
 }
 
+export const isAdminAsync = async (ctx: Koa.Context): Promise<boolean> => {
+	const userId = getMaybeUserId(ctx);
+	if (!userId) {
+		return false;
+	}
+
+	const user = await UserStorageClient.getUserAsync({ id: userId });
+	return user?.role === 'admin';
+}
+
 export const assignCacheControl = (ctx: Koa.Context, maxAge: DurationOrMilliseconds, isPublic: boolean = false) => {
 	ctx.set('Cache-Control', `${isPublic ? 'public' : 'private'}, max-age=${Duration.fromDurationOrMilliseconds(maxAge).inSeconds}`);
 	ctx.set('Vary', VERSION_TAG_HEADER);

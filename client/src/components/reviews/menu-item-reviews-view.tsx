@@ -1,22 +1,18 @@
-import React, { useCallback } from 'react';
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../api/client/dining.ts';
+import React from 'react';
 import { MenuItemReviewsLoadingView } from './menu-item-review-loading-view.tsx';
+import { REVIEW_STORE } from '../../store/reviews.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 
 import './reviews.css';
 
 interface IMenuItemReviewsViewProps {
     menuItemId: string;
-    cafeId?: string;
+    menuItemName: string;
+    cafeId: string;
 }
 
-export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId }) => {
-    const fetchReviews = useCallback(
-        () => DiningClient.retrieveReviewsForMenuItem(menuItemId),
-        [menuItemId]
-    );
-
-    const { stage, value, run } = useImmediatePromiseState(fetchReviews);
+export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId, menuItemName, cafeId }) => {
+    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(menuItemId));
 
     return (
         <div className="default-container bg-raised-3 flex-col">
@@ -28,6 +24,8 @@ export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuI
                 response={value}
                 onRetry={run}
                 menuItemId={menuItemId}
+                menuItemName={menuItemName}
+                cafeId={cafeId}
             />
         </div>
     )

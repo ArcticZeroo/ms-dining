@@ -70,6 +70,7 @@ export const DebugSettings = {
     ingredientsMenuExperience:                 new BooleanSetting('ingredientsMenuExperience', false /*defaultValue*/),
     enableMapPage:                             new BooleanSetting('enableMapPage', false /*defaultValue*/),
     recommendations:                           new BooleanSetting('recommendationsEnabled', false /*defaultValue*/),
+    showAdminReviewControls:                   new BooleanSetting('showAdminReviewControls', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

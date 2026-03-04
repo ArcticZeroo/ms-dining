@@ -10,10 +10,17 @@ import { IServerReview } from '../../../models/review.js';
 interface ICreateReviewItem {
 	menuItemId: string;
 	menuItemNormalizedName: string;
-	userId: string;
+	userId?: string;
+	displayName?: string;
 	rating: number;
 	comment?: string;
 	groupId?: string | null;
+}
+
+interface IUpdateReviewItem {
+	rating?: number;
+	comment?: string;
+	displayName?: string;
 }
 
 interface IGetReviewsForUserParams {
@@ -52,34 +59,54 @@ const GET_REVIEW_INCLUDES = {
 
 export abstract class ReviewStorageClient {
 	public static async createReviewAsync(review: ICreateReviewItem) {
-		const result = await usePrismaClient(client => client.review.upsert({
-			create: {
-				menuItemId:             review.menuItemId,
-				menuItemNormalizedName: review.menuItemNormalizedName,
-				userId:                 review.userId,
-				rating:                 review.rating,
-				comment:                review.comment,
-			},
-			update: {
-				rating:    review.rating,
-				comment:   review.comment,
-				createdAt: new Date()
-			},
-			where:  {
-				userId_menuItemId: {
-					userId:     review.userId,
-					menuItemId: review.menuItemId
+		let result: { id: string };
+		const userId = review.userId;
+
+		if (userId) {
+			result = await usePrismaClient(client => client.review.upsert({
+				create: {
+					menuItemId:             review.menuItemId,
+					menuItemNormalizedName: review.menuItemNormalizedName,
+					userId:                 userId,
+					displayName:            review.displayName,
+					rating:                 review.rating,
+					comment:                review.comment,
+				},
+				update: {
+					rating:      review.rating,
+					comment:     review.comment,
+					displayName: review.displayName,
+					createdAt:   new Date()
+				},
+				where:  {
+					userId_menuItemId: {
+						userId,
+						menuItemId: review.menuItemId
+					}
+				},
+				select: {
+					id: true
 				}
-			},
-			select: {
-				id: true
-			}
-		}));
+			}));
+		} else {
+			result = await usePrismaClient(client => client.review.create({
+				data: {
+					menuItemId:             review.menuItemId,
+					menuItemNormalizedName: review.menuItemNormalizedName,
+					displayName:            review.displayName,
+					rating:                 review.rating,
+					comment:                review.comment,
+				},
+				select: {
+					id: true
+				}
+			}));
+		}
 
 		STORAGE_EVENTS.emit('reviewDirty', {
 			menuItemId:             review.menuItemId,
 			menuItemNormalizedName: review.menuItemNormalizedName,
-			userId:                 review.userId,
+			userId:                 review.userId ?? null,
 			groupId:                review.groupId
 		});
 
@@ -115,6 +142,35 @@ export abstract class ReviewStorageClient {
 				createdAt: 'desc'
 			}
 		}));
+	}
+
+	public static async updateReviewAsync(reviewId: string, data: IUpdateReviewItem) {
+		const result = await usePrismaClient(client => client.review.update({
+			where: {
+				id: reviewId
+			},
+			data: {
+				...(data.rating != null && { rating: data.rating }),
+				...(data.comment != null && { comment: data.comment }),
+				...(data.displayName != null && { displayName: data.displayName }),
+			},
+			include: {
+				menuItem: {
+					select: {
+						groupId: true
+					}
+				}
+			}
+		}));
+
+		STORAGE_EVENTS.emit('reviewDirty', {
+			menuItemId:             result.menuItemId,
+			menuItemNormalizedName: result.menuItemNormalizedName,
+			userId:                 result.userId,
+			groupId:                result.menuItem.groupId
+		});
+
+		return result;
 	}
 
 	public static async deleteReviewAsync(reviewId: string) {
@@ -153,6 +209,13 @@ export abstract class ReviewStorageClient {
 		}));
 
 		return review != null;
+	}
+
+	public static async getReviewByIdAsync(reviewId: string): Promise<IServerReview | null> {
+		return usePrismaClient(client => client.review.findUnique({
+			where:   { id: reviewId },
+			include: GET_REVIEW_INCLUDES
+		}));
 	}
 
 	public static async getRecentReviews(count: number): Promise<IServerReview[]> {

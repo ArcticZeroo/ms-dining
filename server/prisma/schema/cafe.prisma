@@ -193,14 +193,15 @@ model User {
 }
 
 model Review {
-  id        String   @id @default(uuid())
+  id          String   @id @default(uuid())
   // 0-10
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
+  rating      Int
+  comment     String?
+  displayName String?
+  createdAt   DateTime @default(now())
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   menuItemId             String
   menuItem               MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)

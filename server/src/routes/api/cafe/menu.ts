@@ -1,7 +1,13 @@
 import Router from '@koa/router';
-import { ICafeOverviewStation, IMenuItemDTO, IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
+import {
+	ICafeOverviewStation,
+	IMenuItemDTO,
+	IMenuOverviewSummary,
+	IStationUniquenessData
+} from '@msdining/common/models/cafe';
 import {
 	ICreateReviewRequest,
+	IUpdateReviewRequest,
 	MenuResponse,
 	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/models/http';
@@ -11,7 +17,13 @@ import { memoizeResponseBody, memoizeResponseBodyWithResetOnMenuUpdate } from '.
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
-import { attachRouter, getMaybeUserId, getTrimmedQueryParam, getUserIdOrThrow } from '../../../util/koa.js';
+import {
+	attachRouter,
+	getMaybeUserId,
+	getTrimmedQueryParam,
+	getUserIdOrThrow,
+	isAdminAsync
+} from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
 	ANALYTICS_APPLICATION_NAMES,
@@ -26,7 +38,7 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { IServerReview } from '../../../models/review.js';
 import { IReview, IReviewDataForMenuItem, IReviewWithComment } from '@msdining/common/models/review';
-import { toDateString } from '@msdining/common/util/date-util';
+import { getIsRecentlyAvailable, toDateString } from '@msdining/common/util/date-util';
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { retrieveDailyCafeMenuAsync } from '../../../api/cache/daily-menu.js';
@@ -35,7 +47,6 @@ import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interf
 import { logDebug } from '../../../util/log.js';
 import { retrieveReviewHeaderAsync } from '../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-first-appearance.js';
-import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -163,8 +174,8 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	const serializeReview = (review: IServerReview): IReview => ({
 		id:              review.id,
-		userId:          review.userId,
-		userDisplayName: review.user.displayName,
+		userId:          review.userId || undefined,
+		userDisplayName: review.displayName ?? review.user?.displayName ?? 'Anonymous',
 		menuItemId:      review.menuItemId,
 		menuItemName:    review.menuItem.name,
 		cafeId:          review.menuItem.cafe.id,
@@ -238,7 +249,18 @@ export const registerMenuRoutes = (parent: Router) => {
 				return;
 			}
 
-			const userId = getUserIdOrThrow(ctx);
+			const isAnonymous = body.anonymous === true;
+			if (isAnonymous && !(await isAdminAsync(ctx))) {
+				ctx.throw(403, 'Only admins can create anonymous reviews');
+				return;
+			}
+
+			if (!isAnonymous && body.displayName != null) {
+				ctx.throw(400, 'displayName is only allowed for anonymous reviews');
+				return;
+			}
+
+			const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
 
 			const review = await ReviewStorageClient.createReviewAsync({
 				userId,
@@ -246,6 +268,7 @@ export const registerMenuRoutes = (parent: Router) => {
 				menuItemNormalizedName: normalizeNameForSearch(menuItem.name),
 				rating:                 body.rating,
 				comment:                body.comment?.trim(),
+				displayName:            isAnonymous ? body.displayName?.trim() : undefined,
 				groupId:                menuItem.groupId
 			});
 
@@ -284,23 +307,55 @@ export const registerMenuRoutes = (parent: Router) => {
 			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
 		});
 
-	const validateReviewOwnershipAsync = async (ctx: Router.RouterContext) => {
+	const validateReviewOwnershipOrAdminAsync = async (ctx: Router.RouterContext) => {
 		const reviewId = ctx.params.reviewId;
 		if (!reviewId) {
 			ctx.throw(400, 'Missing review id');
 		}
 
-		if (!(await ReviewStorageClient.isOwnedByUser(reviewId, getUserIdOrThrow(ctx)))) {
+		const isAdmin = await isAdminAsync(ctx);
+		if (!isAdmin && !(await ReviewStorageClient.isOwnedByUser(reviewId, getUserIdOrThrow(ctx)))) {
 			ctx.throw(403, 'Not allowed to modify another user\'s review');
 		}
 
 		return reviewId;
 	}
 
+	router.patch('/reviews/:reviewId',
+		requireAuthenticated,
+		async ctx => {
+			const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
+
+			const body = ctx.request.body;
+			if (!isDuckType<IUpdateReviewRequest>(body, {})) {
+				ctx.throw(400, 'Invalid update request');
+				return;
+			}
+
+			if (body.rating != null && (body.rating < 1 || body.rating > 10)) {
+				ctx.throw(400, 'Invalid rating');
+				return;
+			}
+
+			if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
+				ctx.throw(400, 'Invalid review comment');
+				return;
+			}
+
+			await ReviewStorageClient.updateReviewAsync(reviewId, {
+				rating:      body.rating,
+				comment:     body.comment?.trim(),
+				displayName: body.displayName?.trim(),
+			});
+
+			ctx.status = 204;
+			reviewCacheController.clearCache();
+		});
+
 	router.delete('/reviews/:reviewId',
 		requireAuthenticated,
 		async ctx => {
-			const reviewId = await validateReviewOwnershipAsync(ctx);
+			const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
 			await ReviewStorageClient.deleteReviewAsync(reviewId);
 			ctx.status = 204;
 			reviewCacheController.clearCache();

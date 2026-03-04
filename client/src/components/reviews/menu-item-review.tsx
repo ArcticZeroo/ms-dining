@@ -2,7 +2,7 @@ import { IReview } from '@msdining/common/models/review';
 import React, { useContext, useState } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
+import { useValueNotifierContext, useValueNotifier } from '../../hooks/events.ts';
 import { UserContext } from '../../context/auth.ts';
 import { classNames } from '../../util/react.ts';
 import { Link } from 'react-router-dom';
@@ -12,15 +12,17 @@ import { fromDateString } from '@msdining/common/util/date-util';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeName } from '../../util/string.ts';
 import { StarRating } from './star-rating.tsx';
-import { DiningClient } from '../../api/client/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
+import { useIsAdmin } from '../../hooks/auth.ts';
+import { DebugSettings } from '../../constants/settings.ts';
+import { ReviewEditForm } from './review-edit-form.tsx';
+import { REVIEW_STORE } from '../../store/reviews.ts';
 
 interface IMenuItemReviewProps {
     review: IReview;
     isSkeleton?: boolean;
     showMenuItemName?: boolean;
     showMyself: boolean;
-    onDeleted?: () => void;
     stretchSelf?: boolean;
 }
 
@@ -28,25 +30,31 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
     review,
     showMyself,
     showMenuItemName = true,
-    onDeleted,
     isSkeleton = false,
     stretchSelf = false
 }) => {
     const userId = useValueNotifierContext(UserContext)?.id;
+    const isAdmin = useIsAdmin();
+    const showAdminControls = useValueNotifier(DebugSettings.showAdminReviewControls);
+    const isAdminActive = isAdmin && showAdminControls;
     const { viewsById } = useContext(ApplicationContext);
     const cafeIdsOnPage = useCafeIdsOnPage();
     const view = viewsById.get(review.cafeId);
+    const [isEditing, setIsEditing] = useState(false);
+
     const [deleteStage, setDeleteStage] = useState(PromiseStage.notRun);
 
     if (!isSkeleton && view == null) {
         return null;
     }
 
-    const isMe = userId === review.userId;
+    const isMe = userId != null && userId === review.userId;
 
     if (isMe && !showMyself) {
         return null;
     }
+
+    const canModify = isMe || isAdminActive;
 
     const link = view == null
         ? '#'
@@ -60,24 +68,40 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
         });
 
     const onDeleteClicked = (event: React.MouseEvent) => {
-        // we're inside a link; don't use the link when we click here
         event.preventDefault();
 
-        if (onDeleted == null || deleteStage === PromiseStage.running) {
+        if (deleteStage === PromiseStage.running) {
             return;
         }
 
         setDeleteStage(PromiseStage.running);
-        DiningClient.deleteReview(review.id)
+        REVIEW_STORE.deleteReview(review.id, review.menuItemId)
             .then(() => {
                 setDeleteStage(PromiseStage.success);
-                onDeleted();
             })
             .catch(err => {
                 console.error('failed to delete:', err);
                 setDeleteStage(PromiseStage.error);
             });
     };
+
+    const onEditClicked = (event: React.MouseEvent) => {
+        event.preventDefault();
+        setIsEditing(true);
+    };
+
+    if (isEditing) {
+        return (
+            <ReviewEditForm
+                review={review}
+                stretchSelf={stretchSelf}
+                onSaved={() => {
+                    setIsEditing(false);
+                }}
+                onCancelled={() => setIsEditing(false)}
+            />
+        );
+    }
 
     return (
         <Link to={link}
@@ -132,22 +156,27 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                 )
             }
             {
-                isMe && (
-                    <div>
-                        {
-                            onDeleted && (
-                                <button
-                                    className="default-button default-container icon-container"
-                                    onClick={onDeleteClicked}
-                                    title="Delete this review"
-                                    disabled={deleteStage === PromiseStage.running}
-                                >
-                                    <span className="material-symbols-outlined">
-                                        delete
-                                    </span>
-                                </button>
-                            )
-                        }
+                canModify && (
+                    <div className="flex">
+                        <button
+                            className="default-button default-container icon-container"
+                            onClick={onEditClicked}
+                            title="Edit this review"
+                        >
+                            <span className="material-symbols-outlined">
+                                edit
+                            </span>
+                        </button>
+                        <button
+                            className="default-button default-container icon-container"
+                            onClick={onDeleteClicked}
+                            title="Delete this review"
+                            disabled={deleteStage === PromiseStage.running}
+                        >
+                            <span className="material-symbols-outlined">
+                                delete
+                            </span>
+                        </button>
                     </div>
                 )
             }

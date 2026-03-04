@@ -1,28 +1,29 @@
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../../api/client/dining.ts';
+import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { MenuItemReview } from '../../../reviews/menu-item-review.tsx';
 import { toDateString } from '@msdining/common/util/date-util';
+import { REVIEW_STORE } from '../../../../store/reviews.ts';
+import { useValueNotifier } from '../../../../hooks/events.ts';
 
 export const HomeRecentReviewsView = () => {
-    const response = useImmediatePromiseState(DiningClient.getRecentReviews);
+    const { stage, value, run } = useValueNotifier(REVIEW_STORE.recentReviews);
 
-    if (response.stage === PromiseStage.error) {
+    if (stage === PromiseStage.error) {
         return (
             <div className="card flex-col">
                 <span>
                     Couldn't load recent reviews!
                 </span>
-                <RetryButton onClick={response.run}/>
+                <RetryButton onClick={run}/>
             </div>
         );
     }
 
-    if (response.value != null) {
+    if (value != null) {
         return (
             <div className="flex horizontal-scroll">
                 {
-                    response.value.map(review => (
+                    value.map(review => (
                         <MenuItemReview
                             key={review.id}
                             review={review}
@@ -40,7 +41,6 @@ export const HomeRecentReviewsView = () => {
             <MenuItemReview
                 review={{
                     id: 'loading',
-                    userId: '',
                     userDisplayName: '...',
                     menuItemId: '',
                     menuItemName: '...',

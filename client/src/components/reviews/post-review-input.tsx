@@ -1,12 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import { StarRating } from './star-rating.tsx';
-import { DiningClient } from '../../api/client/dining.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { fromDateString } from '@msdining/common/util/date-util';
+import { useIsAdmin } from '../../hooks/auth.ts';
+import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
+import { DebugSettings } from '../../constants/settings.ts';
+import { REVIEW_STORE } from '../../store/reviews.ts';
+import { UserContext } from '../../context/auth.ts';
 
 interface IPostReviewInputProps {
     menuItemId: string;
+    menuItemName: string;
+    cafeId: string;
     rating: number;
     comment: string;
     reviewId: string | undefined;
@@ -21,14 +27,23 @@ interface IPostReviewInputProps {
 
 export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     menuItemId,
+    menuItemName,
+    cafeId,
     comment,
     rating,
     reviewId,
     reviewPostedDate,
     onRatingChanged,
     onReviewIdChanged,
-    onCommentChanged
+    onCommentChanged,
 }) => {
+    const user = useValueNotifierContext(UserContext);
+    const isAdmin = useIsAdmin();
+    const showAdminControls = useValueNotifier(DebugSettings.showAdminReviewControls);
+    const showAnonymousOption = isAdmin && showAdminControls;
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [displayName, setDisplayName] = useState('');
+
     const stars = rating / 2;
 
     const [lastSavedComment, setLastSavedComment] = useState<string>(comment);
@@ -54,18 +69,30 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     const postReview = useCallback(
         (request: ICreateReviewRequest) => {
             setReviewCreationStage(PromiseStage.running);
-            DiningClient.createReview(menuItemId, request)
+            REVIEW_STORE.createReview(menuItemId, request, {
+                userId:          user?.id,
+                userDisplayName: user?.displayName ?? 'Anonymous',
+                menuItemName,
+                cafeId,
+            })
                 .then(id => {
-                    onReviewIdChanged(id);
+                    if (request.anonymous) {
+                        onRatingChanged(0);
+                        onCommentChanged('');
+                        setLastSavedComment('');
+                        setDisplayName('');
+                    } else {
+                        onReviewIdChanged(id);
+                        setLastSavedComment(request.comment || '');
+                    }
                     setReviewCreationStage(PromiseStage.success);
-                    setLastSavedComment(request.comment || '');
                 })
                 .catch(err => {
                     console.error('Could not create review:', err);
                     setReviewCreationStage(PromiseStage.error);
                 });
         },
-        [menuItemId, onReviewIdChanged]
+        [menuItemId, menuItemName, cafeId, user, onReviewIdChanged, onRatingChanged, onCommentChanged]
     );
 
     // If a user clicks on the stars, it'll try to set them to null.
@@ -78,6 +105,12 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         const newRating = value * 2;
         // Show the new value to the user while we do the update
         onRatingChanged(newRating);
+
+        if (isAnonymous) {
+            // In anonymous mode, don't auto-submit on rating change
+            return;
+        }
+
         postReview({ rating: newRating, comment: lastSavedComment });
     };
 
@@ -105,7 +138,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         }
 
         setReviewCreationStage(PromiseStage.running);
-        DiningClient.deleteReview(reviewId)
+        REVIEW_STORE.deleteReview(reviewId, menuItemId)
             .then(() => {
                 onRatingChanged(0);
                 onReviewIdChanged(undefined);
@@ -119,7 +152,14 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     };
 
     const onSaveClicked = () => {
-        postReview({ rating, comment });
+        const request: ICreateReviewRequest = { rating, comment };
+        if (isAnonymous) {
+            request.anonymous = true;
+            if (displayName.trim().length > 0) {
+                request.displayName = displayName.trim();
+            }
+        }
+        postReview(request);
     };
 
     const onCommentInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -129,13 +169,40 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         }
     }
 
+    const canSubmitAnonymous = isAnonymous && stars !== 0;
+
     return (
         <div className="flex-col align-center default-container bg-raised-4">
             <div className="flex">
                 Leave a review! Comments are optional.
             </div>
             {
-                reviewPostedDate && (
+                showAnonymousOption && (
+                    <label className="flex align-center" style={{ gap: '0.5rem' }}>
+                        <input
+                            type="checkbox"
+                            checked={isAnonymous}
+                            onChange={event => setIsAnonymous(event.target.checked)}
+                            disabled={isCurrentlyMakingRequest}
+                        />
+                        Submit as anonymous
+                    </label>
+                )
+            }
+            {
+                isAnonymous && (
+                    <input
+                        type="text"
+                        className="self-stretch"
+                        placeholder="Display name (optional, defaults to Anonymous)"
+                        value={displayName}
+                        onChange={event => setDisplayName(event.target.value)}
+                        disabled={isCurrentlyMakingRequest}
+                    />
+                )
+            }
+            {
+                reviewPostedDate && !isAnonymous && (
                     <div className="subtitle">
                         Posted on {fromDateString(reviewPostedDate).toLocaleDateString()}
                     </div>
@@ -158,28 +225,32 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 rows={5}
             />
             <div className="flex">
+                {
+                    !isAnonymous && (
+                        <button
+                            className="icon-container default-button default-container"
+                            title={deleteOrClearButtonHoverText}
+                            disabled={!canDeleteOrClear}
+                            onClick={onDeleteOrClearReview}
+                        >
+                            <span className="material-symbols-outlined">
+                                {
+                                    reviewId == null
+                                        ? 'clear'
+                                        : 'delete'
+                                }
+                            </span>
+                        </button>
+                    )
+                }
                 <button
                     className="icon-container default-button default-container"
-                    title={deleteOrClearButtonHoverText}
-                    disabled={!canDeleteOrClear}
-                    onClick={onDeleteOrClearReview}
-                >
-                    <span className="material-symbols-outlined">
-                        {
-                            reviewId == null
-                                ? 'clear'
-                                : 'delete'
-                        }
-                    </span>
-                </button>
-                <button
-                    className="icon-container default-button default-container"
-                    title={saveButtonHoverText}
-                    disabled={!canSaveComment}
+                    title={isAnonymous ? (canSubmitAnonymous ? 'Submit anonymous review' : 'Rate your experience first') : saveButtonHoverText}
+                    disabled={isAnonymous ? !canSubmitAnonymous : !canSaveComment}
                     onClick={onSaveClicked}
                 >
                     <span className="material-symbols-outlined">
-                        save
+                        {isAnonymous ? 'send' : 'save'}
                     </span>
                 </button>
             </div>

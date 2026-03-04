@@ -112,11 +112,14 @@ export interface ICreateReviewRequest {
 	rating: number;
 	cafeId?: string;
 	comment?: string;
+	anonymous?: boolean;
+	displayName?: string;
 }
 
 export interface IUpdateReviewRequest {
 	rating?: number;
 	comment?: string;
+	displayName?: string;
 }
 
 export interface ICreateReviewResponse {

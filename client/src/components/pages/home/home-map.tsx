@@ -18,15 +18,17 @@ export const HomeMap = () => {
     return (
         <HomeCollapse title={title} featureToggle={HomeSettings.showMapOnHome}>
             <CampusMapClickTip/>
-            <LazyCampusMapView/>
-            {isMapPageEnabled && (
-                <Link to="/map" className="default-button flex flex-center default-container">
-                    <span className="material-symbols-outlined">open_in_full</span>
-                    <span>
-                        Open Full Map
-                    </span>
-                </Link>
-            )}
+            <div className="home-map-container">
+                <LazyCampusMapView/>
+                {isMapPageEnabled && (
+                    <Link to="/map" className="home-map-open-button default-button flex flex-center default-container">
+                        <span className="material-symbols-outlined">open_in_full</span>
+                        <span>
+                            Open Full Map
+                        </span>
+                    </Link>
+                )}
+            </div>
         </HomeCollapse>
     );
 }

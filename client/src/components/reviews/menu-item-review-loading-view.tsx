@@ -10,13 +10,17 @@ interface IMenuItemReviewsViewProps {
     response: IReviewDataForMenuItem | undefined;
     onRetry: () => void;
     menuItemId: string;
+    menuItemName: string;
+    cafeId: string;
 }
 
 export const MenuItemReviewsLoadingView: React.FC<IMenuItemReviewsViewProps> = ({
     stage,
     response,
     onRetry,
-    menuItemId
+    menuItemId,
+    menuItemName,
+    cafeId
 }) => {
     if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {
         return (
@@ -39,6 +43,6 @@ export const MenuItemReviewsLoadingView: React.FC<IMenuItemReviewsViewProps> = (
     }
 
     return (
-        <MenuItemReviewDataView response={response} menuItemId={menuItemId}/>
+        <MenuItemReviewDataView response={response} menuItemId={menuItemId} menuItemName={menuItemName} cafeId={cafeId}/>
     );
 };
