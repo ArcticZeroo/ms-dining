@@ -1,4 +1,4 @@
-import { ApplicationSettings, DebugSettings } from '../../../constants/settings.ts';
+import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useDatePicker } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { MoreSettingsButton } from '../../button/more-settings-button.tsx';
@@ -12,7 +12,6 @@ import { usePageData } from '../../../hooks/location.ts';
 import { HomeRecentReviews } from './reviews/home-recent-reviews.tsx';
 import './home.css';
 import { HomeRecommendationsView } from './recommendations/home-recommendations-view.js';
-import { HomeFavorites } from './favorites/home-favorites.js';
 
 const useShouldShowWelcomeMessage = () => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
@@ -24,7 +23,7 @@ const useShouldShowWelcomeMessage = () => {
 export const HomePage = () => {
     const datePicker = useDatePicker();
     const isNewUser = useShouldShowWelcomeMessage();
-    const isRecommendationsEnabled = useValueNotifier(DebugSettings.recommendations);
+    const isRecommendationsEnabled = useValueNotifier(ApplicationSettings.showRecommendationsOnHome);
 
     usePageData('Home', 'View the home page - a customizable dashboard for your favorite items and cafes.');
 
@@ -41,11 +40,6 @@ export const HomePage = () => {
             {
                 isRecommendationsEnabled && (
                     <HomeRecommendationsView/>
-                )
-            }
-            {
-                !isRecommendationsEnabled && (
-                    <HomeFavorites/>
                 )
             }
             <HomeMap/>

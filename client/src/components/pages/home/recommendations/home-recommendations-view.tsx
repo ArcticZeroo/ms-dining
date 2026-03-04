@@ -130,6 +130,7 @@ export const HomeRecommendationsView: React.FC = () => {
         <HomeCollapse
             title={title}
             id="home-recommendations"
+            featureToggle={ApplicationSettings.showRecommendationsOnHome}
         >
             <TabView
                 options={tabOptions}

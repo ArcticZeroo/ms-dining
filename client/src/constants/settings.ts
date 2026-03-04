@@ -32,6 +32,7 @@ export const ApplicationSettings = {
     showReviews:                   new BooleanSetting('showReviews', true /*defaultValue*/),
     showSearchTags:                new BooleanSetting('showSearchTags', false /*defaultValue*/),
     showFavoritesOnHome:           new BooleanSetting('showFavoritesOnHome', true /*defaultValue*/),
+    showRecommendationsOnHome:     new BooleanSetting('showRecommendationsOnHome', true /*defaultValue*/),
     showPriceInSearch:             new BooleanSetting('showPriceInSearch', true /*defaultValue*/),
     collapseCafesByDefault:        new BooleanSetting('collapseCafesByDefault', false /*defaultValue*/),
     collapseStationsByDefault:     new BooleanSetting('collapseStationsByDefault', false /*defaultValue*/),
@@ -69,7 +70,7 @@ export const DebugSettings = {
     noVectorSearch:                            new BooleanSetting('noVectorSearch', false /*defaultValue*/),
     ingredientsMenuExperience:                 new BooleanSetting('ingredientsMenuExperience', false /*defaultValue*/),
     enableMapPage:                             new BooleanSetting('enableMapPage', false /*defaultValue*/),
-    recommendations:                           new BooleanSetting('recommendationsEnabled', false /*defaultValue*/),
+
     showAdminReviewControls:                   new BooleanSetting('showAdminReviewControls', false /*defaultValue*/),
 } as const;
 

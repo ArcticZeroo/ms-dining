@@ -46,6 +46,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 showReviews: ApplicationSettings.showReviews.value.toString(),
                 showSearchTags: ApplicationSettings.showSearchTags.value.toString(),
                 showFavoritesOnHome: ApplicationSettings.showFavoritesOnHome.value.toString(),
+                showRecommendationsOnHome: ApplicationSettings.showRecommendationsOnHome.value.toString(),
                 showPriceInSearch: ApplicationSettings.showPriceInSearch.value.toString(),
                 collapseCafesByDefault: ApplicationSettings.collapseCafesByDefault.value.toString(),
                 collapseStationsByDefault: ApplicationSettings.collapseStationsByDefault.value.toString(),
@@ -73,7 +74,6 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 noVectorSearch: DebugSettings.noVectorSearch.value.toString(),
                 ingredientsMenuExperience: DebugSettings.ingredientsMenuExperience.value.toString(),
                 enableMapPage: DebugSettings.enableMapPage.value.toString(),
-                recommendations: DebugSettings.recommendations.value.toString(),
                 showAdminReviewControls: DebugSettings.showAdminReviewControls.value.toString(),
             },
             homeSettings: {
