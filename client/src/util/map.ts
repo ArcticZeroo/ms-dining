@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import { CafeView } from '../models/cafe.js';
 import { InternalSettings } from '../constants/settings.js';
-import { getViewLocation, getViewMarkerLabel } from './view.js';
+import { getViewLocation, getViewMarkerDisplay } from './view.js';
 import { calculateCenter } from './coordinates.js';
 import { toLeafletLocation } from './coordinates.js';
 
@@ -17,7 +17,7 @@ export type MarkerLabelMode = 'full' | 'short' | 'none';
 
 export const computeLabelModes = (views: CafeView[], map: L.Map, zoom: number): Map<string, MarkerLabelMode> => {
     const points = views.map(view => {
-        const markerLabel = getViewMarkerLabel(view);
+        const markerLabel = getViewMarkerDisplay(view);
         return {
             id:        view.value.id,
             pixel:     map.project(toLeafletLocation(getViewLocation(view)), zoom),

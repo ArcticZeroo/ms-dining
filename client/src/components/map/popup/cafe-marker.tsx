@@ -7,7 +7,7 @@ import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { MarkerLabelMode } from '../../../util/map.ts';
 import { toLeafletLocation } from '../../../util/coordinates.ts';
 import { classNames } from '../../../util/react.ts';
-import { getViewLocation, getViewMarkerLabel } from '../../../util/view.ts';
+import { getViewLocation, getViewMarkerDisplay } from '../../../util/view.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { CafeMarkerTooltipContent } from './cafe-marker-tooltip-content.tsx';
@@ -27,7 +27,7 @@ interface IViewIconHtmlOptions {
 }
 
 const getIconHtml = ({ view, labelText, isHomepageView, isRecentlyOpened, isHighlighted, isSelected, isFilterSelected, isDimmed }: IViewIconHtmlOptions) => {
-    const { text, isNumber, isShortText, emojiBadge } = getViewMarkerLabel(view);
+    const { text, isNumber, isShortText, emojiBadge } = getViewMarkerDisplay(view);
 
     return `
 <div class="${classNames('cafe-marker-container', (isNumber || isShortText) && 'has-number', isHomepageView && 'is-homepage-view', isRecentlyOpened && 'recently-opened', isHighlighted && 'is-highlighted', isSelected && 'is-selected', isFilterSelected && 'is-filter-selected', isDimmed && 'is-dimmed')}">
@@ -81,15 +81,15 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMod
             return null;
         }
 
-        const markerLabel = getViewMarkerLabel(view);
+        const markerDisplay = getViewMarkerDisplay(view);
 
         // Numbered cafes never need labels — the number in the bubble is enough
-        if (markerLabel.isNumber) {
+        if (markerDisplay.isNumber) {
             return null;
         }
 
         // Short text labels (H, A, D) only get full name labels, not short ones
-        if (labelMode === 'short' && markerLabel.isShortText) {
+        if (labelMode === 'short' && markerDisplay.isShortText) {
             return null;
         }
 
