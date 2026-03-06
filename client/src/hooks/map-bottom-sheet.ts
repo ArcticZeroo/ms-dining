@@ -5,6 +5,8 @@ const SNAP_POINTS: readonly [number, number, number] = [0.3, 0.5, 0.95] as const
 const DEFAULT_SNAP = SNAP_POINTS[1];
 const MIN_SNAP = SNAP_POINTS[0];
 
+const FLING_VELOCITY_THRESHOLD = 0.8; // fraction per second
+
 const findNearestSnap = (fraction: number): number => {
     let nearest = SNAP_POINTS[0];
     let minDist = Math.abs(fraction - nearest);
@@ -16,6 +18,27 @@ const findNearestSnap = (fraction: number): number => {
         }
     }
     return nearest;
+};
+
+const findFlingSnap = (fraction: number, velocity: number): number => {
+    // velocity > 0 means dragging upward (expanding)
+    if (Math.abs(velocity) < FLING_VELOCITY_THRESHOLD) {
+        return findNearestSnap(fraction);
+    }
+
+    const direction = velocity > 0 ? 1 : -1;
+    // Find the next snap point in the fling direction
+    let best: number | null = null;
+    for (const snap of SNAP_POINTS) {
+        const delta = snap - fraction;
+        if (delta * direction > 0) {
+            if (best === null || Math.abs(delta) < Math.abs(best - fraction)) {
+                best = snap;
+            }
+        }
+    }
+
+    return best ?? findNearestSnap(fraction);
 };
 
 export const useBottomSheetDrag = () => {
@@ -31,6 +54,8 @@ export const useBottomSheetDrag = () => {
     const heightRef = useRef(DEFAULT_SNAP);
     const isDraggingRef = useRef(false);
     const dragStartRef = useRef({ y: 0, fraction: DEFAULT_SNAP });
+    const lastMoveRef = useRef({ y: 0, time: 0 });
+    const prevMoveRef = useRef({ y: 0, time: 0 });
 
     const checkIfHandleNeeded = useCallback(() => {
         const panel = panelRef.current;
@@ -88,6 +113,8 @@ export const useBottomSheetDrag = () => {
         const onPointerDown = (e: PointerEvent) => {
             isDraggingRef.current = true;
             dragStartRef.current = { y: e.clientY, fraction: heightRef.current };
+            lastMoveRef.current = { y: e.clientY, time: Date.now() };
+            prevMoveRef.current = lastMoveRef.current;
             handle.setPointerCapture(e.pointerId);
             setIsDragging(true);
             e.preventDefault();
@@ -104,6 +131,8 @@ export const useBottomSheetDrag = () => {
             const newFraction = Math.max(0.15, Math.min(0.95, dragStartRef.current.fraction + deltaFraction));
             heightRef.current = newFraction;
             setHeightFraction(newFraction);
+            prevMoveRef.current = lastMoveRef.current;
+            lastMoveRef.current = { y: e.clientY, time: Date.now() };
         };
 
         const onPointerUp = () => {
@@ -113,7 +142,14 @@ export const useBottomSheetDrag = () => {
 
             isDraggingRef.current = false;
             setIsDragging(false);
-            const snapped = findNearestSnap(heightRef.current);
+
+            const containerHeight = handle.closest('.map-page')?.clientHeight ?? window.innerHeight;
+            const dt = (lastMoveRef.current.time - prevMoveRef.current.time) / 1000;
+            const dy = prevMoveRef.current.y - lastMoveRef.current.y;
+            // Positive velocity = dragging upward (expanding)
+            const velocity = dt > 0 ? (dy / containerHeight) / dt : 0;
+
+            const snapped = findFlingSnap(heightRef.current, velocity);
             heightRef.current = snapped;
             setHeightFraction(snapped);
         };
@@ -129,7 +165,7 @@ export const useBottomSheetDrag = () => {
             handle.removeEventListener('pointerup', onPointerUp);
             handle.removeEventListener('pointercancel', onPointerUp);
         };
-    }, [isMobile]);
+    }, [isMobile, showHandle]);
 
     const sheetStyle = isMobile
         ? {
