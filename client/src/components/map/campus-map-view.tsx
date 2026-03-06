@@ -20,7 +20,6 @@ const CampusMapMarkers: React.FC<ICampusMapMarkersProps> = ({ onMarkerClick }) =
                     view={view}
                     onClick={onMarkerClick}
                     labelMode={labelModes.get(view.value.id) ?? 'none'}
-                    showTooltip
                 />
             ))}
         </>

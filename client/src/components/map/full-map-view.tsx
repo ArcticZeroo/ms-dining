@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import { useMap } from 'react-leaflet';
 import { useMapPageOverviewSelectedView, useMapSearchFilterViews, useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { CafeMarker } from './popup/cafe-marker.tsx';
 import { GenericMapView } from './generic-map-view.js';
+import { ApplicationContext } from '../../context/app.ts';
+import { getViewLocation } from '../../util/view.ts';
+import { calculateCenter, toLeafletLocation } from '../../util/coordinates.ts';
 
 const viewMatchesCafeIds = (view: CafeView, cafeIds: Set<string>): boolean => {
     if (cafeIds.has(view.value.id)) {
@@ -16,17 +20,54 @@ const viewMatchesCafeIds = (view: CafeView, cafeIds: Set<string>): boolean => {
     return false;
 };
 
+const useMapFlyTo = (cafeIds?: Set<string>) => {
+    const map = useMap();
+    const { viewsById } = useContext(ApplicationContext);
+
+    useEffect(() => {
+        if (!cafeIds || cafeIds.size === 0) {
+            return;
+        }
+
+        const locations = Array.from(cafeIds)
+            .map(id => viewsById.get(id))
+            .filter(Boolean)
+            .map(view => getViewLocation(view!));
+
+        if (locations.length === 0) {
+            return;
+        }
+
+        const center = locations.length === 1
+            ? locations[0]!
+            : calculateCenter(locations);
+
+        const target = toLeafletLocation(center);
+        const current = map.getCenter();
+        const distancePx = map.latLngToContainerPoint(target).distanceTo(map.latLngToContainerPoint(current));
+
+        if (distancePx < 30) {
+            return;
+        }
+
+        map.flyTo(target, map.getZoom(), { duration: 0.5 });
+    }, [cafeIds, viewsById, map]);
+};
+
 interface IFullMapMarkersProps {
     onSelectView(view: CafeView, isMultiSelect: boolean): void;
     highlightedCafeIds?: Set<string>;
     searchResultCafeIds?: Set<string>;
+    selectedCafeIds?: Set<string>;
 }
 
-const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highlightedCafeIds, searchResultCafeIds }) => {
+const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highlightedCafeIds, searchResultCafeIds, selectedCafeIds }) => {
     const { views, labelModes } = useMarkerLabelModes();
     const hasActiveSearch = searchResultCafeIds != null && searchResultCafeIds.size > 0;
     const { allowedViewIds } = useMapSearchFilterViews();
     const overviewSelectedView = useMapPageOverviewSelectedView();
+
+    useMapFlyTo(selectedCafeIds);
 
     return (
         <>
@@ -45,7 +86,6 @@ const FullMapMarkers: React.FC<IFullMapMarkersProps> = ({ onSelectView, highligh
                         isHighlighted={highlightedCafeIds != null && highlightedCafeIds.size > 0 && viewMatchesCafeIds(view, highlightedCafeIds)}
                         isSelected={isViewSelected && !hasActiveSearch}
                         isFilterSelected={isViewSelected && hasActiveSearch}
-                        showTooltip
                     />
                 );
             })}
@@ -57,6 +97,7 @@ interface IFullMapViewProps {
     onSelectView(view: CafeView, isMultiSelect: boolean): void;
     highlightedCafeIds?: Set<string>;
     searchResultCafeIds?: Set<string>;
+    selectedCafeIds?: Set<string>;
 }
 
 const FullMapView: React.FC<IFullMapViewProps> = (props) => {

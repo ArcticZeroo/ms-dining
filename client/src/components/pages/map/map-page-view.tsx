@@ -32,6 +32,13 @@ const MapPageViewContent = () => {
     const { selectedViewIds } = useMapSearchFilterViews();
     const overviewSelectedView = useMapPageOverviewSelectedView();
 
+    const effectiveSearchResultCafeIds = useMemo(() => {
+        if (selectedSearchResult) {
+            return new Set(selectedSearchResult.locationDatesByCafeId.keys());
+        }
+        return searchResultCafeIds;
+    }, [selectedSearchResult, searchResultCafeIds]);
+
     const pageTitle = useMemo(() => {
         if (query) {
             return `Map - Search for "${query}"`;
@@ -102,6 +109,13 @@ const MapPageViewContent = () => {
         }
     }, [query.length, setSearchParams, selectedViewIds, overviewSelectedView?.value.id, navigate]);
 
+    const selectedCafeIds = useMemo(() => {
+        if (!selectedSearchResult) {
+            return undefined;
+        }
+        return new Set(selectedSearchResult.locationDatesByCafeId.keys());
+    }, [selectedSearchResult]);
+
     return (
         <>
             {selectedSearchResult && (
@@ -114,7 +128,8 @@ const MapPageViewContent = () => {
                 <FullMapView
                     onSelectView={onSelectView}
                     highlightedCafeIds={effectiveHighlightedCafeIds}
-                    searchResultCafeIds={searchResultCafeIds}
+                    searchResultCafeIds={effectiveSearchResultCafeIds}
+                    selectedCafeIds={selectedCafeIds}
                 />
             </div>
         </>

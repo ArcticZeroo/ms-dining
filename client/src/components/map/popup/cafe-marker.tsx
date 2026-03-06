@@ -12,6 +12,7 @@ import { getViewName } from '../../../util/cafe.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { CafeMarkerTooltipContent } from './cafe-marker-tooltip-content.tsx';
 import { emptyIfFalsy } from '../../../util/string.js';
+import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
 
 const HOMEPAGE_VIEW_Z_INDEX = 1000;
 
@@ -47,11 +48,10 @@ interface ICafeMarkerProps {
     isHighlighted?: boolean;
     isSelected?: boolean;
     isFilterSelected?: boolean;
-    showTooltip?: boolean;
     isDimmed?: boolean;
 }
 
-export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMode = 'none', isHighlighted = false, isSelected = false, isFilterSelected = false, showTooltip = false, isDimmed = false }) => {
+export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMode = 'none', isHighlighted = false, isSelected = false, isFilterSelected = false, isDimmed = false }) => {
     const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
 
@@ -115,6 +115,9 @@ export const CafeMarker: React.FC<ICafeMarkerProps> = ({ view, onClick, labelMod
             ApplicationSettings.homepageViews.add(view.value.id);
         }
     }
+
+    const deviceType = useDeviceType();
+    const showTooltip = deviceType !== DeviceType.Mobile;
 
     return (
         <Marker

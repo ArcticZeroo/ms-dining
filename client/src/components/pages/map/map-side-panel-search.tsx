@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMapHighlightContext, useMapSearchContext } from '../../../context/map.ts';
 import { MapSearchResults } from './map-search-results.tsx';
 import { useMapSearchFilterViews } from '../../../hooks/map.js';
+import { MapSidePanelContainer } from './map-side-panel-container.tsx';
 
 const useSearchResults = (allowedViewIds: Set<string>) => {
     const { allResults } = useMapSearchContext();
@@ -47,7 +48,7 @@ export const MapSidePanelSearch = () => {
     const closeButtonIcon = isFilteredToHomeCafes ? 'arrow_back' : 'close';
 
     return (
-        <div className="map-side-panel flex-col">
+        <MapSidePanelContainer>
             <div className="panel-header flex">
                 <span className="material-symbols-outlined">map</span>
                 <span className="panel-title">
@@ -66,6 +67,6 @@ export const MapSidePanelSearch = () => {
                 isFilteredToHomeCafes={isFilteredToHomeCafes}
                 onFilterToHomeCafes={onFilterToHomeCafes}
             />
-        </div>
+        </MapSidePanelContainer>
     );
 };

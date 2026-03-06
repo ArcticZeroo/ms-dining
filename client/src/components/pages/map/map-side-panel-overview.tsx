@@ -10,6 +10,7 @@ import { getViewMenuUrl } from '../../../util/link.ts';
 import { getAllSingleCafesInView } from '../../../util/view.ts';
 import { FavoriteItemButton } from '../../button/favorite/favorite-item-button.tsx';
 import { CampusMapViewDetailsMember } from '../../map/popup/campus-map-view-details-member.tsx';
+import { MapSidePanelContainer } from './map-side-panel-container.tsx';
 
 interface IMapSidePanelOverviewProps {
     view: CafeView;
@@ -29,7 +30,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
 
     return (
         <MapSelectedViewContext.Provider value={view}>
-            <div className="map-side-panel flex-col">
+            <MapSidePanelContainer>
                 <div className="panel-header flex">
                     <FavoriteItemButton
                         setting={ApplicationSettings.homepageViews}
@@ -65,7 +66,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
                         </Link>
                     </div>
                 )}
-            </div>
+            </MapSidePanelContainer>
         </MapSelectedViewContext.Provider>
     );
 };

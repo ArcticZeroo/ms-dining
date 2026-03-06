@@ -1,6 +1,8 @@
+import { MapSidePanelContainer } from './map-side-panel-container.tsx';
+
 export const MapSidePanelHome = () => {
     return (
-        <div className="map-side-panel flex-col">
+        <MapSidePanelContainer>
             <div className="panel-header flex">
                 <span className="material-symbols-outlined">map</span>
                 <span className="panel-title">Campus Map</span>
@@ -13,6 +15,6 @@ export const MapSidePanelHome = () => {
                     Use the search bar to find specific cafes, menu items, or stations.
                 </span>
             </div>
-        </div>
+        </MapSidePanelContainer>
     );
 };
