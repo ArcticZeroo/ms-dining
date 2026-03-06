@@ -96,6 +96,8 @@
 
 .map-search-filters {
     gap: var(--constant-padding);
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .map-search-filters .search-entity-selector {
@@ -104,6 +106,16 @@
 
 .map-search-filters .entity-button {
     padding: var(--constant-padding);
+}
+
+.map-filter-select {
+    font-size: 0.8em;
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
+    border: 1px solid var(--color-background-raised-2);
+    background: var(--color-background-raised);
+    color: var(--color-foreground);
+    cursor: pointer;
 }
 
 .map-home-cafes-button {

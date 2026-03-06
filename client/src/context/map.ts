@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useContext } from 'react';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { CafeView } from '../models/cafe.ts';
-import { IQuerySearchResult, SearchEntityFilterType } from '../models/search.ts';
+import { IQuerySearchResult, MapSearchSortType, SearchEntityFilterType } from '../models/search.ts';
 
 export const MapSelectedViewContext = React.createContext<CafeView | null>(null);
 
@@ -12,6 +12,10 @@ export interface IMapSearchContext {
     searchResultCafeIds: Set<string>;
     entityFilter: SearchEntityFilterType;
     setEntityFilter: Dispatch<SetStateAction<SearchEntityFilterType>>;
+    sortType: MapSearchSortType;
+    setSortType: (type: MapSearchSortType) => void;
+    hasUserLocation: boolean;
+    hasHomeCafes: boolean;
     stage: PromiseStage;
 
     retry(): void;
@@ -23,8 +27,12 @@ export const MapSearchContext = React.createContext<IMapSearchContext>({
     entityFilteredResults: [],
     searchResultCafeIds:   new Set(),
     entityFilter:          SearchEntityFilterType.all,
+    sortType:              MapSearchSortType.relevance,
+    hasUserLocation:       false,
+    hasHomeCafes:          false,
     stage:                 PromiseStage.notRun,
     setEntityFilter:       () => {},
+    setSortType:           () => {},
     retry:                 () => {},
 });
 

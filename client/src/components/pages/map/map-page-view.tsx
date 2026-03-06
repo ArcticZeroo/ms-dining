@@ -143,6 +143,7 @@ export const MapPageView = () => {
     const {
         allResults, entityFilteredResults, searchResultCafeIds,
         entityFilter, setEntityFilter,
+        sortType, setSortType, hasUserLocation, hasHomeCafes,
         searchResultStage, retrySearch
     } = useMapSearch(query);
 
@@ -152,12 +153,16 @@ export const MapPageView = () => {
         query,
         entityFilter,
         setEntityFilter,
+        sortType,
+        setSortType,
+        hasUserLocation,
+        hasHomeCafes,
         allResults: allResults ?? [],
         entityFilteredResults: entityFilteredResults ?? [],
         searchResultCafeIds: searchResultCafeIds ?? new Set<string>(),
         stage: searchResultStage,
         retry: retrySearch
-    } satisfies IMapSearchContext), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, searchResultStage, retrySearch]);
+    } satisfies IMapSearchContext), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, searchResultStage, retrySearch]);
 
     return (
         <MapSearchContext.Provider value={searchContextValue}>

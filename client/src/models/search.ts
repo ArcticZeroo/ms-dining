@@ -20,6 +20,13 @@ export enum SearchEntityFilterType {
     cafe
 }
 
+export enum MapSearchSortType {
+    relevance = 'relevance',
+    price = 'price',
+    proximity = 'proximity',
+    homeCafeProximity = 'homeCafeProximity',
+}
+
 export interface IQuerySearchResult {
     entityType: SearchTypes.SearchEntityType;
     name: string;

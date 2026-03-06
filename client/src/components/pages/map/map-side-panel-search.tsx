@@ -6,21 +6,21 @@ import { useMapSearchFilterViews } from '../../../hooks/map.js';
 import { MapSidePanelContainer } from './map-side-panel-container.tsx';
 
 const useSearchResults = (allowedViewIds: Set<string>) => {
-    const { allResults } = useMapSearchContext();
+    const { entityFilteredResults } = useMapSearchContext();
     return useMemo(() => {
-        if (!allResults) {
+        if (!entityFilteredResults) {
             return [];
         }
 
         if (allowedViewIds.size === 0) {
-            return allResults;
+            return entityFilteredResults;
         }
 
-        return allResults.filter(result => {
+        return entityFilteredResults.filter(result => {
             return (result.cafeId && allowedViewIds.has(result.cafeId))
                 || Array.from(result.locationDatesByCafeId.keys()).some(cafeId => allowedViewIds.has(cafeId));
         });
-    }, [allResults, allowedViewIds]);
+    }, [entityFilteredResults, allowedViewIds]);
 }
 
 export const MapSidePanelSearch = () => {

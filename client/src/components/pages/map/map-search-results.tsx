@@ -2,12 +2,11 @@ import React, { useCallback, useMemo } from 'react';
 import { SearchTypes } from '@msdining/common';
 import { IQuerySearchResult } from '../../../models/search.ts';
 import { useMapSearchContext, useMapHighlightContext } from '../../../context/map.ts';
-import { ApplicationSettings } from '../../../constants/settings.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
 import { pluralize } from '../../../util/string.ts';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { EntityTypeSelector } from '../search/entity-type-selector.js';
+import { MapEntityFilterDropdown } from './map-entity-filter-dropdown.tsx';
 import { MapSearchResultItem } from './map-search-result-item.tsx';
+import { MapSearchSortSelector } from './map-search-sort-selector.tsx';
 import starIcon from '../../../assets/icons/filled/star-white.svg';
 import { classNames } from '../../../util/react.ts';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
@@ -20,10 +19,8 @@ interface IMapSearchResultsProps {
 }
 
 export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, isFilteredToHomeCafes, onFilterToHomeCafes }) => {
-    const { query, allResults, entityFilter, setEntityFilter, stage, retry } = useMapSearchContext();
+    const { query, allResults, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, stage, retry } = useMapSearchContext();
     const { selectedSearchResult, setSelectedSearchResult, setHighlightedCafeIds } = useMapHighlightContext();
-    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
-    const hasHomeCafes = homepageViewIds.size > 0;
 
     const clearHighlight = useCallback(
         () => setHighlightedCafeIds(new Set()),
@@ -70,11 +67,17 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
 
     return (
         <div className="panel-content flex-col">
-            <div className="map-search-filters flex-col">
-                <EntityTypeSelector
+            <div className="map-search-filters flex">
+                <MapEntityFilterDropdown
                     selectedType={entityFilter}
                     onSelectedTypeChanged={setEntityFilter}
                     tabCounts={tabCounts}
+                />
+                <MapSearchSortSelector
+                    selectedSort={sortType}
+                    onSortChanged={setSortType}
+                    hasUserLocation={hasUserLocation}
+                    hasHomeCafes={hasHomeCafes}
                 />
                 {hasHomeCafes && (
                     <button

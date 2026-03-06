@@ -66,6 +66,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 maximumPrice: ApplicationSettings.maximumPrice.value.toString(),
                 hasHiddenMapClickTip: ApplicationSettings.hasHiddenMapClickTip.value.toString(),
                 showModifierMinPrice: ApplicationSettings.showModifierMinPrice.value.toString(),
+                mapSearchSortType: ApplicationSettings.mapSearchSortType.value,
             },
             debugSettings: {
                 allowOnlineOrdering: DebugSettings.allowOnlineOrdering.value.toString(),

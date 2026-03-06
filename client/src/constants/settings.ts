@@ -44,6 +44,7 @@ export const ApplicationSettings = {
     showStationOverviews:          new BooleanSetting('showStationOverviews', true /*defaultValue*/),
     intelligentStationSort:        new BooleanSetting('intelligentStationSort', true /*defaultValue*/),
     hasHiddenMapClickTip:          new BooleanSetting('hasHiddenMapClickTip', false /*defaultValue*/),
+    mapSearchSortType:             new StringSetting('mapSearchSortType', 'relevance'),
     homepageViews:                 new StringSetSetting('homepageDiningHalls', {
         key:               'homepageIds',
         lastUpdateSetting: InternalSettings.lastRoamingSettingsUpdateTime
