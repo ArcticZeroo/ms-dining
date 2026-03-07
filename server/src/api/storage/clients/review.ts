@@ -256,7 +256,7 @@ export abstract class ReviewStorageClient {
 		return results.map(result => ({
 			entityKey:        ENTITY_KEY_GROUP_PREFIX + result.groupId,
 			totalReviewCount: Number(result.reviewCount),
-			overallRating:    result.averageRating ?? 0,
+			overallRating:    Number(result.averageRating ?? 0),
 		}));
 	}
 
@@ -275,7 +275,7 @@ export abstract class ReviewStorageClient {
 
 		return {
 			totalReviewCount: result._count,
-			overallRating:    result._avg.rating ?? 0,
+			overallRating:    Number(result._avg.rating ?? 0),
 		};
 	}
 
@@ -293,7 +293,7 @@ export abstract class ReviewStorageClient {
 
 		return {
 			totalReviewCount: result._count,
-			overallRating:    result._avg.rating ?? 0,
+			overallRating:    Number(result._avg.rating ?? 0),
 		};
 	}
 }

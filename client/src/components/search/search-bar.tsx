@@ -6,7 +6,8 @@ import { navigateToSearch } from '../../util/search.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { useAutocompleteSuggestions } from '../../hooks/autocomplete.ts';
 import { SearchAutocomplete } from './search-autocomplete.tsx';
-import { IAutocompleteSuggestion } from '@msdining/common/models/search';
+import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/models/search';
+import { DebugSettings } from '../../constants/settings.js';
 
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -22,16 +23,20 @@ export const SearchBar = () => {
         setSelectedIndex(-1);
     }, []);
 
+    const closeSearch = useCallback(() => {
+        setIsNavExpanded(false);
+        clearSuggestions();
+        deselectSuggestion();
+        inputRef.current?.blur();
+    }, [setIsNavExpanded, clearSuggestions, deselectSuggestion]);
+
     const submitSearch = useCallback((query: string) => {
         const trimmedQuery = query.trim().toLowerCase();
         if (trimmedQuery.length > 0) {
             navigateToSearch(navigate, trimmedQuery);
-            setIsNavExpanded(false);
-            clearSuggestions();
-            deselectSuggestion();
-            inputRef.current?.blur();
+            closeSearch();
         }
-    }, [navigate, setIsNavExpanded, clearSuggestions, deselectSuggestion]);
+    }, [navigate, closeSearch]);
 
     const onFormSubmitted = (event: React.FormEvent) => {
         event.preventDefault();
@@ -57,7 +62,13 @@ export const SearchBar = () => {
     };
 
     const onSuggestionSelected = (suggestion: IAutocompleteSuggestion) => {
-        searchQueryNotifier.value = suggestion.name;
+        if (suggestion.entityType === SearchEntityType.cafe
+            && suggestion.cafeId
+            && DebugSettings.enableMapPage.value) {
+            closeSearch();
+            navigate(`/map/overview/${suggestion.cafeId}`);
+            return;
+        }
         submitSearch(suggestion.name);
     };
 
