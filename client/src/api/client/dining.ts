@@ -21,6 +21,7 @@ import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from '../reques
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/models/auth';
 import { IReview, IReviewSummary } from '@msdining/common/models/review';
+import { IReviewLookup, isStationReview, getReviewEntityId } from '../../models/reviews.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -416,9 +417,16 @@ export abstract class DiningClient {
         return reviews;
     }
 
-    public static async retrieveReviewsForMenuItem(menuItemId: string): Promise<IReviewSummary> {
+    private static _getReviewPath(lookup: IReviewLookup): string {
+        const entityId = getReviewEntityId(lookup);
+        return isStationReview(lookup)
+            ? `/api/dining/menu/stations/${entityId}/reviews`
+            : `/api/dining/menu/menu-items/${entityId}/reviews`;
+    }
+
+    public static async retrieveReviews(lookup: IReviewLookup): Promise<IReviewSummary> {
         const response = await makeJsonRequest({
-            path: `/api/dining/menu/menu-items/${menuItemId}/reviews`
+            path: DiningClient._getReviewPath(lookup)
         });
 
         if (!isDuckType<IReviewSummary>(response, {
@@ -454,13 +462,13 @@ export abstract class DiningClient {
         });
     }
 
-    public static async createReview(menuItemId: string, request: ICreateReviewRequest): Promise<string /*id*/> {
+    public static async createReview(lookup: IReviewLookup, request: ICreateReviewRequest): Promise<string /*id*/> {
         if (request.comment?.trim().length === 0) {
             request.comment = undefined;
         }
 
         const response = await makeJsonRequest({
-            path:    `/api/dining/menu/menu-items/${menuItemId}/reviews`,
+            path:    DiningClient._getReviewPath(lookup),
             options: {
                 method: 'PUT',
                 body:   JSON.stringify(request)
@@ -504,43 +512,6 @@ export abstract class DiningClient {
         }
 
         return response;
-    }
-
-    public static async retrieveReviewsForStation(stationId: string): Promise<IReviewSummary> {
-        const response = await makeJsonRequest({
-            path: `/api/dining/menu/stations/${stationId}/reviews`
-        });
-
-        if (!isDuckType<IReviewSummary>(response, {
-            overallRating:       'number',
-            totalCount:          'number',
-            counts:              'object',
-            reviewsWithComments: 'object'
-        })) {
-            throw new Error('Station reviews not in the correct format');
-        }
-
-        return response;
-    }
-
-    public static async createStationReview(stationId: string, request: ICreateReviewRequest): Promise<string /*id*/> {
-        if (request.comment?.trim().length === 0) {
-            request.comment = undefined;
-        }
-
-        const response = await makeJsonRequest({
-            path:    `/api/dining/menu/stations/${stationId}/reviews`,
-            options: {
-                method: 'PUT',
-                body:   JSON.stringify(request)
-            }
-        });
-
-        if (!isDuckType<{ id: string }>(response, { id: 'string' })) {
-            throw new Error('Response is invalid or in the wrong format');
-        }
-
-        return response.id;
     }
 
     public static async forceRefreshCafes(forceUseNextWeek: boolean = false): Promise<void> {

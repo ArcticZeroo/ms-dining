@@ -158,6 +158,18 @@ Use the `.card` class and its variants from `index.css` for card-like containers
 - `.card.blue` / `.card.dark-blue` / `.card.yellow` / `.card.theme` — colored variants
 - `.card.error` / `.error-card` — error state cards
 
+## Code Reuse & DRY
+
+**Do not duplicate code.** When adding a feature that parallels an existing one (e.g., station reviews alongside menu item reviews), do NOT create separate methods, components, types, or API endpoints that are nearly identical with only a parameter difference. Instead:
+
+- **Use discriminated unions or a shared type** (like `IReviewLookup`) to represent the variation, then write one implementation that handles both cases.
+- **Use helper functions** to derive entity-specific values (paths, IDs, names) from the shared type, rather than branching with `if (isStation) { ... } else { ... }` throughout the codebase.
+- **Parameterize, don't duplicate.** If two functions differ only in which map they access or which API path they hit, merge them into one function that derives the difference from its input.
+- **Components should be entity-agnostic** wherever possible. A review form, review list, or review summary should not know or care whether it's for a menu item or a station — it should receive a lookup type and operate generically.
+- **Stores and API clients** should expose one method per operation (e.g., `createReview`, not `createReview` + `createStationReview`). The entity type should be encoded in the input, not the method name.
+
+If you find yourself copying a function/component and changing one word, stop and refactor instead.
+
 ## Styling Approach
 
 - Avoid inline styles; use CSS classes

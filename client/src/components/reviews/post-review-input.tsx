@@ -10,7 +10,8 @@ import { REVIEW_STORE } from '../../store/reviews.ts';
 import { UserContext } from '../../context/auth.ts';
 import { IReviewLookup } from '../../models/reviews.js';
 
-interface IPostReviewInputOwnProps {
+interface IPostReviewInputProps {
+    lookup: IReviewLookup;
     cafeId: string;
     rating: number;
     comment: string;
@@ -24,13 +25,8 @@ interface IPostReviewInputOwnProps {
     onReviewIdChanged(reviewId: string | undefined): void;
 }
 
-type IPostReviewInputProps = IPostReviewInputOwnProps & IReviewLookup;
-
 export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
-    menuItemId,
-    menuItemName,
-    stationId,
-    stationName,
+    lookup,
     cafeId,
     comment,
     rating,
@@ -69,25 +65,14 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 : 'You have nothing to save! Your comment is the same as what\'s on the server.'
         );
 
-    const isStation = stationId != null;
-
     const postReview = useCallback(
         (request: ICreateReviewRequest) => {
             setReviewCreationStage(PromiseStage.running);
-            const createPromise = isStation
-                ? REVIEW_STORE.createStationReview(stationId, request, {
-                    userId:          user?.id,
-                    userDisplayName: user?.displayName ?? 'Anonymous',
-                    stationName,
-                    cafeId,
-                })
-                : REVIEW_STORE.createReview(menuItemId!, request, {
-                    userId:          user?.id,
-                    userDisplayName: user?.displayName ?? 'Anonymous',
-                    menuItemName,
-                    cafeId,
-                });
-            createPromise
+            REVIEW_STORE.createReview(lookup, request, {
+                userId:          user?.id,
+                userDisplayName: user?.displayName ?? 'Anonymous',
+                cafeId,
+            })
                 .then(id => {
                     if (request.anonymous) {
                         onRatingChanged(0);
@@ -105,7 +90,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                     setReviewCreationStage(PromiseStage.error);
                 });
         },
-        [isStation, stationId, stationName, menuItemId, menuItemName, cafeId, user, onReviewIdChanged, onRatingChanged, onCommentChanged]
+        [lookup, cafeId, user, onReviewIdChanged, onRatingChanged, onCommentChanged]
     );
 
     // If a user clicks on the stars, it'll try to set them to null.
@@ -151,10 +136,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         }
 
         setReviewCreationStage(PromiseStage.running);
-        const deletePromise = isStation
-            ? REVIEW_STORE.deleteStationReview(reviewId, stationId)
-            : REVIEW_STORE.deleteReview(reviewId, menuItemId!);
-        deletePromise
+        REVIEW_STORE.deleteReview(reviewId, lookup)
             .then(() => {
                 onRatingChanged(0);
                 onReviewIdChanged(undefined);

@@ -116,30 +116,15 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                     <ScrollAnchor id={scrollAnchorId} margin={`${cafeHeaderHeight}px`}/>
                     <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
                         <FavoriteSearchableItemButton name={station.name} type={SearchEntityType.station}/>
-                        {
-                            hasReviewData && (
-                                <button
-                                    className="default-button default-container flex flex-center"
-                                    onClick={onReviewClick}
-                                    title="View station reviews"
-                                >
-                                    {formatReviewScore(station.overallRating!, station.totalReviewCount!)}
-                                </button>
-                            )
-                        }
-                        {
-                            !hasReviewData && (
-                                <button
-                                    className="default-button default-container flex flex-center icon-container"
-                                    onClick={onReviewClick}
-                                    title="Review this station"
-                                >
-                                    <span className="material-symbols-outlined">
-                                        rate_review
-                                    </span>
-                                </button>
-                            )
-                        }
+                        <button
+                            className="default-button default-container flex flex-center icon-container"
+                            onClick={onReviewClick}
+                            title="Review this station"
+                        >
+                            <span className="material-symbols-outlined">
+                                rate_review
+                            </span>
+                        </button>
                         <button className="title" onClick={onTitleClick}>
                             {
                                 station.logoUrl ? (
@@ -150,21 +135,33 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                                     />
                                 ) : <span/>
                             }
-                            <span className="flex">
-                                {station.name}
-                                {
-                                    station.uniqueness.isTraveling && (
-                                        <span className="number-badge" title="This station is traveling today. It won't be here tomorrow.">
-                                            <span className="material-symbols-outlined">
-                                                flight
+                            <span className="flex flex-col">
+                                <span className="flex">
+                                    {station.name}
+                                    {
+                                        station.uniqueness.isTraveling && (
+                                            <span className="number-badge" title="This station is traveling today. It won't be here tomorrow.">
+                                                <span className="material-symbols-outlined">
+                                                    flight
+                                                </span>
                                             </span>
-                                        </span>
-                                    )
-                                }
+                                        )
+                                    }
+                                    {
+                                        !station.uniqueness.isTraveling && (station.uniqueness.itemDays[1] || 0) > 0 && (
+                                            <span className="number-badge" title="Unique items available today only">
+                                                {String(station.uniqueness.itemDays[1])}
+                                            </span>
+                                        )
+                                    }
+                                </span>
                                 {
-                                    !station.uniqueness.isTraveling && (station.uniqueness.itemDays[1] || 0) > 0 && (
-                                        <span className="number-badge" title="Unique items available today only">
-                                            {String(station.uniqueness.itemDays[1])}
+                                    hasReviewData && (
+                                        <span
+                                            className="station-review-summary"
+                                            onClick={onReviewClick}
+                                        >
+                                            {formatReviewScore(station.overallRating!, station.totalReviewCount!)}
                                         </span>
                                     )
                                 }

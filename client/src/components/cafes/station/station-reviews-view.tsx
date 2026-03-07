@@ -12,8 +12,8 @@ interface IStationReviewsViewProps {
 }
 
 export const StationReviewsView: React.FC<IStationReviewsViewProps> = ({ stationId, stationName, cafeId }) => {
-    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getStationReviews(stationId));
     const lookup = useMemo(() => ({ stationId, stationName }), [stationId, stationName]);
+    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(lookup));
 
     return (
         <div className="default-container bg-raised-3 flex-col">

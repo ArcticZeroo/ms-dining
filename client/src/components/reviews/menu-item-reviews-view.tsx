@@ -12,8 +12,8 @@ interface IMenuItemReviewsViewProps {
 }
 
 export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId, menuItemName, cafeId }) => {
-    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(menuItemId));
     const lookup = useMemo(() => ({ menuItemId, menuItemName }), [menuItemId, menuItemName]);
+    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(lookup));
 
     return (
         <div className="default-container bg-raised-3 flex-col">

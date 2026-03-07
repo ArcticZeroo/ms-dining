@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { IReview } from '@msdining/common/models/review';
 import { REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { StarRating } from './star-rating.tsx';
 import { useDelayedPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { classNames } from '../../util/react.ts';
 import { REVIEW_STORE } from '../../store/reviews.ts';
+import { IReviewLookup } from '../../models/reviews.ts';
 
 interface IReviewEditFormProps {
     review: IReview;
@@ -23,22 +24,24 @@ export const ReviewEditForm: React.FC<IReviewEditFormProps> = ({
     const [editComment, setEditComment] = useState(review.comment ?? '');
     const [editDisplayName, setEditDisplayName] = useState(review.userDisplayName);
 
+    const lookup: IReviewLookup = useMemo(() => {
+        if (review.stationId) {
+            return { stationId: review.stationId, stationName: review.stationName ?? '' };
+        }
+        return { menuItemId: review.menuItemId ?? '', menuItemName: review.menuItemName ?? '' };
+    }, [review.stationId, review.stationName, review.menuItemId, review.menuItemName]);
+
     const { actualStage: saveStage, run: saveReview } = useDelayedPromiseState(
         useCallback(
             async () => {
-                const updateRequest = {
+                await REVIEW_STORE.updateReview(review.id, lookup, {
                     rating:      editRating,
                     comment:     editComment.trim() || undefined,
                     displayName: !review.userId ? editDisplayName.trim() || undefined : undefined,
-                };
-                if (review.stationId) {
-                    await REVIEW_STORE.updateStationReview(review.id, review.stationId, updateRequest);
-                } else if (review.menuItemId) {
-                    await REVIEW_STORE.updateReview(review.id, review.menuItemId, updateRequest);
-                }
+                });
                 onSaved();
             },
-            [review.id, review.menuItemId, review.stationId, review.userId, editRating, editComment, editDisplayName, onSaved]
+            [review.id, review.userId, lookup, editRating, editComment, editDisplayName, onSaved]
         )
     );
 

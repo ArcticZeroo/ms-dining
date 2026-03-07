@@ -17,6 +17,14 @@ import { useIsAdmin } from '../../hooks/auth.ts';
 import { DebugSettings } from '../../constants/settings.ts';
 import { ReviewEditForm } from './review-edit-form.tsx';
 import { REVIEW_STORE } from '../../store/reviews.ts';
+import { getReviewEntityName, IReviewLookup, isStationReview } from '../../models/reviews.ts';
+
+const getLookupFromReview = (review: IReview): IReviewLookup => {
+    if (review.stationId) {
+        return { stationId: review.stationId, stationName: review.stationName ?? '' };
+    }
+    return { menuItemId: review.menuItemId ?? '', menuItemName: review.menuItemName ?? '' };
+};
 
 interface IReviewCardProps {
     review: IReview;
@@ -56,14 +64,15 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
 
     const canModify = isMe || isAdminActive;
 
-    const isStation = review.stationId != null;
+    const lookup = getLookupFromReview(review);
+    const isStation = isStationReview(lookup);
 
     const link = view == null
         ? '#'
         : getSearchAnchorJumpUrl({
             cafeId:     review.cafeId,
             entityType: isStation ? SearchEntityType.station : SearchEntityType.menuItem,
-            name:       normalizeName((isStation ? review.stationName : review.menuItemName) ?? ''),
+            name:       normalizeName(getReviewEntityName(lookup)),
             view,
             cafeIdsOnPage,
             date:       new Date()
@@ -77,10 +86,7 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
         }
 
         setDeleteStage(PromiseStage.running);
-        const deletePromise = isStation
-            ? REVIEW_STORE.deleteStationReview(review.id, review.stationId!)
-            : REVIEW_STORE.deleteReview(review.id, review.menuItemId!);
-        deletePromise
+        REVIEW_STORE.deleteReview(review.id, lookup)
             .then(() => {
                 setDeleteStage(PromiseStage.success);
             })

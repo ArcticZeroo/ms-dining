@@ -13,3 +13,9 @@ interface IReviewLookupForMenuItem {
 }
 
 export type IReviewLookup = IReviewLookupForStation | IReviewLookupForMenuItem;
+
+export const isStationReview = (lookup: IReviewLookup): lookup is IReviewLookupForStation => lookup.stationId != null;
+
+export const getReviewEntityId = (lookup: IReviewLookup): string => lookup.menuItemId ?? lookup.stationId;
+
+export const getReviewEntityName = (lookup: IReviewLookup): string => lookup.menuItemName ?? lookup.stationName;

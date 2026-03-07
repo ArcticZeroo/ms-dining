@@ -89,7 +89,7 @@ export const ReviewsViewWithData: React.FC<IReviewsViewWithDataProps> = ({ respo
                     isLoggedIn && (
                         <PostReviewInput
                             {...reviewInputProps}
-                            {...lookup}
+                            lookup={lookup}
                         />
                     )
                 }
