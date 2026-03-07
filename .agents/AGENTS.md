@@ -15,7 +15,8 @@ If you find important learnings during development, consider documenting them in
 
 ## General Guidance
 
-- Avoid duplicating code wherever possible. Look for opportunities to share code
+- Avoid duplicating code wherever possible. If two functions or components differ only in one parameter (e.g., an entity type like "station" vs "menu item"), merge them into a single implementation that takes the variation as an input — typically via a discriminated union type. Do NOT create parallel `fooForMenuItem()` / `fooForStation()` methods. Parameterize, don't duplicate.
+- When multiple API endpoints, store methods, or components share the same logic, extract the shared logic into a helper and call it from both places. The goal is zero copy-paste.
 - Try to avoid huge multi-purpose functions where possible. Try to move out individual logical parts into helpers so that the big functions are more readable
 - No obvious self-evident comments
 
