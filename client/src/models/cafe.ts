@@ -25,10 +25,13 @@ export type CafeView = ICafeSingleView | ICafeGroupView;
 export type MenuItemsByCategoryName = Record<string, Array<IMenuItem>>;
 
 export interface ICafeStation {
+    id: string;
     name: string;
     logoUrl?: Nullable<string>;
     menu: MenuItemsByCategoryName;
     uniqueness: IStationUniquenessData;
+    overallRating?: number;
+    totalReviewCount?: number;
 }
 
 export type CafeMenu = ICafeStation[];

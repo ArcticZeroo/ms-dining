@@ -37,15 +37,16 @@ import {
 export const getBasedOnReviews = async (
 	context: IRecommendationContext,
 ): Promise<IRecommendationSection | null> => {
-	const reviews = await context.getUserReviews();
+	const allReviews = await context.getUserReviews();
+	const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);
 	const positiveReviews = reviews.filter(review => review.rating >= POSITIVE_REVIEW_THRESHOLD);
 
 	if (positiveReviews.length === 0) {
 		return null;
 	}
 
-	const reviewedItemIds = new Set(reviews.map(review => review.menuItemId));
-	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem)));
+	const reviewedItemIds = new Set(reviews.map(review => review.menuItemId!));
+	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem!)));
 
 	const allMenuItems = await context.getAllMenuItems();
 	const unreviewedMenuItemsByEntityKey = new Map<string, IMenuItemCandidate>();
@@ -77,7 +78,7 @@ export const getBasedOnReviews = async (
 			try {
 				return {
 					review,
-					results: await searchSimilarEntitiesByType(SearchEntityType.menuItem, review.menuItemId, VECTOR_SEARCH_LIMIT),
+					results: await searchSimilarEntitiesByType(SearchEntityType.menuItem, review.menuItemId!, VECTOR_SEARCH_LIMIT),
 				};
 			} catch (error) {
 				log.error('Error finding similar items for review:', error);
@@ -100,7 +101,7 @@ export const getBasedOnReviews = async (
 					item:     toRecommendationItem(
 						menuItem,
 						1 - result.distance,
-						`Similar to ${review.menuItem.name}`,
+						`Similar to ${review.menuItem!.name}`,
 					),
 					distance: result.distance,
 				});

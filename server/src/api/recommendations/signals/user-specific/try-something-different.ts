@@ -39,7 +39,8 @@ import {
 export const getTrySomethingDifferent = async (
 	context: IRecommendationContext,
 ): Promise<IRecommendationSection | null> => {
-	const reviews = await context.getUserReviews();
+	const allReviews = await context.getUserReviews();
+	const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);
 	if (reviews.length === 0) {
 		return null;
 	}
@@ -48,7 +49,7 @@ export const getTrySomethingDifferent = async (
 	const embeddingResults = await Promise.all(
 		reviews.map(async (review) => {
 			try {
-				return await getSearchEntityEmbedding(SearchEntityType.menuItem, review.menuItemId);
+				return await getSearchEntityEmbedding(SearchEntityType.menuItem, review.menuItemId!);
 			} catch {
 				return null;
 			}
@@ -74,8 +75,8 @@ export const getTrySomethingDifferent = async (
 	// Search broadly from the centroid, then take items with LARGEST distance
 	const results = await searchVectorRawByType(centroid, SearchEntityType.menuItem, VECTOR_SEARCH_LIMIT * 3);
 
-	const reviewedItemIds = new Set(reviews.map(review => review.menuItemId));
-	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem)));
+	const reviewedItemIds = new Set(reviews.map(review => review.menuItemId!));
+	const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem!)));
 	const availableItems = await context.getAllMenuItems();
 	const availableById = new Map(availableItems.map(item => [item.menuItem.id, item]));
 
@@ -84,7 +85,7 @@ export const getTrySomethingDifferent = async (
 	const negativeEmbeddingResults = await Promise.all(
 		negativeReviews.map(async (review) => {
 			try {
-				return await getSearchEntityEmbedding(SearchEntityType.menuItem, review.menuItemId);
+				return await getSearchEntityEmbedding(SearchEntityType.menuItem, review.menuItemId!);
 			} catch {
 				return null;
 			}

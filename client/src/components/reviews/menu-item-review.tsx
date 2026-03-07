@@ -56,12 +56,14 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
 
     const canModify = isMe || isAdminActive;
 
+    const isStation = review.stationId != null;
+
     const link = view == null
         ? '#'
         : getSearchAnchorJumpUrl({
             cafeId:     review.cafeId,
-            entityType: SearchEntityType.menuItem,
-            name:       normalizeName(review.menuItemName),
+            entityType: isStation ? SearchEntityType.station : SearchEntityType.menuItem,
+            name:       normalizeName((isStation ? review.stationName : review.menuItemName) ?? ''),
             view,
             cafeIdsOnPage,
             date:       new Date()
@@ -75,7 +77,10 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
         }
 
         setDeleteStage(PromiseStage.running);
-        REVIEW_STORE.deleteReview(review.id, review.menuItemId)
+        const deletePromise = isStation
+            ? REVIEW_STORE.deleteStationReview(review.id, review.stationId!)
+            : REVIEW_STORE.deleteReview(review.id, review.menuItemId!);
+        deletePromise
             .then(() => {
                 setDeleteStage(PromiseStage.success);
             })
@@ -114,7 +119,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                     {
                         showMenuItemName && (
                             <span>
-                            &nbsp;reviewed {review.menuItemName} at&nbsp;
+                            &nbsp;reviewed {review.menuItemName ?? review.stationName} at&nbsp;
                             </span>
                         )
                     }

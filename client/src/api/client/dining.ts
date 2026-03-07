@@ -20,7 +20,7 @@ import { FavoritesCache } from '../cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from '../request.ts';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/models/auth';
-import { IReview, IReviewDataForMenuItem } from '@msdining/common/models/review';
+import { IReview, IReviewSummary } from '@msdining/common/models/review';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 
@@ -416,12 +416,12 @@ export abstract class DiningClient {
         return reviews;
     }
 
-    public static async retrieveReviewsForMenuItem(menuItemId: string): Promise<IReviewDataForMenuItem> {
+    public static async retrieveReviewsForMenuItem(menuItemId: string): Promise<IReviewSummary> {
         const response = await makeJsonRequest({
             path: `/api/dining/menu/menu-items/${menuItemId}/reviews`
         });
 
-        if (!isDuckType<IReviewDataForMenuItem>(response, {
+        if (!isDuckType<IReviewSummary>(response, {
             overallRating:       'number',
             totalCount:          'number',
             counts:              'object',
@@ -499,11 +499,48 @@ export abstract class DiningClient {
             path: '/api/dining/menu/reviews/recent'
         });
 
-        if (!isDuckTypeArray<IReview>(response, { id: 'string', menuItemId: 'string', menuItemName: 'string' })) {
+        if (!isDuckTypeArray<IReview>(response, { id: 'string' })) {
             throw new Error('Invalid format');
         }
 
         return response;
+    }
+
+    public static async retrieveReviewsForStation(stationId: string): Promise<IReviewSummary> {
+        const response = await makeJsonRequest({
+            path: `/api/dining/menu/stations/${stationId}/reviews`
+        });
+
+        if (!isDuckType<IReviewSummary>(response, {
+            overallRating:       'number',
+            totalCount:          'number',
+            counts:              'object',
+            reviewsWithComments: 'object'
+        })) {
+            throw new Error('Station reviews not in the correct format');
+        }
+
+        return response;
+    }
+
+    public static async createStationReview(stationId: string, request: ICreateReviewRequest): Promise<string /*id*/> {
+        if (request.comment?.trim().length === 0) {
+            request.comment = undefined;
+        }
+
+        const response = await makeJsonRequest({
+            path:    `/api/dining/menu/stations/${stationId}/reviews`,
+            options: {
+                method: 'PUT',
+                body:   JSON.stringify(request)
+            }
+        });
+
+        if (!isDuckType<{ id: string }>(response, { id: 'string' })) {
+            throw new Error('Response is invalid or in the wrong format');
+        }
+
+        return response.id;
     }
 
     public static async forceRefreshCafes(forceUseNextWeek: boolean = false): Promise<void> {

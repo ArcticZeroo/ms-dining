@@ -1,17 +1,31 @@
 import { PostReviewInput } from './post-review-input.tsx';
 import { ReviewStats } from './review-stats.tsx';
 import { MenuItemReviewsList } from './menu-item-reviews-list.tsx';
-import { IReviewDataForMenuItem } from '@msdining/common/models/review';
+import { IReviewSummary } from '@msdining/common/models/review';
 import React, { useMemo, useState } from 'react';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { LogInForReviewButton } from './log-in-for-review-button.tsx';
 
-interface IMenuItemReviewsDataViewProps {
-    response: IReviewDataForMenuItem;
-    menuItemId: string;
-    menuItemName: string;
+interface IMenuItemReviewsDataViewBaseProps {
+    response: IReviewSummary;
     cafeId: string;
 }
+
+interface IMenuItemReviewsDataViewForMenuItem extends IMenuItemReviewsDataViewBaseProps {
+    menuItemId: string;
+    menuItemName: string;
+    stationId?: undefined;
+    stationName?: undefined;
+}
+
+interface IMenuItemReviewsDataViewForStation extends IMenuItemReviewsDataViewBaseProps {
+    stationId: string;
+    stationName: string;
+    menuItemId?: undefined;
+    menuItemName?: undefined;
+}
+
+type IMenuItemReviewsDataViewProps = IMenuItemReviewsDataViewForMenuItem | IMenuItemReviewsDataViewForStation;
 
 interface IReviewStats {
     counts: Record<number, number>;
@@ -19,7 +33,7 @@ interface IReviewStats {
     overallRating: number;
 }
 
-const useLocalStats = (reviewData: IReviewDataForMenuItem, localRating: number | undefined): IReviewStats => {
+const useLocalStats = (reviewData: IReviewSummary, localRating: number | undefined): IReviewStats => {
     return useMemo(
         () => {
             if (localRating == null || reviewData.myReview?.rating === localRating) {
@@ -61,7 +75,8 @@ const useLocalStats = (reviewData: IReviewDataForMenuItem, localRating: number |
     );
 };
 
-export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = ({ response, menuItemId, menuItemName, cafeId }) => {
+export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (props) => {
+    const { response, cafeId, menuItemId, stationId } = props;
     const [localComment, setLocalComment] = useState<string>(response.myReview?.comment ?? '');
     const [localRating, setLocalRating] = useState<number>(response.myReview?.rating ?? 0);
     const [reviewId, setReviewId] = useState<string | undefined>(response.myReview?.id);
@@ -69,22 +84,37 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
 
     const stats = useLocalStats(response, localRating);
 
+    const entityId = menuItemId ?? stationId;
+
+    const reviewInputProps = {
+        cafeId,
+        comment:           localComment,
+        rating:            localRating,
+        reviewId,
+        reviewPostedDate:  response.myReview?.createdDate,
+        onRatingChanged:   setLocalRating,
+        onCommentChanged:  setLocalComment,
+        onReviewIdChanged: setReviewId,
+    };
+
     return (
         <div className="menu-item-reviews flex">
             <div className="flex-col">
                 {
-                    isLoggedIn && (
+                    isLoggedIn && stationId != null && (
                         <PostReviewInput
+                            {...reviewInputProps}
+                            stationId={stationId}
+                            stationName={props.stationName}
+                        />
+                    )
+                }
+                {
+                    isLoggedIn && menuItemId != null && (
+                        <PostReviewInput
+                            {...reviewInputProps}
                             menuItemId={menuItemId}
-                            menuItemName={menuItemName}
-                            cafeId={cafeId}
-                            comment={localComment}
-                            rating={localRating}
-                            reviewId={reviewId}
-                            reviewPostedDate={response.myReview?.createdDate}
-                            onRatingChanged={setLocalRating}
-                            onCommentChanged={setLocalComment}
-                            onReviewIdChanged={setReviewId}
+                            menuItemName={props.menuItemName}
                         />
                     )
                 }
@@ -99,7 +129,7 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                 <MenuItemReviewsList
                     totalCount={stats.totalCount}
                     reviewsWithComments={response.reviewsWithComments}
-                    menuItemId={menuItemId}
+                    menuItemId={entityId}
                 />
             </div>
         </div>

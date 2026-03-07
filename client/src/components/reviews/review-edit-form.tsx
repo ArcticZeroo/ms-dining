@@ -26,14 +26,19 @@ export const ReviewEditForm: React.FC<IReviewEditFormProps> = ({
     const { actualStage: saveStage, run: saveReview } = useDelayedPromiseState(
         useCallback(
             async () => {
-                await REVIEW_STORE.updateReview(review.id, review.menuItemId, {
+                const updateRequest = {
                     rating:      editRating,
                     comment:     editComment.trim() || undefined,
                     displayName: !review.userId ? editDisplayName.trim() || undefined : undefined,
-                });
+                };
+                if (review.stationId) {
+                    await REVIEW_STORE.updateStationReview(review.id, review.stationId, updateRequest);
+                } else if (review.menuItemId) {
+                    await REVIEW_STORE.updateReview(review.id, review.menuItemId, updateRequest);
+                }
                 onSaved();
             },
-            [review.id, review.menuItemId, review.userId, editRating, editComment, editDisplayName, onSaved]
+            [review.id, review.menuItemId, review.stationId, review.userId, editRating, editComment, editDisplayName, onSaved]
         )
     );
 

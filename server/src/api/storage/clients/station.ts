@@ -2,14 +2,16 @@ import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { usePrismaClient } from '../client.js';
 import { Prisma, Station } from '@prisma/client';
 import { ICafeStation } from '../../../models/cafe.js';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 export abstract class StationStorageClient {
 	public static async createStationAsync(station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
 		const updateData = {
-			name:    station.name,
-			menuId:  station.menuId,
-			cafeId:  station.cafeId,
-			logoUrl: station.logoUrl || null
+			name:           station.name,
+			normalizedName: normalizeNameForSearch(station.name),
+			menuId:         station.menuId,
+			cafeId:         station.cafeId,
+			logoUrl:        station.logoUrl || null
 		} satisfies Prisma.StationUpdateArgs['data'];
 
 		if (station.groupId) {

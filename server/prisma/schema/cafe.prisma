@@ -108,10 +108,11 @@ model MenuItemModifierChoice {
 
 model Station {
   // string id from buy-ondemand
-  id      String  @id
-  name    String
-  logoUrl String?
-  menuId  String
+  id             String  @id
+  name           String
+  normalizedName String  @default("")
+  logoUrl        String?
+  menuId         String
 
   groupId String?
   group   CrossCafeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
@@ -121,6 +122,7 @@ model Station {
 
   dailyStations DailyStation[]
   menuItems     MenuItem[]
+  reviews       Review[]
 }
 
 model DailyStation {
@@ -203,11 +205,14 @@ model Review {
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  menuItemId             String
-  menuItem               MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  menuItemNormalizedName String // needed to aggregate since prisma doesn't currently support aggregations on relations
+  menuItemId String?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  stationId String?
+  station   Station? @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, menuItemId])
+  @@unique([userId, stationId])
 }
 
 model Session {

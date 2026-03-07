@@ -10,7 +10,7 @@ import { getDevKey } from '../constants/env.js';
 import { UserStorageClient } from '../api/storage/clients/user.js';
 import { IServerUser } from '../models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
-import { retrieveReviewHeaderByPartsAsync } from '../api/cache/reviews.js';
+import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsync } from '../api/cache/reviews.js';
 
 export const attachRouter = (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 
@@ -87,6 +87,12 @@ const serializeSearchResult = async (searchResult: IServerSearchResult, allowMod
 
 	if (searchResult.type === SearchEntityType.menuItem) {
 		const reviewHeader = await retrieveReviewHeaderByPartsAsync(searchResult.groupId, searchResult.name);
+		if (reviewHeader.totalReviewCount > 0) {
+			overallRating = reviewHeader.overallRating;
+			totalReviewCount = reviewHeader.totalReviewCount;
+		}
+	} else if (searchResult.type === SearchEntityType.station || searchResult.type === SearchEntityType.dailyStation) {
+		const reviewHeader = await retrieveStationReviewHeaderByPartsAsync(searchResult.groupId, searchResult.name);
 		if (reviewHeader.totalReviewCount > 0) {
 			overallRating = reviewHeader.overallRating;
 			totalReviewCount = reviewHeader.totalReviewCount;

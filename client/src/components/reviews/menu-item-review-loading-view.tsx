@@ -1,27 +1,36 @@
 import React from 'react';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { IReviewDataForMenuItem } from '@msdining/common/models/review';
+import { IReviewSummary } from '@msdining/common/models/review';
 import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
 import { RetryButton } from '../button/retry-button.tsx';
 import { MenuItemReviewDataView } from './menu-item-review-data-view.tsx';
 
-interface IMenuItemReviewsViewProps {
+interface IMenuItemReviewsViewBaseProps {
     stage: PromiseStage;
-    response: IReviewDataForMenuItem | undefined;
+    response: IReviewSummary | undefined;
     onRetry: () => void;
-    menuItemId: string;
-    menuItemName: string;
     cafeId: string;
 }
 
-export const MenuItemReviewsLoadingView: React.FC<IMenuItemReviewsViewProps> = ({
-    stage,
-    response,
-    onRetry,
-    menuItemId,
-    menuItemName,
-    cafeId
-}) => {
+interface IMenuItemReviewsViewForMenuItem extends IMenuItemReviewsViewBaseProps {
+    menuItemId: string;
+    menuItemName: string;
+    stationId?: undefined;
+    stationName?: undefined;
+}
+
+interface IMenuItemReviewsViewForStation extends IMenuItemReviewsViewBaseProps {
+    stationId: string;
+    stationName: string;
+    menuItemId?: undefined;
+    menuItemName?: undefined;
+}
+
+type IMenuItemReviewsLoadingViewProps = IMenuItemReviewsViewForMenuItem | IMenuItemReviewsViewForStation;
+
+export const MenuItemReviewsLoadingView: React.FC<IMenuItemReviewsLoadingViewProps> = (props) => {
+    const { stage, response, onRetry } = props;
+
     if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {
         return (
             <div className="flex flex-center">
@@ -42,7 +51,23 @@ export const MenuItemReviewsLoadingView: React.FC<IMenuItemReviewsViewProps> = (
         );
     }
 
+    if (props.stationId != null) {
+        return (
+            <MenuItemReviewDataView
+                response={response}
+                stationId={props.stationId}
+                stationName={props.stationName}
+                cafeId={props.cafeId}
+            />
+        );
+    }
+
     return (
-        <MenuItemReviewDataView response={response} menuItemId={menuItemId} menuItemName={menuItemName} cafeId={cafeId}/>
+        <MenuItemReviewDataView
+            response={response}
+            menuItemId={props.menuItemId}
+            menuItemName={props.menuItemName}
+            cafeId={props.cafeId}
+        />
     );
 };
