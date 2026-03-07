@@ -1,6 +1,6 @@
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../../button/retry-button.tsx';
-import { MenuItemReview } from '../../../reviews/menu-item-review.tsx';
+import { ReviewCard } from '../../../reviews/review-card.tsx';
 import { toDateString } from '@msdining/common/util/date-util';
 import { REVIEW_STORE } from '../../../../store/reviews.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
@@ -24,7 +24,7 @@ export const HomeRecentReviewsView = () => {
             <div className="flex horizontal-scroll">
                 {
                     value.map(review => (
-                        <MenuItemReview
+                        <ReviewCard
                             key={review.id}
                             review={review}
                             showMyself={true}
@@ -38,12 +38,10 @@ export const HomeRecentReviewsView = () => {
 
     return (
         <div className="flex horizontal-scroll loading-skeleton">
-            <MenuItemReview
+            <ReviewCard
                 review={{
                     id: 'loading',
                     userDisplayName: '...',
-                    menuItemId: '',
-                    menuItemName: '...',
                     cafeId: '',
                     rating: 5,
                     createdDate: toDateString(new Date())

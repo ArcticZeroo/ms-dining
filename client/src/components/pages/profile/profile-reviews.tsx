@@ -1,7 +1,7 @@
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { MenuItemReview } from '../../reviews/menu-item-review.tsx';
+import { ReviewCard } from '../../reviews/review-card.tsx';
 import { IReview } from '@msdining/common/models/review';
 import { useMemo } from 'react';
 import { ReviewStats } from '../../reviews/review-stats.tsx';
@@ -101,7 +101,7 @@ export const ProfileReviews = () => {
                     <div className="flex-col">
                         {
                             reviews.map(review => (
-                                <MenuItemReview
+                                <ReviewCard
                                     key={review.id}
                                     review={review}
                                     showMyself={true}

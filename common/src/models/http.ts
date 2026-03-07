@@ -75,6 +75,7 @@ export interface IPriceResponse {
 }
 
 export interface IStationDTO {
+	id: string;
 	name: string;
 	// Not all stations have a logo URL apparently?
 	logoUrl?: Nullable<string>;
@@ -83,6 +84,8 @@ export interface IStationDTO {
 	// todo: revisit this, it seems weird to make this a string instead of json directly
 	// maybe we just make patterns use arrays to avoid needing conversion
 	pattern?: string;
+	overallRating?: number;
+	totalReviewCount?: number;
 }
 
 // GET /api/dining/menu/:cafeId

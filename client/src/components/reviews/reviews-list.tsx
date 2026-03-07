@@ -1,18 +1,19 @@
 import { IReviewWithComment } from '@msdining/common/models/review';
 import React from 'react';
-import { MenuItemReview } from './menu-item-review.tsx';
+import { ReviewCard } from './review-card.tsx';
 
-interface IMenuItemReviewsListProps {
+interface IReviewsListProps {
     totalCount: number;
     reviewsWithComments: IReviewWithComment[];
-    menuItemId?: string;
+    entityId?: string;
+    isStation?: boolean;
 }
 
-export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ totalCount, reviewsWithComments, menuItemId }) => {
+export const ReviewsList: React.FC<IReviewsListProps> = ({ totalCount, reviewsWithComments, entityId, isStation = false }) => {
     if (totalCount === 0) {
         return (
             <div className="flex flex-center flex-col">
-                <span>There are no reviews yet for this item. Be the first!</span>
+                <span>There are no reviews yet for this {isStation ? 'station' : 'item'}. Be the first!</span>
             </div>
         );
     }
@@ -21,10 +22,10 @@ export const MenuItemReviewsList: React.FC<IMenuItemReviewsListProps> = ({ total
         <>
             {
                 reviewsWithComments.map(review => (
-                    <MenuItemReview
+                    <ReviewCard
                         key={review.id}
                         review={review}
-                        showMyself={review.menuItemId !== menuItemId}
+                        showMyself={(review.menuItemId ?? review.stationId) !== entityId}
                     />
                 ))
             }

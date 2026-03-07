@@ -8,8 +8,9 @@ import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts
 import { DebugSettings } from '../../constants/settings.ts';
 import { REVIEW_STORE } from '../../store/reviews.ts';
 import { UserContext } from '../../context/auth.ts';
+import { IReviewLookup } from '../../models/reviews.js';
 
-interface IPostReviewInputBaseProps {
+interface IPostReviewInputOwnProps {
     cafeId: string;
     rating: number;
     comment: string;
@@ -23,21 +24,7 @@ interface IPostReviewInputBaseProps {
     onReviewIdChanged(reviewId: string | undefined): void;
 }
 
-interface IPostMenuItemReviewInputProps extends IPostReviewInputBaseProps {
-    menuItemId: string;
-    menuItemName: string;
-    stationId?: undefined;
-    stationName?: undefined;
-}
-
-interface IPostStationReviewInputProps extends IPostReviewInputBaseProps {
-    stationId: string;
-    stationName: string;
-    menuItemId?: undefined;
-    menuItemName?: undefined;
-}
-
-type IPostReviewInputProps = IPostMenuItemReviewInputProps | IPostStationReviewInputProps;
+type IPostReviewInputProps = IPostReviewInputOwnProps & IReviewLookup;
 
 export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     menuItemId,

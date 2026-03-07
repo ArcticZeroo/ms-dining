@@ -18,18 +18,18 @@ import { DebugSettings } from '../../constants/settings.ts';
 import { ReviewEditForm } from './review-edit-form.tsx';
 import { REVIEW_STORE } from '../../store/reviews.ts';
 
-interface IMenuItemReviewProps {
+interface IReviewCardProps {
     review: IReview;
     isSkeleton?: boolean;
-    showMenuItemName?: boolean;
+    showName?: boolean;
     showMyself: boolean;
     stretchSelf?: boolean;
 }
 
-export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
+export const ReviewCard: React.FC<IReviewCardProps> = ({
     review,
     showMyself,
-    showMenuItemName = true,
+    showName = true,
     isSkeleton = false,
     stretchSelf = false
 }) => {
@@ -117,7 +117,7 @@ export const MenuItemReview: React.FC<IMenuItemReviewProps> = ({
                         {review.userDisplayName}
                     </span>
                     {
-                        showMenuItemName && (
+                        showName && (
                             <span>
                             &nbsp;reviewed {review.menuItemName ?? review.stationName} at&nbsp;
                             </span>

@@ -1,31 +1,11 @@
 import { PostReviewInput } from './post-review-input.tsx';
 import { ReviewStats } from './review-stats.tsx';
-import { MenuItemReviewsList } from './menu-item-reviews-list.tsx';
+import { ReviewsList } from './reviews-list.tsx';
 import { IReviewSummary } from '@msdining/common/models/review';
 import React, { useMemo, useState } from 'react';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { LogInForReviewButton } from './log-in-for-review-button.tsx';
-
-interface IMenuItemReviewsDataViewBaseProps {
-    response: IReviewSummary;
-    cafeId: string;
-}
-
-interface IMenuItemReviewsDataViewForMenuItem extends IMenuItemReviewsDataViewBaseProps {
-    menuItemId: string;
-    menuItemName: string;
-    stationId?: undefined;
-    stationName?: undefined;
-}
-
-interface IMenuItemReviewsDataViewForStation extends IMenuItemReviewsDataViewBaseProps {
-    stationId: string;
-    stationName: string;
-    menuItemId?: undefined;
-    menuItemName?: undefined;
-}
-
-type IMenuItemReviewsDataViewProps = IMenuItemReviewsDataViewForMenuItem | IMenuItemReviewsDataViewForStation;
+import { IReviewLookup } from '../../models/reviews.js';
 
 interface IReviewStats {
     counts: Record<number, number>;
@@ -75,8 +55,13 @@ const useLocalStats = (reviewData: IReviewSummary, localRating: number | undefin
     );
 };
 
-export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (props) => {
-    const { response, cafeId, menuItemId, stationId } = props;
+interface IReviewsViewWithDataProps {
+    response: IReviewSummary;
+    cafeId: string;
+    lookup: IReviewLookup;
+}
+
+export const ReviewsViewWithData: React.FC<IReviewsViewWithDataProps> = ({ response, cafeId, lookup }) => {
     const [localComment, setLocalComment] = useState<string>(response.myReview?.comment ?? '');
     const [localRating, setLocalRating] = useState<number>(response.myReview?.rating ?? 0);
     const [reviewId, setReviewId] = useState<string | undefined>(response.myReview?.id);
@@ -84,7 +69,7 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
 
     const stats = useLocalStats(response, localRating);
 
-    const entityId = menuItemId ?? stationId;
+    const entityId = lookup.menuItemId ?? lookup.stationId;
 
     const reviewInputProps = {
         cafeId,
@@ -98,23 +83,13 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
     };
 
     return (
-        <div className="menu-item-reviews flex">
+        <div className="reviews flex">
             <div className="flex-col">
                 {
-                    isLoggedIn && stationId != null && (
+                    isLoggedIn && (
                         <PostReviewInput
                             {...reviewInputProps}
-                            stationId={stationId}
-                            stationName={props.stationName}
-                        />
-                    )
-                }
-                {
-                    isLoggedIn && menuItemId != null && (
-                        <PostReviewInput
-                            {...reviewInputProps}
-                            menuItemId={menuItemId}
-                            menuItemName={props.menuItemName}
+                            {...lookup}
                         />
                     )
                 }
@@ -126,10 +101,11 @@ export const MenuItemReviewDataView: React.FC<IMenuItemReviewsDataViewProps> = (
                 />
             </div>
             <div className="flex flex-wrap">
-                <MenuItemReviewsList
+                <ReviewsList
                     totalCount={stats.totalCount}
                     reviewsWithComments={response.reviewsWithComments}
-                    menuItemId={entityId}
+                    entityId={entityId}
+                    isStation={lookup.stationId != null}
                 />
             </div>
         </div>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { MenuItemReviewsLoadingView } from './menu-item-review-loading-view.tsx';
+import React, { useMemo } from 'react';
+import { ReviewsView } from './reviews-view.tsx';
 import { REVIEW_STORE } from '../../store/reviews.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 
@@ -13,19 +13,19 @@ interface IMenuItemReviewsViewProps {
 
 export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId, menuItemName, cafeId }) => {
     const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(menuItemId));
+    const lookup = useMemo(() => ({ menuItemId, menuItemName }), [menuItemId, menuItemName]);
 
     return (
         <div className="default-container bg-raised-3 flex-col">
             <div className="title">
                 Reviews
             </div>
-            <MenuItemReviewsLoadingView
+            <ReviewsView
                 stage={stage}
                 response={value}
                 onRetry={run}
-                menuItemId={menuItemId}
-                menuItemName={menuItemName}
                 cafeId={cafeId}
+                lookup={lookup}
             />
         </div>
     )
