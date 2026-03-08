@@ -13,6 +13,8 @@ export const serverStaticPath = path.join(serverFolderPath, 'static');
 
 export const serverMenuItemThumbnailPath = path.join(serverStaticPath, 'menu-items', 'thumbnail');
 
+export const serverThumbnailPath = path.join(serverStaticPath, 'thumbnails');
+
 export const clientFolderDistPath = path.join(rootFolderPath, 'client', 'dist');
 
 export const clientIndexHtmlPath = path.join(clientFolderDistPath, 'index.html');

@@ -57,6 +57,7 @@ const hydrateMenuItem = (menuItem: DehydratedMenuItem): IMenuItemBase => {
 		tags:           deserializeMenuItemTags(menuItem.tags),
 		searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
 		hasThumbnail:   false,
+		thumbnailId:    menuItem.thumbnailHash ?? undefined,
 		modifiers
 	};
 }

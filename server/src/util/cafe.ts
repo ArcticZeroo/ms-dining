@@ -19,6 +19,10 @@ export const getThumbnailUrl = (menuItem: IMenuItemBase): Nullable<string> => {
 		return menuItem.imageUrl;
 	}
 
+	if (menuItem.thumbnailId) {
+		return `/static/thumbnails/${menuItem.thumbnailId}.png`;
+	}
+
 	return `/static/menu-items/thumbnail/${menuItem.id}.png`;
 };
 
