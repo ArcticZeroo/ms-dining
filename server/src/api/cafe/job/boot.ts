@@ -8,8 +8,7 @@ import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ALL_CAFES } from '../../../constants/cafes.js';
 import Duration from '@arcticzeroo/duration';
-import { SearchEntityType } from '@msdining/common/models/search';
-import { pruneExpiredDailyStationEmbeddings, deleteAllByEntityType } from '../../storage/vector/client.js';
+import { pruneExpiredDailyStationEmbeddings } from '../../storage/vector/client.js';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 import { runPendingMigrations } from '../../runtime-migrations/runner.js';
 
@@ -80,9 +79,6 @@ export const performMenuBootTasks = async () => {
 
 	// Will be needed basically always anyway.
 	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
-
-	// Remove legacy static station embeddings (replaced by daily station embeddings)
-	await deleteAllByEntityType(SearchEntityType.station);
 
 	// Prune daily station embeddings outside the rolling window (last week + this week + next week)
 	const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
