@@ -46,6 +46,8 @@ model MenuItem {
   group   CrossCafeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   // externalItemId String?
+  thumbnailHash String?
+
   externalLastUpdateTime DateTime?
   externalReceiptText    String?
 
