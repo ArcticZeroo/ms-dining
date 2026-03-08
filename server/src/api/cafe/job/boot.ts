@@ -77,17 +77,24 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 export const performMenuBootTasks = async () => {
 	await runPendingMigrations();
 
-	// Will be needed basically always anyway.
-	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
-
-    await MenuItemStorageClient.loadThumbnailHashMap();
-
-	// Prune daily station embeddings outside the rolling window (last week + this week + next week)
+	// These can run concurrently — Prisma calls serialize through the semaphore,
+	// but the vector DB prune uses a separate database and can overlap.
+	console.time('boot: init');
 	const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
-	await pruneExpiredDailyStationEmbeddings(validDateStrings);
+	await Promise.all([
+		MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync(),
+		MenuItemStorageClient.loadThumbnailHashMap(),
+		pruneExpiredDailyStationEmbeddings(validDateStrings),
+	]);
+	console.timeEnd('boot: init');
 
+	console.time('boot: repairTodaySessions');
 	const didDailyRepair = await repairTodaySessionsAsync();
+	console.timeEnd('boot: repairTodaySessions');
+
+	console.time('boot: repairWeeklyMenus');
 	const didWeeklyRepair = await repairMissingWeeklyMenusAsync();
+	console.timeEnd('boot: repairWeeklyMenus');
 
 	// In case we just did a repair, schedule the associated job with a delay in case that job is about to run.
 	const scheduleJob = (job: () => void, didRepair: boolean, name: string) => {
@@ -118,5 +125,7 @@ export const performMenuBootTasks = async () => {
 
 	// scheduleWeeklyPatternJob();
 
+	console.time('boot: seedAutocomplete');
 	await seedAutocompleteFromDatabaseAsync();
+	console.timeEnd('boot: seedAutocomplete');
 };
