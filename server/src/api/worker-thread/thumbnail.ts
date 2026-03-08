@@ -19,33 +19,28 @@ const loadExistingThumbnailsOnBoot = async () => {
 	const manifest = await loadManifest();
 	const manifestEntryCount = Object.keys(manifest).length;
 
-	if (manifestEntryCount > 0) {
-		// Fast path: load from manifest
-		for (const [id, entry] of Object.entries(manifest)) {
+	// Always scan the directory to find files missing from manifest
+	const files = await fs.readdir(serverMenuItemThumbnailPath);
+	const pngFiles = files.filter(f => f.endsWith('.png'));
+
+	let loadedFromManifest = 0;
+	let loadedFromDisk = 0;
+
+	for (const fileNode of pngFiles) {
+		const id = fileNode.replace('.png', '');
+
+		const manifestEntry = manifest[id];
+		if (manifestEntry) {
+			// Fast path: use cached manifest data
 			thumbnailDataByMenuItemId.set(id, {
-				width:          entry.width,
-				height:         entry.height,
-				lastUpdateTime: new Date(entry.lastUpdateTime),
-				hash:           entry.hash
+				width:          manifestEntry.width,
+				height:         manifestEntry.height,
+				lastUpdateTime: new Date(manifestEntry.lastUpdateTime),
+				hash:           manifestEntry.hash
 			});
-		}
-		logInfo(`[Thumbnail Thread] Loaded ${manifestEntryCount} thumbnails from manifest`);
-	} else {
-		// Fallback: scan files on disk
-		const files = await fs.readdir(serverMenuItemThumbnailPath);
-
-		for (const fileNode of files) {
-			const [id, extension] = fileNode.split('.');
-
-			if (!id || !extension) {
-				logError(`[Thumbnail Thread] Invalid thumbnail file on disk: ${fileNode}`);
-				continue;
-			}
-
-			if (extension !== 'png') {
-				continue;
-			}
-
+			loadedFromManifest++;
+		} else {
+			// Slow path: file exists on disk but not in manifest — read metadata
 			const metadata = await retrieveImageMetadataAsync(path.join(serverMenuItemThumbnailPath, fileNode));
 			if (!metadata) {
 				continue;
@@ -55,11 +50,15 @@ const loadExistingThumbnailsOnBoot = async () => {
 				...metadata,
 				hash: ''
 			});
+			loadedFromDisk++;
 		}
-
-		logInfo(`[Thumbnail Thread] Loaded ${thumbnailDataByMenuItemId.size} thumbnails from disk (no manifest)`);
 	}
 
+	if (loadedFromDisk > 0) {
+		logInfo(`[Thumbnail Thread] ${loadedFromDisk} thumbnail(s) on disk missing from manifest — will be hashed on next access`);
+	}
+
+	logInfo(`[Thumbnail Thread] Loaded ${loadedFromManifest} from manifest, ${loadedFromDisk} from disk (${pngFiles.length} total files)`);
 	console.timeEnd('thumbnail loading on boot');
 }
 
