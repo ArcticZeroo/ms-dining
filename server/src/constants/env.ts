@@ -12,6 +12,7 @@ export const hasEnvironmentVariable = (key: string): boolean => {
 
 export const WELL_KNOWN_ENVIRONMENT_VARIABLES = {
     openAi: 'OPENAI_API_KEY',
+    anthropicApiKey: 'ANTHROPIC_API_KEY',
     devKey: 'DEV_KEY',
     sessionSecret: 'SESSION_SECRET',
     authMicrosoftClientId: 'AUTH_MICROSOFT_CLIENT_ID',
@@ -23,6 +24,7 @@ export const WELL_KNOWN_ENVIRONMENT_VARIABLES = {
 };
 
 export const getOpenAiKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);
+export const getAnthropicKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.anthropicApiKey);
 export const getDevKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.devKey);
 
 export const getSessionSecret = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret);
