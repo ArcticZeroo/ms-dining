@@ -1,6 +1,6 @@
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { MenuItem, MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry } from '@prisma/client';
+import { MenuItem, MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry, Prisma } from '@prisma/client';
 import { IMenuItemBase } from '../../../models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug, logInfo } from '../../../util/log.js';
@@ -527,10 +527,17 @@ export abstract class MenuItemStorageClient {
 	}
 
 	public static async updateThumbnailHash(menuItemId: string, hash: string): Promise<void> {
-		await usePrismaClient(prismaClient => prismaClient.menuItem.update({
-			where: { id: menuItemId },
-			data:  { thumbnailHash: hash }
-		}));
+		try {
+			await usePrismaClient(prismaClient => prismaClient.menuItem.update({
+				where: { id: menuItemId },
+				data:  { thumbnailHash: hash }
+			}));
+		} catch (err) {
+			if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+				return; // Menu item no longer exists (orphaned thumbnail)
+			}
+			throw err;
+		}
 		this.registerThumbnailHash(menuItemId, hash);
 	}
 

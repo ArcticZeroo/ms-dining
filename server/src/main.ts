@@ -1,5 +1,4 @@
 import { performMenuBootTasks } from './api/cafe/job/boot.js';
-import { runPendingMigrations } from './api/runtime-migrations/runner.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
 import { logDebug, logError, logInfo } from './util/log.js';
@@ -25,9 +24,6 @@ createAnalyticsApplications()
 
 performMenuBootTasks()
     .catch(err => logError('Could not perform boot tasks:', err));
-
-runPendingMigrations()
-    .catch(err => logError('Could not run pending migrations:', err));
 
 // Initialize cafe embeddings
 logInfo('Adding cafe embeddings to queue...');
