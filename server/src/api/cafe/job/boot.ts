@@ -77,20 +77,16 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 export const performMenuBootTasks = async () => {
 	await runPendingMigrations();
 
-	console.time('boot: retrieveMenuItems');
-	// Will be needed basically always anyway.
-	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
-	console.timeEnd('boot: retrieveMenuItems');
-
-	console.time('boot: loadThumbnailHashMap');
-	await MenuItemStorageClient.loadThumbnailHashMap();
-	console.timeEnd('boot: loadThumbnailHashMap');
-
-	console.time('boot: pruneStationEmbeddings');
-	// Prune daily station embeddings outside the rolling window (last week + this week + next week)
+	// These can run concurrently — Prisma calls serialize through the semaphore,
+	// but the vector DB prune uses a separate database and can overlap.
+	console.time('boot: init');
 	const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
-	await pruneExpiredDailyStationEmbeddings(validDateStrings);
-	console.timeEnd('boot: pruneStationEmbeddings');
+	await Promise.all([
+		MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync(),
+		MenuItemStorageClient.loadThumbnailHashMap(),
+		pruneExpiredDailyStationEmbeddings(validDateStrings),
+	]);
+	console.timeEnd('boot: init');
 
 	console.time('boot: repairTodaySessions');
 	const didDailyRepair = await repairTodaySessionsAsync();
