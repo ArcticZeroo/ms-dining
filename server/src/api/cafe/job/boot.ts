@@ -77,15 +77,28 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 export const performMenuBootTasks = async () => {
 	await runPendingMigrations();
 
+	console.time('boot: retrieveMenuItems');
 	// Will be needed basically always anyway.
 	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
+	console.timeEnd('boot: retrieveMenuItems');
 
+	console.time('boot: loadThumbnailHashMap');
+	await MenuItemStorageClient.loadThumbnailHashMap();
+	console.timeEnd('boot: loadThumbnailHashMap');
+
+	console.time('boot: pruneStationEmbeddings');
 	// Prune daily station embeddings outside the rolling window (last week + this week + next week)
 	const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
 	await pruneExpiredDailyStationEmbeddings(validDateStrings);
+	console.timeEnd('boot: pruneStationEmbeddings');
 
+	console.time('boot: repairTodaySessions');
 	const didDailyRepair = await repairTodaySessionsAsync();
+	console.timeEnd('boot: repairTodaySessions');
+
+	console.time('boot: repairWeeklyMenus');
 	const didWeeklyRepair = await repairMissingWeeklyMenusAsync();
+	console.timeEnd('boot: repairWeeklyMenus');
 
 	// In case we just did a repair, schedule the associated job with a delay in case that job is about to run.
 	const scheduleJob = (job: () => void, didRepair: boolean, name: string) => {
@@ -116,5 +129,7 @@ export const performMenuBootTasks = async () => {
 
 	// scheduleWeeklyPatternJob();
 
+	console.time('boot: seedAutocomplete');
 	await seedAutocompleteFromDatabaseAsync();
+	console.timeEnd('boot: seedAutocomplete');
 };

@@ -3,46 +3,66 @@ import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
 import { serverMenuItemThumbnailPath } from '../../constants/config.js';
 import { logDebug, logError, logInfo } from '../../util/log.js';
-import { IImageMetadata, retrieveImageMetadataAsync } from '../../util/image.js';
+import { retrieveImageMetadataAsync } from '../../util/image.js';
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
-import { createAndSaveThumbnailForMenuItem } from '../cafe/image/thumbnail.js';
+import { createAndSaveThumbnailForMenuItem, IThumbnailResult } from '../cafe/image/thumbnail.js';
 import { MultiLock } from '../lock.js';
+import { loadManifest, saveManifestDebounced, updateManifestEntry } from '../cafe/image/manifest.js';
 
-const thumbnailDataByMenuItemId = new Map<string, IImageMetadata>();
+const thumbnailDataByMenuItemId = new Map<string, IThumbnailResult>();
 const THUMBNAIL_SEMAPHORE_BY_ID = new MultiLock();
 
 const loadExistingThumbnailsOnBoot = async () => {
 	console.time('thumbnail loading on boot');
 
+	const manifest = await loadManifest();
+	const manifestEntryCount = Object.keys(manifest).length;
+
+	// Always scan the directory to find files missing from manifest
 	const files = await fs.readdir(serverMenuItemThumbnailPath);
+	const pngFiles = files.filter(f => f.endsWith('.png'));
 
-	for (const fileNode of files) {
-		const [id, extension] = fileNode.split('.');
+	let loadedFromManifest = 0;
+	let loadedFromDisk = 0;
 
-		if (!id || !extension) {
-			logError(`[Thumbnail Thread] Invalid thumbnail file on disk: ${fileNode}`);
-			continue;
+	for (const fileNode of pngFiles) {
+		const id = fileNode.replace('.png', '');
+
+		const manifestEntry = manifest[id];
+		if (manifestEntry) {
+			// Fast path: use cached manifest data
+			thumbnailDataByMenuItemId.set(id, {
+				width:          manifestEntry.width,
+				height:         manifestEntry.height,
+				lastUpdateTime: new Date(manifestEntry.lastUpdateTime),
+				hash:           manifestEntry.hash
+			});
+			loadedFromManifest++;
+		} else {
+			// Slow path: file exists on disk but not in manifest — read metadata
+			const metadata = await retrieveImageMetadataAsync(path.join(serverMenuItemThumbnailPath, fileNode));
+			if (!metadata) {
+				continue;
+			}
+
+			thumbnailDataByMenuItemId.set(id, {
+				...metadata,
+				hash: ''
+			});
+			loadedFromDisk++;
 		}
-
-		if (extension !== 'png') {
-			continue;
-		}
-
-		const metadata = await retrieveImageMetadataAsync(path.join(serverMenuItemThumbnailPath, fileNode));
-		if (!metadata) {
-			continue;
-		}
-
-		thumbnailDataByMenuItemId.set(id, metadata);
 	}
 
-	logInfo(`[Thumbnail Thread] Loaded ${thumbnailDataByMenuItemId.size} thumbnails on boot`);
+	if (loadedFromDisk > 0) {
+		logInfo(`[Thumbnail Thread] ${loadedFromDisk} thumbnail(s) on disk missing from manifest — will be hashed on next access`);
+	}
 
+	logInfo(`[Thumbnail Thread] Loaded ${loadedFromManifest} from manifest, ${loadedFromDisk} from disk (${pngFiles.length} total files)`);
 	console.timeEnd('thumbnail loading on boot');
 }
 
-const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImageMetadata | null> => {
+const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult | null> => {
 	await loadThumbnailsPromise;
 	return THUMBNAIL_SEMAPHORE_BY_ID.acquire(request.id, async () => {
 		if (thumbnailDataByMenuItemId.has(request.id)) {
@@ -60,6 +80,16 @@ const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IImag
 
 		const result = await createAndSaveThumbnailForMenuItem(request);
 		thumbnailDataByMenuItemId.set(request.id, result);
+
+		updateManifestEntry(request.id, {
+			hash:           result.hash,
+			width:          result.width,
+			height:         result.height,
+			lastUpdateTime: result.lastUpdateTime.toISOString()
+		});
+		// Save manifest asynchronously - debounced to avoid concurrent writes
+		saveManifestDebounced();
+
 		return result;
 	});
 }

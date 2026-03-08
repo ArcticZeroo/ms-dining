@@ -46,6 +46,8 @@ model MenuItem {
   group   CrossCafeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   // externalItemId String?
+  thumbnailHash String?
+
   externalLastUpdateTime DateTime?
   externalReceiptText    String?
 
@@ -228,13 +230,4 @@ model SearchQuery {
   query     String   @id
   count     Int      @default(0)
   updatedAt DateTime @updatedAt
-}
-
-model RuntimeMigration {
-  name        String    @id
-  status      String    @default("pending")
-  completedAt DateTime?
-  error       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 }

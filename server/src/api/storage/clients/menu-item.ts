@@ -66,6 +66,11 @@ export abstract class MenuItemStorageClient {
 	private static readonly _menuIdsBySearchTag = new Map<string, Set<string>>();
 	private static _topSearchTags: string[] | undefined;
 
+	// hash → first menu item ID with that hash (canonical source of thumbnail)
+	private static readonly _canonicalIdByHash = new Map<string, string>();
+	// menu item ID → canonical menu item ID for thumbnail dedup
+	private static readonly _canonicalThumbnailRedirect = new Map<string, string>();
+
 	static get cachedMenuItemNames(): Iterable<string> {
 		return Array.from(this._menuItemsById.values(), item => item.name);
 	}
@@ -519,5 +524,66 @@ export abstract class MenuItemStorageClient {
 
 		const menuItems = await Promise.all(menuItemIds.map(({ id }) => this.retrieveMenuItemAsync(id)));
 		return menuItems.filter((item): item is IMenuItemBase => item != null);
+	}
+
+	public static async updateThumbnailHash(menuItemId: string, hash: string): Promise<void> {
+		await usePrismaClient(prismaClient => prismaClient.menuItem.update({
+			where: { id: menuItemId },
+			data:  { thumbnailHash: hash }
+		}));
+	}
+
+	/**
+	 * Build the in-memory hash→canonicalId map from the database.
+	 * For each hash, the first item encountered becomes the canonical source.
+	 */
+	public static async loadThumbnailHashMap(): Promise<void> {
+		const items = await usePrismaClient(prismaClient => prismaClient.menuItem.findMany({
+			where:  { thumbnailHash: { not: null } },
+			select: { id: true, thumbnailHash: true }
+		}));
+
+		this._canonicalIdByHash.clear();
+		this._canonicalThumbnailRedirect.clear();
+
+		for (const item of items) {
+			if (!item.thumbnailHash) continue;
+
+			if (!this._canonicalIdByHash.has(item.thumbnailHash)) {
+				this._canonicalIdByHash.set(item.thumbnailHash, item.id);
+			}
+
+			const canonicalId = this._canonicalIdByHash.get(item.thumbnailHash)!;
+			if (canonicalId !== item.id) {
+				this._canonicalThumbnailRedirect.set(item.id, canonicalId);
+			}
+		}
+
+		const totalDeduplicated = this._canonicalThumbnailRedirect.size;
+		if (totalDeduplicated > 0) {
+			logInfo(`[ThumbnailDedup] Loaded hash map: ${items.length} items, ${this._canonicalIdByHash.size} unique hashes, ${totalDeduplicated} redirectable`);
+		}
+	}
+
+	/**
+	 * Register a thumbnail hash and update the canonical map.
+	 */
+	public static registerThumbnailHash(menuItemId: string, hash: string): void {
+		if (!this._canonicalIdByHash.has(hash)) {
+			this._canonicalIdByHash.set(hash, menuItemId);
+		}
+
+		const canonicalId = this._canonicalIdByHash.get(hash)!;
+		if (canonicalId !== menuItemId) {
+			this._canonicalThumbnailRedirect.set(menuItemId, canonicalId);
+		}
+	}
+
+	/**
+	 * Get the canonical thumbnail ID for a menu item.
+	 * Returns null if the item is already canonical or has no hash.
+	 */
+	public static getCanonicalThumbnailId(menuItemId: string): string | null {
+		return this._canonicalThumbnailRedirect.get(menuItemId) ?? null;
 	}
 }
