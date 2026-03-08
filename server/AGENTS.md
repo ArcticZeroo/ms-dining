@@ -17,6 +17,8 @@ Always use these Koa context helpers from `util/koa.ts`:
 - Never use Prisma client directly — always use Storage Clients (e.g., `UserStorageClient`)
 - Storage clients are static classes with async methods
 - Use `usePrismaClient(callback)` wrapper for database operations (better performance for sqlite)
+- Use `usePrismaTransaction(callback)` for multiple related writes that should be atomic
+- **Never use `Promise.all()` for concurrent DB operations** — SQLite + Prisma performs worse with parallel queries. The `usePrismaClient` wrapper enforces single-threaded access via a semaphore. For multiple writes, use sequential `await` inside `usePrismaTransaction` instead.
 - Handle unique constraint violations with `isUniqueConstraintFailedError(err)`
 
 ## Response Serialization
