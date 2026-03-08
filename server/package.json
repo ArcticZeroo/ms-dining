@@ -66,5 +66,8 @@
     "deploy": "npm run predeploy && npm run start",
     "deploy-dev": "npm run predeploy && npm run start",
     "test": "npx tsc && node --test dist/**/*.test.js"
+  },
+  "prisma": {
+    "schema": "prisma/schema"
   }
 }
