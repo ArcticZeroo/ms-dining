@@ -3,6 +3,8 @@ import { getOpenAiKey } from '../../../constants/env.js';
 import { lazy } from '../../../util/lazy.js';
 import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
 
+const DEFAULT_MAX_TOKENS = 1024;
+
 const getClient = lazy(() => new OpenAI({
     apiKey: getOpenAiKey()
 }));
@@ -10,8 +12,9 @@ const getClient = lazy(() => new OpenAI({
 export const openAiProvider: IAiProvider = {
     async retrieveTextCompletion(request: IAiTextCompletionRequest): Promise<string> {
         const response = await getClient().chat.completions.create({
-            model:    'gpt-5.2',
-            messages: [
+            model:      'gpt-5.2',
+            max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+            messages:   [
                 {
                     role:    'system',
                     content: request.systemPrompt
@@ -38,8 +41,9 @@ export const openAiProvider: IAiProvider = {
 
     async retrieveVisionCompletion(request: IAiVisionRequest): Promise<string> {
         const response = await getClient().chat.completions.create({
-            model:    'gpt-5.2',
-            messages: [
+            model:      'gpt-5.2',
+            max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+            messages:   [
                 {
                     role:    'system',
                     content: request.systemPrompt

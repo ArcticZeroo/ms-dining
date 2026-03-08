@@ -1,7 +1,8 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { isDev } from '../../../util/env.js';
 import { md5 } from '../../../util/hash.js';
-import { logError } from '../../../util/log.js';
+import { logDebug, logError } from '../../../util/log.js';
 import { localeCompareSortAsc } from '../../../util/sort.js';
 import { retrieveTextCompletion } from '../../ai/index.js';
 import { usePrismaClient } from '../client.js';
@@ -125,10 +126,18 @@ export abstract class StationThemeClient {
 
     static async #initializeTheme(stationName: string, hash: string, itemsByCategory: Map<string /*categoryName*/, Array<IMenuItemBase>>): Promise<string | undefined> {
         try {
+            if (isDev) {
+                logDebug(`Getting station theme for station contents: ${StationThemeClient.serializeItemsByCategory(itemsByCategory)}`);
+            }
+
             const theme = await retrieveTextCompletion({
                 systemPrompt: STATION_THEME_SYSTEM_PROMPT,
                 userMessage:  getThemePrompt(stationName, itemsByCategory)
             });
+
+            if (isDev) {
+                logDebug(`Theme for ${StationThemeClient.serializeItemsByCategory(itemsByCategory)}: ${theme}`);
+            }
 
             await StationThemeLocalClient.saveThemeAsync(hash, theme);
 
