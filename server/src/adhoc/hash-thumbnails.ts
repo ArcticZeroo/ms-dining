@@ -1,10 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import Jimp from 'jimp';
 import { serverMenuItemThumbnailPath } from '../constants/config.js';
-import { usePrismaClient } from '../api/storage/client.js';
-import { computeDHash } from '../api/cafe/image/thumbnail.js';
-import { updateManifestEntry, saveManifest } from '../api/cafe/image/manifest.js';
+import { updateThumbnailHashFromExistingImage } from '../api/cafe/image/thumbnail.js';
+import { saveManifest } from '../api/cafe/image/manifest.js';
 
 console.log('Scanning existing thumbnails and computing dHash values...');
 console.log(`Thumbnail directory: ${serverMenuItemThumbnailPath}`);
@@ -29,22 +27,7 @@ for (const file of pngFiles) {
 	const filePath = path.join(serverMenuItemThumbnailPath, file);
 
 	try {
-		const image = await Jimp.read(filePath);
-		const hash = computeDHash(image);
-
-		// Update DB
-		await usePrismaClient(prisma => prisma.menuItem.update({
-			where: { id },
-			data:  { thumbnailHash: hash }
-		}));
-
-		// Update manifest
-		updateManifestEntry(id, {
-			hash,
-			width:          image.getWidth(),
-			height:         image.getHeight(),
-			lastUpdateTime: new Date().toISOString()
-		});
+		const hash = await updateThumbnailHashFromExistingImage(id, filePath);
 
 		// Track duplicates
 		const existing = hashToIds.get(hash) ?? [];

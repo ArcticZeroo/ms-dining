@@ -46,3 +46,13 @@ export const updateManifestEntry = (id: string, entry: IManifestEntry): void => 
 export const removeManifestEntry = (id: string): void => {
 	delete manifest[id];
 };
+
+let saveTimeout: NodeJS.Timeout | null = null;
+const SAVE_DEBOUNCE_MS = 2000;
+
+export const saveManifestDebounced = () => {
+	if (saveTimeout) clearTimeout(saveTimeout);
+	saveTimeout = setTimeout(() => {
+		saveManifest().catch(err => logError('Failed to save manifest:', err));
+	}, SAVE_DEBOUNCE_MS);
+};

@@ -8,7 +8,7 @@ import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem, IThumbnailResult } from '../cafe/image/thumbnail.js';
 import { MultiLock } from '../lock.js';
-import { loadManifest, saveManifest, updateManifestEntry } from '../cafe/image/manifest.js';
+import { loadManifest, saveManifestDebounced, updateManifestEntry } from '../cafe/image/manifest.js';
 
 const thumbnailDataByMenuItemId = new Map<string, IThumbnailResult>();
 const THUMBNAIL_SEMAPHORE_BY_ID = new MultiLock();
@@ -88,8 +88,8 @@ const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThum
 			height:         result.height,
 			lastUpdateTime: result.lastUpdateTime.toISOString()
 		});
-		// Save manifest asynchronously - don't block thumbnail creation
-		saveManifest().catch(err => logError('[Thumbnail Thread] Failed to save manifest after update:', err));
+		// Save manifest asynchronously - debounced to avoid concurrent writes
+		saveManifestDebounced();
 
 		return result;
 	});
