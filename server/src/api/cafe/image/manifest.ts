@@ -48,11 +48,32 @@ export const removeManifestEntry = (id: string): void => {
 };
 
 let saveTimeout: NodeJS.Timeout | null = null;
-const SAVE_DEBOUNCE_MS = 2000;
+let lastSaveTime = 0;
+const SAVE_DEBOUNCE_MS = 10_000;
+const SAVE_MAX_INTERVAL_MS = 30_000;
 
 export const saveManifestDebounced = () => {
 	if (saveTimeout) clearTimeout(saveTimeout);
+
+	const timeSinceLastSave = Date.now() - lastSaveTime;
+	// If it's been too long since the last save, flush now to avoid data loss on crash
+	if (lastSaveTime > 0 && timeSinceLastSave >= SAVE_MAX_INTERVAL_MS) {
+		lastSaveTime = Date.now();
+		saveManifest().catch(err => logError('Failed to save manifest:', err));
+		return;
+	}
+
 	saveTimeout = setTimeout(() => {
+		lastSaveTime = Date.now();
 		saveManifest().catch(err => logError('Failed to save manifest:', err));
 	}, SAVE_DEBOUNCE_MS);
 };
+
+// Flush manifest on graceful shutdown
+process.on('beforeExit', () => {
+	if (saveTimeout) {
+		clearTimeout(saveTimeout);
+		saveTimeout = null;
+		saveManifest().catch(err => logError('Failed to save manifest on exit:', err));
+	}
+});
