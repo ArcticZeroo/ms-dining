@@ -229,3 +229,12 @@ model SearchQuery {
   count     Int      @default(0)
   updatedAt DateTime @updatedAt
 }
+
+model RuntimeMigration {
+  name        String    @id
+  status      String    @default("pending")
+  completedAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

@@ -11,6 +11,7 @@ import Duration from '@arcticzeroo/duration';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { pruneExpiredDailyStationEmbeddings, deleteAllByEntityType } from '../../storage/vector/client.js';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
+import { runPendingMigrations } from '../../runtime-migrations/runner.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
 	const date = DateUtil.getNowWithDaysInFuture(i);
@@ -75,6 +76,8 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 };
 
 export const performMenuBootTasks = async () => {
+	await runPendingMigrations();
+
 	// Will be needed basically always anyway.
 	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
 
