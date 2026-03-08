@@ -4,7 +4,7 @@ import { IReviewSummary } from '@msdining/common/models/review';
 import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
 import { RetryButton } from '../button/retry-button.tsx';
 import { ReviewsViewWithData } from './reviews-view-with-data.tsx';
-import { IReviewLookup } from '../../models/reviews.js';
+import { IReviewLookup, IReviewLookupForStation } from '../../models/reviews.js';
 
 interface IReviewsViewProps {
     stage: PromiseStage;
@@ -12,9 +12,10 @@ interface IReviewsViewProps {
     onRetry: () => void;
     cafeId: string;
     lookup: IReviewLookup;
+    stationLookup?: IReviewLookupForStation;
 }
 
-export const ReviewsView: React.FC<IReviewsViewProps> = ({ stage, response, onRetry, cafeId, lookup }) => {
+export const ReviewsView: React.FC<IReviewsViewProps> = ({ stage, response, onRetry, cafeId, lookup, stationLookup }) => {
     if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {
         return (
             <div className="flex flex-center">
@@ -40,6 +41,7 @@ export const ReviewsView: React.FC<IReviewsViewProps> = ({ stage, response, onRe
             response={response}
             cafeId={cafeId}
             lookup={lookup}
+            stationLookup={stationLookup}
         />
     );
 };

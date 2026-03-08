@@ -39,10 +39,12 @@ interface IMenuItemPopupProps {
 	menuItem: IMenuItemBase;
 	modalSymbol: symbol;
 	cafeId: string;
+	stationId?: string;
+	stationName?: string;
 	fromCartItem?: ICartItemWithMetadata;
 }
 
-export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, fromCartItem }) => {
+export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, stationId, stationName, fromCartItem }) => {
     const isUpdate = fromCartItem != null;
 
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
@@ -128,6 +130,8 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
                     onNotesChanged={setNotes}
                     isOnlineOrderingAllowed={isOnlineOrderingAllowed}
+                    stationId={stationId}
+                    stationName={stationName}
                 />
             )}
             footer={(

@@ -5,20 +5,17 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { StationCollapseContext } from '../../../context/collapse.ts';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../context/html.ts';
-import { CurrentCafeContext, CurrentStationContext } from '../../../context/menu-item.ts';
+import { CurrentCafeContext, CurrentStationScrollIdContext, StationInfoContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
-import { useValueNotifier, useValueNotifierSetTarget } from '../../../hooks/events.ts';
+import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hooks/html.ts';
-import { usePopupOpener } from '../../../hooks/popup.ts';
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getSearchAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
-import { formatReviewScore } from '../../../util/reviews.ts';
 import { FavoriteSearchableItemButton } from '../../button/favorite/favorite-searchable-item-button.tsx';
 import { ScrollAnchor } from '../../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../../icon/expand.tsx';
 import { StationMenu } from './menu-items/station-menu.tsx';
-import { StationPopup } from './station-popup.tsx';
 
 const useStationExpansion = (scrollAnchorId: string) => {
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
@@ -70,8 +67,6 @@ export interface ICollapsibleStationProps {
 export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
     const cafe = useContext(CurrentCafeContext);
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
-    const showReviews = useValueNotifier(ApplicationSettings.showReviews);
-    const openModal = usePopupOpener();
 
     const [stationHeaderRef, setStationHeaderRef] = useState<HTMLDivElement | null>(null);
     const stationHeaderHeight = useElementHeight(stationHeaderRef);
@@ -89,53 +84,31 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
     const { isExpanded, stationHeaderStyle, onTitleClick } = useStationExpansion(scrollAnchorId);
     const isFavoriteStation = useIsFavoriteItem(station.name, SearchEntityType.station);
 
-    const [stationModalSymbol] = useState(() => Symbol('station-popup'));
-
-    const onReviewClick = useCallback((event: React.MouseEvent) => {
-        event.stopPropagation();
-        openModal({
-            id:   stationModalSymbol,
-            body: <StationPopup
-                stationId={station.id}
-                stationName={station.name}
-                stationLogoUrl={station.logoUrl}
-                cafeId={cafe.id}
-                modalSymbol={stationModalSymbol}
-            />,
-        });
-    }, [openModal, station.id, station.name, station.logoUrl, cafe.id, stationModalSymbol]);
-
-    const hasReviewData = showReviews && station.overallRating != null && station.totalReviewCount != null && station.totalReviewCount > 0;
+    const stationInfo = useMemo(
+        () => ({ id: station.id, name: station.name }),
+        [station.id, station.name]
+    );
 
     return (
-        <CurrentStationContext.Provider value={scrollAnchorId}>
-            <StationHeaderHeightContext.Provider value={stationHeaderHeight}>
-                <div
-                    className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
-                >
-                    <ScrollAnchor id={scrollAnchorId} margin={`${cafeHeaderHeight}px`}/>
-                    <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
-                        <FavoriteSearchableItemButton name={station.name} type={SearchEntityType.station}/>
-                        <button
-                            className="default-button default-container flex flex-center icon-container"
-                            onClick={onReviewClick}
-                            title="Review this station"
-                        >
-                            <span className="material-symbols-outlined">
-                                rate_review
-                            </span>
-                        </button>
-                        <button className="title" onClick={onTitleClick}>
-                            {
-                                station.logoUrl ? (
-                                    <img
-                                        src={station.logoUrl}
-                                        alt={`Logo for station ${station.name}`}
-                                        className="station-logo"
-                                    />
-                                ) : <span/>
-                            }
-                            <span className="flex flex-col">
+        <CurrentStationScrollIdContext.Provider value={scrollAnchorId}>
+            <StationInfoContext.Provider value={stationInfo}>
+                <StationHeaderHeightContext.Provider value={stationHeaderHeight}>
+                    <div
+                        className={classNames('station', !isExpanded && 'collapsed', isFavoriteStation && 'is-favorite')}
+                    >
+                        <ScrollAnchor id={scrollAnchorId} margin={`${cafeHeaderHeight}px`}/>
+                        <div className="station-header flex-row" style={stationHeaderStyle} ref={setStationHeaderRef}>
+                            <FavoriteSearchableItemButton name={station.name} type={SearchEntityType.station}/>
+                            <button className="title" onClick={onTitleClick}>
+                                {
+                                    station.logoUrl ? (
+                                        <img
+                                            src={station.logoUrl}
+                                            alt={`Logo for station ${station.name}`}
+                                            className="station-logo"
+                                        />
+                                    ) : <span/>
+                                }
                                 <span className="flex">
                                     {station.name}
                                     {
@@ -155,27 +128,17 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                                         )
                                     }
                                 </span>
-                                {
-                                    hasReviewData && (
-                                        <span
-                                            className="station-review-summary"
-                                            onClick={onReviewClick}
-                                        >
-                                            {formatReviewScore(station.overallRating!, station.totalReviewCount!)}
-                                        </span>
-                                    )
-                                }
-                            </span>
-                            <ExpandIcon isExpanded={isExpanded}/>
-                        </button>
+                                <ExpandIcon isExpanded={isExpanded}/>
+                            </button>
+                        </div>
+                        <StationMenu
+                            station={station}
+                            normalizedStationName={normalizedName}
+                            menuItemsByCategoryName={menu}
+                        />
                     </div>
-                    <StationMenu
-                        station={station}
-                        normalizedStationName={normalizedName}
-                        menuItemsByCategoryName={menu}
-                    />
-                </div>
-            </StationHeaderHeightContext.Provider>
-        </CurrentStationContext.Provider>
+                </StationHeaderHeightContext.Provider>
+            </StationInfoContext.Provider>
+        </CurrentStationScrollIdContext.Provider>
     );
 };

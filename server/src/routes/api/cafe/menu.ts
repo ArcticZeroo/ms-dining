@@ -204,8 +204,7 @@ export const registerMenuRoutes = (parent: Router) => {
 			const userId = getMaybeUserId(ctx);
 			const menuItem = await getMenuItemFromRequest(ctx);
 
-			// todo: limit? paging?
-			const reviews = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem);
+			const { menuItemReviews, stationReviews } = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem);
 
 			const response: IReviewSummary = {
 				counts:              {},
@@ -214,7 +213,9 @@ export const registerMenuRoutes = (parent: Router) => {
 				overallRating:       0,
 			};
 
-			for (const review of reviews) {
+			const allReviews = [...menuItemReviews, ...stationReviews];
+
+			for (const review of allReviews) {
 				response.totalCount += 1;
 				response.overallRating += review.rating;
 				response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
@@ -224,15 +225,22 @@ export const registerMenuRoutes = (parent: Router) => {
 					serializedReview.comment = review.comment;
 					response.reviewsWithComments.push(serializedReview as IReviewWithComment);
 				}
+			}
 
-				// Users can review the same item at multiple different cafes.
-				if (review.menuItemId === menuItem.id && userId != null && review.userId === userId) {
-					response.myReview = serializeReview(review);
+			if (userId != null) {
+				const myMenuItemReview = menuItemReviews.find(r => r.menuItemId === menuItem.id && r.userId === userId);
+				if (myMenuItemReview) {
+					response.myReview = serializeReview(myMenuItemReview);
+				}
+
+				const myStationReview = stationReviews.find(r => r.userId === userId);
+				if (myStationReview) {
+					response.myStationReview = serializeReview(myStationReview);
 				}
 			}
 
-			if (reviews.length > 0) {
-				response.overallRating /= reviews.length;
+			if (allReviews.length > 0) {
+				response.overallRating /= allReviews.length;
 			}
 
 			ctx.body = jsonStringifyWithoutNull(response);

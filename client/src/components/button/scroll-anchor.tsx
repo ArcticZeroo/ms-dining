@@ -1,7 +1,7 @@
 import React, { useContext, useLayoutEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
-import { CurrentCafeContext, CurrentStationContext } from '../../context/menu-item.ts';
+import { CurrentCafeContext, CurrentStationScrollIdContext } from '../../context/menu-item.ts';
 
 const SCROLL_DELAY_MS = 50;
 
@@ -17,7 +17,7 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const collapsedStationNamesNotifier = useContext(StationCollapseContext);
     const cafe = useContext(CurrentCafeContext);
-    const stationId = useContext(CurrentStationContext);
+    const stationId = useContext(CurrentStationScrollIdContext);
 
     const anchorId = `#${id}`;
 

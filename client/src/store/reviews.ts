@@ -29,6 +29,7 @@ const recomputeOverallRating = (counts: Record<number, number>, totalCount: numb
 
 class ReviewStore {
     readonly #reviewsByEntityId = new Map<string, LazyResource<IReviewSummary>>();
+    readonly #menuItemIdsByStationId = new Map<string, Set<string>>();
     readonly #recentReviews = new LazyResource<Array<IReview>>(() => DiningClient.getRecentReviews());
     readonly #myReviews = new LazyResource<Array<IReview>>(() => DiningClient.retrieveMyReviews());
 
@@ -51,6 +52,10 @@ class ReviewStore {
         for (const [entityId, resource] of this.#reviewsByEntityId) {
             if (now - resource.lastAccessed > EVICTION_MAX_IDLE_MS) {
                 this.#reviewsByEntityId.delete(entityId);
+                // Clean up station mapping for evicted menu item resources
+                for (const [, menuItemIds] of this.#menuItemIdsByStationId) {
+                    menuItemIds.delete(entityId);
+                }
             }
         }
     }
@@ -67,7 +72,12 @@ class ReviewStore {
         );
     }
 
-    getReviews(lookup: IReviewLookup) {
+    getReviews(lookup: IReviewLookup, stationId?: string) {
+        if (stationId && lookup.menuItemId) {
+            const menuItemIds = this.#menuItemIdsByStationId.get(stationId) ?? new Set();
+            menuItemIds.add(lookup.menuItemId);
+            this.#menuItemIdsByStationId.set(stationId, menuItemIds);
+        }
         return this.#getOrCreateResource(lookup).get();
     }
 
@@ -77,6 +87,26 @@ class ReviewStore {
 
     get myReviews() {
         return this.#myReviews.get();
+    }
+
+    // Station reviews appear in menu item review resources (keyed by menuItemId).
+    // Use the station→menuItem mapping to update only affected resources.
+    async #updateMenuItemResourcesForStation(
+        stationId: string,
+        updater: (current: IReviewSummary) => IReviewSummary
+    ) {
+        const menuItemIds = this.#menuItemIdsByStationId.get(stationId);
+        if (!menuItemIds) {
+            return;
+        }
+        const updates: Promise<void>[] = [];
+        for (const menuItemId of menuItemIds) {
+            const resource = this.#reviewsByEntityId.get(menuItemId);
+            if (resource) {
+                updates.push(resource.updateExisting(updater));
+            }
+        }
+        await Promise.all(updates);
     }
 
     async createReview(lookup: IReviewLookup, request: ICreateReviewRequest, context: ICreateReviewContext): Promise<string> {
@@ -111,9 +141,10 @@ class ReviewStore {
             return {
                 counts,
                 totalCount,
-                overallRating:    recomputeOverallRating(counts, totalCount),
+                overallRating:       recomputeOverallRating(counts, totalCount),
                 reviewsWithComments,
-                myReview:         request.anonymous ? current.myReview : review,
+                myReview:            isStation ? current.myReview : (request.anonymous ? current.myReview : review),
+                myStationReview:     isStation ? (request.anonymous ? current.myStationReview : review) : current.myStationReview,
             };
         });
 
@@ -135,55 +166,13 @@ class ReviewStore {
     async updateReview(reviewId: string, lookup: IReviewLookup, request: IUpdateReviewRequest): Promise<void> {
         await DiningClient.updateReview(reviewId, request);
 
-        const entityId = getReviewEntityId(lookup);
-        const resource = this.#reviewsByEntityId.get(entityId);
-        await resource?.updateExisting((current) => {
-            const counts = { ...current.counts };
-            let myReview = current.myReview;
-
-            const updateReviewFields = (existing: IReview): IReview => {
-                const updated = { ...existing };
-                if (request.rating != null && request.rating !== existing.rating) {
+        const updateReviewFields = (existing: IReview, counts?: Record<number, number>): IReview => {
+            const updated = { ...existing };
+            if (request.rating != null && request.rating !== existing.rating) {
+                if (counts) {
                     counts[existing.rating] = (counts[existing.rating] ?? 1) - 1;
                     counts[request.rating] = (counts[request.rating] ?? 0) + 1;
-                    updated.rating = request.rating;
                 }
-                if (request.comment !== undefined) {
-                    updated.comment = request.comment;
-                }
-                if (request.displayName !== undefined) {
-                    updated.userDisplayName = request.displayName || 'Anonymous';
-                }
-                return updated;
-            };
-
-            const reviewsWithComments = current.reviewsWithComments.flatMap((review) => {
-                if (review.id !== reviewId) {
-                    return [review];
-                }
-                const updated = updateReviewFields(review);
-                if (!updated.comment) {
-                    return [];
-                }
-                return [updated as IReviewWithComment];
-            });
-
-            if (myReview?.id === reviewId) {
-                myReview = updateReviewFields(myReview);
-            }
-
-            return {
-                counts,
-                totalCount:    current.totalCount,
-                overallRating: recomputeOverallRating(counts, current.totalCount),
-                reviewsWithComments,
-                myReview,
-            };
-        });
-
-        const patchReview = (review: IReview): IReview => {
-            const updated = { ...review };
-            if (request.rating != null) {
                 updated.rating = request.rating;
             }
             if (request.comment !== undefined) {
@@ -195,23 +184,63 @@ class ReviewStore {
             return updated;
         };
 
-        await this.#updateRecentReviews((recent) =>
-            recent.map((review) => review.id === reviewId ? patchReview(review) : review)
-        );
+        const updateResource = (current: IReviewSummary): IReviewSummary => {
+            const counts = { ...current.counts };
+            let myReview = current.myReview;
+            let myStationReview = current.myStationReview;
 
-        await this.#updateMyReviews((mine) =>
-            mine.map((review) => review.id === reviewId ? patchReview(review) : review)
-        );
+            const reviewsWithComments = current.reviewsWithComments.flatMap((review) => {
+                if (review.id !== reviewId) {
+                    return [review];
+                }
+                const updated = updateReviewFields(review, counts);
+                if (!updated.comment) {
+                    return [];
+                }
+                return [updated as IReviewWithComment];
+            });
+
+            if (myReview?.id === reviewId) {
+                myReview = updateReviewFields(myReview);
+            }
+            if (myStationReview?.id === reviewId) {
+                myStationReview = updateReviewFields(myStationReview);
+            }
+
+            return {
+                counts,
+                totalCount:    current.totalCount,
+                overallRating: recomputeOverallRating(counts, current.totalCount),
+                reviewsWithComments,
+                myReview,
+                myStationReview,
+            };
+        };
+
+        const entityId = getReviewEntityId(lookup);
+        const resource = this.#reviewsByEntityId.get(entityId);
+        await resource?.updateExisting(updateResource);
+
+        if (isStationReview(lookup)) {
+            await this.#updateMenuItemResourcesForStation(entityId, updateResource);
+        }
+
+        const patchReview = (review: IReview): IReview => {
+            return review.id === reviewId ? updateReviewFields(review) : review;
+        };
+
+        await this.#updateRecentReviews((recent) => recent.map(patchReview));
+
+        await this.#updateMyReviews((mine) => mine.map(patchReview));
     }
 
     async deleteReview(reviewId: string, lookup: IReviewLookup): Promise<void> {
         await DiningClient.deleteReview(reviewId);
 
-        const entityId = getReviewEntityId(lookup);
-        const resource = this.#reviewsByEntityId.get(entityId);
-        await resource?.updateExisting((current) => {
+        const removeReview = (current: IReviewSummary): IReviewSummary => {
             const deletedReview = current.reviewsWithComments.find((review) => review.id === reviewId)
-                ?? (current.myReview?.id === reviewId ? current.myReview : undefined);
+                ?? (current.myReview?.id === reviewId ? current.myReview : undefined)
+                ?? (current.myStationReview?.id === reviewId ? current.myStationReview : undefined);
 
             const counts = { ...current.counts };
             let totalCount = current.totalCount;
@@ -227,8 +256,19 @@ class ReviewStore {
                 overallRating:       recomputeOverallRating(counts, totalCount),
                 reviewsWithComments: current.reviewsWithComments.filter((review) => review.id !== reviewId),
                 myReview:            current.myReview?.id === reviewId ? undefined : current.myReview,
+                myStationReview:     current.myStationReview?.id === reviewId ? undefined : current.myStationReview,
             };
-        });
+        };
+
+        // Update the directly-keyed resource (works for menu item reviews)
+        const entityId = getReviewEntityId(lookup);
+        const resource = this.#reviewsByEntityId.get(entityId);
+        await resource?.updateExisting(removeReview);
+
+        // Station reviews appear in menu item resources — update affected ones
+        if (isStationReview(lookup)) {
+            await this.#updateMenuItemResourcesForStation(entityId, removeReview);
+        }
 
         await this.#updateRecentReviews((recent) => recent.filter((review) => review.id !== reviewId));
 

@@ -5,15 +5,16 @@ import { IReviewSummary } from '@msdining/common/models/review';
 import React, { useState } from 'react';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { LogInForReviewButton } from './log-in-for-review-button.tsx';
-import { IReviewLookup } from '../../models/reviews.js';
+import { IReviewLookup, IReviewLookupForStation } from '../../models/reviews.js';
 
 interface IReviewsViewWithDataProps {
     response: IReviewSummary;
     cafeId: string;
     lookup: IReviewLookup;
+    stationLookup?: IReviewLookupForStation;
 }
 
-export const ReviewsViewWithData: React.FC<IReviewsViewWithDataProps> = ({ response, cafeId, lookup }) => {
+export const ReviewsViewWithData: React.FC<IReviewsViewWithDataProps> = ({ response, cafeId, lookup, stationLookup }) => {
     const [localComment, setLocalComment] = useState<string>(response.myReview?.comment ?? '');
     const [localRating, setLocalRating] = useState<number>(response.myReview?.rating ?? 0);
     const [reviewId, setReviewId] = useState<string | undefined>(response.myReview?.id);
@@ -40,6 +41,8 @@ export const ReviewsViewWithData: React.FC<IReviewsViewWithDataProps> = ({ respo
                         <PostReviewInput
                             {...reviewInputProps}
                             lookup={lookup}
+                            stationLookup={stationLookup}
+                            myStationReview={response.myStationReview}
                         />
                     )
                 }

@@ -9,11 +9,17 @@ interface IMenuItemReviewsViewProps {
     menuItemId: string;
     menuItemName: string;
     cafeId: string;
+    stationId?: string;
+    stationName?: string;
 }
 
-export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId, menuItemName, cafeId }) => {
+export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuItemId, menuItemName, cafeId, stationId, stationName }) => {
     const lookup = useMemo(() => ({ menuItemId, menuItemName }), [menuItemId, menuItemName]);
-    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(lookup));
+    const stationLookup = useMemo(
+        () => stationId ? { stationId, stationName: stationName ?? '' } : undefined,
+        [stationId, stationName]
+    );
+    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(lookup, stationId));
 
     return (
         <div className="default-container bg-raised-3 flex-col">
@@ -26,6 +32,7 @@ export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuI
                 onRetry={run}
                 cafeId={cafeId}
                 lookup={lookup}
+                stationLookup={stationLookup}
             />
         </div>
     )

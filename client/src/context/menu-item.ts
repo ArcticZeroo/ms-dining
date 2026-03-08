@@ -7,4 +7,11 @@ export const CurrentCafeContext = React.createContext<ICafe>({
     logoUrl: ''
 });
 
-export const CurrentStationContext = React.createContext<string>('');
+export const CurrentStationScrollIdContext = React.createContext<string>('');
+
+export interface IStationInfo {
+    id: string;
+    name: string;
+}
+
+export const StationInfoContext = React.createContext<IStationInfo>({ id: '', name: '' });

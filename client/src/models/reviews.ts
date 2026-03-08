@@ -1,4 +1,4 @@
-interface IReviewLookupForStation {
+export interface IReviewLookupForStation {
     stationId: string;
     stationName: string;
     menuItemId?: undefined;

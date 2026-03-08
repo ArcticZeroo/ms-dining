@@ -2,16 +2,19 @@ import React, { useCallback, useState } from 'react';
 import { StarRating } from './star-rating.tsx';
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
+import { IReview } from '@msdining/common/models/review';
 import { fromDateString } from '@msdining/common/util/date-util';
 import { useIsAdmin } from '../../hooks/auth.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { DebugSettings } from '../../constants/settings.ts';
 import { REVIEW_STORE } from '../../store/reviews.ts';
 import { UserContext } from '../../context/auth.ts';
-import { IReviewLookup } from '../../models/reviews.js';
+import { IReviewLookup, IReviewLookupForStation } from '../../models/reviews.js';
 
 interface IPostReviewInputProps {
     lookup: IReviewLookup;
+    stationLookup?: IReviewLookupForStation;
+    myStationReview?: IReview;
     cafeId: string;
     rating: number;
     comment: string;
@@ -27,6 +30,8 @@ interface IPostReviewInputProps {
 
 export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     lookup,
+    stationLookup,
+    myStationReview,
     cafeId,
     comment,
     rating,
@@ -41,19 +46,38 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     const showAdminControls = useValueNotifier(DebugSettings.showAdminReviewControls);
     const showAnonymousOption = isAdmin && showAdminControls;
     const [isAnonymous, setIsAnonymous] = useState(false);
+    const [isStationReview, setIsStationReview] = useState(false);
     const [displayName, setDisplayName] = useState('');
 
-    const stars = rating / 2;
+    // Station review form state (tracked internally, separate from the parent-managed menu item state)
+    const [stationRating, setStationRating] = useState<number>(myStationReview?.rating ?? 0);
+    const [stationComment, setStationComment] = useState<string>(myStationReview?.comment ?? '');
+    const [stationReviewId, setStationReviewId] = useState<string | undefined>(myStationReview?.id);
+    const [stationLastSavedComment, setStationLastSavedComment] = useState<string>(myStationReview?.comment ?? '');
 
-    const [lastSavedComment, setLastSavedComment] = useState<string>(comment);
+    const activeLookup = (isStationReview && stationLookup) ? stationLookup : lookup;
+    const activeRating = isStationReview ? stationRating : rating;
+    const activeComment = isStationReview ? stationComment : comment;
+    const activeReviewId = isStationReview ? stationReviewId : reviewId;
+    const activeReviewPostedDate = isStationReview ? myStationReview?.createdDate : reviewPostedDate;
+
+    const setActiveRating = isStationReview ? setStationRating : onRatingChanged;
+    const setActiveComment = isStationReview ? setStationComment : onCommentChanged;
+    const setActiveReviewId = isStationReview ? setStationReviewId : onReviewIdChanged;
+
+    const stars = activeRating / 2;
+
+    const [menuItemLastSavedComment, setMenuItemLastSavedComment] = useState<string>(comment);
+    const lastSavedComment = isStationReview ? stationLastSavedComment : menuItemLastSavedComment;
+    const setLastSavedComment = isStationReview ? setStationLastSavedComment : setMenuItemLastSavedComment;
 
     const [reviewCreationStage, setReviewCreationStage] = useState<PromiseStage>(PromiseStage.notRun);
 
     const isCurrentlyMakingRequest = reviewCreationStage === PromiseStage.running;
-    const canSaveComment = stars !== 0 && lastSavedComment !== comment;
-    const canDeleteOrClear = !isCurrentlyMakingRequest && (reviewId != null || lastSavedComment.length > 0);
+    const canSaveComment = stars !== 0 && lastSavedComment !== activeComment;
+    const canDeleteOrClear = !isCurrentlyMakingRequest && (activeReviewId != null || lastSavedComment.length > 0);
 
-    const deleteOrClearButtonHoverText = reviewId == null
+    const deleteOrClearButtonHoverText = activeReviewId == null
         ? 'Clear your pending review'
         : 'Delete your review from the server';
 
@@ -68,19 +92,19 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     const postReview = useCallback(
         (request: ICreateReviewRequest) => {
             setReviewCreationStage(PromiseStage.running);
-            REVIEW_STORE.createReview(lookup, request, {
+            REVIEW_STORE.createReview(activeLookup, request, {
                 userId:          user?.id,
                 userDisplayName: user?.displayName ?? 'Anonymous',
                 cafeId,
             })
                 .then(id => {
                     if (request.anonymous) {
-                        onRatingChanged(0);
-                        onCommentChanged('');
+                        setActiveRating(0);
+                        setActiveComment('');
                         setLastSavedComment('');
                         setDisplayName('');
                     } else {
-                        onReviewIdChanged(id);
+                        setActiveReviewId(id);
                         setLastSavedComment(request.comment || '');
                     }
                     setReviewCreationStage(PromiseStage.success);
@@ -90,7 +114,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                     setReviewCreationStage(PromiseStage.error);
                 });
         },
-        [lookup, cafeId, user, onReviewIdChanged, onRatingChanged, onCommentChanged]
+        [activeLookup, cafeId, user, setActiveRating, setActiveComment, setActiveReviewId, setLastSavedComment]
     );
 
     // If a user clicks on the stars, it'll try to set them to null.
@@ -101,8 +125,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
         }
 
         const newRating = value * 2;
-        // Show the new value to the user while we do the update
-        onRatingChanged(newRating);
+        setActiveRating(newRating);
 
         if (isAnonymous) {
             // In anonymous mode, don't auto-submit on rating change
@@ -122,7 +145,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
             return;
         }
 
-        onCommentChanged(newValue);
+        setActiveComment(newValue);
     };
 
     const onDeleteOrClearReview = () => {
@@ -130,17 +153,18 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
             return;
         }
 
-        if (reviewId == null) {
-            onCommentChanged('');
+        if (activeReviewId == null) {
+            setActiveComment('');
             return;
         }
 
         setReviewCreationStage(PromiseStage.running);
-        REVIEW_STORE.deleteReview(reviewId, lookup)
+        REVIEW_STORE.deleteReview(activeReviewId, activeLookup)
             .then(() => {
-                onRatingChanged(0);
-                onReviewIdChanged(undefined);
-                onCommentChanged('');
+                setActiveRating(0);
+                setActiveReviewId(undefined);
+                setActiveComment('');
+                setLastSavedComment('');
                 setReviewCreationStage(PromiseStage.notRun);
             })
             .catch(err => {
@@ -150,7 +174,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     };
 
     const onSaveClicked = () => {
-        const request: ICreateReviewRequest = { rating, comment };
+        const request: ICreateReviewRequest = { rating: activeRating, comment: activeComment };
         if (isAnonymous) {
             request.anonymous = true;
             if (displayName.trim().length > 0) {
@@ -174,6 +198,28 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
             <div className="flex">
                 Leave a review! Comments are optional.
             </div>
+            {
+                stationLookup != null && (
+                    <div className="flex-col align-center" style={{ gap: '0.25rem' }}>
+                        <label className="flex align-center" style={{ gap: '0.5rem' }}>
+                            <input
+                                type="checkbox"
+                                checked={isStationReview}
+                                onChange={event => setIsStationReview(event.target.checked)}
+                                disabled={isCurrentlyMakingRequest}
+                            />
+                            Review this station instead
+                        </label>
+                        {
+                            !isStationReview && myStationReview != null && (
+                                <span className="subtitle" style={{ cursor: 'pointer' }} onClick={() => setIsStationReview(true)}>
+                                    You already have a station review — click to edit
+                                </span>
+                            )
+                        }
+                    </div>
+                )
+            }
             {
                 showAnonymousOption && (
                     <label className="flex align-center" style={{ gap: '0.5rem' }}>
@@ -200,9 +246,9 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 )
             }
             {
-                reviewPostedDate && !isAnonymous && (
+                activeReviewPostedDate && !isAnonymous && (
                     <div className="subtitle">
-                        Posted on {fromDateString(reviewPostedDate).toLocaleDateString()}
+                        Posted on {fromDateString(activeReviewPostedDate).toLocaleDateString()}
                     </div>
                 )
             }
@@ -217,7 +263,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 className="self-stretch"
                 disabled={isCurrentlyMakingRequest}
                 placeholder="Comments (optional)"
-                value={comment}
+                value={activeComment}
                 onChange={onCommentInputChanged}
                 onKeyDown={onCommentInputKeyDown}
                 rows={5}
@@ -233,7 +279,7 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                         >
                             <span className="material-symbols-outlined">
                                 {
-                                    reviewId == null
+                                    activeReviewId == null
                                         ? 'clear'
                                         : 'delete'
                                 }

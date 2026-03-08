@@ -11,6 +11,8 @@ interface IMenuItemPopupBodyProps {
     onSelectedChoiceIdsChanged: (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => void;
     onNotesChanged: (notes: string) => void;
     isOnlineOrderingAllowed: boolean;
+    stationId?: string;
+    stationName?: string;
 }
 
 export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
@@ -19,7 +21,9 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     getSelectedChoiceIdsForModifier,
     onSelectedChoiceIdsChanged,
     onNotesChanged,
-    isOnlineOrderingAllowed
+    isOnlineOrderingAllowed,
+    stationId,
+    stationName,
 }) => {
     return (
         <div className="menu-item-popup-body">
@@ -72,6 +76,8 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                 menuItemId={menuItem.id}
                 menuItemName={menuItem.name}
                 cafeId={menuItem.cafeId}
+                stationId={stationId}
+                stationName={stationName}
             />
         </div>
     );

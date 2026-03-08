@@ -5,7 +5,7 @@ import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../../context/html.ts';
-import { CurrentCafeContext } from '../../../../context/menu-item.ts';
+import { CurrentCafeContext, StationInfoContext } from '../../../../context/menu-item.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { formatPrice, getMinRequiredPrice, hasModifierPriceBeyondMinimum } from '../../../../util/cart.ts';
@@ -52,6 +52,7 @@ const menuItemModalSymbol = Symbol('menuItem');
 
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const cafe = useContext(CurrentCafeContext);
+    const stationInfo = useContext(StationInfoContext);
     const isOnlineOrderingAllowed = useIsOnlineOrderingAllowedForSelectedDate();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
@@ -74,6 +75,8 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 cafeId={cafe.id}
                 menuItem={menuItem}
                 modalSymbol={menuItemModalSymbol}
+                stationId={stationInfo.id}
+                stationName={stationInfo.name}
             />,
         });
     };

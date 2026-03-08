@@ -145,6 +145,13 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
                     }
                 </span>
             </div>
+            {
+                isStation && (
+                    <span className="station-review-badge">
+                        Station review
+                    </span>
+                )
+            }
             <div className="flex flex-around">
                 <StarRating
                     value={review.rating / 2}
@@ -168,7 +175,7 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
             }
             {
                 canModify && (
-                    <div className="flex">
+                    <div className="flex flex-center">
                         <button
                             className="default-button default-container icon-container"
                             onClick={onEditClicked}

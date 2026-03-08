@@ -22,4 +22,5 @@ export interface IReviewSummary {
 	overallRating: number;
 	reviewsWithComments: IReviewWithComment[];
 	myReview?: IReview;
+	myStationReview?: IReview;
 }

@@ -6,6 +6,7 @@ import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { Prisma } from '@prisma/client';
 import { getReviewHeadersByGroupId, getReviewHeadersByName, getStationReviewHeadersByGroupId, getStationReviewHeadersByName } from '@prisma/client/sql';
 import { IServerReview } from '../../../models/review.js';
+import { StationStorageClient } from './station.js';
 
 interface ICreateMenuItemReviewItem {
 	menuItemId: string;
@@ -79,6 +80,11 @@ const REVIEW_ENTITY_SELECT = {
 		},
 	}
 };
+
+export interface IMenuItemReviewsResult {
+	menuItemReviews: IServerReview[];
+	stationReviews: IServerReview[];
+}
 
 export abstract class ReviewStorageClient {
 	public static async createMenuItemReviewAsync(review: ICreateMenuItemReviewItem) {
@@ -187,7 +193,15 @@ export abstract class ReviewStorageClient {
 		return result;
 	}
 
-	public static async getReviewsForMenuItemAsync(menuItem: IMenuItemBase): Promise<IServerReview[]> {
+	static async #getStationReviewsForMenuItemAsync(stationId: string): Promise<IServerReview[]> {
+		const station = await StationStorageClient.retrieveStationAsync(stationId);
+		if (station == null) {
+			return [];
+		}
+		return this.getReviewsForStationAsync(station);
+	}
+
+	public static async getReviewsForMenuItemAsync(menuItem: IMenuItemBase): Promise<IMenuItemReviewsResult> {
 		const whereCondition: Prisma.ReviewWhereInput = {};
 		if (menuItem.groupId) {
 			whereCondition.menuItem = { groupId: menuItem.groupId };
@@ -195,13 +209,18 @@ export abstract class ReviewStorageClient {
 			whereCondition.menuItem = { normalizedName: normalizeNameForSearch(menuItem.name), groupId: null };
 		}
 
-		return usePrismaClient(client => client.review.findMany({
-			where:   whereCondition,
-			include: REVIEW_ENTITY_SELECT,
-			orderBy: {
-				createdAt: 'desc'
-			}
-		}));
+		const [menuItemReviews, stationReviews] = await Promise.all([
+			usePrismaClient(client => client.review.findMany({
+				where:   whereCondition,
+				include: REVIEW_ENTITY_SELECT,
+				orderBy: {
+					createdAt: 'desc'
+				}
+			})),
+			this.#getStationReviewsForMenuItemAsync(menuItem.stationId),
+		]);
+
+		return { menuItemReviews, stationReviews };
 	}
 
 	public static async getReviewsForStationAsync(station: { name: string; groupId?: string | null }): Promise<IServerReview[]> {

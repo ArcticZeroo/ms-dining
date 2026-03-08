@@ -1,5 +1,6 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import { ReviewStorageClient, getReviewEntityKey, getReviewEntityKeyFromParts } from '../storage/clients/review.js';
+import { StationStorageClient } from '../storage/clients/station.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../../util/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
@@ -60,7 +61,18 @@ STORAGE_EVENTS.on('groupMembershipDirty', (event) => {
 
 // --- Menu item review headers ---
 
-export const retrieveReviewHeaderAsync = async (menuItem: IMenuItemBase): Promise<IMenuItemReviewHeader> => {
+const combineHeaders = (menuItemHeader: IMenuItemReviewHeader, stationHeader: IMenuItemReviewHeader): IMenuItemReviewHeader => {
+	const totalReviewCount = menuItemHeader.totalReviewCount + stationHeader.totalReviewCount;
+	if (totalReviewCount === 0) {
+		return { totalReviewCount: 0, overallRating: 0 };
+	}
+	return {
+		totalReviewCount,
+		overallRating: (menuItemHeader.overallRating * menuItemHeader.totalReviewCount + stationHeader.overallRating * stationHeader.totalReviewCount) / totalReviewCount,
+	};
+};
+
+const retrieveMenuItemOnlyReviewHeaderAsync = async (menuItem: IMenuItemBase): Promise<IMenuItemReviewHeader> => {
 	const entityKey = getReviewEntityKey(menuItem);
 	return MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.update(
 		entityKey,
@@ -73,6 +85,22 @@ export const retrieveReviewHeaderAsync = async (menuItem: IMenuItemBase): Promis
 			}
 			return ReviewStorageClient.getMenuItemReviewHeaderByName(normalizeNameForSearch(menuItem.name));
 		});
+}
+
+const retrieveStationReviewHeaderForMenuItemAsync = async (stationId: string): Promise<IMenuItemReviewHeader> => {
+	const station = await StationStorageClient.retrieveStationAsync(stationId);
+	if (station == null) {
+		return { totalReviewCount: 0, overallRating: 0 };
+	}
+	return retrieveStationReviewHeaderAsync({ name: station.name, groupId: station.groupId });
+};
+
+export const retrieveReviewHeaderAsync = async (menuItem: IMenuItemBase): Promise<IMenuItemReviewHeader> => {
+	const [menuItemHeader, stationHeader] = await Promise.all([
+		retrieveMenuItemOnlyReviewHeaderAsync(menuItem),
+		retrieveStationReviewHeaderForMenuItemAsync(menuItem.stationId),
+	]);
+	return combineHeaders(menuItemHeader, stationHeader);
 }
 
 export const retrieveReviewHeaderByPartsAsync = async (groupId: string | null | undefined, name: string): Promise<IMenuItemReviewHeader> => {
@@ -136,7 +164,7 @@ export const retrieveWeightedStationReviewHeaderAsync = async (
 ): Promise<IMenuItemReviewHeader> => {
 	const [stationHeader, ...itemHeaders] = await Promise.all([
 		retrieveStationReviewHeaderAsync(station),
-		...menuItems.map(item => retrieveReviewHeaderAsync(item))
+		...menuItems.map(item => retrieveMenuItemOnlyReviewHeaderAsync(item))
 	]);
 
 	const stationCount = stationHeader.totalReviewCount;

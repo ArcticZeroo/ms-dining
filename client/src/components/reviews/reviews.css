@@ -24,3 +24,9 @@ a.review-location {
 .character-counter.warning {
     color: var(--color-error-light);
 }
+
+.station-review-badge {
+    font-size: 0.75em;
+    opacity: 0.7;
+    font-style: italic;
+}
