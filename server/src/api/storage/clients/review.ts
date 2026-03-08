@@ -451,7 +451,7 @@ export abstract class ReviewStorageClient {
 
 		return {
 			totalReviewCount: result._count ?? 0,
-			overallRating:    result._avg?.rating ?? 0,
+			overallRating:    Number(result._avg?.rating ?? 0),
 		};
 	}
 
@@ -469,7 +469,7 @@ export abstract class ReviewStorageClient {
 
 		return {
 			totalReviewCount: result._count ?? 0,
-			overallRating:    result._avg?.rating ?? 0,
+			overallRating:    Number(result._avg?.rating ?? 0),
 		};
 	}
 }
