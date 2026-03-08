@@ -1,5 +1,5 @@
 import { SEARCH_THREAD_HANDLER } from '../../worker-thread/search.js';
-import { retrieveEmbeddings, retrieveMenuItemEmbeddings, retrieveStationEmbeddings, retrieveCafeEmbeddings } from '../../openai.js';
+import { retrieveEmbeddings, retrieveMenuItemEmbeddings, retrieveStationEmbeddings, retrieveCafeEmbeddings } from '../../embeddings.js';
 import { IVectorSearchResult } from '../../../models/vector.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
