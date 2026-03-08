@@ -531,6 +531,7 @@ export abstract class MenuItemStorageClient {
 			where: { id: menuItemId },
 			data:  { thumbnailHash: hash }
 		}));
+		this.registerThumbnailHash(menuItemId, hash);
 	}
 
 	/**
