@@ -12,9 +12,9 @@ const getClient = lazy(() => new OpenAI({
 export const openAiProvider: IAiProvider = {
     async retrieveTextCompletion(request: IAiTextCompletionRequest): Promise<string> {
         const response = await getClient().chat.completions.create({
-            model:      'gpt-5.2',
-            max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
-            messages:   [
+            model:                'gpt-5.2',
+            max_completion_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+            messages:             [
                 {
                     role:    'system',
                     content: request.systemPrompt
@@ -41,9 +41,9 @@ export const openAiProvider: IAiProvider = {
 
     async retrieveVisionCompletion(request: IAiVisionRequest): Promise<string> {
         const response = await getClient().chat.completions.create({
-            model:      'gpt-5.2',
-            max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
-            messages:   [
+            model:                'gpt-5.2',
+            max_completion_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+            messages:             [
                 {
                     role:    'system',
                     content: request.systemPrompt
