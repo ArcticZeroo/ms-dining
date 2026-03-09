@@ -20,6 +20,15 @@ Always use these Koa context helpers from `util/koa.ts`:
 - Use `usePrismaTransaction(callback)` for multiple related writes that should be atomic
 - **Never use `Promise.all()` for concurrent DB operations** — SQLite + Prisma performs worse with parallel queries. The `usePrismaClient` wrapper enforces single-threaded access via a semaphore. For multiple writes, use sequential `await` inside `usePrismaTransaction` instead.
 - Handle unique constraint violations with `isUniqueConstraintFailedError(err)`
+- Handle missing record errors (P2025) gracefully — e.g., when updating a record that may have been deleted, catch `PrismaClientKnownRequestError` with code `P2025` and skip instead of crashing
+- **Keep in-memory caches in sync with DB writes** — when a storage client maintains an in-memory cache (e.g., maps, sets), any method that writes to the DB must also update the in-memory state. Don't rely on reboots to resync.
+
+## Prisma CLI
+- The Prisma schema uses multi-file schema in `prisma/` with `prisma.config.ts` for path configuration
+- **Never pass `--schema prisma/schema`** to Prisma CLI commands — this causes migrations to be created in the wrong directory. The `prisma.config.ts` file handles schema discovery automatically.
+- Run `npx prisma generate` (no flags) to regenerate the client
+- Run `npx prisma generate --sql` to regenerate typed SQL queries
+- Run `npx prisma migrate dev --name <name>` to create migrations
 
 ## Response Serialization
 - Use `jsonStringifyWithoutNull()` for JSON responses to remove null values
@@ -51,3 +60,11 @@ Always use these Koa context helpers from `util/koa.ts`:
 - Menu items belong to cafes and can have multiple modifiers
 - Daily data is time-scoped and links to base entities
 - User preferences stored as delimited strings, deserialized by Storage Clients
+
+## API Design Patterns
+- **Additive-only changes** — browser JS caches may serve stale frontend code. Never break existing endpoints; add new ones or add optional fields.
+
+## Code Style
+- Use descriptive variable names in callbacks: `snapshot => snapshot.price`, not `s => s.price`
+- Before creating a utility function, search the codebase for existing helpers (e.g., `formatPrice` in `util/cart.ts`, `normalizeNameForSearch`, etc.)
+- Component and type names should be generic where possible — `PaymentIframe` not `RguestPaymentIframe`, since the implementation detail (rguest) may change

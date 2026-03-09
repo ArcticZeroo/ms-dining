@@ -28,13 +28,15 @@ const response = useImmediatePromiseState(asyncFunction);
 const { value, error, run } = useDelayedPromiseState(asyncFunction);
 ```
 
-**You MUST handle all three states**: loading, error, and success. Never skip loading or error handling.
+**You MUST handle all three states**: loading, error, and success. Never skip loading or error handling. **Never return `null` for loading or error** — always show a spinner or error message.
 
 - **Error state**: Check `response.stage === PromiseStage.error` and render an error message with a `<RetryButton onClick={response.run}/>`.
 - **Loading state**: Check that the value is still `null`/`undefined` and render a loading indicator (e.g. `<HourglassLoadingSpinner/>` or a skeleton).
 - **Success state**: Render the data only after confirming the value is available.
 
 Both hooks return `{ stage, value, error, run }`. Always import `PromiseStage` alongside the hook.
+
+**Prefer these hooks over manual state management.** Don't use `useState` + `try/catch` + manual `isPending`/`error` state when `useDelayedPromiseState` or `useImmediatePromiseState` can handle it. The hooks provide consistent loading/error/success tracking without reimplementing the pattern.
 
 #### Example (useImmediatePromiseState)
 ```tsx
@@ -167,8 +169,18 @@ Use the `.card` class and its variants from `index.css` for card-like containers
 - **Parameterize, don't duplicate.** If two functions differ only in which map they access or which API path they hit, merge them into one function that derives the difference from its input.
 - **Components should be entity-agnostic** wherever possible. A review form, review list, or review summary should not know or care whether it's for a menu item or a station — it should receive a lookup type and operate generically.
 - **Stores and API clients** should expose one method per operation (e.g., `createReview`, not `createReview` + `createStationReview`). The entity type should be encoded in the input, not the method name.
+- **Search for existing helpers before creating new ones.** Common utilities already exist:
+  - `formatPrice()` in `util/cart.ts` — don't create local `formatPrice` functions
+  - `normalizeNameForSearch()` — for name normalization
+  - `classNames()` — for conditional CSS classes
+  - `getEntityKey()` — for cross-cafe entity deduplication
+- When writing `.map()`, `.filter()`, or similar callbacks that appear more than once with the same transformation, extract a named helper function.
 
 If you find yourself copying a function/component and changing one word, stop and refactor instead.
+
+## Code Style
+- Use descriptive variable names in callbacks: `snapshot => snapshot.price`, not `s => s.price`
+- Component and type names should be generic where possible — `PaymentIframe` not `RguestPaymentIframe`, since the implementation detail may change
 
 ## Styling Approach
 
