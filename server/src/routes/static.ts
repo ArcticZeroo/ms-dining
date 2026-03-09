@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import mount from 'koa-mount';
 import serve from 'koa-static';
+import send from 'koa-send';
 import { serverStaticPath } from '../constants/config.js';
 import Duration from '@arcticzeroo/duration';
 import Router from '@koa/router';
@@ -18,8 +19,8 @@ export const createStaticRoutingApp= () => {
 
 		const canonicalId = MenuItemStorageClient.getCanonicalThumbnailId(id);
 		if (canonicalId != null) {
-			ctx.redirect(`/menu-items/thumbnail/${canonicalId}.png`);
-			ctx.status = 302;
+			// Serve the canonical file directly instead of redirecting
+			await send(ctx, `menu-items/thumbnail/${canonicalId}.png`, { root: serverStaticPath });
 			return;
 		}
 
