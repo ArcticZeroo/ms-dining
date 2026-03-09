@@ -103,14 +103,10 @@ export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorke
 	// Save to old path (backward compat)
 	await image.writeAsync(getThumbnailFilepath(request.id));
 
-	// Save to new hash-based path (skip if file already exists — that's the dedup)
+	// Save to new hash-based path (always overwrite — collision rate is negligible)
 	const hashPath = getHashThumbnailFilepath(hash);
-	try {
-		await fs.access(hashPath);
-	} catch {
-		await fs.mkdir(serverThumbnailPath, { recursive: true });
-		await image.writeAsync(hashPath);
-	}
+	await fs.mkdir(serverThumbnailPath, { recursive: true });
+	await image.writeAsync(hashPath);
 
 	return {
 		width:          image.getWidth(),
