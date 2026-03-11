@@ -504,7 +504,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			const [stations, ingredientsMenu] = await Promise.all([
 				convertMenuToSerializable(menuStations, uniquenessData),
-				resolveIngredientsMenuAsync(cafe.id, menuStations),
+				resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
 			]);
 
 			const response: ICafeMenuResponse = { stations };
