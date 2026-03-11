@@ -898,7 +898,8 @@ export class CafeOrderSession {
         await this.client.requestAsync(
             `/order/${this.#orderId}/processPaymentAndClosedOrder`,
             {
-                method: 'POST',
+                method:  'POST',
+                headers: JSON_HEADERS,
                 body:   JSON.stringify({
                     amHereConfig:                    {
                         isCurbsidePickup: false,
@@ -1180,7 +1181,8 @@ export class CafeOrderSession {
         await this.client.requestAsync(
             `/order/${this.#orderId}/processPaymentAndClosedOrder`,
             {
-                method: 'POST',
+                method:  'POST',
+                headers: JSON_HEADERS,
                 body:   JSON.stringify({
                     amHereConfig:                    {
                         isCurbsidePickup: false,
@@ -1463,6 +1465,7 @@ export class CafeOrderSession {
             await callback();
         } catch (err) {
             logError(`{${this.client.cafe.name}} Failed after stage ${this.#lastCompletedStage}:`, err);
+            throw err;
         }
     }
 

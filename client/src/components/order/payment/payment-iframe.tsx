@@ -24,9 +24,9 @@ const rguestCardInfoSchema = z.object({
     cardIssuer:          z.string(),
     accountNumberMasked: z.string(),
     expirationYearMonth: z.string(),
-    cardHolderName:      z.string(),
+    cardholderName:      z.string(),
     postalCode:          z.string(),
-});
+}).passthrough();
 
 const rguestPaymentSuccessSchema = z.object({
     token: z.string().optional(),
@@ -36,6 +36,7 @@ const rguestPaymentSuccessSchema = z.object({
     cardInfo: rguestCardInfoSchema.optional(),
     gatewayResponseData: z.object({
         decision: z.string(),
+        message:  z.string().optional(),
     }).optional(),
 });
 
@@ -110,13 +111,22 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
         // Success — has token or transactionReferenceData
         const successResult = rguestPaymentSuccessSchema.safeParse(data);
         if (successResult.success) {
+            const decision = successResult.data.gatewayResponseData?.decision;
+            if (decision && decision !== 'ACCEPT') {
+                const reason = successResult.data.gatewayResponseData?.message ?? decision;
+                const message = `Payment declined: ${reason}`;
+                setIframeError(message);
+                onPaymentError(message);
+                return;
+            }
+
             const token = successResult.data.token ?? successResult.data.transactionReferenceData?.token;
             if (token) {
                 const cardInfo: IRguestCardInfo = {
                     accountNumberMasked: successResult.data.cardInfo?.accountNumberMasked ?? '',
                     cardIssuer:          successResult.data.cardInfo?.cardIssuer ?? '',
                     expirationYearMonth: successResult.data.cardInfo?.expirationYearMonth ?? '',
-                    cardHolderName:      successResult.data.cardInfo?.cardHolderName ?? '',
+                    cardHolderName:      successResult.data.cardInfo?.cardholderName ?? '',
                     postalCode:          successResult.data.cardInfo?.postalCode ?? '',
                 };
 

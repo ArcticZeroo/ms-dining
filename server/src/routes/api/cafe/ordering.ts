@@ -7,6 +7,7 @@ import {
     ICardData,
     ICartItem,
     ICompleteOrderRequest,
+    ICompleteOrderResponse,
     IOrderCompletionResponse,
     IPrepareOrderRequest,
     IRguestCardInfo,
@@ -71,7 +72,7 @@ const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest 
 
 const isValidCompleteOrderParams = (data: unknown): data is ICompleteOrderRequest => {
     if (!isDuckType<ICompleteOrderRequest>(data, {
-        orderIds:     'object',
+        orderId:      'string',
         paymentToken: 'string',
         cardInfo:     'object',
         alias:        'string',
@@ -368,47 +369,32 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
-        // Look up sessions by orderId from the prepare response
-        const sessionsToComplete: IPendingIframeSession[] = [];
-
-        for (const orderId of Object.values(data.orderIds)) {
-            const pending = pendingIframeSessions.get(orderId);
-            if (pending != null && pending.session.lastCompletedStage === SubmitOrderStage.initializeCardProcessor) {
-                sessionsToComplete.push(pending);
-            }
+        const pending = pendingIframeSessions.get(data.orderId);
+        if (pending == null || pending.session.lastCompletedStage !== SubmitOrderStage.initializeCardProcessor) {
+            return ctx.throw(400, 'No pending order session found. The order may have expired — please try again.');
         }
 
-        if (sessionsToComplete.length === 0) {
-            return ctx.throw(400, 'No pending order sessions found. The order may have expired — please try again.');
+        // TODO: some sort of lock to avoid multiple completions, for now just delete to prevent a second one
+        pendingIframeSessions.delete(data.orderId);
+
+        await pending.session.completeWithIframeToken({
+            alias:        data.alias,
+            phoneData:    pending.phoneData,
+            paymentToken: data.paymentToken,
+            cardInfo:     data.cardInfo,
+        });
+
+        const orderNumber = pending.session.orderNumber;
+        if (orderNumber == null) {
+            console.error(`Order number for cafe ${pending.cafeId} is null`);
         }
 
-        await Promise.all(
-            sessionsToComplete.map(pending =>
-                pending.session.completeWithIframeToken({
-                    alias:        data.alias,
-                    phoneData:    pending.phoneData,
-                    paymentToken: data.paymentToken,
-                    cardInfo:     data.cardInfo,
-                }).then(() => {
-                    pendingIframeSessions.delete(pending.session.orderId!);
-                })
-            )
-        );
-
-        const response: IOrderCompletionResponse = {};
-        for (const pending of sessionsToComplete) {
-            const orderNumber = pending.session.orderNumber;
-            if (orderNumber == null) {
-                console.error(`Order number for cafe ${pending.cafeId} is null`);
-            }
-
-            response[pending.cafeId] = {
-                lastCompletedStage: pending.session.lastCompletedStage,
-                orderNumber:        orderNumber ?? 'Unknown',
-                waitTimeMin:        '0',
-                waitTimeMax:        '0'
-            };
-        }
+        const response: ICompleteOrderResponse = {
+            lastCompletedStage: pending.session.lastCompletedStage,
+            orderNumber:        orderNumber ?? 'Unknown',
+            waitTimeMin:        '0',
+            waitTimeMax:        '0'
+        };
 
         ctx.body = JSON.stringify(response);
     });

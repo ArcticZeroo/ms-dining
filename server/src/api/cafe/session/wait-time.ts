@@ -3,6 +3,7 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { IBuyOnDemandWaitTimeResponse, IBuyOnDemandWaitTimeSection } from '../../../models/buyondemand/cart.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ICafe } from '../../../models/cafe.js';
+import { logError } from '../../../util/log.js';
 
 const isDuckTypeWaitTimeSection = (data: unknown): data is IBuyOnDemandWaitTimeSection => isDuckType<IBuyOnDemandWaitTimeSection>(data, { minutes: 'number' });
 
@@ -45,6 +46,7 @@ export class WaitTimeSession {
         const json = await response.json();
 
         if (!isDuckType<IBuyOnDemandWaitTimeResponse>(json, { minTime: 'object', maxTime: 'object' })) {
+            logError('Unexpected wait time response format:', JSON.stringify(json));
             throw new Error('Invalid response format: missing min/maxTime or in wrong format');
         }
 

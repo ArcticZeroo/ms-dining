@@ -97,12 +97,10 @@ export interface IPrepareOrderResponse {
 }
 
 export interface ICompleteOrderRequest {
-    orderIds: Record<string, string>; // cafeId → orderId from prepare response
+    orderId: string;
     paymentToken: string;
     cardInfo: IRguestCardInfo;
     alias: string;
 }
 
-export interface ICompleteOrderResponse {
-    [cafeId: string]: IOrderCompletionData;
-}
+export type ICompleteOrderResponse = IOrderCompletionData;

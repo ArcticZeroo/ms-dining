@@ -117,7 +117,7 @@ export abstract class OrderingClient {
     }
 
     public static async completeOrder(params: ICompleteOrderRequest): Promise<ICompleteOrderResponse> {
-        const response = await makeJsonRequest<ICompleteOrderResponse>({
+        return await makeJsonRequest<ICompleteOrderResponse>({
             path:    '/api/dining/order/complete',
             options: {
                 method:  'POST',
@@ -125,8 +125,6 @@ export abstract class OrderingClient {
                 body:    JSON.stringify(params)
             }
         });
-
-        return response;
     }
 
     public static async hydrateCart(serializedCart: Record<string /*cafeId*/, Array<ISerializedCartItemWithName>>): Promise<IHydratedCartData> {
