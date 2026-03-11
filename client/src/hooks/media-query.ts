@@ -12,8 +12,7 @@ const getDeviceType = (): DeviceType => (window.innerWidth <= mobileDeviceMaxWid
 
 const mobileDeviceMaxWidthPx = 800;
 
-const deviceTypeNotifier = new class extends RefCountedValueNotifier<DeviceType>
-{
+const deviceTypeNotifier = new class extends RefCountedValueNotifier<DeviceType> {
     constructor() {
         super(getDeviceType());
     }

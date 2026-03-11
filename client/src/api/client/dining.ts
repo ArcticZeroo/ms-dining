@@ -3,10 +3,11 @@ import { DateUtil, SearchTypes } from '@msdining/common';
 import { ICafeOverviewStation, IMenuItemBase, IMenuItem, IMenuOverviewSummary } from '@msdining/common/models/cafe';
 import {
     ICreateReviewRequest,
+    ICafeMenuResponse,
     IDiningCoreResponse,
     ISearchResponseResult, IUpdateReviewRequest, IUpdateUserSettingsInput,
+    IStationDTO,
     IWaitTimeResponse,
-    MenuResponse
 } from '@msdining/common/models/http';
 import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/models/search';
 import { IAutocompleteSuggestion, IAutocompleteResponse } from '@msdining/common/models/search';
@@ -55,30 +56,15 @@ export abstract class DiningClient {
         return response;
     }
 
-    private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<Array<ICafeStation>> {
+    private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<CafeMenu> {
         const response = await makeJsonRequest({
-            path: `/api/dining/menu/${id}?date=${dateString}`
-        }) as MenuResponse;
+            path: `/api/dining/menu/${id}/menu?date=${dateString}`
+        }) as ICafeMenuResponse;
 
-        const stations: ICafeStation[] = [];
-        for (const responseStation of response) {
-            const menu: Record<string, Array<IMenuItem>> = {};
-            for (const [category, menuItems] of Object.entries(responseStation.menu)) {
-                menu[category] = menuItems.map(dto => ({
-                    ...dto,
-                    lastUpdateTime: dto.lastUpdateTime ? new Date(dto.lastUpdateTime) : undefined,
-                    tags:           new Set(dto.tags),
-                    searchTags:     new Set(dto.searchTags)
-                } satisfies IMenuItemBase));
-            }
-
-            stations.push({
-                ...responseStation,
-                menu
-            });
-        }
-
-        return stations;
+        return {
+            stations:        DiningClient._deserializeStations(response.stations),
+            ingredientsMenu: response.ingredientsMenu,
+        };
     }
 
     private static _addToLastUsedCafeIds(id: string) {
@@ -139,7 +125,7 @@ export abstract class DiningClient {
         if (existingMenuPromise) {
             return Promise.race([
                 overviewPromise,
-                existingMenuPromise
+                existingMenuPromise.then(menu => menu.stations)
             ]);
         }
 
@@ -152,6 +138,26 @@ export abstract class DiningClient {
         });
 
         return response as IMenuOverviewSummary;
+    }
+
+    private static _deserializeStations(rawStations: IStationDTO[]): ICafeStation[] {
+        const stations: ICafeStation[] = [];
+        for (const responseStation of rawStations) {
+            const menu: Record<string, Array<IMenuItem>> = {};
+            for (const [category, menuItems] of Object.entries(responseStation.menu)) {
+                menu[category] = menuItems.map(dto => ({
+                    ...dto,
+                    lastUpdateTime: dto.lastUpdateTime ? new Date(dto.lastUpdateTime) : undefined,
+                    tags:           new Set(dto.tags),
+                    searchTags:     new Set(dto.searchTags)
+                } satisfies IMenuItemBase));
+            }
+            stations.push({
+                ...responseStation,
+                menu
+            });
+        }
+        return stations;
     }
 
     public static async retrieveRecentMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {

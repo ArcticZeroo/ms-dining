@@ -61,7 +61,7 @@ export const IngredientsMenuView: React.FC<IMenuForIngredientsProps> = ({ menu }
             <CourseMenuSection
                 title="Entrées"
                 subtitle="Choose one"
-                items={menu.mainChoices}
+                items={menu.entreeChoices}
             />
             <CourseMenuSection
                 title="Desserts"
@@ -69,9 +69,19 @@ export const IngredientsMenuView: React.FC<IMenuForIngredientsProps> = ({ menu }
                 items={menu.dessertChoices}
             />
             <CourseMenuSection
-                title="Additional Offerings"
+                title="Drinks"
                 subtitle="Available à la carte"
-                items={menu.additionalOfferings}
+                items={menu.drinkChoices}
+            />
+            <CourseMenuSection
+                title="Sides"
+                subtitle="Available à la carte"
+                items={menu.sideChoices}
+            />
+            <CourseMenuSection
+                title="Other Items"
+                subtitle="Available à la carte"
+                items={menu.otherItems}
             />
         </div>
     );

@@ -6,5 +6,5 @@ import { backfillThumbnailHashesMigration } from './migrations/backfill-thumbnai
 export const MIGRATION_REGISTRY: IRuntimeMigration[] = [
 	deleteLegacyStationEmbeddings,
 	backfillStationNames,
-    backfillThumbnailHashesMigration,
+	backfillThumbnailHashesMigration,
 ];

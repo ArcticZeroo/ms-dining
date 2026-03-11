@@ -1,4 +1,4 @@
-import { CafeMenu, ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
+import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import React, { useMemo } from 'react';
 import { StationListEmpty } from './station-list-empty.tsx';
 import { Station } from './station.tsx';
@@ -8,7 +8,7 @@ import { ApplicationSettings } from '../../../constants/settings.ts';
 import { sortStationUniquenessInPlace } from '../../../util/sorting.ts';
 
 interface IStationListProps {
-    stations: CafeMenu;
+    stations: ICafeStation[];
 }
 
 export const StationList: React.FC<IStationListProps> = ({ stations  }) => {
