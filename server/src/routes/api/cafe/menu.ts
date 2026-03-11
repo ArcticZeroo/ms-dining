@@ -49,9 +49,7 @@ import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interf
 import { logDebug } from '../../../util/log.js';
 import { retrieveReviewHeaderAsync, retrieveStationReviewHeaderAsync } from '../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-first-appearance.js';
-import { categorizeIngredientsMenu } from '../../../api/cafe/ingredients/ai-categorizer.js';
-import { computeMenuHash, getRolesByMenuHash, setRolesForMenuHash, IMenuRoleRow } from '../../../api/cafe/ingredients/cache.js';
-import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
+import { resolveIngredientsMenuAsync } from '../../../api/cache/ingredients-menu.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -495,84 +493,6 @@ export const registerMenuRoutes = (parent: Router) => {
 			ctx.body = MenuItemStorageClient.topSearchTags;
 		});
 
-	const buildItemsById = (stations: ICafeStation[]): Map<string, IMenuItemBase> => {
-		const allItemsById = new Map<string, IMenuItemBase>();
-		for (const station of stations) {
-			for (const [, item] of station.menuItemsById) {
-				allItemsById.set(item.id, item);
-			}
-		}
-		return allItemsById;
-	};
-
-	const ROLE_TO_DTO_KEY: Record<string, keyof Pick<IIngredientsMenuDTO, 'starterChoiceIds' | 'entreeChoiceIds' | 'dessertChoiceIds' | 'drinkChoiceIds' | 'sideChoiceIds' | 'otherItemIds'>> = {
-		STARTER: 'starterChoiceIds',
-		ENTREE:  'entreeChoiceIds',
-		DESSERT: 'dessertChoiceIds',
-		DRINK:   'drinkChoiceIds',
-		SIDE:    'sideChoiceIds',
-		OTHER:   'otherItemIds',
-	};
-
-	const buildIngredientsDTO = (roles: IMenuRoleRow[], stations: ICafeStation[], price: number): IIngredientsMenuDTO => {
-		const logoUrl = stations[0]?.logoUrl ?? null;
-
-		const dto: IIngredientsMenuDTO = {
-			price,
-			logoUrl,
-			starterChoiceIds: [],
-			entreeChoiceIds:  [],
-			dessertChoiceIds: [],
-			drinkChoiceIds:   [],
-			sideChoiceIds:    [],
-			otherItemIds:     [],
-		};
-
-		for (const { menuItemId, role } of roles) {
-			const key = ROLE_TO_DTO_KEY[role];
-			if (key) {
-				dto[key].push(menuItemId);
-			}
-		}
-
-		return dto;
-	};
-
-	const deriveEntreePrice = (roles: IMenuRoleRow[], stations: ICafeStation[]): number => {
-		const itemsById = buildItemsById(stations);
-		for (const { menuItemId, role } of roles) {
-			if (role === 'ENTREE') {
-				const item = itemsById.get(menuItemId);
-				if (item) {
-					return item.price;
-				}
-			}
-		}
-		return 0;
-	};
-
-	const resolveIngredientsMenu = async (cafeId: string, menuStations: ICafeStation[]): Promise<IIngredientsMenuDTO | null> => {
-		if (cafeId !== 'in-gredients') {
-			return null;
-		}
-
-		const hash = computeMenuHash(menuStations);
-		const roles = await getRolesByMenuHash(hash);
-
-		if (roles.length > 0) {
-			const price = deriveEntreePrice(roles, menuStations);
-			return buildIngredientsDTO(roles, menuStations, price);
-		}
-
-		const aiResult = await categorizeIngredientsMenu(menuStations);
-		if (aiResult == null) {
-			return null;
-		}
-
-		await setRolesForMenuHash(hash, aiResult.roles);
-		return buildIngredientsDTO(aiResult.roles, menuStations, aiResult.price);
-	};
-
 	router.get('/:id/menu',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
 		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
@@ -584,7 +504,7 @@ export const registerMenuRoutes = (parent: Router) => {
 
 			const [stations, ingredientsMenu] = await Promise.all([
 				convertMenuToSerializable(menuStations, uniquenessData),
-				resolveIngredientsMenu(cafe.id, menuStations),
+				resolveIngredientsMenuAsync(cafe.id, menuStations),
 			]);
 
 			const response: ICafeMenuResponse = { stations };
