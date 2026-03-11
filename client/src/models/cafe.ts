@@ -1,6 +1,7 @@
 import { IDiningCoreGroup, IDiningCoreGroupMember, } from '@msdining/common/models/http';
 import { IMenuItem, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { Nullable } from '@msdining/common/models/util';
+import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 
 export type ICafeGroup = IDiningCoreGroup;
 export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };
@@ -34,4 +35,7 @@ export interface ICafeStation {
     totalReviewCount?: number;
 }
 
-export type CafeMenu = ICafeStation[];
+export interface CafeMenu {
+    stations: ICafeStation[];
+    ingredientsMenu?: IIngredientsMenuDTO;
+}

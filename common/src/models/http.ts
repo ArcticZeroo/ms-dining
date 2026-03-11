@@ -1,4 +1,5 @@
 import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
+import { IIngredientsMenuDTO } from './ingredients.js';
 import { SearchEntityType, SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
 
@@ -90,6 +91,12 @@ export interface IStationDTO {
 
 // GET /api/dining/menu/:cafeId
 export type MenuResponse = Array<IStationDTO>;
+
+// GET /api/dining/menu/:cafeId/menu
+export interface ICafeMenuResponse {
+	stations: IStationDTO[];
+	ingredientsMenu?: IIngredientsMenuDTO;
+}
 
 export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;
 

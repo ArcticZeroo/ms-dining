@@ -7,9 +7,11 @@ export interface IIngredientsMenu {
     price: number;
     logoUrl: Nullable<string>;
     starterChoices: IMenuItem[];
-    mainChoices: IMenuItem[];
+    entreeChoices: IMenuItem[];
     dessertChoices: IMenuItem[];
-    additionalOfferings: IMenuItem[];
+    drinkChoices: IMenuItem[];
+    sideChoices: IMenuItem[];
+    otherItems: IMenuItem[];
 }
 
 const findMatchingItem = (
@@ -135,11 +137,13 @@ export const parseIngredientsMenu = (stations: ICafeStation[]): IIngredientsMenu
     });
 
     return {
-        price:       threeCourseMealMenuItems[0]!.price,
-        logoUrl:     station.logoUrl,
-        mainChoices: threeCourseMealMenuItems,
+        price:          threeCourseMealMenuItems[0]!.price,
+        logoUrl:        station.logoUrl,
+        entreeChoices:  threeCourseMealMenuItems,
         starterChoices,
         dessertChoices,
-        additionalOfferings,
+        drinkChoices:   [],
+        sideChoices:    [],
+        otherItems:     additionalOfferings,
     };
 };

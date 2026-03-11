@@ -61,7 +61,9 @@ const DebugSettingToggle: React.FC<IDebugSettingToggleProps> = ({ setting }) => 
                 type="checkbox"
                 id={htmlId}
                 checked={currentValue}
-                onChange={() => { setting.value = !currentValue; }}
+                onChange={() => {
+                    setting.value = !currentValue; 
+                }}
             />
         </label>
     );

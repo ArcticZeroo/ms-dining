@@ -57,10 +57,11 @@ model MenuItem {
   stationId String
   station   Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
-  dailyMenuItems DailyMenuItem[]
-  modifiers      MenuItemModifierEntry[]
-  searchTags     SearchTag[]
-  reviews        Review[]
+  dailyMenuItems         DailyMenuItem[]
+  modifiers              MenuItemModifierEntry[]
+  searchTags             SearchTag[]
+  reviews                Review[]
+  ingredientsMenuRoles   IngredientsMenuRole[]
 }
 
 model MenuItemModifierEntry {
@@ -230,4 +231,14 @@ model SearchQuery {
   query     String   @id
   count     Int      @default(0)
   updatedAt DateTime @updatedAt
+}
+
+model IngredientsMenuRole {
+  id         String   @id @default(uuid())
+  menuItemId String
+  role       String
+  menuHash   String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId, menuHash])
 }

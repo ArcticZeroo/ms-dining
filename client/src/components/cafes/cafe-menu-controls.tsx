@@ -19,13 +19,13 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
     const cafe = useContext(CurrentCafeContext);
     const openPopup = usePopupOpener();
     const deviceType = useDeviceType();
-    const isOverviewDisabled = menuData.value && menuData.value.length === 0;
+    const isOverviewDisabled = menuData.value && menuData.value.stations.length === 0;
     const overviewTitle = isOverviewDisabled
         ? 'There are no stations on the menu today.'
         : 'Click to view menu overview';
 
     const onOpenMenuOverviewClicked = () => {
-        const stations = menuData.value;
+        const stations = menuData.value?.stations;
         if (!stations || stations.length === 0) {
             return;
         }
