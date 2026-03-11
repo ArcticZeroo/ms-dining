@@ -61,9 +61,8 @@ const runMigrationIfNeeded = async (migration: IRuntimeMigration) => {
 				where: { name: migration.name },
 				data:  { status: 'failed', error: errorMessage }
 			})
-		).catch(() => {});
+		);
 
 		logError(`[Migrations] Failed: ${migration.name}:`, err);
-		// Don't rethrow — let boot continue
 	}
 };

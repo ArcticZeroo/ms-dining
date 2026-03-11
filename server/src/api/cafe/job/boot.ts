@@ -80,6 +80,8 @@ export const performMenuBootTasks = async () => {
 	// Will be needed basically always anyway.
 	await MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync();
 
+    await MenuItemStorageClient.loadThumbnailHashMap();
+
 	// Prune daily station embeddings outside the rolling window (last week + this week + next week)
 	const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
 	await pruneExpiredDailyStationEmbeddings(validDateStrings);
