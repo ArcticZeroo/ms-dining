@@ -70,3 +70,39 @@ export interface IOrderCompletionData {
 export interface IOrderCompletionResponse {
     [cafeId: string]: IOrderCompletionData;
 }
+
+// --- rguest iframe payment flow types ---
+
+export interface IRguestCardInfo {
+    accountNumberMasked: string;
+    cardIssuer: string;
+    expirationYearMonth: string;
+    cardHolderName: string;
+    postalCode: string;
+}
+
+export interface IPrepareOrderRequest {
+    itemsByCafeId: ISubmitOrderItems;
+    alias: string;
+    phoneNumberWithCountryCode: string;
+}
+
+export interface IPrepareOrderResponse {
+    [cafeId: string]: {
+        siteToken: string;
+        iframeUrl: string;
+        orderId: string;
+        orderNumber: string;
+    };
+}
+
+export interface ICompleteOrderRequest {
+    orderIds: Record<string, string>; // cafeId → orderId from prepare response
+    paymentToken: string;
+    cardInfo: IRguestCardInfo;
+    alias: string;
+}
+
+export interface ICompleteOrderResponse {
+    [cafeId: string]: IOrderCompletionData;
+}

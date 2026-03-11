@@ -1,3 +1,7 @@
 #order-checkout .cart-item-buttons {
     width: min-content;
 }
+
+#order-checkout .prepare-error {
+    color: var(--color-error, red);
+}

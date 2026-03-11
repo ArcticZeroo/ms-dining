@@ -1,55 +1,64 @@
-# Design Justification — feature/ingredients-ai
+# Design Justification — feature/rguest-popup
 
-## 1. Server-Side AI Categorization vs Client-Side Only
+## 1. Two-Phase Prepare/Complete vs Single Endpoint
 
-**Chosen:** A server-side `ai-categorizer.ts` module sends menu item data to an AI text completion API with a structured prompt, receiving categorized items (starters, entrées, desserts, additional offerings) as a JSON response. The client fetches the result from `GET /:id/menu`.
+**Chosen:** Split the ordering flow into `POST /order/prepare` (creates order, returns iframe URL) and `POST /order/complete` (submits payment token + card info to close the order).
 
-**Why it's right:** The in.gredients cafe uses a "buy-on-demand" ordering system that encodes its prix fixe 3-course meal structure in non-obvious ways — entrées appear in a "3 Course Meal" category, starters/desserts are hidden inside modifier choices, and à la carte duplicates clutter the listing. Client-side string matching (the existing `parseIngredientsMenu`) works for predictable patterns but fails on human data entry inconsistencies: misspellings, inconsistent capitalization, creative dessert names like "Sweet" or "Savory", and structural changes when staff reorganize categories. AI categorization handles these variations robustly by understanding menu semantics, not just string patterns.
-
-**Alternatives rejected:**
-- **Client-side only:** The existing `parseIngredientsMenu` uses fragile string matching that breaks whenever staff change category names, add unexpected items, or use creative descriptions. Every menu change risks a broken categorization that requires a code update. Server-side AI adapts to content changes without code modifications.
-
-## 2. Text Categorization vs PDF Vision Parsing
-
-**Chosen:** The AI categorizer serializes station data as structured text (`serializeStationForPrompt`) and uses a text completion API to categorize items by name, description, price, and modifier structure.
-
-**Why it's right:** The menu data is already available as structured JSON from the rguest API — item names, descriptions, prices, and modifier choices are all text fields. A text completion call is cheap (~$0.001–0.005 per request), fast, and the input format is deterministic. The prompt explicitly encodes domain knowledge about in.gredients' prix fixe structure (e.g., "Items in the '3 Course Meal' category are ENTRÉES", "Modifier choices named 'Starter Choice' contain the STARTER options").
+**Why it's right:** The rguest payment system requires a browser-hosted iframe (`pay.rguest.com`) for card collection — the iframe posts a tokenized payment result back via `postMessage`. The server cannot collect card details because it never sees the card form; the iframe runs entirely in the user's browser. A single endpoint would need the card data up front, which is impossible when the iframe hasn't rendered yet. The two-phase split follows the **Single Responsibility Principle** — prepare handles order creation and pricing, complete handles payment finalization — and matches the actual temporal sequence of the rguest protocol.
 
 **Alternatives rejected:**
-- **PDF vision parsing:** Would require rendering the menu as an image or PDF first, then using a vision model to extract and categorize items. Vision API calls are 10–50x more expensive than text completion, slower (multi-second latency), and introduce OCR-like failure modes. The structured text data is already available from the API — converting it to an image to re-extract it via vision is wasteful and error-prone.
+- **Single endpoint:** Cannot work because the server has no way to collect card details — the iframe must run in the browser to handle card entry and captcha. A single endpoint would require the client to somehow obtain a payment token before the order exists, creating a chicken-and-egg problem.
 
-## 3. Unified /:id/menu Endpoint vs Separate /ingredients-menu
+## 2. Frontend Iframe Popup vs Server-Side Card Submission
 
-**Chosen:** A single `GET /api/dining/cafe/:id/menu` endpoint that returns the standard menu data plus an optional `ingredientsMenu` field when the cafe is in.gredients and AI categorization succeeds.
+**Chosen:** Render the rguest iframe (`PaymentIframe` component) in a popup on the client, listen for `postMessage` events from `pay.rguest.com`, and forward the resulting token to the server.
 
-**Why it's right:** Only one cafe (in.gredients) uses this feature currently, so a dedicated endpoint would serve a single consumer. The unified endpoint follows the **pattern consistency** of the existing API — the menu route already handles per-cafe logic. It also sets up a clean extension point: future per-cafe metadata (hours, special instructions, dietary info) can be added to the same response without proliferating endpoints. From the client's perspective, a single request is simpler than coordinating two parallel fetches.
-
-**Alternatives rejected:**
-- **Separate `/ingredients-menu` endpoint:** Creates a one-off route for a single cafe, diverging from the existing pattern where cafe data flows through parameterized `/:id/` routes. The client would need to make two parallel requests and merge results, adding coordination complexity. If more cafes get custom metadata in the future, each would need its own endpoint, leading to route sprawl.
-
-## 4. MD5 Content-Based Caching vs Time-Based
-
-**Chosen:** `cache.ts` computes an MD5 hash of the menu content (item names, descriptions, prices, modifier choices) and uses it as a cache key. The cached AI categorization result is returned when the hash matches, bypassing the AI call entirely.
-
-**Why it's right:** The in.gredients menu changes unpredictably — sometimes every 6 weeks, sometimes every 10 weeks, and occasionally mid-week for special events. A time-based cache (e.g., "refresh every 24 hours") would either waste AI calls when the menu hasn't changed or serve stale results when it has. Content hashing detects actual changes with zero false positives or negatives. The hash includes modifier choice prices to catch price-only changes that don't affect item names.
+**Why it's right:** The rguest iframe embeds a captcha challenge that only works when loaded from a browser origin. Server-side submission from the app's domain would be blocked by the captcha. The iframe also handles PCI-compliant card collection — the app never touches raw card numbers, only receives a tokenized result. This is the pattern rguest designed for, confirmed by reverse-engineering their `iframe.js` postMessage protocol (documented in `rguest-popup-findings.md`).
 
 **Alternatives rejected:**
-- **Time-based caching (TTL):** A fixed TTL has no way to know whether the menu actually changed. A 24-hour TTL would make ~365 AI calls/year when the menu only changes ~6–8 times. A 1-week TTL would serve stale categorizations for up to 7 days after a menu change. Content hashing makes exactly as many AI calls as there are actual menu changes — typically 6–8 per year.
+- **Server-side card submission:** Captcha blocks the server's domain. Even if bypassed, handling raw card data server-side introduces PCI compliance scope. The iframe natively handles captcha, 3DS challenges, and card tokenization without exposing sensitive data to the app.
 
-## 5. Keeping Client-Side Parsing as Fallback vs Removing It
+## 3. Zod Schemas for postMessage Parsing vs Duck Typing
 
-**Chosen:** `CafeMenuBody` tries the server-provided AI categorization first (`serverIngredientsMenu`). If the server fetch completed without a result (`serverFetchAttempted && !serverIngredientsMenu`), it falls back to the existing client-side `parseIngredientsMenu`. While the server fetch is in progress, it renders the raw station list with an `IngredientsInfoBanner`.
+**Chosen:** Define `rguestPaymentSuccessSchema`, `rguestPaymentErrorSchema`, and `rguestCancelSchema` using Zod, and validate every `postMessage` event with `.safeParse()` before acting on it.
 
-**Why it's right:** This implements **graceful degradation** — if the AI service is down, the API key is exhausted, or the server endpoint is unreachable, users still get the categorized menu experience via client-side parsing. The fallback path is already tested and proven. Removing it would create a single point of failure where an AI outage degrades the entire in.gredients experience to an uncategorized station list.
-
-**Alternatives rejected:**
-- **Removing client-side parsing:** Eliminates a working fallback for no benefit. The client-side code is ~50 lines, already tested, and has zero runtime cost when the server path succeeds (it's never called). Removing it means any server-side failure — network issues, API quota, AI model changes — would immediately degrade the user experience with no recovery path.
-
-## 6. No Outer Retry Wrapper vs Adding Application-Level Retries
-
-**Chosen:** The `ai-categorizer.ts` module calls `retrieveTextCompletion` without an outer retry wrapper. The AI provider client already implements 3 retries with exponential backoff internally.
-
-**Why it's right:** Adding an application-level retry around a function that already retries 3x would create a **multiplicative retry storm** — 3 inner × 3 outer = 9 total attempts on a persistent failure. Each attempt costs money (AI API billing) and adds latency. If the AI service is genuinely down, 9 attempts won't help but will waste ~$0.01–0.05 and delay the response by 30+ seconds. The provider's built-in retry handles transient failures (network blips, rate limits); persistent failures (bad prompt, model unavailable) should fail fast and fall back to client-side parsing.
+**Why it's right:** `postMessage` data arrives as `any` from `JSON.parse` — there is zero type safety on messages from an untrusted cross-origin iframe. Zod provides runtime validation that catches malformed or unexpected messages before they propagate. This follows **defensive programming** principles: the schemas document the expected protocol shapes, serve as living documentation of the rguest iframe API, and prevent silent failures from unexpected message formats (e.g., a string error vs an object error). The `tryParseJson` + `safeParse` chain gracefully handles both string and object messages.
 
 **Alternatives rejected:**
-- **Application-level retry wrapper:** An earlier version included this (removed in commit `bc5a1c1`). The double retry caused 9 total attempts on persistent failures, wasting money and delaying fallback activation. The correct behavior is: retry transient failures (handled by the provider), fail fast on persistent failures (triggers client-side fallback). One retry layer achieves both.
+- **Duck typing / manual `if` checks:** With `JSON.parse` returning `any`, duck typing (`if (data.token)`) provides no compile-time safety and silently ignores structural changes. Missing or renamed fields would cause subtle bugs. Zod schemas make the contract explicit and fail loudly on violations.
+
+## 4. Multi-Cafe Checklist UX vs Auto-Advancing
+
+**Chosen:** `MultiCafePayment` renders a checklist of cafes with individual "Pay" buttons and a progress indicator ("2 of 3 paid"). The user explicitly clicks each cafe to open its payment iframe.
+
+**Why it's right:** Multi-cafe orders involve separate rguest transactions per cafe — each can independently succeed or fail. A checklist gives the user full control: they can see which payments succeeded (✅), retry a failed one, or abandon remaining payments. This follows established **multi-step checkout UX patterns** (similar to paying multiple invoices). The `completedResults` state accumulates per-cafe results and triggers `onAllComplete` only when all cafes are paid.
+
+**Alternatives rejected:**
+- **Auto-advancing (automatically open next iframe on success):** Removes user control — the user can't choose payment order, can't pause between cafes, and gets confused if one fails mid-sequence. If the second iframe fails, the user doesn't know whether to retry or whether the first payment was already charged. The checklist makes state explicit and actionable.
+
+## 5. orderId-Based Session Matching vs Phone/Alias Matching
+
+**Chosen:** The `/complete` endpoint matches the payment to the correct `CafeOrderSession` using the `orderId` returned from `/prepare`, passed back in `ICompleteOrderRequest.orderIds`.
+
+**Why it's right:** The `orderId` is a unique, server-generated identifier that unambiguously maps a payment completion to the exact order session that was prepared. This is cryptographically sound — the client receives the orderId from prepare and returns it to complete, creating a closed loop. It follows the **principle of least authority** by using a minimal, unforgeable identifier.
+
+**Alternatives rejected:**
+- **Phone number or alias matching:** Insecure — if User B submits a payment with User A's phone number, the payment could be applied to the wrong order. Phone numbers aren't unique identifiers for concurrent sessions. Alias matching is similarly fragile since multiple users could use the same alias. The orderId is guaranteed unique per session.
+
+## 6. In-Memory Session Store with TTL vs Database-Backed Sessions
+
+**Chosen:** `CafeOrderSession` instances are stored in memory on the server with a TTL (sessions expire after the payment flow completes or times out, ~30 minutes max).
+
+**Why it's right:** The payment flow is inherently short-lived — prepare creates the session, the user enters payment in the iframe (typically 1–5 minutes), and complete closes it. The deployment is single-instance, so in-memory storage has no consistency issues. A TTL ensures abandoned sessions are garbage-collected. This follows **YAGNI** — the simplest storage that meets the requirements.
+
+**Alternatives rejected:**
+- **Database-backed sessions (Redis/SQLite):** Adds infrastructure complexity (connection management, serialization, migration) for a flow that lasts minutes and runs on a single instance. The session contains transient rguest API state (tokens, order context) that has no value after completion. DB-backed sessions would be warranted for multi-instance deployment or flows lasting hours, neither of which applies here.
+
+## 7. useDelayedPromiseState vs Manual Loading/Error State
+
+**Chosen:** `PaymentIframe` uses the `useDelayedPromiseState` hook from `@arcticzeroo/react-promise-hook` to manage the completion stage (not-run → running → success/error), with `RetryButton` for error recovery.
+
+**Why it's right:** This is an established codebase convention — the same pattern is used throughout the app for async operations (e.g., `useImmediatePromiseState` in menu loading, price history). Using the hook avoids reimplementing `isLoading`/`error`/`result` state tracking, which is error-prone (forgetting to clear loading on error, race conditions with stale state). The `PromiseStage` enum provides exhaustive stage matching in the render logic.
+
+**Alternatives rejected:**
+- **Manual `useState` for loading/error/result:** Would duplicate the pattern already abstracted by the hook library. Manual state management requires coordinating 3+ state variables and is a common source of bugs (e.g., setting `isLoading = false` but forgetting to set `error`). The hook handles all transitions atomically.

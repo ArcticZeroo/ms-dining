@@ -1,17 +1,13 @@
 import { ICardData } from '@msdining/common/models/cart';
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { InternalSettings } from '../../../constants/settings.ts';
-import { CardNumberContext } from '../../../context/payment.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
 import { classNames } from '../../../util/react.ts';
 
 import './payment-info-form.css';
 import {
     expectValid,
-    validateExpirationMonth,
     validatePhoneNumber,
-    validateSecurityCode
 } from '../../../util/validation.ts';
 
 import { PaymentField } from './payment-field.tsx';
@@ -22,33 +18,24 @@ export interface IPaymentInfo {
     cardData: ICardData;
 }
 
+export interface IPaymentFormData {
+    phoneNumberWithCountryCode: string;
+    alias: string;
+}
+
 interface IPaymentInfoFormProps {
-    onSubmit(paymentInfo: IPaymentInfo): void;
+    onSubmit(data: IPaymentFormData): void;
 }
 
 export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) => {
     const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
     const [alias, setAlias] = useState(InternalSettings.alias.value);
 
-    const [name, setName] = useState(InternalSettings.nameOnCard.value);
-
-    const cardNumberNotifier = useContext(CardNumberContext);
-    const cardNumber = useValueNotifier(cardNumberNotifier);
-
-    const [expiration, setExpiration] = useFieldWithValidator(validateExpirationMonth);
-    const [securityCode, setSecurityCode] = useFieldWithValidator(validateSecurityCode);
-    const [postalCode, setPostalCode] = useState(InternalSettings.postalCode.value);
-
     const isFormValid = useMemo(
         () => {
             const fields = [
                 phoneNumber,
                 alias,
-                name,
-                cardNumber,
-                expiration,
-                securityCode,
-                postalCode
             ];
 
             return fields.every(field => {
@@ -59,7 +46,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                 return field.isValid;
             });
         },
-        [phoneNumber, alias, name, cardNumber, expiration, securityCode, postalCode]
+        [phoneNumber, alias]
     );
 
     const onFormSubmitted = (event: React.FormEvent) => {
@@ -69,34 +56,13 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
             return;
         }
 
-        const { month, year } = expectValid(expiration);
         const phoneNumberWithCountryCode = expectValid(phoneNumber);
-
-        const paymentInfo: IPaymentInfo = {
-            phoneNumberWithCountryCode,
-            alias,
-            cardData:                   {
-                name,
-                cardNumber,
-                postalCode,
-                securityCode:    expectValid(securityCode),
-                expirationMonth: month.toString(),
-                expirationYear:  year.toString(),
-                userAgent:       navigator.userAgent
-            }
-        };
 
         InternalSettings.phoneNumber.value = phoneNumberWithCountryCode;
         InternalSettings.alias.value = alias;
-        InternalSettings.nameOnCard.value = name;
-        InternalSettings.postalCode.value = postalCode;
 
-        onSubmit(paymentInfo);
+        onSubmit({ phoneNumberWithCountryCode, alias });
     };
-
-    const onCardNumberChanged = (cardNumber: string) => {
-        cardNumberNotifier.value = cardNumber;
-    }
 
     return (
         <form onSubmit={onFormSubmitted} id="payment-info" className="card">
@@ -119,52 +85,14 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) =
                     onValueChanged={setAlias}
                 />
             </div>
-            <div className="payment-section">
-                <PaymentField
-                    id="name"
-                    icon="person"
-                    name="Name on Card"
-                    value={name}
-                    onValueChanged={setName}
-                />
-                <PaymentField
-                    id="cardNumber"
-                    icon="credit_card"
-                    name="Card Number"
-                    value={cardNumber}
-                    onValueChanged={onCardNumberChanged}
-                />
-                <PaymentField
-                    id="expiration"
-                    icon="event"
-                    name="Expiration"
-                    inputType="month"
-                    validationState={expiration}
-                    onValueChanged={setExpiration}
-                />
-                <PaymentField
-                    id="securityCode"
-                    icon="lock"
-                    name="Security Code"
-                    validationState={securityCode}
-                    onValueChanged={setSecurityCode}
-                />
-                <PaymentField
-                    id="postalCode"
-                    icon="location_on"
-                    name="Postal Code"
-                    value={postalCode}
-                    onValueChanged={setPostalCode}
-                />
-            </div>
             <button
                 type="submit"
                 id="payment-submit"
                 className={classNames('default-container', !isFormValid && 'invalid')}
-                title={isFormValid ? 'Click to submit your order' : 'Please fill out all fields and check for validation errors.'}
+                title={isFormValid ? 'Click to pay' : 'Please fill out all fields and check for validation errors.'}
                 disabled={!isFormValid}
             >
-                Submit
+                Pay with Card
             </button>
         </form>
     );

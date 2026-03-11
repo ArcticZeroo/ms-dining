@@ -6,13 +6,16 @@ import { IMenuItemModifier } from '@msdining/common/models/cafe';
 import {
     ICardData,
     ICartItem,
+    ICompleteOrderRequest,
     IOrderCompletionResponse,
+    IPrepareOrderRequest,
+    IRguestCardInfo,
     ISubmitOrderItems,
     ISubmitOrderRequest,
     SubmitOrderStage
 } from '@msdining/common/models/cart';
 import { toDateString } from '@msdining/common/util/date-util';
-import { phone } from 'phone';
+import { phone, PhoneValidResult } from 'phone';
 import { CafeOrderSession } from '../../../api/cafe/session/order.js';
 import { WaitTimeSession } from '../../../api/cafe/session/wait-time.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
@@ -54,7 +57,38 @@ const isValidSubmitOrderParams = (data: unknown): data is ISubmitOrderRequest =>
     return true;
 }
 
-const isModifierValid = (modifier: IMenuItemModifier, choiceIds: Set<string>): boolean => {
+const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest => {
+    if (!isDuckType<IPrepareOrderRequest>(data, {
+        itemsByCafeId:              'object',
+        phoneNumberWithCountryCode: 'string',
+        alias:                      'string',
+    })) {
+        return false;
+    }
+
+    return Object.values(data.itemsByCafeId).every(items => items.every(isDuckTypeSerializedCartItem));
+}
+
+const isValidCompleteOrderParams = (data: unknown): data is ICompleteOrderRequest => {
+    if (!isDuckType<ICompleteOrderRequest>(data, {
+        orderIds:     'object',
+        paymentToken: 'string',
+        cardInfo:     'object',
+        alias:        'string',
+    })) {
+        return false;
+    }
+
+    return isDuckType<IRguestCardInfo>(data.cardInfo, {
+        accountNumberMasked: 'string',
+        cardIssuer:          'string',
+        expirationYearMonth: 'string',
+        cardHolderName:      'string',
+        postalCode:          'string',
+    });
+}
+
+const isModifierValid= (modifier: IMenuItemModifier, choiceIds: Set<string>): boolean => {
     if (choiceIds.size < modifier.minimum || choiceIds.size > modifier.maximum) {
         return false;
     }
@@ -266,6 +300,110 @@ export const registerOrderingRoutes = (parent: Router) => {
 
             response[cafeId] = {
                 lastCompletedStage: session.lastCompletedStage,
+                orderNumber:        orderNumber ?? 'Unknown',
+                waitTimeMin:        '0',
+                waitTimeMax:        '0'
+            };
+        }
+
+        ctx.body = JSON.stringify(response);
+    });
+
+    // Session store for the two-phase iframe payment flow.
+    // Sessions are stored after prepare and retrieved during complete.
+    interface IPendingIframeSession {
+        session:   CafeOrderSession;
+        cafeId:    string;
+        phoneData: PhoneValidResult;
+        alias:     string;
+    }
+
+    const pendingIframeSessions = new Map<string /*orderId*/, IPendingIframeSession>();
+
+    router.post('/prepare', async ctx => {
+        const data = ctx.request.body;
+
+        if (!isValidPrepareOrderParams(data)) {
+            return ctx.throw(400, 'Invalid request body');
+        }
+
+        const phoneData = phone(data.phoneNumberWithCountryCode);
+
+        if (!phoneData.isValid) {
+            return ctx.throw(400, 'Invalid phone number');
+        }
+
+        const cartItemsByCafeId = await validateCartData(ctx, data.itemsByCafeId);
+
+        const prepareResults: Record<string, { siteToken: string; iframeUrl: string; orderId: string; orderNumber: string }> = {};
+
+        await Promise.all(
+            Array.from(cartItemsByCafeId).map(async ([cafeId, cartData]) => {
+                const session = await CafeOrderSession.createAsync(cartData.cafe, cartData.cartItems);
+                await session.populateCart();
+
+                const result = await session.prepareForIframe();
+
+                pendingIframeSessions.set(result.orderId, {
+                    session,
+                    cafeId,
+                    phoneData,
+                    alias: data.alias,
+                });
+
+                // Clean up stale sessions after 30 minutes
+                setTimeout(() => pendingIframeSessions.delete(result.orderId), 30 * 60 * 1000);
+
+                prepareResults[cafeId] = result;
+            })
+        );
+
+        ctx.body = jsonStringifyWithoutNull(prepareResults);
+    });
+
+    router.post('/complete', async ctx => {
+        const data = ctx.request.body;
+
+        if (!isValidCompleteOrderParams(data)) {
+            return ctx.throw(400, 'Invalid request body');
+        }
+
+        // Look up sessions by orderId from the prepare response
+        const sessionsToComplete: IPendingIframeSession[] = [];
+
+        for (const orderId of Object.values(data.orderIds)) {
+            const pending = pendingIframeSessions.get(orderId);
+            if (pending != null && pending.session.lastCompletedStage === SubmitOrderStage.initializeCardProcessor) {
+                sessionsToComplete.push(pending);
+            }
+        }
+
+        if (sessionsToComplete.length === 0) {
+            return ctx.throw(400, 'No pending order sessions found. The order may have expired — please try again.');
+        }
+
+        await Promise.all(
+            sessionsToComplete.map(pending =>
+                pending.session.completeWithIframeToken({
+                    alias:        data.alias,
+                    phoneData:    pending.phoneData,
+                    paymentToken: data.paymentToken,
+                    cardInfo:     data.cardInfo,
+                }).then(() => {
+                    pendingIframeSessions.delete(pending.session.orderId!);
+                })
+            )
+        );
+
+        const response: IOrderCompletionResponse = {};
+        for (const pending of sessionsToComplete) {
+            const orderNumber = pending.session.orderNumber;
+            if (orderNumber == null) {
+                console.error(`Order number for cafe ${pending.cafeId} is null`);
+            }
+
+            response[pending.cafeId] = {
+                lastCompletedStage: pending.session.lastCompletedStage,
                 orderNumber:        orderNumber ?? 'Unknown',
                 waitTimeMin:        '0',
                 waitTimeMax:        '0'

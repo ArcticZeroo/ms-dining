@@ -1,7 +1,10 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import {
+    ICompleteOrderRequest,
+    ICompleteOrderResponse,
     IOrderCompletionResponse,
+    IPrepareOrderResponse,
     ISerializedCartItem,
     ISerializedModifier,
     ISubmitOrderItems
@@ -89,6 +92,39 @@ export abstract class OrderingClient {
         })) {
             throw new Error('Invalid response format');
         }
+
+        return response;
+    }
+
+    public static async prepareOrder(cart: CartItemsByCafeId, {
+        phoneNumberWithCountryCode,
+        alias,
+    }: { phoneNumberWithCountryCode: string; alias: string }): Promise<IPrepareOrderResponse> {
+        const response = await makeJsonRequest<IPrepareOrderResponse>({
+            path:    '/api/dining/order/prepare',
+            options: {
+                method:  'POST',
+                headers: JSON_HEADERS,
+                body:    JSON.stringify({
+                    itemsByCafeId: this._serializeCart(cart),
+                    phoneNumberWithCountryCode,
+                    alias,
+                })
+            }
+        });
+
+        return response;
+    }
+
+    public static async completeOrder(params: ICompleteOrderRequest): Promise<ICompleteOrderResponse> {
+        const response = await makeJsonRequest<ICompleteOrderResponse>({
+            path:    '/api/dining/order/complete',
+            options: {
+                method:  'POST',
+                headers: JSON_HEADERS,
+                body:    JSON.stringify(params)
+            }
+        });
 
         return response;
     }

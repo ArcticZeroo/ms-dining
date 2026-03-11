@@ -1,0 +1,54 @@
+.multi-cafe-payment-description {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.multi-cafe-payment-progress {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.multi-cafe-payment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.multi-cafe-payment-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--default-padding);
+    border-radius: var(--default-border-radius, 8px);
+    background: var(--color-background-secondary, rgba(0, 0, 0, 0.05));
+    transition: background-color 0.2s ease;
+}
+
+.multi-cafe-payment-row.completed {
+    opacity: 0.75;
+}
+
+.multi-cafe-payment-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.multi-cafe-payment-cafe-name {
+    font-weight: 600;
+}
+
+.multi-cafe-payment-total {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.multi-cafe-payment-row-action {
+    display: flex;
+    align-items: center;
+}
+
+.multi-cafe-payment-check {
+    font-size: 1.5rem;
+}
