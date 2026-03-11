@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
+import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../constants/config.js';
 import { updateThumbnailHashFromExistingImage } from '../../cafe/image/thumbnail.js';
 import { saveManifest } from '../../cafe/image/manifest.js';
 import { getNamespaceLogger } from '../../../util/log.js';
@@ -31,6 +31,8 @@ export const backfillThumbnailHashesMigration: IRuntimeMigration = {
 			return;
 		}
 
+		await fs.mkdir(serverThumbnailPath, { recursive: true });
+
 		const hashToIds = new Map<string, string[]>();
 		let processed = 0;
 		let errors = 0;
@@ -45,6 +47,14 @@ export const backfillThumbnailHashesMigration: IRuntimeMigration = {
 				const existing = hashToIds.get(hash) ?? [];
 				existing.push(id);
 				hashToIds.set(hash, existing);
+
+				// Copy to hash-based path, skip if already exists
+				const hashFilePath = path.join(serverThumbnailPath, `${hash}.png`);
+				try {
+					await fs.copyFile(filePath, hashFilePath, fs.constants.COPYFILE_EXCL);
+				} catch {
+					// File already exists — expected for duplicates
+				}
 
 				processed++;
 				if (processed % 100 === 0) {

@@ -51,6 +51,7 @@ export interface IMenuItemBase {
     calories: number;
     maxCalories: number;
     hasThumbnail: boolean;
+    thumbnailId?: string;
     modifiers: IMenuItemModifier[];
     thumbnailWidth?: number;
     thumbnailHeight?: number;
@@ -76,6 +77,7 @@ export interface IMenuItemDTO extends IMenuItemReviewHeader {
     calories: number;
     maxCalories: number;
     hasThumbnail: boolean;
+    thumbnailId?: string;
     modifiers: IMenuItemModifier[];
     thumbnailWidth?: number;
     thumbnailHeight?: number;

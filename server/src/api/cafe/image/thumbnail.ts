@@ -1,6 +1,7 @@
 import Jimp from 'jimp';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
+import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../constants/config.js';
 import { defaultUserAgent } from '../../../constants/http.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
 import { logDebug } from '../../../util/log.js';
@@ -77,6 +78,9 @@ export const loadImageData = async (url: string): Promise<Buffer> => {
 // static/menu-items/thumbnail/<id>
 export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
 
+// static/thumbnails/<hash>
+export const getHashThumbnailFilepath = (hash: string) => path.join(serverThumbnailPath, `${hash}.png`);
+
 export const updateThumbnailHashFromExistingImage = async (id: string, imagePath: string): Promise<string> => {
 	const image = await Jimp.read(imagePath);
 	const hash = computeDHash(image);
@@ -96,7 +100,13 @@ export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorke
 
 	const hash = computeDHash(image);
 
+	// Save to old path (backward compat)
 	await image.writeAsync(getThumbnailFilepath(request.id));
+
+	// Save to new hash-based path (always overwrite — collision rate is negligible)
+	const hashPath = getHashThumbnailFilepath(hash);
+	await fs.mkdir(serverThumbnailPath, { recursive: true });
+	await image.writeAsync(hashPath);
 
 	return {
 		width:          image.getWidth(),
