@@ -4,6 +4,15 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
 import { CartContext } from '../../context/cart.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
+import { pluralize } from '../../util/string.js';
+
+const formatWaitTimeRange = (waitTime: IWaitTimeResponse): string => {
+    if (waitTime.minTime === waitTime.maxTime) {
+        return `${waitTime.minTime} ${pluralize('minute', waitTime.minTime)}`;
+    }
+
+    return `${waitTime.minTime} - ${waitTime.maxTime} minutes`;
+}
 
 export const WaitTime = () => {
     const cartItemsByCafeId = useValueNotifierContext(CartContext);
@@ -52,11 +61,10 @@ export const WaitTime = () => {
             }
 
             if (waitTimeState.value != null) {
-                return `Estimated wait time: ${waitTimeState.value.minTime} - ${waitTimeState.value.maxTime} minutes`;
+                return `Estimated wait time: ${formatWaitTimeRange(waitTimeState.value)}`;
             }
 
             return 'Error retrieving wait time';
-
         },
         [waitTimeState]
     );

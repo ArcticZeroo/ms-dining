@@ -1,11 +1,7 @@
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
-import { isDuckType } from '@arcticzeroo/typeguard';
-import { IBuyOnDemandWaitTimeResponse, IBuyOnDemandWaitTimeSection } from '../../../models/buyondemand/cart.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ICafe } from '../../../models/cafe.js';
-import { logError } from '../../../util/log.js';
-
-const isDuckTypeWaitTimeSection = (data: unknown): data is IBuyOnDemandWaitTimeSection => isDuckType<IBuyOnDemandWaitTimeSection>(data, { minutes: 'number' });
+import { BuyOnDemandWaitTimeSchema } from '../../../models/buyondemand/cart.js';
 
 export class WaitTimeSession {
     constructor(readonly client: BuyOnDemandClient) {
@@ -45,18 +41,16 @@ export class WaitTimeSession {
 
         const json = await response.json();
 
-        if (!isDuckType<IBuyOnDemandWaitTimeResponse>(json, { minTime: 'object', maxTime: 'object' })) {
-            logError('Unexpected wait time response format:', JSON.stringify(json));
-            throw new Error('Invalid response format: missing min/maxTime or in wrong format');
-        }
+		const buyOnDemandResponse = BuyOnDemandWaitTimeSchema.safeParse(json);
 
-        if (!isDuckTypeWaitTimeSection(json.minTime) || !isDuckTypeWaitTimeSection(json.maxTime)) {
-            throw new Error('Invalid response format: bad min/maxTime');
-        }
+		if (!buyOnDemandResponse.success) {
+			throw new Error(`Invalid response from buy on demand wait time API: ${JSON.stringify(json)}, errors: ${JSON.stringify(buyOnDemandResponse.error.issues)}`);
+		}
 
+		// Used to be min/max, may as well keep supporting both in case it changes back/different formats at different times
         return {
-            minTime: json.minTime.minutes,
-            maxTime: json.maxTime.minutes
+            minTime: buyOnDemandResponse.data.etf.minutes,
+            maxTime: buyOnDemandResponse.data.etf.minutes
         };
     }
 }
