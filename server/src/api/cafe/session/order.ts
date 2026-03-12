@@ -99,6 +99,7 @@ export class CafeOrderSession {
         profitCenterId:     '',
         profitCenterName:   '',
         storePriceLevel:    '',
+        payClientId:        '',
     };
     #orderId: string | null = null;
     #orderNumber: string | null = null;
@@ -110,6 +111,9 @@ export class CafeOrderSession {
     // The full orderDetails from the last POST /orders response,
     // echoed back to the close order endpoint as-is.
     #lastOrderDetails: OrderDetails | null = null;
+    #conceptSchedule: Array<unknown> = [];
+    #openScheduleExpression: string = '0 0 0 * * *';
+    #closeScheduleExpression: string = '0 0 0 * * *';
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #conceptIds = new Set<string>();
@@ -148,11 +152,30 @@ export class CafeOrderSession {
     }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
-        const response = await this.client.requestAsync(`/sites/${this.client.config.contextId}`,
-            {
-                method:  'GET',
-                headers: JSON_HEADERS
-            });
+        const [siteData, payClientId] = await Promise.all([
+            this._fetchSiteData(),
+            this._fetchPayClientId(),
+        ]);
+
+        const orderingContext: IOrderingContext = {
+            onDemandTerminalId: siteData.displayOptions.onDemandTerminalId,
+            onDemandEmployeeId: siteData.displayOptions.onDemandEmployeeId,
+            profitCenterId:     siteData.displayOptions['profit-center-id'],
+            storePriceLevel:    siteData.storePriceLevel,
+            profitCenterName:   '',
+            payClientId,
+        };
+
+        orderingContext.profitCenterName = await this._retrieveProfitCenterName(orderingContext.profitCenterId);
+
+        return orderingContext;
+    }
+
+    private async _fetchSiteData(): Promise<ISiteDataResponseItem> {
+        const response = await this.client.requestAsync(`/sites/${this.client.config.contextId}`, {
+            method:  'GET',
+            headers: JSON_HEADERS
+        });
 
         const json = await response.json();
 
@@ -160,7 +183,7 @@ export class CafeOrderSession {
             storePriceLevel: 'string',
             displayOptions:  'object'
         })) {
-            throw new Error('Data is not in the correct format');
+            throw new Error('Site data is not in the correct format');
         }
 
         const [siteData] = json;
@@ -169,17 +192,29 @@ export class CafeOrderSession {
             throw new Error('Site data is empty!');
         }
 
-        const orderingContext = {
-            onDemandTerminalId: siteData.displayOptions.onDemandTerminalId,
-            onDemandEmployeeId: siteData.displayOptions.onDemandEmployeeId,
-            profitCenterId:     siteData.displayOptions['profit-center-id'],
-            storePriceLevel:    siteData.storePriceLevel,
-            profitCenterName:   ''
-        };
+        return siteData;
+    }
 
-        orderingContext.profitCenterName = await this._retrieveProfitCenterName(orderingContext.profitCenterId);
+    private async _fetchPayClientId(): Promise<string> {
+        const response = await this.client.requestAsync(
+            `/sites/${this.client.config.contextId}/${this.client.config.displayProfileId}`,
+            {
+                method: 'POST',
+                headers: JSON_HEADERS,
+                body: JSON.stringify({
+                    scheduledDay: 0,
+                })
+            }
+        );
 
-        return orderingContext;
+        const json = await response.json();
+        const result = z.object({
+            pay: z.object({
+                clientId: z.string(),
+            }),
+        }).parse(json);
+
+        return result.pay.clientId;
     }
 
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
@@ -327,24 +362,7 @@ export class CafeOrderSession {
                 currencyCode:          'USD',
                 currencySymbol:        '$',
             },
-            schedule:           [
-                {
-                    '@c':                '.DisplayProfileTask',
-                    scheduledExpression: '0 0 0 * * *',
-                    properties:          {
-                        'meal-period-id': '1',
-                    },
-                    displayProfileState: {
-                        displayProfileId: this.client.config.displayProfileId,
-                        conceptStates:    [
-                            {
-                                conceptId: station.id,
-                                menuId:    station.menuId,
-                            }
-                        ],
-                    },
-                }
-            ],
+            schedule:           this.#conceptSchedule,
             orderTimeZone:      'PST8PDT',
             storePriceLevel:    this.#orderingContext.storePriceLevel,
             scheduledDay:       0,
@@ -360,8 +378,8 @@ export class CafeOrderSession {
                 priceLevelId:              this.#orderingContext.storePriceLevel,
             },
             conceptSchedule:    {
-                openScheduleExpression:  '0 0 0 * * *',
-                closeScheduleExpression: '0 0 0 * * *',
+                openScheduleExpression:  this.#openScheduleExpression,
+                closeScheduleExpression: this.#closeScheduleExpression,
             },
             isMultiItem:        false,
             scannedOrder:       false,
@@ -395,10 +413,46 @@ export class CafeOrderSession {
     }
 
     private async _populateCart() {
+        await this._fetchConceptSchedule();
+
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
         for (const cartItem of this.#cartItems) {
             await this._addItemToCart(cartItem);
         }
+    }
+
+    private async _fetchConceptSchedule() {
+        const response = await this.client.requestAsync(
+            `/sites/${this.client.config.tenantId}/${this.client.config.contextId}/concepts/${this.client.config.displayProfileId}`,
+            {
+                method:  'POST',
+                headers: JSON_HEADERS,
+                body:    JSON.stringify({
+                    isEasyMenuEnabled: false,
+                    scheduleTime:      { startTime: '12:00 AM', endTime: '11:59 PM' },
+                    scheduledDay:      0,
+                })
+            }
+        );
+
+        const json = await response.json();
+
+        const conceptSchema = z.object({
+            schedule:                z.array(z.unknown()),
+            openScheduleExpression:  z.string(),
+            closeScheduleExpression: z.string(),
+        }).passthrough();
+
+        const concepts = z.array(conceptSchema).parse(json);
+        const firstConcept = concepts[0];
+
+        if (firstConcept == null) {
+            throw new Error('No concepts returned from API');
+        }
+
+        this.#conceptSchedule = firstConcept.schedule;
+        this.#openScheduleExpression = firstConcept.openScheduleExpression;
+        this.#closeScheduleExpression = firstConcept.closeScheduleExpression;
     }
 
     private async _getCardProcessorSiteToken(iframeCssUrl?: string) {
@@ -457,8 +511,7 @@ export class CafeOrderSession {
         }
 
         const styleUrl = iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`;
-        // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
-        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=${encodeURIComponent(styleUrl)}&language=en&doVerify=true&version=3`;
+        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/${this.#orderingContext.payClientId}?apiToken=${token}&submit=PROCESS&style=${encodeURIComponent(styleUrl)}&language=en&doVerify=true&version=3`;
     }
 
     private async _sendPhoneConfirmation(phoneData: PhoneValidResult) {
