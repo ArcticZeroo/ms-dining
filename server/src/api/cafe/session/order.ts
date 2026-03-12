@@ -779,7 +779,6 @@ export class CafeOrderSession {
                             voidReasonId:              '11',
                             orderSourceSystem:         'onDemand',
                             additionalGuestData:       '{}',
-                            openScheduleExpression:    '0 0 0 * * *',
                             useIgOrderApi:             'true',
                         }
                     },
