@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useMemo } from 'react';
-import { IOrderCompletionData, IPrepareOrderResponse } from '@msdining/common/models/cart';
+import { IOrderCompletionData, IPreparePaymentResponse } from '@msdining/common/models/cart';
 import { ApplicationContext } from '../../../context/app.ts';
 import { CartContext } from '../../../context/cart.ts';
 import { useValueNotifierContext } from '../../../hooks/events.ts';
@@ -12,7 +12,7 @@ import { PaymentIframe } from './payment-iframe.tsx';
 
 interface ICafePaymentRowProps {
     cafeId: string;
-    initialPrepareData: IPrepareOrderResponse[string];
+    initialPrepareData: IPreparePaymentResponse;
     formData: { phoneNumberWithCountryCode: string; alias: string };
     popupId: symbol;
     disabled: boolean;

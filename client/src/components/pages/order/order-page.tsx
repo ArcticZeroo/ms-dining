@@ -1,6 +1,6 @@
 import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IOrderCompletionResponse } from '@msdining/common/models/cart';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OrderingClient } from '../../../api/order.ts';
 import { DebugSettings } from '../../../constants/settings.ts';
@@ -30,26 +30,56 @@ export const OrderPage = () => {
 
     const formDataRef = useRef<IPaymentFormData | null>(null);
 
-    const { stage: prepareStage, value: prepareResults, error: prepareError, run: runPrepare } = useDelayedPromiseState(
+    // Phase 1: Build cart on server + get price data (runs on cart change)
+    const {
+        stage: cartSessionStage,
+        value: cartSessionData,
+        error: cartSessionError,
+        run: runCartSession
+    } = useDelayedPromiseState(
         useCallback(async () => {
-            const response = await OrderingClient.prepareOrder(cart);
-
-            const cafeEntries = Object.entries(response);
-            if (cafeEntries.length === 0) {
-                throw new Error('No cafes returned from server');
+            if (cart.size === 0) {
+                return null;
             }
-
-            return response;
+            return await OrderingClient.prepareCart(cart);
         }, [cart])
     );
 
+    useEffect(() => {
+        runCartSession();
+    }, [runCartSession]);
+
+    // Phase 2: Get card processor token (runs when user clicks "Pay with Card")
+    const {
+        stage: paymentStage,
+        value: paymentResults,
+        error: paymentError,
+        run: runPayment
+    } = useDelayedPromiseState(
+        useCallback(async () => {
+            if (!cartSessionData) {
+                throw new Error('Cart session not ready');
+            }
+
+            const results: Record<string, { siteToken: string; iframeUrl: string; orderId: string; orderNumber: string; expiresAt: string }> = {};
+
+            await Promise.all(
+                Object.entries(cartSessionData).map(async ([cafeId, cafeData]) => {
+                    results[cafeId] = await OrderingClient.preparePayment(cafeData.orderId);
+                })
+            );
+
+            return results;
+        }, [cartSessionData])
+    );
+
     const onFormSubmitted = useCallback((formData: IPaymentFormData) => {
-        if (prepareStage === PromiseStage.running) {
+        if (paymentStage === PromiseStage.running) {
             return;
         }
         formDataRef.current = formData;
-        runPrepare();
-    }, [prepareStage, runPrepare]);
+        runPayment();
+    }, [paymentStage, runPayment]);
 
     const onAllCafesComplete = useCallback((results: IOrderCompletionResponse) => {
         setOrderResult(results);
@@ -64,8 +94,8 @@ export const OrderPage = () => {
         );
     }
 
-    const isPrepareStarted = prepareStage !== PromiseStage.notRun;
-    const isPrepareComplete = prepareResults != null;
+    const isPaymentStarted = paymentStage !== PromiseStage.notRun;
+    const isPaymentComplete = paymentResults != null;
 
     const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
 
@@ -80,31 +110,43 @@ export const OrderPage = () => {
                 <div className="title">
                     Your Order
                 </div>
-                <CartContentsTable showFullDetails={true} showTotalPrice={true} readOnly={isPrepareStarted}/>
+                <CartContentsTable
+                    showFullDetails={true}
+                    showTotalPrice={true}
+                    readOnly={isPaymentStarted}
+                    cartSessionData={cartSessionData}
+                    cartSessionError={cartSessionError}
+                />
                 <WaitTime/>
             </div>
             {cart.size > 1 && <MultiCafeOrderWarning/>}
             <PaymentInfoForm
-                isPrepareStarted={isPrepareStarted}
+                isPrepareStarted={isPaymentStarted}
                 onSubmit={onFormSubmitted}
             />
             <OrderPrivacyPolicy/>
-            {prepareStage === PromiseStage.running && (
+            {cartSessionStage === PromiseStage.running && (
                 <div className="flex flex-justify-center">
                     <HourglassLoadingSpinner/>
-                    Preparing your order...
+                    Building your order...
                 </div>
             )}
-            {prepareStage === PromiseStage.error && (
+            {paymentStage === PromiseStage.running && (
+                <div className="flex flex-justify-center">
+                    <HourglassLoadingSpinner/>
+                    Preparing payment...
+                </div>
+            )}
+            {paymentStage === PromiseStage.error && (
                 <div className="card error">
-                    {prepareError instanceof Error ? prepareError.message : 'Failed to prepare order'}
-                    <RetryButton onClick={runPrepare}/>
+                    {paymentError instanceof Error ? paymentError.message : 'Failed to prepare payment'}
+                    <RetryButton onClick={runPayment}/>
                 </div>
             )}
             {
-                isPrepareComplete && (
+                isPaymentComplete && (
                     <CafePayment
-                        prepareResults={prepareResults}
+                        prepareResults={paymentResults}
                         formData={formDataRef.current!}
                         onAllComplete={onAllCafesComplete}
                     />

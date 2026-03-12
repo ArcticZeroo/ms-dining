@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IOrderCompletionData, IOrderCompletionResponse, IPrepareOrderResponse } from '@msdining/common/models/cart';
+import { IOrderCompletionData, IOrderCompletionResponse, IPreparePaymentResponse } from '@msdining/common/models/cart';
 import { CafePaymentRow } from './cafe-payment-row.tsx';
 
 import './multi-cafe-payment.css';
 
 interface ICafePaymentProps {
-    prepareResults: IPrepareOrderResponse;
+    prepareResults: Record<string, IPreparePaymentResponse>;
     formData: { phoneNumberWithCountryCode: string; alias: string };
     onAllComplete: (results: IOrderCompletionResponse) => void;
 }

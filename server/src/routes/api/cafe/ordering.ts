@@ -4,15 +4,15 @@ import Router, { RouterContext } from '@koa/router';
 import { DateUtil } from '@msdining/common';
 import { IMenuItemModifier } from '@msdining/common/models/cafe';
 import {
-    ICardData,
     ICartItem,
     ICompleteOrderRequest,
     ICompleteOrderResponse,
-    IOrderCompletionResponse,
+    IPrepareCartResponse,
     IPrepareOrderRequest,
+    IPreparePaymentRequest,
+    IPreparePaymentResponse,
     IRguestCardInfo,
     ISubmitOrderItems,
-    ISubmitOrderRequest,
     SubmitOrderStage
 } from '@msdining/common/models/cart';
 import { toDateString } from '@msdining/common/util/date-util';
@@ -27,36 +27,7 @@ import { memoizeResponseBody } from '../../../middleware/cache.js';
 import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
-import { isDuckTypeSerializedCartItem, isValidItemIdsByCafeId, isValidItemsByCafeId } from '../../../util/typeguard.js';
-
-const isValidSubmitOrderParams = (data: unknown): data is ISubmitOrderRequest => {
-    if (!isDuckType<ISubmitOrderRequest>(data, {
-        itemsByCafeId:              'object',
-        phoneNumberWithCountryCode: 'string',
-        alias:                      'string',
-        cardData:                   'object'
-    })) {
-        return false;
-    }
-
-    if (!Object.values(data.itemsByCafeId).every(items => items.every(isDuckTypeSerializedCartItem))) {
-        return false;
-    }
-
-    if (!isDuckType<ICardData>(data.cardData, {
-        userAgent:       'string',
-        cardNumber:      'string',
-        name:            'string',
-        expirationMonth: 'string',
-        expirationYear:  'string',
-        postalCode:      'string',
-        securityCode:    'string'
-    })) {
-        return false;
-    }
-
-    return true;
-}
+import { isDuckTypeSerializedCartItem, isValidItemIdsByCafeId } from '../../../util/typeguard.js';
 
 const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest => {
     if (!isDuckType<IPrepareOrderRequest>(data, {
@@ -66,6 +37,12 @@ const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest 
     }
 
     return Object.values(data.itemsByCafeId).every(items => items.every(isDuckTypeSerializedCartItem));
+}
+
+const isValidPreparePaymentParams = (data: unknown): data is IPreparePaymentRequest => {
+    return isDuckType<IPreparePaymentRequest>(data, {
+        orderId: 'string',
+    });
 }
 
 const isValidCompleteOrderParams = (data: unknown): data is ICompleteOrderRequest => {
@@ -201,120 +178,13 @@ export const registerOrderingRoutes = (parent: Router) => {
         }
     );
 
-    const validateAndPrepareOrderSessions = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderItems, prepareBeforeOrder: boolean) => {
-        const cartItemsByCafeId = await validateCartData(ctx, itemsByCafeId);
-
-        const orderSessionsByCafeId = new Map<string, CafeOrderSession>();
-        const preparePromises: Array<Promise<void>> = [];
-
-        const prepareSession = async (cafeId: string, cartData: ICafeCartData) => {
-            const session = await CafeOrderSession.createAsync(cartData.cafe, cartData.cartItems);
-            await session.populateCart();
-
-            if (prepareBeforeOrder) {
-                await session.prepareBeforeOrder();
-            }
-
-            orderSessionsByCafeId.set(cafeId, session);
-        }
-
-        for (const [cafeId, cartData] of cartItemsByCafeId) {
-            preparePromises.push(prepareSession(cafeId, cartData));
-        }
-
-        await Promise.all(preparePromises);
-
-        return orderSessionsByCafeId;
-    }
-
-    router.post('/price', async ctx => {
-        const itemsByCafeId = ctx.request.body;
-
-        if (!isValidItemsByCafeId(itemsByCafeId)) {
-            return ctx.throw(400, 'Invalid request body');
-        }
-
-        const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, itemsByCafeId, false /*prepareBeforeOrder*/);
-
-        const areAllSessionsReady = Array.from(orderSessionsByCafeId.values()).every(session => session.lastCompletedStage === SubmitOrderStage.addToCart);
-        if (!areAllSessionsReady) {
-            return ctx.throw(500, 'Not all sessions are ready for price retrieval');
-        }
-
-        let totalPriceWithTax = 0;
-        let totalPriceWithoutTax = 0;
-        let totalTax = 0;
-
-        for (const session of orderSessionsByCafeId.values()) {
-            totalPriceWithTax += session.orderTotalWithTax;
-            totalPriceWithoutTax += session.orderTotalWithoutTax;
-            totalTax += session.orderTotalTax;
-        }
-
-        ctx.body = jsonStringifyWithoutNull({
-            totalPriceWithTax,
-            totalPriceWithoutTax,
-            totalTax
-        });
-    });
-
-    // If you happen to be reading this code on github, don't try requesting to this endpoint right now!
-    // It's probably not going to work, and you might get charged for an order you didn't place.
-    router.post('/', async ctx => {
-        const data = ctx.request.body;
-
-        if (!isValidSubmitOrderParams(data)) {
-            return ctx.throw(400, 'Invalid request body');
-        }
-
-        const phoneData = phone(data.phoneNumberWithCountryCode);
-
-        if (!phoneData.isValid) {
-            return ctx.throw(400, 'Invalid phone number');
-        }
-
-        const orderSessionsByCafeId = await validateAndPrepareOrderSessions(ctx, data.itemsByCafeId, true /*prepareBeforeOrder*/);
-
-        const areAllSessionsReady = Array.from(orderSessionsByCafeId.values()).every(session => session.isReadyForSubmit);
-
-        if (areAllSessionsReady) {
-            const orderPromises: Array<Promise<void>> = [];
-
-            for (const session of orderSessionsByCafeId.values()) {
-                orderPromises.push(session.submitOrder({
-                    alias:                      data.alias,
-                    cardData:                   data.cardData,
-                    phoneData
-                }));
-            }
-
-            await Promise.all(orderPromises);
-        }
-
-        const response: IOrderCompletionResponse = {};
-        for (const [cafeId, session] of orderSessionsByCafeId.entries()) {
-            const orderNumber = session.orderNumber;
-            if (orderNumber == null) {
-                console.error(`Order number for cafe ${cafeId} is null`);
-            }
-
-            response[cafeId] = {
-                lastCompletedStage: session.lastCompletedStage,
-                orderNumber:        orderNumber ?? 'Unknown',
-                waitTimeMin:        '0',
-                waitTimeMax:        '0'
-            };
-        }
-
-        ctx.body = JSON.stringify(response);
-    });
-
     // Session store for the two-phase iframe payment flow.
     // Sessions are stored after prepare and retrieved during complete.
     interface IPendingIframeSession {
         session:         CafeOrderSession;
         cafeId:          string;
         refreshInterval: ReturnType<typeof setInterval>;
+        ttlTimeout:      ReturnType<typeof setTimeout>;
     }
 
     const pendingIframeSessions = new Map<string /*orderId*/, IPendingIframeSession>();
@@ -322,7 +192,36 @@ export const registerOrderingRoutes = (parent: Router) => {
     const SESSION_TTL_MS = 30 * 60 * 1000;
     const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 
-    router.post('/prepare', async ctx => {
+    const cleanupPendingSession = (orderId: string) => {
+        const pending = pendingIframeSessions.get(orderId);
+        if (pending) {
+            clearInterval(pending.refreshInterval);
+            clearTimeout(pending.ttlTimeout);
+            pendingIframeSessions.delete(orderId);
+        }
+    };
+
+    const storePendingSession = (orderId: string, session: CafeOrderSession, cafeId: string) => {
+        const refreshInterval = setInterval(() => {
+            session.client.refreshLogin().catch(err => {
+                console.error(`Failed to refresh token for order ${orderId}:`, err);
+            });
+        }, TOKEN_REFRESH_INTERVAL_MS);
+
+        const ttlTimeout = setTimeout(() => cleanupPendingSession(orderId), SESSION_TTL_MS);
+
+        pendingIframeSessions.set(orderId, {
+            session,
+            cafeId,
+            refreshInterval,
+            ttlTimeout,
+        });
+    };
+
+    // Builds cart on the server and returns price data.
+    // Sessions are stored so /prepare/payment can get the card processor token without re-building.
+    // TODO: Diff-based cart updates instead of replacing the entire session each time.
+    router.post('/prepare/cart', async ctx => {
         const data = ctx.request.body;
 
         if (!isValidPrepareOrderParams(data)) {
@@ -331,43 +230,66 @@ export const registerOrderingRoutes = (parent: Router) => {
 
         const cartItemsByCafeId = await validateCartData(ctx, data.itemsByCafeId);
 
-        const iframeCssUrl = `${ctx.origin}/iframe.css`;
         const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
-        const prepareResults: Record<string, { siteToken: string; iframeUrl: string; orderId: string; orderNumber: string; expiresAt: string }> = {};
+        const prepareResults: IPrepareCartResponse = {};
 
         await Promise.all(
             Array.from(cartItemsByCafeId).map(async ([cafeId, cartData]) => {
                 const session = await CafeOrderSession.createAsync(cartData.cafe, cartData.cartItems);
                 await session.populateCart();
 
-                const result = await session.prepareForIframe(iframeCssUrl);
+                const orderId = session.orderId;
+                if (!orderId || !session.orderNumber) {
+                    throw new Error('Order ID or order number is not set after cart population');
+                }
 
-                const refreshInterval = setInterval(() => {
-                    session.client.refreshLogin().catch(err => {
-                        console.error(`Failed to refresh token for order ${result.orderId}:`, err);
-                    });
-                }, TOKEN_REFRESH_INTERVAL_MS);
+                storePendingSession(orderId, session, cafeId);
 
-                pendingIframeSessions.set(result.orderId, {
-                    session,
-                    cafeId,
-                    refreshInterval,
-                });
-
-                // Clean up stale sessions after TTL
-                setTimeout(() => {
-                    const pending = pendingIframeSessions.get(result.orderId);
-                    if (pending) {
-                        clearInterval(pending.refreshInterval);
-                        pendingIframeSessions.delete(result.orderId);
-                    }
-                }, SESSION_TTL_MS);
-
-                prepareResults[cafeId] = { ...result, expiresAt };
+                prepareResults[cafeId] = {
+                    orderId,
+                    orderNumber:        session.orderNumber,
+                    totalPriceWithTax:   session.orderTotalWithTax,
+                    totalPriceWithoutTax: session.orderTotalWithoutTax,
+                    totalTax:            session.orderTotalTax,
+                    expiresAt,
+                };
             })
         );
 
         ctx.body = jsonStringifyWithoutNull(prepareResults);
+    });
+
+    // Gets the card processor token for an existing cart session (fast — cart already built).
+    router.post('/prepare/payment', async ctx => {
+        const data = ctx.request.body;
+
+        if (!isValidPreparePaymentParams(data)) {
+            return ctx.throw(400, 'Invalid request body');
+        }
+
+        const pending = pendingIframeSessions.get(data.orderId);
+        if (pending == null || pending.session.lastCompletedStage !== SubmitOrderStage.addToCart) {
+            return ctx.throw(400, 'No pending cart session found. The session may have expired — please try again.');
+        }
+
+        const iframeCssUrl = `${ctx.origin}/iframe.css`;
+        const result = await pending.session.prepareForIframe(iframeCssUrl);
+
+        // Reset TTL since the user is actively paying
+        clearTimeout(pending.ttlTimeout);
+        pending.ttlTimeout = setTimeout(() => cleanupPendingSession(data.orderId), SESSION_TTL_MS);
+
+        const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
+
+        const response: IPreparePaymentResponse = {
+            siteToken:   result.siteToken,
+            iframeUrl:   result.iframeUrl,
+            orderId:     result.orderId,
+            orderNumber: result.orderNumber,
+            expiresAt,
+        };
+
+        ctx.body = jsonStringifyWithoutNull(response);
     });
 
     router.post('/complete', async ctx => {
@@ -389,8 +311,7 @@ export const registerOrderingRoutes = (parent: Router) => {
         }
 
         // TODO: some sort of lock to avoid multiple completions, for now just delete to prevent a second one
-        clearInterval(pending.refreshInterval);
-        pendingIframeSessions.delete(data.orderId);
+        cleanupPendingSession(data.orderId);
 
         await pending.session.completeWithIframeToken({
             alias:        data.alias,

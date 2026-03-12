@@ -1,24 +1,16 @@
 import { CartContext } from '../../context/cart.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';
-import { useCallback, useEffect, useMemo } from 'react';
-import { OrderingClient } from '../../api/order.ts';
-import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useMemo } from 'react';
+import { IPrepareCartResponse } from '@msdining/common/models/cart';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
-import { IPriceResponse } from '@msdining/common/models/http';
 
-export const OrderPriceInlineTable = () => {
+interface IOrderPriceInlineTableProps {
+    cartSessionData: IPrepareCartResponse | null;
+    cartSessionError: unknown;
+}
+
+export const OrderPriceInlineTable: React.FC<IOrderPriceInlineTableProps> = ({ cartSessionData, cartSessionError }) => {
     const cart = useValueNotifierContext(CartContext);
-
-    const retrievePriceCallback = useCallback(
-        () => OrderingClient.retrievePrice(cart),
-        [cart]
-    );
-
-    const { value, error, run } = useDelayedPromiseState(retrievePriceCallback, false /*keepLastValue*/);
-
-    useEffect(() => {
-        run();
-    }, [run]);
 
     const localTotalWithoutTax = useMemo(
         () => {
@@ -36,20 +28,30 @@ export const OrderPriceInlineTable = () => {
         [cart]
     );
 
-    const price: IPriceResponse = useMemo(
-        () => {
-            return value ?? {
-                totalTax:             -1,
-                totalPriceWithTax:    localTotalWithoutTax,
-                totalPriceWithoutTax: localTotalWithoutTax
-            }
-        },
-        [value, localTotalWithoutTax]
-    );
+    const serverPrice = useMemo(() => {
+        if (!cartSessionData) {
+            return null;
+        }
 
-    const taxDisplay = price.totalTax >= 0
-        ? formatPrice(price.totalTax)
-        : error != null
+        let totalPriceWithTax = 0;
+        let totalPriceWithoutTax = 0;
+        let totalTax = 0;
+
+        for (const cafeData of Object.values(cartSessionData)) {
+            totalPriceWithTax += cafeData.totalPriceWithTax;
+            totalPriceWithoutTax += cafeData.totalPriceWithoutTax;
+            totalTax += cafeData.totalTax;
+        }
+
+        return { totalPriceWithTax, totalPriceWithoutTax, totalTax };
+    }, [cartSessionData]);
+
+    const subtotal = serverPrice?.totalPriceWithoutTax ?? localTotalWithoutTax;
+    const total = serverPrice?.totalPriceWithTax ?? localTotalWithoutTax;
+
+    const taxDisplay = serverPrice
+        ? formatPrice(serverPrice.totalTax)
+        : cartSessionError != null
             ? 'Failed to load'
             : 'Loading...';
 
@@ -61,7 +63,7 @@ export const OrderPriceInlineTable = () => {
                     Subtotal
                 </td>
                 <td className="price">
-                    {formatPrice(price.totalPriceWithoutTax)}
+                    {formatPrice(subtotal)}
                 </td>
             </tr>
             <tr>
@@ -79,7 +81,7 @@ export const OrderPriceInlineTable = () => {
                     Total
                 </td>
                 <td className="price">
-                    {formatPrice(price.totalPriceWithTax)}
+                    {formatPrice(total)}
                 </td>
             </tr>
         </>

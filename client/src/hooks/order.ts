@@ -1,4 +1,4 @@
-import { IOrderCompletionData, IPrepareOrderResponse } from '@msdining/common/models/cart';
+import { IOrderCompletionData, IPreparePaymentResponse } from '@msdining/common/models/cart';
 import { useCallback, useContext, useState } from 'react';
 import { CartContext } from '../context/cart.ts';
 import { OrderingClient } from '../api/order.ts';
@@ -23,7 +23,7 @@ export interface ICafePaymentState {
     isPreparing: boolean;
     isCompleting: boolean;
     iframeUrl?: string;
-    orderId?: string;
+    orderId: string;
     completionResult?: IOrderCompletionData;
     error?: string;
 }
@@ -33,7 +33,7 @@ interface ICafePaymentFormData {
     alias: string;
 }
 
-export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrderResponse[string], formData: ICafePaymentFormData) => {
+export const useCafePayment = (cafeId: string, initialPrepareData: IPreparePaymentResponse, formData: ICafePaymentFormData) => {
     const cartNotifier = useContext(CartContext);
 
     const [state, setState] = useState<ICafePaymentState>({
@@ -43,41 +43,27 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrder
         orderId:      initialPrepareData.orderId,
     });
 
+    // Re-get card processor token for the existing cart session (e.g., after iframe close)
     const prepare = useCallback(async () => {
-        const cafeItems = cartNotifier.value.get(cafeId);
-        if (!cafeItems) {
-            return;
-        }
-
         setState(prev => ({ ...prev, isPreparing: true, error: undefined }));
 
         try {
-            const singleCafeCart = new Map([[cafeId, cafeItems]]);
-            const response = await OrderingClient.prepareOrder(singleCafeCart);
-            const cafeData = response[cafeId];
-            if (!cafeData) {
-                throw new Error('No prepare data returned for cafe');
-            }
+            const response = await OrderingClient.preparePayment(state.orderId);
             setState(prev => ({
                 ...prev,
                 isPreparing: false,
-                iframeUrl:   cafeData.iframeUrl,
-                orderId:     cafeData.orderId,
+                iframeUrl:   response.iframeUrl,
             }));
         } catch (err) {
             setState(prev => ({
                 ...prev,
                 isPreparing: false,
-                error:       err instanceof Error ? err.message : 'Failed to prepare order',
+                error:       err instanceof Error ? err.message : 'Failed to prepare payment',
             }));
         }
-    }, [cafeId, cartNotifier]);
+    }, [state.orderId]);
 
     const complete = useCallback(async (result: IRguestPaymentResult): Promise<IOrderCompletionData> => {
-        if (!state.orderId) {
-            throw new Error('No order ID — cannot complete');
-        }
-
         setState(prev => ({ ...prev, isCompleting: true, error: undefined }));
 
         try {
@@ -104,7 +90,7 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrder
     }, [cafeId, state.orderId, formData.alias, formData.phoneNumberWithCountryCode, cartNotifier]);
 
     const invalidatePrepare = useCallback(() => {
-        setState(prev => ({ ...prev, iframeUrl: undefined, orderId: undefined }));
+        setState(prev => ({ ...prev, iframeUrl: undefined }));
     }, []);
 
     const setError = useCallback((error: string) => {

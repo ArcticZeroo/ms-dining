@@ -1,16 +1,12 @@
-import { ICardData, ICartItem, IRguestCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
-import { getPaymentProcessorTimezoneOffset } from '../../../util/date.js';
-import { logDebug, logError } from '../../../util/log.js';
+import { ICartItem, IRguestCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import { logError } from '../../../util/log.js';
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
-    IAddToOrderResponse,
-    ICardProcessorPaymentFailureResponse,
-    ICardProcessorPaymentSuccessResponse,
-    IOrderLineItem,
-    IRetrieveCardProcessorTokenResponse,
-    isCardProcessorPaymentFailureResponse
+	IAddToOrderResponse,
+	IOrderLineItem,
+	IRetrieveCardProcessorTokenResponse,
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
@@ -20,14 +16,9 @@ import { StationStorageClient } from '../../storage/clients/station.js';
 import { StringUtil } from '../../../util/string.js';
 import { z } from 'zod';
 import { fixed } from '../../../util/math.js';
-import { makeRequestWithRetries } from '../../../util/request.js';
-import fetch from 'node-fetch';
 import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
-import { phone, PhoneValidResult } from 'phone';
+import { PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
-import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-
-const CARD_PROCESSOR_XSS_TOKEN_REGEX = /<input\s+entityType="hidden"\s+id="token"\s+name="token"\s+value="(?<xssToken>.+?)"\s+\/>/;
 
 // Validates the kiosk-items/{id} response. Uses passthrough() so all extra fields
 // are preserved when we spread the response into the cart request body.
@@ -77,22 +68,6 @@ interface ISerializedModifier {
     };
 }
 
-interface ISubmitOrderProcessedParams {
-    alias: string;
-    cardData: ICardData;
-    phoneData: PhoneValidResult;
-}
-
-interface ISubmittedPaymentData {
-    token: string;
-    cardIssuer: string;
-    accountNumberMasked: string;
-}
-
-interface ICloseOrderParams extends ISubmitOrderProcessedParams {
-    submittedPaymentData: ISubmittedPaymentData;
-}
-
 interface IIframeCloseOrderParams {
     alias: string;
     phoneData: PhoneValidResult;
@@ -115,7 +90,6 @@ export class CafeOrderSession {
     #orderTotalWithTax: number = 0;
     #lastCompletedStage: SubmitOrderStage = SubmitOrderStage.notStarted;
     #cardProcessorToken: string = '';
-    #xssToken: string = '';
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
 
@@ -130,10 +104,6 @@ export class CafeOrderSession {
 
     get lastCompletedStage() {
         return this.#lastCompletedStage;
-    }
-
-    public get isReadyForSubmit() {
-        return this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
     }
 
     public get orderNumber() {
@@ -154,10 +124,6 @@ export class CafeOrderSession {
 
     public get orderId() {
         return this.#orderId;
-    }
-
-    public get siteToken() {
-        return this.#cardProcessorToken;
     }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
@@ -251,12 +217,6 @@ export class CafeOrderSession {
         }
 
         return modifiers;
-    }
-
-    private _assertMatch(errorMessage: string, existingValue: string | null, newValue: string) {
-        if (existingValue != null && existingValue !== newValue) {
-            throw new Error(errorMessage);
-        }
     }
 
     private async _fetchRawItemDetail(itemId: string, station: { menuId: string }) {
@@ -482,129 +442,6 @@ export class CafeOrderSession {
         return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=${encodeURIComponent(styleUrl)}&language=en&doVerify=true&version=3`;
     }
 
-    private async _parseCreditProcessorResponse<T>(response: Awaited<ReturnType<typeof fetch>>): Promise<T> {
-        const text = await response.text();
-
-        try {
-            return JSON.parse(text);
-        } catch (err) {
-            if (!response.ok) {
-                throw new Error(`Card processor response failed with code ${response.statusText}: ${text}`);
-            } else {
-                throw new Error(`Failed to parse card processor response: ${text}`);
-            }
-        }
-    }
-
-    private async _makeCardProcessorRequest(token: string, url: string, method: 'POST' | 'GET', body?: object) {
-        return await makeRequestWithRetries({
-            makeRequest: (retry) => {
-                if (ENVIRONMENT_SETTINGS.logRequests) {
-                    logDebug('Making card processor request');
-                    logDebug(`${method ?? 'GET'} ${url} (Attempt ${retry})`);
-                    logDebug(`Token: "${token}"`);
-                    if (body) {
-                        logDebug(JSON.stringify(body));
-                    }
-                }
-
-                return fetch(
-                    url,
-                    {
-                        method,
-                        headers: {
-                            ...JSON_HEADERS,
-                            'Api-Key-Token': token,
-                            'Referer':       this._getCardProcessorUrl(token)
-                        },
-                        body:    body ? JSON.stringify(body) : undefined
-                    }
-                );
-            }
-        });
-    }
-
-    private async _retrieveCardProcessorXssToken() {
-        if (this.#cardProcessorToken.length === 0) {
-            throw new Error('Card processor token is not set!');
-        }
-
-        const response = await this._makeCardProcessorRequest(
-            this.#cardProcessorToken,
-            this._getCardProcessorUrl(this.#cardProcessorToken),
-            'GET'
-        );
-
-        if (!response.ok) {
-            throw new Error(`Card processor response failed with code ${response.statusText}`);
-        }
-
-        const text = await response.text();
-
-        const xssToken = text.match(CARD_PROCESSOR_XSS_TOKEN_REGEX)?.groups?.['xssToken'];
-
-        if (xssToken == null) {
-            throw new Error('Failed to find XSS token in response');
-        }
-
-        return xssToken;
-    }
-
-    private async _submitPaymentToCardProcessor(token: string, cardData: ICardData): Promise<ISubmittedPaymentData> {
-        const response = await this._makeCardProcessorRequest(
-            token,
-            'https://pay.rguest.com/pay-iframe-service/iFrame/tenants/107/token/6564d6cadc5f9d30a2cf76b3',
-            'POST',
-            {
-                cardholderName:  cardData.name,
-                cardNumber:      cardData.cardNumber,
-                expirationMonth: cardData.expirationMonth.padStart(2, '0'),
-                expirationYear:  cardData.expirationYear,
-                cvv:             cardData.securityCode,
-                postalCode:      cardData.postalCode,
-                dateTimeZone:    getPaymentProcessorTimezoneOffset(),
-                addressLine1:    null,
-                addressLine2:    null,
-                city:            null,
-                state1:          null,
-                state2:          null,
-                postalCode1:     null,
-                doVerify:        'false',
-                enableCaptcha:   false,
-                // doVerify:        'true',
-                // enableCaptcha:   true,
-                // 'g-recaptcha-response': '03AFcWeA6NbAxkZklfmkgiYS-skISqqNeGkQV4Ygim33N_lxmS9uKW6qd6FvLVKEFEDa8NVJ9DnLOWiKi_cmozUpEE94VyZ6TN-LCAnejRU4r49-YF-273oWXy9_1cYtQYRbNG3jYvqpYUTPsb2SkFL40beSsoLl_4WuD1GVM02SxAjmUMAZ6F7ZnU0VrKBLeEDaXfIZP6VvjKxJ0QXmtgJnGS0AaHHyOSZQzwu4jDE5GRQ6xTbP6ofnjnhlvS7krlG4Cn8nf06DEygh2QUkqnxKLy6jtGFZc56WE0R9UBPn6BnW0G6PINBFGMkEKW_-mL24MsaASS8aGqmg0NUSBVxmJNflwGlCfn_vnxMi93FAB0s0bYPzo-JC0id2tqtUsEQNLHktYYHIhgVgMIFmo8eda2aGj53Ush5aSbL9E1J9RbCmlvbMtd-MK2p8ykfNbqnH_qtaEqdsW07b_BHZqJGSDkjTNDkG5EltHMp6299_7z0MS-y4CsZWsjfnOmJtfFN9rd0DWfQKMkLkZF-rNywI0bj_7aiXo4hjiRnNIL9BJGq-wsV3HqtY79bCGShidV1NF-9DfG9hMzI1pJnVYPCFhs6hX_tC8tXc0VJ7RfAtVUjRyWpsJdIOPkVLhsMwsJ15uoe7BOe87YIp4Ez5wni18LOF9dupTqoyiGTm2nVqChgE26viw_wbK5VhzVGcDkhDaXa4B8Cwrz0uA7vJcOu7hkj1qKO3m6G4rlBiWi7fCxCkbjH-3syGM2h45h4MD70Lcjrt5DgHp1OFoCJErhvbAf8NAh-BKOk85HkKoaGEa1SR4WzUb-hpIn2UsyMtO40UO0tujC60pQLK7IWTFhXfkyg1NvThb8_4xygmphdT54ZqKDKOF3fkruBJOc6fTFiZZZFljhfXEneDGuqtnI2_8tXwS0JA7_knjOExW-JCZfnTXsrmTX1r4QzzDvSgvyoFukmMyZVxKmwifL-PZmTJVf5nOxaLggpIXRB-kdSQYKDFvBptFK4HHJ0hLjiKFYp0AEtddALBDI7A5C3Mac79FavXvq6a2QP8PAEeKP-nGPffjBMwpTJuzkXnz3AHa5j4hP0edNXziyT-E2sdXD6jgOS1dAYUvOWOHuTzEWl3ps9q3yjaI07ymBIbOYarGZJQAzm8YSZnsXgFi9PD4zkSO0p4y7AUWVSk8oSHjCorz-vxtd_f5ly_bZ8J6EGf-1hkzYszKSZd1H_5T_OodXtHaleclcFSiz1U4DB2urNE09JzE8nkRRzVS7USUqiB6IKDirZP-HeP-u61gU2IEzecXRLEZZ-RjImKNthp1eVUrVifn9BM2WiaY4MqcAlLitXAHYanMQBAxUPghNKSoqxyab-SH01F1TFPijZdVP7Xz3dKCTMTb_4kZzsFRZC2bLx-bNvNnU4fBisewU-AMLDJpnCF7elxwhmKke0eqhgZDNVzU0BvU1xAgFm0De403R41ttBG8wwkgAIUvzMqsoOvrtULYbrW-FAEkHOfoC6-V8h1wdeN692ukkzXjtImfzByTskxUrjkilc5DodvZ3eYMhojsBagMhrqZ-HM4QVvX7KRS3ZWeoy3zBL_EjklXOnFiAIhWPXcONwnNQY3mqWSPxlulPexlBQhhX0pVe7g1BTRw5adw5Uzi3pkAnO3pwTNzEMXrAs-gWK7SBz7sQVi1Zym2mxzD8BohrmKWqIJPQiJvEOTFeXre4FnhOCWKzL7w0v0DffvGOpDKwze-FC5_sL5euEuPV_eVR0N5_f4_AVQSQc4kVFsI',
-                // googleCaptcha: '03AFcWeA6NbAxkZklfmkgiYS-skISqqNeGkQV4Ygim33N_lxmS9uKW6qd6FvLVKEFEDa8NVJ9DnLOWiKi_cmozUpEE94VyZ6TN-LCAnejRU4r49-YF-273oWXy9_1cYtQYRbNG3jYvqpYUTPsb2SkFL40beSsoLl_4WuD1GVM02SxAjmUMAZ6F7ZnU0VrKBLeEDaXfIZP6VvjKxJ0QXmtgJnGS0AaHHyOSZQzwu4jDE5GRQ6xTbP6ofnjnhlvS7krlG4Cn8nf06DEygh2QUkqnxKLy6jtGFZc56WE0R9UBPn6BnW0G6PINBFGMkEKW_-mL24MsaASS8aGqmg0NUSBVxmJNflwGlCfn_vnxMi93FAB0s0bYPzo-JC0id2tqtUsEQNLHktYYHIhgVgMIFmo8eda2aGj53Ush5aSbL9E1J9RbCmlvbMtd-MK2p8ykfNbqnH_qtaEqdsW07b_BHZqJGSDkjTNDkG5EltHMp6299_7z0MS-y4CsZWsjfnOmJtfFN9rd0DWfQKMkLkZF-rNywI0bj_7aiXo4hjiRnNIL9BJGq-wsV3HqtY79bCGShidV1NF-9DfG9hMzI1pJnVYPCFhs6hX_tC8tXc0VJ7RfAtVUjRyWpsJdIOPkVLhsMwsJ15uoe7BOe87YIp4Ez5wni18LOF9dupTqoyiGTm2nVqChgE26viw_wbK5VhzVGcDkhDaXa4B8Cwrz0uA7vJcOu7hkj1qKO3m6G4rlBiWi7fCxCkbjH-3syGM2h45h4MD70Lcjrt5DgHp1OFoCJErhvbAf8NAh-BKOk85HkKoaGEa1SR4WzUb-hpIn2UsyMtO40UO0tujC60pQLK7IWTFhXfkyg1NvThb8_4xygmphdT54ZqKDKOF3fkruBJOc6fTFiZZZFljhfXEneDGuqtnI2_8tXwS0JA7_knjOExW-JCZfnTXsrmTX1r4QzzDvSgvyoFukmMyZVxKmwifL-PZmTJVf5nOxaLggpIXRB-kdSQYKDFvBptFK4HHJ0hLjiKFYp0AEtddALBDI7A5C3Mac79FavXvq6a2QP8PAEeKP-nGPffjBMwpTJuzkXnz3AHa5j4hP0edNXziyT-E2sdXD6jgOS1dAYUvOWOHuTzEWl3ps9q3yjaI07ymBIbOYarGZJQAzm8YSZnsXgFi9PD4zkSO0p4y7AUWVSk8oSHjCorz-vxtd_f5ly_bZ8J6EGf-1hkzYszKSZd1H_5T_OodXtHaleclcFSiz1U4DB2urNE09JzE8nkRRzVS7USUqiB6IKDirZP-HeP-u61gU2IEzecXRLEZZ-RjImKNthp1eVUrVifn9BM2WiaY4MqcAlLitXAHYanMQBAxUPghNKSoqxyab-SH01F1TFPijZdVP7Xz3dKCTMTb_4kZzsFRZC2bLx-bNvNnU4fBisewU-AMLDJpnCF7elxwhmKke0eqhgZDNVzU0BvU1xAgFm0De403R41ttBG8wwkgAIUvzMqsoOvrtULYbrW-FAEkHOfoC6-V8h1wdeN692ukkzXjtImfzByTskxUrjkilc5DodvZ3eYMhojsBagMhrqZ-HM4QVvX7KRS3ZWeoy3zBL_EjklXOnFiAIhWPXcONwnNQY3mqWSPxlulPexlBQhhX0pVe7g1BTRw5adw5Uzi3pkAnO3pwTNzEMXrAs-gWK7SBz7sQVi1Zym2mxzD8BohrmKWqIJPQiJvEOTFeXre4FnhOCWKzL7w0v0DffvGOpDKwze-FC5_sL5euEuPV_eVR0N5_f4_AVQSQc4kVFsI',
-                customerId: '',
-                // Intentional that we're double-stringifying here. The actual request sends this object as an encoded string.
-                browserInfo: JSON.stringify({
-                    userAgent: cardData.userAgent
-                }),
-                token:       this.#xssToken,
-            }
-        );
-
-        const json = await this._parseCreditProcessorResponse<ICardProcessorPaymentSuccessResponse | ICardProcessorPaymentFailureResponse>(response);
-
-        if (isCardProcessorPaymentFailureResponse(json)) {
-            throw new Error(`Card processor response failed (${response.statusText}): ${json.message}`);
-        }
-
-        // This is how the actual JS does it
-        const submittedPaymentToken = json.token || json.transactionReferenceData?.token;
-
-        if (!submittedPaymentToken) {
-            logDebug('Card processor response is missing payment token:', json);
-            throw new Error('TODO: Handle this by enabling the captcha and trying again');
-        }
-
-        return {
-            token:               submittedPaymentToken,
-            accountNumberMasked: json.cardInfo.accountNumberMasked,
-            cardIssuer:          json.cardInfo.cardIssuer
-        };
-    }
-
     private async _sendPhoneConfirmation(phoneData: PhoneValidResult) {
         await this.client.requestAsync(`/communication/sendSMSReceipt`,
             {
@@ -677,293 +514,6 @@ export class CafeOrderSession {
             });
 
         return response.text();
-    }
-
-    private async _closeOrderAsync({ alias, phoneData, cardData, submittedPaymentData }: ICloseOrderParams) {
-        if (StringUtil.isNullOrWhitespace(this.#xssToken)) {
-            throw new Error('XSS token is not set!');
-        }
-
-        if (this.#orderId == null) {
-            throw new Error('Order ID is not set!');
-        }
-
-        const nowString = (new Date()).toISOString();
-
-        await this.client.requestAsync(
-            `/order/${this.#orderId}/processPaymentAndClosedOrder`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:   JSON.stringify({
-                    amHereConfig:                    {
-                        isCurbsidePickup: false,
-                        lateTolerance:    5,
-                        origin:           `https://${this.client.cafe.id}.buy-ondemand.com`
-                    },
-                    authorizedAmount:                this.orderTotalWithTax.toString(),
-                    calorieTotal:                    {
-                        baseCalorie: 0,
-                        maxCalorie:  0
-                    },
-                    capacitySuggestionPerformed:     false,
-                    contextId:                       this.client.config.contextId,
-                    currencyDetails:                 {
-                        currencyCode:          'USD',
-                        currencyCultureName:   'en-US',
-                        currencyDecimalDigits: '2',
-                        currencySymbol:        '$'
-                    },
-                    currencyUnit:                    'USD',
-                    customCardCodeMapping:           false,
-                    customerAddress:                 [],
-                    cyberSourcePaymentData:          null,
-                    cyberSourceTransactionData:      null,
-                    deliveryProperties:              {
-                        deliveryOption:     {
-                            conceptEntries:          {},
-                            defaultConfirmationText: 'Thank you for your order! You will be notified when your order is ready for pick-up at the Mobile Order Pick-Up station.',
-                            displayText:             'PICKUP',
-                            id:                      'pickup',
-                            isEnabled:               true,
-                            kitchenText:             'PICKUP'
-                        },
-                        fulfillmentDetails: {
-                            fulfillmentTYpe: 'pickupFormFields',
-                        },
-                        isCutleryEnabled:   false,
-                        nameCapture:        {
-                            firstName:   alias,
-                            lastInitial: ''
-                        },
-                        nameString:         `${alias} `
-                    },
-                    discountInfo:                    [],
-                    displayProfileId:                this.client.config.displayProfileId,
-                    emailInfo:                       {
-                        featureEnabled:     true,
-                        customerAddress:    [], // todo, maybe throw an email in here
-                        headerText:         'Email receipt',
-                        instructionText:    'Please use your MICROSOFT email for receipt & reception ',
-                        receiptFooter:      'Thanks for using dining.frozor.io!',
-                        receiptFromAddress: 'noreply@rguest.com',
-                        receiptFromName:    this.client.cafe.name,
-                        receiptSubject:     `Receipt from ${this.client.cafe.name}`,
-                    },
-                    engageAccrualEnabled:            false,
-                    firstName:                       alias,
-                    giftCardSaleDataMap:             {},
-                    graceCompletionTime:             false,
-                    igOrderStatusConfig:             {},
-                    igSettings:                      {
-                        'discountStateTitle':              'Check for loyalty discounts',
-                        'timezone':                        'PST8PDT',
-                        'LOYALTY/uiNoTendersAvailableMsg': 'You do not have available points or vouchers to apply. \nPlease use a different payment entityType or cancel this order.',
-                        'isSmsEnabled':                    'true',
-                        'greetingText':                    'Select to begin',
-                        'currency/currencyCultureName':    'en-US',
-                        'smsInstructionText':              'You\'ll receive a text when order is ready for PICK-UP.',
-                        'isMobileNumberRequired':          'true',
-                        'isProfileValid':                  'true',
-                        'limitGaTenderIds':                '11,111,12,13,9',
-                        'currency/currencyCode':           'USD',
-                        'onDemandIgVerificationCodeId':    'MSFT152',
-                        'useIgOrderApi':                   'true',
-                        'roomCharge/paymentIds':           '',
-                        'LOYALTY/bannedPlayerMessage':     'Please see cashier.',
-                        'LOYALTY/pinNumberLength':         '4',
-                        'currency/currencySymbol':         '$',
-                        'gaPaymentName':                   'Badge / Coupon',
-                        'onDemandTenderId':                '94',
-                        'onDemandEmployeeId':              this.#orderingContext.onDemandEmployeeId,
-                        'profit-center-id':                this.#orderingContext.profitCenterId,
-                        'LOYALTY/uiSystemBrandingLabel':   'Player card',
-                        'currency/currencyDecimalDigits':  '2',
-                        'LOYALTY/restrictBannedPlayers':   'true',
-                        'useIgPosApi':                     'false',
-                        'onDemandTerminalId':              this.#orderingContext.onDemandTerminalId,
-                        'smsHeaderText':                   'Text order status requires mobile number.'
-                    },
-                    isGaPaymentAvailable:            false,
-                    itemCountdown:                   {},
-                    kitchenContextId:                null,
-                    lastName:                        '',
-                    locizeConfig:                    {
-                        currentLanguage:     'en',
-                        shouldUseLocizeText: false,
-                        domain:              `${this.client.cafe.id}.buy-ondemand.com`,
-                        storeInfo:           {
-                            businessContextId:       this.client.config.contextId,
-                            tenantId:                this.client.config.tenantId,
-                            storeInfoId:             this.client.config.storeId,
-                            storeName:               this.client.cafe.name,
-                            timezone:                'PST8PDT',
-                            properties:              {
-                                selectedLanguage:        'en_US',
-                                taxIdentificationNumber: ''
-                            },
-                            storeInfoOptions:        {
-                                calories:  {
-                                    abbreviation: 'Cal',
-                                    fullName:     'Calories'
-                                },
-                                birConfig: {
-                                    displayText:                       'OR#',
-                                    acknowledgementReceiptDisplayText: 'AR#',
-                                    acknowledgementReceiptIndicator:   'Acknowledgement Receipt#',
-                                    officialReceiptIndicator:          'Official Receipt#'
-                                }
-                            },
-                            receiptConfigProperties: {
-                                smsBody:                      'true',
-                                smsHeader:                    'true',
-                                smsFooter:                    'true',
-                                showCompleteCheckNumberInSms: 'true'
-                            },
-                            address:                 [
-                                ' ',
-                                '  '
-                            ]
-                        },
-                        scheduledDay:        0,
-                        dateTime:            'en',
-                        readyTime:           {
-                            minTime: {
-                                minutes:    0,
-                                fieldType:  {
-                                    name: 'minutes'
-                                },
-                                periodType: {
-                                    name: 'Minutes'
-                                }
-                            },
-                            maxTime: {
-                                minutes:    0,
-                                fieldType:  {
-                                    name: 'minutes'
-                                },
-                                periodType: {
-                                    name: 'Minutes'
-                                }
-                            }
-                        },
-                        deliveryProperties:  {
-                            deliveryOption:     {
-                                id:                      'pickup',
-                                kitchenText:             'PICKUP',
-                                displayText:             'PICKUP',
-                                defaultConfirmationText: 'Thank you for your order! You will be notified when your order is ready for pick-up at the Mobile Order Pick-Up station.',
-                                conceptEntries:          {},
-                                isEnabled:               true
-                            },
-                            fulfillmentDetails: {
-                                fulfillmentType: 'pickupFormFields'
-                            },
-                            isCutleryEnabled:   false,
-                            nameCapture:        {
-                                firstName:   alias,
-                                lastInitial: ''
-                            },
-                            nameString:         `${alias} `
-                        },
-                        multiLanguageConfig: {}
-                    },
-                    loyaltyGuestInfo:                {},
-                    loyaltyPayment:                  false,
-                    mealPeriodId:                    MEAL_PERIOD.lunch,
-                    mobileNumber:                    phoneData.phoneNumber,
-                    mobileNumberCountryCode:         phoneData.countryCode,
-                    multiPassEnabled:                false,
-                    notifyGuestOnFailure:            true, // false from the rela thing
-                    order:                           {
-                        orderId:      this.#orderId,
-                        version:      1,
-                        tenantId:     this.client.config.tenantId,
-                        contextId:    this.client.config.contextId,
-                        created:      nowString,
-                        lastUpdated:  nowString,
-                        orderState:   'OPEN',
-                        currencyUnit: 'USD',
-                        orderNumber:  this.#orderNumber,
-                        properties:   {
-                            orderNumberSequenceLength: '4',
-                            profitCenterId:            this.#orderingContext.profitCenterId,
-                            displayProfileId:          this.client.config.displayProfileId,
-                            orderNumberNameSpace:      this.#orderingContext.onDemandTerminalId,
-                            priceLevelId:              this.#orderingContext.storePriceLevel,
-                            employeeId:                this.#orderingContext.onDemandEmployeeId,
-                            mealPeriodId:              MEAL_PERIOD.lunch,
-                            closedTerminalId:          this.#orderingContext.onDemandTerminalId,
-                            orderSourceSystem:         'onDemand',
-                            openScheduleExpression:    '0 0 0 * * *',
-                            useIgOrderApi:             true,
-                        }
-                    },
-                    orderGuid:                       null,
-                    orderVersion:                    1,
-                    paymentType:                     null,
-                    processPaymentAsExternalPayment: false,
-                    profileId:                       this.client.config.displayProfileId,
-                    profitCenterId:                  this.#orderingContext.profitCenterId,
-                    profitCenterName:                this.#orderingContext.profitCenterName,
-                    receiptInfo:                     {
-                        orderData: {
-                            orderId:      this.#orderId,
-                            version:      1,
-                            tenantId:     this.client.config.tenantId,
-                            contextId:    this.client.config.contextId,
-                            created:      nowString,
-                            lastUpdated:  nowString,
-                            orderState:   'OPEN',
-                            orderNumber:  this.orderNumber,
-                            currencyUnit: 'USD',
-                            lineItems:    Array.from(this.#lineItemsById.values())
-                        }
-                    },
-                    salesTransactionData:            null,
-                    scannedItemOrder:                false,
-                    scheduledDay:                    0,
-                    shouldRefundOnFailure:           true, // false from the real thing
-                    siteId:                          this.client.config.contextId,
-                    storePriceLevel:                 this.#orderingContext.storePriceLevel,
-                    stripeTransactionData:           null,
-                    subtotal:                        this.#orderTotalWithoutTax.toString(),
-                    tenantId:                        this.client.config.tenantId,
-                    terminalId:                      this.#orderingContext.onDemandTerminalId,
-                    tipAmount:                       0,
-                    tipPercent:                      0,
-                    tokenizedData:                   {
-                        paymentDetails: {
-                            taxAmount:            this.orderTotalTax.toString(),
-                            invoiceId:            this.#orderNumber,
-                            billDate:             nowString,
-                            userCurrentDate:      nowString,
-                            currencyUnit:         'USD',
-                            description:          `Order ${this.#orderNumber}`,
-                            transactionAmount:    this.orderTotalWithTax.toString(),
-                            multiPaymentAmount:   fixed(this.orderTotalWithTax, 2),
-                            isWindCave:           false,
-                            isCyberSource:        false,
-                            isCyberSourceWallets: false,
-                            language:             'en',
-                            apiToken:             this.#cardProcessorToken,
-                            payTenantId:          this.client.config.tenantId,
-                            accountNumberMasked:  submittedPaymentData.accountNumberMasked,
-                            cardIssuer:           submittedPaymentData.cardIssuer,
-                            expirationYearMonth:  `${cardData.expirationYear}${cardData.expirationMonth.padStart(2, '0')}`,
-                            cardHolderName:       cardData.name,
-                            postalCode:           cardData.postalCode,
-                        },
-                        saveCardFlag:   false,
-                        token:          submittedPaymentData.token
-                    },
-                    use24HrTimeFormat:               false,
-                    useIgPosApi:                     false,
-                    walletPaymentData:               null,
-                    walletSaleTransactionData:       null
-                })
-            }
-        );
     }
 
     private async _closeOrderWithIframeTokenAsync({ alias, phoneData, paymentToken, cardInfo }: IIframeCloseOrderParams) {
@@ -1268,44 +818,6 @@ export class CafeOrderSession {
         await this._runStages(SubmitOrderStage.notStarted, async () => {
             await this._populateCart();
             this.#lastCompletedStage = SubmitOrderStage.addToCart;
-        });
-    }
-
-    public async prepareBeforeOrder(): Promise<void> {
-        await this._runStages(SubmitOrderStage.addToCart, async () => {
-            this.#cardProcessorToken = await this._getCardProcessorSiteToken();
-            this.#xssToken = await this._retrieveCardProcessorXssToken();
-
-            this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
-        });
-    }
-
-    // TODO: Figure out a way to break this up into two separate actions to reduce user-perceived latency.
-    /**
-     * @returns The latest stage which was successfully completed.
-     */
-    public async submitOrder({
-                                 alias,
-                                 cardData,
-                                 phoneData,
-                             }: ISubmitOrderProcessedParams): Promise<void> {
-        await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
-            const submittedPaymentData = await this._submitPaymentToCardProcessor(this.#cardProcessorToken, cardData);
-
-            this.#lastCompletedStage = SubmitOrderStage.payment;
-
-            await this._closeOrderAsync({
-                alias,
-                cardData,
-                phoneData,
-                submittedPaymentData
-            });
-
-            this.#lastCompletedStage = SubmitOrderStage.closeOrder;
-
-            await this._sendPhoneConfirmation(phoneData);
-
-            this.#lastCompletedStage = SubmitOrderStage.complete;
         });
     }
 

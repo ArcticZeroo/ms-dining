@@ -17,28 +17,8 @@ export interface ISerializedCartItem {
     specialInstructions?: string;
 }
 
-export interface ICardData {
-    name: string;
-    cardNumber: string;
-    expirationMonth: string;
-    expirationYear: string;
-    securityCode: string;
-    postalCode: string;
-    userAgent: string;
-}
-
-export interface ISubmitOrderParams {
-    phoneNumberWithCountryCode: string;
-    alias: string;
-    cardData: ICardData;
-}
-
 export interface ISubmitOrderItems {
     [cafeId: string]: ISerializedCartItem[];
-}
-
-export interface ISubmitOrderRequest extends ISubmitOrderParams {
-    itemsByCafeId: ISubmitOrderItems;
 }
 
 export enum SubmitOrderStage {
@@ -85,6 +65,32 @@ export interface IPrepareOrderRequest {
     itemsByCafeId: ISubmitOrderItems;
 }
 
+// Response from /prepare/cart — builds cart on server and returns price data
+export interface IPrepareCartResponse {
+    [cafeId: string]: {
+        orderId: string;
+        orderNumber: string;
+        totalPriceWithTax: number;
+        totalPriceWithoutTax: number;
+        totalTax: number;
+        expiresAt: string;
+    };
+}
+
+// Request/response for /prepare/payment — gets card processor token for an existing cart session
+export interface IPreparePaymentRequest {
+    orderId: string;
+}
+
+export interface IPreparePaymentResponse {
+    siteToken: string;
+    iframeUrl: string;
+    orderId: string;
+    orderNumber: string;
+    expiresAt: string;
+}
+
+// Legacy combined prepare response (kept for backwards compat)
 export interface IPrepareOrderResponse {
     [cafeId: string]: {
         siteToken: string;

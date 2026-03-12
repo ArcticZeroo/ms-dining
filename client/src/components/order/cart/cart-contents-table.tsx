@@ -13,9 +13,9 @@ import { getViewMenuUrl } from '../../../util/link.ts';
 import { sortViews } from '../../../util/sorting.ts';
 import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
 import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
-
-import './cart-contents-table.css';
+import { IPrepareCartResponse } from '@msdining/common/models/cart';
 import { CartItemRow } from './cart-item-row.tsx';
+import './cart-contents-table.css';
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
@@ -23,9 +23,11 @@ interface ICartContentsTableProps {
     showFullDetails?: boolean;
     showTotalPrice?: boolean;
     readOnly?: boolean;
+    cartSessionData?: IPrepareCartResponse | null;
+    cartSessionError?: unknown;
 }
 
-export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false, readOnly = false }) => {
+export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false, readOnly = false, cartSessionData = null, cartSessionError }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsNotifier = useContext(CartContext);
@@ -135,7 +137,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
             <tbody>
                 {cartItemsView}
                 {
-                    showTotalPrice && <OrderPriceInlineTable/>
+                    showTotalPrice && <OrderPriceInlineTable cartSessionData={cartSessionData} cartSessionError={cartSessionError}/>
                 }
             </tbody>
         </table>
