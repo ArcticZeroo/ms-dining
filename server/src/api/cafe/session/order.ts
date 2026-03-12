@@ -573,7 +573,7 @@ export class CafeOrderSession {
 
         const nowString = (new Date()).toISOString();
 
-        await this.client.requestAsync(
+        const response = await this.client.requestAsync(
             `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orderId/${this.#orderId}/processPaymentAndClosedOrder`,
             {
                 method:  'POST',
@@ -845,8 +845,15 @@ export class CafeOrderSession {
                     walletPaymentData:               null,
                     walletSaleTransactionData:       null
                 })
-            }
+            },
+            false /*shouldValidateSuccess*/
         );
+
+        if (!response.ok) {
+            const body = await response.text();
+            logError(`{${this.client.cafe.name}} closeOrder failed (${response.status}):`, body);
+            throw new Error(`Close order failed with status ${response.status}: ${body}`);
+        }
     }
 
     private async _runStages(requiredStage: SubmitOrderStage, callback: () => Promise<void>): Promise<void> {
