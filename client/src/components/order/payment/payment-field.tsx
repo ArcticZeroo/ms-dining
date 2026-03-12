@@ -4,6 +4,7 @@ import { ValidationState } from '../../../models/validation.ts';
 import { classNames } from '../../../util/react.ts';
 
 interface IBasePaymentFieldProps {
+    isEnabled?: boolean;
     id: string;
     icon: string;
     name: string;
@@ -31,7 +32,8 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
     description,
     value,
     validationState,
-    onValueChanged
+    onValueChanged,
+    isEnabled = true,
 }) => {
     if (validationState == null) {
         validationState = {
@@ -72,6 +74,7 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
                 type={inputType}
                 value={rawValue}
                 onChange={event => onValueChanged(event.target.value)}
+                disabled={!isEnabled}
                 required
             />
         </label>

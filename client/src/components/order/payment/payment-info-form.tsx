@@ -24,10 +24,11 @@ export interface IPaymentFormData {
 }
 
 interface IPaymentInfoFormProps {
+    isEnabled: boolean;
     onSubmit(data: IPaymentFormData): void;
 }
 
-export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ onSubmit }) => {
+export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isEnabled, onSubmit }) => {
     const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
     const [alias, setAlias] = useState(InternalSettings.alias.value);
 

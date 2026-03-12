@@ -57,35 +57,6 @@ export const OrderPage = () => {
         setOrderResult(results);
     }, []);
 
-    if (orderResult != null) {
-        return (
-            <>
-                <OrderStatus
-                    stage={PromiseStage.success}
-                    value={orderResult}
-                    error={undefined}
-                />
-                <div className="flex flex-justify-center">
-                    <button className="default-container" onClick={() => navigate('/')}>
-                        Return Home
-                    </button>
-                </div>
-            </>
-        );
-    }
-
-    if (prepareResults != null) {
-        return (
-            <div id="order-checkout" className="flex-col">
-                <CafePayment
-                    prepareResults={prepareResults}
-                    formData={formDataRef.current!}
-                    onAllComplete={onAllCafesComplete}
-                />
-            </div>
-        );
-    }
-
     if (cartHydrationState.stage === PromiseStage.running) {
         return (
             <div className="flex">
@@ -112,6 +83,11 @@ export const OrderPage = () => {
                 <WaitTime/>
             </div>
             {cart.size > 1 && <MultiCafeOrderWarning/>}
+            <PaymentInfoForm
+                isEnabled={prepareStage !== PromiseStage.running}
+                onSubmit={onFormSubmitted}
+            />
+            <OrderPrivacyPolicy/>
             {prepareStage === PromiseStage.running && (
                 <div className="flex flex-justify-center">
                     <HourglassLoadingSpinner/>
@@ -124,8 +100,31 @@ export const OrderPage = () => {
                     <RetryButton onClick={runPrepare}/>
                 </div>
             )}
-            <PaymentInfoForm onSubmit={onFormSubmitted}/>
-            <OrderPrivacyPolicy/>
+            {
+                prepareResults != null && (
+                    <CafePayment
+                        prepareResults={prepareResults}
+                        formData={formDataRef.current!}
+                        onAllComplete={onAllCafesComplete}
+                    />
+                )
+            }
+            {
+                orderResult != null && (
+                    <>
+                        <OrderStatus
+                            stage={PromiseStage.success}
+                            value={orderResult}
+                            error={undefined}
+                        />
+                        <div className="flex flex-justify-center">
+                            <button className="default-container" onClick={() => navigate('/')}>
+                                Return Home
+                            </button>
+                        </div>
+                    </>
+                )
+            }
         </div>
     );
 };
