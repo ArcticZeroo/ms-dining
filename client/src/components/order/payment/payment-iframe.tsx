@@ -196,7 +196,7 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
                     </div>
                 ) : (
                     <div className="payment-completing">
-                        <span className="material-symbols-outlined">hourglass_top</span>
+                        <HourglassLoadingSpinner/>
                         <span>Processing payment...</span>
                     </div>
                 )}

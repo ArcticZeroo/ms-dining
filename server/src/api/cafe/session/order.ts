@@ -92,6 +92,7 @@ export class CafeOrderSession {
     #cardProcessorToken: string = '';
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
+    readonly #conceptIds = new Set<string>();
 
     constructor(public client: BuyOnDemandClient, cartItems: ICartItem[]) {
         this.#cartItems = cartItems;
@@ -263,6 +264,8 @@ export class CafeOrderSession {
 
         const rawItemDetail = await this._fetchRawItemDetail(cartItem.itemId, station);
 
+        this.#conceptIds.add(station.id);
+
         const serializedModifiers = this._serializeModifiers(cartItem, menuItem);
         const cartItemId = hat();
         const cartGuid = `${menuItem.id}-${Date.now()}`;
@@ -407,7 +410,7 @@ export class CafeOrderSession {
                     transactionAmount:    this.#orderTotalWithTax.toFixed(2),
                     remainingTipAmount:   '0.00',
                     tipAmount:            '0.00',
-                    style:                iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false`,
+                    style:                iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
                     multiPaymentAmount:   fixed(this.#orderTotalWithTax, 2),
                     isWindCave:           false,
                     isCyberSource:        false,
@@ -437,7 +440,7 @@ export class CafeOrderSession {
             throw new Error('Config is required to get card processor url!');
         }
 
-        const styleUrl = iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false`;
+        const styleUrl = iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`;
         // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
         return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=${encodeURIComponent(styleUrl)}&language=en&doVerify=true&version=3`;
     }
@@ -449,7 +452,7 @@ export class CafeOrderSession {
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
                     contextId:         this.client.config.contextId,
-                    orderId:           this.#orderNumber,
+                    orderId:           this.#orderId,
                     sendOrderTo:       phoneData.phoneNumber,
                     storeInfo:         {
                         businessContextId:       this.client.config.contextId,
@@ -516,6 +519,33 @@ export class CafeOrderSession {
         return response.text();
     }
 
+    private async _logIframeData(paymentToken: string, cardInfo: IRguestCardInfo) {
+        await this.client.requestAsync(
+            `/order/logIframeData`,
+            {
+                method:  'POST',
+                headers: JSON_HEADERS,
+                body:    JSON.stringify({
+                    type:        'success',
+                    data:        {
+                        token:    paymentToken,
+                        cardInfo: {
+                            cardIssuer:          cardInfo.cardIssuer,
+                            accountNumberMasked: cardInfo.accountNumberMasked,
+                            expirationYearMonth: cardInfo.expirationYearMonth,
+                            cardholderName:      cardInfo.cardHolderName,
+                            postalCode:          cardInfo.postalCode,
+                        }
+                    },
+                    orderId:     this.#orderId,
+                    orderNumber: this.#orderNumber,
+                    paymentType: 'rGuestIframe'
+                })
+            },
+            false /*shouldValidateSuccess*/
+        );
+    }
+
     private async _closeOrderWithIframeTokenAsync({ alias, phoneData, paymentToken, cardInfo }: IIframeCloseOrderParams) {
         if (this.#orderId == null) {
             throw new Error('Order ID is not set!');
@@ -524,7 +554,7 @@ export class CafeOrderSession {
         const nowString = (new Date()).toISOString();
 
         await this.client.requestAsync(
-            `/order/${this.#orderId}/processPaymentAndClosedOrder`,
+            `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orderId/${this.#orderId}/processPaymentAndClosedOrder`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
@@ -540,6 +570,7 @@ export class CafeOrderSession {
                         maxCalorie:  0
                     },
                     capacitySuggestionPerformed:     false,
+                    conceptId:                       this.#conceptIds.values().next().value,
                     contextId:                       this.client.config.contextId,
                     currencyDetails:                 {
                         currencyCode:          'USD',
@@ -562,7 +593,7 @@ export class CafeOrderSession {
                             kitchenText:             'PICKUP'
                         },
                         fulfillmentDetails: {
-                            fulfillmentTYpe: 'pickupFormFields',
+                            fulfillmentType: 'pickupFormFields',
                         },
                         isCutleryEnabled:   false,
                         nameCapture:        {
@@ -584,9 +615,13 @@ export class CafeOrderSession {
                         receiptSubject:     `Receipt from ${this.client.cafe.name}`,
                     },
                     engageAccrualEnabled:            false,
+                    engagePromotionAppliedPromotions: [],
+                    engagePromotionCardNumber:       null,
+                    engagePromotionLastName:         '',
                     firstName:                       alias,
                     giftCardSaleDataMap:             {},
                     graceCompletionTime:             false,
+                    gratuityBreakupConfigEnabled:    false,
                     igOrderStatusConfig:             {},
                     igSettings:                      {
                         'discountStateTitle':              'Check for loyalty discounts',
@@ -707,7 +742,7 @@ export class CafeOrderSession {
                     mobileNumber:                    phoneData.phoneNumber,
                     mobileNumberCountryCode:         phoneData.countryCode,
                     multiPassEnabled:                false,
-                    notifyGuestOnFailure:            true,
+                    notifyGuestOnFailure:            false,
                     order:                           {
                         orderId:      this.#orderId,
                         version:      1,
@@ -723,13 +758,16 @@ export class CafeOrderSession {
                             profitCenterId:            this.#orderingContext.profitCenterId,
                             displayProfileId:          this.client.config.displayProfileId,
                             orderNumberNameSpace:      this.#orderingContext.onDemandTerminalId,
+                            openTerminalId:            this.#orderingContext.onDemandTerminalId,
                             priceLevelId:              this.#orderingContext.storePriceLevel,
                             employeeId:                this.#orderingContext.onDemandEmployeeId,
                             mealPeriodId:              MEAL_PERIOD.lunch,
                             closedTerminalId:          this.#orderingContext.onDemandTerminalId,
+                            voidReasonId:              '11',
                             orderSourceSystem:         'onDemand',
+                            additionalGuestData:       '{}',
                             openScheduleExpression:    '0 0 0 * * *',
-                            useIgOrderApi:             true,
+                            useIgOrderApi:             'true',
                         }
                     },
                     orderGuid:                       null,
@@ -739,6 +777,7 @@ export class CafeOrderSession {
                     profileId:                       this.client.config.displayProfileId,
                     profitCenterId:                  this.#orderingContext.profitCenterId,
                     profitCenterName:                this.#orderingContext.profitCenterName,
+                    recallCheck:                     false,
                     receiptInfo:                     {
                         orderData: {
                             orderId:      this.#orderId,
@@ -753,43 +792,52 @@ export class CafeOrderSession {
                             lineItems:    Array.from(this.#lineItemsById.values())
                         }
                     },
-                    salesTransactionData:            null,
+                    saleTransactionData:             null,
                     scannedItemOrder:                false,
                     scheduledDay:                    0,
-                    shouldRefundOnFailure:           true,
+                    shouldRefundOnFailure:           false,
                     siteId:                          this.client.config.contextId,
                     storePriceLevel:                 this.#orderingContext.storePriceLevel,
                     stripeTransactionData:           null,
-                    subtotal:                        this.#orderTotalWithoutTax.toString(),
+                    subtotal:                        this.orderTotalWithTax.toString(),
                     tenantId:                        this.client.config.tenantId,
                     terminalId:                      this.#orderingContext.onDemandTerminalId,
+                    textReceiptConfig:               {
+                        textMessageWithReceiptLink: false
+                    },
                     tipAmount:                       0,
                     tipPercent:                      0,
                     tokenizedData:                   {
                         paymentDetails: {
-                            taxAmount:            this.orderTotalTax.toString(),
-                            invoiceId:            this.#orderNumber,
-                            billDate:             nowString,
-                            userCurrentDate:      nowString,
-                            currencyUnit:         'USD',
-                            description:          `Order ${this.#orderNumber}`,
-                            transactionAmount:    this.orderTotalWithTax.toString(),
-                            multiPaymentAmount:   fixed(this.orderTotalWithTax, 2),
-                            isWindCave:           false,
-                            isCyberSource:        false,
-                            isCyberSourceWallets: false,
-                            language:             'en',
-                            apiToken:             this.#cardProcessorToken,
-                            payTenantId:          this.client.config.tenantId,
-                            accountNumberMasked:  cardInfo.accountNumberMasked,
-                            cardIssuer:           cardInfo.cardIssuer,
-                            expirationYearMonth:  cardInfo.expirationYearMonth,
-                            cardHolderName:       cardInfo.cardHolderName,
-                            postalCode:           cardInfo.postalCode,
+                            taxAmount:              this.orderTotalTax.toString(),
+                            invoiceId:              this.#orderNumber,
+                            billDate:               nowString,
+                            userCurrentDate:        nowString,
+                            currencyUnit:           'USD',
+                            description:            `Order ${this.#orderNumber}`,
+                            transactionAmount:      this.orderTotalWithTax.toString(),
+                            remainingTipAmount:     '0.00',
+                            tipAmount:              '0.00',
+                            style:                  `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
+                            multiPaymentAmount:     fixed(this.orderTotalWithTax, 2),
+                            isWindCave:             false,
+                            isCyberSource:          false,
+                            isCyberSourceWallets:   false,
+                            language:               'en',
+                            apiToken:               this.#cardProcessorToken,
+                            payTenantId:            this.client.config.tenantId,
+                            previousTransactionId:  null,
+                            accountNumberMasked:    cardInfo.accountNumberMasked,
+                            cardIssuer:             cardInfo.cardIssuer,
+                            expirationYearMonth:    cardInfo.expirationYearMonth,
+                            cardHolderName:         cardInfo.cardHolderName,
+                            postalCode:             cardInfo.postalCode,
                         },
                         saveCardFlag:   false,
                         token:          paymentToken
                     },
+                    previousTransactionId:           null,
+                    previousTransactionTokenInfo:     null,
                     use24HrTimeFormat:               false,
                     useIgPosApi:                     false,
                     walletPaymentData:               null,
@@ -856,6 +904,12 @@ export class CafeOrderSession {
                                          }: IIframeCloseOrderParams): Promise<void> {
         await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
             this.#lastCompletedStage = SubmitOrderStage.payment;
+
+            try {
+                await this._logIframeData(paymentToken, cardInfo);
+            } catch (err) {
+                logError('Unable to report iframe data (non-fatal, continuing anyway):', err);
+            }
 
             await this._closeOrderWithIframeTokenAsync({
                 alias,
