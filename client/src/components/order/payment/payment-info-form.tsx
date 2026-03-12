@@ -1,22 +1,13 @@
-import { ICardData } from '@msdining/common/models/cart';
 import React, { useMemo, useState } from 'react';
 import { InternalSettings } from '../../../constants/settings.ts';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
 import { classNames } from '../../../util/react.ts';
-
-import './payment-info-form.css';
 import {
     expectValid,
     validatePhoneNumber,
 } from '../../../util/validation.ts';
-
 import { PaymentField } from './payment-field.tsx';
-
-export interface IPaymentInfo {
-    phoneNumberWithCountryCode: string;
-    alias: string;
-    cardData: ICardData;
-}
+import './payment-info-form.css';
 
 export interface IPaymentFormData {
     phoneNumberWithCountryCode: string;
