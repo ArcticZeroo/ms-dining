@@ -4,7 +4,6 @@ import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-cl
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
-	IAddToOrderResponse,
 	IOrderLineItem,
 	IRetrieveCardProcessorTokenResponse,
 } from '../../../models/buyondemand/cart.js';
@@ -20,7 +19,25 @@ import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
 
-// Validates the kiosk-items/{id} response. Uses passthrough() so all extra fields
+// Validates the POST /orders response. Uses passthrough() so the full object
+// (including lineItems, financial totals, taxBreakdown, etc.) is preserved
+// for echoing back in the close order request.
+const orderDetailsSchema = z.object({
+    orderId:               z.string(),
+    orderNumber:           z.string(),
+    taxExcludedTotalAmount: z.object({ amount: z.string() }),
+    taxTotalAmount:        z.object({ amount: z.string() }),
+    totalDueAmount:        z.object({ amount: z.string() }),
+    lineItems:             z.array(z.object({ lineItemId: z.string() }).passthrough()),
+    properties:            z.record(z.unknown()).optional(),
+}).passthrough();
+
+const addToOrderResponseSchema = z.object({
+    orderDetails: orderDetailsSchema,
+});
+
+type OrderDetails = z.infer<typeof orderDetailsSchema>;
+
 // are preserved when we spread the response into the cart request body.
 const kioskItemDetailSchema = z.object({
     id:                      z.string(),
@@ -90,6 +107,9 @@ export class CafeOrderSession {
     #orderTotalWithTax: number = 0;
     #lastCompletedStage: SubmitOrderStage = SubmitOrderStage.notStarted;
     #cardProcessorToken: string = '';
+    // The full orderDetails from the last POST /orders response,
+    // echoed back to the close order endpoint as-is.
+    #lastOrderDetails: OrderDetails | null = null;
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #conceptIds = new Set<string>();
@@ -357,23 +377,19 @@ export class CafeOrderSession {
         );
 
         const json = await response.json();
-
-        if (!isDuckType<IAddToOrderResponse>(json, {
-            orderDetails: 'object'
-        })) {
-            throw new Error('Data is not in the correct format');
-        }
+        const { orderDetails } = addToOrderResponseSchema.parse(json);
 
         // Seems like the cart might be fake. We appear to get a new order number every time we add an item?
-        this.#orderNumber = json.orderDetails.orderNumber;
-        this.#orderId = json.orderDetails.orderId;
+        this.#orderNumber = orderDetails.orderNumber;
+        this.#orderId = orderDetails.orderId;
+        this.#lastOrderDetails = orderDetails;
 
         // These seem to be incremental for some reason, despite the naming and structure of the response. /shrug
-        this.#orderTotalTax += Number(json.orderDetails.taxTotalAmount.amount);
-        this.#orderTotalWithoutTax += Number(json.orderDetails.taxExcludedTotalAmount.amount);
-        this.#orderTotalWithTax += Number(json.orderDetails.totalDueAmount.amount);
+        this.#orderTotalTax += Number(orderDetails.taxTotalAmount.amount);
+        this.#orderTotalWithoutTax += Number(orderDetails.taxExcludedTotalAmount.amount);
+        this.#orderTotalWithTax += Number(orderDetails.totalDueAmount.amount);
 
-        for (const lineItem of json.orderDetails.lineItems) {
+        for (const lineItem of orderDetails.lineItems) {
             this.#lineItemsById.set(lineItem.lineItemId, lineItem);
         }
     }
@@ -549,6 +565,10 @@ export class CafeOrderSession {
     private async _closeOrderWithIframeTokenAsync({ alias, phoneData, paymentToken, cardInfo }: IIframeCloseOrderParams) {
         if (this.#orderId == null) {
             throw new Error('Order ID is not set!');
+        }
+
+        if (this.#lastOrderDetails == null) {
+            throw new Error('Order details are not set!');
         }
 
         const nowString = (new Date()).toISOString();
@@ -744,16 +764,9 @@ export class CafeOrderSession {
                     multiPassEnabled:                false,
                     notifyGuestOnFailure:            false,
                     order:                           {
-                        orderId:      this.#orderId,
-                        version:      1,
-                        tenantId:     this.client.config.tenantId,
-                        contextId:    this.client.config.contextId,
-                        created:      nowString,
-                        lastUpdated:  nowString,
-                        orderState:   'OPEN',
-                        currencyUnit: 'USD',
-                        orderNumber:  this.#orderNumber,
+                        ...this.#lastOrderDetails,
                         properties:   {
+                            ...this.#lastOrderDetails.properties,
                             orderNumberSequenceLength: '4',
                             profitCenterId:            this.#orderingContext.profitCenterId,
                             displayProfileId:          this.client.config.displayProfileId,
@@ -779,18 +792,7 @@ export class CafeOrderSession {
                     profitCenterName:                this.#orderingContext.profitCenterName,
                     recallCheck:                     false,
                     receiptInfo:                     {
-                        orderData: {
-                            orderId:      this.#orderId,
-                            version:      1,
-                            tenantId:     this.client.config.tenantId,
-                            contextId:    this.client.config.contextId,
-                            created:      nowString,
-                            lastUpdated:  nowString,
-                            orderState:   'OPEN',
-                            orderNumber:  this.orderNumber,
-                            currencyUnit: 'USD',
-                            lineItems:    Array.from(this.#lineItemsById.values())
-                        }
+                        orderData: this.#lastOrderDetails
                     },
                     saleTransactionData:             null,
                     scannedItemOrder:                false,
