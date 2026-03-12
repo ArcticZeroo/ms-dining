@@ -5,8 +5,23 @@ import { CartItemModifiers } from './cart-item-modifiers.tsx';
 
 const MAX_QUANTITY = 99;
 
+const READONLY_TITLE = 'Order has been submitted for preparation';
+
+const getDecreaseTitle = (readOnly: boolean, canDecrease: boolean) => {
+    if (readOnly) return READONLY_TITLE;
+    if (canDecrease) return 'Remove one more';
+    return 'Use the trash can to remove this item';
+};
+
+const getIncreaseTitle = (readOnly: boolean, canIncrease: boolean) => {
+    if (readOnly) return READONLY_TITLE;
+    if (canIncrease) return 'Add one more';
+    return 'You can only order up to 99 of each item';
+};
+
 interface ICartItemProps {
     showFullDetails: boolean;
+    readOnly?: boolean;
     item: ICartItemWithMetadata;
     onRemove: () => void;
     onEdit: () => void;
@@ -18,10 +33,11 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
     onRemove,
     onEdit,
     onChangeQuantity,
-    showFullDetails
+    showFullDetails,
+    readOnly = false
 }) => {
-    const canDecreaseQuantity = item.quantity > 1;
-    const canIncreaseQuantity = item.quantity < MAX_QUANTITY;
+    const canDecreaseQuantity = !readOnly && item.quantity > 1;
+    const canIncreaseQuantity = !readOnly && item.quantity < MAX_QUANTITY;
 
     const onDecreaseQuantity = () => {
         if (!canDecreaseQuantity) {
@@ -46,7 +62,8 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
                     <button
                         className="material-symbols-outlined"
                         onClick={onRemove}
-                        title="Remove this item"
+                        disabled={readOnly}
+                        title={readOnly ? READONLY_TITLE : 'Remove this item'}
                     >
                         delete
                     </button>
@@ -54,7 +71,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
                         className="material-symbols-outlined"
                         disabled={!canDecreaseQuantity}
                         onClick={onDecreaseQuantity}
-                        title={canDecreaseQuantity ? 'Remove one more' : 'Use the trash can to remove this item'}
+                        title={getDecreaseTitle(readOnly, canDecreaseQuantity)}
                     >
                         remove
                     </button>
@@ -62,14 +79,15 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
                         className="material-symbols-outlined"
                         disabled={!canIncreaseQuantity}
                         onClick={onIncreaseQuantity}
-                        title={canIncreaseQuantity ? 'Add one more' : 'You can only order up to 99 of each item'}
+                        title={getIncreaseTitle(readOnly, canIncreaseQuantity)}
                     >
                         add
                     </button>
                     <button
                         className="material-symbols-outlined"
                         onClick={onEdit}
-                        title="Edit this item"
+                        disabled={readOnly}
+                        title={readOnly ? READONLY_TITLE : 'Edit this item'}
                     >
                         edit
                     </button>

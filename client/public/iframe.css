@@ -1,0 +1,353 @@
+/*
+ * Custom styles for the rguest payment iframe (pay.rguest.com).
+ * Replaces the default getIFrameCss endpoint to match our dark theme.
+ *
+ * This file loads inside a cross-origin iframe, so it cannot inherit
+ * CSS vars from our site. We define our own :root vars here mirroring
+ * the values from index.css so they stay in sync.
+ */
+
+:root {
+    --color-background: #212121;
+    --color-background-raised: #313131;
+    --color-background-raised-2: #414141;
+    --color-background-raised-3: #515151;
+    --color-background-raised-4: #616161;
+    --color-foreground: #FAFAFA;
+    --color-foreground-raised: #E6E6E6;
+    --color-theme: #3488E0;
+    --color-theme-dark: #2A6AA6;
+    --color-error-light: #FFBBBB;
+}
+
+/* Reset & base */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+#agisFrame {
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+/* Main form container */
+.form-box.main {
+    width: 100%;
+    max-width: 480px;
+    background: var(--color-background-raised);
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-sizing: border-box;
+}
+
+/* "Payment Details" header */
+.paymentText {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Form layout */
+.formFlex {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Labels */
+.cardText,
+.cardLabel,
+.expCvvLabel,
+.zipText,
+.emailText,
+.numberText,
+.addressText,
+.statelabel {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-foreground-raised);
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Text inputs */
+.inputs,
+.sosoInput,
+input.inputs {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: var(--color-background-raised-2);
+    border: 1px solid var(--color-background-raised-3);
+    border-radius: 6px;
+    color: var(--color-foreground);
+    font-size: 0.95rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.inputs:focus,
+.sosoInput:focus,
+input.inputs:focus {
+    border-color: var(--color-theme);
+    box-shadow: 0 0 0 2px rgba(52, 136, 224, 0.25);
+}
+
+.inputs::placeholder {
+    color: #888;
+}
+
+/* Select dropdowns */
+select,
+.inputTextSize {
+    padding: 0.6rem 0.75rem;
+    background: var(--color-background-raised-2);
+    border: 1px solid var(--color-background-raised-3);
+    border-radius: 6px;
+    color: var(--color-foreground);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+select:focus {
+    border-color: var(--color-theme);
+    box-shadow: 0 0 0 2px rgba(52, 136, 224, 0.25);
+}
+
+select option {
+    background: var(--color-background-raised-2);
+    color: var(--color-foreground);
+}
+
+/* Card number row */
+.cardFlex {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cardBlock {
+    flex: 1;
+}
+
+/* Expiration date row */
+.expDateBlockDiv {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 !important;
+}
+
+.expMonthTextWidth,
+.expYearTextWidth {
+    flex: 1;
+}
+
+/* CVV row */
+.cvvFlexRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cvvTextWidth {
+    flex: 1;
+}
+
+.cvvImageEye {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-foreground-raised);
+    font-size: 1.1rem;
+}
+
+/* Eye icon (show/hide) */
+.eyeBlock {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-foreground-raised);
+}
+
+/* Error messages */
+.cardErrorBlock {
+    color: var(--color-error-light);
+    font-size: 0.8rem;
+    min-height: 0;
+    margin-top: 0.15rem;
+}
+
+.transactionHeader {
+    color: var(--color-error-light) !important;
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    margin-top: 1rem;
+}
+
+.submitBtn,
+input.submitBtn,
+button.submitBtn {
+    background: var(--color-theme);
+    color: var(--color-foreground);
+    width: 100%;
+}
+
+.submitBtn:hover,
+input.submitBtn:hover,
+button.submitBtn:hover {
+    background: var(--color-theme-dark);
+}
+
+.submitBtn:disabled,
+input.submitBtn:disabled,
+button.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelBtn {
+    background: var(--color-background-raised-2);
+    color: var(--color-foreground-raised);
+    border: 1px solid var(--color-background-raised-3);
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.cancelBtn:hover {
+    background: var(--color-background-raised-3);
+}
+
+/* Service charge label */
+.serviceChargeClass {
+    color: var(--color-foreground-raised);
+    font-size: 0.85rem;
+}
+
+/* reCAPTCHA badge - hide visual clutter, it still works */
+.grecaptcha-badge {
+    visibility: hidden !important;
+}
+
+/* Billing address section */
+.billingAddress {
+    margin-top: 0.5rem;
+}
+
+.addressInput {
+    width: 100%;
+    margin-top: 0.25rem;
+}
+
+/* State selector */
+.state-container {
+    margin-top: 0.25rem;
+}
+
+.states {
+    width: 100%;
+}
+
+/* Alternate payment section */
+#alternatePayment {
+    display: none;
+}
+
+/* Modal overlay (3DS verification) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--color-background-raised);
+    border-radius: 8px;
+    padding: 1rem;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+}
+
+/* Close button in modal */
+.close {
+    color: var(--color-foreground-raised);
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+.close:hover {
+    color: var(--color-foreground);
+}
+
+/* Zip/postal width */
+.zipWidth {
+    width: 100%;
+}
+
+/* Card name text width */
+.cardNameText {
+    width: 100%;
+}
+
+/* Card number text width */
+.cardNumberText {
+    width: 100%;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-background-raised-3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-background-raised-4);
+}

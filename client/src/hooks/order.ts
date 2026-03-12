@@ -53,7 +53,7 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrder
 
         try {
             const singleCafeCart = new Map([[cafeId, cafeItems]]);
-            const response = await OrderingClient.prepareOrder(singleCafeCart, formData);
+            const response = await OrderingClient.prepareOrder(singleCafeCart);
             const cafeData = response[cafeId];
             if (!cafeData) {
                 throw new Error('No prepare data returned for cafe');
@@ -71,7 +71,7 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrder
                 error:       err instanceof Error ? err.message : 'Failed to prepare order',
             }));
         }
-    }, [cafeId, cartNotifier, formData]);
+    }, [cafeId, cartNotifier]);
 
     const complete = useCallback(async (result: IRguestPaymentResult): Promise<IOrderCompletionData> => {
         if (!state.orderId) {
@@ -82,10 +82,11 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrder
 
         try {
             const completeResult = await OrderingClient.completeOrder({
-                orderId:      state.orderId,
-                paymentToken: result.token,
-                cardInfo:     result.cardInfo,
-                alias:        formData.alias,
+                orderId:                    state.orderId,
+                paymentToken:               result.token,
+                cardInfo:                   result.cardInfo,
+                alias:                      formData.alias,
+                phoneNumberWithCountryCode: formData.phoneNumberWithCountryCode,
             });
             const newCart = shallowCloneCart(cartNotifier.value);
             newCart.delete(cafeId);
@@ -100,7 +101,7 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPrepareOrder
             }));
             throw err;
         }
-    }, [cafeId, state.orderId, formData.alias, cartNotifier]);
+    }, [cafeId, state.orderId, formData.alias, formData.phoneNumberWithCountryCode, cartNotifier]);
 
     const invalidatePrepare = useCallback(() => {
         setState(prev => ({ ...prev, iframeUrl: undefined, orderId: undefined }));

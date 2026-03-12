@@ -422,7 +422,7 @@ export class CafeOrderSession {
         }
     }
 
-    private async _getCardProcessorSiteToken() {
+    private async _getCardProcessorSiteToken(iframeCssUrl?: string) {
         if (StringUtil.isNullOrWhitespace(this.#orderNumber)) {
             throw new Error('Order number is not set');
         }
@@ -447,7 +447,7 @@ export class CafeOrderSession {
                     transactionAmount:    this.#orderTotalWithTax.toFixed(2),
                     remainingTipAmount:   '0.00',
                     tipAmount:            '0.00',
-                    style:                `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false`,
+                    style:                iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false`,
                     multiPaymentAmount:   fixed(this.#orderTotalWithTax, 2),
                     isWindCave:           false,
                     isCyberSource:        false,
@@ -472,13 +472,14 @@ export class CafeOrderSession {
         return json.token;
     }
 
-    private _getCardProcessorUrl(token: string) {
+    private _getCardProcessorUrl(token: string, iframeCssUrl?: string) {
         if (!this.client.config) {
             throw new Error('Config is required to get card processor url!');
         }
 
+        const styleUrl = iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false`;
         // "6564d6cadc5f9d30a2cf76b3" appears to be hardcoded in the JS. Client ID?
-        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false&language=en&doVerify=true&version=3`;
+        return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/6564d6cadc5f9d30a2cf76b3?apiToken=${token}&submit=PROCESS&style=${encodeURIComponent(styleUrl)}&language=en&doVerify=true&version=3`;
     }
 
     private async _parseCreditProcessorResponse<T>(response: Awaited<ReturnType<typeof fetch>>): Promise<T> {
@@ -1313,9 +1314,9 @@ export class CafeOrderSession {
      * Populates the cart and gets the site token + iframe URL.
      * Does NOT submit payment — the frontend iframe handles that.
      */
-    public async prepareForIframe(): Promise<{ siteToken: string; iframeUrl: string; orderId: string; orderNumber: string }> {
+    public async prepareForIframe(iframeCssUrl: string): Promise<{ siteToken: string; iframeUrl: string; orderId: string; orderNumber: string }> {
         await this._runStages(SubmitOrderStage.addToCart, async () => {
-            this.#cardProcessorToken = await this._getCardProcessorSiteToken();
+            this.#cardProcessorToken = await this._getCardProcessorSiteToken(iframeCssUrl);
             this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
         });
 
@@ -1325,7 +1326,7 @@ export class CafeOrderSession {
 
         return {
             siteToken:   this.#cardProcessorToken,
-            iframeUrl:   this._getCardProcessorUrl(this.#cardProcessorToken),
+            iframeUrl:   this._getCardProcessorUrl(this.#cardProcessorToken, iframeCssUrl),
             orderId:     this.#orderId,
             orderNumber: this.#orderNumber,
         };

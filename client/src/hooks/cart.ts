@@ -50,6 +50,12 @@ export const useCartHydration = (cartNotifier: ValueNotifier<CartItemsByCafeId>)
     );
 
     useEffect(() => {
+        // Don't overwrite persisted cart data before hydration finishes
+        const hydrationStage = cartHydrationNotifier.value.stage;
+        if (hydrationStage === PromiseStage.notRun || hydrationStage === PromiseStage.running) {
+            return;
+        }
+
         InternalSettings.cart.value = serializeCart(cart, cartHydrationNotifier);
     }, [cart, cartHydrationNotifier]);
 

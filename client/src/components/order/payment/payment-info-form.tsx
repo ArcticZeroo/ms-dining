@@ -24,11 +24,11 @@ export interface IPaymentFormData {
 }
 
 interface IPaymentInfoFormProps {
-    isEnabled: boolean;
+    isPrepareStarted: boolean;
     onSubmit(data: IPaymentFormData): void;
 }
 
-export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isEnabled, onSubmit }) => {
+export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isPrepareStarted, onSubmit }) => {
     const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
     const [alias, setAlias] = useState(InternalSettings.alias.value);
 
@@ -76,6 +76,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isEnabled, on
                     inputType="tel"
                     validationState={phoneNumber}
                     onValueChanged={setPhoneNumber}
+                    isEnabled={!isPrepareStarted}
                 />
                 <PaymentField
                     id="alias"
@@ -84,17 +85,20 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isEnabled, on
                     description="Your alias will appear on your receipt."
                     value={alias}
                     onValueChanged={setAlias}
+                    isEnabled={!isPrepareStarted}
                 />
             </div>
-            <button
-                type="submit"
-                id="payment-submit"
-                className={classNames('default-container', !isFormValid && 'invalid')}
-                title={isFormValid ? 'Click to pay' : 'Please fill out all fields and check for validation errors.'}
-                disabled={!isFormValid}
-            >
-                Pay with Card
-            </button>
+            {!isPrepareStarted && (
+                <button
+                    type="submit"
+                    id="payment-submit"
+                    className={classNames('default-container', !isFormValid && 'invalid')}
+                    title={isFormValid ? 'Click to pay' : 'Please fill out all fields and check for validation errors.'}
+                    disabled={!isFormValid}
+                >
+                    Pay with Card
+                </button>
+            )}
         </form>
     );
 }

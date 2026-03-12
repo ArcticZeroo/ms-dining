@@ -96,10 +96,7 @@ export abstract class OrderingClient {
         return response;
     }
 
-    public static async prepareOrder(cart: CartItemsByCafeId, {
-        phoneNumberWithCountryCode,
-        alias,
-    }: { phoneNumberWithCountryCode: string; alias: string }): Promise<IPrepareOrderResponse> {
+    public static async prepareOrder(cart: CartItemsByCafeId): Promise<IPrepareOrderResponse> {
         const response = await makeJsonRequest<IPrepareOrderResponse>({
             path:    '/api/dining/order/prepare',
             options: {
@@ -107,8 +104,6 @@ export abstract class OrderingClient {
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
                     itemsByCafeId: this._serializeCart(cart),
-                    phoneNumberWithCountryCode,
-                    alias,
                 })
             }
         });
@@ -185,7 +180,7 @@ export abstract class OrderingClient {
                 const cartItem: ICartItemWithMetadata = {
                     id:                  getRandomId(),
                     cafeId:              cafeId,
-                    price:               calculatePrice(foundItem, deserializedModifiers, serializedItem.quantity),
+                    price:               calculatePrice(foundItem, deserializedModifiers),
                     itemId:              foundItem.id,
                     quantity:            serializedItem.quantity,
                     choicesByModifierId: deserializedModifiers,

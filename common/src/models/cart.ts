@@ -83,8 +83,6 @@ export interface IRguestCardInfo {
 
 export interface IPrepareOrderRequest {
     itemsByCafeId: ISubmitOrderItems;
-    alias: string;
-    phoneNumberWithCountryCode: string;
 }
 
 export interface IPrepareOrderResponse {
@@ -93,6 +91,7 @@ export interface IPrepareOrderResponse {
         iframeUrl: string;
         orderId: string;
         orderNumber: string;
+        expiresAt: string;
     };
 }
 
@@ -101,6 +100,7 @@ export interface ICompleteOrderRequest {
     paymentToken: string;
     cardInfo: IRguestCardInfo;
     alias: string;
+    phoneNumberWithCountryCode: string;
 }
 
 export type ICompleteOrderResponse = IOrderCompletionData;

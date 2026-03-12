@@ -32,9 +32,7 @@ export const OrderPage = () => {
 
     const { stage: prepareStage, value: prepareResults, error: prepareError, run: runPrepare } = useDelayedPromiseState(
         useCallback(async () => {
-            const formData = formDataRef.current!;
-
-            const response = await OrderingClient.prepareOrder(cart, formData);
+            const response = await OrderingClient.prepareOrder(cart);
 
             const cafeEntries = Object.entries(response);
             if (cafeEntries.length === 0) {
@@ -66,6 +64,9 @@ export const OrderPage = () => {
         );
     }
 
+    const isPrepareStarted = prepareStage !== PromiseStage.notRun;
+    const isPrepareComplete = prepareResults != null;
+
     const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
 
     if (!isCheckoutAllowed) {
@@ -79,12 +80,12 @@ export const OrderPage = () => {
                 <div className="title">
                     Your Order
                 </div>
-                <CartContentsTable showFullDetails={true} showTotalPrice={true}/>
+                <CartContentsTable showFullDetails={true} showTotalPrice={true} readOnly={isPrepareStarted}/>
                 <WaitTime/>
             </div>
             {cart.size > 1 && <MultiCafeOrderWarning/>}
             <PaymentInfoForm
-                isEnabled={prepareStage !== PromiseStage.running}
+                isPrepareStarted={isPrepareStarted}
                 onSubmit={onFormSubmitted}
             />
             <OrderPrivacyPolicy/>
@@ -101,7 +102,7 @@ export const OrderPage = () => {
                 </div>
             )}
             {
-                prepareResults != null && (
+                isPrepareComplete && (
                     <CafePayment
                         prepareResults={prepareResults}
                         formData={formDataRef.current!}

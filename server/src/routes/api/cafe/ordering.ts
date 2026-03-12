@@ -16,7 +16,7 @@ import {
     SubmitOrderStage
 } from '@msdining/common/models/cart';
 import { toDateString } from '@msdining/common/util/date-util';
-import { phone, PhoneValidResult } from 'phone';
+import { phone } from 'phone';
 import { CafeOrderSession } from '../../../api/cafe/session/order.js';
 import { WaitTimeSession } from '../../../api/cafe/session/wait-time.js';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
@@ -60,9 +60,7 @@ const isValidSubmitOrderParams = (data: unknown): data is ISubmitOrderRequest =>
 
 const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest => {
     if (!isDuckType<IPrepareOrderRequest>(data, {
-        itemsByCafeId:              'object',
-        phoneNumberWithCountryCode: 'string',
-        alias:                      'string',
+        itemsByCafeId: 'object',
     })) {
         return false;
     }
@@ -72,10 +70,11 @@ const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest 
 
 const isValidCompleteOrderParams = (data: unknown): data is ICompleteOrderRequest => {
     if (!isDuckType<ICompleteOrderRequest>(data, {
-        orderId:      'string',
-        paymentToken: 'string',
-        cardInfo:     'object',
-        alias:        'string',
+        orderId:                    'string',
+        paymentToken:               'string',
+        cardInfo:                   'object',
+        alias:                      'string',
+        phoneNumberWithCountryCode: 'string',
     })) {
         return false;
     }
@@ -313,13 +312,15 @@ export const registerOrderingRoutes = (parent: Router) => {
     // Session store for the two-phase iframe payment flow.
     // Sessions are stored after prepare and retrieved during complete.
     interface IPendingIframeSession {
-        session:   CafeOrderSession;
-        cafeId:    string;
-        phoneData: PhoneValidResult;
-        alias:     string;
+        session:         CafeOrderSession;
+        cafeId:          string;
+        refreshInterval: ReturnType<typeof setInterval>;
     }
 
     const pendingIframeSessions = new Map<string /*orderId*/, IPendingIframeSession>();
+
+    const SESSION_TTL_MS = 30 * 60 * 1000;
+    const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 
     router.post('/prepare', async ctx => {
         const data = ctx.request.body;
@@ -328,34 +329,41 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
-        const phoneData = phone(data.phoneNumberWithCountryCode);
-
-        if (!phoneData.isValid) {
-            return ctx.throw(400, 'Invalid phone number');
-        }
-
         const cartItemsByCafeId = await validateCartData(ctx, data.itemsByCafeId);
 
-        const prepareResults: Record<string, { siteToken: string; iframeUrl: string; orderId: string; orderNumber: string }> = {};
+        const iframeCssUrl = `${ctx.origin}/iframe.css`;
+        const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
+        const prepareResults: Record<string, { siteToken: string; iframeUrl: string; orderId: string; orderNumber: string; expiresAt: string }> = {};
 
         await Promise.all(
             Array.from(cartItemsByCafeId).map(async ([cafeId, cartData]) => {
                 const session = await CafeOrderSession.createAsync(cartData.cafe, cartData.cartItems);
                 await session.populateCart();
 
-                const result = await session.prepareForIframe();
+                const result = await session.prepareForIframe(iframeCssUrl);
+
+                const refreshInterval = setInterval(() => {
+                    session.client.refreshLogin().catch(err => {
+                        console.error(`Failed to refresh token for order ${result.orderId}:`, err);
+                    });
+                }, TOKEN_REFRESH_INTERVAL_MS);
 
                 pendingIframeSessions.set(result.orderId, {
                     session,
                     cafeId,
-                    phoneData,
-                    alias: data.alias,
+                    refreshInterval,
                 });
 
-                // Clean up stale sessions after 30 minutes
-                setTimeout(() => pendingIframeSessions.delete(result.orderId), 30 * 60 * 1000);
+                // Clean up stale sessions after TTL
+                setTimeout(() => {
+                    const pending = pendingIframeSessions.get(result.orderId);
+                    if (pending) {
+                        clearInterval(pending.refreshInterval);
+                        pendingIframeSessions.delete(result.orderId);
+                    }
+                }, SESSION_TTL_MS);
 
-                prepareResults[cafeId] = result;
+                prepareResults[cafeId] = { ...result, expiresAt };
             })
         );
 
@@ -369,17 +377,24 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
+        const phoneData = phone(data.phoneNumberWithCountryCode);
+
+        if (!phoneData.isValid) {
+            return ctx.throw(400, 'Invalid phone number');
+        }
+
         const pending = pendingIframeSessions.get(data.orderId);
         if (pending == null || pending.session.lastCompletedStage !== SubmitOrderStage.initializeCardProcessor) {
             return ctx.throw(400, 'No pending order session found. The order may have expired — please try again.');
         }
 
         // TODO: some sort of lock to avoid multiple completions, for now just delete to prevent a second one
+        clearInterval(pending.refreshInterval);
         pendingIframeSessions.delete(data.orderId);
 
         await pending.session.completeWithIframeToken({
             alias:        data.alias,
-            phoneData:    pending.phoneData,
+            phoneData,
             paymentToken: data.paymentToken,
             cardInfo:     data.cardInfo,
         });

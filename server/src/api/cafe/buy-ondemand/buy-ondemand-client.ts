@@ -51,6 +51,10 @@ export class BuyOnDemandClient {
 		return client;
 	}
 
+	public async refreshLogin(): Promise<void> {
+		await this.#performLoginAsync();
+	}
+
 	protected _getUrl(path: string) {
 		return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}${path}`;
 	}

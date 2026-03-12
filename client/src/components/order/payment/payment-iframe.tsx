@@ -3,6 +3,7 @@ import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise
 import { IRguestCardInfo } from '@msdining/common/models/cart';
 import { z } from 'zod';
 import { RetryButton } from '../../button/retry-button.tsx';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 
 import './payment-iframe.css';
 
@@ -219,10 +220,10 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
                     </button>
                 </div>
             )}
-            <div className="iframe-container">
+            <div className="iframe-container default-container">
                 {isLoading && (
                     <div className="iframe-loading">
-                        <span className="material-symbols-outlined">hourglass_top</span>
+                        <HourglassLoadingSpinner/>
                         <span>Loading payment form...</span>
                     </div>
                 )}

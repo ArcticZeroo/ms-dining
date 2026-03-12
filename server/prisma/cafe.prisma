@@ -100,13 +100,16 @@ model MenuItemModifier {
 }
 
 model MenuItemModifierChoice {
-  // string id from buy-ondemand
-  id          String @id
+  // string id from buy-ondemand; not globally unique, since different
+  // modifier groups can share the same set of choice IDs.
+  id          String
   description String
   price       Float
 
   modifierId String
   modifier   MenuItemModifier @relation(fields: [modifierId], references: [id], onDelete: Cascade)
+
+  @@id([id, modifierId])
 }
 
 model Station {

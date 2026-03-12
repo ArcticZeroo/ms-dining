@@ -22,9 +22,10 @@ const editCartItemSymbol = Symbol('edit-cart-item');
 interface ICartContentsTableProps {
     showFullDetails?: boolean;
     showTotalPrice?: boolean;
+    readOnly?: boolean;
 }
 
-export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false }) => {
+export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false, readOnly = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsNotifier = useContext(CartContext);
@@ -115,6 +116,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                             <CartItemRow
                                 key={item.id}
                                 showFullDetails={showFullDetails}
+                                readOnly={readOnly}
                                 item={item}
                                 onRemove={() => onRemove(item)}
                                 onEdit={() => onEdit(item)}
@@ -125,7 +127,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                 </React.Fragment>
             ))
         },
-        [cartItemsByView, viewsById, shouldUseGroups, showFullDetails, onRemove, onEdit, onChangeQuantity]
+        [cartItemsByView, viewsById, shouldUseGroups, showFullDetails, readOnly, onRemove, onEdit, onChangeQuantity]
     );
 
     return (

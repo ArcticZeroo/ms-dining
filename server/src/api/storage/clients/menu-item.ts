@@ -107,17 +107,16 @@ export abstract class MenuItemStorageClient {
 
 	private static async _doCreateModifierChoiceAsync(prismaClient: PrismaLikeClient, modifier: IMenuItemModifier, choice: IMenuItemModifierChoice): Promise<void> {
 		const existingChoice = await prismaClient.menuItemModifierChoice.findUnique({
-			where: { id: choice.id }
+			where: { id_modifierId: { id: choice.id, modifierId: modifier.id } }
 		});
 
 		if (existingChoice != null) {
 			// some choices get disconnected from their modifiers somehow, so try to reconnect
 			await prismaClient.menuItemModifierChoice.update({
-				where: { id: choice.id },
+				where: { id_modifierId: { id: choice.id, modifierId: modifier.id } },
 				data:  {
 					description: choice.description,
 					price:       choice.price,
-					modifierId:  modifier.id
 				}
 			});
 		} else {
@@ -289,6 +288,7 @@ export abstract class MenuItemStorageClient {
 			if (modifierIdsToCreate.size > 0) {
 				const existingItems = await prismaClient.menuItemModifierEntry.findMany({
 					where: {
+						menuItemId: menuItem.id,
 						modifierId: {
 							in: Array.from(modifierIdsToCreate)
 						}
