@@ -5,7 +5,7 @@ import { logError } from '../../../util/log.js';
 import { TagStorageClient } from '../../storage/clients/tags.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-import { Lock } from 'semaphore-async-await';
+import { Lock } from '../../lock.js';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/queues/search-tags.js';
 import { retrieveStationListAsync } from '../buy-ondemand/stations.js';
 import { retrieveTagDefinitionsAsync } from '../buy-ondemand/tags.js';
@@ -93,42 +93,40 @@ export class CafeMenuSession {
     async #retrieveTagNameAsync(tagId: string, station: ICafeStation): Promise<string | undefined> {
         try {
             // This might be a bottleneck, but we don't want to drop tags
-            await tagLock.acquire();
+            return await tagLock.acquire(async () => {
+                const localTags = await TagStorageClient.retrieveTagsAsync();
 
-            const localTags = await TagStorageClient.retrieveTagsAsync();
+                if (localTags.has(tagId)) {
+                    return localTags.get(tagId);
+                }
 
-            if (localTags.has(tagId)) {
-                return localTags.get(tagId);
-            }
+                // Only reach out once per station
+                if (this.#retrievedTagStationIds.has(station.id)) {
+                    return undefined;
+                }
 
-            // Only reach out once per station
-            if (this.#retrievedTagStationIds.has(station.id)) {
-                return undefined;
-            }
+                this.#retrievedTagStationIds.add(station.id);
 
-            this.#retrievedTagStationIds.add(station.id);
+                const buyOnDemandTags = await retrieveTagDefinitionsAsync({
+                    client:       this.client,
+                    daysInFuture: this.daysInFuture,
+                    stationId:    station.id,
+                    menuId:       station.menuId
+                });
 
-            const buyOnDemandTags = await retrieveTagDefinitionsAsync({
-                client:       this.client,
-                daysInFuture: this.daysInFuture,
-                stationId:    station.id,
-                menuId:       station.menuId
+                await TagStorageClient.createTags(
+                    Array.from(buyOnDemandTags.entries())
+                        .map(([tagId, tagName]) => ({
+                            id:   tagId,
+                            name: tagName
+                        }))
+                );
+
+                return buyOnDemandTags.get(tagId);
             });
-
-            await TagStorageClient.createTags(
-                Array.from(buyOnDemandTags.entries())
-                    .map(([tagId, tagName]) => ({
-                        id:   tagId,
-                        name: tagName
-                    }))
-            );
-
-            return buyOnDemandTags.get(tagId);
         } catch (err) {
             logError(`Unable to retrieve tag name for tag id ${tagId} in station ${station.name} (${station.id}, ${station.menuId}):`, err);
             return undefined;
-        } finally {
-            tagLock.release();
         }
     }
 

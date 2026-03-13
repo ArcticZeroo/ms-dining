@@ -17,8 +17,12 @@ import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIAB
 import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
+import { dbPriorityMiddleware } from './middleware/db-priority.js';
 
 const app = new Koa();
+
+// Set DB priority to 'normal' for all HTTP requests (before any DB-touching middleware)
+app.use(dbPriorityMiddleware);
 
 // Do this first so that this isn't impacted by auth/doesn't send telemetry
 app.use(mount('/.well-known', serve(path.join(serverStaticPath, '.well-known'))));

@@ -2,37 +2,28 @@ import * as SemaphoreModule from 'semaphore-async-await';
 import { MaybePromise } from '../models/async.js';
 
 export class Lock {
-    #queue: Array<() => void> = [];
+    #locked = false;
+    #waiters: Array<() => void> = [];
 
     get queueLength() {
-        return this.#queue.length;
+        return this.#waiters.length;
     }
 
-    #doNext() {
-        const next = this.#queue[0];
-        next?.();
-    }
-
-    acquire<T = void>(work: () => MaybePromise<T>): Promise<T> {
-        return new Promise((resolve, reject) => {
-            const callback = async () => {
-                try {
-                    resolve(await work());
-                } catch (err) {
-                    reject(err);
-                } finally {
-                    this.#queue.shift();
-                    this.#doNext();
-                }
+    async acquire<T = void>(work: () => MaybePromise<T>): Promise<T> {
+        if (this.#locked) {
+            await new Promise<void>(resolve => this.#waiters.push(resolve));
+        }
+        this.#locked = true;
+        try {
+            return await work();
+        } finally {
+            const next = this.#waiters.shift();
+            if (next != null) {
+                next();
+            } else {
+                this.#locked = false;
             }
-
-            const canImmediatelyExecute = this.#queue.length === 0;
-            this.#queue.push(callback);
-
-            if (canImmediatelyExecute) {
-                this.#doNext();
-            }
-        });
+        }
     }
 }
 

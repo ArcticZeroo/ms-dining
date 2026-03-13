@@ -11,6 +11,7 @@ import Duration from '@arcticzeroo/duration';
 import { pruneExpiredDailyStationEmbeddings } from '../../storage/vector/client.js';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 import { runPendingMigrations } from '../../runtime-migrations/runner.js';
+import { runWithDbPriority } from '../../storage/db-context.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
     const date = DateUtil.getNowWithDaysInFuture(i);
@@ -74,7 +75,7 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
     return true;
 };
 
-export const performMenuBootTasks = async () => {
+export const performMenuBootTasks = () => runWithDbPriority('critical', async () => {
     await runPendingMigrations();
 
     // These can run concurrently — Prisma calls serialize through the semaphore,
@@ -128,4 +129,4 @@ export const performMenuBootTasks = async () => {
     console.time('boot: seedAutocomplete');
     await seedAutocompleteFromDatabaseAsync();
     console.timeEnd('boot: seedAutocomplete');
-};
+});

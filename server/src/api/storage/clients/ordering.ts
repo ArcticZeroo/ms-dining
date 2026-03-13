@@ -1,6 +1,6 @@
 import { usePrismaClient } from '../client.js';
 import { isSameDate, toDateString } from '@msdining/common/util/date-util';
-import { Lock } from 'semaphore-async-await';
+import { Lock } from '../../lock.js';
 import { IOrderingContext } from '../../../models/cart.js';
 import { Nullable } from '../../../models/util.js';
 
@@ -28,9 +28,7 @@ export abstract class OrderingClient {
     }
 
     public static async retrieveOrderingContextAsync(cafeId: string): Promise<Nullable<IOrderingContext>> {
-        try {
-            await orderingContextLock.acquire();
-
+        return orderingContextLock.acquire(async () => {
             this._ensureCacheIsRecent(cafeId);
 
             if (!this.#orderingContextByCafeIdForToday.has(cafeId)) {
@@ -54,15 +52,11 @@ export abstract class OrderingClient {
             }
 
             return this.#orderingContextByCafeIdForToday.get(cafeId)?.context;
-        } finally {
-            orderingContextLock.release();
-        }
+        });
     }
 
     public static async createOrderingContextAsync(cafeId: string, context: IOrderingContext): Promise<void> {
-        try {
-            await orderingContextLock.acquire();
-
+        return orderingContextLock.acquire(async () => {
             const dateString = toDateString(new Date());
 
             await usePrismaClient(
@@ -88,8 +82,6 @@ export abstract class OrderingClient {
                 lastRetrievedDate: new Date(),
                 context,
             });
-        } finally {
-            orderingContextLock.release();
-        }
+        });
     }
 }

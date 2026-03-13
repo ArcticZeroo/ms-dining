@@ -1,19 +1,16 @@
 import { PrismaClient } from '@prisma/client';
-import { Lock } from 'semaphore-async-await';
 import { PrismaTransactionClient } from '../../models/prisma.js';
+import { getDbPriority } from './db-context.js';
+import { PriorityLock } from './priority-lock.js';
 
 // According to docs, perf can be very bad if we make parallel requests to SQLite
-const databaseLock = new Lock();
+const databaseLock = new PriorityLock();
 
 const prismaClient = new PrismaClient();
 
 export const usePrismaClient = async <T>(callback: (client: PrismaClient) => Promise<T>) => {
-    try {
-        await databaseLock.acquire();
-        return await callback(prismaClient);
-    } finally {
-        databaseLock.release();
-    }
+    const priority = getDbPriority();
+    return databaseLock.acquire(priority, () => callback(prismaClient));
 };
 
 export const usePrismaTransaction = async <T>(callback: (tx: PrismaTransactionClient) => Promise<T>) => {
