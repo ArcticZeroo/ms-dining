@@ -1,8 +1,9 @@
 import { DateUtil } from '@msdining/common';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
+import { PrismaTransactionClient } from '../../../models/prisma.js';
 import { isDateValid } from '../../../util/date.js';
-import { logDebug, logError } from '../../../util/log.js';
+import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { usePrismaClient } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import { SearchEntityType } from '@msdining/common/models/search';
@@ -42,6 +43,115 @@ interface ICafeMenuOverviewHeader {
 	logoUrl?: string;
 }
 
+interface IPreviousDailyStationMenu {
+    stationId: string;
+    categories: Array<{
+        name: string;
+        menuItems: Array<{ menuItemId: string }>;
+    }>;
+}
+
+const computeMenuPublishDiff = (
+    publishEvent: IMenuPublishEvent,
+    stations: Array<ICafeStation>,
+    previousDailyStationMenus: IPreviousDailyStationMenu[],
+    dateString: string
+) => {
+    for (const previousStation of previousDailyStationMenus) {
+        publishEvent.removedStations.add(previousStation.stationId);
+        publishEvent.removedMenuItemsByStation.set(
+            previousStation.stationId,
+            new Set(previousStation.categories.flatMap(category => category.menuItems.flatMap(menuItem => menuItem.menuItemId)))
+        );
+    }
+
+    for (const station of stations) {
+        if (publishEvent.removedStations.has(station.id)) {
+            publishEvent.removedStations.delete(station.id);
+
+            const previousMenu = previousDailyStationMenus.find(s => s.stationId === station.id);
+            if (!previousMenu) {
+                throw new Error(`Missing previous menu for station ${station.id} on date ${dateString}`);
+            }
+
+            const removedItemIds = new Set<string>(previousMenu.categories.flatMap(category => category.menuItems.map(item => item.menuItemId)));
+            const addedItemIds = new Set<string>();
+
+            for (const menuItemId of station.menuItemsById.keys()) {
+                if (removedItemIds.has(menuItemId)) {
+                    removedItemIds.delete(menuItemId);
+                } else {
+                    addedItemIds.add(menuItemId);
+                }
+            }
+
+            if (removedItemIds.size != 0 || addedItemIds.size != 0) {
+                publishEvent.updatedStations.add(station.id);
+            } else {
+                const previousMenuItemIdsByCategoryName = new Map<string, Array<string>>();
+                for (const category of previousMenu.categories) {
+                    previousMenuItemIdsByCategoryName.set(category.name, category.menuItems.map(item => item.menuItemId));
+                }
+
+                if (!areMenuItemsByCategoryNameEqual(previousMenuItemIdsByCategoryName, station.menuItemIdsByCategoryName)) {
+                    publishEvent.updatedStations.add(station.id);
+                }
+            }
+
+            publishEvent.removedMenuItemsByStation.set(station.id, removedItemIds);
+            publishEvent.addedMenuItemsByStation.set(station.id, addedItemIds);
+        } else {
+            publishEvent.addedStations.add(station.id);
+            publishEvent.updatedStations.add(station.id);
+            publishEvent.addedMenuItemsByStation.set(station.id, new Set(station.menuItemsById.keys()));
+        }
+    }
+}
+
+const writeMenuInTransaction = async (
+    tx: PrismaTransactionClient,
+    { cafeId, dateString, stations }: { cafeId: string; dateString: string; stations: Array<ICafeStation> }
+) => {
+    await tx.dailyStation.deleteMany({
+        where: {
+            dateString,
+            cafeId
+        }
+    });
+
+    // Create stations and categories individually (need autoincrement IDs),
+    // then batch-create all menu items with a single createMany.
+    const allMenuItems: Array<{ menuItemId: string; categoryId: number }> = [];
+
+    for (const station of stations) {
+        const dailyStation = await tx.dailyStation.create({
+            data: {
+                cafeId,
+                dateString,
+                stationId: station.id
+            }
+        });
+
+        for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName) {
+            const dailyCategory = await tx.dailyCategory.create({
+                data: {
+                    name:      categoryName,
+                    stationId: dailyStation.id
+                }
+            });
+
+            for (const menuItemId of menuItemIds) {
+                allMenuItems.push({ menuItemId, categoryId: dailyCategory.id });
+            }
+        }
+    }
+
+    await tx.dailyMenuItem.createMany({ data: allMenuItems });
+}
+
+const MENU_PUBLISH_TRANSACTION_TIMEOUT_MS = 15_000;
+const MENU_PUBLISH_TRANSACTION_WARN_MS = 5_000;
+
 // TODO: Clean this up so that it doesn't rely on the MenuItemStorageClient directly.
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
@@ -63,104 +173,36 @@ export abstract class DailyMenuStorageClient {
             dirtyMenuItemIds:          new Set<string>()
         };
 
-        await usePrismaClient(async (prismaClient) => prismaClient.$transaction(async tx => {
-            const previousDailyStationMenus = await tx.dailyStation.findMany({
-                where:  {
-                    cafeId,
-                    dateString
-                },
+        await usePrismaClient(async (prismaClient) => {
+            // Read previous menu + compute diffs outside the transaction.
+            // The usePrismaClient lock prevents other DB operations from interfering.
+            const previousDailyStationMenus = await prismaClient.dailyStation.findMany({
+                where:  { cafeId, dateString },
                 select: {
                     stationId:  true,
                     categories: {
                         select: {
                             name:      true,
-                            menuItems: {
-                                select: {
-                                    menuItemId: true
-                                }
-                            }
+                            menuItems: { select: { menuItemId: true } }
                         }
                     }
                 }
             });
 
-            await tx.dailyStation.deleteMany({
-                where: {
-                    dateString,
-                    cafeId
-                }
-            });
+            computeMenuPublishDiff(publishEvent, stations, previousDailyStationMenus, dateString);
 
-            for (const previousStation of previousDailyStationMenus) {
-                publishEvent.removedStations.add(previousStation.stationId);
-                publishEvent.removedMenuItemsByStation.set(
-                    previousStation.stationId,
-                    new Set(previousStation.categories.flatMap(category => category.menuItems.flatMap(menuItem => menuItem.menuItemId)))
-                );
+            // Atomic write: delete old data + insert new data in a single transaction.
+            const transactionStartMs = Date.now();
+            await prismaClient.$transaction(
+                async tx => writeMenuInTransaction(tx, { cafeId, dateString, stations }),
+                { timeout: MENU_PUBLISH_TRANSACTION_TIMEOUT_MS }
+            );
+
+            const transactionElapsedMs = Date.now() - transactionStartMs;
+            if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
+                logInfo(`{${dateString}} WARNING: Menu publish transaction for cafe ${cafe.name} took ${transactionElapsedMs}ms (exceeds ${MENU_PUBLISH_TRANSACTION_WARN_MS}ms threshold)`);
             }
-
-            for (const station of stations) {
-                // Calculate diff info for the event
-                if (publishEvent.removedStations.has(station.id)) {
-                    publishEvent.removedStations.delete(station.id);
-
-                    const previousMenu = previousDailyStationMenus.find(s => s.stationId === station.id);
-                    if (!previousMenu) {
-                        throw new Error(`Missing previous menu for station ${station.id} on date ${dateString}`);
-                    }
-
-                    const removedItemIds = new Set<string>(previousMenu.categories.flatMap(category => category.menuItems.map(item => item.menuItemId)));
-                    const addedItemIds = new Set<string>();
-
-                    for (const menuItemId of station.menuItemsById.keys()) {
-                        if (removedItemIds.has(menuItemId)) {
-                            removedItemIds.delete(menuItemId);
-                        } else {
-                            addedItemIds.add(menuItemId);
-                        }
-                    }
-
-                    // If anything was added or removed, we know that the station has been updated.
-                    if (removedItemIds.size != 0 || addedItemIds.size != 0) {
-                        publishEvent.updatedStations.add(station.id);
-                    } else {
-                        // Otherwise, let's check to see if categories/menu items in those categories have changed.
-                        // (e.g. a menu item might have been added to a second category)
-                        const previousMenuItemIdsByCategoryName = new Map<string, Array<string>>();
-                        for (const category of previousMenu.categories) {
-                            previousMenuItemIdsByCategoryName.set(category.name, category.menuItems.map(item => item.menuItemId));
-                        }
-
-                        if (!areMenuItemsByCategoryNameEqual(previousMenuItemIdsByCategoryName, station.menuItemIdsByCategoryName)) {
-                            publishEvent.updatedStations.add(station.id);
-                        }
-                    }
-
-                    publishEvent.removedMenuItemsByStation.set(station.id, removedItemIds);
-                    publishEvent.addedMenuItemsByStation.set(station.id, addedItemIds);
-                } else {
-                    publishEvent.addedStations.add(station.id);
-                    publishEvent.updatedStations.add(station.id);
-                    publishEvent.addedMenuItemsByStation.set(station.id, new Set(station.menuItemsById.keys()));
-                }
-
-                await tx.dailyStation.create({
-                    data: {
-                        cafeId,
-                        dateString,
-                        stationId:  station.id,
-                        categories: {
-                            create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([name, menuItemIds]) => ({
-                                name,
-                                menuItems: {
-                                    create: menuItemIds.map(menuItemId => ({ menuItemId }))
-                                }
-                            }))
-                        }
-                    }
-                });
-            }
-        }));
+        });
 
         publishEvent.dirtyStations = new Set([
             ...publishEvent.addedStations,
