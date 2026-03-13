@@ -1,8 +1,5 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
-import {
-    IRecommendationItem,
-    IRecommendationSection,
-} from '@msdining/common/models/recommendation';
+import { IRecommendationItem, IRecommendationSection, } from '@msdining/common/models/recommendation';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { Nullable } from '@msdining/common/models/util';
 

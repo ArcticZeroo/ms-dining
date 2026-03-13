@@ -16,7 +16,6 @@ import passport from 'koa-passport';
 import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from './constants/env.js';
 import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
-import { logDebug } from './util/log.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 
 const app = new Koa();

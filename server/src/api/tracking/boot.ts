@@ -1,7 +1,7 @@
 import {
-    ANALYTICS_APPLICATION_NAMES,
-    getApplicationNameForCafeMenu,
-    getApplicationNameForMenuOverview
+	ANALYTICS_APPLICATION_NAMES,
+	getApplicationNameForCafeMenu,
+	getApplicationNameForMenuOverview
 } from '@msdining/common/constants/analytics';
 import { createAnalyticsApplicationAsync } from './visitors.js';
 import { ApplicationContext } from '../../constants/context.js';

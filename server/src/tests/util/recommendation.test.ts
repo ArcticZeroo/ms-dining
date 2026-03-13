@@ -1,10 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-    toRecommendationItem,
-    deduplicateItems,
-    computePopularityScore,
-    IMenuItemCandidate,
+	computePopularityScore,
+	deduplicateItems,
+	IMenuItemCandidate,
+	toRecommendationItem,
 } from '../../util/recommendation.js';
 import { RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { IMenuItemBase } from '@msdining/common/models/cafe';

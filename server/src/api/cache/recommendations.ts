@@ -1,11 +1,20 @@
 import Duration from '@arcticzeroo/duration';
-import { IRecommendationItem, IRecommendationSection, IRecommendationsResponse } from '@msdining/common/models/recommendation';
+import {
+	IRecommendationItem,
+	IRecommendationSection,
+	IRecommendationsResponse
+} from '@msdining/common/models/recommendation';
 import { LockedMap } from '../../util/map.js';
 import { computeRecommendations } from '../recommendations/compute.js';
 import { getNewItemsForCafe } from '../recommendations/signals/user-specific/new-at-favorites.js';
 import { getPopularItems } from '../recommendations/signals/anonymous/popular.js';
 import { getHiddenGems } from '../recommendations/signals/anonymous/hidden-gems.js';
-import { IRecommendationContext, getAllAvailableItems, ITEMS_PER_SECTION, withErrorHandling } from '../recommendations/shared.js';
+import {
+	getAllAvailableItems,
+	IRecommendationContext,
+	ITEMS_PER_SECTION,
+	withErrorHandling
+} from '../recommendations/shared.js';
 import { lazy } from '../../util/lazy.js';
 import { isDateStringWithinMenuWindow } from '../../util/date.js';
 import { setInterval } from 'node:timers';

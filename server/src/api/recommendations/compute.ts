@@ -1,8 +1,8 @@
 import {
-    IRecommendationItem,
-    IRecommendationSection,
-    IRecommendationsResponse,
-    RecommendationSectionType,
+	IRecommendationItem,
+	IRecommendationSection,
+	IRecommendationsResponse,
+	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { deduplicateItems } from '../../util/recommendation.js';
 import { lazy } from '../../util/lazy.js';
@@ -10,7 +10,7 @@ import { buildProximityWeightMap } from '../../util/proximity.js';
 import { createSeededRandom, selectWithVariety } from '../../util/random.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { getAnonymousSectionsAsync, getNewAtFavoritesForCafeAsync } from '../cache/recommendations.js';
-import { IRecommendationContext, getAllAvailableItems, ITEMS_PER_SECTION, withErrorHandling } from './shared.js';
+import { getAllAvailableItems, IRecommendationContext, ITEMS_PER_SECTION, withErrorHandling } from './shared.js';
 import { getNewAtFavorites } from './signals/user-specific/new-at-favorites.js';
 import { getBasedOnReviews } from './signals/user-specific/based-on-reviews.js';
 import { getTrySomethingDifferent } from './signals/user-specific/try-something-different.js';

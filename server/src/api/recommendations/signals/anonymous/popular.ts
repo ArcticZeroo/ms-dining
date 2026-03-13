@@ -1,10 +1,10 @@
 import { IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
-    IRecommendationSection,
-    RecommendationSectionType,
-    RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	IRecommendationSection,
+	RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
-import { IMenuItemCandidate, toRecommendationItem, computePopularityScore } from '../../../../util/recommendation.js';
+import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { IRecommendationContext, ITEMS_PER_SECTION } from '../../shared.js';
 

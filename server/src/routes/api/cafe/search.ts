@@ -8,12 +8,12 @@ import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { assignCacheControlMiddleware, memoizeResponseBody } from '../../../middleware/cache.js';
 import {
-    attachRouter,
-    getEntityTypeAndName,
-    getTrimmedQueryParam,
-    serializeMapOfStringToSet,
-    serializeSearchResults,
-    supportsVersionTag
+	attachRouter,
+	getEntityTypeAndName,
+	getTrimmedQueryParam,
+	serializeMapOfStringToSet,
+	serializeSearchResults,
+	supportsVersionTag
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug, logError } from '../../../util/log.js';

@@ -17,7 +17,6 @@ const loadExistingThumbnailsOnBoot = async () => {
     console.time('thumbnail loading on boot');
 
     const manifest = await loadManifest();
-    const manifestEntryCount = Object.keys(manifest).length;
 
     // Always scan the directory to find files missing from manifest
     const files = await fs.readdir(serverMenuItemThumbnailPath);

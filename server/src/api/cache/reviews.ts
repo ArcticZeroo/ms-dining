@@ -1,5 +1,5 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
-import { ReviewStorageClient, getReviewEntityKey, getReviewEntityKeyFromParts } from '../storage/clients/review.js';
+import { getReviewEntityKey, getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review.js';
 import { StationStorageClient } from '../storage/clients/station.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../../util/map.js';

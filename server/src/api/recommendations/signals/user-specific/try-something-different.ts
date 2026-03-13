@@ -1,23 +1,20 @@
 import {
-    IRecommendationItem,
-    IRecommendationSection,
-    RecommendationSectionType,
-    RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	IRecommendationItem,
+	IRecommendationSection,
+	RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { selectWithVariety } from '../../../../util/random.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
+import { getSearchEntityEmbedding, searchVectorRawByType, } from '../../../storage/vector/client.js';
 import {
-    getSearchEntityEmbedding,
-    searchVectorRawByType,
-} from '../../../storage/vector/client.js';
-import {
-    IRecommendationContext,
-    ITEMS_PER_SECTION,
-    NEGATIVE_REVIEW_THRESHOLD,
-    VECTOR_SEARCH_LIMIT,
+	IRecommendationContext,
+	ITEMS_PER_SECTION,
+	NEGATIVE_REVIEW_THRESHOLD,
+	VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
 
 /**

@@ -1,8 +1,8 @@
 import {
-    IRecommendationItem,
-    IRecommendationSection,
-    RecommendationSectionType,
-    RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	IRecommendationItem,
+	IRecommendationSection,
+	RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getEntityKey } from '@msdining/common/util/entity-key';

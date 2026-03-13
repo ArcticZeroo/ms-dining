@@ -1,5 +1,5 @@
 import { usePrismaClient } from '../storage/client.js';
-import { logInfo, logError } from '../../util/log.js';
+import { logError, logInfo } from '../../util/log.js';
 import { IRuntimeMigration } from './types.js';
 import { MIGRATION_REGISTRY } from './registry.js';
 

@@ -1,16 +1,16 @@
 import Router from '@koa/router';
 import {
-    ICafeOverviewStation,
-    IMenuItemDTO,
-    IMenuOverviewSummary,
-    IStationUniquenessData
+	ICafeOverviewStation,
+	IMenuItemDTO,
+	IMenuOverviewSummary,
+	IStationUniquenessData
 } from '@msdining/common/models/cafe';
 import {
-    ICreateReviewRequest,
-    ICafeMenuResponse,
-    IUpdateReviewRequest,
-    MenuResponse,
-    REVIEW_MAX_COMMENT_LENGTH_CHARS
+	ICafeMenuResponse,
+	ICreateReviewRequest,
+	IUpdateReviewRequest,
+	MenuResponse,
+	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/models/http';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
@@ -19,18 +19,18 @@ import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import {
-    attachRouter,
-    getMaybeUserId,
-    getTrimmedQueryParam,
-    getUserIdOrThrow,
-    isAdminAsync
+	attachRouter,
+	getMaybeUserId,
+	getTrimmedQueryParam,
+	getUserIdOrThrow,
+	isAdminAsync
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
-    ANALYTICS_APPLICATION_NAMES,
-    getApplicationNameForCafeMenu,
-    getApplicationNameForMenuOverview,
-    getApplicationNameForMenuOverviewSummary,
+	ANALYTICS_APPLICATION_NAMES,
+	getApplicationNameForCafeMenu,
+	getApplicationNameForMenuOverview,
+	getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';

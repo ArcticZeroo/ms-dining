@@ -7,14 +7,13 @@ import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';
 import { getLogoUrl } from '../../../util/cafe.js';
 import { isCafeAvailable } from '../../../util/date.js';
-import { assignCacheControl, attachRouter, getUserIdOrThrow, supportsVersionTag } from '../../../util/koa.js';
+import { attachRouter, getUserIdOrThrow, supportsVersionTag } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerOrderingRoutes } from './ordering.js';
 import { registerSearchRoutes } from './search.js';
 import { logDebug } from '../../../util/log.js';
 import { UserStorageClient } from '../../../api/storage/clients/user.js';
-import { DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
 import { registerRecommendationsRoutes } from './recommendations.js';
 import { registerGroupsRoutes } from './groups.js';
 

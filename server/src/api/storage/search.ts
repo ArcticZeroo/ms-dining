@@ -1,9 +1,9 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import {
-    DB_ID_TO_SEARCH_ENTITY_TYPE,
-    ISearchQuery,
-    SearchEntityType,
-    SearchMatchReason
+	DB_ID_TO_SEARCH_ENTITY_TYPE,
+	ISearchQuery,
+	SearchEntityType,
+	SearchMatchReason
 } from '@msdining/common/models/search';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getCafeNumber } from '@msdining/common/util/cafe-util';

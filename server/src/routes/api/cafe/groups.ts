@@ -1,16 +1,16 @@
 import Router from '@koa/router';
 import {
-    GroupStorageClient,
-    menuItemToGroupMember,
-    stationToGroupMember
+	GroupStorageClient,
+	menuItemToGroupMember,
+	stationToGroupMember
 } from '../../../api/storage/clients/groups.js';
 import { attachRouter, requireAdmin } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
-    AddGroupMembersRequestSchema,
-    CreateGroupRequestSchema,
-    IGroupMember,
-    UpdateGroupRequest
+	AddGroupMembersRequestSchema,
+	CreateGroupRequestSchema,
+	IGroupMember,
+	UpdateGroupRequest
 } from '@msdining/common/models/group';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';

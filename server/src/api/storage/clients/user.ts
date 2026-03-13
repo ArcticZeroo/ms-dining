@@ -1,4 +1,4 @@
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { usePrismaClient } from '../client.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { IServerUser } from '../../../models/auth.js';

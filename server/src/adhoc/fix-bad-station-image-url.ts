@@ -1,4 +1,4 @@
-import { getAllMenuItemsWithBadImageUrl, getAllStationsWithBadImageUrl } from '@prisma/client/sql';
+import { getAllStationsWithBadImageUrl } from '@prisma/client/sql';
 import { usePrismaClient } from '../api/storage/client.js';
 
 console.log('Searching for menu items with bad image URLs...');
