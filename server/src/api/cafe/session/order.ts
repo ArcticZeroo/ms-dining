@@ -125,7 +125,7 @@ export class CafeOrderSession {
     }
 
     public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
-        const client = await BuyOnDemandClient.createAsync(cafe);
+        const client = await BuyOnDemandClient.createAsync(cafe, true /*enableHar*/);
         return new CafeOrderSession(client, cartItems);
     }
 
@@ -943,27 +943,31 @@ export class CafeOrderSession {
         paymentToken,
         cardInfo,
     }: IIframeCloseOrderParams): Promise<void> {
-        await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
-            this.#lastCompletedStage = SubmitOrderStage.payment;
+        try {
+            await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
+                this.#lastCompletedStage = SubmitOrderStage.payment;
 
-            try {
-                await this._logIframeData(paymentToken, cardInfo);
-            } catch (err) {
-                logError('Unable to report iframe data (non-fatal, continuing anyway):', err);
-            }
+                try {
+                    await this._logIframeData(paymentToken, cardInfo);
+                } catch (err) {
+                    logError('Unable to report iframe data (non-fatal, continuing anyway):', err);
+                }
 
-            await this._closeOrderWithIframeTokenAsync({
-                alias,
-                phoneData,
-                paymentToken,
-                cardInfo,
+                await this._closeOrderWithIframeTokenAsync({
+                    alias,
+                    phoneData,
+                    paymentToken,
+                    cardInfo,
+                });
+
+                this.#lastCompletedStage = SubmitOrderStage.closeOrder;
+
+                await this._sendPhoneConfirmation(phoneData);
+
+                this.#lastCompletedStage = SubmitOrderStage.complete;
             });
-
-            this.#lastCompletedStage = SubmitOrderStage.closeOrder;
-
-            await this._sendPhoneConfirmation(phoneData);
-
-            this.#lastCompletedStage = SubmitOrderStage.complete;
-        });
+        } finally {
+            await this.client.harCapture?.writeToFile(this.client.cafe.id);
+        }
     }
 }

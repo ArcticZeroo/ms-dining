@@ -5,6 +5,7 @@ import { ICafe, ICafeConfig } from '../../../models/cafe.js';
 import { ICafeConfigResponse } from '../../../models/buyondemand/responses.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError } from '../../../util/log.js';
+import { captureFetchAsHarEntry, HarCapture } from '../../../util/har.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../util/request.js';
 import { Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
@@ -29,6 +30,7 @@ export const JSON_HEADERS = {
 export class BuyOnDemandClient {
     #token: string = '';
     #csrfToken: string = '';
+    #harCapture: HarCapture | null = null;
 
     // will always be set to non-empty value after initialization
     // ...this is just easier than extracting request logic to a separate class
@@ -44,8 +46,11 @@ export class BuyOnDemandClient {
     private constructor(public readonly cafe: ICafe) {
     }
 
-    public static async createAsync(cafe: ICafe): Promise<BuyOnDemandClient> {
+    public static async createAsync(cafe: ICafe, enableHar: boolean = false): Promise<BuyOnDemandClient> {
         const client = new BuyOnDemandClient(cafe);
+        if (enableHar) {
+            client.enableHarCapture();
+        }
         await client.#performLoginAsync();
         await client.#retrieveConfigDataAsync();
         return client;
@@ -53,6 +58,15 @@ export class BuyOnDemandClient {
 
     public async refreshLogin(): Promise<void> {
         await this.#performLoginAsync();
+    }
+
+    public enableHarCapture(): HarCapture {
+        this.#harCapture = new HarCapture();
+        return this.#harCapture;
+    }
+
+    public get harCapture(): HarCapture | null {
+        return this.#harCapture;
     }
 
     protected _getUrl(path: string) {
@@ -96,6 +110,11 @@ export class BuyOnDemandClient {
 
             if (ENVIRONMENT_SETTINGS.logRequests) {
                 logDebug(`${id} Response ${response.status} ${response.statusText}`);
+            }
+
+            if (this.#harCapture != null) {
+                const entry = await captureFetchAsHarEntry(url, optionsWithToken, response);
+                this.#harCapture.addEntry(entry);
             }
 
             if (shouldValidateSuccess) {

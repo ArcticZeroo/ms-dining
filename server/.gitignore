@@ -5,3 +5,4 @@ static/menu-items/thumbnail
 *.db-*
 .env
 *.csv
+har-captures/
