@@ -23,6 +23,8 @@ import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { CAFES_BY_ID } from '../../../constants/cafes.js';
+import { webserverHost } from '../../../constants/config.js';
+import { isDev } from '../../../util/env.js';
 import { memoizeResponseBody } from '../../../middleware/cache.js';
 import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { attachRouter } from '../../../util/koa.js';
@@ -276,7 +278,7 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'No pending cart session found. The session may have expired — please try again.');
         }
 
-        const iframeCssUrl = `${ctx.origin}/iframe.css`;
+        const iframeCssUrl = `${isDev ? ctx.origin : webserverHost}/iframe.css`;
         const result = await pending.session.prepareForIframe(iframeCssUrl);
 
         // Reset TTL since the user is actively paying

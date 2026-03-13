@@ -122,6 +122,7 @@ export const OrderPage = () => {
             {cart.size > 1 && <MultiCafeOrderWarning/>}
             <PaymentInfoForm
                 isPrepareStarted={isPaymentStarted}
+                isCartReady={cartSessionData != null}
                 onSubmit={onFormSubmitted}
             />
             <OrderPrivacyPolicy/>

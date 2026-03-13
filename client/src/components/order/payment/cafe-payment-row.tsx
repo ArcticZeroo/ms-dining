@@ -47,14 +47,9 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, initial
                 <PaymentIframe
                     iframeUrl={iframeUrl}
                     onPaymentComplete={async (result) => {
-                        try {
-                            const completeResult = await complete(result);
-                            closePopup();
-                            onComplete(cafeId, completeResult);
-                        } catch (err) {
-                            // Outer state should be handled by the hook
-                            console.error('Unable to complete order:', err);
-                        }
+                        const completeResult = await complete(result);
+                        closePopup();
+                        onComplete(cafeId, completeResult);
                     }}
                     onPaymentError={(error) => {
                         setError(error);
