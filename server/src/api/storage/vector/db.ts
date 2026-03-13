@@ -1,68 +1,68 @@
 import sqlite3 from 'better-sqlite3';
 import * as vec from 'sqlite-vec';
 import {
-	DB_ID_TO_SEARCH_ENTITY_TYPE,
-	SEARCH_ENTITY_TYPE_TO_DB_ID,
-	SearchEntityType
+    DB_ID_TO_SEARCH_ENTITY_TYPE,
+    SEARCH_ENTITY_TYPE_TO_DB_ID,
+    SearchEntityType
 } from '@msdining/common/models/search';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../util/typeguard.js';
 
 const createVectorDatabase = (path: string) => {
-	const db = sqlite3(path);
-	db.pragma('journal_mode = WAL');
-	vec.load(db);
-	return db;
+    const db = sqlite3(path);
+    db.pragma('journal_mode = WAL');
+    vec.load(db);
+    return db;
 };
 
 const createDatabaseFactory = (path: string) => {
-	let db: sqlite3.Database | null = null;
+    let db: sqlite3.Database | null = null;
 
-	return () => {
-		if (!db) {
-			db = createVectorDatabase(path);
+    return () => {
+        if (!db) {
+            db = createVectorDatabase(path);
 
-			db.exec(`
+            db.exec(`
 CREATE VIRTUAL TABLE IF NOT EXISTS query_vec USING vec0(
     query TEXT UNIQUE,
     embedding float[1536]
 )
 `);
 
-			// Schema versioning: bump when search_vec schema changes.
-			// Partition key on entity_type allows filtered vector searches (e.g. menu items only).
-			const SEARCH_VEC_SCHEMA_VERSION = 2;
-			db.exec(`CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value INTEGER)`);
-			const row = db.prepare('SELECT value FROM schema_meta WHERE key = ?').get('search_vec_version') as { value: number } | undefined;
-			if (!row || row.value !== SEARCH_VEC_SCHEMA_VERSION) {
-				db.exec('DROP TABLE IF EXISTS search_vec');
-				db.prepare('INSERT OR REPLACE INTO schema_meta (key, value) VALUES (?, ?)').run('search_vec_version', SEARCH_VEC_SCHEMA_VERSION);
-			}
+            // Schema versioning: bump when search_vec schema changes.
+            // Partition key on entity_type allows filtered vector searches (e.g. menu items only).
+            const SEARCH_VEC_SCHEMA_VERSION = 2;
+            db.exec(`CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value INTEGER)`);
+            const row = db.prepare('SELECT value FROM schema_meta WHERE key = ?').get('search_vec_version') as { value: number } | undefined;
+            if (!row || row.value !== SEARCH_VEC_SCHEMA_VERSION) {
+                db.exec('DROP TABLE IF EXISTS search_vec');
+                db.prepare('INSERT OR REPLACE INTO schema_meta (key, value) VALUES (?, ?)').run('search_vec_version', SEARCH_VEC_SCHEMA_VERSION);
+            }
 
-			db.exec(`
+            db.exec(`
     CREATE VIRTUAL TABLE IF NOT EXISTS search_vec USING vec0(
         embedding float[1536],
         +id TEXT,
         entity_type INTEGER PARTITION KEY
     )
 `);
-		}
+        }
 
-		return db;
-	}
+        return db;
+    }
 }
 
 const getSearchVectorDatabase = createDatabaseFactory('search.db');
 
 const createPreparedStatementFactory = (sql: string) => {
-	let statement: sqlite3.Statement | null = null;
-	return () => {
-		if (!statement) {
-			statement = getSearchVectorDatabase().prepare(sql);
-		}
+    let statement: sqlite3.Statement | null = null;
+    return () => {
+        if (!statement) {
+            statement = getSearchVectorDatabase().prepare(sql);
+        }
 
-		return statement;
-	}
+        return statement;
+    }
 }
 
 const INSERT_SEARCH_ENTITY_STATEMENT = createPreparedStatementFactory(`
@@ -131,21 +131,21 @@ const SEARCH_QUERIES_STATEMENT = createPreparedStatementFactory(`
 `);
 
 const populateAllEmbeddedItems = () => {
-	const embeddedItems = new Map<SearchEntityType, Set<string /*id*/>>;
+    const embeddedItems = new Map<SearchEntityType, Set<string /*id*/>>;
 
-	const results = ALL_EMBEDDED_ITEMS_STATEMENT().all();
+    const results = ALL_EMBEDDED_ITEMS_STATEMENT().all();
 
-	if (isDuckTypeArray<{ id: string, entity_type: number }>(results, { id: 'string', entity_type: 'number' })) {
-		for (const row of results) {
-			const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[row.entity_type] as SearchEntityType;
-			if (!embeddedItems.has(entityType)) {
-				embeddedItems.set(entityType, new Set());
-			}
+    if (isDuckTypeArray<{ id: string, entity_type: number }>(results, { id: 'string', entity_type: 'number' })) {
+        for (const row of results) {
+            const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[row.entity_type] as SearchEntityType;
+            if (!embeddedItems.has(entityType)) {
+                embeddedItems.set(entityType, new Set());
+            }
 			embeddedItems.get(entityType)!.add(row.id);
-		}
-	}
+        }
+    }
 
-	return embeddedItems;
+    return embeddedItems;
 };
 
 const ALL_EMBEDDED_ITEMS = populateAllEmbeddedItems();
@@ -153,116 +153,116 @@ const ALL_EMBEDDED_ITEMS = populateAllEmbeddedItems();
 export const getAllEmbeddedEntities = () => ALL_EMBEDDED_ITEMS;
 
 export const isEmbeddedEntity = (entityType: SearchEntityType, id: string) => {
-	return ALL_EMBEDDED_ITEMS.get(entityType)?.has(id) === true;
+    return ALL_EMBEDDED_ITEMS.get(entityType)?.has(id) === true;
 }
 
 const markEmbeddedItem = (entityType: SearchEntityType, id: string) => {
-	if (!ALL_EMBEDDED_ITEMS.has(entityType)) {
-		ALL_EMBEDDED_ITEMS.set(entityType, new Set());
-	}
+    if (!ALL_EMBEDDED_ITEMS.has(entityType)) {
+        ALL_EMBEDDED_ITEMS.set(entityType, new Set());
+    }
 	ALL_EMBEDDED_ITEMS.get(entityType)!.add(id);
 }
 
 const unmarkEmbeddedItem = (entityType: SearchEntityType, id: string) => {
-	ALL_EMBEDDED_ITEMS.get(entityType)?.delete(id);
+    ALL_EMBEDDED_ITEMS.get(entityType)?.delete(id);
 }
 
 export const insertSearchEntityEmbedding = (embedding: Float32Array, id: string, entityType: SearchEntityType) => {
-	INSERT_SEARCH_ENTITY_STATEMENT().run(embedding, id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
-	markEmbeddedItem(entityType, id);
+    INSERT_SEARCH_ENTITY_STATEMENT().run(embedding, id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+    markEmbeddedItem(entityType, id);
 }
 
 export const deleteSearchEntityEmbedding = (entityType: SearchEntityType, id: string) => {
-	DELETE_SEARCH_ENTITY_STATEMENT().run(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
-	unmarkEmbeddedItem(entityType, id);
+    DELETE_SEARCH_ENTITY_STATEMENT().run(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+    unmarkEmbeddedItem(entityType, id);
 }
 
 export const getAllEmbeddedIdsByType = (entityType: SearchEntityType): Set<string> => {
-	return ALL_EMBEDDED_ITEMS.get(entityType) ?? new Set();
+    return ALL_EMBEDDED_ITEMS.get(entityType) ?? new Set();
 }
 
 export const deleteAllByEntityType = (entityType: SearchEntityType) => {
-	DELETE_ALL_BY_TYPE_STATEMENT().run(SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
-	ALL_EMBEDDED_ITEMS.delete(entityType);
+    DELETE_ALL_BY_TYPE_STATEMENT().run(SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+    ALL_EMBEDDED_ITEMS.delete(entityType);
 }
 
 export const insertQueryEmbedding = (embedding: Float32Array, query: string) => {
-	INSERT_QUERY_STATEMENT().run(embedding, query);
+    INSERT_QUERY_STATEMENT().run(embedding, query);
 }
 
 export const getQueryEmbedding = (query: string) => {
-	const result = GET_QUERY_EMBEDDING_STATEMENT().get(query);
+    const result = GET_QUERY_EMBEDDING_STATEMENT().get(query);
 
-	if (isValidEmbeddingResult(result)) {
-		return result.embedding;
-	}
+    if (isValidEmbeddingResult(result)) {
+        return result.embedding;
+    }
 
-	return null;
+    return null;
 }
 
 export const searchVectorRaw = async (queryEmbedding: Float32Array, limit: number) => {
-	const results = SEARCH_STATEMENT().all(queryEmbedding, limit);
+    const results = SEARCH_STATEMENT().all(queryEmbedding, limit);
 
-	if (!isValidVectorSearchResultArray(results)) {
-		throw new Error('Invalid search results');
-	}
+    if (!isValidVectorSearchResultArray(results)) {
+        throw new Error('Invalid search results');
+    }
 
-	return results;
+    return results;
 };
 
 export const searchVectorRawByType = async (queryEmbedding: Float32Array, entityType: SearchEntityType, limit: number) => {
-	const results = SEARCH_BY_TYPE_STATEMENT().all(queryEmbedding, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType], limit);
+    const results = SEARCH_BY_TYPE_STATEMENT().all(queryEmbedding, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType], limit);
 
-	if (!isValidVectorSearchResultArray(results)) {
-		throw new Error('Invalid search results');
-	}
+    if (!isValidVectorSearchResultArray(results)) {
+        throw new Error('Invalid search results');
+    }
 
-	return results;
+    return results;
 };
 
 export const getAllSearchQueries = () => {
-	const statement = getSearchVectorDatabase().prepare('SELECT query FROM query_vec');
-	const results = statement.all();
+    const statement = getSearchVectorDatabase().prepare('SELECT query FROM query_vec');
+    const results = statement.all();
 
-	if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
-		throw new Error('Invalid query results');
-	}
+    if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
+        throw new Error('Invalid query results');
+    }
 
-	return new Set(results.map(row => row.query));
+    return new Set(results.map(row => row.query));
 }
 
 export const getSearchEntityEmbedding = (entityType: SearchEntityType, id: string): Float32Array | null => {
-	const result = GET_SEARCH_ENTITY_STATEMENT().get(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
+    const result = GET_SEARCH_ENTITY_STATEMENT().get(id, SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
 
-	if (isValidEmbeddingResult(result)) {
-		const raw = result.embedding;
-		// sqlite-vec returns raw bytes as Uint8Array despite the type; wrap as Float32Array
-		if (raw.BYTES_PER_ELEMENT !== 4) {
-			const bytes = raw as unknown as Uint8Array;
-			return new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
-		}
-		return raw;
-	}
+    if (isValidEmbeddingResult(result)) {
+        const raw = result.embedding;
+        // sqlite-vec returns raw bytes as Uint8Array despite the type; wrap as Float32Array
+        if (raw.BYTES_PER_ELEMENT !== 4) {
+            const bytes = raw as unknown as Uint8Array;
+            return new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
+        }
+        return raw;
+    }
 
-	return null;
+    return null;
 }
 
 export const searchForSimilarQueries = async (queryEmbedding: Float32Array, query: string, limit: number) => {
-	// random dupes seem to appear, and I can't figure out why, so we just double the limit and slice later
-	const results = SEARCH_QUERIES_STATEMENT().all(queryEmbedding, query.toLowerCase(), limit * 2);
+    // random dupes seem to appear, and I can't figure out why, so we just double the limit and slice later
+    const results = SEARCH_QUERIES_STATEMENT().all(queryEmbedding, query.toLowerCase(), limit * 2);
 
-	if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
-		throw new Error('Invalid search results');
-	}
+    if (!isDuckTypeArray<{ query: string }>(results, { query: 'string' })) {
+        throw new Error('Invalid search results');
+    }
 
-	return results.slice(0, limit).map(row => row.query);
+    return results.slice(0, limit).map(row => row.query);
 }
 
 export const clearDuplicatedQueries = () => {
-	const db = getSearchVectorDatabase();
+    const db = getSearchVectorDatabase();
 
-	// For each group of LOWER(query), delete all but one and make sure that one ends up lowercase
-	db.exec(`
+    // For each group of LOWER(query), delete all but one and make sure that one ends up lowercase
+    db.exec(`
 		DELETE FROM query_vec
 		WHERE rowid NOT IN (
 			SELECT MIN(rowid)
@@ -271,10 +271,10 @@ export const clearDuplicatedQueries = () => {
 		)
 	`);
 
-	db.exec(`
+    db.exec(`
 		UPDATE query_vec
 		SET query = LOWER(query)
 	`);
 
-	populateAllEmbeddedItems();
+    populateAllEmbeddedItems();
 }

@@ -1,16 +1,16 @@
 import Router from '@koa/router';
 import {
-	ICafeOverviewStation,
-	IMenuItemDTO,
-	IMenuOverviewSummary,
-	IStationUniquenessData
+    ICafeOverviewStation,
+    IMenuItemDTO,
+    IMenuOverviewSummary,
+    IStationUniquenessData
 } from '@msdining/common/models/cafe';
 import {
-	ICreateReviewRequest,
-	ICafeMenuResponse,
-	IUpdateReviewRequest,
-	MenuResponse,
-	REVIEW_MAX_COMMENT_LENGTH_CHARS
+    ICreateReviewRequest,
+    ICafeMenuResponse,
+    IUpdateReviewRequest,
+    MenuResponse,
+    REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/models/http';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
@@ -19,18 +19,18 @@ import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import {
-	attachRouter,
-	getMaybeUserId,
-	getTrimmedQueryParam,
-	getUserIdOrThrow,
-	isAdminAsync
+    attachRouter,
+    getMaybeUserId,
+    getTrimmedQueryParam,
+    getUserIdOrThrow,
+    isAdminAsync
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
-	ANALYTICS_APPLICATION_NAMES,
-	getApplicationNameForCafeMenu,
-	getApplicationNameForMenuOverview,
-	getApplicationNameForMenuOverviewSummary,
+    ANALYTICS_APPLICATION_NAMES,
+    getApplicationNameForCafeMenu,
+    getApplicationNameForMenuOverview,
+    getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';
@@ -52,558 +52,558 @@ import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-fi
 import { resolveIngredientsMenuAsync } from '../../../api/cache/ingredients-menu.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
-	if (uniquenessData == null || !uniquenessData.has(station.name)) {
-		return getDefaultUniquenessDataForStation(station.menuItemsById.size);
-	}
+    if (uniquenessData == null || !uniquenessData.has(station.name)) {
+        return getDefaultUniquenessDataForStation(station.menuItemsById.size);
+    }
 
-	return uniquenessData.get(station.name)!;
+    return uniquenessData.get(station.name)!;
 };
 
 export const registerMenuRoutes = (parent: Router) => {
-	const router = new Router({
-		prefix: '/menu'
-	});
-
-	const serializeMenuItem = async (menuItem: IMenuItemBase): Promise<IMenuItemDTO> => {
-		const [reviewHeader, firstAppearance] = await Promise.all([
-			retrieveReviewHeaderAsync(menuItem),
-			retrieveFirstMenuItemAppearance(menuItem.id),
-			ensureThumbnailDataHasBeenRetrievedAsync(menuItem),
-		]);
-
-		return ({
-			...reviewHeader,
-			...menuItem,
-			firstAppearance,
-			lastUpdateTime: menuItem.lastUpdateTime?.getTime(),
-			tags:           Array.from(menuItem.tags),
-			searchTags:     Array.from(menuItem.searchTags)
-		});
-	};
-
-	const convertMenuToSerializable = async (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): Promise<MenuResponse> => {
-		const menusByStation: MenuResponse = [];
-
-		const addStation = async (station: ICafeStation): Promise<void> => {
-			const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
-
-			const itemsByCategory: Record<string, Array<IMenuItemDTO>> = {};
-
-			const serializeCategory = async (categoryName: string, categoryItemIds: string[]) => {
-				const serializedItems: Array<Promise<IMenuItemDTO>> = [];
-
-				for (const itemId of categoryItemIds) {
-					if (!station.menuItemsById.has(itemId)) {
-						logDebug(`Menu item with id ${itemId} not found in station ${station.name}. Skipping.`);
-						continue;
-					}
-
-					serializedItems.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
-				}
-
-				itemsByCategory[categoryName] = await Promise.all(serializedItems);
-			}
-
-			const categoryPromises: Array<Promise<void>> = [];
-
-			for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
-				categoryPromises.push(serializeCategory(categoryName, categoryItemIds));
-			}
-
-			await Promise.all(categoryPromises);
-
-			if (Object.keys(itemsByCategory).length === 0) {
-				return;
-			}
-
-			const stationReviewHeader = await retrieveStationReviewHeaderAsync({
-				name:    station.name,
-				groupId: station.groupId
-			});
-
-			menusByStation.push({
-				id:               station.id,
-				name:             station.name,
-				logoUrl:          getStationLogoUrl(station.name, station.logoUrl),
-				menu:             itemsByCategory,
-				uniqueness:       uniquenessDataForStation,
-				overallRating:    stationReviewHeader.totalReviewCount > 0 ? stationReviewHeader.overallRating : undefined,
-				totalReviewCount: stationReviewHeader.totalReviewCount > 0 ? stationReviewHeader.totalReviewCount : undefined,
-			});
-		}
-
-		const stationPromises: Array<Promise<void>> = [];
-
-		for (const station of menuStations) {
-			stationPromises.push(addStation(station));
-		}
-
-		await Promise.all(stationPromises);
-
-		return menusByStation;
-	};
-
-	const getCafeFromRequest = async (ctx: Router.RouterContext) => {
-		const id = ctx.params.id?.toLowerCase();
-		if (!id) {
-			ctx.throw(400, 'Missing cafe id');
-		}
-
-		const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-		if (!cafe) {
-			ctx.throw(404, 'Cafe not found or data is missing');
-		}
-
-		return cafe;
-	}
-
-	const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
-		const cafe = await getCafeFromRequest(ctx);
-
-		const dateString = getDateStringForMenuRequest(ctx);
-		if (dateString == null) {
-			ctx.body = JSON.stringify([]);
-			return;
-		}
-
-		return onReady(cafe, dateString);
-	};
-
-	const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
-		const menuItemId = ctx.params.menuItemId;
-		if (!menuItemId) {
-			ctx.throw(400, 'Missing menu item id');
-		}
-
-		const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
-		if (menuItem == null) {
-			ctx.throw(404, 'Menu item not found');
-		}
-
-		return menuItem;
-	}
-
-	const serializeReview = (review: IServerReview): IReview => ({
-		id:              review.id,
-		userId:          review.userId || undefined,
-		userDisplayName: review.displayName ?? review.user?.displayName ?? 'Anonymous',
-		menuItemId:      review.menuItemId || undefined,
-		menuItemName:    review.menuItem?.name,
-		stationId:       review.stationId || undefined,
-		stationName:     review.station?.name,
-		cafeId:          review.menuItem?.cafe.id ?? review.station?.cafe.id ?? '',
-		rating:          review.rating,
-		comment:         review.comment || undefined,
-		createdDate:     toDateString(review.createdAt),
-	});
-
-	const reviewCacheController = memoizeResponseBody({ expirationTime: new Duration({ minutes: 5 }), isPublic: true });
-
-	router.get('/menu-items/:menuItemId/reviews',
-		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.getReviews),
-		reviewCacheController,
-		async ctx => {
-			const userId = getMaybeUserId(ctx);
-			const menuItem = await getMenuItemFromRequest(ctx);
-
-			const { menuItemReviews, stationReviews } = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem);
-
-			const response: IReviewSummary = {
-				counts:              {},
-				reviewsWithComments: [],
-				totalCount:          0,
-				overallRating:       0,
-			};
-
-			const allReviews = [...menuItemReviews, ...stationReviews];
-
-			for (const review of allReviews) {
-				response.totalCount += 1;
-				response.overallRating += review.rating;
-				response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
-
-				if (review.comment != null && review.comment.trim().length > 0) {
-					const serializedReview = serializeReview(review);
-					serializedReview.comment = review.comment;
-					response.reviewsWithComments.push(serializedReview as IReviewWithComment);
-				}
-			}
-
-			if (userId != null) {
-				const myMenuItemReview = menuItemReviews.find(r => r.menuItemId === menuItem.id && r.userId === userId);
-				if (myMenuItemReview) {
-					response.myReview = serializeReview(myMenuItemReview);
-				}
-
-				const myStationReview = stationReviews.find(r => r.userId === userId);
-				if (myStationReview) {
-					response.myStationReview = serializeReview(myStationReview);
-				}
-			}
-
-			if (allReviews.length > 0) {
-				response.overallRating /= allReviews.length;
-			}
-
-			ctx.body = jsonStringifyWithoutNull(response);
-		});
-
-	router.put('/menu-items/:menuItemId/reviews',
-		requireAuthenticated,
-		sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.postReview),
-		async ctx => {
-			const menuItem = await getMenuItemFromRequest(ctx);
-
-			const body = ctx.request.body;
-			if (!isDuckType<ICreateReviewRequest>(body, { rating: 'number' })) {
-				ctx.throw(400, 'Invalid review');
-				return;
-			}
-
-			if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
-				ctx.throw(400, 'Invalid review comment');
-				return;
-			}
-
-			if (body.rating < 1 || body.rating > 10) {
-				ctx.throw(400, 'Invalid rating');
-				return;
-			}
-
-			const isAnonymous = body.anonymous === true;
-			if (isAnonymous && !(await isAdminAsync(ctx))) {
-				ctx.throw(403, 'Only admins can create anonymous reviews');
-				return;
-			}
-
-			if (!isAnonymous && body.displayName != null) {
-				ctx.throw(400, 'displayName is only allowed for anonymous reviews');
-				return;
-			}
-
-			const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
-
-			const review = await ReviewStorageClient.createMenuItemReviewAsync({
-				userId,
-				menuItemId:     menuItem.id,
-				normalizedName: normalizeNameForSearch(menuItem.name),
-				rating:         body.rating,
-				comment:        body.comment?.trim(),
-				displayName:    isAnonymous ? body.displayName?.trim() : undefined,
-				groupId:        menuItem.groupId
-			});
-
-			ctx.body = {
-				id: review.id
-			};
-
-			reviewCacheController.clearCache();
-		});
-
-	router.get('/reviews/mine',
-		requireAuthenticated,
-		async ctx => {
-			const menuItemId = getTrimmedQueryParam(ctx, 'menuItemId');
-
-			if (menuItemId != null) {
-				const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
-				if (menuItem == null) {
-					ctx.throw(400, 'Invalid menu item');
-					return;
-				}
-			}
-
-			const reviews = await ReviewStorageClient.getReviewsForUserAsync({
-				userId: getUserIdOrThrow(ctx),
-				menuItemId
-			});
-
-			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
-		});
-
-	router.get('/reviews/recent',
-		reviewCacheController,
-		async ctx => {
-			const reviews = await ReviewStorageClient.getRecentReviews(10);
-			ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
-		});
-
-	const validateReviewOwnershipOrAdminAsync = async (ctx: Router.RouterContext) => {
-		const reviewId = ctx.params.reviewId;
-		if (!reviewId) {
-			ctx.throw(400, 'Missing review id');
-		}
-
-		const isAdmin = await isAdminAsync(ctx);
-		if (!isAdmin && !(await ReviewStorageClient.isOwnedByUser(reviewId, getUserIdOrThrow(ctx)))) {
-			ctx.throw(403, 'Not allowed to modify another user\'s review');
-		}
-
-		return reviewId;
-	}
-
-	router.patch('/reviews/:reviewId',
-		requireAuthenticated,
-		async ctx => {
-			const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
-
-			const body = ctx.request.body;
-			if (!isDuckType<IUpdateReviewRequest>(body, {})) {
-				ctx.throw(400, 'Invalid update request');
-				return;
-			}
-
-			if (body.rating != null && (body.rating < 1 || body.rating > 10)) {
-				ctx.throw(400, 'Invalid rating');
-				return;
-			}
-
-			if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
-				ctx.throw(400, 'Invalid review comment');
-				return;
-			}
-
-			await ReviewStorageClient.updateReviewAsync(reviewId, {
-				rating:      body.rating,
-				comment:     body.comment?.trim(),
-				displayName: body.displayName?.trim(),
-			});
-
-			ctx.status = 204;
-			reviewCacheController.clearCache();
-		});
-
-	router.delete('/reviews/:reviewId',
-		requireAuthenticated,
-		async ctx => {
-			const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
-			await ReviewStorageClient.deleteReviewAsync(reviewId);
-			ctx.status = 204;
-			reviewCacheController.clearCache();
-		});
-
-	// --- Station reviews ---
-
-	const getStationFromRequest = async (ctx: Router.RouterContext) => {
-		const stationId = ctx.params.stationId;
-		if (!stationId) {
-			ctx.throw(400, 'Missing station id');
-		}
-
-		const station = await StationStorageClient.retrieveStationAsync(stationId);
-		if (station == null) {
-			ctx.throw(404, 'Station not found');
-		}
-
-		return station;
-	};
-
-	router.get('/stations/:stationId/reviews',
-		reviewCacheController,
-		async ctx => {
-			const userId = getMaybeUserId(ctx);
-			const station = await getStationFromRequest(ctx);
-
-			const reviews = await ReviewStorageClient.getReviewsForStationAsync(station);
-
-			const response: IReviewSummary = {
-				counts:              {},
-				reviewsWithComments: [],
-				totalCount:          0,
-				overallRating:       0,
-			};
-
-			for (const review of reviews) {
-				response.totalCount += 1;
-				response.overallRating += review.rating;
-				response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
-
-				if (review.comment != null && review.comment.trim().length > 0) {
-					const serializedReview = serializeReview(review);
-					serializedReview.comment = review.comment;
-					response.reviewsWithComments.push(serializedReview as IReviewWithComment);
-				}
-
-				if (review.stationId === station.id && userId != null && review.userId === userId) {
-					response.myReview = serializeReview(review);
-				}
-			}
-
-			if (reviews.length > 0) {
-				response.overallRating /= reviews.length;
-			}
-
-			ctx.body = jsonStringifyWithoutNull(response);
-		});
-
-	router.put('/stations/:stationId/reviews',
-		requireAuthenticated,
-		async ctx => {
-			const station = await getStationFromRequest(ctx);
-
-			const body = ctx.request.body;
-			if (!isDuckType<ICreateReviewRequest>(body, { rating: 'number' })) {
-				ctx.throw(400, 'Invalid review');
-				return;
-			}
-
-			if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
-				ctx.throw(400, 'Invalid review comment');
-				return;
-			}
-
-			if (body.rating < 1 || body.rating > 10) {
-				ctx.throw(400, 'Invalid rating');
-				return;
-			}
-
-			const isAnonymous = body.anonymous === true;
-			if (isAnonymous && !(await isAdminAsync(ctx))) {
-				ctx.throw(403, 'Only admins can create anonymous reviews');
-				return;
-			}
-
-			if (!isAnonymous && body.displayName != null) {
-				ctx.throw(400, 'displayName is only allowed for anonymous reviews');
-				return;
-			}
-
-			const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
-
-			const review = await ReviewStorageClient.createStationReviewAsync({
-				userId,
-				stationId:      station.id,
-				normalizedName: station.normalizedName,
-				rating:         body.rating,
-				comment:        body.comment?.trim(),
-				displayName:    isAnonymous ? body.displayName?.trim() : undefined,
-				groupId:        station.groupId
-			});
-
-			ctx.body = {
-				id: review.id
-			};
-
-			reviewCacheController.clearCache();
-		});
-
-	router.get('/search-ideas',
-		memoizeResponseBody({ isPublic: true }),
-		async ctx => {
-			ctx.body = MenuItemStorageClient.topSearchTags;
-		});
-
-	router.get('/:id/menu',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const [menuStations, uniquenessData] = await Promise.all([
-				retrieveDailyCafeMenuAsync(cafe.id, dateString),
-				retrieveUniquenessDataForCafe(cafe.id, dateString)
-			]);
-
-			const [stations, ingredientsMenu] = await Promise.all([
-				convertMenuToSerializable(menuStations, uniquenessData),
-				resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
-			]);
-
-			const response: ICafeMenuResponse = { stations };
-			if (ingredientsMenu != null) {
-				response.ingredientsMenu = ingredientsMenu;
-			}
-
-			ctx.body = jsonStringifyWithoutNull(response);
-		}));
-
-	router.get('/:id',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const [menuStations, uniquenessData] = await Promise.all([
-				retrieveDailyCafeMenuAsync(cafe.id, dateString),
-				retrieveUniquenessDataForCafe(cafe.id, dateString)
-			]);
-
-			ctx.body = jsonStringifyWithoutNull(await convertMenuToSerializable(menuStations, uniquenessData));
-		}));
-
-	router.get('/:id/overview-summary',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverviewSummary),
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => {
-			const id = ctx.params.id?.toLowerCase();
-			if (!id) {
-				return ctx.throw(400, 'Missing id');
-			}
-
-			const cafes = resolveViewToCafes(id);
-			if (!cafes) {
-				return ctx.throw(404, 'View not found');
-			}
-
-			const dateString = getDateStringForMenuRequest(ctx);
-			if (dateString == null) {
-				ctx.body = JSON.stringify({ total: 0, traveling: 0, newStations: 0, newItems: 0, rotating: 0 });
-				return;
-			}
-
-			const allOverviewStations = await Promise.all(
-				cafes.map(async (cafe) => {
-					const [stationHeaders, uniquenessData] = await Promise.all([
-						DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
-						retrieveUniquenessDataForCafe(cafe.id, dateString)
-					]);
-
-					return stationHeaders.map(station => ({
-						uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
-					}));
-				})
-			);
-
-			const stations = allOverviewStations.flat();
-
-			const summary: IMenuOverviewSummary = {
-				total:       stations.length,
-				traveling:   0,
-				newStations: 0,
-				newItems:    0,
-				rotating:    0,
-			};
-
-			for (const { uniqueness } of stations) {
-				if (uniqueness.isTraveling) {
-					summary.traveling++;
-				}
-				if (getIsRecentlyAvailable(uniqueness.firstAppearance)) {
-					summary.newStations++;
-				}
-				if (uniqueness.recentlyAvailableItemCount > 0) {
-					summary.newItems++;
-				}
-				if (uniqueness.theme != null) {
-					summary.rotating++;
-				}
-			}
-
-			ctx.body = JSON.stringify(summary);
-		});
-
-	router.get('/:id/overview',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const [stationHeaders, uniquenessData] = await Promise.all([
-				DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
-				retrieveUniquenessDataForCafe(cafe.id, dateString)
-			]);
-
-			const overviewStations: ICafeOverviewStation[] = stationHeaders.map(station => ({
-				...station,
-				uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
-			}));
-
-			ctx.body = jsonStringifyWithoutNull(overviewStations);
-		}));
-
-	attachRouter(parent, router);
+    const router = new Router({
+        prefix: '/menu'
+    });
+
+    const serializeMenuItem = async (menuItem: IMenuItemBase): Promise<IMenuItemDTO> => {
+        const [reviewHeader, firstAppearance] = await Promise.all([
+            retrieveReviewHeaderAsync(menuItem),
+            retrieveFirstMenuItemAppearance(menuItem.id),
+            ensureThumbnailDataHasBeenRetrievedAsync(menuItem),
+        ]);
+
+        return ({
+            ...reviewHeader,
+            ...menuItem,
+            firstAppearance,
+            lastUpdateTime: menuItem.lastUpdateTime?.getTime(),
+            tags:           Array.from(menuItem.tags),
+            searchTags:     Array.from(menuItem.searchTags)
+        });
+    };
+
+    const convertMenuToSerializable = async (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): Promise<MenuResponse> => {
+        const menusByStation: MenuResponse = [];
+
+        const addStation = async (station: ICafeStation): Promise<void> => {
+            const uniquenessDataForStation = getUniquenessDataForStation(station, uniquenessData);
+
+            const itemsByCategory: Record<string, Array<IMenuItemDTO>> = {};
+
+            const serializeCategory = async (categoryName: string, categoryItemIds: string[]) => {
+                const serializedItems: Array<Promise<IMenuItemDTO>> = [];
+
+                for (const itemId of categoryItemIds) {
+                    if (!station.menuItemsById.has(itemId)) {
+                        logDebug(`Menu item with id ${itemId} not found in station ${station.name}. Skipping.`);
+                        continue;
+                    }
+
+                    serializedItems.push(serializeMenuItem(station.menuItemsById.get(itemId)!));
+                }
+
+                itemsByCategory[categoryName] = await Promise.all(serializedItems);
+            }
+
+            const categoryPromises: Array<Promise<void>> = [];
+
+            for (const [categoryName, categoryItemIds] of station.menuItemIdsByCategoryName) {
+                categoryPromises.push(serializeCategory(categoryName, categoryItemIds));
+            }
+
+            await Promise.all(categoryPromises);
+
+            if (Object.keys(itemsByCategory).length === 0) {
+                return;
+            }
+
+            const stationReviewHeader = await retrieveStationReviewHeaderAsync({
+                name:    station.name,
+                groupId: station.groupId
+            });
+
+            menusByStation.push({
+                id:               station.id,
+                name:             station.name,
+                logoUrl:          getStationLogoUrl(station.name, station.logoUrl),
+                menu:             itemsByCategory,
+                uniqueness:       uniquenessDataForStation,
+                overallRating:    stationReviewHeader.totalReviewCount > 0 ? stationReviewHeader.overallRating : undefined,
+                totalReviewCount: stationReviewHeader.totalReviewCount > 0 ? stationReviewHeader.totalReviewCount : undefined,
+            });
+        }
+
+        const stationPromises: Array<Promise<void>> = [];
+
+        for (const station of menuStations) {
+            stationPromises.push(addStation(station));
+        }
+
+        await Promise.all(stationPromises);
+
+        return menusByStation;
+    };
+
+    const getCafeFromRequest = async (ctx: Router.RouterContext) => {
+        const id = ctx.params.id?.toLowerCase();
+        if (!id) {
+            ctx.throw(400, 'Missing cafe id');
+        }
+
+        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+        if (!cafe) {
+            ctx.throw(404, 'Cafe not found or data is missing');
+        }
+
+        return cafe;
+    }
+
+    const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
+        const cafe = await getCafeFromRequest(ctx);
+
+        const dateString = getDateStringForMenuRequest(ctx);
+        if (dateString == null) {
+            ctx.body = JSON.stringify([]);
+            return;
+        }
+
+        return onReady(cafe, dateString);
+    };
+
+    const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
+        const menuItemId = ctx.params.menuItemId;
+        if (!menuItemId) {
+            ctx.throw(400, 'Missing menu item id');
+        }
+
+        const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
+        if (menuItem == null) {
+            ctx.throw(404, 'Menu item not found');
+        }
+
+        return menuItem;
+    }
+
+    const serializeReview = (review: IServerReview): IReview => ({
+        id:              review.id,
+        userId:          review.userId || undefined,
+        userDisplayName: review.displayName ?? review.user?.displayName ?? 'Anonymous',
+        menuItemId:      review.menuItemId || undefined,
+        menuItemName:    review.menuItem?.name,
+        stationId:       review.stationId || undefined,
+        stationName:     review.station?.name,
+        cafeId:          review.menuItem?.cafe.id ?? review.station?.cafe.id ?? '',
+        rating:          review.rating,
+        comment:         review.comment || undefined,
+        createdDate:     toDateString(review.createdAt),
+    });
+
+    const reviewCacheController = memoizeResponseBody({ expirationTime: new Duration({ minutes: 5 }), isPublic: true });
+
+    router.get('/menu-items/:menuItemId/reviews',
+        sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.getReviews),
+        reviewCacheController,
+        async ctx => {
+            const userId = getMaybeUserId(ctx);
+            const menuItem = await getMenuItemFromRequest(ctx);
+
+            const { menuItemReviews, stationReviews } = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem);
+
+            const response: IReviewSummary = {
+                counts:              {},
+                reviewsWithComments: [],
+                totalCount:          0,
+                overallRating:       0,
+            };
+
+            const allReviews = [...menuItemReviews, ...stationReviews];
+
+            for (const review of allReviews) {
+                response.totalCount += 1;
+                response.overallRating += review.rating;
+                response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
+
+                if (review.comment != null && review.comment.trim().length > 0) {
+                    const serializedReview = serializeReview(review);
+                    serializedReview.comment = review.comment;
+                    response.reviewsWithComments.push(serializedReview as IReviewWithComment);
+                }
+            }
+
+            if (userId != null) {
+                const myMenuItemReview = menuItemReviews.find(r => r.menuItemId === menuItem.id && r.userId === userId);
+                if (myMenuItemReview) {
+                    response.myReview = serializeReview(myMenuItemReview);
+                }
+
+                const myStationReview = stationReviews.find(r => r.userId === userId);
+                if (myStationReview) {
+                    response.myStationReview = serializeReview(myStationReview);
+                }
+            }
+
+            if (allReviews.length > 0) {
+                response.overallRating /= allReviews.length;
+            }
+
+            ctx.body = jsonStringifyWithoutNull(response);
+        });
+
+    router.put('/menu-items/:menuItemId/reviews',
+        requireAuthenticated,
+        sendVisitMiddleware(ANALYTICS_APPLICATION_NAMES.postReview),
+        async ctx => {
+            const menuItem = await getMenuItemFromRequest(ctx);
+
+            const body = ctx.request.body;
+            if (!isDuckType<ICreateReviewRequest>(body, { rating: 'number' })) {
+                ctx.throw(400, 'Invalid review');
+                return;
+            }
+
+            if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
+                ctx.throw(400, 'Invalid review comment');
+                return;
+            }
+
+            if (body.rating < 1 || body.rating > 10) {
+                ctx.throw(400, 'Invalid rating');
+                return;
+            }
+
+            const isAnonymous = body.anonymous === true;
+            if (isAnonymous && !(await isAdminAsync(ctx))) {
+                ctx.throw(403, 'Only admins can create anonymous reviews');
+                return;
+            }
+
+            if (!isAnonymous && body.displayName != null) {
+                ctx.throw(400, 'displayName is only allowed for anonymous reviews');
+                return;
+            }
+
+            const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
+
+            const review = await ReviewStorageClient.createMenuItemReviewAsync({
+                userId,
+                menuItemId:     menuItem.id,
+                normalizedName: normalizeNameForSearch(menuItem.name),
+                rating:         body.rating,
+                comment:        body.comment?.trim(),
+                displayName:    isAnonymous ? body.displayName?.trim() : undefined,
+                groupId:        menuItem.groupId
+            });
+
+            ctx.body = {
+                id: review.id
+            };
+
+            reviewCacheController.clearCache();
+        });
+
+    router.get('/reviews/mine',
+        requireAuthenticated,
+        async ctx => {
+            const menuItemId = getTrimmedQueryParam(ctx, 'menuItemId');
+
+            if (menuItemId != null) {
+                const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
+                if (menuItem == null) {
+                    ctx.throw(400, 'Invalid menu item');
+                    return;
+                }
+            }
+
+            const reviews = await ReviewStorageClient.getReviewsForUserAsync({
+                userId: getUserIdOrThrow(ctx),
+                menuItemId
+            });
+
+            ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
+        });
+
+    router.get('/reviews/recent',
+        reviewCacheController,
+        async ctx => {
+            const reviews = await ReviewStorageClient.getRecentReviews(10);
+            ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
+        });
+
+    const validateReviewOwnershipOrAdminAsync = async (ctx: Router.RouterContext) => {
+        const reviewId = ctx.params.reviewId;
+        if (!reviewId) {
+            ctx.throw(400, 'Missing review id');
+        }
+
+        const isAdmin = await isAdminAsync(ctx);
+        if (!isAdmin && !(await ReviewStorageClient.isOwnedByUser(reviewId, getUserIdOrThrow(ctx)))) {
+            ctx.throw(403, 'Not allowed to modify another user\'s review');
+        }
+
+        return reviewId;
+    }
+
+    router.patch('/reviews/:reviewId',
+        requireAuthenticated,
+        async ctx => {
+            const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
+
+            const body = ctx.request.body;
+            if (!isDuckType<IUpdateReviewRequest>(body, {})) {
+                ctx.throw(400, 'Invalid update request');
+                return;
+            }
+
+            if (body.rating != null && (body.rating < 1 || body.rating > 10)) {
+                ctx.throw(400, 'Invalid rating');
+                return;
+            }
+
+            if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
+                ctx.throw(400, 'Invalid review comment');
+                return;
+            }
+
+            await ReviewStorageClient.updateReviewAsync(reviewId, {
+                rating:      body.rating,
+                comment:     body.comment?.trim(),
+                displayName: body.displayName?.trim(),
+            });
+
+            ctx.status = 204;
+            reviewCacheController.clearCache();
+        });
+
+    router.delete('/reviews/:reviewId',
+        requireAuthenticated,
+        async ctx => {
+            const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
+            await ReviewStorageClient.deleteReviewAsync(reviewId);
+            ctx.status = 204;
+            reviewCacheController.clearCache();
+        });
+
+    // --- Station reviews ---
+
+    const getStationFromRequest = async (ctx: Router.RouterContext) => {
+        const stationId = ctx.params.stationId;
+        if (!stationId) {
+            ctx.throw(400, 'Missing station id');
+        }
+
+        const station = await StationStorageClient.retrieveStationAsync(stationId);
+        if (station == null) {
+            ctx.throw(404, 'Station not found');
+        }
+
+        return station;
+    };
+
+    router.get('/stations/:stationId/reviews',
+        reviewCacheController,
+        async ctx => {
+            const userId = getMaybeUserId(ctx);
+            const station = await getStationFromRequest(ctx);
+
+            const reviews = await ReviewStorageClient.getReviewsForStationAsync(station);
+
+            const response: IReviewSummary = {
+                counts:              {},
+                reviewsWithComments: [],
+                totalCount:          0,
+                overallRating:       0,
+            };
+
+            for (const review of reviews) {
+                response.totalCount += 1;
+                response.overallRating += review.rating;
+                response.counts[review.rating] = (response.counts[review.rating] || 0) + 1;
+
+                if (review.comment != null && review.comment.trim().length > 0) {
+                    const serializedReview = serializeReview(review);
+                    serializedReview.comment = review.comment;
+                    response.reviewsWithComments.push(serializedReview as IReviewWithComment);
+                }
+
+                if (review.stationId === station.id && userId != null && review.userId === userId) {
+                    response.myReview = serializeReview(review);
+                }
+            }
+
+            if (reviews.length > 0) {
+                response.overallRating /= reviews.length;
+            }
+
+            ctx.body = jsonStringifyWithoutNull(response);
+        });
+
+    router.put('/stations/:stationId/reviews',
+        requireAuthenticated,
+        async ctx => {
+            const station = await getStationFromRequest(ctx);
+
+            const body = ctx.request.body;
+            if (!isDuckType<ICreateReviewRequest>(body, { rating: 'number' })) {
+                ctx.throw(400, 'Invalid review');
+                return;
+            }
+
+            if (body.comment != null && (typeof body.comment !== 'string' || body.comment.length > REVIEW_MAX_COMMENT_LENGTH_CHARS)) {
+                ctx.throw(400, 'Invalid review comment');
+                return;
+            }
+
+            if (body.rating < 1 || body.rating > 10) {
+                ctx.throw(400, 'Invalid rating');
+                return;
+            }
+
+            const isAnonymous = body.anonymous === true;
+            if (isAnonymous && !(await isAdminAsync(ctx))) {
+                ctx.throw(403, 'Only admins can create anonymous reviews');
+                return;
+            }
+
+            if (!isAnonymous && body.displayName != null) {
+                ctx.throw(400, 'displayName is only allowed for anonymous reviews');
+                return;
+            }
+
+            const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
+
+            const review = await ReviewStorageClient.createStationReviewAsync({
+                userId,
+                stationId:      station.id,
+                normalizedName: station.normalizedName,
+                rating:         body.rating,
+                comment:        body.comment?.trim(),
+                displayName:    isAnonymous ? body.displayName?.trim() : undefined,
+                groupId:        station.groupId
+            });
+
+            ctx.body = {
+                id: review.id
+            };
+
+            reviewCacheController.clearCache();
+        });
+
+    router.get('/search-ideas',
+        memoizeResponseBody({ isPublic: true }),
+        async ctx => {
+            ctx.body = MenuItemStorageClient.topSearchTags;
+        });
+
+    router.get('/:id/menu',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+        memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+        async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+            const [menuStations, uniquenessData] = await Promise.all([
+                retrieveDailyCafeMenuAsync(cafe.id, dateString),
+                retrieveUniquenessDataForCafe(cafe.id, dateString)
+            ]);
+
+            const [stations, ingredientsMenu] = await Promise.all([
+                convertMenuToSerializable(menuStations, uniquenessData),
+                resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
+            ]);
+
+            const response: ICafeMenuResponse = { stations };
+            if (ingredientsMenu != null) {
+                response.ingredientsMenu = ingredientsMenu;
+            }
+
+            ctx.body = jsonStringifyWithoutNull(response);
+        }));
+
+    router.get('/:id',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+        memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+        async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+            const [menuStations, uniquenessData] = await Promise.all([
+                retrieveDailyCafeMenuAsync(cafe.id, dateString),
+                retrieveUniquenessDataForCafe(cafe.id, dateString)
+            ]);
+
+            ctx.body = jsonStringifyWithoutNull(await convertMenuToSerializable(menuStations, uniquenessData));
+        }));
+
+    router.get('/:id/overview-summary',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverviewSummary),
+        memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+        async ctx => {
+            const id = ctx.params.id?.toLowerCase();
+            if (!id) {
+                return ctx.throw(400, 'Missing id');
+            }
+
+            const cafes = resolveViewToCafes(id);
+            if (!cafes) {
+                return ctx.throw(404, 'View not found');
+            }
+
+            const dateString = getDateStringForMenuRequest(ctx);
+            if (dateString == null) {
+                ctx.body = JSON.stringify({ total: 0, traveling: 0, newStations: 0, newItems: 0, rotating: 0 });
+                return;
+            }
+
+            const allOverviewStations = await Promise.all(
+                cafes.map(async (cafe) => {
+                    const [stationHeaders, uniquenessData] = await Promise.all([
+                        DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
+                        retrieveUniquenessDataForCafe(cafe.id, dateString)
+                    ]);
+
+                    return stationHeaders.map(station => ({
+                        uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+                    }));
+                })
+            );
+
+            const stations = allOverviewStations.flat();
+
+            const summary: IMenuOverviewSummary = {
+                total:       stations.length,
+                traveling:   0,
+                newStations: 0,
+                newItems:    0,
+                rotating:    0,
+            };
+
+            for (const { uniqueness } of stations) {
+                if (uniqueness.isTraveling) {
+                    summary.traveling++;
+                }
+                if (getIsRecentlyAvailable(uniqueness.firstAppearance)) {
+                    summary.newStations++;
+                }
+                if (uniqueness.recentlyAvailableItemCount > 0) {
+                    summary.newItems++;
+                }
+                if (uniqueness.theme != null) {
+                    summary.rotating++;
+                }
+            }
+
+            ctx.body = JSON.stringify(summary);
+        });
+
+    router.get('/:id/overview',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
+        memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+        async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+            const [stationHeaders, uniquenessData] = await Promise.all([
+                DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
+                retrieveUniquenessDataForCafe(cafe.id, dateString)
+            ]);
+
+            const overviewStations: ICafeOverviewStation[] = stationHeaders.map(station => ({
+                ...station,
+                uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+            }));
+
+            ctx.body = jsonStringifyWithoutNull(overviewStations);
+        }));
+
+    attachRouter(parent, router);
 };

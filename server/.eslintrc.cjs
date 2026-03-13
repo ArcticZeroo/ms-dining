@@ -7,6 +7,9 @@ module.exports = {
     ],
     ignorePatterns: ['dist', '.eslintrc.cjs'],
     parser: '@typescript-eslint/parser',
+    parserOptions: {
+        sourceType: 'module',
+    },
     rules: {
         'indent': ['error', 4],
         'curly': ['error', 'all'],

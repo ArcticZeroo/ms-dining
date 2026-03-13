@@ -13,9 +13,9 @@ export const STORAGE_EVENTS = new EventEmitter() as TypedEmitter<StorageEvents>;
 export const CACHE_EVENTS = new EventEmitter() as TypedEmitter<StorageEvents>;
 
 STORAGE_EVENTS.on('menuPublished', (event) => {
-	logDebug(`Menu published for cafe "${event.cafe.id}" on ${event.dateString} with ${event.menu.length} stations. Added: ${event.addedStations.size}, Removed: ${event.removedStations.size}, Updated: ${event.updatedStations.size}`);
+    logDebug(`Menu published for cafe "${event.cafe.id}" on ${event.dateString} with ${event.menu.length} stations. Added: ${event.addedStations.size}, Removed: ${event.removedStations.size}, Updated: ${event.updatedStations.size}`);
 });
 
 CACHE_EVENTS.on('menuPublished', (event) => {
-	logDebug(`Cache updated for cafe "${event.cafe.id}" on ${event.dateString}`);
+    logDebug(`Cache updated for cafe "${event.cafe.id}" on ${event.dateString}`);
 });

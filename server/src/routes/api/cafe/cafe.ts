@@ -19,115 +19,115 @@ import { registerRecommendationsRoutes } from './recommendations.js';
 import { registerGroupsRoutes } from './groups.js';
 
 export const registerCafeRoutes = (parent: Router) => {
-	const router = new Router({
-		prefix: '/dining'
-	});
+    const router = new Router({
+        prefix: '/dining'
+    });
 
-	registerMenuRoutes(router);
-	registerSearchRoutes(router);
-	registerOrderingRoutes(router);
-	registerRecommendationsRoutes(router);
-	registerGroupsRoutes(router);
+    registerMenuRoutes(router);
+    registerSearchRoutes(router);
+    registerOrderingRoutes(router);
+    registerRecommendationsRoutes(router);
+    registerGroupsRoutes(router);
 
-	const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
-		const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
+    const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
+        const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
 
-		for (const group of diningConfig.CAFE_GROUP_LIST) {
-			const responseGroup: IDiningCoreGroup = {
-				name:         group.name,
-				id:           group.id,
-				shortName:    group.shortName,
-				aliases:      group.aliases,
-				alwaysExpand: group.alwaysExpand ?? false,
-				members:      [],
-				location:     group.location
-			};
+        for (const group of diningConfig.CAFE_GROUP_LIST) {
+            const responseGroup: IDiningCoreGroup = {
+                name:         group.name,
+                id:           group.id,
+                shortName:    group.shortName,
+                aliases:      group.aliases,
+                alwaysExpand: group.alwaysExpand ?? false,
+                members:      [],
+                location:     group.location
+            };
 
-			for (const cafe of group.members) {
-				// Allows us to add cafes before they've officially opened, without polluting the menu list.
-				// For instance, when Food Hall 4 was added, the online ordering menu became available more than
-				// a week early.
-				if (!supportsVersionTag(ctx, VERSION_TAG.unreleasedCafes) && !isCafeAvailable(cafe, getMinimumDateForMenu())) {
-					logDebug(`Skipping cafe ${cafe.id} because it is not yet available & client does not support unreleased cafes`);
-					continue;
-				}
+            for (const cafe of group.members) {
+                // Allows us to add cafes before they've officially opened, without polluting the menu list.
+                // For instance, when Food Hall 4 was added, the online ordering menu became available more than
+                // a week early.
+                if (!supportsVersionTag(ctx, VERSION_TAG.unreleasedCafes) && !isCafeAvailable(cafe, getMinimumDateForMenu())) {
+                    logDebug(`Skipping cafe ${cafe.id} because it is not yet available & client does not support unreleased cafes`);
+                    continue;
+                }
 
-				const cafeData = cafeDataById.get(cafe.id);
-				if (!cafeData) {
-					// Expected in case we have a cafe in config which isn't available online for some reason
-					continue;
-				}
+                const cafeData = cafeDataById.get(cafe.id);
+                if (!cafeData) {
+                    // Expected in case we have a cafe in config which isn't available online for some reason
+                    continue;
+                }
 
-				const member: IDiningCoreGroupMember = {
-					name:               cafe.name,
-					id:                 cafe.id,
-					shortName:          cafe.shortName,
-					aliases:            cafe.aliases,
-					url:                cafe.url,
-					logoUrl:            getLogoUrl(cafe, cafeData),
-					location:           cafe.location,
-					emoji:              cafe.emoji,
-					firstAvailableDate: toMaybeDateString(cafe.firstAvailable)
-				};
+                const member: IDiningCoreGroupMember = {
+                    name:               cafe.name,
+                    id:                 cafe.id,
+                    shortName:          cafe.shortName,
+                    aliases:            cafe.aliases,
+                    url:                cafe.url,
+                    logoUrl:            getLogoUrl(cafe, cafeData),
+                    location:           cafe.location,
+                    emoji:              cafe.emoji,
+                    firstAvailableDate: toMaybeDateString(cafe.firstAvailable)
+                };
 
-				// @ts-expect-error: TS doesn't know that we have already enforced the location requirement
-				// in the original definition of the group
-				responseGroup.members.push(member);
-			}
+                // @ts-expect-error: TS doesn't know that we have already enforced the location requirement
+                // in the original definition of the group
+                responseGroup.members.push(member);
+            }
 
-			response.groups.push(responseGroup);
-		}
-	}
+            response.groups.push(responseGroup);
+        }
+    }
 
-	const populateUserDataAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
-		if (!ctx.isAuthenticated()) {
-			return;
-		}
+    const populateUserDataAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
+        if (!ctx.isAuthenticated()) {
+            return;
+        }
 
-		const userId = getUserIdOrThrow(ctx);
-		const user = await UserStorageClient.getUserAsync({ id: userId });
+        const userId = getUserIdOrThrow(ctx);
+        const user = await UserStorageClient.getUserAsync({ id: userId });
 
-		// If we have to swap out the database for any reason, just sign out users who had previously authed.
-		if (user == null) {
-			await ctx.logout();
-			return;
-		}
+        // If we have to swap out the database for any reason, just sign out users who had previously authed.
+        if (user == null) {
+            await ctx.logout();
+            return;
+        }
 
-		response.user = {
-			id: userId,
-			role: user.role
-		};
+        response.user = {
+            id: userId,
+            role: user.role
+        };
 
-		if (user.settings) {
-			response.user.settings = {
-				...user.settings,
-				lastUpdate: user.settings.lastUpdate.getTime()
-			};
-		}
-	}
+        if (user.settings) {
+            response.user.settings = {
+                ...user.settings,
+                lastUpdate: user.settings.lastUpdate.getTime()
+            };
+        }
+    }
 
-	router.get('/',
-		// can't memoize because it depends on auth now
-		// todo: add a way to memoize just the cafes part?
-		// memoizeResponseBodyByQueryParams(),
-		async ctx => {
-			const response: IDiningCoreResponse = {
-				isTrackingEnabled: ApplicationContext.analyticsApplicationsReady.size > 0,
-				groups:            []
-			};
+    router.get('/',
+        // can't memoize because it depends on auth now
+        // todo: add a way to memoize just the cafes part?
+        // memoizeResponseBodyByQueryParams(),
+        async ctx => {
+            const response: IDiningCoreResponse = {
+                isTrackingEnabled: ApplicationContext.analyticsApplicationsReady.size > 0,
+                groups:            []
+            };
 
-			const userDataPromise: Promise<void> = supportsVersionTag(ctx, VERSION_TAG.userNotInCafeList)
-				? Promise.resolve()
-				: populateUserDataAsync(ctx, response);
+            const userDataPromise: Promise<void> = supportsVersionTag(ctx, VERSION_TAG.userNotInCafeList)
+                ? Promise.resolve()
+                : populateUserDataAsync(ctx, response);
 
-			await Promise.all([
-				populateCafesAsync(ctx, response),
-				userDataPromise
-			]);
+            await Promise.all([
+                populateCafesAsync(ctx, response),
+                userDataPromise
+            ]);
 
-			ctx.body = jsonStringifyWithoutNull(response);
-			// assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, false /*isPublic*/);
-		});
+            ctx.body = jsonStringifyWithoutNull(response);
+            // assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, false /*isPublic*/);
+        });
 
-	attachRouter(parent, router);
+    attachRouter(parent, router);
 };

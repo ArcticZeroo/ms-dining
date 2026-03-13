@@ -13,44 +13,44 @@ const CLOSE_BOOST_MULTIPLIER = 1.2;
 // Pre-computed lookup from cafeId → parent group
 const GROUP_BY_CAFE_ID = new Map<string, CafeGroup>();
 for (const group of CAFE_GROUP_LIST) {
-	for (const member of group.members) {
-		GROUP_BY_CAFE_ID.set(member.id, group);
-	}
+    for (const member of group.members) {
+        GROUP_BY_CAFE_ID.set(member.id, group);
+    }
 }
 
 export const getCafeLocation = (cafeId: string): ILocationCoordinates | null => {
-	const cafe = CAFES_BY_ID.get(cafeId);
-	if (cafe?.location) {
-		return cafe.location;
-	}
+    const cafe = CAFES_BY_ID.get(cafeId);
+    if (cafe?.location) {
+        return cafe.location;
+    }
 
-	const group = GROUP_BY_CAFE_ID.get(cafeId);
-	if (group?.location) {
-		return group.location;
-	}
+    const group = GROUP_BY_CAFE_ID.get(cafeId);
+    if (group?.location) {
+        return group.location;
+    }
 
-	return null;
+    return null;
 };
 
 const getMinDistanceToAnyCafe = (targetCafeId: string, referenceCafeIds: string[]): number | null => {
-	const targetLocation = getCafeLocation(targetCafeId);
-	if (!targetLocation) {
-		return null;
-	}
+    const targetLocation = getCafeLocation(targetCafeId);
+    if (!targetLocation) {
+        return null;
+    }
 
-	let minDistance: number | null = null;
-	for (const referenceCafeId of referenceCafeIds) {
-		const referenceLocation = getCafeLocation(referenceCafeId);
-		if (!referenceLocation) {
-			continue;
-		}
-		const distance = getDistanceBetweenCoordinates(targetLocation, referenceLocation);
-		if (minDistance === null || distance < minDistance) {
-			minDistance = distance;
-		}
-	}
+    let minDistance: number | null = null;
+    for (const referenceCafeId of referenceCafeIds) {
+        const referenceLocation = getCafeLocation(referenceCafeId);
+        if (!referenceLocation) {
+            continue;
+        }
+        const distance = getDistanceBetweenCoordinates(targetLocation, referenceLocation);
+        if (minDistance === null || distance < minDistance) {
+            minDistance = distance;
+        }
+    }
 
-	return minDistance;
+    return minDistance;
 };
 
 /**
@@ -61,13 +61,13 @@ const getMinDistanceToAnyCafe = (targetCafeId: string, referenceCafeIds: string[
  * - otherwise → sigmoid curve from ~1.0 down to ~0.0
  */
 export const computeProximityWeight = (distanceKm: number): number => {
-	if (distanceKm >= MAX_RECOMMENDATION_DISTANCE_KM) {
-		return 0;
-	}
-	if (distanceKm <= CLOSE_BOOST_THRESHOLD_KM) {
-		return CLOSE_BOOST_MULTIPLIER;
-	}
-	return 1 / (1 + Math.exp(SIGMOID_STEEPNESS * (distanceKm - SIGMOID_MIDPOINT_KM)));
+    if (distanceKm >= MAX_RECOMMENDATION_DISTANCE_KM) {
+        return 0;
+    }
+    if (distanceKm <= CLOSE_BOOST_THRESHOLD_KM) {
+        return CLOSE_BOOST_MULTIPLIER;
+    }
+    return 1 / (1 + Math.exp(SIGMOID_STEEPNESS * (distanceKm - SIGMOID_MIDPOINT_KM)));
 };
 
 /**
@@ -76,26 +76,26 @@ export const computeProximityWeight = (distanceKm: number): number => {
  * Returns null if no homepage cafes have location data.
  */
 export const buildProximityWeightMap = (homepageIds: string[], cafeIdFilter?: string): Map<string, number> | null => {
-	if (cafeIdFilter) {
-		return null;
-	}
+    if (cafeIdFilter) {
+        return null;
+    }
 
-	const weights = new Map<string, number>();
-	let hasAnyLocation = false;
-	for (const cafeId of CAFES_BY_ID.keys()) {
-		const distance = getMinDistanceToAnyCafe(cafeId, homepageIds);
-		if (distance === null) {
-			// No location data for this cafe; don't filter it out
-			weights.set(cafeId, 1);
-			continue;
-		}
-		hasAnyLocation = true;
-		weights.set(cafeId, computeProximityWeight(distance));
-	}
+    const weights = new Map<string, number>();
+    let hasAnyLocation = false;
+    for (const cafeId of CAFES_BY_ID.keys()) {
+        const distance = getMinDistanceToAnyCafe(cafeId, homepageIds);
+        if (distance === null) {
+            // No location data for this cafe; don't filter it out
+            weights.set(cafeId, 1);
+            continue;
+        }
+        hasAnyLocation = true;
+        weights.set(cafeId, computeProximityWeight(distance));
+    }
 
-	if (!hasAnyLocation) {
-		return null;
-	}
+    if (!hasAnyLocation) {
+        return null;
+    }
 
-	return weights;
+    return weights;
 };

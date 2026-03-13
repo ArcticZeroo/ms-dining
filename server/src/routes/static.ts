@@ -7,23 +7,23 @@ import Router from '@koa/router';
 import { attachRouter, CATCH_ALL_PATH } from '../util/koa.js';
 
 export const createStaticRoutingApp= () => {
-	const app = new Koa();
+    const app = new Koa();
 
-	const router = new Router();
+    const router = new Router();
 
-	router.use(mount(
-		'/',
-		serve(serverStaticPath, {
-			// Assume that most thumbnails are rarely being updated
-			maxAge: new Duration({ days: 30 }).inMilliseconds
-		})
-	));
+    router.use(mount(
+        '/',
+        serve(serverStaticPath, {
+            // Assume that most thumbnails are rarely being updated
+            maxAge: new Duration({ days: 30 }).inMilliseconds
+        })
+    ));
 
-	router.all(CATCH_ALL_PATH, (ctx) => {
-		ctx.throw(404, 'Resource not found');
-	});
+    router.all(CATCH_ALL_PATH, (ctx) => {
+        ctx.throw(404, 'Resource not found');
+    });
 
-	attachRouter(app, router);
+    attachRouter(app, router);
 
-	return app;
+    return app;
 }

@@ -1,16 +1,16 @@
 import Router from '@koa/router';
 import {
-	GroupStorageClient,
-	menuItemToGroupMember,
-	stationToGroupMember
+    GroupStorageClient,
+    menuItemToGroupMember,
+    stationToGroupMember
 } from '../../../api/storage/clients/groups.js';
 import { attachRouter, requireAdmin } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
-	AddGroupMembersRequestSchema,
-	CreateGroupRequestSchema,
-	IGroupMember,
-	UpdateGroupRequest
+    AddGroupMembersRequestSchema,
+    CreateGroupRequestSchema,
+    IGroupMember,
+    UpdateGroupRequest
 } from '@msdining/common/models/group';
 import { MenuItemStorageClient } from '../../../api/storage/clients/menu-item.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';
@@ -19,120 +19,120 @@ import { Context } from 'koa';
 import { treatPrismaNotFoundAs404 } from '../../../middleware/prisma.js';
 
 export const registerGroupsRoutes = (parent: Router) => {
-	const router = new Router({
-		prefix: '/groups'
-	});
+    const router = new Router({
+        prefix: '/groups'
+    });
 
-	const requireGroupIdParam = (ctx: Context) => {
-		const groupId = ctx.params.id;
-		if (!groupId) {
-			ctx.throw(400, 'Missing group id');
-		}
+    const requireGroupIdParam = (ctx: Context) => {
+        const groupId = ctx.params.id;
+        if (!groupId) {
+            ctx.throw(400, 'Missing group id');
+        }
 
-		return groupId;
-	}
+        return groupId;
+    }
 
-	// GET /api/dining/groups - Get all groups
-	router.get('/',
-		doNotCacheMiddleware,
-		async ctx => {
-			const groups = await GroupStorageClient.getGroups();
-			ctx.body = jsonStringifyWithoutNull(groups);
-		});
+    // GET /api/dining/groups - Get all groups
+    router.get('/',
+        doNotCacheMiddleware,
+        async ctx => {
+            const groups = await GroupStorageClient.getGroups();
+            ctx.body = jsonStringifyWithoutNull(groups);
+        });
 
-	// GET /api/dining/groups/candidates - Get suggested groups to create (zero context)
-	router.get('/candidates',
-		requireAdmin,
-		doNotCacheMiddleware,
-		async ctx => {
-			const candidates = await GroupStorageClient.getGroupCandidatesZeroContext();
-			ctx.body = jsonStringifyWithoutNull(candidates);
-		});
+    // GET /api/dining/groups/candidates - Get suggested groups to create (zero context)
+    router.get('/candidates',
+        requireAdmin,
+        doNotCacheMiddleware,
+        async ctx => {
+            const candidates = await GroupStorageClient.getGroupCandidatesZeroContext();
+            ctx.body = jsonStringifyWithoutNull(candidates);
+        });
 
-	// POST /api/dining/groups - Create a new group
-	router.post('/',
-		requireAdmin,
-		async ctx => {
-			const { name, type, initialMembers } = CreateGroupRequestSchema.parse(ctx.request.body);
+    // POST /api/dining/groups - Create a new group
+    router.post('/',
+        requireAdmin,
+        async ctx => {
+            const { name, type, initialMembers } = CreateGroupRequestSchema.parse(ctx.request.body);
 
-			const group = await GroupStorageClient.createGroup(
-				name,
-				type,
-				initialMembers
-			);
+            const group = await GroupStorageClient.createGroup(
+                name,
+                type,
+                initialMembers
+            );
 
-			ctx.body = jsonStringifyWithoutNull({ id: group.id });
-		});
+            ctx.body = jsonStringifyWithoutNull({ id: group.id });
+        });
 
-	// PATCH /api/dining/groups/:id - Rename a group
-	router.patch('/:id',
-		requireAdmin,
-		treatPrismaNotFoundAs404('Group not found'),
-		async ctx => {
-			const groupId = requireGroupIdParam(ctx);
-			const body = UpdateGroupRequest.parse(ctx.request.body);
-			await GroupStorageClient.updateGroup(groupId, body);
-			ctx.status = 204;
-		});
+    // PATCH /api/dining/groups/:id - Rename a group
+    router.patch('/:id',
+        requireAdmin,
+        treatPrismaNotFoundAs404('Group not found'),
+        async ctx => {
+            const groupId = requireGroupIdParam(ctx);
+            const body = UpdateGroupRequest.parse(ctx.request.body);
+            await GroupStorageClient.updateGroup(groupId, body);
+            ctx.status = 204;
+        });
 
-	// DELETE /api/dining/groups/:id - Delete a group
-	router.delete('/:id',
-		requireAdmin,
-		async ctx => {
-			const groupId = requireGroupIdParam(ctx);
-			await GroupStorageClient.deleteGroup(groupId);
-			ctx.status = 204;
-		});
+    // DELETE /api/dining/groups/:id - Delete a group
+    router.delete('/:id',
+        requireAdmin,
+        async ctx => {
+            const groupId = requireGroupIdParam(ctx);
+            await GroupStorageClient.deleteGroup(groupId);
+            ctx.status = 204;
+        });
 
-	// POST /api/dining/groups/:id/members - Add members to a group
-	router.post('/:id/members',
-		requireAdmin,
-		async ctx => {
-			const groupId = requireGroupIdParam(ctx);
-			const { memberIds } = AddGroupMembersRequestSchema.parse(ctx.request.body);
-			await GroupStorageClient.addToGroup(groupId, memberIds);
-			ctx.status = 204;
-		});
+    // POST /api/dining/groups/:id/members - Add members to a group
+    router.post('/:id/members',
+        requireAdmin,
+        async ctx => {
+            const groupId = requireGroupIdParam(ctx);
+            const { memberIds } = AddGroupMembersRequestSchema.parse(ctx.request.body);
+            await GroupStorageClient.addToGroup(groupId, memberIds);
+            ctx.status = 204;
+        });
 
-	// GET /api/dining/groups/:id/candidates - Get candidate members for a group
-	router.get('/:id/candidates',
-		requireAdmin,
-		doNotCacheMiddleware,
-		async ctx => {
-			const groupId = requireGroupIdParam(ctx);
-			const candidates = await GroupStorageClient.getCandidatesForGroup(groupId);
-			ctx.body = jsonStringifyWithoutNull(candidates);
-		});
+    // GET /api/dining/groups/:id/candidates - Get candidate members for a group
+    router.get('/:id/candidates',
+        requireAdmin,
+        doNotCacheMiddleware,
+        async ctx => {
+            const groupId = requireGroupIdParam(ctx);
+            const candidates = await GroupStorageClient.getCandidatesForGroup(groupId);
+            ctx.body = jsonStringifyWithoutNull(candidates);
+        });
 
-	// GET /api/dining/groups/all-items-without-group - Get all items without a group
-	router.get('/all-items-without-group',
-		requireAdmin,
-		doNotCacheMiddleware,
-		async ctx => {
-			const [menuItems, stations] = await Promise.all([
-				MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
-				StationStorageClient.retrieveAllStationsWithoutGroup()
-			]);
+    // GET /api/dining/groups/all-items-without-group - Get all items without a group
+    router.get('/all-items-without-group',
+        requireAdmin,
+        doNotCacheMiddleware,
+        async ctx => {
+            const [menuItems, stations] = await Promise.all([
+                MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
+                StationStorageClient.retrieveAllStationsWithoutGroup()
+            ]);
 
-			ctx.body = jsonStringifyWithoutNull([
-				...await Promise.all(menuItems.map(menuItemToGroupMember)),
-				...stations.map(stationToGroupMember)
-			] satisfies IGroupMember[]);
-		});
+            ctx.body = jsonStringifyWithoutNull([
+                ...await Promise.all(menuItems.map(menuItemToGroupMember)),
+                ...stations.map(stationToGroupMember)
+            ] satisfies IGroupMember[]);
+        });
 
-	router.delete('/:id/members/:memberId',
-		requireAdmin,
-		async ctx => {
-			const groupId = requireGroupIdParam(ctx);
-			const memberId = ctx.params.memberId;
-			if (!memberId) {
-				ctx.throw(400, 'Missing member id');
-				return;
-			}
+    router.delete('/:id/members/:memberId',
+        requireAdmin,
+        async ctx => {
+            const groupId = requireGroupIdParam(ctx);
+            const memberId = ctx.params.memberId;
+            if (!memberId) {
+                ctx.throw(400, 'Missing member id');
+                return;
+            }
 
-			await GroupStorageClient.deleteMembersFromGroup(groupId, [memberId]);
-			ctx.status = 204;
-		});
+            await GroupStorageClient.deleteMembersFromGroup(groupId, [memberId]);
+            ctx.status = 204;
+        });
 
-	attachRouter(parent, router);
+    attachRouter(parent, router);
 };

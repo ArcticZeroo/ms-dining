@@ -38,11 +38,11 @@ interface ISaveSessionParams {
 }
 
 export const saveDailyMenuAsync = async ({
-                                           cafe,
-                                           dateString,
-                                           stations,
-                                           shouldUpdateExistingItems
-                                       }: ISaveSessionParams) => {
+    cafe,
+    dateString,
+    stations,
+    shouldUpdateExistingItems
+}: ISaveSessionParams) => {
     EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations, dateString);
 
     for (const station of stations) {

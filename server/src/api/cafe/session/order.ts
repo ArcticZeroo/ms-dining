@@ -4,8 +4,8 @@ import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-cl
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
-	IOrderLineItem,
-	IRetrieveCardProcessorTokenResponse,
+    IOrderLineItem,
+    IRetrieveCardProcessorTokenResponse,
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
 import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
@@ -966,11 +966,11 @@ export class CafeOrderSession {
      * Closes the order and sends phone confirmation.
      */
     public async completeWithIframeToken({
-                                             alias,
-                                             phoneData,
-                                             paymentToken,
-                                             cardInfo,
-                                         }: IIframeCloseOrderParams): Promise<void> {
+        alias,
+        phoneData,
+        paymentToken,
+        cardInfo,
+    }: IIframeCloseOrderParams): Promise<void> {
         await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
             this.#lastCompletedStage = SubmitOrderStage.payment;
 

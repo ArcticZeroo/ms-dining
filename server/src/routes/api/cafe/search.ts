@@ -50,8 +50,8 @@ export const registerSearchRoutes = (parent: Router) => {
 
     const getApplicationNameForSearch = (isExplore: string | undefined) => {
         return isExplore === 'true'
-               ? ANALYTICS_APPLICATION_NAMES.searchExplore
-               : ANALYTICS_APPLICATION_NAMES.search;
+            ? ANALYTICS_APPLICATION_NAMES.searchExplore
+            : ANALYTICS_APPLICATION_NAMES.search;
     };
 
     const incrementSearchCountMiddleware: Middleware = (ctx, next) => {
@@ -111,12 +111,12 @@ export const registerSearchRoutes = (parent: Router) => {
             const minPriceRaw = ctx.query.min;
 
             const maxPrice = typeof maxPriceRaw === 'string'
-                             ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
-                             : DEFAULT_MAX_PRICE;
+                ? NumberUtil.parseNumber(maxPriceRaw, DEFAULT_MAX_PRICE)
+                : DEFAULT_MAX_PRICE;
 
             const minPrice = typeof minPriceRaw === 'string'
-                             ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
-                             : DEFAULT_MIN_PRICE;
+                ? NumberUtil.parseNumber(minPriceRaw, DEFAULT_MIN_PRICE)
+                : DEFAULT_MIN_PRICE;
 
             const date = getDateForMenuRequest(ctx);
 

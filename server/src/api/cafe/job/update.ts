@@ -103,5 +103,5 @@ export class DailyCafeUpdateSession {
         const elapsedSeconds = (endTime - startTime) / 1000;
 
         logInfo(`{${this.dateString}} Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
-    };
+    }
 }

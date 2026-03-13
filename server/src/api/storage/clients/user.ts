@@ -19,147 +19,147 @@ interface IUpdateUserSettingsPrismaData {
 }
 
 export abstract class UserStorageClient {
-	static async createUserAsync(userToCreate: Prisma.UserCreateInput): Promise<IServerUser> {
-		const newUser = await usePrismaClient(async prismaClient => {
-			try {
-				const user = await prismaClient.user.create({ data: userToCreate });
+    static async createUserAsync(userToCreate: Prisma.UserCreateInput): Promise<IServerUser> {
+        const newUser = await usePrismaClient(async prismaClient => {
+            try {
+                const user = await prismaClient.user.create({ data: userToCreate });
 
-				sendVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.userSignup, randomUUID());
+                sendVisitFireAndForget(ANALYTICS_APPLICATION_NAMES.userSignup, randomUUID());
 
-				return user;
-			} catch (err) {
-				if (isUniqueConstraintFailedError(err)) {
-					return prismaClient.user.findUnique({
-						where: {
-							externalId_provider: {
-								externalId: userToCreate.externalId,
-								provider:   userToCreate.provider
-							}
-						}
-					});
-				}
+                return user;
+            } catch (err) {
+                if (isUniqueConstraintFailedError(err)) {
+                    return prismaClient.user.findUnique({
+                        where: {
+                            externalId_provider: {
+                                externalId: userToCreate.externalId,
+                                provider:   userToCreate.provider
+                            }
+                        }
+                    });
+                }
 
-				throw err;
-			}
-		});
+                throw err;
+            }
+        });
 
-		if (!newUser) {
-			throw new Error('User not created or found');
-		}
+        if (!newUser) {
+            throw new Error('User not created or found');
+        }
 
-		return newUser;
-	}
+        return newUser;
+    }
 
-	static async getUserAsync(uniqueValue: Prisma.UserFindUniqueArgs['where']): Promise<IServerUser | null> {
-		const user = await usePrismaClient(prismaClient => prismaClient.user.findUnique({
-			where: uniqueValue
-		}));
+    static async getUserAsync(uniqueValue: Prisma.UserFindUniqueArgs['where']): Promise<IServerUser | null> {
+        const user = await usePrismaClient(prismaClient => prismaClient.user.findUnique({
+            where: uniqueValue
+        }));
 
-		if (user == null) {
-			return null;
-		}
+        if (user == null) {
+            return null;
+        }
 
-		const serverUser: IServerUser = {
-			id:          user.id,
-			externalId:  user.externalId,
-			provider:    user.provider,
-			displayName: user.displayName,
-			role:        user.role,
-			createdAt:   user.createdAt,
-		};
+        const serverUser: IServerUser = {
+            id:          user.id,
+            externalId:  user.externalId,
+            provider:    user.provider,
+            displayName: user.displayName,
+            role:        user.role,
+            createdAt:   user.createdAt,
+        };
 
-		if (user.lastSettingsUpdate != null) {
-			serverUser.settings = {
-				favoriteStations:  UserStorageClient._deserializeSetting(user.favoriteStations),
-				favoriteMenuItems: UserStorageClient._deserializeSetting(user.favoriteMenuItems),
-				homepageIds:       UserStorageClient._deserializeSetting(user.homepageIds),
-				lastUpdate:        user.lastSettingsUpdate
-			};
-		}
+        if (user.lastSettingsUpdate != null) {
+            serverUser.settings = {
+                favoriteStations:  UserStorageClient._deserializeSetting(user.favoriteStations),
+                favoriteMenuItems: UserStorageClient._deserializeSetting(user.favoriteMenuItems),
+                homepageIds:       UserStorageClient._deserializeSetting(user.homepageIds),
+                lastUpdate:        user.lastSettingsUpdate
+            };
+        }
 
-		return serverUser;
-	}
+        return serverUser;
+    }
 
-	static async updateUserDisplayNameAsync(id: string, displayName: string): Promise<void> {
-		await usePrismaClient(prismaClient => prismaClient.user.update({
-			where:  {
-				id
-			},
-			data:   {
-				displayName
-			},
-			select: {
-				id: true
-			}
-		}));
-	}
+    static async updateUserDisplayNameAsync(id: string, displayName: string): Promise<void> {
+        await usePrismaClient(prismaClient => prismaClient.user.update({
+            where:  {
+                id
+            },
+            data:   {
+                displayName
+            },
+            select: {
+                id: true
+            }
+        }));
+    }
 
-	private static _deserializeSetting(settingValue: string | null): string[] {
-		if (settingValue == null || settingValue.trim().length === 0) {
-			return [];
-		}
+    private static _deserializeSetting(settingValue: string | null): string[] {
+        if (settingValue == null || settingValue.trim().length === 0) {
+            return [];
+        }
 
-		const value = settingValue.split(ID_DELIMITER);
-		if (value.length === 0) {
-			return [];
-		}
+        const value = settingValue.split(ID_DELIMITER);
+        if (value.length === 0) {
+            return [];
+        }
 
-		return value;
-	}
+        return value;
+    }
 
-	private static _serializeSetting(settingValue: Nullable<string[]>): string | null {
-		if (settingValue == null) {
-			return null;
-		}
+    private static _serializeSetting(settingValue: Nullable<string[]>): string | null {
+        if (settingValue == null) {
+            return null;
+        }
 
-		const value = settingValue.join(ID_DELIMITER);
-		if (value.trim().length === 0) {
-			return null;
-		}
+        const value = settingValue.join(ID_DELIMITER);
+        if (value.trim().length === 0) {
+            return null;
+        }
 
-		return value;
-	}
+        return value;
+    }
 
-	static async updateUserSettingsAsync(id: string, {
-		favoriteStations,
-		favoriteMenuItems,
-		homepageIds,
-		timestamp
-	}: IUpdateUserSettingsInput) {
-		const data: IUpdateUserSettingsPrismaData = {
-			lastSettingsUpdate: new Date(timestamp)
-		};
+    static async updateUserSettingsAsync(id: string, {
+        favoriteStations,
+        favoriteMenuItems,
+        homepageIds,
+        timestamp
+    }: IUpdateUserSettingsInput) {
+        const data: IUpdateUserSettingsPrismaData = {
+            lastSettingsUpdate: new Date(timestamp)
+        };
 
-		if (favoriteStations != null) {
-			data.favoriteStations = UserStorageClient._serializeSetting(favoriteStations);
-		}
+        if (favoriteStations != null) {
+            data.favoriteStations = UserStorageClient._serializeSetting(favoriteStations);
+        }
 
-		if (favoriteMenuItems != null) {
-			data.favoriteMenuItems = UserStorageClient._serializeSetting(favoriteMenuItems);
-		}
+        if (favoriteMenuItems != null) {
+            data.favoriteMenuItems = UserStorageClient._serializeSetting(favoriteMenuItems);
+        }
 
-		if (homepageIds != null) {
-			data.homepageIds = UserStorageClient._serializeSetting(homepageIds);
-		}
+        if (homepageIds != null) {
+            data.homepageIds = UserStorageClient._serializeSetting(homepageIds);
+        }
 
-		await usePrismaClient(async prismaClient => {
-			const user = await prismaClient.user.findUnique({ where: { id }, select: { lastSettingsUpdate: true } });
+        await usePrismaClient(async prismaClient => {
+            const user = await prismaClient.user.findUnique({ where: { id }, select: { lastSettingsUpdate: true } });
 
-			if (user == null) {
-				throw new Error('User not found');
-			}
+            if (user == null) {
+                throw new Error('User not found');
+            }
 
-			if (user.lastSettingsUpdate != null && user.lastSettingsUpdate.getTime() >= timestamp) {
-				logDebug('Skipping settings update because server settings are newer');
-				return;
-			}
+            if (user.lastSettingsUpdate != null && user.lastSettingsUpdate.getTime() >= timestamp) {
+                logDebug('Skipping settings update because server settings are newer');
+                return;
+            }
 
-			await prismaClient.user.update({
-				where: { id },
-				data
-			});
+            await prismaClient.user.update({
+                where: { id },
+                data
+            });
 
-			logDebug('Updated user settings!');
-		});
-	}
+            logDebug('Updated user settings!');
+        });
+    }
 }

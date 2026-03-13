@@ -1,3 +1,3 @@
 export const throwError = (message: string): never => {
-	throw new Error(message);
+    throw new Error(message);
 }

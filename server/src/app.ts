@@ -27,14 +27,14 @@ app.use(mount('/static', createStaticRoutingApp()));
 
 // If we don't initialize the session, everything else fails later
 if (!hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
-	throw new Error('Session secret environment variable is not set. Please set the SESSION_SECRET environment variable.');
+    throw new Error('Session secret environment variable is not set. Please set the SESSION_SECRET environment variable.');
 }
 
 app.keys = [getSessionSecret()];
 app.use(session({
-	maxAge: new Duration({ days: 180 }).inMilliseconds,
-	renew: true,
-	store: new PrismaSessionStore()
+    maxAge: new Duration({ days: 180 }).inMilliseconds,
+    renew: true,
+    store: new PrismaSessionStore()
 }, app));
 
 app.use(passport.initialize());

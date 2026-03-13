@@ -28,22 +28,22 @@ class ExpiringCache {
         }
     }
 
-	getEntry(key: string): ICacheEntry | undefined {
-		const entry = this.#cache.get(key);
-		if (entry == null || Date.now() > entry.expirationTime) {
-			this.#cache.delete(key);
-			return undefined;
-		}
-		return entry;
-	}
+    getEntry(key: string): ICacheEntry | undefined {
+        const entry = this.#cache.get(key);
+        if (entry == null || Date.now() > entry.expirationTime) {
+            this.#cache.delete(key);
+            return undefined;
+        }
+        return entry;
+    }
 
     getValue(key: string) {
         return this.getEntry(key)?.value;
     }
 
-	getExpirationTime(key: string): number | undefined {
-		return this.#cache.get(key)?.expirationTime;
-	}
+    getExpirationTime(key: string): number | undefined {
+        return this.#cache.get(key)?.expirationTime;
+    }
 
     insertEntry(key: string, value: string) {
         this.#cache.set(key, {
@@ -94,14 +94,14 @@ export const memoizeResponseBody = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_
     const getCacheKey = (ctx: Koa.Context) => `${ctx.path}@${getVersionTag(ctx)}?${serializeQueryParams(ctx)}`;
 
     const middleware: Koa.Middleware = async (ctx, next) => {
-		ctx.state.memoize = middleware;
+        ctx.state.memoize = middleware;
 
         const cacheKey = getCacheKey(ctx);
         const cacheEntry = cache.getEntry(cacheKey);
 
         if (cacheEntry != null) {
-			const remainingTimeMs = cacheEntry.expirationTime - Date.now();
-			assignCacheControl(ctx, Math.floor(remainingTimeMs / 1000), isPublic);
+            const remainingTimeMs = cacheEntry.expirationTime - Date.now();
+            assignCacheControl(ctx, Math.floor(remainingTimeMs / 1000), isPublic);
             ctx.body = cacheEntry.value;
             return;
         }
@@ -109,12 +109,12 @@ export const memoizeResponseBody = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_
         await next();
 
         if (ctx.body && ctx.status === 200) {
-			assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, isPublic);
+            assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, isPublic);
             cache.insertEntry(cacheKey, ctx.body);
         }
     };
 
-	const controller = middleware as IMemoizeController;
+    const controller = middleware as IMemoizeController;
 
     controller.clearCache = (ctx) => {
         if (ctx) {
@@ -124,10 +124,10 @@ export const memoizeResponseBody = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_
         }
     };
 
-	controller.getNextExpiryTime = (ctx: Koa.Context) => {
-		const cacheKey = getCacheKey(ctx);
-		return cache.getExpirationTime(cacheKey);
-	};
+    controller.getNextExpiryTime = (ctx: Koa.Context) => {
+        const cacheKey = getCacheKey(ctx);
+        return cache.getExpirationTime(cacheKey);
+    };
 
     return middleware as IMemoizeController;
 }
@@ -138,29 +138,29 @@ interface IMemoizeResponseBodyWithResetOnMenuUpdateParams extends IMemoizeRespon
 }
 
 export const memoizeResponseBodyWithResetOnMenuUpdate = ({ cafeId, dateString, ...params }: IMemoizeResponseBodyWithResetOnMenuUpdateParams = {}) => {
-	const controller = memoizeResponseBody(params);
+    const controller = memoizeResponseBody(params);
 
-	CACHE_EVENTS.on('menuPublished', (event) => {
-		if ((cafeId && event.cafe.id !== cafeId) || (dateString && event.dateString !== dateString)) {
-			return;
-		}
+    CACHE_EVENTS.on('menuPublished', (event) => {
+        if ((cafeId && event.cafe.id !== cafeId) || (dateString && event.dateString !== dateString)) {
+            return;
+        }
 
-		controller.clearCache();
-	});
+        controller.clearCache();
+    });
 
-	return controller;
+    return controller;
 }
 
 export const assignCacheControlMiddleware = (maxAge: DurationOrMilliseconds = DEFAULT_CACHE_EXPIRATION_TIME, isPublic: boolean = false) => {
-	const maxAgeDuration = Duration.fromDurationOrMilliseconds(maxAge);
+    const maxAgeDuration = Duration.fromDurationOrMilliseconds(maxAge);
 
-	return async (ctx: Koa.Context, next: Koa.Next) => {
-		ctx.set('Cache-Control', `${isPublic ? 'public' : 'private'}, max-age=${maxAgeDuration.inSeconds}`);
-		await next();
-	};
+    return async (ctx: Koa.Context, next: Koa.Next) => {
+        ctx.set('Cache-Control', `${isPublic ? 'public' : 'private'}, max-age=${maxAgeDuration.inSeconds}`);
+        await next();
+    };
 }
 
 export const doNotCacheMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-	ctx.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-	await next();
+    ctx.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    await next();
 }

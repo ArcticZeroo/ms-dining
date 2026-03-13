@@ -27,52 +27,52 @@ export interface IThumbnailResult extends IImageMetadata {
  * Resizes to 9x8 grayscale, compares adjacent pixels per row to produce a 64-bit hash.
  */
 export const computeDHash = (image: Jimp): string => {
-	const resized = image.clone()
-		.resize(DHASH_WIDTH, DHASH_HEIGHT)
-		.greyscale();
+    const resized = image.clone()
+        .resize(DHASH_WIDTH, DHASH_HEIGHT)
+        .greyscale();
 
-	let hash = BigInt(0);
+    let hash = BigInt(0);
 
-	for (let y = 0; y < DHASH_HEIGHT; y++) {
-		for (let x = 0; x < DHASH_WIDTH - 1; x++) {
-			const leftPixel = Jimp.intToRGBA(resized.getPixelColor(x, y));
-			const rightPixel = Jimp.intToRGBA(resized.getPixelColor(x + 1, y));
+    for (let y = 0; y < DHASH_HEIGHT; y++) {
+        for (let x = 0; x < DHASH_WIDTH - 1; x++) {
+            const leftPixel = Jimp.intToRGBA(resized.getPixelColor(x, y));
+            const rightPixel = Jimp.intToRGBA(resized.getPixelColor(x + 1, y));
 
-			hash <<= BigInt(1);
-			if (leftPixel.r > rightPixel.r) {
-				hash |= BigInt(1);
-			}
-		}
-	}
+            hash <<= BigInt(1);
+            if (leftPixel.r > rightPixel.r) {
+                hash |= BigInt(1);
+            }
+        }
+    }
 
-	return hash.toString(16).padStart(16, '0');
+    return hash.toString(16).padStart(16, '0');
 };
 
 export const loadImageData = async (url: string): Promise<Buffer> => {
-	logDebug(`[Thumbnail] Loading image data from ${encodeURI(url)}`);
+    logDebug(`[Thumbnail] Loading image data from ${encodeURI(url)}`);
 
-	const response = await runPromiseWithRetries(
-		() => fetch(url, {
-			headers: {
-				'User-Agent': defaultUserAgent
-			}
-		}),
-		loadImageRetries,
-		loadImageRetryDelayMs
-	);
+    const response = await runPromiseWithRetries(
+        () => fetch(url, {
+            headers: {
+                'User-Agent': defaultUserAgent
+            }
+        }),
+        loadImageRetries,
+        loadImageRetryDelayMs
+    );
 
-	if (!response.ok) {
-		let text;
-		try {
-			text = await response.text();
-		} catch {
-			throw new Error(`Response failed with status: ${response.status}, could not deserialize text`);
-		}
-		throw new Error(`Response failed with status: ${response.status}, text: ${text}`);
-	}
+    if (!response.ok) {
+        let text;
+        try {
+            text = await response.text();
+        } catch {
+            throw new Error(`Response failed with status: ${response.status}, could not deserialize text`);
+        }
+        throw new Error(`Response failed with status: ${response.status}, text: ${text}`);
+    }
 
-	const buffer = await response.arrayBuffer();
-	return Buffer.from(buffer);
+    const buffer = await response.arrayBuffer();
+    return Buffer.from(buffer);
 };
 
 // static/menu-items/thumbnail/<id>
@@ -82,36 +82,36 @@ export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThum
 export const getHashThumbnailFilepath = (hash: string) => path.join(serverThumbnailPath, `${hash}.png`);
 
 export const updateThumbnailHashFromExistingImage = async (id: string, imagePath: string): Promise<string> => {
-	const image = await Jimp.read(imagePath);
-	const hash = computeDHash(image);
-	await MenuItemStorageClient.updateThumbnailHash(id, hash);
-	updateManifestEntry(id, { hash, width: image.getWidth(), height: image.getHeight(), lastUpdateTime: new Date().toISOString() });
-	return hash;
+    const image = await Jimp.read(imagePath);
+    const hash = computeDHash(image);
+    await MenuItemStorageClient.updateThumbnailHash(id, hash);
+    updateManifestEntry(id, { hash, width: image.getWidth(), height: image.getHeight(), lastUpdateTime: new Date().toISOString() });
+    return hash;
 };
 
 export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult> => {
-	const imageData = await loadImageData(request.imageUrl);
-	const image = await Jimp.read(imageData);
+    const imageData = await loadImageData(request.imageUrl);
+    const image = await Jimp.read(imageData);
 
-	const { height, width } = image.bitmap;
-	const scale = Math.min(maxThumbnailHeightPx / height, maxThumbnailWidthPx / width);
+    const { height, width } = image.bitmap;
+    const scale = Math.min(maxThumbnailHeightPx / height, maxThumbnailWidthPx / width);
 
-	image.scale(scale);
+    image.scale(scale);
 
-	const hash = computeDHash(image);
+    const hash = computeDHash(image);
 
-	// Save to old path (backward compat)
-	await image.writeAsync(getThumbnailFilepath(request.id));
+    // Save to old path (backward compat)
+    await image.writeAsync(getThumbnailFilepath(request.id));
 
-	// Save to new hash-based path (always overwrite — collision rate is negligible)
-	const hashPath = getHashThumbnailFilepath(hash);
-	await fs.mkdir(serverThumbnailPath, { recursive: true });
-	await image.writeAsync(hashPath);
+    // Save to new hash-based path (always overwrite — collision rate is negligible)
+    const hashPath = getHashThumbnailFilepath(hash);
+    await fs.mkdir(serverThumbnailPath, { recursive: true });
+    await image.writeAsync(hashPath);
 
-	return {
-		width:          image.getWidth(),
-		height:         image.getHeight(),
-		lastUpdateTime: new Date(),
-		hash
-	};
+    return {
+        width:          image.getWidth(),
+        height:         image.getHeight(),
+        lastUpdateTime: new Date(),
+        hash
+    };
 };
