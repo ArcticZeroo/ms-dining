@@ -25,6 +25,7 @@ import { MEAL_PERIOD } from '../../../constants/enum.js';
 const orderDetailsSchema = z.object({
     orderId:               z.string(),
     orderNumber:           z.string(),
+    created:               z.string().optional(),
     taxExcludedTotalAmount: z.object({ amount: z.string() }),
     taxTotalAmount:        z.object({ amount: z.string() }),
     totalDueAmount:        z.object({ amount: z.string() }),
@@ -380,6 +381,7 @@ export class CafeOrderSession {
                 orderNumberSequenceLength: 4,
                 orderNumberNameSpace:      this.#orderingContext.onDemandTerminalId,
                 displayProfileId:          this.client.config.displayProfileId,
+                voidReasonId:              '11',
                 priceLevelId:              this.#orderingContext.storePriceLevel,
             },
             conceptSchedule:    {
@@ -436,9 +438,7 @@ export class CafeOrderSession {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    isEasyMenuEnabled: false,
-                    scheduleTime:      { startTime: '12:00 AM', endTime: '11:59 PM' },
-                    scheduledDay:      0,
+                    scheduledDay: 0,
                 })
             }
         );
@@ -472,6 +472,7 @@ export class CafeOrderSession {
             throw new Error('Order totals cannot be zero');
         }
 
+        const billDate = this.#lastOrderDetails?.created ?? (new Date()).toISOString();
         const nowString = (new Date()).toISOString();
 
         const response = await this.client.requestAsync(`/iFrame/token/${this.client.config.tenantId}`,
@@ -479,26 +480,28 @@ export class CafeOrderSession {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    taxAmount:            this.#orderTotalTax.toFixed(2),
-                    invoiceId:            this.#orderNumber,
-                    billDate:             nowString,
-                    userCurrentDate:      nowString,
-                    currencyUnit:         'USD',
-                    description:          `Order ${this.#orderNumber}`,
-                    transactionAmount:    this.#orderTotalWithTax.toFixed(2),
-                    remainingTipAmount:   '0.00',
-                    tipAmount:            '0.00',
-                    style:                iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
-                    multiPaymentAmount:   fixed(this.#orderTotalWithTax, 2),
-                    isWindCave:           false,
-                    isCyberSource:        false,
-                    isCyberSourceWallets: false,
-                    language:             'en',
-                    contextId:            this.client.config.contextId,
-                    profileId:            this.client.config.displayProfileId,
-                    profitCenterId:       this.#orderingContext.profitCenterId,
-                    processButtonText:    'PROCESS',
-                    terminalId:           this.#orderingContext.onDemandTerminalId
+                    taxAmount:              this.#orderTotalTax.toFixed(2),
+                    invoiceId:              this.#orderNumber,
+                    billDate,
+                    userCurrentDate:        nowString,
+                    currencyUnit:           'USD',
+                    description:            `Order ${this.#orderNumber}`,
+                    transactionAmount:      this.#orderTotalWithTax.toFixed(2),
+                    remainingTipAmount:     '0.00',
+                    tipAmount:              '0.00',
+                    style:                  iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
+                    multiPaymentAmount:     fixed(this.#orderTotalWithTax, 2),
+                    isWindCave:             false,
+                    isCyberSource:          false,
+                    isCyberSourceWallets:   false,
+                    language:               'en',
+                    previousTransactionId:  null,
+                    contextId:              this.client.config.contextId,
+                    profileId:              this.client.config.displayProfileId,
+                    conceptId:              this.#conceptIds.values().next().value,
+                    profitCenterId:         this.#orderingContext.profitCenterId,
+                    processButtonText:      'PROCESS',
+                    terminalId:             this.#orderingContext.onDemandTerminalId
                 })
             });
 
@@ -531,50 +534,18 @@ export class CafeOrderSession {
                     contextId:         this.client.config.contextId,
                     orderId:           this.#orderId,
                     sendOrderTo:       phoneData.phoneNumber,
-                    storeInfo:         {
-                        businessContextId:       this.client.config.contextId,
-                        tenantId:                this.client.config.tenantId,
-                        storeInfoId:             this.client.config.storeId,
-                        storeName:               this.client.cafe.name,
-                        timezone:                'PST8PDT',
-                        properties:              {
-                            selectedLanguage:        'en_US',
-                            taxIdentificationNumber: ''
-                        },
-                        storeInfoOptions:        {
-                            calories:  {
-                                abbreviation: 'Cal',
-                                fullName:     'Calories'
-                            },
-                            birConfig: {
-                                displayText:                       'OR#',
-                                acknowledgementReceiptDisplayText: 'AR#',
-                                acknowledgementReceiptIndicator:   'Acknowledgement Receipt#',
-                                officialReceiptIndicator:          'Official Receipt#'
-                            }
-                        },
-                        receiptConfigProperties: {
-                            smsBody:                      'true',
-                            smsHeader:                    'true',
-                            smsFooter:                    'true',
-                            showCompleteCheckNumberInSms: 'true'
-                        },
-                        address:                 [
-                            ' ',
-                            '  '
-                        ]
-                    },
                     smsConfig:         {
                         overrideFromStoreConfig: true,
-                        introText:               '🐧 Thank you for placing your order on with {{N}}',
+                        introText:               '🐧 Thank you for placing your order with {{N}}',
                         isItemizedListEnabled:   true,
                         isTotalsEnabled:         true,
                         isIntroEnabled:          true,
                         showCompleteCheckNumber: true,
                         appReceipt:              {
-                            introText:  '🐧 Thank you for placing your order with {{N}}. Your order number is {{O}}',
-                            fromNumber: ''
-                        }
+                            introText:      '🐧 Thank you for placing your order with {{N}}. Your order number is {{O}}',
+                            enableFallback: false,
+                        },
+                        linkIntroText:           '🐧 Thank you for placing your order with {{N}}. Please find your receipt here {{L}}'
                     },
                     isCateringEnabled: false,
                     textReceiptConfig: {
@@ -582,7 +553,8 @@ export class CafeOrderSession {
                         headerText:      'Text receipt',
                         instructionText: 'Enter your phone number. Message & data rates may apply.',
                         autoSendEnabled: true
-                    }
+                    },
+                    displayProfileId:  this.client.config.displayProfileId,
                 })
             });
     }
