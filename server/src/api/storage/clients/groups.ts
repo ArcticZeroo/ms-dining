@@ -21,43 +21,43 @@ interface IResultWithId {
 }
 
 export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
-	const menuItems = await Promise.all(results.map(result => MenuItemStorageClient.retrieveMenuItemAsync(result.id)));
-	return Promise.all(
-		menuItems
-			.filter((item): item is IMenuItemBase => item !== null)
-			.map(menuItemToGroupMember)
-	);
+    const menuItems = await Promise.all(results.map(result => MenuItemStorageClient.retrieveMenuItemAsync(result.id)));
+    return Promise.all(
+        menuItems
+            .filter((item): item is IMenuItemBase => item !== null)
+            .map(menuItemToGroupMember)
+    );
 }
 
 export const extractStationsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
-	const stations = await Promise.all(results.map((result) => StationStorageClient.retrieveStationAsync(result.id)));
-	return stations
-		.filter((station): station is Station => station !== null)
-		.map(stationToGroupMember);
+    const stations = await Promise.all(results.map((result) => StationStorageClient.retrieveStationAsync(result.id)));
+    return stations
+        .filter((station): station is Station => station !== null)
+        .map(stationToGroupMember);
 }
 
 export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IGroupMember> => {
-	const station = await StationStorageClient.retrieveStationAsync(menuItem.stationId);
+    const station = await StationStorageClient.retrieveStationAsync(menuItem.stationId);
 
-	return ({
-		id:       menuItem.id,
-		name:     menuItem.name,
-		type:     SearchEntityType.menuItem,
-		imageUrl: menuItem.imageUrl || undefined,
-		cafeId:   menuItem.cafeId,
-		metadata: {
-			stationName:    station?.name || '',
-			stationLogoUrl: station?.logoUrl || ''
-		}
-	});
+    return ({
+        id:       menuItem.id,
+        name:     menuItem.name,
+        type:     SearchEntityType.menuItem,
+        imageUrl: menuItem.imageUrl || undefined,
+        cafeId:   menuItem.cafeId,
+        metadata: {
+            stationName:    station?.name || '',
+            stationLogoUrl: station?.logoUrl || ''
+        }
+    });
 };
 
 export const stationToGroupMember = (station: Station): IGroupMember => ({
-	id:       station.id,
-	name:     station.name,
-	type:     SearchEntityType.station,
-	cafeId:   station.cafeId,
-	imageUrl: station.logoUrl || undefined,
+    id:       station.id,
+    name:     station.name,
+    type:     SearchEntityType.station,
+    cafeId:   station.cafeId,
+    imageUrl: station.logoUrl || undefined,
 });
 
 interface IGroupResult {
@@ -66,391 +66,391 @@ interface IGroupResult {
 }
 
 const getGroupResultMembers = async (result: IGroupResult): Promise<Array<IGroupMember>> => {
-	const [menuItems, stations] = await Promise.all([
-		extractMenuItemsAsync(result.menuItems),
-		extractStationsAsync(result.stations)
-	]);
+    const [menuItems, stations] = await Promise.all([
+        extractMenuItemsAsync(result.menuItems),
+        extractStationsAsync(result.stations)
+    ]);
 
-	return [
-		...menuItems,
-		...stations
-	];
+    return [
+        ...menuItems,
+        ...stations
+    ];
 }
 
 export abstract class GroupStorageClient {
-	static async #getMenuItemCandidatesZeroContext(): Promise<Array<Array<IGroupMember>>> {
-		const results = await usePrismaClient(async prisma => {
-			return prisma.$queryRawTyped(getMenuItemGroupCandidatesZeroContext());
-		});
+    static async #getMenuItemCandidatesZeroContext(): Promise<Array<Array<IGroupMember>>> {
+        const results = await usePrismaClient(async prisma => {
+            return prisma.$queryRawTyped(getMenuItemGroupCandidatesZeroContext());
+        });
 
-		const menuItemsByNormalizedName = new Map<string /*normalizedName*/, Array<IGroupMember>>();
+        const menuItemsByNormalizedName = new Map<string /*normalizedName*/, Array<IGroupMember>>();
 
-		const menuItems = await extractMenuItemsAsync(results);
+        const menuItems = await extractMenuItemsAsync(results);
 
-		for (const item of menuItems) {
-			const normalizedName = normalizeNameForSearch(item.name);
-			const itemsForName = menuItemsByNormalizedName.get(normalizedName) ?? [];
-			itemsForName.push(item);
-			menuItemsByNormalizedName.set(normalizedName, itemsForName);
-		}
+        for (const item of menuItems) {
+            const normalizedName = normalizeNameForSearch(item.name);
+            const itemsForName = menuItemsByNormalizedName.get(normalizedName) ?? [];
+            itemsForName.push(item);
+            menuItemsByNormalizedName.set(normalizedName, itemsForName);
+        }
 
-		return Array.from(menuItemsByNormalizedName.values());
-	}
+        return Array.from(menuItemsByNormalizedName.values());
+    }
 
-	static async #getStationCandidatesZeroContext(): Promise<Array<Array<IGroupMember>>> {
-		const results = await usePrismaClient(async prisma => {
-			return prisma.$queryRawTyped(getStationGroupCandidatesZeroContext());
-		});
+    static async #getStationCandidatesZeroContext(): Promise<Array<Array<IGroupMember>>> {
+        const results = await usePrismaClient(async prisma => {
+            return prisma.$queryRawTyped(getStationGroupCandidatesZeroContext());
+        });
 
-		const stations = await extractStationsAsync(results);
-		const stationsByNormalizedName = new Map<string /*normalizedName*/, Array<IGroupMember>>();
-		for (const station of stations) {
-			const normalizedName = normalizeNameForSearch(station.name);
-			const stationsForName = stationsByNormalizedName.get(normalizedName) ?? [];
-			stationsForName.push(station);
-			stationsByNormalizedName.set(normalizedName, stationsForName);
-		}
+        const stations = await extractStationsAsync(results);
+        const stationsByNormalizedName = new Map<string /*normalizedName*/, Array<IGroupMember>>();
+        for (const station of stations) {
+            const normalizedName = normalizeNameForSearch(station.name);
+            const stationsForName = stationsByNormalizedName.get(normalizedName) ?? [];
+            stationsForName.push(station);
+            stationsByNormalizedName.set(normalizedName, stationsForName);
+        }
 
-		return Array.from(stationsByNormalizedName.values());
-	}
+        return Array.from(stationsByNormalizedName.values());
+    }
 
-	public static async getGroupCandidatesZeroContext(): Promise<Array<IGroupData>> {
-		const results: IGroupData[] = [];
-		const [menuItemCandidates, stationCandidates] = await Promise.all([
-			this.#getMenuItemCandidatesZeroContext(),
-			this.#getStationCandidatesZeroContext()
-		]);
+    public static async getGroupCandidatesZeroContext(): Promise<Array<IGroupData>> {
+        const results: IGroupData[] = [];
+        const [menuItemCandidates, stationCandidates] = await Promise.all([
+            this.#getMenuItemCandidatesZeroContext(),
+            this.#getStationCandidatesZeroContext()
+        ]);
 
-		const mapResultsToGroups = (type: SearchEntityType, map: Map<string /*suggestedGroupName*/, Array<IGroupMember>>): Array<IGroupData> => {
-			return Array.from(map.entries()).map(([suggestedGroupName, members]) => ({
-				name: suggestedGroupName,
-				id:   hat(),
-				type,
-				members,
-			} satisfies IGroupData));
-		}
+        const mapResultsToGroups = (type: SearchEntityType, map: Map<string /*suggestedGroupName*/, Array<IGroupMember>>): Array<IGroupData> => {
+            return Array.from(map.entries()).map(([suggestedGroupName, members]) => ({
+                name: suggestedGroupName,
+                id:   hat(),
+                type,
+                members,
+            } satisfies IGroupData));
+        }
 
-		const menuItemResults = new Map<string /*suggestedGroupName*/, Array<IGroupMember>>();
-		for (const menuItemGroup of menuItemCandidates) {
-			if (menuItemGroup.length === 0) {
-				continue;
-			}
+        const menuItemResults = new Map<string /*suggestedGroupName*/, Array<IGroupMember>>();
+        for (const menuItemGroup of menuItemCandidates) {
+            if (menuItemGroup.length === 0) {
+                continue;
+            }
 
-			const suggestedGroupName = menuItemGroup[0]!.name;
-			menuItemResults.set(suggestedGroupName, menuItemGroup);
-		}
+            const suggestedGroupName = menuItemGroup[0]!.name;
+            menuItemResults.set(suggestedGroupName, menuItemGroup);
+        }
 
-		results.push(...mapResultsToGroups(SearchEntityType.menuItem, menuItemResults));
+        results.push(...mapResultsToGroups(SearchEntityType.menuItem, menuItemResults));
 
-		const stationResults = new Map<string /*suggestedGroupName*/, Array<IGroupMember>>();
-		for (const stationGroup of stationCandidates) {
-			if (stationGroup.length === 0) {
-				continue;
-			}
+        const stationResults = new Map<string /*suggestedGroupName*/, Array<IGroupMember>>();
+        for (const stationGroup of stationCandidates) {
+            if (stationGroup.length === 0) {
+                continue;
+            }
 
-			const suggestedGroupName = stationGroup[0]!.name;
-			stationResults.set(suggestedGroupName, stationGroup);
-		}
+            const suggestedGroupName = stationGroup[0]!.name;
+            stationResults.set(suggestedGroupName, stationGroup);
+        }
 
-		results.push(...mapResultsToGroups(SearchEntityType.station, stationResults));
+        results.push(...mapResultsToGroups(SearchEntityType.station, stationResults));
 
-		return results;
-	}
+        return results;
+    }
 
-	static async #getMenuItemCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
-		const results = await usePrismaClient(async prisma => {
-			return prisma.$queryRawTyped(getMenuItemGroupCandidatesForGroup(groupId));
-		});
+    static async #getMenuItemCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
+        const results = await usePrismaClient(async prisma => {
+            return prisma.$queryRawTyped(getMenuItemGroupCandidatesForGroup(groupId));
+        });
 
-		return extractMenuItemsAsync(results);
-	}
+        return extractMenuItemsAsync(results);
+    }
 
-	static async #getStationCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
-		const results = await usePrismaClient(async prisma => {
-			return prisma.$queryRawTyped(getStationGroupCandidatesForGroup(groupId));
-		});
+    static async #getStationCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
+        const results = await usePrismaClient(async prisma => {
+            return prisma.$queryRawTyped(getStationGroupCandidatesForGroup(groupId));
+        });
 
-		return extractStationsAsync(results);
-	}
+        return extractStationsAsync(results);
+    }
 
-	public static async getCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
-		const candidates: Array<IGroupMember> = [];
+    public static async getCandidatesForGroup(groupId: string): Promise<Array<IGroupMember>> {
+        const candidates: Array<IGroupMember> = [];
 
-		const [menuItemCandidates, stationCandidates] = await Promise.all([
-			this.#getMenuItemCandidatesForGroup(groupId),
-			this.#getStationCandidatesForGroup(groupId)
-		]);
+        const [menuItemCandidates, stationCandidates] = await Promise.all([
+            this.#getMenuItemCandidatesForGroup(groupId),
+            this.#getStationCandidatesForGroup(groupId)
+        ]);
 
-		candidates.push(
-			...menuItemCandidates,
-			...stationCandidates
-		);
+        candidates.push(
+            ...menuItemCandidates,
+            ...stationCandidates
+        );
 
-		return candidates;
-	}
+        return candidates;
+    }
 
-	public static async getGroups(): Promise<Array<IGroupData>> {
-		const groupResults = await usePrismaClient(async prisma => {
-			return prisma.crossCafeGroup.findMany({
-				orderBy: {
-					name: 'asc',
-				},
-				select:  {
-					id:         true,
-					name:       true,
-					entityType: true,
-					notes:      true,
-					menuItems:  {
-						select: {
-							id: true
-						}
-					},
-					stations:   {
-						select: {
-							id: true
-						}
-					}
-				}
-			});
-		});
+    public static async getGroups(): Promise<Array<IGroupData>> {
+        const groupResults = await usePrismaClient(async prisma => {
+            return prisma.crossCafeGroup.findMany({
+                orderBy: {
+                    name: 'asc',
+                },
+                select:  {
+                    id:         true,
+                    name:       true,
+                    entityType: true,
+                    notes:      true,
+                    menuItems:  {
+                        select: {
+                            id: true
+                        }
+                    },
+                    stations:   {
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            });
+        });
 
-		return Promise.all(groupResults.map(async groupResult => {
-			const members = await getGroupResultMembers(groupResult);
+        return Promise.all(groupResults.map(async groupResult => {
+            const members = await getGroupResultMembers(groupResult);
 
-			return {
-				id:    groupResult.id,
-				name:  groupResult.name,
-				notes: groupResult.notes || undefined,
-				type:  SearchEntityType[groupResult.entityType as keyof typeof SearchEntityType],
-				members
-			} satisfies IGroupData;
-		}));
-	}
+            return {
+                id:    groupResult.id,
+                name:  groupResult.name,
+                notes: groupResult.notes || undefined,
+                type:  SearchEntityType[groupResult.entityType as keyof typeof SearchEntityType],
+                members
+            } satisfies IGroupData;
+        }));
+    }
 
-	public static async getGroupMembers(groupId: string): Promise<Array<IGroupMember>> {
-		const groupResult = await usePrismaClient(async prisma => {
-			return prisma.crossCafeGroup.findUnique({
-				where:  {
-					id: groupId
-				},
-				select: {
-					menuItems: {
-						select: {
-							id: true
-						}
-					},
-					stations:  {
-						select: {
-							id: true
-						}
-					}
-				}
-			});
-		});
+    public static async getGroupMembers(groupId: string): Promise<Array<IGroupMember>> {
+        const groupResult = await usePrismaClient(async prisma => {
+            return prisma.crossCafeGroup.findUnique({
+                where:  {
+                    id: groupId
+                },
+                select: {
+                    menuItems: {
+                        select: {
+                            id: true
+                        }
+                    },
+                    stations:  {
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            });
+        });
 
-		if (!groupResult) {
-			throw new Error(`Group with ID ${groupId} not found`);
-		}
+        if (!groupResult) {
+            throw new Error(`Group with ID ${groupId} not found`);
+        }
 
-		return getGroupResultMembers(groupResult);
-	}
+        return getGroupResultMembers(groupResult);
+    }
 
-	static async #getNormalizedNamesForMenuItems(memberIds: Array<string>): Promise<string[]> {
-		const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
-		return menuItems
-			.filter((item): item is IMenuItemBase => item != null)
-			.map(item => normalizeNameForSearch(item.name));
-	}
+    static async #getNormalizedNamesForMenuItems(memberIds: Array<string>): Promise<string[]> {
+        const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
+        return menuItems
+            .filter((item): item is IMenuItemBase => item != null)
+            .map(item => normalizeNameForSearch(item.name));
+    }
 
-	static async #updateGroupIdForCachedMenuItems(groupId: string | null, memberIds: Array<string>) {
-		const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
-		for (const menuItem of menuItems) {
-			if (menuItem) {
-				menuItem.groupId = groupId;
-			}
-		}
-	}
+    static async #updateGroupIdForCachedMenuItems(groupId: string | null, memberIds: Array<string>) {
+        const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
+        for (const menuItem of menuItems) {
+            if (menuItem) {
+                menuItem.groupId = groupId;
+            }
+        }
+    }
 
-	static async #setGroupMembersInternal(prisma: PrismaLikeClient, groupId: string | null, memberIds: Array<string>, entityType: SearchEntityType): Promise<void> {
-		if (entityType === SearchEntityType.station) {
-			await prisma.station.updateMany({
-				where: {
-					id: {
-						in: memberIds
-					}
-				},
-				data:  {
-					groupId
-				}
-			});
-		} else if (entityType === SearchEntityType.menuItem) {
-			await Promise.all([
-				this.#updateGroupIdForCachedMenuItems(groupId, memberIds),
-				prisma.menuItem.updateMany({
-					where: {
-						id: {
-							in: memberIds
-						}
-					},
-					data:  {
-						groupId
-					}
-				})
-			]);
-		}
-	}
+    static async #setGroupMembersInternal(prisma: PrismaLikeClient, groupId: string | null, memberIds: Array<string>, entityType: SearchEntityType): Promise<void> {
+        if (entityType === SearchEntityType.station) {
+            await prisma.station.updateMany({
+                where: {
+                    id: {
+                        in: memberIds
+                    }
+                },
+                data:  {
+                    groupId
+                }
+            });
+        } else if (entityType === SearchEntityType.menuItem) {
+            await Promise.all([
+                this.#updateGroupIdForCachedMenuItems(groupId, memberIds),
+                prisma.menuItem.updateMany({
+                    where: {
+                        id: {
+                            in: memberIds
+                        }
+                    },
+                    data:  {
+                        groupId
+                    }
+                })
+            ]);
+        }
+    }
 
-	public static async addToGroup(groupId: string, memberIds: Array<string>): Promise<void> {
-		let memberNormalizedNames: string[] = [];
+    public static async addToGroup(groupId: string, memberIds: Array<string>): Promise<void> {
+        let memberNormalizedNames: string[] = [];
 
-		await usePrismaClient(async prisma => {
-			await prisma.$transaction(async tx => {
-				const group = await tx.crossCafeGroup.findUnique({
-					where:  {
-						id: groupId
-					},
-					select: {
-						entityType: true
-					}
-				});
+        await usePrismaClient(async prisma => {
+            await prisma.$transaction(async tx => {
+                const group = await tx.crossCafeGroup.findUnique({
+                    where:  {
+                        id: groupId
+                    },
+                    select: {
+                        entityType: true
+                    }
+                });
 
-				if (!group) {
-					throw new Error(`Group with ID ${groupId} not found`);
-				}
+                if (!group) {
+                    throw new Error(`Group with ID ${groupId} not found`);
+                }
 
-				const entityType = searchEntityTypeFromString(group.entityType);
-				await this.#setGroupMembersInternal(tx, groupId, memberIds, entityType);
+                const entityType = searchEntityTypeFromString(group.entityType);
+                await this.#setGroupMembersInternal(tx, groupId, memberIds, entityType);
 
-				if (entityType === SearchEntityType.menuItem) {
-					memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
-				}
-			});
-		});
+                if (entityType === SearchEntityType.menuItem) {
+                    memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
+                }
+            });
+        });
 
-		if (memberNormalizedNames.length > 0) {
-			STORAGE_EVENTS.emit('groupMembershipDirty', { groupId, memberNormalizedNames });
-		}
-	}
+        if (memberNormalizedNames.length > 0) {
+            STORAGE_EVENTS.emit('groupMembershipDirty', { groupId, memberNormalizedNames });
+        }
+    }
 
-	public static async createGroup(name: string, entityType: SearchEntityType, initialMembers: Array<string> = []): Promise<CrossCafeGroup> {
-		let memberNormalizedNames: string[] = [];
+    public static async createGroup(name: string, entityType: SearchEntityType, initialMembers: Array<string> = []): Promise<CrossCafeGroup> {
+        let memberNormalizedNames: string[] = [];
 
-		const newGroup = await usePrismaClient(async prisma => {
-			return prisma.$transaction(async tx => {
-				const group = await tx.crossCafeGroup.create({
-					data: {
-						name,
-						entityType
-					}
-				});
+        const newGroup = await usePrismaClient(async prisma => {
+            return prisma.$transaction(async tx => {
+                const group = await tx.crossCafeGroup.create({
+                    data: {
+                        name,
+                        entityType
+                    }
+                });
 
-				if (initialMembers.length > 0) {
-					await this.#setGroupMembersInternal(tx, group.id, initialMembers, entityType);
+                if (initialMembers.length > 0) {
+                    await this.#setGroupMembersInternal(tx, group.id, initialMembers, entityType);
 
-					if (entityType === SearchEntityType.menuItem) {
-						memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(initialMembers);
-					}
-				}
+                    if (entityType === SearchEntityType.menuItem) {
+                        memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(initialMembers);
+                    }
+                }
 
-				return group;
-			});
-		});
+                return group;
+            });
+        });
 
-		if (memberNormalizedNames.length > 0) {
-			STORAGE_EVENTS.emit('groupMembershipDirty', { groupId: newGroup.id, memberNormalizedNames });
-		}
+        if (memberNormalizedNames.length > 0) {
+            STORAGE_EVENTS.emit('groupMembershipDirty', { groupId: newGroup.id, memberNormalizedNames });
+        }
 
-		return newGroup;
-	}
+        return newGroup;
+    }
 
-	public static async deleteGroup(id: string): Promise<void> {
-		await usePrismaClient(async prisma => {
-			const group = await prisma.crossCafeGroup.findUnique({
-				where:  { id },
-				select: {
-					entityType: true,
-					menuItems:  { select: { id: true } }
-				}
-			});
+    public static async deleteGroup(id: string): Promise<void> {
+        await usePrismaClient(async prisma => {
+            const group = await prisma.crossCafeGroup.findUnique({
+                where:  { id },
+                select: {
+                    entityType: true,
+                    menuItems:  { select: { id: true } }
+                }
+            });
 
-			if (group && searchEntityTypeFromString(group.entityType) === SearchEntityType.menuItem && group.menuItems.length > 0) {
-				const memberIds = group.menuItems.map(m => m.id);
-				const memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
-				await prisma.crossCafeGroup.delete({ where: { id } });
-				STORAGE_EVENTS.emit('groupMembershipDirty', { groupId: id, memberNormalizedNames });
-			} else {
-				await prisma.crossCafeGroup.delete({ where: { id } });
-			}
-		});
-	}
+            if (group && searchEntityTypeFromString(group.entityType) === SearchEntityType.menuItem && group.menuItems.length > 0) {
+                const memberIds = group.menuItems.map(m => m.id);
+                const memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
+                await prisma.crossCafeGroup.delete({ where: { id } });
+                STORAGE_EVENTS.emit('groupMembershipDirty', { groupId: id, memberNormalizedNames });
+            } else {
+                await prisma.crossCafeGroup.delete({ where: { id } });
+            }
+        });
+    }
 
-	public static async updateGroup(id: string, update: IUpdateGroupRequest): Promise<void> {
-		await usePrismaClient(async prisma => {
-			return prisma.crossCafeGroup.update({
-				where: {
-					id
-				},
-				data:  {
-					...update
-				}
-			});
-		});
-	}
+    public static async updateGroup(id: string, update: IUpdateGroupRequest): Promise<void> {
+        await usePrismaClient(async prisma => {
+            return prisma.crossCafeGroup.update({
+                where: {
+                    id
+                },
+                data:  {
+                    ...update
+                }
+            });
+        });
+    }
 
-	public static async deleteMembersFromGroup(groupId: string, memberIds: Array<string>): Promise<void> {
-		let memberNormalizedNames: string[] = [];
+    public static async deleteMembersFromGroup(groupId: string, memberIds: Array<string>): Promise<void> {
+        let memberNormalizedNames: string[] = [];
 
-		await usePrismaTransaction(async prisma => {
-			const group = await prisma.crossCafeGroup.findUnique({
-				where:  {
-					id: groupId
-				},
-				select: {
-					entityType: true
-				}
-			});
+        await usePrismaTransaction(async prisma => {
+            const group = await prisma.crossCafeGroup.findUnique({
+                where:  {
+                    id: groupId
+                },
+                select: {
+                    entityType: true
+                }
+            });
 
-			if (!group) {
-				throw new Error(`Group with ID ${groupId} not found`);
-			}
+            if (!group) {
+                throw new Error(`Group with ID ${groupId} not found`);
+            }
 
-			const entityType = searchEntityTypeFromString(group.entityType);
+            const entityType = searchEntityTypeFromString(group.entityType);
 
-			if (entityType === SearchEntityType.menuItem) {
-				memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
-			}
+            if (entityType === SearchEntityType.menuItem) {
+                memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
+            }
 
-			await this.#setGroupMembersInternal(prisma, null, memberIds, entityType);
+            await this.#setGroupMembersInternal(prisma, null, memberIds, entityType);
 
-			const remainingMembers = await prisma.crossCafeGroup.findUnique({
-				where:  {
-					id: groupId
-				},
-				select: {
-					menuItems: {
-						select: {
-							id: true
-						}
-					},
-					stations:  {
-						select: {
-							id: true
-						}
-					}
-				}
-			});
+            const remainingMembers = await prisma.crossCafeGroup.findUnique({
+                where:  {
+                    id: groupId
+                },
+                select: {
+                    menuItems: {
+                        select: {
+                            id: true
+                        }
+                    },
+                    stations:  {
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            });
 
-			if (!remainingMembers || (remainingMembers.menuItems.length === 0 && remainingMembers.stations.length === 0)) {
-				await prisma.crossCafeGroup.delete({
-					where: {
-						id: groupId
-					}
-				});
-			}
-		});
+            if (!remainingMembers || (remainingMembers.menuItems.length === 0 && remainingMembers.stations.length === 0)) {
+                await prisma.crossCafeGroup.delete({
+                    where: {
+                        id: groupId
+                    }
+                });
+            }
+        });
 
-		if (memberNormalizedNames.length > 0) {
-			STORAGE_EVENTS.emit('groupMembershipDirty', { groupId, memberNormalizedNames });
-		}
-	}
+        if (memberNormalizedNames.length > 0) {
+            STORAGE_EVENTS.emit('groupMembershipDirty', { groupId, memberNormalizedNames });
+        }
+    }
 }

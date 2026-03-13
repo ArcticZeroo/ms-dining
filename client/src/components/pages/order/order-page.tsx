@@ -117,7 +117,7 @@ export const OrderPage = () => {
                     cartSessionData={cartSessionData}
                     cartSessionError={cartSessionError}
                 />
-                <WaitTime/>
+                <WaitTime cartSessionData={cartSessionData}/>
             </div>
             {cart.size > 1 && <MultiCafeOrderWarning/>}
             <PaymentInfoForm

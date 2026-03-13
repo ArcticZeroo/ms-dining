@@ -14,91 +14,90 @@ const thumbnailDataByMenuItemId = new Map<string, IThumbnailResult>();
 const THUMBNAIL_SEMAPHORE_BY_ID = new MultiLock();
 
 const loadExistingThumbnailsOnBoot = async () => {
-	console.time('thumbnail loading on boot');
+    console.time('thumbnail loading on boot');
 
-	const manifest = await loadManifest();
-	const manifestEntryCount = Object.keys(manifest).length;
+    const manifest = await loadManifest();
 
-	// Always scan the directory to find files missing from manifest
-	const files = await fs.readdir(serverMenuItemThumbnailPath);
-	const pngFiles = files.filter(f => f.endsWith('.png'));
+    // Always scan the directory to find files missing from manifest
+    const files = await fs.readdir(serverMenuItemThumbnailPath);
+    const pngFiles = files.filter(f => f.endsWith('.png'));
 
-	let loadedFromManifest = 0;
-	let loadedFromDisk = 0;
+    let loadedFromManifest = 0;
+    let loadedFromDisk = 0;
 
-	for (const fileNode of pngFiles) {
-		const id = fileNode.replace('.png', '');
+    for (const fileNode of pngFiles) {
+        const id = fileNode.replace('.png', '');
 
-		const manifestEntry = manifest[id];
-		if (manifestEntry) {
-			// Fast path: use cached manifest data
-			thumbnailDataByMenuItemId.set(id, {
-				width:          manifestEntry.width,
-				height:         manifestEntry.height,
-				lastUpdateTime: new Date(manifestEntry.lastUpdateTime),
-				hash:           manifestEntry.hash
-			});
-			loadedFromManifest++;
-		} else {
-			// Slow path: file exists on disk but not in manifest — read metadata
-			const metadata = await retrieveImageMetadataAsync(path.join(serverMenuItemThumbnailPath, fileNode));
-			if (!metadata) {
-				continue;
-			}
+        const manifestEntry = manifest[id];
+        if (manifestEntry) {
+            // Fast path: use cached manifest data
+            thumbnailDataByMenuItemId.set(id, {
+                width:          manifestEntry.width,
+                height:         manifestEntry.height,
+                lastUpdateTime: new Date(manifestEntry.lastUpdateTime),
+                hash:           manifestEntry.hash
+            });
+            loadedFromManifest++;
+        } else {
+            // Slow path: file exists on disk but not in manifest — read metadata
+            const metadata = await retrieveImageMetadataAsync(path.join(serverMenuItemThumbnailPath, fileNode));
+            if (!metadata) {
+                continue;
+            }
 
-			thumbnailDataByMenuItemId.set(id, {
-				...metadata,
-				hash: ''
-			});
-			loadedFromDisk++;
-		}
-	}
+            thumbnailDataByMenuItemId.set(id, {
+                ...metadata,
+                hash: ''
+            });
+            loadedFromDisk++;
+        }
+    }
 
-	if (loadedFromDisk > 0) {
-		logInfo(`[Thumbnail Thread] ${loadedFromDisk} thumbnail(s) on disk missing from manifest — will be hashed on next access`);
-	}
+    if (loadedFromDisk > 0) {
+        logInfo(`[Thumbnail Thread] ${loadedFromDisk} thumbnail(s) on disk missing from manifest — will be hashed on next access`);
+    }
 
-	logInfo(`[Thumbnail Thread] Loaded ${loadedFromManifest} from manifest, ${loadedFromDisk} from disk (${pngFiles.length} total files)`);
-	console.timeEnd('thumbnail loading on boot');
+    logInfo(`[Thumbnail Thread] Loaded ${loadedFromManifest} from manifest, ${loadedFromDisk} from disk (${pngFiles.length} total files)`);
+    console.timeEnd('thumbnail loading on boot');
 }
 
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult | null> => {
-	await loadThumbnailsPromise;
-	return THUMBNAIL_SEMAPHORE_BY_ID.acquire(request.id, async () => {
-		if (thumbnailDataByMenuItemId.has(request.id)) {
-			const metadata = thumbnailDataByMenuItemId.get(request.id)!;
-			if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
-				if (request.lastUpdateTime == null) {
-					logDebug(`[Thumbnail Thread] Returning existing thumbnail for menu item ${request.id} without update check due to no lastUpdateTime provided`);
-				} else {
-					logDebug(`[Thumbnail Thread] Returning existing thumbnail for menu item ${request.id} with request lastUpdateTime ${request.lastUpdateTime.toISOString()} and metadata lastUpdateTime ${metadata.lastUpdateTime.toISOString()}`);
-				}
+    await loadThumbnailsPromise;
+    return THUMBNAIL_SEMAPHORE_BY_ID.acquire(request.id, async () => {
+        if (thumbnailDataByMenuItemId.has(request.id)) {
+            const metadata = thumbnailDataByMenuItemId.get(request.id)!;
+            if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
+                if (request.lastUpdateTime == null) {
+                    logDebug(`[Thumbnail Thread] Returning existing thumbnail for menu item ${request.id} without update check due to no lastUpdateTime provided`);
+                } else {
+                    logDebug(`[Thumbnail Thread] Returning existing thumbnail for menu item ${request.id} with request lastUpdateTime ${request.lastUpdateTime.toISOString()} and metadata lastUpdateTime ${metadata.lastUpdateTime.toISOString()}`);
+                }
 
-				return metadata;
-			}
-		}
+                return metadata;
+            }
+        }
 
-		const result = await createAndSaveThumbnailForMenuItem(request);
-		thumbnailDataByMenuItemId.set(request.id, result);
+        const result = await createAndSaveThumbnailForMenuItem(request);
+        thumbnailDataByMenuItemId.set(request.id, result);
 
-		updateManifestEntry(request.id, {
-			hash:           result.hash,
-			width:          result.width,
-			height:         result.height,
-			lastUpdateTime: result.lastUpdateTime.toISOString()
-		});
-		// Save manifest asynchronously - debounced to avoid concurrent writes
-		saveManifestDebounced();
+        updateManifestEntry(request.id, {
+            hash:           result.hash,
+            width:          result.width,
+            height:         result.height,
+            lastUpdateTime: result.lastUpdateTime.toISOString()
+        });
+        // Save manifest asynchronously - debounced to avoid concurrent writes
+        saveManifestDebounced();
 
-		return result;
-	});
+        return result;
+    });
 }
 
 const loadThumbnailsPromise = isMainThread ? Promise.resolve() : loadExistingThumbnailsOnBoot();
 
 loadThumbnailsPromise
-	.catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
+    .catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
 
 export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), {
-	getThumbnailData
+    getThumbnailData
 });

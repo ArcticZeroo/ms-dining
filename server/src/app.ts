@@ -16,7 +16,6 @@ import passport from 'koa-passport';
 import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from './constants/env.js';
 import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
-import { logDebug } from './util/log.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 
 const app = new Koa();
@@ -27,14 +26,14 @@ app.use(mount('/static', createStaticRoutingApp()));
 
 // If we don't initialize the session, everything else fails later
 if (!hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
-	throw new Error('Session secret environment variable is not set. Please set the SESSION_SECRET environment variable.');
+    throw new Error('Session secret environment variable is not set. Please set the SESSION_SECRET environment variable.');
 }
 
 app.keys = [getSessionSecret()];
 app.use(session({
-	maxAge: new Duration({ days: 180 }).inMilliseconds,
-	renew: true,
-	store: new PrismaSessionStore()
+    maxAge: new Duration({ days: 180 }).inMilliseconds,
+    renew: true,
+    store: new PrismaSessionStore()
 }, app));
 
 app.use(passport.initialize());

@@ -1,5 +1,5 @@
 import Duration from '@arcticzeroo/duration';
-import { getNamespaceLogger, logDebug, Logger, logInfo } from '../../util/log.js';
+import { getNamespaceLogger, Logger } from '../../util/log.js';
 import { Nullable } from '../../models/util.js';
 
 const LOG_STATUS_INTERVAL = new Duration({ minutes: 1 });

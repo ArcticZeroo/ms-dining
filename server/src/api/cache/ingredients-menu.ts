@@ -1,7 +1,7 @@
 import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 import { ICafeStation } from '../../models/cafe.js';
 import { LockedMap } from '../../util/map.js';
-import { computeMenuHash, getRolesByMenuHash, setRolesForMenuHash, IMenuRoleRow } from '../cafe/ingredients/cache.js';
+import { computeMenuHash, getRolesByMenuHash, IMenuRoleRow, setRolesForMenuHash } from '../cafe/ingredients/cache.js';
 import { categorizeIngredientsMenu } from '../cafe/ingredients/ai-categorizer.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { logInfo } from '../../util/log.js';
@@ -12,95 +12,95 @@ const INGREDIENTS_CAFE_ID = 'in-gredients';
 const INGREDIENTS_MENU_CACHE = new LockedMap<string /*dateString*/, IIngredientsMenuDTO>();
 
 const ROLE_TO_DTO_KEY: Record<string, keyof Pick<IIngredientsMenuDTO, 'starterChoiceIds' | 'entreeChoiceIds' | 'dessertChoiceIds' | 'drinkChoiceIds' | 'sideChoiceIds' | 'otherItemIds'>> = {
-	STARTER: 'starterChoiceIds',
-	ENTREE:  'entreeChoiceIds',
-	DESSERT: 'dessertChoiceIds',
-	DRINK:   'drinkChoiceIds',
-	SIDE:    'sideChoiceIds',
-	OTHER:   'otherItemIds',
+    STARTER: 'starterChoiceIds',
+    ENTREE:  'entreeChoiceIds',
+    DESSERT: 'dessertChoiceIds',
+    DRINK:   'drinkChoiceIds',
+    SIDE:    'sideChoiceIds',
+    OTHER:   'otherItemIds',
 };
 
 const buildIngredientsDTO = (roles: IMenuRoleRow[], stations: ICafeStation[], price: number): IIngredientsMenuDTO => {
-	const logoUrl = stations[0]?.logoUrl ?? null;
+    const logoUrl = stations[0]?.logoUrl ?? null;
 
-	const dto: IIngredientsMenuDTO = {
-		price,
-		logoUrl,
-		starterChoiceIds: [],
-		entreeChoiceIds:  [],
-		dessertChoiceIds: [],
-		drinkChoiceIds:   [],
-		sideChoiceIds:    [],
-		otherItemIds:     [],
-	};
+    const dto: IIngredientsMenuDTO = {
+        price,
+        logoUrl,
+        starterChoiceIds: [],
+        entreeChoiceIds:  [],
+        dessertChoiceIds: [],
+        drinkChoiceIds:   [],
+        sideChoiceIds:    [],
+        otherItemIds:     [],
+    };
 
-	for (const { menuItemId, role } of roles) {
-		const key = ROLE_TO_DTO_KEY[role];
-		if (key) {
-			dto[key].push(menuItemId);
-		}
-	}
+    for (const { menuItemId, role } of roles) {
+        const key = ROLE_TO_DTO_KEY[role];
+        if (key) {
+            dto[key].push(menuItemId);
+        }
+    }
 
-	return dto;
+    return dto;
 };
 
 const deriveEntreePrice = (roles: IMenuRoleRow[], stations: ICafeStation[]): number => {
-	for (const station of stations) {
-		for (const { menuItemId, role } of roles) {
-			if (role === 'ENTREE') {
-				const item = station.menuItemsById.get(menuItemId);
-				if (item) {
-					return item.price;
-				}
-			}
-		}
-	}
-	return 0;
+    for (const station of stations) {
+        for (const { menuItemId, role } of roles) {
+            if (role === 'ENTREE') {
+                const item = station.menuItemsById.get(menuItemId);
+                if (item) {
+                    return item.price;
+                }
+            }
+        }
+    }
+    return 0;
 };
 
 const categorizeAndCache = async (dateString: string, menuStations: ICafeStation[]): Promise<IIngredientsMenuDTO | undefined> => {
-	const hash = computeMenuHash(menuStations);
+    const hash = computeMenuHash(menuStations);
 
-	const roles = await getRolesByMenuHash(hash);
-	if (roles.length > 0) {
-		const price = deriveEntreePrice(roles, menuStations);
-		return buildIngredientsDTO(roles, menuStations, price);
-	}
+    const roles = await getRolesByMenuHash(hash);
+    if (roles.length > 0) {
+        const price = deriveEntreePrice(roles, menuStations);
+        return buildIngredientsDTO(roles, menuStations, price);
+    }
 
-	const aiResult = await categorizeIngredientsMenu(menuStations);
-	if (aiResult == null) {
-		return undefined;
-	}
+    const aiResult = await categorizeIngredientsMenu(menuStations);
+    if (aiResult == null) {
+        return undefined;
+    }
 
-	await setRolesForMenuHash(hash, aiResult.roles);
-	return buildIngredientsDTO(aiResult.roles, menuStations, aiResult.price);
+    await setRolesForMenuHash(hash, aiResult.roles);
+    return buildIngredientsDTO(aiResult.roles, menuStations, aiResult.price);
 };
 
 // Pre-compute on menu publish so route requests are instant
 CACHE_EVENTS.on('menuPublished', (event) => {
-	if (event.cafe.id !== INGREDIENTS_CAFE_ID) {
-		return;
-	}
+    if (event.cafe.id !== INGREDIENTS_CAFE_ID) {
+        return;
+    }
 
-	logInfo(`[IngredientsCache] Menu published for in.gredients on ${event.dateString}, pre-computing...`);
+    logInfo(`[IngredientsCache] Menu published for in.gredients on ${event.dateString}, pre-computing...`);
 
-	INGREDIENTS_MENU_CACHE.update(event.dateString, () => categorizeAndCache(event.dateString, event.menu))
-		.catch(err => logInfo('[IngredientsCache] Failed to pre-compute ingredients menu:', err));
+    INGREDIENTS_MENU_CACHE.update(event.dateString, () => categorizeAndCache(event.dateString, event.menu))
+        .catch(err => logInfo('[IngredientsCache] Failed to pre-compute ingredients menu:', err));
 });
 
 export const resolveIngredientsMenuAsync = async (cafeId: string, dateString: string, menuStations: ICafeStation[]): Promise<IIngredientsMenuDTO | null> => {
-	if (cafeId !== INGREDIENTS_CAFE_ID) {
-		return null;
-	}
+    if (cafeId !== INGREDIENTS_CAFE_ID) {
+        return null;
+    }
 
-	const result = await INGREDIENTS_MENU_CACHE.update(dateString, async (cached) => {
-		if (cached != null) {
-			return cached;
-		}
+    const result = await INGREDIENTS_MENU_CACHE.update(dateString, async (cached) => {
+        if (cached != null) {
+            return cached;
+        }
 
-		// Cold boot or cache miss — compute on demand
-		return categorizeAndCache(dateString, menuStations);
-	});
+        // Cold boot or cache miss — compute on demand
+        return categorizeAndCache(dateString, menuStations);
+    });
 
-	return result ?? null;
+    return result ?? null;
 };

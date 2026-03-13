@@ -7,7 +7,7 @@ import { runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
-import { Lock, Semaphore } from '../../lock.js';
+import { Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveDailyMenuAsync } from './storage.js';
 import { CafeMenuSession } from '../session/menu.js';
@@ -103,5 +103,5 @@ export class DailyCafeUpdateSession {
         const elapsedSeconds = (endTime - startTime) / 1000;
 
         logInfo(`{${this.dateString}} Finished populating cafe sessions in ${elapsedSeconds} second(s)`);
-    };
+    }
 }

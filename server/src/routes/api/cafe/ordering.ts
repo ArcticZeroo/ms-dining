@@ -4,16 +4,16 @@ import Router, { RouterContext } from '@koa/router';
 import { DateUtil } from '@msdining/common';
 import { IMenuItemModifier } from '@msdining/common/models/cafe';
 import {
-    ICartItem,
-    ICompleteOrderRequest,
-    ICompleteOrderResponse,
-    IPrepareCartResponse,
-    IPrepareOrderRequest,
-    IPreparePaymentRequest,
-    IPreparePaymentResponse,
-    IRguestCardInfo,
-    ISubmitOrderItems,
-    SubmitOrderStage
+	ICartItem,
+	ICompleteOrderRequest,
+	ICompleteOrderResponse,
+	IPrepareCartResponse,
+	IPrepareOrderRequest,
+	IPreparePaymentRequest,
+	IPreparePaymentResponse,
+	IRguestCardInfo,
+	ISubmitOrderItems,
+	SubmitOrderStage
 } from '@msdining/common/models/cart';
 import { toDateString } from '@msdining/common/util/date-util';
 import { phone } from 'phone';
@@ -245,14 +245,18 @@ export const registerOrderingRoutes = (parent: Router) => {
                     throw new Error('Order ID or order number is not set after cart population');
                 }
 
+                const waitTime = await WaitTimeSession.retrieveWaitTimeWithCartItems(session.client, [...session.rawCartItemsForWaitTime]);
+
                 storePendingSession(orderId, session, cafeId);
 
                 prepareResults[cafeId] = {
                     orderId,
-                    orderNumber:        session.orderNumber,
+                    orderNumber:         session.orderNumber,
                     totalPriceWithTax:   session.orderTotalWithTax,
                     totalPriceWithoutTax: session.orderTotalWithoutTax,
                     totalTax:            session.orderTotalTax,
+                    waitTimeMin:         waitTime.minTime,
+                    waitTimeMax:         waitTime.maxTime,
                     expiresAt,
                 };
             })

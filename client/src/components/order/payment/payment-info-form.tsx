@@ -7,6 +7,7 @@ import {
     validatePhoneNumber,
 } from '../../../util/validation.ts';
 import { PaymentField } from './payment-field.tsx';
+
 import './payment-info-form.css';
 
 export interface IPaymentFormData {

@@ -15,154 +15,154 @@ import { getSimilarQueries } from '../../../api/storage/vector/client.js';
 import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
 import { getRecommendationsAsync } from '../../../api/cache/recommendations.js';
 import { UserStorageClient } from '../../../api/storage/clients/user.js';
-import { CAFE_GROUP_LIST, CAFES_BY_ID, GROUPS_BY_ID } from '../../../constants/cafes.js';
+import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../constants/cafes.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
 
 export const registerRecommendationsRoutes = (parent: Router) => {
-	const router = new Router({
-		prefix: '/recommendations'
-	});
+    const router = new Router({
+        prefix: '/recommendations'
+    });
 
-	const trimResults = (results: Map<SearchEntityType, Map<string, IServerSearchResult>>, limit: number) => {
-		const allResults: Array<{ entityType: SearchEntityType, name: string, result: IServerSearchResult }> = [];
-		for (const [entityType, entityResults] of results) {
-			for (const [name, result] of entityResults) {
-				allResults.push({ entityType, name, result });
-			}
-		}
+    const trimResults = (results: Map<SearchEntityType, Map<string, IServerSearchResult>>, limit: number) => {
+        const allResults: Array<{ entityType: SearchEntityType, name: string, result: IServerSearchResult }> = [];
+        for (const [entityType, entityResults] of results) {
+            for (const [name, result] of entityResults) {
+                allResults.push({ entityType, name, result });
+            }
+        }
 
-		allResults.sort(({ result: a }, { result: b }) => {
-			if (a.vectorDistance == null || b.vectorDistance == null) {
-				throw new Error('Missing vector distance');
-			}
+        allResults.sort(({ result: a }, { result: b }) => {
+            if (a.vectorDistance == null || b.vectorDistance == null) {
+                throw new Error('Missing vector distance');
+            }
 
-			return a.vectorDistance - b.vectorDistance;
-		});
+            return a.vectorDistance - b.vectorDistance;
+        });
 
-		const trimmedResultsList = allResults.slice(0, limit);
+        const trimmedResultsList = allResults.slice(0, limit);
 
-		const trimmedResults = new Map<SearchEntityType, Map<string, IServerSearchResult>>();
-		for (const { entityType, name, result } of trimmedResultsList) {
-			const results = trimmedResults.get(entityType) ?? new Map<string, IServerSearchResult>();
-			results.set(name, result);
-			trimmedResults.set(entityType, results);
-		}
+        const trimmedResults = new Map<SearchEntityType, Map<string, IServerSearchResult>>();
+        for (const { entityType, name, result } of trimmedResultsList) {
+            const results = trimmedResults.get(entityType) ?? new Map<string, IServerSearchResult>();
+            results.set(name, result);
+            trimmedResults.set(entityType, results);
+        }
 
-		return trimmedResults;
-	}
+        return trimmedResults;
+    }
 
-	router.get('/similar', async ctx => {
-		const [entityType, entityName] = getEntityTypeAndName(ctx);
+    router.get('/similar', async ctx => {
+        const [entityType, entityName] = getEntityTypeAndName(ctx);
 
-		const date = getDateForMenuRequest(ctx);
-		const limit = getMaybeNumberQueryParam(ctx, 'limit');
+        const date = getDateForMenuRequest(ctx);
+        const limit = getMaybeNumberQueryParam(ctx, 'limit');
 
-		if (!date) {
-			ctx.throw(400, 'Invalid date');
-			return;
-		}
+        if (!date) {
+            ctx.throw(400, 'Invalid date');
+            return;
+        }
 
-		if (!limit || limit < 1 || limit > 10) {
-			ctx.throw(400, 'Invalid limit, must be between 1 and 10');
-			return;
-		}
+        if (!limit || limit < 1 || limit > 10) {
+            ctx.throw(400, 'Invalid limit, must be between 1 and 10');
+            return;
+        }
 
-		const rawResults = await SearchManager.searchForSimilarEntities({ entityName, entityType, date });
-		await serializeSearchResults(ctx, trimResults(rawResults, limit));
-	});
+        const rawResults = await SearchManager.searchForSimilarEntities({ entityName, entityType, date });
+        await serializeSearchResults(ctx, trimResults(rawResults, limit));
+    });
 
-	router.get('/queries',
-		assignCacheControlMiddleware(DEFAULT_CACHE_EXPIRATION_TIME, true /*isPublic*/),
-		async ctx => {
-			const query = getTrimmedQueryParam(ctx, 'q');
+    router.get('/queries',
+        assignCacheControlMiddleware(DEFAULT_CACHE_EXPIRATION_TIME, true /*isPublic*/),
+        async ctx => {
+            const query = getTrimmedQueryParam(ctx, 'q');
 
-			if (!query) {
-				ctx.throw(400, 'Missing query');
-				return;
-			}
+            if (!query) {
+                ctx.throw(400, 'Missing query');
+                return;
+            }
 
-			ctx.body = await getSimilarQueries(query);
-		});
+            ctx.body = await getSimilarQueries(query);
+        });
 
-	const parseHomepageIds = (homepageIdsParam: string | undefined): string[] | undefined => {
-		if (!homepageIdsParam) {
-			return undefined;
-		}
+    const parseHomepageIds = (homepageIdsParam: string | undefined): string[] | undefined => {
+        if (!homepageIdsParam) {
+            return undefined;
+        }
 
-		const homepageIdsRaw = homepageIdsParam.split(',');
-		const resolvedCafeIds: string[] = [];
-		for (const homepageId of homepageIdsRaw) {
-			const trimmedId = homepageId.trim();
-			if (!trimmedId) {
-				continue;
-			}
+        const homepageIdsRaw = homepageIdsParam.split(',');
+        const resolvedCafeIds: string[] = [];
+        for (const homepageId of homepageIdsRaw) {
+            const trimmedId = homepageId.trim();
+            if (!trimmedId) {
+                continue;
+            }
 
-			if (CAFES_BY_ID.has(trimmedId)) {
-				resolvedCafeIds.push(trimmedId);
-			} else {
-				const group = GROUPS_BY_ID.get(trimmedId);
-				if (group) {
-					for (const member of group.members) {
-						resolvedCafeIds.push(member.id);
-					}
-				}
-			}
-		}
+            if (CAFES_BY_ID.has(trimmedId)) {
+                resolvedCafeIds.push(trimmedId);
+            } else {
+                const group = GROUPS_BY_ID.get(trimmedId);
+                if (group) {
+                    for (const member of group.members) {
+                        resolvedCafeIds.push(member.id);
+                    }
+                }
+            }
+        }
 
-		if (resolvedCafeIds.length === 0) {
-			return undefined;
-		}
+        if (resolvedCafeIds.length === 0) {
+            return undefined;
+        }
 
-		return resolvedCafeIds;
-	}
+        return resolvedCafeIds;
+    }
 
-	const resolveHomepageIdsToIndividualCafeIds = (homepageIds: string[]): string[] => {
-		const cafeIds: string[] = [];
-		for (const homepageId of homepageIds) {
-			if (CAFES_BY_ID.has(homepageId)) {
-				cafeIds.push(homepageId);
-			} else {
-				const group = GROUPS_BY_ID.get(homepageId);
-				if (group) {
-					for (const member of group.members) {
-						cafeIds.push(member.id);
-					}
-				}
-			}
-		}
-		return cafeIds;
-	};
+    const resolveHomepageIdsToIndividualCafeIds = (homepageIds: string[]): string[] => {
+        const cafeIds: string[] = [];
+        for (const homepageId of homepageIds) {
+            if (CAFES_BY_ID.has(homepageId)) {
+                cafeIds.push(homepageId);
+            } else {
+                const group = GROUPS_BY_ID.get(homepageId);
+                if (group) {
+                    for (const member of group.members) {
+                        cafeIds.push(member.id);
+                    }
+                }
+            }
+        }
+        return cafeIds;
+    };
 
-	const resolveHomepageIds = async (homepageIds: string[] | undefined, userId: string | null): Promise<string[]> => {
-		if (homepageIds) {
-			return homepageIds;
-		}
+    const resolveHomepageIds = async (homepageIds: string[] | undefined, userId: string | null): Promise<string[]> => {
+        if (homepageIds) {
+            return homepageIds;
+        }
 
-		if (userId) {
-			const user = await UserStorageClient.getUserAsync({ id: userId });
-			return resolveHomepageIdsToIndividualCafeIds(user?.settings?.homepageIds ?? []);
-		}
+        if (userId) {
+            const user = await UserStorageClient.getUserAsync({ id: userId });
+            return resolveHomepageIdsToIndividualCafeIds(user?.settings?.homepageIds ?? []);
+        }
 
-		return [];
-	};
+        return [];
+    };
 
-	router.get('/for-you', async ctx => {
-		const date = getDateForMenuRequest(ctx);
+    router.get('/for-you', async ctx => {
+        const date = getDateForMenuRequest(ctx);
 
-		if (!date) {
-			ctx.throw(400, 'Missing or invalid date');
-			return;
-		}
+        if (!date) {
+            ctx.throw(400, 'Missing or invalid date');
+            return;
+        }
 
-		const dateString = toDateString(date);
-		const cafeId = getTrimmedQueryParam(ctx, 'cafeId');
-		const homepageIdsParam = getTrimmedQueryParam(ctx, 'homepageIds');
-		const homepageIds = parseHomepageIds(homepageIdsParam);
-		const userId = getMaybeUserId(ctx);
-		const resolvedHomepageIds = await resolveHomepageIds(homepageIds, userId);
+        const dateString = toDateString(date);
+        const cafeId = getTrimmedQueryParam(ctx, 'cafeId');
+        const homepageIdsParam = getTrimmedQueryParam(ctx, 'homepageIds');
+        const homepageIds = parseHomepageIds(homepageIdsParam);
+        const userId = getMaybeUserId(ctx);
+        const resolvedHomepageIds = await resolveHomepageIds(homepageIds, userId);
 
-		ctx.body = await getRecommendationsAsync(userId, dateString, resolvedHomepageIds, cafeId);
-	});
+        ctx.body = await getRecommendationsAsync(userId, dateString, resolvedHomepageIds, cafeId);
+    });
 
-	attachRouter(parent, router);
+    attachRouter(parent, router);
 };

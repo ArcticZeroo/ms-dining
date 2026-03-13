@@ -1,8 +1,8 @@
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	RecommendationSectionType,
 	RECOMMENDATION_SECTION_DISPLAY_NAMES,
+	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -32,109 +32,109 @@ interface INewAtFavoritesCandidate {
  * Per-cafe results are cached; the user-facing section shuffles and deduplicates across cafes.
  */
 export const getNewItemsForCafe = async (cafeId: string, dateString: string): Promise<IRecommendationItem[]> => {
-	const cafe = CAFES_BY_ID.get(cafeId);
-	if (!cafe) {
-		return [];
-	}
+    const cafe = CAFES_BY_ID.get(cafeId);
+    if (!cafe) {
+        return [];
+    }
 
-	const [stations, uniquenessData] = await Promise.all([
-		retrieveDailyCafeMenuAsync(cafeId, dateString),
-		retrieveUniquenessDataForCafe(cafeId, dateString),
-	]);
+    const [stations, uniquenessData] = await Promise.all([
+        retrieveDailyCafeMenuAsync(cafeId, dateString),
+        retrieveUniquenessDataForCafe(cafeId, dateString),
+    ]);
 
-	// Collect candidates with reasons first, then batch header lookups
-	const candidates: INewAtFavoritesCandidate[] = [];
-	const seenEntityKeys = new Set<string>();
+    // Collect candidates with reasons first, then batch header lookups
+    const candidates: INewAtFavoritesCandidate[] = [];
+    const seenEntityKeys = new Set<string>();
 
-	for (const station of stations) {
-		const uniqueness = uniquenessData.get(station.name);
-		const themeItemIdSet = new Set(uniqueness?.themeItemIds ?? []);
+    for (const station of stations) {
+        const uniqueness = uniquenessData.get(station.name);
+        const themeItemIdSet = new Set(uniqueness?.themeItemIds ?? []);
 
-		for (const menuItem of station.menuItemsById.values()) {
-			const entityKey = getEntityKey(menuItem);
-			if (seenEntityKeys.has(entityKey)) {
-				continue;
-			}
+        for (const menuItem of station.menuItemsById.values()) {
+            const entityKey = getEntityKey(menuItem);
+            if (seenEntityKeys.has(entityKey)) {
+                continue;
+            }
 
-			let reason: string | undefined;
+            let reason: string | undefined;
 
-			if (uniqueness?.isTraveling) {
-				reason = 'Traveling';
-			} else if (themeItemIdSet.has(menuItem.id)) {
-				reason = 'Rotating today';
-			}
+            if (uniqueness?.isTraveling) {
+                reason = 'Traveling';
+            } else if (themeItemIdSet.has(menuItem.id)) {
+                reason = 'Rotating today';
+            }
 
-			if (!reason) {
-				try {
-					const firstAppearance = await retrieveFirstMenuItemAppearance(menuItem.id);
-					if (getIsRecentlyAvailable(firstAppearance)) {
-						reason = 'New this week';
-					}
-				} catch {
-					// Item might not have first appearance data yet
-				}
-			}
+            if (!reason) {
+                try {
+                    const firstAppearance = await retrieveFirstMenuItemAppearance(menuItem.id);
+                    if (getIsRecentlyAvailable(firstAppearance)) {
+                        reason = 'New this week';
+                    }
+                } catch {
+                    // Item might not have first appearance data yet
+                }
+            }
 
-			if (!reason) {
-				continue;
-			}
+            if (!reason) {
+                continue;
+            }
 
-			seenEntityKeys.add(entityKey);
-			candidates.push({
-				item: { menuItem, cafeId, cafeName: cafe.name, stationName: station.name },
-				reason,
-			});
-		}
-	}
+            seenEntityKeys.add(entityKey);
+            candidates.push({
+                item: { menuItem, cafeId, cafeName: cafe.name, stationName: station.name },
+                reason,
+            });
+        }
+    }
 
-	// Batch review header lookups
-	const headerResults = await Promise.allSettled(
-		candidates.map(({ item }) => retrieveReviewHeaderAsync(item.menuItem))
-	);
+    // Batch review header lookups
+    const headerResults = await Promise.allSettled(
+        candidates.map(({ item }) => retrieveReviewHeaderAsync(item.menuItem))
+    );
 
-	return candidates.map(({ item, reason }, index) => {
-		const headerResult = headerResults[index]!;
-		const header = headerResult.status === 'fulfilled' ? headerResult.value : null;
-		return toRecommendationItem(item, 1, reason, header);
-	});
+    return candidates.map(({ item, reason }, index) => {
+        const headerResult = headerResults[index]!;
+        const header = headerResult.status === 'fulfilled' ? headerResult.value : null;
+        return toRecommendationItem(item, 1, reason, header);
+    });
 };
 
 export const getNewAtFavorites = async (
-	context: IRecommendationContext,
+    context: IRecommendationContext,
 ): Promise<IRecommendationSection | null> => {
-	const { homepageIds, cafeIdFilter } = context;
+    const { homepageIds, cafeIdFilter } = context;
 
-	const cafeIds = cafeIdFilter ? [cafeIdFilter] : homepageIds;
-	if (cafeIds.length === 0) {
-		return null;
-	}
+    const cafeIds = cafeIdFilter ? [cafeIdFilter] : homepageIds;
+    if (cafeIds.length === 0) {
+        return null;
+    }
 
-	// Fetch per-cafe results in parallel
-	const perCafeResults = await Promise.all(
-		cafeIds.map(cafeId => context.getNewItemsForCafe(cafeId))
-	);
+    // Fetch per-cafe results in parallel
+    const perCafeResults = await Promise.all(
+        cafeIds.map(cafeId => context.getNewItemsForCafe(cafeId))
+    );
 
-	// Merge and deduplicate across cafes
-	const seenEntityKeys = new Set<string>();
-	const items: IRecommendationItem[] = [];
-	for (const cafeItems of perCafeResults) {
-		for (const item of cafeItems) {
-			const entityKey = getEntityKey(item);
-			if (seenEntityKeys.has(entityKey)) {
-				continue;
-			}
-			seenEntityKeys.add(entityKey);
-			items.push(item);
-		}
-	}
+    // Merge and deduplicate across cafes
+    const seenEntityKeys = new Set<string>();
+    const items: IRecommendationItem[] = [];
+    for (const cafeItems of perCafeResults) {
+        for (const item of cafeItems) {
+            const entityKey = getEntityKey(item);
+            if (seenEntityKeys.has(entityKey)) {
+                continue;
+            }
+            seenEntityKeys.add(entityKey);
+            items.push(item);
+        }
+    }
 
-	if (items.length === 0) {
-		return null;
-	}
+    if (items.length === 0) {
+        return null;
+    }
 
-	return {
-		type:  RecommendationSectionType.newAtFavorites,
-		title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.newAtFavorites],
-		items: seededShuffle(items, context.random).slice(0, ITEMS_PER_SECTION),
-	};
+    return {
+        type:  RecommendationSectionType.newAtFavorites,
+        title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.newAtFavorites],
+        items: seededShuffle(items, context.random).slice(0, ITEMS_PER_SECTION),
+    };
 };

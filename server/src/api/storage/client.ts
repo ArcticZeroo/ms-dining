@@ -17,9 +17,9 @@ export const usePrismaClient = async <T>(callback: (client: PrismaClient) => Pro
 };
 
 export const usePrismaTransaction = async <T>(callback: (tx: PrismaTransactionClient) => Promise<T>) => {
-	return usePrismaClient(async (client) => {
-		return client.$transaction(async (tx) => {
-			return callback(tx);
-		});
-	});
+    return usePrismaClient(async (client) => {
+        return client.$transaction(async (tx) => {
+            return callback(tx);
+        });
+    });
 }

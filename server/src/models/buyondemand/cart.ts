@@ -1,10 +1,17 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { z } from 'zod';
 
-export const BuyOnDemandWaitTimeSchema = z.object({
-	etf: z.object({
-		minutes: z.number()
-	})
+const waitTimeEntrySchema = z.object({
+    minutes: z.number(),
+});
+
+export const BuyOnDemandWaitTimeEtfSchema = z.object({
+    etf: waitTimeEntrySchema,
+});
+
+export const BuyOnDemandWaitTimeMinMaxSchema = z.object({
+    minTime: waitTimeEntrySchema,
+    maxTime: waitTimeEntrySchema,
 });
 
 export interface IRequestCartItem {

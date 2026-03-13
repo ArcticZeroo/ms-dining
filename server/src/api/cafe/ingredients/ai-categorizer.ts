@@ -7,49 +7,49 @@ import { IMenuRoleRow } from './cache.js';
 const logger = getNamespaceLogger('ingredients-ai');
 
 const aiResponseSchema = z.object({
-	price:    z.number(),
-	starters: z.array(z.string()),
-	entrees:  z.array(z.string()),
-	desserts: z.array(z.string()),
-	drinks:   z.array(z.string()).default([]),
-	sides:    z.array(z.string()).default([]),
-	other:    z.array(z.string()).default([]),
+    price:    z.number(),
+    starters: z.array(z.string()),
+    entrees:  z.array(z.string()),
+    desserts: z.array(z.string()),
+    drinks:   z.array(z.string()).default([]),
+    sides:    z.array(z.string()).default([]),
+    other:    z.array(z.string()).default([]),
 });
 
 const serializeStationForPrompt = (station: ICafeStation): string => {
-	const lines: string[] = [];
+    const lines: string[] = [];
 
-	for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
-		lines.push(`\n## Category: "${categoryName}"`);
+    for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
+        lines.push(`\n## Category: "${categoryName}"`);
 
-		for (const itemId of itemIds) {
-			const item = station.menuItemsById.get(itemId);
-			if (!item) {
-				continue;
-			}
+        for (const itemId of itemIds) {
+            const item = station.menuItemsById.get(itemId);
+            if (!item) {
+                continue;
+            }
 
-			const parts = [`  - Item ID: "${item.id}" | Name: "${item.name}" | Price: $${item.price.toFixed(2)}`];
-			if (item.description) {
-				parts.push(`    Description: "${item.description}"`);
-			}
-			if (item.modifiers.length > 0) {
-				parts.push(`    Modifiers:`);
-				for (const modifier of item.modifiers) {
-					const choiceNames = modifier.choices.map(choice => `"${choice.description}"`).join(', ');
-					parts.push(`      - ${modifier.description}: [${choiceNames}]`);
-				}
-			}
-			lines.push(parts.join('\n'));
-		}
-	}
+            const parts = [`  - Item ID: "${item.id}" | Name: "${item.name}" | Price: $${item.price.toFixed(2)}`];
+            if (item.description) {
+                parts.push(`    Description: "${item.description}"`);
+            }
+            if (item.modifiers.length > 0) {
+                parts.push(`    Modifiers:`);
+                for (const modifier of item.modifiers) {
+                    const choiceNames = modifier.choices.map(choice => `"${choice.description}"`).join(', ');
+                    parts.push(`      - ${modifier.description}: [${choiceNames}]`);
+                }
+            }
+            lines.push(parts.join('\n'));
+        }
+    }
 
-	return lines.join('\n');
+    return lines.join('\n');
 };
 
 const buildPrompt = (stations: ICafeStation[]): string => {
-	const menuData = stations.map(serializeStationForPrompt).join('\n');
+    const menuData = stations.map(serializeStationForPrompt).join('\n');
 
-	return `You are an expert at analyzing restaurant menus. You need to categorize menu items for "in.gredients", a prix fixe 3-course meal restaurant.
+    return `You are an expert at analyzing restaurant menus. You need to categorize menu items for "in.gredients", a prix fixe 3-course meal restaurant.
 
 [CONTEXT]
 in.gredients offers a fixed-price 3-course dinner: diners choose 1 starter + 1 entrée + 1 dessert for one set price.
@@ -107,83 +107,83 @@ Respond with your analysis inside XML tags. You may include reasoning before the
 };
 
 const parseAiResponse = (response: string): z.infer<typeof aiResponseSchema> | null => {
-	const xmlMatch = response.match(/<menu-analysis>([\s\S]*?)<\/menu-analysis>/);
-	if (!xmlMatch) {
-		// Fallback: try extracting raw JSON
-		const jsonMatch = response.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) {
-			logger.error('AI response did not contain <menu-analysis> tags or JSON');
-			return null;
-		}
-		return parseJsonWithZod(jsonMatch[0]);
-	}
+    const xmlMatch = response.match(/<menu-analysis>([\s\S]*?)<\/menu-analysis>/);
+    if (!xmlMatch) {
+        // Fallback: try extracting raw JSON
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            logger.error('AI response did not contain <menu-analysis> tags or JSON');
+            return null;
+        }
+        return parseJsonWithZod(jsonMatch[0]);
+    }
 
-	return parseJsonWithZod(xmlMatch[1]!);
+    return parseJsonWithZod(xmlMatch[1]!);
 };
 
 const parseJsonWithZod = (jsonString: string): z.infer<typeof aiResponseSchema> | null => {
-	try {
-		const parsed = JSON.parse(jsonString);
-		const result = aiResponseSchema.safeParse(parsed);
-		if (!result.success) {
-			logger.error('AI response JSON failed validation:', result.error.message);
-			return null;
-		}
-		return result.data;
-	} catch (err) {
-		logger.error('Failed to parse AI response JSON:', err);
-		return null;
-	}
+    try {
+        const parsed = JSON.parse(jsonString);
+        const result = aiResponseSchema.safeParse(parsed);
+        if (!result.success) {
+            logger.error('AI response JSON failed validation:', result.error.message);
+            return null;
+        }
+        return result.data;
+    } catch (err) {
+        logger.error('Failed to parse AI response JSON:', err);
+        return null;
+    }
 };
 
 const categoriesToRoles = (categorized: z.infer<typeof aiResponseSchema>): IMenuRoleRow[] => {
-	const roles: IMenuRoleRow[] = [];
-	const addRoles = (ids: string[], role: string) => {
-		for (const menuItemId of ids) {
-			roles.push({ menuItemId, role });
-		}
-	};
-	addRoles(categorized.starters, 'STARTER');
-	addRoles(categorized.entrees, 'ENTREE');
-	addRoles(categorized.desserts, 'DESSERT');
-	addRoles(categorized.drinks, 'DRINK');
-	addRoles(categorized.sides, 'SIDE');
-	addRoles(categorized.other, 'OTHER');
-	return roles;
+    const roles: IMenuRoleRow[] = [];
+    const addRoles = (ids: string[], role: string) => {
+        for (const menuItemId of ids) {
+            roles.push({ menuItemId, role });
+        }
+    };
+    addRoles(categorized.starters, 'STARTER');
+    addRoles(categorized.entrees, 'ENTREE');
+    addRoles(categorized.desserts, 'DESSERT');
+    addRoles(categorized.drinks, 'DRINK');
+    addRoles(categorized.sides, 'SIDE');
+    addRoles(categorized.other, 'OTHER');
+    return roles;
 };
 
 export const categorizeIngredientsMenu = async (stations: ICafeStation[]): Promise<{ price: number; roles: IMenuRoleRow[] } | null> => {
-	if (stations.length === 0) {
-		return null;
-	}
+    if (stations.length === 0) {
+        return null;
+    }
 
-	logger.info('Running AI categorization...');
+    logger.info('Running AI categorization...');
 
-	const prompt = buildPrompt(stations);
+    const prompt = buildPrompt(stations);
 
-	try {
-		const response = await retrieveTextCompletion({
-			systemPrompt: 'You are a menu categorization expert.',
-			userMessage:  prompt,
-		});
+    try {
+        const response = await retrieveTextCompletion({
+            systemPrompt: 'You are a menu categorization expert.',
+            userMessage:  prompt,
+        });
 
-		const parsed = parseAiResponse(response);
-		if (!parsed) {
-			logger.error('Failed to parse AI response');
-			return null;
-		}
+        const parsed = parseAiResponse(response);
+        if (!parsed) {
+            logger.error('Failed to parse AI response');
+            return null;
+        }
 
-		const roles = categoriesToRoles(parsed);
+        const roles = categoriesToRoles(parsed);
 
-		if (parsed.entrees.length === 0 || parsed.starters.length === 0 || parsed.desserts.length === 0) {
-			logger.error('AI categorization returned too few items in a category, discarding result');
-			return null;
-		}
+        if (parsed.entrees.length === 0 || parsed.starters.length === 0 || parsed.desserts.length === 0) {
+            logger.error('AI categorization returned too few items in a category, discarding result');
+            return null;
+        }
 
-		logger.info(`Successfully categorized ingredients menu (${parsed.entrees.length} entrées, ${parsed.starters.length} starters, ${parsed.desserts.length} desserts, ${parsed.drinks.length} drinks, ${parsed.sides.length} sides, ${parsed.other.length} other)`);
-		return { price: parsed.price, roles };
-	} catch (err) {
-		logger.error('AI categorization failed:', err);
-		return null;
-	}
+        logger.info(`Successfully categorized ingredients menu (${parsed.entrees.length} entrées, ${parsed.starters.length} starters, ${parsed.desserts.length} desserts, ${parsed.drinks.length} drinks, ${parsed.sides.length} sides, ${parsed.other.length} other)`);
+        return { price: parsed.price, roles };
+    } catch (err) {
+        logger.error('AI categorization failed:', err);
+        return null;
+    }
 };

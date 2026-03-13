@@ -12,7 +12,10 @@
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-microsoft": "^1.0.3",
     "@types/seedrandom": "^3.0.8",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "cross-env": "^7.0.3",
+    "eslint": "^8.57.1",
     "prisma": "^6.19.2",
     "typescript": "^5.9.3",
     "undici": "^5.24.0"
@@ -65,6 +68,8 @@
     "predeploy": "npx tsc --project ../common/tsconfig.json && npx prisma migrate deploy && npx prisma generate",
     "deploy": "npm run predeploy && npm run start",
     "deploy-dev": "npm run predeploy && npm run start",
-    "test": "npx tsc && node --test dist/**/*.test.js"
+    "test": "npx tsc && node --test dist/**/*.test.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   }
 }

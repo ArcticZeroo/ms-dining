@@ -1,72 +1,33 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { IWaitTimeResponse } from '@msdining/common/models/http';
-import { useCallback, useEffect, useMemo } from 'react';
-import { DiningClient } from '../../api/client/dining.ts';
-import { CartContext } from '../../context/cart.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
+import React, { useMemo } from 'react';
+import { IPrepareCartResponse } from '@msdining/common/models/cart';
 import { pluralize } from '../../util/string.js';
 
-const formatWaitTimeRange = (waitTime: IWaitTimeResponse): string => {
-    if (waitTime.minTime === waitTime.maxTime) {
-        return `${waitTime.minTime} ${pluralize('minute', waitTime.minTime)}`;
-    }
-
-    return `${waitTime.minTime} - ${waitTime.maxTime} minutes`;
+interface IWaitTimeProps {
+    cartSessionData?: IPrepareCartResponse | null;
 }
 
-export const WaitTime = () => {
-    const cartItemsByCafeId = useValueNotifierContext(CartContext);
-
-    const retrieveWaitTime = useCallback(
-        async (): Promise<IWaitTimeResponse> => {
-            const waitTimePromises: Array<Promise<IWaitTimeResponse>> = [];
-
-            for (const [cafeId, cafeCartItems] of cartItemsByCafeId) {
-                const totalQuantity = Array.from(cafeCartItems.values()).reduce((total, item) => total + item.quantity, 0);
-                waitTimePromises.push(DiningClient.retrieveWaitTimeForItems(cafeId, totalQuantity));
-            }
-
-            const waitTimes = await Promise.all(waitTimePromises);
-
-            const waitTime: IWaitTimeResponse = {
-                minTime: 0,
-                maxTime: 0,
-            };
-
-            for (const wait of waitTimes) {
-                waitTime.minTime = Math.max(waitTime.minTime, wait.minTime);
-                waitTime.maxTime = Math.max(waitTime.maxTime, wait.maxTime);
-            }
-
-            if (waitTime.minTime === Number.MAX_SAFE_INTEGER) {
-                waitTime.minTime = 0;
-            }
-
-            return waitTime;
-        },
-        [cartItemsByCafeId]
-    );
-
-    const waitTimeState = useDelayedPromiseState(retrieveWaitTime);
-    const runWaitTimePromise = waitTimeState.run;
-
-    useEffect(() => {
-        runWaitTimePromise();
-    }, [runWaitTimePromise]);
-
+export const WaitTime: React.FC<IWaitTimeProps> = ({ cartSessionData }) => {
     const waitTimeView = useMemo(
         () => {
-            if (waitTimeState.stage === PromiseStage.running) {
+            if (!cartSessionData) {
                 return 'Loading wait time...';
             }
 
-            if (waitTimeState.value != null) {
-                return `Estimated wait time: ${formatWaitTimeRange(waitTimeState.value)}`;
+            let minTime = 0;
+            let maxTime = 0;
+
+            for (const cafeData of Object.values(cartSessionData)) {
+                minTime = Math.max(minTime, cafeData.waitTimeMin);
+                maxTime = Math.max(maxTime, cafeData.waitTimeMax);
             }
 
-            return 'Error retrieving wait time';
+            if (minTime === maxTime) {
+                return `Estimated wait time: ${minTime} ${pluralize('minute', minTime)}`;
+            }
+
+            return `Estimated wait time: ${minTime} - ${maxTime} minutes`;
         },
-        [waitTimeState]
+        [cartSessionData]
     );
 
     return (

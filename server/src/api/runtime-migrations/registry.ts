@@ -4,7 +4,7 @@ import { deleteLegacyStationEmbeddings } from './migrations/delete-legacy-statio
 import { backfillThumbnailHashesMigration } from './migrations/backfill-thumbnail-hashes.js';
 
 export const MIGRATION_REGISTRY: IRuntimeMigration[] = [
-	deleteLegacyStationEmbeddings,
-	backfillStationNames,
-	backfillThumbnailHashesMigration,
+    deleteLegacyStationEmbeddings,
+    backfillStationNames,
+    backfillThumbnailHashesMigration,
 ];

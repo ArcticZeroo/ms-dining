@@ -12,76 +12,76 @@ interface IInsertSearchEmbeddingRequestData {
 }
 
 const onInsertSearchEmbedding = async ({ entityType, id, embedding }: IInsertSearchEmbeddingRequestData) => {
-	db.insertSearchEntityEmbedding(embedding, id, entityType);
+    db.insertSearchEntityEmbedding(embedding, id, entityType);
 }
 
 const onInsertQueryEmbedding = async ({ embedding, query }: { embedding: Float32Array, query: string }) => {
-	db.insertQueryEmbedding(embedding, query);
+    db.insertQueryEmbedding(embedding, query);
 }
 
 const onGetIsSearchEntityEmbedded = async ({ entityType, id }: { entityType: SearchEntityType, id: string }) => {
-	return db.isEmbeddedEntity(entityType, id);
+    return db.isEmbeddedEntity(entityType, id);
 }
 
 const onGetQueryEmbedding = async (query: string) => {
-	return db.getQueryEmbedding(query);
+    return db.getQueryEmbedding(query);
 }
 
 const onGetSearchResults = async ({ query }: { query: Float32Array }) => {
-	return db.searchVectorRaw(query, VECTOR_SEARCH_ITEM_LIMIT);
+    return db.searchVectorRaw(query, VECTOR_SEARCH_ITEM_LIMIT);
 }
 
 const onGetSearchResultsByType = async ({ query, entityType, limit }: { query: Float32Array, entityType: SearchEntityType, limit: number }) => {
-	return db.searchVectorRawByType(query, entityType, limit);
+    return db.searchVectorRawByType(query, entityType, limit);
 }
 
 const onGetAllEmbeddedEntities = async () => {
-	return db.getAllEmbeddedEntities();
+    return db.getAllEmbeddedEntities();
 }
 
 const onGetAllSearchQueries = async () => {
-	return db.getAllSearchQueries();
+    return db.getAllSearchQueries();
 }
 
 const onGetSearchEntityEmbedding = async ({ entityType, id }: { entityType: SearchEntityType, id: string }) => {
-	return db.getSearchEntityEmbedding(entityType, id);
+    return db.getSearchEntityEmbedding(entityType, id);
 }
 
 const onGetSimilarQueries = async ({ query, queryEmbedding }: { query: string, queryEmbedding: Float32Array }) => {
-	return db.searchForSimilarQueries(queryEmbedding, query, SIMILAR_QUERY_SEARCH_LIMIT);
+    return db.searchForSimilarQueries(queryEmbedding, query, SIMILAR_QUERY_SEARCH_LIMIT);
 }
 
 const onClearDuplicatedQueries = async () => {
-	return db.clearDuplicatedQueries();
+    return db.clearDuplicatedQueries();
 }
 
 const onDeleteSearchEmbedding = async ({ entityType, id }: { entityType: SearchEntityType, id: string }) => {
-	db.deleteSearchEntityEmbedding(entityType, id);
+    db.deleteSearchEntityEmbedding(entityType, id);
 }
 
 const onGetAllEmbeddedIdsByType = async (entityType: SearchEntityType) => {
-	return db.getAllEmbeddedIdsByType(entityType);
+    return db.getAllEmbeddedIdsByType(entityType);
 }
 
 const onDeleteAllByEntityType = async (entityType: SearchEntityType) => {
-	db.deleteAllByEntityType(entityType);
+    db.deleteAllByEntityType(entityType);
 }
 
 const COMMANDS = {
-	insertSearchEmbedding: onInsertSearchEmbedding,
-	insertQueryEmbedding: onInsertQueryEmbedding,
-	getIsSearchEntityEmbedded: onGetIsSearchEntityEmbedded,
-	getQueryEmbedding: onGetQueryEmbedding,
-	getSearchResults: onGetSearchResults,
-	getSearchResultsByType: onGetSearchResultsByType,
-	getAllEmbeddedEntities: onGetAllEmbeddedEntities,
-	getAllSearchQueries: onGetAllSearchQueries,
-	getSearchEntityEmbedding: onGetSearchEntityEmbedding,
-	getSimilarQueries: onGetSimilarQueries,
-	clearDuplicatedQueries: onClearDuplicatedQueries,
-	deleteSearchEmbedding: onDeleteSearchEmbedding,
-	getAllEmbeddedIdsByType: onGetAllEmbeddedIdsByType,
-	deleteAllByEntityType: onDeleteAllByEntityType,
+    insertSearchEmbedding: onInsertSearchEmbedding,
+    insertQueryEmbedding: onInsertQueryEmbedding,
+    getIsSearchEntityEmbedded: onGetIsSearchEntityEmbedded,
+    getQueryEmbedding: onGetQueryEmbedding,
+    getSearchResults: onGetSearchResults,
+    getSearchResultsByType: onGetSearchResultsByType,
+    getAllEmbeddedEntities: onGetAllEmbeddedEntities,
+    getAllSearchQueries: onGetAllSearchQueries,
+    getSearchEntityEmbedding: onGetSearchEntityEmbedding,
+    getSimilarQueries: onGetSimilarQueries,
+    clearDuplicatedQueries: onClearDuplicatedQueries,
+    deleteSearchEmbedding: onDeleteSearchEmbedding,
+    getAllEmbeddedIdsByType: onGetAllEmbeddedIdsByType,
+    deleteAllByEntityType: onDeleteAllByEntityType,
 };
 
 export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);

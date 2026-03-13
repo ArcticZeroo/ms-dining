@@ -12,31 +12,31 @@ export interface IImageMetadata {
 }
 
 export const retrieveImageMetadataAsync = async (imagePath: string): Promise<IImageMetadata | null> => {
-	try {
-		const [imageSizeResult, { mtime: lastUpdateTime }] = await Promise.all([getImageSizeAsync(imagePath), fs.stat(imagePath)]);
+    try {
+        const [imageSizeResult, { mtime: lastUpdateTime }] = await Promise.all([getImageSizeAsync(imagePath), fs.stat(imagePath)]);
 
-		if (imageSizeResult == null) {
-			return null;
-		}
+        if (imageSizeResult == null) {
+            return null;
+        }
 
-		const { width, height } = imageSizeResult;
+        const { width, height } = imageSizeResult;
 
-		if (width == null || height == null) {
-			return null;
-		}
+        if (width == null || height == null) {
+            return null;
+        }
 
-		return {
-			width,
-			height,
-			lastUpdateTime
-		};
-	} catch (err) {
-		logError('Could not get image metadata:', err);
+        return {
+            width,
+            height,
+            lastUpdateTime
+        };
+    } catch (err) {
+        logError('Could not get image metadata:', err);
 
-		if (String(err).includes('Empty file')) {
-			await fs.rm(imagePath);
-		}
+        if (String(err).includes('Empty file')) {
+            await fs.rm(imagePath);
+        }
 
-		return null;
-	}
+        return null;
+    }
 }
