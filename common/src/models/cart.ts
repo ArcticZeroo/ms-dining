@@ -73,6 +73,8 @@ export interface IPrepareCartResponse {
         totalPriceWithTax: number;
         totalPriceWithoutTax: number;
         totalTax: number;
+        waitTimeMin: number;
+        waitTimeMax: number;
         expiresAt: string;
     };
 }

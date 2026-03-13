@@ -92,6 +92,7 @@ export class CafeOrderSession {
     #cardProcessorToken: string = '';
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
+    readonly #rawCartItemsForWaitTime: unknown[] = [];
 
     constructor(public client: BuyOnDemandClient, cartItems: ICartItem[]) {
         this.#cartItems = cartItems;
@@ -124,6 +125,10 @@ export class CafeOrderSession {
 
     public get orderId() {
         return this.#orderId;
+    }
+
+    public get rawCartItemsForWaitTime(): readonly unknown[] {
+        return this.#rawCartItemsForWaitTime;
     }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
@@ -343,6 +348,9 @@ export class CafeOrderSession {
             isMultiItem:        false,
             scannedOrder:       false,
         };
+
+        // Store the built cart item for wait time API (needs full item data for accurate estimates)
+        this.#rawCartItemsForWaitTime.push(requestBody.item);
 
         const response = await this.client.requestAsync(
             `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orders`,

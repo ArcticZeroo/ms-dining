@@ -243,14 +243,18 @@ export const registerOrderingRoutes = (parent: Router) => {
                     throw new Error('Order ID or order number is not set after cart population');
                 }
 
+                const waitTime = await WaitTimeSession.retrieveWaitTimeWithCartItems(session.client, [...session.rawCartItemsForWaitTime]);
+
                 storePendingSession(orderId, session, cafeId);
 
                 prepareResults[cafeId] = {
                     orderId,
-                    orderNumber:        session.orderNumber,
+                    orderNumber:         session.orderNumber,
                     totalPriceWithTax:   session.orderTotalWithTax,
                     totalPriceWithoutTax: session.orderTotalWithoutTax,
                     totalTax:            session.orderTotalTax,
+                    waitTimeMin:         waitTime.minTime,
+                    waitTimeMax:         waitTime.maxTime,
                     expiresAt,
                 };
             })
