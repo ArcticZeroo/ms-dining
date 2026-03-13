@@ -2,3 +2,4 @@
 memory/
 plans/
 server/static/thumbnails/
+*.har
