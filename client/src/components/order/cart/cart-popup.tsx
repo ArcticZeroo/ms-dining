@@ -1,5 +1,5 @@
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
 import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
@@ -19,11 +19,14 @@ export const CartPopup = () => {
     const cartHydration = useValueNotifierContext(CartHydrationContext);
     const isTodaySelected = useIsTodaySelected();
     const scrollbarWidth = useScrollbarWidth();
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const totalItemCount = useMemo(
         () => Array.from(cart.values()).reduce((total, itemsById) => total + itemsById.size, 0),
         [cart]
     );
+
+    const toggleExpanded = useCallback(() => setIsExpanded(prev => !prev), []);
 
     const hasMissingItems = cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
     const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
@@ -37,13 +40,14 @@ export const CartPopup = () => {
             className={classNames(
                 'cart-popup',
                 !shouldShow && 'hidden',
+                isExpanded && 'expanded',
                 hasMissingItems && 'has-missing-items'
             )}
             style={{
                 right: `${scrollbarWidth}px`
             }}
         >
-            <div className="cart-header cart-info">
+            <div className="cart-header cart-info" onClick={toggleExpanded}>
                 {
                     hasMissingItems && (
                         <span className="cart-warning material-symbols-outlined" title="Some cart items could not be loaded">
