@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { Modal } from '../popup/modal.js';
 import { CafeOverviewWithData } from './cafe-overview-with-data.js';
 import { CafeMenu } from '../../models/cafe.js';
-import { IDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { IDelayedPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { usePopupOpener } from '../../hooks/popup.js';
 import { CurrentCafeContext } from '../../context/menu-item.js';
 import { classNames } from '../../util/react.js';
@@ -23,6 +23,22 @@ const getOrderButtonTitle = (cafeId: string): string => {
     return 'Click to open online ordering menu at buy-ondemand.com';
 }
 
+const getOverviewTitle = (menuData: IDelayedPromiseState<CafeMenu>, isDisabled: boolean) => {
+    if (menuData.stage === PromiseStage.error) {
+        return 'Menu overview is unavailable due to an error loading the menu';
+    }
+
+    if (menuData.stage === PromiseStage.success) {
+        if (isDisabled) {
+            return 'There are no stations on the menu today';
+        }
+
+        return 'Click to view menu overview';
+    }
+
+    return 'Overview will be ready once the menu has loaded';
+}
+
 interface ICafeMenuControlsProps {
     cafeName: string;
     menuData: IDelayedPromiseState<CafeMenu>;
@@ -32,13 +48,12 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
     const cafe = useContext(CurrentCafeContext);
     const openPopup = usePopupOpener();
     const deviceType = useDeviceType();
-    const isOverviewDisabled = menuData.value && menuData.value.stations.length === 0;
-    const overviewTitle = isOverviewDisabled
-        ? 'There are no stations on the menu today.'
-        : 'Click to view menu overview';
+
+    const stations = menuData.value?.stations;
+    const isOverviewDisabled = !stations || stations.length === 0;
+    const overviewTitle = getOverviewTitle(menuData, isOverviewDisabled);
 
     const onOpenMenuOverviewClicked = () => {
-        const stations = menuData.value?.stations;
         if (!stations || stations.length === 0) {
             return;
         }
@@ -52,7 +67,7 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
                         <CafeOverviewWithData
                             cafe={cafe}
                             overviewStations={stations}
-                            showAllStationsIfNoneInteresting={true}
+                            showAllStations={true}
                         />
                     }
                 />
