@@ -14,7 +14,7 @@ const run = async () => {
     console.log('Client created. Config:', JSON.stringify(client.config, null, 2));
 
     console.log('\nFetching station list...');
-    const stations = await retrieveStationListAsync(client, 0);
+    const { stations } = await retrieveStationListAsync(client, 0);
     console.log(`Found ${stations.length} stations:`);
     for (const station of stations) {
         console.log(`  - ${station.name} (id: ${station.id}, menuId: ${station.menuId})`);

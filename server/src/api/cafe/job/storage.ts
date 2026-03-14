@@ -33,6 +33,7 @@ const saveStaticStationDataAsync = async ({ station, shouldUpdateExistingItems }
 interface ISaveSessionParams {
     cafe: ICafe;
     dateString: string;
+    isAvailable: boolean;
     stations: ICafeStation[];
     shouldUpdateExistingItems: boolean;
 }
@@ -40,6 +41,7 @@ interface ISaveSessionParams {
 export const saveDailyMenuAsync = async ({
     cafe,
     dateString,
+    isAvailable,
     stations,
     shouldUpdateExistingItems
 }: ISaveSessionParams) => {
@@ -55,6 +57,7 @@ export const saveDailyMenuAsync = async ({
     await DailyMenuStorageClient.publishDailyStationMenuAsync({
         cafe,
         dateString,
+        isAvailable,
         stations
     });
 }

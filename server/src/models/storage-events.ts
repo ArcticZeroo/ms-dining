@@ -3,6 +3,7 @@ import { ICafe, ICafeStation } from './cafe.js';
 export interface IMenuPublishEvent {
 	cafe: ICafe;
 	dateString: string;
+	isAvailable: boolean;
 	menu: ICafeStation[];
 	addedStations: Set<string /*stationId*/>;
 	removedStations: Set<string /*stationId*/>;

@@ -36,6 +36,7 @@ export interface ICafeStation {
 }
 
 export interface CafeMenu {
+    isAvailable: boolean;
     stations: ICafeStation[];
     ingredientsMenu?: IIngredientsMenuDTO;
 }

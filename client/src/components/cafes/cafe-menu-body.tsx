@@ -99,7 +99,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
             return (
                 <>
                     <IngredientsInfoBanner/>
-                    <StationList stations={value.stations}/>
+                    <StationList stations={value.stations} isAvailable={value.isAvailable}/>
                 </>
             );
         }
@@ -107,7 +107,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
         return (
             <>
                 {isIngredients && <IngredientsInfoBanner/>}
-                <StationList stations={value.stations}/>
+                <StationList stations={value.stations} isAvailable={value.isAvailable}/>
             </>
         );
     }

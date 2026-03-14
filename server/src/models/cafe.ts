@@ -65,6 +65,8 @@ export interface ICafeStation {
     menuItemIdsByCategoryName: Map<string, Array<string>>;
     menuItemsById: Map<string, IMenuItemBase>;
     menuLastUpdateTime?: Date;
+    opensAt: number;
+    closesAt: number;
 }
 
 export interface IMenuItemTag {

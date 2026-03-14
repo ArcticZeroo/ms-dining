@@ -12,13 +12,13 @@ import { STORAGE_EVENTS } from '../events.js';
 import Duration from '@arcticzeroo/duration';
 import { getAllMenuItemsFirstAppearance } from '@prisma/client/sql';
 
-const areMenuItemsByCategoryNameEqual = (a: Map<string, Array<string>>, b: Map<string, Array<string>>) => {
-    if (a.size !== b.size) {
+const areMenuItemsByCategoryNameEqual = (left: Map<string, Array<string>>, right: Map<string, Array<string>>) => {
+    if (left.size !== right.size) {
         return false;
     }
 
-    for (const [categoryName, menuItemIds] of a.entries()) {
-        const otherMenuItemIds = b.get(categoryName);
+    for (const [categoryName, menuItemIds] of left.entries()) {
+        const otherMenuItemIds = right.get(categoryName);
         if (otherMenuItemIds == null || menuItemIds.length !== otherMenuItemIds.length) {
             return false;
         }
@@ -34,6 +34,7 @@ const areMenuItemsByCategoryNameEqual = (a: Map<string, Array<string>>, b: Map<s
 interface IPublishDailyMenuParams {
 	cafe: ICafe;
 	dateString: string;
+	isAvailable: boolean;
 	stations: Array<ICafeStation>;
 }
 
@@ -46,12 +47,13 @@ interface ICafeMenuOverviewHeader {
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
 export abstract class DailyMenuStorageClient {
-    public static async publishDailyStationMenuAsync({ cafe, dateString, stations }: IPublishDailyMenuParams) {
+    public static async publishDailyStationMenuAsync({ cafe, dateString, isAvailable, stations }: IPublishDailyMenuParams) {
         const cafeId = cafe.id;
 
         const publishEvent: IMenuPublishEvent = {
             cafe,
             dateString,
+            isAvailable,
             menu:            stations,
             addedStations:   new Set<string>(),
             removedStations: new Set<string>(),
@@ -63,8 +65,8 @@ export abstract class DailyMenuStorageClient {
             dirtyMenuItemIds:          new Set<string>()
         };
 
-        await usePrismaClient(async (prismaClient) => prismaClient.$transaction(async tx => {
-            const previousDailyStationMenus = await tx.dailyStation.findMany({
+        await usePrismaClient(async (prismaClient) => prismaClient.$transaction(async txn => {
+            const previousDailyStationMenus = await txn.dailyStation.findMany({
                 where:  {
                     cafeId,
                     dateString
@@ -84,7 +86,7 @@ export abstract class DailyMenuStorageClient {
                 }
             });
 
-            await tx.dailyStation.deleteMany({
+            await txn.dailyStation.deleteMany({
                 where: {
                     dateString,
                     cafeId
@@ -104,7 +106,7 @@ export abstract class DailyMenuStorageClient {
                 if (publishEvent.removedStations.has(station.id)) {
                     publishEvent.removedStations.delete(station.id);
 
-                    const previousMenu = previousDailyStationMenus.find(s => s.stationId === station.id);
+                    const previousMenu = previousDailyStationMenus.find(prev => prev.stationId === station.id);
                     if (!previousMenu) {
                         throw new Error(`Missing previous menu for station ${station.id} on date ${dateString}`);
                     }
@@ -144,11 +146,13 @@ export abstract class DailyMenuStorageClient {
                     publishEvent.addedMenuItemsByStation.set(station.id, new Set(station.menuItemsById.keys()));
                 }
 
-                await tx.dailyStation.create({
+                await txn.dailyStation.create({
                     data: {
                         cafeId,
                         dateString,
                         stationId:  station.id,
+                        opensAt:    station.opensAt,
+                        closesAt:   station.closesAt,
                         categories: {
                             create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([name, menuItemIds]) => ({
                                 name,
@@ -186,6 +190,8 @@ export abstract class DailyMenuStorageClient {
             select: {
                 stationId:              true,
                 externalLastUpdateTime: true,
+                opensAt:                true,
+                closesAt:               true,
                 station:                {
                     select: {
                         name:    true,
@@ -246,7 +252,9 @@ export abstract class DailyMenuStorageClient {
                     : undefined,
                 cafeId,
                 menuItemsById,
-                menuItemIdsByCategoryName
+                menuItemIdsByCategoryName,
+                opensAt:            dailyStation.opensAt,
+                closesAt:           dailyStation.closesAt,
             });
         }
 
@@ -433,19 +441,19 @@ export abstract class DailyMenuStorageClient {
                 stationVisitsById.set(stationId, new Set());
             }
 
-			stationVisitsById.get(stationId)!.add(visitDate);
+            stationVisitsById.get(stationId)!.add(visitDate);
 
-			for (const category of stationVisit.categories) {
-			    for (const menuItem of category.menuItems) {
-			        const menuItemId = menuItem.menuItemId;
+            for (const category of stationVisit.categories) {
+                for (const menuItem of category.menuItems) {
+                    const menuItemId = menuItem.menuItemId;
 
-			        if (!itemVisitsById.has(menuItemId)) {
-			            itemVisitsById.set(menuItemId, new Set());
-			        }
+                    if (!itemVisitsById.has(menuItemId)) {
+                        itemVisitsById.set(menuItemId, new Set());
+                    }
 
-					itemVisitsById.get(menuItemId)!.add(visitDate);
-			    }
-			}
+                    itemVisitsById.get(menuItemId)!.add(visitDate);
+                }
+            }
         }
 
         return {
@@ -685,5 +693,75 @@ export abstract class DailyMenuStorageClient {
             }
         }
         return firstVisitDates;
+    }
+
+    public static async getCafeHoursForDate(cafeId: string, dateString: string): Promise<{ opensAt: number; closesAt: number } | null> {
+        const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  { cafeId, dateString },
+            select: { opensAt: true, closesAt: true }
+        }));
+
+        if (stations.length === 0) {
+            return null;
+        }
+
+        // Aggregate: earliest open and latest close across all stations
+        let earliestOpen = Infinity;
+        let latestClose = -Infinity;
+
+        for (const station of stations) {
+            if (station.opensAt < earliestOpen) {
+                earliestOpen = station.opensAt;
+            }
+            if (station.closesAt > latestClose) {
+                latestClose = station.closesAt;
+            }
+        }
+
+        return { opensAt: earliestOpen, closesAt: latestClose };
+    }
+
+    public static async getAllCafeHoursForDate(dateString: string): Promise<Map<string, { opensAt: number; closesAt: number }>> {
+        const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  { dateString },
+            select: { cafeId: true, opensAt: true, closesAt: true }
+        }));
+
+        const hoursByCafe = new Map<string, { opensAt: number; closesAt: number }>();
+        for (const station of stations) {
+            const existing = hoursByCafe.get(station.cafeId);
+            if (!existing) {
+                hoursByCafe.set(station.cafeId, {
+                    opensAt:  station.opensAt,
+                    closesAt: station.closesAt
+                });
+            } else {
+                if (station.opensAt < existing.opensAt) {
+                    existing.opensAt = station.opensAt;
+                }
+                if (station.closesAt > existing.closesAt) {
+                    existing.closesAt = station.closesAt;
+                }
+            }
+        }
+
+        return hoursByCafe;
+    }
+
+    public static async upsertDailyCafeAsync(cafeId: string, dateString: string, isAvailable: boolean): Promise<void> {
+        await usePrismaClient(prismaClient => prismaClient.dailyCafe.upsert({
+            where:  { dateString_cafeId: { dateString, cafeId } },
+            update: { isAvailable },
+            create: { dateString, cafeId, isAvailable },
+        }));
+    }
+
+    public static async retrieveIsAvailableAsync(cafeId: string, dateString: string): Promise<boolean> {
+        const row = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findUnique({
+            where:  { dateString_cafeId: { dateString, cafeId } },
+            select: { isAvailable: true },
+        }));
+
+        return row?.isAvailable ?? true;
     }
 }

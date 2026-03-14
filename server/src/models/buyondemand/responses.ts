@@ -56,6 +56,13 @@ export interface ICafeStationListItem {
         inUse?: string;
         onDemandDisplayText?: string;
     };
+    openScheduleExpression?: string;
+    closeScheduleExpression?: string;
+    availableNow?: boolean;
+    availableAt?: {
+        open: string;
+        close: string;
+    };
 }
 
 export interface ICafeMenuItemDetailsResponseModifierOption {

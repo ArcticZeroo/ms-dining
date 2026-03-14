@@ -9,9 +9,10 @@ import { sortStationUniquenessInPlace } from '../../../util/sorting.ts';
 
 interface IStationListProps {
     stations: ICafeStation[];
+    isAvailable: boolean;
 }
 
-export const StationList: React.FC<IStationListProps> = ({ stations  }) => {
+export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable }) => {
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
@@ -49,7 +50,7 @@ export const StationList: React.FC<IStationListProps> = ({ stations  }) => {
 
     if (stations.length === 0) {
         return (
-            <StationListEmpty/>
+            <StationListEmpty message={isAvailable ? undefined : 'This cafe is not available today.'}/>
         );
     }
 

@@ -1,16 +1,16 @@
 import Router from '@koa/router';
 import {
-	ICafeOverviewStation,
-	IMenuItemDTO,
-	IMenuOverviewSummary,
-	IStationUniquenessData
+    ICafeOverviewStation,
+    IMenuItemDTO,
+    IMenuOverviewSummary,
+    IStationUniquenessData
 } from '@msdining/common/models/cafe';
 import {
-	ICafeMenuResponse,
-	ICreateReviewRequest,
-	IUpdateReviewRequest,
-	MenuResponse,
-	REVIEW_MAX_COMMENT_LENGTH_CHARS
+    ICreateReviewRequest,
+    ICafeMenuResponse,
+    IUpdateReviewRequest,
+    MenuResponse,
+    REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/models/http';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
@@ -19,18 +19,18 @@ import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import {
-	attachRouter,
-	getMaybeUserId,
-	getTrimmedQueryParam,
-	getUserIdOrThrow,
-	isAdminAsync
+    attachRouter,
+    getMaybeUserId,
+    getTrimmedQueryParam,
+    getUserIdOrThrow,
+    isAdminAsync
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
-	ANALYTICS_APPLICATION_NAMES,
-	getApplicationNameForCafeMenu,
-	getApplicationNameForMenuOverview,
-	getApplicationNameForMenuOverviewSummary,
+    ANALYTICS_APPLICATION_NAMES,
+    getApplicationNameForCafeMenu,
+    getApplicationNameForMenuOverview,
+    getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';
@@ -44,6 +44,7 @@ import { getIsRecentlyAvailable, toDateString } from '@msdining/common/util/date
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { retrieveDailyCafeMenuAsync } from '../../../api/cache/daily-menu.js';
+import { retrieveIsAvailableAsync } from '../../../api/cache/daily-availability.js';
 import { retrieveUniquenessDataForCafe } from '../../../api/cache/daily-uniqueness.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../worker/interface/thumbnail.js';
 import { logDebug } from '../../../util/log.js';
@@ -129,6 +130,8 @@ export const registerMenuRoutes = (parent: Router) => {
                 uniqueness:       uniquenessDataForStation,
                 overallRating:    stationReviewHeader.totalReviewCount > 0 ? stationReviewHeader.overallRating : undefined,
                 totalReviewCount: stationReviewHeader.totalReviewCount > 0 ? stationReviewHeader.totalReviewCount : undefined,
+                opensAt:          station.opensAt,
+                closesAt:         station.closesAt,
             });
         }
 
@@ -230,12 +233,12 @@ export const registerMenuRoutes = (parent: Router) => {
             }
 
             if (userId != null) {
-                const myMenuItemReview = menuItemReviews.find(r => r.menuItemId === menuItem.id && r.userId === userId);
+                const myMenuItemReview = menuItemReviews.find(review => review.menuItemId === menuItem.id && review.userId === userId);
                 if (myMenuItemReview) {
                     response.myReview = serializeReview(myMenuItemReview);
                 }
 
-                const myStationReview = stationReviews.find(r => r.userId === userId);
+                const myStationReview = stationReviews.find(review => review.userId === userId);
                 if (myStationReview) {
                     response.myStationReview = serializeReview(myStationReview);
                 }
@@ -497,9 +500,10 @@ export const registerMenuRoutes = (parent: Router) => {
         sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
         memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
         async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-            const [menuStations, uniquenessData] = await Promise.all([
+            const [menuStations, uniquenessData, isAvailable] = await Promise.all([
                 retrieveDailyCafeMenuAsync(cafe.id, dateString),
-                retrieveUniquenessDataForCafe(cafe.id, dateString)
+                retrieveUniquenessDataForCafe(cafe.id, dateString),
+                retrieveIsAvailableAsync(cafe.id, dateString),
             ]);
 
             const [stations, ingredientsMenu] = await Promise.all([
@@ -507,7 +511,7 @@ export const registerMenuRoutes = (parent: Router) => {
                 resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
             ]);
 
-            const response: ICafeMenuResponse = { stations };
+            const response: ICafeMenuResponse = { isAvailable, stations };
             if (ingredientsMenu != null) {
                 response.ingredientsMenu = ingredientsMenu;
             }
