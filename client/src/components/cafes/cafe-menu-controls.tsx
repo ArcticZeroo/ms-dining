@@ -10,6 +10,19 @@ import { classNames } from '../../util/react.js';
 
 const menuOverviewSymbol = Symbol();
 
+const getOrderButtonText = (cafeId: string, deviceType: DeviceType): string => {
+    const baseText = cafeId === 'in-gredients' ? 'Reserve / Order' : 'Order';
+    return deviceType === DeviceType.Desktop ? `${baseText} Online` : baseText;
+}
+
+const getOrderButtonTitle = (cafeId: string): string => {
+    if (cafeId === 'in-gredients') {
+        return 'Click to open reservation and online ordering menu';
+    }
+
+    return 'Click to open online ordering menu at buy-ondemand.com';
+}
+
 interface ICafeMenuControlsProps {
     cafeName: string;
     menuData: IDelayedPromiseState<CafeMenu>;
@@ -57,6 +70,8 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
         event.stopPropagation();
     }
 
+    const orderButtonText = getOrderButtonText(cafe.id, deviceType);
+
     return (
         <div
             className={classNames('flex flex-around flex-wrap force-base-font-size cafe-header-controls', deviceType === DeviceType.Desktop && 'in-header')}
@@ -66,13 +81,13 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
                 className={childElementClassName}
                 href={cafe.url || `https://${cafe.id}.buy-ondemand.com`}
                 target="_blank"
-                title="Click to open online ordering menu at buy-ondemand.com"
+                title={getOrderButtonTitle(cafe.id)}
             >
                 <span className="material-symbols-outlined">
                     captive_portal
                 </span>
                 <span>
-                    Order{deviceType === DeviceType.Desktop && ' Online'}
+                    {orderButtonText}
                 </span>
             </a>
             <button
@@ -82,7 +97,7 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
                 disabled={isOverviewDisabled}
             >
                 <span className="material-symbols-outlined">
-                                                menu_book_2
+                    menu_book_2
                 </span>
                 <span>
                     {deviceType === DeviceType.Desktop && 'Menu '}Overview

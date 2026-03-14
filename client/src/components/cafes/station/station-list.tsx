@@ -1,28 +1,35 @@
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { StationListEmpty } from './station-list-empty.tsx';
 import { Station } from './station.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { getFilteredMenu } from '../../../hooks/cafe.ts';
-import { ApplicationSettings } from '../../../constants/settings.ts';
+import { ApplicationSettings, DebugSettings } from '../../../constants/settings.ts';
 import { sortStationUniquenessInPlace } from '../../../util/sorting.ts';
+import { CurrentCafeContext } from '../../../context/menu-item.js';
+import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
+import { resolveIngredientsMenu } from '../../../util/in-gredients.js';
 
-interface IStationListProps {
-    stations: ICafeStation[];
-}
-
-export const StationList: React.FC<IStationListProps> = ({ stations  }) => {
+const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIngredientsMenuDTO): Array<[ICafeStation, MenuItemsByCategoryName]> => {
+    const cafe = useContext(CurrentCafeContext);
+    const enableBetterIngredientsMenu = useValueNotifier(DebugSettings.ingredientsMenuExperience);
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
     const shouldHideEveryDayStations = useValueNotifier(ApplicationSettings.hideEveryDayStations);
     const shouldDoIntelligentOrdering = useValueNotifier(ApplicationSettings.intelligentStationSort);
 
-    const filteredStationData: Array<[ICafeStation, MenuItemsByCategoryName]> = useMemo(
+    return useMemo(
         () => {
             const filteredStations: Array<[ICafeStation, MenuItemsByCategoryName]> = [];
 
-            const stationsInOrder = [...stations];
+            const stationsInOrder = [];
+            if (cafe.id === 'in-gredients' && enableBetterIngredientsMenu) {
+                stationsInOrder.push(...resolveIngredientsMenu(ingredientsMenu, stations));
+            } else {
+                stationsInOrder.push(...stations);
+            }
+
             if (shouldDoIntelligentOrdering) {
                 sortStationUniquenessInPlace(stationsInOrder);
             }
@@ -44,8 +51,17 @@ export const StationList: React.FC<IStationListProps> = ({ stations  }) => {
 
             return filteredStations;
         },
-        [shouldDoIntelligentOrdering, stations, shouldHideEveryDayStations, enablePriceFilters, minPrice, maxPrice]
+        [cafe.id, enableBetterIngredientsMenu, shouldDoIntelligentOrdering, ingredientsMenu, stations, shouldHideEveryDayStations, enablePriceFilters, minPrice, maxPrice]
     );
+}
+
+interface IStationListProps {
+    stations: ICafeStation[];
+    ingredientsMenu?: IIngredientsMenuDTO;
+}
+
+export const StationList: React.FC<IStationListProps> = ({ stations, ingredientsMenu }) => {
+    const filteredStationData = useFilteredStationData(stations, ingredientsMenu);
 
     if (stations.length === 0) {
         return (

@@ -98,6 +98,10 @@ interface IUniquenessSortableStation {
 }
 
 export const sortStationUniquenessInPlace = <T extends IUniquenessSortableStation>(stations: T[]): T[] => {
+    if (stations.length <= 1) {
+        return stations;
+    }
+
     const didOpenRecentlyByName = new Map<string, boolean>();
     for (const station of stations) {
         didOpenRecentlyByName.set(station.name, getIsRecentlyAvailable(station.uniqueness.firstAppearance));

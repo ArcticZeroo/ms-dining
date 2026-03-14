@@ -108,7 +108,7 @@
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     /*Max thumbnail size is 400px*/
-    max-width: calc(400px + 2 * var(--default-padding));
+    max-width: calc(400px + (2 * var(--default-padding)));
     align-self: stretch;
     justify-content: space-between;
     flex-grow: 1;

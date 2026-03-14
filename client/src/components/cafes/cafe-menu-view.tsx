@@ -71,6 +71,11 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
         [cafe]
     );
 
+    const { run: retrieveMenuData } = menuData;
+    useEffect(() => {
+        retrieveMenuData();
+    }, [retrieveMenuData]);
+
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
             collapsedCafeIdsNotifier.add(cafe.id);

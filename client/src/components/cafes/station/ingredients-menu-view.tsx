@@ -48,7 +48,7 @@ export const IngredientsInfoBanner: React.FC = () => (
 
 export const IngredientsMenuView: React.FC<IMenuForIngredientsProps> = ({ menu }) => {
     return (
-        <div className="ingredients-menu-view">
+        <div className="ingredients-menu-view station">
             <IngredientsInfoBanner/>
             <div className="ingredients-price-callout">
                 {formatPrice(menu.price)} for a 3-course meal (starter + entrée + dessert)

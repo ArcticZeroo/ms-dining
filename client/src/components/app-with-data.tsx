@@ -55,6 +55,7 @@ const AppWithData: React.FC<IAppWithDataProps> = ({ coreData, user }) => {
     const [isNavExpanded, setIsNavExpanded] = useState(false);
     const deviceType = useDeviceType();
     const isNavVisible = deviceType === DeviceType.Desktop || isNavExpanded;
+    const deviceTypeClassName = deviceType === DeviceType.Mobile ? 'device-type-mobile' : 'device-type-desktop';
 
     const applicationContext = useMemo(
         () => ({
@@ -78,7 +79,7 @@ const AppWithData: React.FC<IAppWithDataProps> = ({ coreData, user }) => {
     );
 
     return (
-        <div className={classNames('App', shouldUseCompactMode && 'compact-view-mode')}>
+        <div className={classNames('App', shouldUseCompactMode && 'compact-view-mode', deviceTypeClassName)}>
             <ApplicationContext.Provider value={applicationContext}>
                 <UserContext.Provider value={userNotifier}>
                     <NavExpansionContext.Provider value={navExpansionContext}>

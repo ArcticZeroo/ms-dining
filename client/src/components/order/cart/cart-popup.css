@@ -126,3 +126,7 @@
 .cart-popup .cart-loading:only-child {
     padding-top: var(--default-padding);
 }
+
+.device-type-mobile .cart-popup {
+    top: calc(var(--icon-size) + (2 * var(--default-padding)));
+}
