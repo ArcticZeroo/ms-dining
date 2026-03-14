@@ -1,7 +1,7 @@
 import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 import { ICafeStation } from '../../models/cafe.js';
 import { LockedMap } from '../../util/map.js';
-import { computeMenuHash, getRolesByMenuHash, IMenuRoleRow, setRolesForMenuHash } from '../cafe/ingredients/cache.js';
+import { computeMenuHash, IMenuRoleRow, getIngredientsMenuByHash, setRolesForMenuHash } from '../cafe/ingredients/cache.js';
 import { categorizeIngredientsMenu } from '../cafe/ingredients/ai-categorizer.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { logInfo } from '../../util/log.js';
@@ -44,27 +44,12 @@ const buildIngredientsDTO = (roles: IMenuRoleRow[], stations: ICafeStation[], pr
     return dto;
 };
 
-const deriveEntreePrice = (roles: IMenuRoleRow[], stations: ICafeStation[]): number => {
-    for (const station of stations) {
-        for (const { menuItemId, role } of roles) {
-            if (role === 'ENTREE') {
-                const item = station.menuItemsById.get(menuItemId);
-                if (item) {
-                    return item.price;
-                }
-            }
-        }
-    }
-    return 0;
-};
-
 const categorizeAndCache = async (dateString: string, menuStations: ICafeStation[]): Promise<IIngredientsMenuDTO | undefined> => {
     const hash = computeMenuHash(menuStations);
 
-    const roles = await getRolesByMenuHash(hash);
-    if (roles.length > 0) {
-        const price = deriveEntreePrice(roles, menuStations);
-        return buildIngredientsDTO(roles, menuStations, price);
+    const cached = await getIngredientsMenuByHash(hash);
+    if (cached != null) {
+        return buildIngredientsDTO(cached.roles, menuStations, cached.price);
     }
 
     const aiResult = await categorizeIngredientsMenu(menuStations);
@@ -72,7 +57,7 @@ const categorizeAndCache = async (dateString: string, menuStations: ICafeStation
         return undefined;
     }
 
-    await setRolesForMenuHash(hash, aiResult.roles);
+    await setRolesForMenuHash(hash, aiResult.roles, aiResult.price);
     return buildIngredientsDTO(aiResult.roles, menuStations, aiResult.price);
 };
 

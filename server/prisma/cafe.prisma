@@ -244,5 +244,14 @@ model IngredientsMenuRole {
   menuHash   String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
+  metadata   IngredientsMenuMetadata @relation(fields: [menuHash], references: [menuHash], onDelete: Cascade)
+
   @@unique([menuItemId, menuHash])
+}
+
+model IngredientsMenuMetadata {
+  menuHash String @id
+  price    Float
+
+  roles IngredientsMenuRole[]
 }

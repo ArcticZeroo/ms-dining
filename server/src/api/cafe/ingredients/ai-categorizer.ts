@@ -88,9 +88,9 @@ ${menuData}
 
 [INSTRUCTIONS]
 Analyze the menu data above and categorize items into: STARTER, ENTREE, DESSERT, DRINK, SIDE, OTHER.
+- Identify the 3-course meal price from the "3 Course Meal" category entrée prices. This will be higher than the price of any individual item in the à la carte menu, including entrees.
 - For starters, desserts, and entrées: use the À LA CARTE version's Item ID when available (the one with individual pricing). Exclude the 3-course version.
 - Use the modifier choice names to identify which à la carte items are starters vs desserts.
-- Identify the 3-course meal price from the "3 Course Meal" category entrée prices.
 
 Respond with your analysis inside XML tags. You may include reasoning before the tags, but the tags must contain valid JSON:
 <menu-analysis>

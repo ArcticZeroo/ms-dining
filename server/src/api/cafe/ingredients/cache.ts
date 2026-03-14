@@ -35,18 +35,34 @@ export interface IMenuRoleRow {
     role: string;
 }
 
-export const getRolesByMenuHash = async (menuHash: string): Promise<IMenuRoleRow[]> => {
-    return usePrismaClient(client =>
-        client.ingredientsMenuRole.findMany({
-            where:  { menuHash },
-            select: { menuItemId: true, role: true },
-        })
-    );
+export interface IIngredientsMenuData {
+    price: number;
+    roles: IMenuRoleRow[];
+}
+
+export const getIngredientsMenuByHash = async (menuHash: string): Promise<IIngredientsMenuData | null> => {
+    return usePrismaClient(async (client) => {
+        const metadata = await client.ingredientsMenuMetadata.findUnique({
+            where:   { menuHash },
+            include: { roles: { select: { menuItemId: true, role: true } } },
+        });
+
+        if (metadata == null) {
+            return null;
+        }
+
+        return {
+            price: metadata.price,
+            roles: metadata.roles,
+        };
+    });
 };
 
-export const setRolesForMenuHash = async (menuHash: string, roles: IMenuRoleRow[]): Promise<void> => {
+export const setRolesForMenuHash = async (menuHash: string, roles: IMenuRoleRow[], price: number): Promise<void> => {
     await usePrismaTransaction(async (tx) => {
         await tx.ingredientsMenuRole.deleteMany({ where: { menuHash } });
+        await tx.ingredientsMenuMetadata.deleteMany({ where: { menuHash } });
+        await tx.ingredientsMenuMetadata.create({ data: { menuHash, price } });
         for (const role of roles) {
             await tx.ingredientsMenuRole.create({
                 data: {
