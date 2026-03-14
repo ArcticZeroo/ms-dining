@@ -1,9 +1,10 @@
 import { PromiseStage } from '@arcticzeroo/react-promise-hook';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
 import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useClickTracker } from '../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
 import { classNames } from '../../../util/react.ts';
 import { WaitTime } from '../wait-time.tsx';
@@ -20,6 +21,7 @@ export const CartPopup = () => {
     const isTodaySelected = useIsTodaySelected();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
+    const popupRef = useRef<HTMLDivElement>(null);
 
     const totalItemCount = useMemo(
         () => Array.from(cart.values()).reduce((total, itemsById) => total + itemsById.size, 0),
@@ -27,6 +29,14 @@ export const CartPopup = () => {
     );
 
     const toggleExpanded = useCallback(() => setIsExpanded(prev => !prev), []);
+
+    const onClickAnywhere = useCallback((isInside: boolean) => {
+        if (!isInside) {
+            setIsExpanded(false);
+        }
+    }, []);
+
+    useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
     const hasMissingItems = cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
     const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
@@ -37,6 +47,7 @@ export const CartPopup = () => {
 
     return (
         <div
+            ref={popupRef}
             className={classNames(
                 'cart-popup',
                 !shouldShow && 'hidden',
