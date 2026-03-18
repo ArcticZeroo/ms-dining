@@ -3,8 +3,9 @@ import fsp from 'fs/promises';
 import { ALL_CAFES } from '../../../constants/cafes.js';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe } from '../../../models/cafe.js';
-import { runPromiseWithRetries } from '../../../util/async.js';
-import { isCafeAvailable, isCurrentlyPastMinutes, minutesToTimeString } from '../../../util/date.js';
+import { ICancellationToken, PromiseCancelledException, runPromiseWithRetries } from '../../../util/async.js';
+import { isCafeAvailable } from '../../../util/date.js';
+import { isCurrentlyPastMinutes, minutesToTimeString } from '@msdining/common/util/date-util';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { Semaphore } from '../../lock.js';
@@ -17,7 +18,14 @@ export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCaf
 const cafeDiscoveryRetryDelayMs = 1000;
 
 export class DailyCafeUpdateSession {
-    constructor(public readonly daysInFuture: number) {
+	#firstAttemptFailureCount = 0;
+    readonly #cancellation: ICancellationToken;
+
+    constructor(
+        public readonly daysInFuture: number,
+        cancellation?: ICancellationToken,
+    ) {
+        this.#cancellation = cancellation ?? { isCancelled: false };
     }
 
     get date() {
@@ -41,6 +49,15 @@ export class DailyCafeUpdateSession {
 
             return await CafeMenuSession.retrieveMenuAsync(cafe, this.daysInFuture);
         } catch (err) {
+			if (!(err instanceof PromiseCancelledException) && attemptIndex === 0) {
+				this.#firstAttemptFailureCount++;
+
+				if (this.#firstAttemptFailureCount >= ENVIRONMENT_SETTINGS.cafeMenuUpdateCircuitBreakerThreshold) {
+					this.#cancellation.isCancelled = true;
+					logError(`{${this.dateString}}`, `Cafe menu update breaker tripped: ${this.#firstAttemptFailureCount} cafe(s) have failed. Skipping remaining cafes.`);
+				}
+			}
+
             throw new Error(`Failed to discover menu for "${cafe.name}" @ ${cafe.id} (attempt ${attemptIndex}): ${err}`);
         } finally {
             cafeSemaphore.release();
@@ -48,12 +65,23 @@ export class DailyCafeUpdateSession {
     }
 
     async #discoverCafeWithRetriesAsync(cafe: ICafe) {
+        if (this.#cancellation.isCancelled) {
+            logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} — too many cafes have failed update`);
+            return;
+        }
+
         try {
             const result = await runPromiseWithRetries(
                 (attemptIndex) => this.#discoverCafeAsync(cafe, attemptIndex),
                 ENVIRONMENT_SETTINGS.cafeDiscoveryRetryCount,
-                cafeDiscoveryRetryDelayMs
+                cafeDiscoveryRetryDelayMs,
+                this.#cancellation
             );
+
+			if (this.#cancellation.isCancelled) {
+				logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} after discovery because too many cafes have failed update`);
+				return;
+			}
 
             await DailyMenuStorageClient.upsertDailyCafeAsync(cafe.id, this.dateString, result.isAvailable);
 
@@ -65,6 +93,10 @@ export class DailyCafeUpdateSession {
                 shouldUpdateExistingItems: true
             });
         } catch (err) {
+            if (err instanceof PromiseCancelledException) {
+                return;
+            }
+
             logError(`{${this.dateString}}`, `Failed to populate cafe ${cafe.name}:`, err);
         }
     }
@@ -92,7 +124,7 @@ export class DailyCafeUpdateSession {
             if (this.daysInFuture === 0) {
                 const storedHours = await DailyMenuStorageClient.getCafeHoursForDate(cafe.id, this.dateString);
                 if (storedHours && isCurrentlyPastMinutes(storedHours.closesAt)) {
-                    logDebug(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is past closing time (${minutesToTimeString(storedHours.closesAt)})`);
+                    logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is past closing time (closes at ${minutesToTimeString(storedHours.closesAt)}, opens at ${minutesToTimeString(storedHours.opensAt)})`);
                     continue;
                 }
             }
