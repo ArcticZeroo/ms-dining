@@ -33,6 +33,8 @@ export interface ICafeStation {
     uniqueness: IStationUniquenessData;
     overallRating?: number;
     totalReviewCount?: number;
+    opensAt: number;
+    closesAt: number;
 }
 
 export interface CafeMenu {

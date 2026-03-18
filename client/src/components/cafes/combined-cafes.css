@@ -67,6 +67,13 @@
     border-radius: var(--constant-padding);
 }
 
+.station .station-header .station-hours,
+.collapsible-cafe .cafe-hours {
+    font-size: 0.75em;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+
 .station .menu-body {
     padding: var(--default-padding);
     gap: var(--default-padding);

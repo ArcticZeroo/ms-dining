@@ -17,6 +17,7 @@ const SETTING_DISPLAY_NAMES: Record<string, string> = {
     [DebugSettings.enableMapPage.name]:                            'Enable Map Page',
 
     [DebugSettings.showAdminReviewControls.name]:                  'Show Admin Review Controls',
+    [DebugSettings.showCafeHours.name]:                            'Show Cafe Hours',
 };
 
 const useIsKeyEnabled = (valueNotifier: ValueNotifier<boolean> | null) => {

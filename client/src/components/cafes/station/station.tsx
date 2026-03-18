@@ -1,13 +1,14 @@
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { minutesToTimeString } from '@msdining/common/util/date-util';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { ApplicationSettings } from '../../../constants/settings.ts';
+import { ApplicationSettings, DebugSettings } from '../../../constants/settings.ts';
 import { StationCollapseContext } from '../../../context/collapse.ts';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../context/html.ts';
 import { CurrentCafeContext, CurrentStationScrollIdContext, StationInfoContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
-import { useValueNotifierSetTarget } from '../../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierSetTarget } from '../../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hooks/html.ts';
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getSearchAnchorId } from '../../../util/link.ts';
@@ -67,6 +68,7 @@ export interface ICollapsibleStationProps {
 export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) => {
     const cafe = useContext(CurrentCafeContext);
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
+    const showCafeHours = useValueNotifier(DebugSettings.showCafeHours);
 
     const [stationHeaderRef, setStationHeaderRef] = useState<HTMLDivElement | null>(null);
     const stationHeaderHeight = useElementHeight(stationHeaderRef);
@@ -128,6 +130,13 @@ export const Station: React.FC<ICollapsibleStationProps> = ({ station, menu }) =
                                         )
                                     }
                                 </span>
+                                {
+                                    showCafeHours && (
+                                        <span className="station-hours">
+                                            {minutesToTimeString(station.opensAt)} – {minutesToTimeString(station.closesAt)}
+                                        </span>
+                                    )
+                                }
                                 <ExpandIcon isExpanded={isExpanded}/>
                             </button>
                         </div>

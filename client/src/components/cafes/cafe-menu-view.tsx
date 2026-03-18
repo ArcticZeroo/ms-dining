@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { ApplicationSettings } from '../../constants/settings.ts';
+import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
@@ -12,7 +12,7 @@ import { ScrollAnchor } from '../button/scroll-anchor.tsx';
 import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
+import { getIsRecentlyAvailable, minutesToTimeString } from '@msdining/common/util/date-util';
 import { IDelayedPromiseState, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SelectedDateContext } from '../../context/time.js';
 import { DiningClient } from '../../api/client/dining.js';
@@ -38,6 +38,29 @@ const useMenuData = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): IDelayed
     return useDelayedPromiseState(retrieveMenu);
 }
 
+const useCafeHoursString = (menuData: IDelayedPromiseState<CafeMenu>): string | undefined => {
+    return useMemo(() => {
+        const stations = menuData.value?.stations;
+        if (!stations || stations.length === 0) {
+            return undefined;
+        }
+
+        let minOpensAt = Infinity;
+        let maxClosesAt = -Infinity;
+        for (const station of stations) {
+            minOpensAt = Math.min(minOpensAt, station.opensAt);
+            maxClosesAt = Math.max(maxClosesAt, station.closesAt);
+        }
+
+        if (!isFinite(minOpensAt) || !isFinite(maxClosesAt)) {
+            console.error('Unexpected Infinity for opensAt/closesAt', stations);
+            return undefined;
+        }
+
+        return `${minutesToTimeString(minOpensAt)} – ${minutesToTimeString(maxClosesAt)}`;
+    }, [menuData.value]);
+}
+
 interface ICafeMenuViewProps {
 	cafe: ICafe;
 	showGroupName: boolean;
@@ -54,10 +77,12 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
 
     const deviceType = useDeviceType();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
+    const showCafeHours = useValueNotifier(DebugSettings.showCafeHours);
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
     const menuData = useMenuData(cafe, shouldCountTowardsLastUsed);
+    const cafeHoursString = useCafeHoursString(menuData);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
@@ -125,6 +150,11 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
                                         {cafeName}
                                         <ExpandIcon isExpanded={!isCollapsed}/>
                                     </span>
+                                    {
+                                        showCafeHours && cafeHoursString && (
+                                            <span className="cafe-hours">{cafeHoursString}</span>
+                                        )
+                                    }
                                 </div>
                                 <span className="flex grid-justify-end">
                                     {
