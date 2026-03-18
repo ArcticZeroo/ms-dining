@@ -9,8 +9,10 @@ Use the CLI tool at `tools/har/har.mjs` to analyze HAR files. Do not write ad-ho
 
 ## Running the tool
 
+Use the `har.bat` wrapper in the repo root:
+
 ```bash
-node tools/har/har.mjs <command> <file.har> [options]
+.\har.bat <command> <file.har> [options]
 ```
 
 ## Available commands
