@@ -16,7 +16,7 @@ const run = async () => {
     console.log('Client created.');
 
     console.log('\nFetching station list...');
-    const stations = await retrieveStationListAsync(client, 0);
+    const { stations } = await retrieveStationListAsync(client, 0);
     console.log(`Found ${stations.length} stations.`);
 
     // Pick the first station with items
