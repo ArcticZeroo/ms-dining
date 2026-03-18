@@ -57,15 +57,16 @@ const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIng
 
 interface IStationListProps {
     stations: ICafeStation[];
+    isAvailable: boolean;
     ingredientsMenu?: IIngredientsMenuDTO;
 }
 
-export const StationList: React.FC<IStationListProps> = ({ stations, ingredientsMenu }) => {
+export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable, ingredientsMenu }) => {
     const filteredStationData = useFilteredStationData(stations, ingredientsMenu);
 
     if (stations.length === 0) {
         return (
-            <StationListEmpty/>
+            <StationListEmpty message={isAvailable ? undefined : 'This cafe is not available today.'}/>
         );
     }
 

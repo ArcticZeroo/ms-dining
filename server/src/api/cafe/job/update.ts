@@ -1,14 +1,15 @@
 import { DateUtil } from '@msdining/common';
-import fs from 'fs/promises';
+import fsp from 'fs/promises';
 import { ALL_CAFES } from '../../../constants/cafes.js';
 import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
 import { ICafe } from '../../../models/cafe.js';
 import { runPromiseWithRetries } from '../../../util/async.js';
-import { isCafeAvailable } from '../../../util/date.js';
+import { isCafeAvailable, isCurrentlyPastMinutes, minutesToTimeString } from '../../../util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
 import { Semaphore } from '../../lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
+import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { saveDailyMenuAsync } from './storage.js';
 import { CafeMenuSession } from '../session/menu.js';
 
@@ -29,7 +30,7 @@ export class DailyCafeUpdateSession {
 
     private async resetDailyState() {
         CafeStorageClient.resetCache();
-        await fs.mkdir(serverMenuItemThumbnailPath, { recursive: true });
+        await fsp.mkdir(serverMenuItemThumbnailPath, { recursive: true });
     }
 
     async #discoverCafeAsync(cafe: ICafe, attemptIndex: number) {
@@ -48,15 +49,18 @@ export class DailyCafeUpdateSession {
 
     async #discoverCafeWithRetriesAsync(cafe: ICafe) {
         try {
-            const stations = await runPromiseWithRetries(
+            const result = await runPromiseWithRetries(
                 (attemptIndex) => this.#discoverCafeAsync(cafe, attemptIndex),
                 ENVIRONMENT_SETTINGS.cafeDiscoveryRetryCount,
                 cafeDiscoveryRetryDelayMs
             );
 
+            await DailyMenuStorageClient.upsertDailyCafeAsync(cafe.id, this.dateString, result.isAvailable);
+
             await saveDailyMenuAsync({
                 cafe,
-                stations,
+                stations:                  result.stations,
+                isAvailable:               result.isAvailable,
                 dateString:                this.dateString,
                 shouldUpdateExistingItems: true
             });
@@ -82,6 +86,15 @@ export class DailyCafeUpdateSession {
             if (!isCafeAvailable(cafe, this.date)) {
                 logDebug(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is not available`);
                 continue;
+            }
+
+            // Skip cafes that are past their closing time for today
+            if (this.daysInFuture === 0) {
+                const storedHours = await DailyMenuStorageClient.getCafeHoursForDate(cafe.id, this.dateString);
+                if (storedHours && isCurrentlyPastMinutes(storedHours.closesAt)) {
+                    logDebug(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is past closing time (${minutesToTimeString(storedHours.closesAt)})`);
+                    continue;
+                }
             }
 
             const discoverPromise = this.#discoverCafeWithRetriesAsync(cafe);

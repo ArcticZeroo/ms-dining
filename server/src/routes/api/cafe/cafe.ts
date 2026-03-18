@@ -66,7 +66,7 @@ export const registerCafeRoutes = (parent: Router) => {
                     logoUrl:            getLogoUrl(cafe, cafeData),
                     location:           cafe.location,
                     emoji:              cafe.emoji,
-                    firstAvailableDate: toMaybeDateString(cafe.firstAvailable)
+                    firstAvailableDate: toMaybeDateString(cafe.firstAvailable),
                 };
 
                 // @ts-expect-error: TS doesn't know that we have already enforced the location requirement

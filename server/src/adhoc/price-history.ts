@@ -174,7 +174,7 @@ class CafePriceHistorySession {
     }
 
     async retrieveMenuPricesAsync(itemsByStationId: ItemsByStationMap): Promise<CafeItemPriceMap> {
-        const stations = await retrieveStationListAsync(this.client, this.daysInFuture);
+        const { stations } = await retrieveStationListAsync(this.client, this.daysInFuture);
         const menuId = stations[0]?.menuId;
 
         if (!menuId) {

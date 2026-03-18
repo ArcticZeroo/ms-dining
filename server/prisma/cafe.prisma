@@ -9,7 +9,7 @@ model Cafe {
   storeId          String  @default("")
   externalName     String  @default("")
 
-  dailyStations         DailyStation[]
+  dailyCafes            DailyCafe[]
   dailyOrderingContexts DailyCafeOrderingContext[]
   menuItems             MenuItem[]
   stations              Station[]
@@ -136,12 +136,15 @@ model DailyStation {
 
   dateString             String
   externalLastUpdateTime DateTime?
+  // Minutes since midnight. Most cafes open at 11 AM (660) and close around 2 PM (840).
+  opensAt                Int    @default(660)
+  closesAt               Int    @default(840)
 
   stationId String
   station   Station @relation(fields: [stationId], references: [id])
 
   cafeId String
-  cafe   Cafe   @relation(fields: [cafeId], references: [id])
+  dailyCafe DailyCafe @relation(fields: [dateString, cafeId], references: [dateString, cafeId], onDelete: Cascade)
 
   categories DailyCategory[]
 }
@@ -178,6 +181,18 @@ model DailyCafeOrderingContext {
 
   cafeId String
   cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
+  @@id([dateString, cafeId])
+}
+
+model DailyCafe {
+  dateString  String
+  isAvailable Boolean @default(true)
+
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
+  dailyStations DailyStation[]
 
   @@id([dateString, cafeId])
 }

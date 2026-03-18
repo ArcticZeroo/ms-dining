@@ -87,6 +87,8 @@ export interface IStationDTO {
 	pattern?: string;
 	overallRating?: number;
 	totalReviewCount?: number;
+	opensAt: number;
+	closesAt: number;
 }
 
 // GET /api/dining/menu/:cafeId
@@ -94,6 +96,7 @@ export type MenuResponse = Array<IStationDTO>;
 
 // GET /api/dining/menu/:cafeId/menu
 export interface ICafeMenuResponse {
+	isAvailable: boolean;
 	stations: IStationDTO[];
 	ingredientsMenu?: IIngredientsMenuDTO;
 }

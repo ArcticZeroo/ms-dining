@@ -2,6 +2,7 @@ import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
 import { ICafeStation } from '../../../models/cafe.js';
 import { ICafeStationListItem } from '../../../models/buyondemand/responses.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
+import { DEFAULT_CLOSES_AT_MINUTES, DEFAULT_OPENS_AT_MINUTES, parseTimeToMinutes } from '../../../util/date.js';
 
 const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafeStationListItem): ICafeStation => {
     const url = stationJson.image
@@ -22,7 +23,9 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
         menuId:                    stationJson.priceLevelConfig.menuId,
         menuLastUpdateTime:        new Date(0),
         menuItemIdsByCategoryName: new Map(),
-        menuItemsById:             new Map()
+        menuItemsById:             new Map(),
+        opensAt:                   stationJson.availableAt?.open ? (parseTimeToMinutes(stationJson.availableAt.open) ?? DEFAULT_OPENS_AT_MINUTES) : DEFAULT_OPENS_AT_MINUTES,
+        closesAt:                  stationJson.availableAt?.close ? (parseTimeToMinutes(stationJson.availableAt.close) ?? DEFAULT_CLOSES_AT_MINUTES) : DEFAULT_CLOSES_AT_MINUTES,
     };
 
     const menu = stationJson.menus.find(menu => menu.id === station.menuId);
@@ -65,26 +68,26 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
     return station;
 }
 
-export const retrieveStationListAsync = async (client: BuyOnDemandClient, daysInFuture: number): Promise<Array<ICafeStation>> => {
+export interface IStationListResult {
+    stations: Array<ICafeStation>;
+    isAvailable: boolean;
+}
+
+export const retrieveStationListAsync = async (client: BuyOnDemandClient, daysInFuture: number): Promise<IStationListResult> => {
     const response = await client.requestAsync(
         `/sites/${client.config.tenantId}/${client.config.contextId}/concepts/${client.config.displayProfileId}`,
         {
             method:  'POST',
             headers: JSON_HEADERS,
             body:    JSON.stringify({
-                isEasyMenuEnabled: false,
-                // TODO: use schedule time discovered in config?
-                scheduleTime: { startTime: '11:00 AM', endTime: '11:15 PM' },
                 scheduledDay: daysInFuture,
-                // storeInfo { some huge object }
             }),
         },
         false /*shouldValidateSuccess*/
     );
 
     if (response.status === 410) {
-        // This cafe is not open today
-        return [];
+        return { stations: [], isAvailable: false };
     }
 
     if (!response.ok) {
@@ -101,5 +104,8 @@ export const retrieveStationListAsync = async (client: BuyOnDemandClient, daysIn
         throw new Error('Station list item is missing id/name/menus');
     }
 
-    return json.map(stationJson => convertBuyOnDemandStation(client, stationJson));
+    return {
+        stations:    json.map(stationJson => convertBuyOnDemandStation(client, stationJson)),
+        isAvailable: true,
+    };
 }

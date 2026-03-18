@@ -37,7 +37,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
         return (
             <>
                 {isIngredients && <IngredientsInfoBanner/>}
-                <StationList stations={value.stations} ingredientsMenu={value?.ingredientsMenu} />
+                <StationList stations={value.stations} isAvailable={value.isAvailable} ingredientsMenu={value?.ingredientsMenu} />
             </>
         );
     }

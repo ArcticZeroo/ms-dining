@@ -7,7 +7,7 @@ import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { Lock } from '../../lock.js';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/queues/search-tags.js';
-import { retrieveStationListAsync } from '../buy-ondemand/stations.js';
+import { IStationListResult, retrieveStationListAsync } from '../buy-ondemand/stations.js';
 import { retrieveTagDefinitionsAsync } from '../buy-ondemand/tags.js';
 import { retrieveMenuItemsAsync } from '../buy-ondemand/menu-items.js';
 import { retrieveModifiersForMenuItemAsync } from '../buy-ondemand/modifiers.js';
@@ -18,10 +18,13 @@ const tagLock = new Lock();
 export class CafeMenuSession {
     #retrievedTagStationIds = new Set<string>();
 
-    constructor(public readonly client: BuyOnDemandClient, public readonly daysInFuture: number) {
+    constructor(
+        public readonly client: BuyOnDemandClient,
+        public readonly daysInFuture: number,
+    ) {
     }
 
-    public static async retrieveMenuAsync(cafe: ICafe, daysInFuture: number = 0): Promise<Array<ICafeStation>> {
+    public static async retrieveMenuAsync(cafe: ICafe, daysInFuture: number = 0): Promise<IStationListResult> {
         const client = await BuyOnDemandClient.createAsync(cafe);
         const session = new CafeMenuSession(client, daysInFuture);
         return session.#retrieveMenuAsync();
@@ -275,10 +278,10 @@ export class CafeMenuSession {
         await Promise.all(populatePromises);
     }
 
-    async #retrieveMenuAsync(): Promise<Array<ICafeStation>> {
-        const stations = await retrieveStationListAsync(this.client, this.daysInFuture);
-        await this.#populateMenuItemsForAllStationsAsync(stations, this.daysInFuture === 0 /*alwaysGetServerItems*/);
-        return stations;
+    async #retrieveMenuAsync(): Promise<IStationListResult> {
+        const result = await retrieveStationListAsync(this.client, this.daysInFuture);
+        await this.#populateMenuItemsForAllStationsAsync(result.stations, this.daysInFuture === 0 /*alwaysGetServerItems*/);
+        return result;
     }
 
 }

@@ -62,6 +62,7 @@ export abstract class DiningClient {
         }) as ICafeMenuResponse;
 
         return {
+            isAvailable:     response.isAvailable,
             stations:        DiningClient._deserializeStations(response.stations),
             ingredientsMenu: response.ingredientsMenu,
         };
