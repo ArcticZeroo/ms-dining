@@ -12,7 +12,6 @@ import { searchSimilarEntitiesByType, } from '../../../storage/vector/client.js'
 import {
 	HIDDEN_GEM_MAX_REVIEW_COUNT,
 	IRecommendationContext,
-	ITEMS_PER_SECTION,
 	log,
 	POSITIVE_REVIEW_THRESHOLD,
 	TOP_RATED_SEED_COUNT,
@@ -35,7 +34,6 @@ import {
  */
 export const getHiddenGems = async (
     context: IRecommendationContext,
-    count: number = ITEMS_PER_SECTION,
 ): Promise<IRecommendationSection | null> => {
     const availableItems = await context.getAllMenuItems();
 
@@ -143,7 +141,6 @@ export const getHiddenGems = async (
 
     const items = Array.from(candidates.values())
         .sort((a, b) => a.distance - b.distance)
-        .slice(0, count)
         .map(({ item }) => item);
 
     if (items.length === 0) {

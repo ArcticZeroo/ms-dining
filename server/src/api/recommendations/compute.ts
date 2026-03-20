@@ -4,16 +4,20 @@ import {
 	IRecommendationsResponse,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
-import { deduplicateItems } from '../../util/recommendation.js';
+import { throwError } from '../../util/error.js';
 import { lazy } from '../../util/lazy.js';
 import { buildProximityWeightMap } from '../../util/proximity.js';
 import { createSeededRandom, selectWithVariety } from '../../util/random.js';
+import { deduplicateItems } from '../../util/recommendation.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
-import { getAnonymousSectionsAsync, getNewAtFavoritesForCafeAsync } from '../cache/recommendations.js';
-import { getAllAvailableItems, IRecommendationContext, ITEMS_PER_SECTION, withErrorHandling } from './shared.js';
-import { getNewAtFavorites } from './signals/user-specific/new-at-favorites.js';
+import { getHiddenGems } from './signals/anonymous/hidden-gems.js';
+import { getPopularItems } from './signals/anonymous/popular.js';
 import { getBasedOnReviews } from './signals/user-specific/based-on-reviews.js';
+import { getNewAtFavorites } from './signals/user-specific/new-at-favorites.js';
 import { getTrySomethingDifferent } from './signals/user-specific/try-something-different.js';
+import { getAllAvailableItems, IRecommendationContext, ITEMS_PER_SECTION, withErrorHandling } from './shared.js';
+
+// --- Proximity helpers ---
 
 const applyProximityToItems = (items: IRecommendationItem[], proximityWeights: Map<string, number> | null): IRecommendationItem[] => {
     if (!proximityWeights) {
@@ -36,7 +40,6 @@ const applyProximityToItems = (items: IRecommendationItem[], proximityWeights: M
         }
     }
 
-    // If all weights are default (1), we don't need to sort again.
     if (isAnyWeightNotDefault) {
         resultItems.sort((itemA, itemB) => itemB.score - itemA.score);
     }
@@ -77,7 +80,17 @@ const proximityAdjustUserSections = (sections: Array<IRecommendationSection | nu
     return adjustedSections;
 }
 
-const buildContext = (userId: string | null, dateString: string, homepageIds: string[], cafeIdFilter?: string): IRecommendationContext => {
+// --- Context building ---
+
+type BuildContextParams = Pick<IRecommendationContext, 'userId' | 'dateString' | 'homepageIds' | 'cafeIdFilter' | 'getNewItemsForCafe'>;
+
+const buildContext = ({
+    userId = null,
+    dateString,
+    homepageIds,
+    cafeIdFilter,
+    getNewItemsForCafe,
+}: BuildContextParams): IRecommendationContext => {
     const random = createSeededRandom(`${dateString}:${userId ?? 'anon'}`);
 
     return {
@@ -90,9 +103,34 @@ const buildContext = (userId: string | null, dateString: string, homepageIds: st
         getUserReviews:     lazy(() => userId
             ? ReviewStorageClient.getReviewsForUserAsync({ userId })
             : Promise.resolve([])),
-        getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
+        getNewItemsForCafe,
     } satisfies IRecommendationContext;
 }
+
+// --- Anonymous sections computation ---
+
+/**
+ * Computes the anonymous recommendation sections (Popular Today, Hidden Gems).
+ * These are user-independent and can be cached globally.
+ */
+export const computeAnonymousSections = async (dateString: string, cafeIdFilter?: string): Promise<IRecommendationSection[]> => {
+    const context = buildContext({
+        userId:             null,
+		homepageIds:        [],
+		getNewItemsForCafe: () => throwError('getNewItemsForCafe should not be called for anonymous recommendations'),
+        dateString,
+        cafeIdFilter,
+    });
+
+    const results = await Promise.all([
+        withErrorHandling('popular', getPopularItems(context)),
+        withErrorHandling('hiddenGems', getHiddenGems(context)),
+    ]);
+
+    return results.filter((section): section is IRecommendationSection => section != null);
+};
+
+// --- Main computation ---
 
 /**
  * Computes the full recommendations response for a user by assembling sections from
@@ -107,23 +145,31 @@ const buildContext = (userId: string | null, dateString: string, homepageIds: st
  * - "Based on Your Reviews" — items similar to things the user rated highly
  * - "Try Something Different" — items maximally different from the user's review history
  *
- * Anonymous sections are pre-computed with a larger pool, then per-user variety selection
+ * Anonymous sections are pre-computed as a full pool, then per-user variety selection
  * (seeded by date + userId) picks a randomized subset. All sections are deduplicated so
  * the same item doesn't appear in multiple sections.
  *
  * When homepage views are set (and no single-cafe filter), proximity weighting
  * deprioritizes items from distant cafes and excludes those beyond the max distance.
  */
-export const computeRecommendations = async (
-    userId: string | null,
-    dateString: string,
-    homepageIds: string[],
-    cafeIdFilter?: string,
-): Promise<IRecommendationsResponse> => {
-    const context = buildContext(userId, dateString, homepageIds, cafeIdFilter);
+interface IComputeRecommendationsParams {
+    anonymousSections: IRecommendationSection[];
+    userId: string | null;
+    dateString: string;
+    homepageIds: string[];
+    cafeIdFilter?: string;
+    getNewItemsForCafe: (cafeId: string) => Promise<IRecommendationItem[]>;
+}
 
-    // Fetch anonymous sections (cached) and user-specific sections in parallel
-    const anonymousSectionsPromise = getAnonymousSectionsAsync(dateString, cafeIdFilter);
+export const computeRecommendations = async ({
+    anonymousSections,
+    userId,
+    dateString,
+    homepageIds,
+    cafeIdFilter,
+    getNewItemsForCafe,
+}: IComputeRecommendationsParams): Promise<IRecommendationsResponse> => {
+    const context = buildContext({ userId, dateString, homepageIds, cafeIdFilter, getNewItemsForCafe });
 
     const sectionPromises: Array<Promise<IRecommendationSection | null>> = [];
 
@@ -136,15 +182,12 @@ export const computeRecommendations = async (
         sectionPromises.push(withErrorHandling('trySomethingDifferent', getTrySomethingDifferent(context)));
     }
 
-    const [anonymousSections, userResults] = await Promise.all([
-        anonymousSectionsPromise,
-        Promise.all(sectionPromises),
-    ]);
+    const userResults = await Promise.all(sectionPromises);
 
     // Apply proximity weighting when homepage views are set and no single-cafe filter
     const proximityWeights = buildProximityWeightMap(homepageIds, cafeIdFilter);
 
-    // Apply per-user variety to the anonymous pool sections
+    // Apply per-user variety to the anonymous pool sections.
     // When proximity weights are available, apply them before variety selection
     // so that distant items are removed/deprioritized before picking the final subset.
     const userAnonymousSections = anonymousSections.map(section => {

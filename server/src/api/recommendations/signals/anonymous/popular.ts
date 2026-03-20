@@ -4,9 +4,10 @@ import {
 	RECOMMENDATION_SECTION_DISPLAY_NAMES,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
+import { getEntityKey } from '@msdining/common/util/entity-key';
 import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
-import { IRecommendationContext, ITEMS_PER_SECTION } from '../../shared.js';
+import { IRecommendationContext } from '../../shared.js';
 
 /**
  * "Popular Today" — ranks all available menu items by community review data and surfaces
@@ -15,11 +16,10 @@ import { IRecommendationContext, ITEMS_PER_SECTION } from '../../shared.js';
  * higher. Excludes items with zero reviews.
  *
  * Shown to all users (anonymous and authenticated). Results are cached at the anonymous
- * level with a larger pool, then per-user variety selection picks a subset.
+ * level, then per-user variety selection picks a subset.
  */
 export const getPopularItems = async (
     context: IRecommendationContext,
-    count: number = ITEMS_PER_SECTION,
 ): Promise<IRecommendationSection | null> => {
     const availableItems = await context.getAllMenuItems();
 
@@ -44,8 +44,20 @@ export const getPopularItems = async (
 
     scored.sort((a, b) => b.score - a.score);
 
-    const items = scored
-        .slice(0, count)
+    // Deduplicate by entity key — the same item can appear at multiple cafes with
+    // identical review data, inflating the pool with duplicates and crowding out
+    // other unique items. Keep the highest-scored (first) occurrence.
+    const seenEntityKeys = new Set<string>();
+    const uniqueScored = scored.filter(entry => {
+        const key = getEntityKey(entry.item.menuItem);
+        if (seenEntityKeys.has(key)) {
+            return false;
+        }
+        seenEntityKeys.add(key);
+        return true;
+    });
+
+    const items = uniqueScored
         .map(({ item, score, header }) => toRecommendationItem(item, score, undefined /*reason*/, header));
 
     if (items.length === 0) {
