@@ -69,6 +69,7 @@
     position: absolute;
     bottom: -0.55rem;
     right: -0.55rem;
+    aspect-ratio: 1;
     background: var(--color-icon-background);
     border: 0.125rem solid var(--color-icon-border);
     border-radius: 100%;
