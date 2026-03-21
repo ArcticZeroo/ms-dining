@@ -50,6 +50,7 @@ import { logDebug } from '../../../util/log.js';
 import { retrieveReviewHeaderAsync, retrieveStationReviewHeaderAsync } from '../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-first-appearance.js';
 import { resolveIngredientsMenuAsync } from '../../../api/cache/ingredients-menu.js';
+import { getRecommendationsAsync } from '../../../api/cache/recommendations.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -145,12 +146,16 @@ export const registerMenuRoutes = (parent: Router) => {
         return menusByStation;
     };
 
-    const getCafeFromRequest = async (ctx: Router.RouterContext) => {
-        const id = ctx.params.id?.toLowerCase();
-        if (!id) {
-            ctx.throw(400, 'Missing cafe id');
-        }
+	const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
+		const id = ctx.params.id?.toLowerCase();
+		if (!id) {
+			ctx.throw(400, 'Missing cafe id');
+		}
+		return id;
+	}
 
+    const getCafeFromRequest = async (ctx: Router.RouterContext) => {
+		const id = getCafeIdFromRequest(ctx);
         const cafe = await CafeStorageClient.retrieveCafeAsync(id);
         if (!cafe) {
             ctx.throw(404, 'Cafe not found or data is missing');
@@ -170,6 +175,23 @@ export const registerMenuRoutes = (parent: Router) => {
 
         return onReady(cafe, dateString);
     };
+
+	const validateViewMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafes: ICafe[], dateString: string) => Promise<void>) => {
+		const id = getCafeIdFromRequest(ctx);
+
+		const cafes = resolveViewToCafes(id);
+		if (!cafes) {
+			ctx.throw(404, 'View not found');
+		}
+
+		const dateString = getDateStringForMenuRequest(ctx);
+		if (dateString == null) {
+			ctx.body = JSON.stringify([]);
+			return;
+		}
+
+		return onReady(cafes, dateString);
+	}
 
     const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
         const menuItemId = ctx.params.menuItemId;
@@ -517,6 +539,12 @@ export const registerMenuRoutes = (parent: Router) => {
 
             ctx.body = jsonStringifyWithoutNull(response);
         }));
+
+	router.get('/:id/menu/featured',
+		memoizeResponseBody({ isPublic: true }),
+		async ctx => validateViewMenuAccessAsync(ctx, async (cafe, dateString) => {
+			const recommendations = await getRecommendationsAsync(getMaybeUserId(ctx), dateString, [], [], );
+		}));
 
     router.get('/:id',
         sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),

@@ -1,14 +1,8 @@
 import { IStationUniquenessData } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { betterLogosByNormalizedName } from '../constants/better-logos.js';
-import {
-	ALL_CAFES,
-	CAFE_GROUP_LIST,
-	CAFES_BY_ID,
-	getBaseApiUrlWithoutTrailingSlash,
-	GROUPS_BY_ID
-} from '../constants/cafes.js';
-import { CafeGroup, ICafe, ICafeConfig, IMenuItemBase } from '../models/cafe.js';
+import { CafeViewType, getBaseApiUrlWithoutTrailingSlash, VIEWS_BY_ID } from '../constants/cafes.js';
+import { ICafe, ICafeConfig, IMenuItemBase } from '../models/cafe.js';
 import { Nullable } from '../models/util.js';
 import { toDateString } from '@msdining/common/util/date-util';
 
@@ -59,24 +53,16 @@ export const getDefaultUniquenessDataForStation = (itemCount: number = 0): IStat
     firstAppearance: toDateString(new Date(0)) // Default to epoch start date since this is used to show newly-added stations
 });
 
-const findGroupByAlias = (id: string): CafeGroup | undefined => {
-    return CAFE_GROUP_LIST.find(group => group.aliases?.includes(id));
-};
-
-const findCafeByAlias = (id: string): ICafe | undefined => {
-    return ALL_CAFES.find(cafe => cafe.aliases?.includes(id));
-};
-
 export const resolveViewToCafes = (viewId: string): ICafe[] | undefined => {
-    const group = GROUPS_BY_ID.get(viewId) ?? findGroupByAlias(viewId);
-    if (group) {
-        return group.members;
-    }
+	const view = VIEWS_BY_ID.get(viewId);
 
-    const cafe = CAFES_BY_ID.get(viewId) ?? findCafeByAlias(viewId);
-    if (cafe) {
-        return [cafe];
-    }
+	if (view) {
+		if (view.type === CafeViewType.group) {
+			return view.value.members;
+		} else {
+			return [view.value];
+		}
+	}
 
     return undefined;
 };

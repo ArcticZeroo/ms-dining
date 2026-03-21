@@ -169,7 +169,13 @@ export const registerRecommendationsRoutes = (parent: Router) => {
         const resolvedHomepageIds = resolveHomepageIds(homepageIds, userSettings);
         const favoriteItemNames = resolveFavoriteItemNames(favoriteItemNamesParam, userSettings);
 
-        ctx.body = await getRecommendationsAsync(userId, dateString, resolvedHomepageIds, favoriteItemNames, cafeId);
+        ctx.body = await getRecommendationsAsync({
+			userId,
+			dateString,
+			homepageIds: resolvedHomepageIds,
+			favoriteItemNames,
+			cafeIdFilter: cafeId ? new Set([cafeId]) : undefined,
+		});
     });
 
     attachRouter(parent, router);

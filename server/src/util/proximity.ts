@@ -75,7 +75,7 @@ export const computeProximityWeight = (distanceKm: number): number => {
  * Each cafe's weight is based on its distance to the nearest homepage cafe.
  * Returns null if no homepage cafes have location data.
  */
-export const buildProximityWeightMap = (homepageIds: string[], cafeIdFilter?: string): Map<string, number> | null => {
+export const buildProximityWeightMap = (homepageIds: string[], cafeIdFilter?: Set<string>): Map<string, number> | null => {
     if (cafeIdFilter) {
         return null;
     }

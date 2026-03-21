@@ -524,3 +524,35 @@ export const ALL_CAFES = CAFE_GROUP_LIST.flatMap(group => group.members);
 
 export const CAFES_BY_ID = new Map(ALL_CAFES.map(cafe => [cafe.id, cafe]));
 export const GROUPS_BY_ID = new Map(CAFE_GROUP_LIST.map(group => [group.id, group]));
+
+export enum CafeViewType {
+	group,
+	cafe
+}
+
+interface ICafeView {
+	type: CafeViewType.cafe;
+	value: ICafe;
+}
+
+interface IGroupView {
+	type: CafeViewType.group;
+	value: CafeGroup;
+}
+
+export type CafeView = ICafeView | IGroupView;
+
+export const VIEWS_BY_ID: Map<string, CafeView> = new Map();
+
+for (const group of CAFE_GROUP_LIST) {
+	VIEWS_BY_ID.set(group.id, { type: CafeViewType.group, value: group });
+	for (const alias of group.aliases ?? []) {
+		VIEWS_BY_ID.set(alias, { type: CafeViewType.group, value: group });
+	}
+}
+for (const cafe of ALL_CAFES) {
+	VIEWS_BY_ID.set(cafe.id, { type: CafeViewType.cafe, value: cafe });
+	for (const alias of cafe.aliases ?? []) {
+		VIEWS_BY_ID.set(alias, { type: CafeViewType.cafe, value: cafe });
+	}
+}

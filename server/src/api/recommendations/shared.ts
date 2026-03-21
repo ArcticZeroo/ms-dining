@@ -19,7 +19,7 @@ export interface IRecommendationContext {
 	userId: string | null;
 	dateString: string;
 	homepageIds: string[];
-	cafeIdFilter?: string;
+	cafeIdFilter?: Set<string>;
 	random: () => number;
 	getAllMenuItems: () => Promise<IMenuItemCandidate[]>;
 	getUserReviews: () => Promise<IServerReview[]>;
@@ -32,8 +32,8 @@ export const withErrorHandling = (name: string, promise: Promise<IRecommendation
         return null;
     });
 
-export const getAllAvailableItems = async (dateString: string, cafeIdFilter?: string): Promise<IMenuItemCandidate[]> => {
-    const cafeIds = cafeIdFilter ? [cafeIdFilter] : Array.from(CAFES_BY_ID.keys());
+export const getAllAvailableItems = async (dateString: string, cafeIdFilter?: Set<string>): Promise<IMenuItemCandidate[]> => {
+    const cafeIds = cafeIdFilter ? [...cafeIdFilter] : Array.from(CAFES_BY_ID.keys());
     const items: IMenuItemCandidate[] = [];
 
     const menus = await Promise.all(

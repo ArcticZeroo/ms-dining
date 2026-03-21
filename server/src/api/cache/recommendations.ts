@@ -25,105 +25,131 @@ interface ICacheEntry<T> {
 const NEW_AT_FAVORITES_CACHE = new LockedMap<string, ICacheEntry<IRecommendationItem[]>>();
 
 const getNewAtFavoritesForCafeAsync = async (cafeId: string, dateString: string): Promise<IRecommendationItem[]> => {
-    const cacheKey = `${cafeId}:${dateString}`;
-    return NEW_AT_FAVORITES_CACHE.update(cacheKey, async (existing) => {
-        if (existing && existing.expiresAt > Date.now()) {
-            return existing;
-        }
-        const items = await getNewItemsForCafe(cafeId, dateString);
-        return {
-            dateString,
-            value:     items,
-            expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-        };
-    }).then(entry => entry.value);
+	const cacheKey = `${cafeId}:${dateString}`;
+	return NEW_AT_FAVORITES_CACHE.update(cacheKey, async (existing) => {
+		if (existing && existing.expiresAt > Date.now()) {
+			return existing;
+		}
+		const items = await getNewItemsForCafe(cafeId, dateString);
+		return {
+			dateString,
+			value:     items,
+			expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
+		};
+	}).then(entry => entry.value);
 };
 
 // --- Anonymous sections cache (popular + hidden-gems) ---
 
 const ANONYMOUS_SECTIONS_CACHE = new LockedMap<string, ICacheEntry<IRecommendationSection[]>>();
 
-const getAnonymousSectionsAsync = async (dateString: string, cafeIdFilter?: string): Promise<IRecommendationSection[]> => {
-    const cacheKey = cafeIdFilter ? `${dateString}:${cafeIdFilter}` : dateString;
-    return ANONYMOUS_SECTIONS_CACHE.update(cacheKey, async (existing) => {
-        if (existing && existing.expiresAt > Date.now()) {
-            return existing;
-        }
+const getAnonymousSectionsCacheKey = (dateString: string, cafeIdFilter?: Set<string>) => {
+	if (!cafeIdFilter || cafeIdFilter.size === 0) {
+		return dateString;
+	}
 
-        const sections = await computeAnonymousSections(dateString, cafeIdFilter);
+	const sortedCafeIds = Array.from(cafeIdFilter).sort();
+	return `${dateString}:${sortedCafeIds.join(',')}`;
+}
 
-        return {
-            value:     sections,
-            dateString,
-            expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-        };
-    }).then(entry => entry.value);
+const getAnonymousSectionsAsync = async (dateString: string, cafeIdFilter?: Set<string>): Promise<IRecommendationSection[]> => {
+	const cacheKey = getAnonymousSectionsCacheKey(dateString, cafeIdFilter);
+	return ANONYMOUS_SECTIONS_CACHE.update(cacheKey, async (existing) => {
+		if (existing && existing.expiresAt > Date.now()) {
+			return existing;
+		}
+
+		const sections = await computeAnonymousSections(dateString, cafeIdFilter);
+
+		return {
+			value:     sections,
+			dateString,
+			expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
+		};
+	}).then(entry => entry.value);
 };
 
 // --- Per-user recommendation cache ---
 
 const RECOMMENDATION_CACHE = new LockedMap<string, ICacheEntry<IRecommendationsResponse>>();
 
-const buildCacheKey = (userId: string | null, dateString: string, homepageIds: string[], cafeId?: string) =>
-    `${userId ?? 'anon'}:${dateString}:${homepageIds.join(',')}:${cafeId ?? 'all'}`;
+const buildCafeIdFilterString = (cafeIdFilter?: Set<string>): string => {
+	if (!cafeIdFilter || cafeIdFilter.size === 0) {
+		return 'all';
+	}
 
-export const getRecommendationsAsync = async (
-    userId: string | null,
-    dateString: string,
-    homepageIds: string[],
-    favoriteItemNames: string[],
-    cafeId?: string,
-): Promise<IRecommendationsResponse> => {
-    const anonymousSections = await getAnonymousSectionsAsync(dateString, cafeId);
+	const sortedCafeIds = Array.from(cafeIdFilter).sort();
+	return sortedCafeIds.join(',');
+}
 
-    const compute = () => computeRecommendations({
-        anonymousSections,
-        userId,
-        dateString,
-        homepageIds,
-        cafeIdFilter:   cafeId,
-        favoriteItemNames,
-        getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
-    });
+const buildCacheKey = (userId: string | null, dateString: string, homepageIds: string[], cafeIdFilter?: Set<string>) =>
+	`${userId ?? 'anon'}:${dateString}:${homepageIds.join(',')}:${buildCafeIdFilterString(cafeIdFilter)}`;
 
-    // When favorites are provided for an anonymous user, skip the per-user cache —
-    // every unique set of favorites would be a different cache key, making it useless.
-    // The expensive anonymous pool is already cached; assembly is cheap.
-    if (!userId && favoriteItemNames.length > 0) {
-        return compute();
-    }
+interface IGetRecommendationsParams {
+	userId: string | null;
+	dateString: string;
+	homepageIds: string[];
+	favoriteItemNames: string[];
+	cafeIdFilter?: Set<string>;
+}
 
-    const cacheKey = buildCacheKey(userId, dateString, homepageIds, cafeId);
+export const getRecommendationsAsync = async ({
+												  userId,
+												  dateString,
+												  homepageIds,
+												  favoriteItemNames,
+												  cafeIdFilter,
+											  }: IGetRecommendationsParams): Promise<IRecommendationsResponse> => {
+	const anonymousSections = await getAnonymousSectionsAsync(dateString, cafeIdFilter);
 
-    return RECOMMENDATION_CACHE.update(cacheKey, async (existing) => {
-        if (existing && existing.expiresAt > Date.now()) {
-            return existing;
-        }
+	const compute = () => computeRecommendations({
+		anonymousSections,
+		userId,
+		dateString,
+		homepageIds,
+		cafeIdFilter,
+		favoriteItemNames,
+		getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
+	});
 
-        const result = await compute();
+	// When favorites are provided for an anonymous user, skip the per-user cache —
+	// every unique set of favorites would be a different cache key, making it useless.
+	// The expensive anonymous pool is already cached; assembly is cheap.
+	if (!userId && favoriteItemNames.length > 0) {
+		return compute();
+	}
 
-        return {
-            value:     result,
-            dateString,
-            expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-        };
-    }).then(entry => entry.value);
+	const cacheKey = buildCacheKey(userId, dateString, homepageIds, cafeIdFilter);
+
+	return RECOMMENDATION_CACHE.update(cacheKey, async (existing) => {
+		if (existing && existing.expiresAt > Date.now()) {
+			return existing;
+		}
+
+		const result = await compute();
+
+		return {
+			value:     result,
+			dateString,
+			expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
+		};
+	}).then(entry => entry.value);
 };
 
 // --- Cache cleanup ---
 
 const isEntryOutsideMenuWindow = (_key: string, entry: ICacheEntry<unknown>) =>
-    !isDateStringWithinMenuWindow(entry.dateString);
+	!isDateStringWithinMenuWindow(entry.dateString);
 
 const cleanOldRecommendationCaches = async () => {
-    await Promise.all([
-        NEW_AT_FAVORITES_CACHE.deleteWhere(isEntryOutsideMenuWindow),
-        ANONYMOUS_SECTIONS_CACHE.deleteWhere(isEntryOutsideMenuWindow),
-        RECOMMENDATION_CACHE.deleteWhere(isEntryOutsideMenuWindow),
-    ]);
+	await Promise.all([
+		NEW_AT_FAVORITES_CACHE.deleteWhere(isEntryOutsideMenuWindow),
+		ANONYMOUS_SECTIONS_CACHE.deleteWhere(isEntryOutsideMenuWindow),
+		RECOMMENDATION_CACHE.deleteWhere(isEntryOutsideMenuWindow),
+	]);
 };
 
 setInterval(() => {
-    cleanOldRecommendationCaches()
-        .catch(error => logError('Failed to clean old recommendation caches:', error));
+	cleanOldRecommendationCaches()
+		.catch(error => logError('Failed to clean old recommendation caches:', error));
 }, CLEANUP_INTERVAL.inMilliseconds);

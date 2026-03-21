@@ -204,7 +204,7 @@ const collectSections = (
  * Computes the anonymous recommendation sections (Popular Today, Hidden Gems).
  * These are user-independent and can be cached globally.
  */
-export const computeAnonymousSections = async (dateString: string, cafeIdFilter?: string): Promise<IRecommendationSection[]> => {
+export const computeAnonymousSections = async (dateString: string, cafeIdFilter?: Set<string>): Promise<IRecommendationSection[]> => {
     const context = buildContext({
         userId:             null,
         homepageIds:        [],
@@ -235,7 +235,7 @@ interface IComputeRecommendationsParams {
     userId: string | null;
     dateString: string;
     homepageIds: string[];
-    cafeIdFilter?: string;
+    cafeIdFilter?: Set<string>;
     favoriteItemNames: string[];
     getNewItemsForCafe: (cafeId: string) => Promise<IRecommendationItem[]>;
 }
