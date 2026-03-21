@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../../../api/client/dining.ts';
 import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../../../hooks/events.ts';
+import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { useTitleWithSelectedDate } from '../../../../hooks/string.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { ITabOption, TabView } from '../../../view/tab-view.tsx';
@@ -26,11 +26,9 @@ const useRecommendations = () => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
     const dateString = toDateString(selectedDate);
 
-    const homepageViewIds = useValueNotifier(ApplicationSettings.homepageViews);
-
-    const retrieveRecommendations = useCallback(async () => {
-        return DiningClient.retrieveRecommendations(dateString, homepageViewIds);
-    }, [dateString, homepageViewIds]);
+    const retrieveRecommendations= useCallback(async () => {
+        return DiningClient.retrieveRecommendations(dateString);
+    }, [dateString]);
 
     const recommendationsState = useDelayedPromiseState(
         retrieveRecommendations,

@@ -133,17 +133,18 @@ export const registerRecommendationsRoutes = (parent: Router) => {
         return cafeIds;
     };
 
-    const resolveHomepageIds = async (homepageIds: string[] | undefined, userId: string | null): Promise<string[]> => {
+    const resolveHomepageIds = (homepageIds: string[] | undefined, userSettings: { homepageIds?: string[] } | undefined): string[] => {
         if (homepageIds) {
             return homepageIds;
         }
+        return resolveHomepageIdsToIndividualCafeIds(userSettings?.homepageIds ?? []);
+    };
 
-        if (userId) {
-            const user = await UserStorageClient.getUserAsync({ id: userId });
-            return resolveHomepageIdsToIndividualCafeIds(user?.settings?.homepageIds ?? []);
+    const resolveFavoriteItemNames = (favoriteItemNamesParam: string | undefined, userSettings: { favoriteMenuItems?: string[] } | undefined): string[] => {
+        if (favoriteItemNamesParam) {
+            return favoriteItemNamesParam.split(';').map(name => name.trim()).filter(Boolean);
         }
-
-        return [];
+        return userSettings?.favoriteMenuItems ?? [];
     };
 
     router.get('/for-you', async ctx => {
@@ -158,10 +159,17 @@ export const registerRecommendationsRoutes = (parent: Router) => {
         const cafeId = getTrimmedQueryParam(ctx, 'cafeId');
         const homepageIdsParam = getTrimmedQueryParam(ctx, 'homepageIds');
         const homepageIds = parseHomepageIds(homepageIdsParam);
+        const favoriteItemNamesParam = getTrimmedQueryParam(ctx, 'favoriteItemNames');
         const userId = getMaybeUserId(ctx);
-        const resolvedHomepageIds = await resolveHomepageIds(homepageIds, userId);
 
-        ctx.body = await getRecommendationsAsync(userId, dateString, resolvedHomepageIds, cafeId);
+        const userSettings = userId
+            ? (await UserStorageClient.getUserAsync({ id: userId }))?.settings
+            : undefined;
+
+        const resolvedHomepageIds = resolveHomepageIds(homepageIds, userSettings);
+        const favoriteItemNames = resolveFavoriteItemNames(favoriteItemNamesParam, userSettings);
+
+        ctx.body = await getRecommendationsAsync(userId, dateString, resolvedHomepageIds, favoriteItemNames, cafeId);
     });
 
     attachRouter(parent, router);

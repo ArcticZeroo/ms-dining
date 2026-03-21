@@ -71,8 +71,28 @@ export const getRecommendationsAsync = async (
     userId: string | null,
     dateString: string,
     homepageIds: string[],
+    favoriteItemNames: string[],
     cafeId?: string,
 ): Promise<IRecommendationsResponse> => {
+    const anonymousSections = await getAnonymousSectionsAsync(dateString, cafeId);
+
+    const compute = () => computeRecommendations({
+        anonymousSections,
+        userId,
+        dateString,
+        homepageIds,
+        cafeIdFilter:   cafeId,
+        favoriteItemNames,
+        getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
+    });
+
+    // When favorites are provided for an anonymous user, skip the per-user cache —
+    // every unique set of favorites would be a different cache key, making it useless.
+    // The expensive anonymous pool is already cached; assembly is cheap.
+    if (!userId && favoriteItemNames.length > 0) {
+        return compute();
+    }
+
     const cacheKey = buildCacheKey(userId, dateString, homepageIds, cafeId);
 
     return RECOMMENDATION_CACHE.update(cacheKey, async (existing) => {
@@ -80,15 +100,7 @@ export const getRecommendationsAsync = async (
             return existing;
         }
 
-        const anonymousSections = await getAnonymousSectionsAsync(dateString, cafeId);
-        const result = await computeRecommendations({
-            anonymousSections,
-            userId,
-			dateString,
-			homepageIds,
-            cafeIdFilter: cafeId,
-            getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
-        });
+        const result = await compute();
 
         return {
             value:     result,

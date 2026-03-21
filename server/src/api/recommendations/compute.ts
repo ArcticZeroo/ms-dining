@@ -4,11 +4,12 @@ import {
 	IRecommendationsResponse,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
+import { ENTITY_KEY_NAME_PREFIX, getEntityKey } from '@msdining/common/util/entity-key';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { throwError } from '../../util/error.js';
 import { lazy } from '../../util/lazy.js';
 import { buildProximityWeightMap } from '../../util/proximity.js';
-import { createSeededRandom, selectWithVariety } from '../../util/random.js';
-import { deduplicateItems } from '../../util/recommendation.js';
+import { createSeededRandom, selectWithFilter } from '../../util/random.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { getHiddenGems } from './signals/anonymous/hidden-gems.js';
 import { getPopularItems } from './signals/anonymous/popular.js';
@@ -17,11 +18,20 @@ import { getNewAtFavorites } from './signals/user-specific/new-at-favorites.js';
 import { getTrySomethingDifferent } from './signals/user-specific/try-something-different.js';
 import { getAllAvailableItems, IRecommendationContext, ITEMS_PER_SECTION, withErrorHandling } from './shared.js';
 
-// --- Proximity helpers ---
+// --- Proximity ---
 
-const applyProximityToItems = (items: IRecommendationItem[], proximityWeights: Map<string, number> | null): IRecommendationItem[] => {
-    if (!proximityWeights) {
-        return items;
+const PROXIMITY_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
+    RecommendationSectionType.newAtFavorites,
+    RecommendationSectionType.favorites,
+]);
+
+const applyProximityWeighting = (
+    items: readonly IRecommendationItem[],
+    sectionType: RecommendationSectionType,
+    proximityWeights: Map<string, number> | null,
+): IRecommendationItem[] => {
+    if (!proximityWeights || PROXIMITY_EXEMPT_SECTION_TYPES.has(sectionType)) {
+        return items as IRecommendationItem[];
     }
 
     const resultItems: IRecommendationItem[] = [];
@@ -45,40 +55,89 @@ const applyProximityToItems = (items: IRecommendationItem[], proximityWeights: M
     }
 
     return resultItems;
-}
+};
 
-const PROXIMITY_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
+// --- Favorites ---
+
+const buildFavoriteEntityKeys = (favoriteItemNames: string[]): Set<string> => {
+    const keys = new Set<string>();
+    for (const name of favoriteItemNames) {
+        keys.add(ENTITY_KEY_NAME_PREFIX + normalizeNameForSearch(name));
+    }
+    return keys;
+};
+
+// --- Section assembly ---
+
+// Sections are processed in this order. Higher-priority sections claim items first;
+// lower-priority sections pick from the remaining pool.
+const SECTION_PRIORITY: RecommendationSectionType[] = [
     RecommendationSectionType.newAtFavorites,
-    RecommendationSectionType.favorites,
+    RecommendationSectionType.basedOnReviews,
+    RecommendationSectionType.popular,
+    RecommendationSectionType.hiddenGems,
+    RecommendationSectionType.trySomethingDifferent,
+];
+
+// Anonymous section types have large pre-computed pools that need variety selection at assembly time.
+const ANONYMOUS_SECTION_TYPES = new Set<RecommendationSectionType>([
+    RecommendationSectionType.popular,
+    RecommendationSectionType.hiddenGems,
 ]);
 
-const proximityAdjustUserSections = (sections: Array<IRecommendationSection | null>, proximityWeights: Map<string, number> | null): IRecommendationSection[] => {
-    if (!proximityWeights) {
-        return sections.filter((section): section is IRecommendationSection => section != null);
+const claimItems = (items: IRecommendationItem[], claimedKeys: Set<string>) => {
+    for (const item of items) {
+        claimedKeys.add(getEntityKey(item));
     }
+};
 
-    const adjustedSections: IRecommendationSection[] = [];
-    for (const section of sections) {
+interface IAssembleSectionsParams {
+    sectionsByType: Map<RecommendationSectionType, IRecommendationSection>;
+    claimedKeys: Set<string>;
+    proximityWeights: Map<string, number> | null;
+    random: () => number;
+}
+
+/**
+ * Assembles the final recommendation sections in priority order with dedup-aware selection.
+ *
+ * For user-specific sections (already fixed-size): filters out claimed entity keys.
+ * For anonymous sections (full pools): applies proximity weighting, then uses selectWithFilter
+ * to pick ITEMS_PER_SECTION items that aren't already claimed.
+ *
+ * Each section's selected items are added to the claimed set before processing the next section.
+ */
+const assembleSections = ({
+    sectionsByType,
+    claimedKeys,
+    proximityWeights,
+    random,
+}: IAssembleSectionsParams): IRecommendationSection[] => {
+    const result: IRecommendationSection[] = [];
+    const isNotClaimed = (item: IRecommendationItem) => !claimedKeys.has(getEntityKey(item));
+
+    for (const sectionType of SECTION_PRIORITY) {
+        const section = sectionsByType.get(sectionType);
         if (!section) {
             continue;
         }
 
-        if (PROXIMITY_EXEMPT_SECTION_TYPES.has(section.type)) {
-            adjustedSections.push(section);
+        const adjustedItems = applyProximityWeighting(section.items, sectionType, proximityWeights);
+
+        const selectedItems = ANONYMOUS_SECTION_TYPES.has(sectionType)
+            ? selectWithFilter(adjustedItems, ITEMS_PER_SECTION, random, isNotClaimed)
+            : adjustedItems.filter(isNotClaimed);
+
+        if (selectedItems.length === 0) {
             continue;
         }
 
-        const adjustedItems = applyProximityToItems(section.items, proximityWeights);
-        if (adjustedItems.length > 0) {
-            adjustedSections.push({
-                ...section,
-                items: adjustedItems,
-            });
-        }
+        claimItems(selectedItems, claimedKeys);
+        result.push({ ...section, items: selectedItems });
     }
 
-    return adjustedSections;
-}
+    return result;
+};
 
 // --- Context building ---
 
@@ -105,9 +164,41 @@ const buildContext = ({
             : Promise.resolve([])),
         getNewItemsForCafe,
     } satisfies IRecommendationContext;
-}
+};
 
-// --- Anonymous sections computation ---
+// --- Signal dispatching ---
+
+const computeUserSpecificSections = (context: IRecommendationContext): Promise<Array<IRecommendationSection | null>> => {
+    const promises: Array<Promise<IRecommendationSection | null>> = [];
+    const { homepageIds, cafeIdFilter, userId } = context;
+
+    if (homepageIds.length > 0 || cafeIdFilter) {
+        promises.push(withErrorHandling('newAtFavorites', getNewAtFavorites(context)));
+    }
+
+    if (userId) {
+        promises.push(withErrorHandling('basedOnReviews', getBasedOnReviews(context)));
+        promises.push(withErrorHandling('trySomethingDifferent', getTrySomethingDifferent(context)));
+    }
+
+    return Promise.all(promises);
+};
+
+const collectSections = (
+    ...sectionLists: Array<ReadonlyArray<IRecommendationSection | null>>
+): Map<RecommendationSectionType, IRecommendationSection> => {
+    const map = new Map<RecommendationSectionType, IRecommendationSection>();
+    for (const sections of sectionLists) {
+        for (const section of sections) {
+            if (section) {
+                map.set(section.type, section);
+            }
+        }
+    }
+    return map;
+};
+
+// --- Public API ---
 
 /**
  * Computes the anonymous recommendation sections (Popular Today, Hidden Gems).
@@ -116,8 +207,8 @@ const buildContext = ({
 export const computeAnonymousSections = async (dateString: string, cafeIdFilter?: string): Promise<IRecommendationSection[]> => {
     const context = buildContext({
         userId:             null,
-		homepageIds:        [],
-		getNewItemsForCafe: () => throwError('getNewItemsForCafe should not be called for anonymous recommendations'),
+        homepageIds:        [],
+        getNewItemsForCafe: () => throwError('getNewItemsForCafe should not be called for anonymous recommendations'),
         dateString,
         cafeIdFilter,
     });
@@ -130,27 +221,14 @@ export const computeAnonymousSections = async (dateString: string, cafeIdFilter?
     return results.filter((section): section is IRecommendationSection => section != null);
 };
 
-// --- Main computation ---
-
 /**
  * Computes the full recommendations response for a user by assembling sections from
- * multiple signals. There are two categories of sections:
+ * multiple signals.
  *
- * **Anonymous sections** (cached globally, shown to all users):
- * - "Popular Today" — highest-rated items by community reviews
- * - "Hidden Gems" — under-reviewed items similar to top-rated ones
- *
- * **User-specific sections** (computed per-request):
- * - "New at Your Favorites" — new/rotating/traveling items at the user's homepage cafes
- * - "Based on Your Reviews" — items similar to things the user rated highly
- * - "Try Something Different" — items maximally different from the user's review history
- *
- * Anonymous sections are pre-computed as a full pool, then per-user variety selection
- * (seeded by date + userId) picks a randomized subset. All sections are deduplicated so
- * the same item doesn't appear in multiple sections.
- *
- * When homepage views are set (and no single-cafe filter), proximity weighting
- * deprioritizes items from distant cafes and excludes those beyond the max distance.
+ * All signals are computed in parallel. After they resolve, sections are assembled in
+ * priority order with dedup-aware selection: higher-priority sections claim items first,
+ * and lower-priority sections pick from the remaining pool. User favorites are pre-excluded
+ * so recommendation sections don't redundantly show favorited items.
  */
 interface IComputeRecommendationsParams {
     anonymousSections: IRecommendationSection[];
@@ -158,6 +236,7 @@ interface IComputeRecommendationsParams {
     dateString: string;
     homepageIds: string[];
     cafeIdFilter?: string;
+    favoriteItemNames: string[];
     getNewItemsForCafe: (cafeId: string) => Promise<IRecommendationItem[]>;
 }
 
@@ -167,42 +246,22 @@ export const computeRecommendations = async ({
     dateString,
     homepageIds,
     cafeIdFilter,
+    favoriteItemNames,
     getNewItemsForCafe,
 }: IComputeRecommendationsParams): Promise<IRecommendationsResponse> => {
     const context = buildContext({ userId, dateString, homepageIds, cafeIdFilter, getNewItemsForCafe });
 
-    const sectionPromises: Array<Promise<IRecommendationSection | null>> = [];
-
-    if (homepageIds.length > 0 || cafeIdFilter) {
-        sectionPromises.push(withErrorHandling('newAtFavorites', getNewAtFavorites(context)));
-    }
-
-    if (userId) {
-        sectionPromises.push(withErrorHandling('basedOnReviews', getBasedOnReviews(context)));
-        sectionPromises.push(withErrorHandling('trySomethingDifferent', getTrySomethingDifferent(context)));
-    }
-
-    const userResults = await Promise.all(sectionPromises);
-
-    // Apply proximity weighting when homepage views are set and no single-cafe filter
+    const userSections = await computeUserSpecificSections(context);
+    const sectionsByType = collectSections(anonymousSections, userSections);
+    const claimedKeys = buildFavoriteEntityKeys(favoriteItemNames);
     const proximityWeights = buildProximityWeightMap(homepageIds, cafeIdFilter);
 
-    // Apply per-user variety to the anonymous pool sections.
-    // When proximity weights are available, apply them before variety selection
-    // so that distant items are removed/deprioritized before picking the final subset.
-    const userAnonymousSections = anonymousSections.map(section => {
-        const proximityAdjustedItems = applyProximityToItems(section.items, proximityWeights);
-
-        return {
-            ...section,
-            items: selectWithVariety(proximityAdjustedItems, ITEMS_PER_SECTION, context.random),
-        };
+    const sections = assembleSections({
+        sectionsByType,
+        claimedKeys,
+        proximityWeights,
+        random: context.random,
     });
 
-    const userSections = proximityAdjustUserSections(userResults, proximityWeights);
-
-    // new-at-favorites first, then user-specific, then anonymous
-    const allSections = [...userSections, ...userAnonymousSections];
-
-    return { sections: deduplicateItems(allSections) };
+    return { sections };
 };

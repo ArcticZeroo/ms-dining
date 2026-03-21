@@ -12,7 +12,7 @@ import {
 import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/models/search';
 import { IAutocompleteSuggestion, IAutocompleteResponse } from '@msdining/common/models/search';
 import { IRecommendationsResponse } from '@msdining/common/models/recommendation';
-import { DebugSettings, InternalSettings } from '../../constants/settings.ts';
+import { ApplicationSettings, DebugSettings, InternalSettings } from '../../constants/settings.ts';
 import { CafeMenu, CafeView, ICafe, ICafeStation } from '../../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../../models/search.ts';
 import { ICancellationToken, pause } from '../../util/async.ts';
@@ -557,12 +557,19 @@ export abstract class DiningClient {
         return response;
     }
 
-    public static async retrieveRecommendations(dateString: string, homepageIds?: Iterable<string>, cafeId?: string): Promise<IRecommendationsResponse> {
+    public static async retrieveRecommendations(dateString: string, cafeId?: string): Promise<IRecommendationsResponse> {
         const params = new URLSearchParams({ date: dateString });
-        const homepageIdsList = homepageIds ? Array.from(homepageIds) : [];
-        if (homepageIdsList.length > 0) {
-            params.set('homepageIds', homepageIdsList.join(','));
+
+        const homepageIds = Array.from(ApplicationSettings.homepageViews.value);
+        if (homepageIds.length > 0) {
+            params.set('homepageIds', homepageIds.join(','));
         }
+
+        const favoriteItemNames = Array.from(ApplicationSettings.favoriteItemNames.value);
+        if (favoriteItemNames.length > 0) {
+            params.set('favoriteItemNames', favoriteItemNames.join(';'));
+        }
+
         if (cafeId) {
             params.set('cafeId', cafeId);
         }
