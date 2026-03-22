@@ -1,4 +1,4 @@
-import { LockedMap } from '../../util/map.js';
+import { LockedMap } from '../lock/map.js';
 import { IMenuItemBase, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { CACHE_EVENTS } from '../storage/events.js';
 import {

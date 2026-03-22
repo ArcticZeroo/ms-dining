@@ -60,7 +60,7 @@ const useTabOptions = (shouldShowFavorites: boolean, recommendations: IRecommend
             for (const section of recommendations.sections) {
                 options.push({
                     id:   section.type,
-                    name: section.title,
+                    name: RECOMMENDATION_SECTION_DISPLAY_NAMES[section.type],
                 });
             }
         }

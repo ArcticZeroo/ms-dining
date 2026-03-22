@@ -542,8 +542,20 @@ export const registerMenuRoutes = (parent: Router) => {
 
 	router.get('/:id/menu/featured',
 		memoizeResponseBody({ isPublic: true }),
-		async ctx => validateViewMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const recommendations = await getRecommendationsAsync(getMaybeUserId(ctx), dateString, [], [], );
+		async ctx => validateViewMenuAccessAsync(ctx, async (cafes, dateString) => {
+			// Get recommendations just for this view without taking the user into account (for now)
+			const recommendations = await getRecommendationsAsync({
+				dateString,
+				cafeIdFilter: new Set<string>(cafes.map(cafe => cafe.id)),
+				userId: null,
+				homepageIds: [],
+				favoriteItemNames: []
+			});
+
+			const allItems = recommendations.flatMap(section => section.items).sort((a, b) => b.score - a.score);
+			const selectedItems = allItems.slice(0, 10);
+
+			ctx.body = jsonStringifyWithoutNull(selectedItems);
 		}));
 
     router.get('/:id',

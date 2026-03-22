@@ -2,7 +2,7 @@ import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/ca
 import { getReviewEntityKey, getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review.js';
 import { StationStorageClient } from '../storage/clients/station.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
-import { LockedMap } from '../../util/map.js';
+import { LockedMap } from '../lock/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 const MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
@@ -100,11 +100,13 @@ export const retrieveReviewHeaderAsync = async (menuItem: IMenuItemBase): Promis
         retrieveMenuItemOnlyReviewHeaderAsync(menuItem),
         retrieveStationReviewHeaderForMenuItemAsync(menuItem.stationId),
     ]);
+
     return combineHeaders(menuItemHeader, stationHeader);
 }
 
 export const retrieveReviewHeaderByPartsAsync = async (groupId: string | null | undefined, name: string): Promise<IMenuItemReviewHeader> => {
     const entityKey = getReviewEntityKeyFromParts(groupId, normalizeNameForSearch(name));
+
     return MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.update(
         entityKey,
         async (header) => {

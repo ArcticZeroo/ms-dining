@@ -17,6 +17,7 @@ import { getRecommendationsAsync } from '../../../api/cache/recommendations.js';
 import { UserStorageClient } from '../../../api/storage/clients/user.js';
 import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../constants/cafes.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
+import { IRecommendationsResponse } from '@msdining/common/models/recommendation';
 
 export const registerRecommendationsRoutes = (parent: Router) => {
     const router = new Router({
@@ -169,13 +170,15 @@ export const registerRecommendationsRoutes = (parent: Router) => {
         const resolvedHomepageIds = resolveHomepageIds(homepageIds, userSettings);
         const favoriteItemNames = resolveFavoriteItemNames(favoriteItemNamesParam, userSettings);
 
-        ctx.body = await getRecommendationsAsync({
+        const recommendations = await getRecommendationsAsync({
 			userId,
 			dateString,
 			homepageIds: resolvedHomepageIds,
 			favoriteItemNames,
 			cafeIdFilter: cafeId ? new Set([cafeId]) : undefined,
 		});
+
+		ctx.body = { sections: recommendations } satisfies IRecommendationsResponse;
     });
 
     attachRouter(parent, router);

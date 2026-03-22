@@ -7,7 +7,7 @@ import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError } from '../../../util/log.js';
 import { captureFetchAsHarEntry, HarCapture } from '../../../util/har.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../util/request.js';
-import { Semaphore } from '../../lock.js';
+import { Semaphore } from '../../lock/lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { StringUtil } from '../../../util/string.js';
 import hat from 'hat';

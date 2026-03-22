@@ -18,6 +18,8 @@ import {
 	VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
 
+const SOURCE_REVIEWS_COUNT = 5;
+
 /**
  * "Based on Your Reviews" — finds available menu items that are semantically similar to
  * items the user has positively reviewed (rating ≥ POSITIVE_REVIEW_THRESHOLD). Helps users
@@ -61,10 +63,9 @@ export const getBasedOnReviews = async (
         return null;
     }
 
-    // Pick up to 3 positive reviews using weighted random sampling (weight = rating)
     const selectedReviews = weightedRandomSample(
         positiveReviews.map(review => ({ value: review, weight: review.rating })),
-        3,
+        SOURCE_REVIEWS_COUNT,
         context.random,
     );
 
@@ -98,7 +99,7 @@ export const getBasedOnReviews = async (
                 candidates.set(entityKey, {
                     item:     toRecommendationItem(
                         menuItem,
-                        1 - result.distance,
+                        1 - result.distance /*score*/,
                         `Similar to ${review.menuItem!.name}`,
                     ),
                     distance: result.distance,
@@ -107,11 +108,8 @@ export const getBasedOnReviews = async (
         }
     }
 
-    const sortedCandidates = Array.from(candidates.values()).sort((a, b) => a.distance - b.distance);
-    const selectedCandidates = selectWithVariety(sortedCandidates, ITEMS_PER_SECTION, context.random);
-
     const items = await Promise.all(
-        selectedCandidates.map(async ({ item }) => {
+        Array.from(candidates.values()).map(async ({ item }) => {
             try {
                 const entityKey = getEntityKey(item);
                 const candidate = unreviewedMenuItemsByEntityKey.get(entityKey);

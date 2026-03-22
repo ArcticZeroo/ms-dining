@@ -5,7 +5,7 @@ import { logError } from '../../../util/log.js';
 import { TagStorageClient } from '../../storage/clients/tags.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-import { Lock } from '../../lock.js';
+import { Lock } from '../../lock/lock.js';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/queues/search-tags.js';
 import { IStationListResult, retrieveStationListAsync } from '../buy-ondemand/stations.js';
 import { retrieveTagDefinitionsAsync } from '../buy-ondemand/tags.js';

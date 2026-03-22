@@ -1,19 +1,17 @@
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	RECOMMENDATION_SECTION_DISPLAY_NAMES,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { CAFES_BY_ID } from '../../../../constants/cafes.js';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
-import { seededShuffle } from '../../../../util/random.js';
 import { retrieveDailyCafeMenuAsync } from '../../../cache/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../cache/daily-uniqueness.js';
 import { retrieveFirstMenuItemAppearance } from '../../../cache/menu-item-first-appearance.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
-import { IRecommendationContext, ITEMS_PER_SECTION } from '../../shared.js';
+import { IRecommendationContext } from '../../shared.js';
 
 interface INewAtFavoritesCandidate {
 	item: IMenuItemCandidate;
@@ -99,33 +97,21 @@ export const getNewItemsForCafe = async (cafeId: string, dateString: string): Pr
     });
 };
 
-export const getNewAtFavorites = async (
+export const getNewAtCafe = async (
     context: IRecommendationContext,
 ): Promise<IRecommendationSection | null> => {
-    const { homepageIds, cafeIdFilter } = context;
+	const newItemsForCafe = await getNewItemsForCafe(context.cafeId, context.dateString);
 
-    const cafeIds = cafeIdFilter ? [...cafeIdFilter] : homepageIds;
-    if (cafeIds.length === 0) {
-        return null;
-    }
-
-    const perCafeResults = await Promise.all(
-        cafeIds.map(cafeId => context.getNewItemsForCafe(cafeId))
-    );
-
-    // Merge and deduplicate across cafes
     const seenEntityKeys = new Set<string>();
     const items: IRecommendationItem[] = [];
-    for (const cafeItems of perCafeResults) {
-        for (const item of cafeItems) {
-            const entityKey = getEntityKey(item);
-            if (seenEntityKeys.has(entityKey)) {
-                continue;
-            }
-            seenEntityKeys.add(entityKey);
-            items.push(item);
-        }
-    }
+	for (const item of newItemsForCafe) {
+		const entityKey = getEntityKey(item);
+		if (seenEntityKeys.has(entityKey)) {
+			continue;
+		}
+		seenEntityKeys.add(entityKey);
+		items.push(item);
+	}
 
     if (items.length === 0) {
         return null;
@@ -133,6 +119,6 @@ export const getNewAtFavorites = async (
 
     return {
         type:  RecommendationSectionType.newAtFavorites,
-        items: seededShuffle(items, context.random).slice(0, ITEMS_PER_SECTION),
+        items
     };
 };

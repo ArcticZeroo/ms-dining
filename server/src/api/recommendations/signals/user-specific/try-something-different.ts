@@ -152,14 +152,8 @@ export const getTrySomethingDifferent = async (
         }
     }
 
-    const filtered = selectWithVariety(qualityFiltered, ITEMS_PER_SECTION, context.random);
-
-    if (filtered.length === 0) {
-        return null;
-    }
-
     return {
         type:  RecommendationSectionType.trySomethingDifferent,
-        items: filtered,
+        items: qualityFiltered
     };
 };

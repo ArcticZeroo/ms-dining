@@ -1,5 +1,5 @@
 import * as SemaphoreModule from 'semaphore-async-await';
-import { MaybePromise } from '../models/async.js';
+import { MaybePromise } from '../../models/async.js';
 
 export class Lock {
     #locked = false;

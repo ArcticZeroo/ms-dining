@@ -85,18 +85,6 @@ export const getHiddenGems = async (
         }
     }
 
-    // Also add items that failed header fetch (no review data = hidden gem candidate)
-    for (let i = 0; i < headerResults.length; i++) {
-        if (headerResults[i]!.status === 'rejected') {
-            const item = availableItems[i]!;
-            const entityKey = getEntityKey(item.menuItem);
-            if (!seedEntityKeys.has(entityKey) && !gemCandidatesByEntityKey.has(entityKey)) {
-                gemCandidatesByEntityKey.set(entityKey, item);
-                gemCandidatesById.set(item.menuItem.id, item);
-            }
-        }
-    }
-
     if (gemCandidatesByEntityKey.size === 0) {
         return null;
     }

@@ -7,7 +7,7 @@ import { retrieveImageMetadataAsync } from '../../util/image.js';
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem, IThumbnailResult } from '../cafe/image/thumbnail.js';
-import { MultiLock } from '../lock.js';
+import { MultiLock } from '../lock/lock.js';
 import { loadManifest, saveManifestDebounced, updateManifestEntry } from '../cafe/image/manifest.js';
 
 const thumbnailDataByMenuItemId = new Map<string, IThumbnailResult>();

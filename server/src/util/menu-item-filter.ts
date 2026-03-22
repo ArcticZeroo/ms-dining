@@ -3,6 +3,7 @@
  * Used by both the recommendation system and the cheap items search to exclude
  * items that aren't meaningful standalone recommendations or entrees.
  */
+import { Nullable } from '../models/util.js';
 
 // Accompaniment items: sides, condiments, sauces, dressings
 const ACCOMPANIMENT_FILTER_TERMS = [
@@ -73,6 +74,12 @@ export class MenuItemFilter {
         }
         return false;
     }
+
+	matchesMenuItem(menuItem: { name: string; description?: Nullable<string>; searchTags: Set<string> }): boolean {
+		return this.matchesItemText(menuItem.name)
+			|| (menuItem.description && this.matchesItemText(menuItem.description))
+			|| this.matchesSearchTags(menuItem.searchTags);
+	}
 }
 
 export const ACCOMPANIMENT_FILTER = new MenuItemFilter(ACCOMPANIMENT_FILTER_TERMS);

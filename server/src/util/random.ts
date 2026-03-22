@@ -29,10 +29,10 @@ export const selectWithVariety = <T>(sortedItems: readonly T[], count: number, r
 // Randomly samples from the top of the sorted pool without shuffling the entire array.
 // Stops when it has `count` passing items or has exhausted the variety pool.
 export const selectWithFilter = <T>(
-    sortedItems: readonly T[],
-    count: number,
-    random: () => number,
-    filter: (item: T) => boolean,
+	sortedItems: readonly T[],
+	count: number,
+	random: () => number,
+	filter: (item: T) => boolean,
 ): T[] => {
     const poolSize = Math.min(sortedItems.length, count * VARIETY_POOL_MULTIPLIER);
 

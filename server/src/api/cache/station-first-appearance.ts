@@ -1,4 +1,4 @@
-import { LockedMap } from '../../util/map.js';
+import { LockedMap } from '../lock/map.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { logError } from '../../util/log.js';

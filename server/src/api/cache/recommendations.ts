@@ -2,110 +2,127 @@ import Duration from '@arcticzeroo/duration';
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	IRecommendationsResponse, RecommendationSectionType,
+	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { setInterval } from 'node:timers';
 import { isDateStringWithinMenuWindow } from '../../util/date.js';
 import { logError } from '../../util/log.js';
-import { LockedMap } from '../../util/map.js';
-import { computeAnonymousSections, computeRecommendations } from '../recommendations/compute.js';
-import { getNewItemsForCafe } from '../recommendations/signals/user-specific/new-at-favorites.js';
+import { LockedExpiringMap } from '../lock/map.js';
+import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
 import { CAFES_BY_ID } from '../../constants/cafes.js';
+import { getAllAvailableItems, IRecommendationContext } from '../recommendations/shared.js';
+import { createSeededRandom } from '../../util/random.js';
+import { lazy } from '../../util/lazy.js';
+import { ReviewStorageClient } from '../storage/clients/review.js';
+import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
+import { getHiddenGems } from '../recommendations/signals/cafe-specific/hidden-gems.js';
+import { getBasedOnReviews } from '../recommendations/signals/user-specific/based-on-reviews.js';
+import { getTrySomethingDifferent } from '../recommendations/signals/user-specific/try-something-different.js';
+import { buildProximityWeightMap } from '../../util/proximity.js';
+import { assembleSections } from '../recommendations/compute.js';
 
-const CACHE_TTL = new Duration({ minutes: 30 });
-const CLEANUP_INTERVAL = new Duration({ minutes: 10 });
+const GLOBAL_RECOMMENDATION_SECTIONS_CACHE = new Map<string /*dateString*/, LockedExpiringMap<string /*cafeId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
+const USER_RECOMMENDATION_SECTIONS_CACHE = new Map<string /*dateString*/, Map<string /*cafeId*/, LockedExpiringMap<string /*userId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>>();
 
-interface ICacheEntry<T> {
-	value: T;
-	dateString: string;
-	expiresAt: number;
-}
+const RECOMMENDATIONS_CACHE_EXPIRATION = new Duration({ minutes: 30 });
+const RECOMMENDATIONS_CACHE_CLEANUP_INTERVAL = new Duration({ hours: 12 });
 
-// --- Per-cafe new-at-favorites cache ---
-
-const NEW_AT_FAVORITES_CACHE = new LockedMap<string, ICacheEntry<IRecommendationItem[]>>();
-
-const getNewAtFavoritesForCafeAsync = async (cafeId: string, dateString: string): Promise<IRecommendationItem[]> => {
-	const cacheKey = `${cafeId}:${dateString}`;
-	return NEW_AT_FAVORITES_CACHE.update(cacheKey, async (existing) => {
-		if (existing && existing.expiresAt > Date.now()) {
-			return existing;
-		}
-		const items = await getNewItemsForCafe(cafeId, dateString);
-		return {
-			dateString,
-			value:     items,
-			expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-		};
-	}).then(entry => entry.value);
-};
-
-// --- Anonymous sections cache (popular + hidden-gems) ---
-
-const ANONYMOUS_SECTIONS_CACHE = new LockedMap<string, ICacheEntry<IRecommendationSection[]>>();
-
-const getAnonymousSectionsCacheKey = (dateString: string, cafeId: string) => {
-	return `${dateString}:${cafeId}`;
-}
-
-const getAnonymousSectionsAsync = async (dateString: string, cafeIdFilter?: Set<string>): Promise<IRecommendationSection[]> => {
-	const cafeList = (cafeIdFilter && cafeIdFilter.size > 0) ? cafeIdFilter : new Set(CAFES_BY_ID.keys());
-
-	const sectionsByCafe = await Promise.all(
-		Array.from(cafeList).map(async (cafeId) => {
-			const cafe = CAFES_BY_ID.get(cafeId);
-			if (!cafe) {
-				return [];
-			}
-
-			const entry = await ANONYMOUS_SECTIONS_CACHE.update(getAnonymousSectionsCacheKey(dateString, cafeId), async (existing) => {
-				if (existing && existing.expiresAt > Date.now()) {
-					return existing;
-				}
-
-				const sections = await computeAnonymousSections(dateString, cafeId);
-
-				return {
-					value:     sections,
-					dateString,
-					expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-				};
-			});
-
-			return entry.value;
-		})
-	);
-
-	const sectionsByType = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
-	for (const sections of sectionsByCafe) {
-		for (const section of sections) {
-			const sectionsForType = sectionsByType.get(section.type) ?? [];
-			sectionsForType.push(...section.items);
-			sectionsByType.set(section.type, sectionsForType);
-		}
+const ensureGlobalCacheForDateString = (dateString: string) => {
+	if (!GLOBAL_RECOMMENDATION_SECTIONS_CACHE.has(dateString)) {
+		const cache = new LockedExpiringMap<string, Map<RecommendationSectionType, Array<IRecommendationItem>>>(RECOMMENDATIONS_CACHE_EXPIRATION);
+		GLOBAL_RECOMMENDATION_SECTIONS_CACHE.set(dateString, cache);
 	}
 
-	return Array.from(sectionsByType.entries()).map(([type, items]) => ({
-		type,
-		items,
-	}));
-};
-
-// --- Per-user recommendation cache ---
-
-const RECOMMENDATION_CACHE = new LockedMap<string, ICacheEntry<IRecommendationsResponse>>();
-
-const buildCafeIdFilterString = (cafeIdFilter?: Set<string>): string => {
-	if (!cafeIdFilter || cafeIdFilter.size === 0) {
-		return 'all';
-	}
-
-	const sortedCafeIds = Array.from(cafeIdFilter).sort();
-	return sortedCafeIds.join(',');
+	return GLOBAL_RECOMMENDATION_SECTIONS_CACHE.get(dateString)!;
 }
 
-const buildCacheKey = (userId: string | null, dateString: string, homepageIds: string[], cafeIdFilter?: Set<string>) =>
-	`${userId ?? 'anon'}:${dateString}:${homepageIds.join(',')}:${buildCafeIdFilterString(cafeIdFilter)}`;
+const ensureUserCacheForDateString = (dateString: string, cafeId: string) => {
+	if (!USER_RECOMMENDATION_SECTIONS_CACHE.has(dateString)) {
+		const cache = new Map<string, LockedExpiringMap<string, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
+		USER_RECOMMENDATION_SECTIONS_CACHE.set(dateString, cache);
+	}
+
+	const cacheForDateString = USER_RECOMMENDATION_SECTIONS_CACHE.get(dateString)!;
+	if (!cacheForDateString.has(cafeId)) {
+		cacheForDateString.set(cafeId, new LockedExpiringMap<string, Map<RecommendationSectionType, Array<IRecommendationItem>>>(RECOMMENDATIONS_CACHE_EXPIRATION));
+	}
+
+	return cacheForDateString.get(cafeId)!;
+}
+
+type BuildContextParams = Pick<IRecommendationContext, 'userId' | 'dateString' | 'homepageIds' | 'cafeId' | 'random'>;
+
+const buildContext = ({
+						  userId = null,
+						  dateString,
+						  homepageIds,
+						  cafeId,
+						  random
+					  }: BuildContextParams): IRecommendationContext => {
+	return {
+		userId,
+		dateString,
+		homepageIds,
+		cafeId,
+		random,
+		getAllMenuItems: lazy(() => getAllAvailableItems(dateString, cafeId)),
+		getUserReviews:  lazy(() => userId
+			? ReviewStorageClient.getReviewsForUserAsync({ userId })
+			: Promise.resolve([]))
+	} satisfies IRecommendationContext;
+};
+
+const insertIfSucceeded = async (map: Map<RecommendationSectionType, Array<IRecommendationItem>>, resultPromise: Promise<IRecommendationSection | null>) => {
+	try {
+		const result = await resultPromise;
+		if (result && result.items.length > 0) {
+			map.set(result.type, result.items);
+		}
+	} catch (error) {
+		logError('Error computing section', error);
+	}
+}
+
+const getRecommendationsForCafe = async (context: IRecommendationContext): Promise<Map<RecommendationSectionType, Array<IRecommendationItem>>> => {
+	const cacheForDateString = ensureGlobalCacheForDateString(context.dateString);
+	return cacheForDateString.getOrInsert(context.cafeId, async () => {
+		const recommendations = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
+
+		await Promise.all([
+			insertIfSucceeded(recommendations, getPopularItems(context)),
+			insertIfSucceeded(recommendations, getHiddenGems(context)),
+			insertIfSucceeded(recommendations, getNewAtCafe(context)),
+		]);
+
+		return recommendations;
+	});
+}
+
+const getRecommendationsForUser = async (context: IRecommendationContext): Promise<Map<RecommendationSectionType, Array<IRecommendationItem>>> => {
+	if (!context.userId) {
+		return new Map();
+	}
+
+	const cacheForDateString = ensureUserCacheForDateString(context.dateString, context.cafeId);
+	return cacheForDateString.getOrInsert(context.userId, async () => {
+		const recommendations = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
+
+		await Promise.all([
+			insertIfSucceeded(recommendations, getBasedOnReviews(context)),
+			insertIfSucceeded(recommendations, getTrySomethingDifferent(context)),
+		]);
+
+		return recommendations;
+	});
+}
+
+const addToRecommendations = (existing: Map<RecommendationSectionType, Array<IRecommendationItem>>, additions: Map<RecommendationSectionType, Array<IRecommendationItem>>) => {
+	for (const [sectionType, items] of additions) {
+		const existingItems = existing.get(sectionType) ?? [];
+		existingItems.push(...items);
+		existing.set(sectionType, existingItems);
+	}
+}
 
 interface IGetRecommendationsParams {
 	userId: string | null;
@@ -121,57 +138,53 @@ export const getRecommendationsAsync = async ({
 												  homepageIds,
 												  favoriteItemNames,
 												  cafeIdFilter,
-											  }: IGetRecommendationsParams): Promise<IRecommendationsResponse> => {
-	const anonymousSections = await getAnonymousSectionsAsync(dateString, cafeIdFilter);
-
-	const compute = () => computeRecommendations({
-		anonymousSections,
-		userId,
-		dateString,
-		homepageIds,
-		cafeIdFilter,
-		favoriteItemNames,
-		getNewItemsForCafe: (cafeId) => getNewAtFavoritesForCafeAsync(cafeId, dateString),
-	});
-
-	// When favorites are provided for an anonymous user, skip the per-user cache —
-	// every unique set of favorites would be a different cache key, making it useless.
-	// The expensive anonymous pool is already cached; assembly is cheap.
-	if (!userId && favoriteItemNames.length > 0) {
-		return compute();
+											  }: IGetRecommendationsParams): Promise<Array<IRecommendationSection>> => {
+	if (!isDateStringWithinMenuWindow(dateString)) {
+		return [];
 	}
 
-	const cacheKey = buildCacheKey(userId, dateString, homepageIds, cafeIdFilter);
+	const random = createSeededRandom(`${dateString}:${userId ?? 'anon'}`);
+	const cafeIds = (cafeIdFilter && cafeIdFilter.size > 0) ? Array.from(cafeIdFilter) : Array.from(CAFES_BY_ID.keys());
 
-	return RECOMMENDATION_CACHE.update(cacheKey, async (existing) => {
-		if (existing && existing.expiresAt > Date.now()) {
-			return existing;
-		}
-
-		const result = await compute();
-
-		return {
-			value:     result,
+	const sectionsByType = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
+	await Promise.all(cafeIds.map(async (cafeId) => {
+		const context = buildContext({
+			userId,
 			dateString,
-			expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-		};
-	}).then(entry => entry.value);
-};
+			homepageIds,
+			cafeId,
+			random
+		});
 
-// --- Cache cleanup ---
+		const [cafeRecommendations, userRecommendations] = await Promise.all([
+			getRecommendationsForCafe(context),
+			getRecommendationsForUser(context),
+		]);
 
-const isEntryOutsideMenuWindow = (_key: string, entry: ICacheEntry<unknown>) =>
-	!isDateStringWithinMenuWindow(entry.dateString);
+		addToRecommendations(sectionsByType, cafeRecommendations);
+		addToRecommendations(sectionsByType, userRecommendations);
+	}));
 
-const cleanOldRecommendationCaches = async () => {
-	await Promise.all([
-		NEW_AT_FAVORITES_CACHE.deleteWhere(isEntryOutsideMenuWindow),
-		ANONYMOUS_SECTIONS_CACHE.deleteWhere(isEntryOutsideMenuWindow),
-		RECOMMENDATION_CACHE.deleteWhere(isEntryOutsideMenuWindow),
-	]);
+	const proximityWeights = buildProximityWeightMap(homepageIds, cafeIdFilter);
+
+	return assembleSections({
+		claimedKeys: new Set<string>(),
+		sectionsByType,
+		random,
+		proximityWeights,
+	});
 };
 
 setInterval(() => {
-	cleanOldRecommendationCaches()
-		.catch(error => logError('Failed to clean old recommendation caches:', error));
-}, CLEANUP_INTERVAL.inMilliseconds);
+	for (const dateString of GLOBAL_RECOMMENDATION_SECTIONS_CACHE.keys()) {
+		if (!isDateStringWithinMenuWindow(dateString)) {
+			GLOBAL_RECOMMENDATION_SECTIONS_CACHE.delete(dateString);
+		}
+	}
+
+	for (const dateString of USER_RECOMMENDATION_SECTIONS_CACHE.keys()) {
+		if (!isDateStringWithinMenuWindow(dateString)) {
+			USER_RECOMMENDATION_SECTIONS_CACHE.delete(dateString);
+		}
+	}
+}, RECOMMENDATIONS_CACHE_CLEANUP_INTERVAL.inMilliseconds);
