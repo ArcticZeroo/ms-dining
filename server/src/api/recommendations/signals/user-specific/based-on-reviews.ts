@@ -36,6 +36,7 @@ const SOURCE_REVIEWS_COUNT = 5;
  */
 export const getBasedOnReviews = async (
     context: IRecommendationContext,
+	random: () => number,
 ): Promise<IRecommendationSection | null> => {
     const allReviews = await context.getUserReviews();
     const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);
@@ -66,7 +67,7 @@ export const getBasedOnReviews = async (
     const selectedReviews = weightedRandomSample(
         positiveReviews.map(review => ({ value: review, weight: review.rating })),
         SOURCE_REVIEWS_COUNT,
-        context.random,
+        random,
     );
 
     const candidates = new Map<string, { item: IRecommendationItem; distance: number }>();

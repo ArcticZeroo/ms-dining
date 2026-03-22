@@ -8,10 +8,10 @@ import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ALL_CAFES } from '../../../constants/cafes.js';
 import Duration from '@arcticzeroo/duration';
-import { pruneExpiredDailyStationEmbeddings } from '../../storage/vector/client.js';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 import { runPendingMigrations } from '../../runtime-migrations/runner.js';
 import { runWithDbPriority } from '../../storage/db-context.js';
+import { seedAllCafeRecommendationsForToday } from '../../cache/recommendations.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
     const date = DateUtil.getNowWithDaysInFuture(i);
@@ -81,11 +81,9 @@ export const performMenuBootTasks = () => runWithDbPriority('critical', async ()
     // These can run concurrently — Prisma calls serialize through the semaphore,
     // but the vector DB prune uses a separate database and can overlap.
     console.time('boot: init');
-    const validDateStrings = new Set(DateUtil.getDateStringsForRollingWindow());
     await Promise.all([
         MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync(),
         MenuItemStorageClient.loadThumbnailHashMap(),
-        pruneExpiredDailyStationEmbeddings(validDateStrings),
     ]);
     console.timeEnd('boot: init');
 
@@ -129,4 +127,6 @@ export const performMenuBootTasks = () => runWithDbPriority('critical', async ()
     console.time('boot: seedAutocomplete');
     await seedAutocompleteFromDatabaseAsync();
     console.timeEnd('boot: seedAutocomplete');
+
+	seedAllCafeRecommendationsForToday();
 });

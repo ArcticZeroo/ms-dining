@@ -22,7 +22,6 @@ export interface IRecommendationContext {
 	cafeId: string;
 	getAllMenuItems: () => Promise<IMenuItemCandidate[]>;
 	getUserReviews: () => Promise<IServerReview[]>;
-	random: () => number;
 }
 
 export const getAllAvailableItems = async (dateString: string, cafeId: string): Promise<IMenuItemCandidate[]> => {

@@ -71,7 +71,7 @@ export class LockedMap<K, V> implements ILockedMap<K, V> {
 
 	async getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {
 		return this.update(key, async (value) => {
-			if (value) {
+			if (value !== undefined) {
 				return value;
 			}
 
@@ -134,7 +134,7 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 			this.#map.deleteWhere((_, entry) => {
 				return entry.expirationTime < Date.now();
 			}).catch(err => logError(`Failed to delete expired entries from LockedExpiringMap: ${err}`));
-		});
+		}, this.#expirationTimeMs);
 	}
 
 	async update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
@@ -159,7 +159,7 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 
 	getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {
 		return this.update(key, async (value) => {
-			if (value) {
+			if (value !== undefined) {
 				return value;
 			}
 
@@ -204,7 +204,7 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 	}
 
 	has(key: K): Promise<boolean> {
-		return this.#map.peek(key, (entry) => {
+		return this.peek(key, (entry) => {
 			// Peek will send undefined if the key doesn't exist or if it has expired, so treat both cases as "not found"
 			return entry != null;
 		});
