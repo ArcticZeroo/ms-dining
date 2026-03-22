@@ -131,7 +131,6 @@ export const getBasedOnReviews = async (
 
     return {
         type:  RecommendationSectionType.basedOnReviews,
-        title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.basedOnReviews],
         items,
     };
 };

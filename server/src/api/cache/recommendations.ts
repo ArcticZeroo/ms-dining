@@ -2,7 +2,7 @@ import Duration from '@arcticzeroo/duration';
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	IRecommendationsResponse,
+	IRecommendationsResponse, RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { setInterval } from 'node:timers';
 import { isDateStringWithinMenuWindow } from '../../util/date.js';
@@ -10,6 +10,7 @@ import { logError } from '../../util/log.js';
 import { LockedMap } from '../../util/map.js';
 import { computeAnonymousSections, computeRecommendations } from '../recommendations/compute.js';
 import { getNewItemsForCafe } from '../recommendations/signals/user-specific/new-at-favorites.js';
+import { CAFES_BY_ID } from '../../constants/cafes.js';
 
 const CACHE_TTL = new Duration({ minutes: 30 });
 const CLEANUP_INTERVAL = new Duration({ minutes: 10 });
@@ -43,30 +44,51 @@ const getNewAtFavoritesForCafeAsync = async (cafeId: string, dateString: string)
 
 const ANONYMOUS_SECTIONS_CACHE = new LockedMap<string, ICacheEntry<IRecommendationSection[]>>();
 
-const getAnonymousSectionsCacheKey = (dateString: string, cafeIdFilter?: Set<string>) => {
-	if (!cafeIdFilter || cafeIdFilter.size === 0) {
-		return dateString;
-	}
-
-	const sortedCafeIds = Array.from(cafeIdFilter).sort();
-	return `${dateString}:${sortedCafeIds.join(',')}`;
+const getAnonymousSectionsCacheKey = (dateString: string, cafeId: string) => {
+	return `${dateString}:${cafeId}`;
 }
 
 const getAnonymousSectionsAsync = async (dateString: string, cafeIdFilter?: Set<string>): Promise<IRecommendationSection[]> => {
-	const cacheKey = getAnonymousSectionsCacheKey(dateString, cafeIdFilter);
-	return ANONYMOUS_SECTIONS_CACHE.update(cacheKey, async (existing) => {
-		if (existing && existing.expiresAt > Date.now()) {
-			return existing;
+	const cafeList = (cafeIdFilter && cafeIdFilter.size > 0) ? cafeIdFilter : new Set(CAFES_BY_ID.keys());
+
+	const sectionsByCafe = await Promise.all(
+		Array.from(cafeList).map(async (cafeId) => {
+			const cafe = CAFES_BY_ID.get(cafeId);
+			if (!cafe) {
+				return [];
+			}
+
+			const entry = await ANONYMOUS_SECTIONS_CACHE.update(getAnonymousSectionsCacheKey(dateString, cafeId), async (existing) => {
+				if (existing && existing.expiresAt > Date.now()) {
+					return existing;
+				}
+
+				const sections = await computeAnonymousSections(dateString, cafeId);
+
+				return {
+					value:     sections,
+					dateString,
+					expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
+				};
+			});
+
+			return entry.value;
+		})
+	);
+
+	const sectionsByType = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
+	for (const sections of sectionsByCafe) {
+		for (const section of sections) {
+			const sectionsForType = sectionsByType.get(section.type) ?? [];
+			sectionsForType.push(...section.items);
+			sectionsByType.set(section.type, sectionsForType);
 		}
+	}
 
-		const sections = await computeAnonymousSections(dateString, cafeIdFilter);
-
-		return {
-			value:     sections,
-			dateString,
-			expiresAt: Date.now() + CACHE_TTL.inMilliseconds,
-		};
-	}).then(entry => entry.value);
+	return Array.from(sectionsByType.entries()).map(([type, items]) => ({
+		type,
+		items,
+	}));
 };
 
 // --- Per-user recommendation cache ---

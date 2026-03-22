@@ -38,7 +38,6 @@ export interface IRecommendationItem {
 
 export interface IRecommendationSection {
     type: RecommendationSectionType;
-    title: string;
     items: IRecommendationItem[];
 }
 

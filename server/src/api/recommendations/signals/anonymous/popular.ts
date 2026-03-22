@@ -66,7 +66,6 @@ export const getPopularItems = async (
 
     return {
         type:  RecommendationSectionType.popular,
-        title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.popular],
-        items,
+        items
     };
 };

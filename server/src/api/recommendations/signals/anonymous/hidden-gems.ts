@@ -149,7 +149,6 @@ export const getHiddenGems = async (
 
     return {
         type:  RecommendationSectionType.hiddenGems,
-        title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.hiddenGems],
         items,
     };
 };

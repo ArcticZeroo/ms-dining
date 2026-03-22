@@ -160,7 +160,6 @@ export const getTrySomethingDifferent = async (
 
     return {
         type:  RecommendationSectionType.trySomethingDifferent,
-        title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.trySomethingDifferent],
         items: filtered,
     };
 };

@@ -203,14 +203,16 @@ const collectSections = (
 /**
  * Computes the anonymous recommendation sections (Popular Today, Hidden Gems).
  * These are user-independent and can be cached globally.
+ * Anonymous sections are computed for only one cafe at a time so that we can
+ * cache by individual cafe and build combinations faster.
  */
-export const computeAnonymousSections = async (dateString: string, cafeIdFilter?: Set<string>): Promise<IRecommendationSection[]> => {
+export const computeAnonymousSections = async (dateString: string, cafeId: string): Promise<IRecommendationSection[]> => {
     const context = buildContext({
         userId:             null,
         homepageIds:        [],
         getNewItemsForCafe: () => throwError('getNewItemsForCafe should not be called for anonymous recommendations'),
         dateString,
-        cafeIdFilter,
+        cafeIdFilter: new Set([cafeId]),
     });
 
     const results = await Promise.all([

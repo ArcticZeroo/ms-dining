@@ -104,12 +104,11 @@ export const getNewAtFavorites = async (
 ): Promise<IRecommendationSection | null> => {
     const { homepageIds, cafeIdFilter } = context;
 
-    const cafeIds = cafeIdFilter ? [cafeIdFilter] : homepageIds;
+    const cafeIds = cafeIdFilter ? [...cafeIdFilter] : homepageIds;
     if (cafeIds.length === 0) {
         return null;
     }
 
-    // Fetch per-cafe results in parallel
     const perCafeResults = await Promise.all(
         cafeIds.map(cafeId => context.getNewItemsForCafe(cafeId))
     );
@@ -134,7 +133,6 @@ export const getNewAtFavorites = async (
 
     return {
         type:  RecommendationSectionType.newAtFavorites,
-        title: RECOMMENDATION_SECTION_DISPLAY_NAMES[RecommendationSectionType.newAtFavorites],
         items: seededShuffle(items, context.random).slice(0, ITEMS_PER_SECTION),
     };
 };
