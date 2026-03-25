@@ -12,11 +12,12 @@ import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
 import {
 	IRecommendationContext,
-	ITEMS_PER_SECTION,
+	ITEMS_PER_SECTION, IUserRecommendationContext,
 	log,
 	POSITIVE_REVIEW_THRESHOLD,
 	VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
+import { IServerReview } from '../../../../models/review.js';
 
 const SOURCE_REVIEWS_COUNT = 5;
 
@@ -35,10 +36,11 @@ const SOURCE_REVIEWS_COUNT = 5;
  * Only shown to authenticated users who have at least one positive review.
  */
 export const getBasedOnReviews = async (
-    context: IRecommendationContext,
+    context: IUserRecommendationContext,
+	getUserReviews: () => Promise<Array<IServerReview>>,
 	random: () => number,
 ): Promise<IRecommendationSection | null> => {
-    const allReviews = await context.getUserReviews();
+    const allReviews = await getUserReviews();
     const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);
     const positiveReviews = reviews.filter(review => review.rating >= POSITIVE_REVIEW_THRESHOLD);
 

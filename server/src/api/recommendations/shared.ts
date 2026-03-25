@@ -20,43 +20,52 @@ export interface IRecommendationContext {
 	dateString: string;
 	homepageIds: string[];
 	cafeId: string;
-	getAllMenuItems: () => Promise<IMenuItemCandidate[]>;
-	getUserReviews: () => Promise<IServerReview[]>;
+	getAllMenuItems: () => Promise<Array<IMenuItemCandidate>>;
 }
 
-export const getAllAvailableItems = async (dateString: string, cafeId: string): Promise<IMenuItemCandidate[]> => {
+export interface IUserRecommendationContext {
+	userId: string;
+	dateString: string;
+	getAllMenuItems: () => Promise<Array<IMenuItemCandidate>>;
+	random: () => number;
+}
+
+export const getAllAvailableItems = async (dateString: string, cafeId?: string): Promise<IMenuItemCandidate[]> => {
     const items: IMenuItemCandidate[] = [];
+	const cafeIds = cafeId ? [cafeId] : Array.from(CAFES_BY_ID.keys());
 
-	const cafe = CAFES_BY_ID.get(cafeId);
-	if (!cafe) {
-		return [];
-	}
-
-	const stations = await retrieveDailyCafeMenuAsync(cafeId, dateString);
-	for (const station of stations) {
-		if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(station.name)) {
-			continue;
+	await Promise.all(cafeIds.map(async (cafeId) => {
+		const cafe = CAFES_BY_ID.get(cafeId);
+		if (!cafe) {
+			return;
 		}
 
-		for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
-			if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(categoryName)) {
+		const stations = await retrieveDailyCafeMenuAsync(cafeId, dateString);
+		for (const station of stations) {
+			if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(station.name)) {
 				continue;
 			}
 
-			for (const itemId of itemIds) {
-				const menuItem = station.menuItemsById.get(itemId);
-				if (!menuItem) {
+			for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
+				if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(categoryName)) {
 					continue;
 				}
 
-				if (ACCOMPANIMENT_FILTER.matchesMenuItem(menuItem)) {
-					continue;
-				}
+				for (const itemId of itemIds) {
+					const menuItem = station.menuItemsById.get(itemId);
+					if (!menuItem) {
+						continue;
+					}
 
-				items.push({ menuItem, cafeId, cafeName: cafe.name, stationName: station.name });
+					if (ACCOMPANIMENT_FILTER.matchesMenuItem(menuItem)) {
+						continue;
+					}
+
+					items.push({ menuItem, cafeId, cafeName: cafe.name, stationName: station.name });
+				}
 			}
 		}
-	}
+	}));
 
     return items;
 };

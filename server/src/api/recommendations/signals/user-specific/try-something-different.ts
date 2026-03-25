@@ -12,10 +12,11 @@ import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { getSearchEntityEmbedding, searchVectorRawByType, } from '../../../storage/vector/client.js';
 import {
 	IRecommendationContext,
-	ITEMS_PER_SECTION,
+	ITEMS_PER_SECTION, IUserRecommendationContext,
 	NEGATIVE_REVIEW_THRESHOLD,
 	VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
+import { IServerReview } from '../../../../models/review.js';
 
 /**
  * "Try Something Different" — surfaces available menu items that are maximally different
@@ -34,15 +35,15 @@ import {
  * Only shown to authenticated users who have at least one review.
  */
 export const getTrySomethingDifferent = async (
-    context: IRecommendationContext,
+    context: IUserRecommendationContext,
+	getUserReviews: () => Promise<Array<IServerReview>>,
 ): Promise<IRecommendationSection | null> => {
-    const allReviews = await context.getUserReviews();
+    const allReviews = await getUserReviews();
     const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);
     if (reviews.length === 0) {
         return null;
     }
 
-    // Compute centroid of all reviewed items' embeddings (parallel)
     const embeddingResults = await Promise.all(
         reviews.map(async (review) => {
             try {
