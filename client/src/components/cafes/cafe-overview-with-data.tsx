@@ -5,6 +5,7 @@ import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { CafePopupOverviewStation } from '../map/popup/overview/cafe-popup-overview-station.js';
 import { ICafe } from '../../models/cafe.js';
 import './menu-overview.css';
+import { useSelectedDisplayDateString } from '../../hooks/date-picker.js';
 
 const TARGET_STATION_MINIMUM = 3;
 
@@ -23,6 +24,8 @@ interface ICafeOverviewWithDataProps {
 }
 
 export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ cafe, overviewStations, showAllStationsIfNoneInteresting = false, showAllStations = false }) => {
+    const dateString = useSelectedDisplayDateString();
+
     const interestingStations = useMemo(
         () => {
             const allStations = overviewStations ?? [];
@@ -74,10 +77,10 @@ export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ caf
     }
 
     const title = showAllStations
-        ? 'Stations today:'
+        ? `Stations on ${dateString}:`
         : interestingStations.length > 0
-            ? 'Interesting stations today:'
-            : 'No new or rotating items today. Here\'s all available stations:';
+            ? `Interesting stations on ${dateString}:`
+            : `No new or rotating items on ${dateString}. Here's all available stations:`;
 
     const targetStations = interestingStations.length > 0
         ? interestingStations
