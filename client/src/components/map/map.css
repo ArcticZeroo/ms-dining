@@ -80,26 +80,35 @@
     50% { transform: translateY(-4px); }
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.is-selected {
+.campus-map .leaflet-div-icon .cafe-marker-container.is-selected {
     --color-icon-background: #1a4a7a;
     --color-icon-border: var(--color-theme);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-container.is-selected .cafe-marker-tracker {
     box-shadow: 0 0 10px 4px rgba(52, 136, 224, 0.6);
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.is-filter-selected {
+.campus-map .leaflet-div-icon .cafe-marker-container.is-filter-selected {
     --color-icon-background: #7a4a1a;
     --color-icon-border: #f0a050;
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-container.is-filter-selected .cafe-marker-tracker {
     box-shadow: 0 0 8px 3px rgba(240, 160, 80, 0.6);
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.is-highlighted {
+.campus-map .leaflet-div-icon .cafe-marker-container.is-highlighted {
     --color-icon-background: #1a6b3a;
     --color-icon-border: #2ecc71;
-    box-shadow: 0 0 8px 3px rgba(46, 204, 113, 0.6);
     animation: marker-bounce 0.6s ease-in-out infinite;
 }
 
-.campus-map .leaflet-div-icon .cafe-marker-tracker.is-dimmed {
+.campus-map .leaflet-div-icon .cafe-marker-container.is-highlighted .cafe-marker-tracker {
+    box-shadow: 0 0 8px 3px rgba(46, 204, 113, 0.6);
+}
+
+.campus-map .leaflet-div-icon .cafe-marker-container.is-dimmed {
     opacity: 0.35;
     filter: grayscale(0.8);
 }
