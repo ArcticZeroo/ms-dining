@@ -7,7 +7,6 @@ import { NavExpansionContext } from '../../context/nav.ts';
 import { useAutocompleteSuggestions } from '../../hooks/autocomplete.ts';
 import { SearchAutocomplete } from './search-autocomplete.tsx';
 import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/models/search';
-import { DebugSettings } from '../../constants/settings.js';
 
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);

@@ -20,7 +20,7 @@ interface IMapSearchResultsProps {
 
 export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, isFilteredToHomeCafes, onFilterToHomeCafes }) => {
     const { query, allResults, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, stage, retry } = useMapSearchContext();
-    const { selectedSearchResult, setSelectedSearchResult, setHighlightedCafeIds } = useMapHighlightContext();
+    const { selectedSearchResult, selectSearchResult, setHighlightedCafeIds } = useMapHighlightContext();
 
     const clearHighlight = useCallback(
         () => setHighlightedCafeIds(new Set()),
@@ -103,7 +103,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
                         onMouseEnter={() => setHighlightedCafeIds(new Set(result.locationDatesByCafeId.keys()))}
                         onMouseLeave={clearHighlight}
                         onClick={() => {
-                            setSelectedSearchResult(selectedSearchResult === result ? null : result);
+                            selectSearchResult(selectedSearchResult === result ? null : result);
                             setHighlightedCafeIds(new Set(result.locationDatesByCafeId.keys()));
                         }}
                     />

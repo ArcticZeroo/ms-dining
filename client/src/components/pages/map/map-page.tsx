@@ -147,7 +147,7 @@ export const MapPage = () => {
         searchResultStage, retrySearch
     } = useMapSearch(query);
 
-    const highlight = useMapHighlight(query);
+    const highlight = useMapHighlight(allResults ?? []);
 
     const searchContextValue = useMemo(() => ({
         query,

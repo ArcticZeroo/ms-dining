@@ -28,6 +28,7 @@ export enum MapSearchSortType {
 }
 
 export interface IQuerySearchResult {
+    id: string;
     entityType: SearchTypes.SearchEntityType;
     name: string;
     description?: string;

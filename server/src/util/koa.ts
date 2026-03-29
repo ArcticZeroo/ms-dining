@@ -72,7 +72,7 @@ export const serializeMapOfStringToSet = (deserialized: Map<string, Set<string>>
     return serialized;
 };
 
-const serializeSearchResult = async (searchResult: IServerSearchResult, allowModifiers: boolean): Promise<ISearchResponseResult> => {
+const serializeSearchResult = async (id: string, searchResult: IServerSearchResult, allowModifiers: boolean): Promise<ISearchResponseResult> => {
     const matchReasons = new Set(searchResult.matchReasons);
     if (!allowModifiers) {
         matchReasons.delete(SearchMatchReason.modifier);
@@ -100,6 +100,7 @@ const serializeSearchResult = async (searchResult: IServerSearchResult, allowMod
     }
 
     return ({
+        id,
         type:             searchResult.type,
         name:             searchResult.name,
         description:      searchResult.description || undefined,
@@ -123,8 +124,8 @@ export const serializeSearchResults = async (ctx: Koa.Context, searchResultsById
     const areModifiersAllowed = supportsVersionTag(ctx, VERSION_TAG.modifiersInSearchResults);
 
     for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
-        for (const searchResult of searchResultsById.values()) {
-            searchResultPromises.push(serializeSearchResult(searchResult, areModifiersAllowed));
+        for (const [id, searchResult] of searchResultsById.entries()) {
+            searchResultPromises.push(serializeSearchResult(id, searchResult, areModifiersAllowed));
         }
     }
 

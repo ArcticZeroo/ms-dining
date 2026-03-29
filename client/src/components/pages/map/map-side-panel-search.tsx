@@ -25,7 +25,7 @@ const useSearchResults = (allowedViewIds: Set<string>) => {
 
 export const MapSidePanelSearch = () => {
     const navigate = useNavigate();
-    const { setHighlightedCafeIds, setSelectedSearchResult } = useMapHighlightContext();
+    const { setHighlightedCafeIds } = useMapHighlightContext();
     const { filterViewName, isFilteringViews, allowedViewIds, isFilteredToHomeCafes, onFilterToHomeCafes, onClearFilteredViews } = useMapSearchFilterViews();
     const searchResults = useSearchResults(allowedViewIds);
     const { query } = useMapSearchContext();
@@ -33,7 +33,6 @@ export const MapSidePanelSearch = () => {
     const onClearSearch = () => {
         navigate('/map');
         setHighlightedCafeIds(new Set());
-        setSelectedSearchResult(null);
     };
 
     const onCloseButtonClicked = () => {

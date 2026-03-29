@@ -41,7 +41,7 @@ export const useMapSearchContext = () => useContext(MapSearchContext);
 
 export interface IMapHighlightContext {
     selectedSearchResult: IQuerySearchResult | null;
-    setSelectedSearchResult: Dispatch<SetStateAction<IQuerySearchResult | null>>;
+    selectSearchResult(result: IQuerySearchResult | null): void;
     setHighlightedCafeIds: Dispatch<SetStateAction<Set<string>>>;
     effectiveHighlightedCafeIds: Set<string>;
 
@@ -50,7 +50,7 @@ export interface IMapHighlightContext {
 
 export const MapHighlightContext = React.createContext<IMapHighlightContext>({
     selectedSearchResult:        null,
-    setSelectedSearchResult:     () => {
+    selectSearchResult:          () => {
     },
     setHighlightedCafeIds:       () => {
     },

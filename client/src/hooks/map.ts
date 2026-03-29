@@ -259,18 +259,50 @@ export const useMapSearch = (query: string) => {
     };
 };
 
-export const useMapHighlight = (query: string) => {
+export const useMapHighlight = (allResults: IQuerySearchResult[]) => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [highlightedCafeIds, setHighlightedCafeIds] = useState<Set<string>>(new Set());
-    const [selectedSearchResult, setSelectedSearchResult] = useState<IQuerySearchResult | null>(null);
+    const selectedId = searchParams.get('selected');
 
-    useEffect(() => {
-        setSelectedSearchResult(null);
-    }, [query]);
+    const deleteSearchResultIdFromParams = useCallback((replace: boolean = false) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('selected');
+            return next;
+        }, { replace });
+    }, [setSearchParams]);
+
+    const selectedSearchResult = useMemo(() => {
+        if (!selectedId) {
+            return null;
+        }
+
+        const result = allResults.find(searchResult => searchResult.id === selectedId) ?? null;
+        if (!result) {
+            deleteSearchResultIdFromParams(true /*replace*/);
+        }
+        
+        return result;
+    }, [selectedId, allResults, deleteSearchResultIdFromParams]);
+
+    const selectSearchResult = useCallback((result: IQuerySearchResult | null) => {
+        if (result === null) {
+            deleteSearchResultIdFromParams();
+            return;
+        }
+
+        const hasExistingDetail = new URLSearchParams(window.location.search).has('selected');
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('selected', result.id);
+            return next;
+        }, { replace: hasExistingDetail });
+    }, [deleteSearchResultIdFromParams, setSearchParams]);
 
     const onCloseDetail = useCallback(() => {
-        setSelectedSearchResult(null);
+        selectSearchResult(null);
         setHighlightedCafeIds(new Set());
-    }, []);
+    }, [selectSearchResult]);
 
     const effectiveHighlightedCafeIds = useMemo(() => {
         if (highlightedCafeIds.size > 0) {
@@ -284,7 +316,7 @@ export const useMapHighlight = (query: string) => {
 
     return {
         selectedSearchResult,
-        setSelectedSearchResult,
+        selectSearchResult,
         setHighlightedCafeIds,
         effectiveHighlightedCafeIds,
         onCloseDetail

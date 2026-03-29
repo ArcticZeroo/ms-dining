@@ -104,6 +104,7 @@ export interface ICafeMenuResponse {
 export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;
 
 export interface ISearchResponseResult {
+	id: string;
 	type: SearchEntityType;
 	name: string;
 	description?: string;

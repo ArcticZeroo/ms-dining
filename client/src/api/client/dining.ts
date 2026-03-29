@@ -232,6 +232,7 @@ export abstract class DiningClient {
 
             results.push({
                 entityType,
+                id:                    serverResult.id,
                 name:                  serverResult.name,
                 description:           serverResult.description,
                 imageUrl:              serverResult.imageUrl,
