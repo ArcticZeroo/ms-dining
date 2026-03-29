@@ -20,6 +20,7 @@ import { CafeView } from '../../../models/cafe.js';
 import { usePageData } from '../../../hooks/location.js';
 import { getViewName } from '../../../util/cafe.js';
 import FullMapView from '../../map/full-map-view.js';
+import './map-page.css';
 
 const MapPageViewContent = () => {
     const navigate = useNavigate();

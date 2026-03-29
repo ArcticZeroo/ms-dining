@@ -43,8 +43,8 @@ export const MapSidePanelSearch = () => {
         }
     }
 
-    const closeButtonText = isFilteredToHomeCafes ? 'Back to all results' : 'Clear search';
-    const closeButtonIcon = isFilteredToHomeCafes ? 'arrow_back' : 'close';
+    const closeButtonText = isFilteringViews ? 'Back to all results' : 'Clear search';
+    const closeButtonIcon = isFilteringViews ? 'arrow_back' : 'close';
 
     return (
         <MapSidePanelContainer>
