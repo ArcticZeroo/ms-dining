@@ -8,14 +8,22 @@ const MAX_QUANTITY = 99;
 const READONLY_TITLE = 'Order has been submitted for preparation';
 
 const getDecreaseTitle = (readOnly: boolean, canDecrease: boolean) => {
-    if (readOnly) return READONLY_TITLE;
-    if (canDecrease) return 'Remove one more';
+    if (readOnly) {
+        return READONLY_TITLE;
+    }
+    if (canDecrease) {
+        return 'Remove one more';
+    }
     return 'Use the trash can to remove this item';
 };
 
 const getIncreaseTitle = (readOnly: boolean, canIncrease: boolean) => {
-    if (readOnly) return READONLY_TITLE;
-    if (canIncrease) return 'Add one more';
+    if (readOnly) {
+        return READONLY_TITLE;
+    }
+    if (canIncrease) {
+        return 'Add one more';
+    }
     return 'You can only order up to 99 of each item';
 };
 

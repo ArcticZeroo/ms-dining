@@ -61,7 +61,7 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, initial
                 />
             ),
         });
-    }, [cafeId, popupId, openPopup, closePopup, complete, invalidatePrepare, onComplete]);
+    }, [openPopup, popupId, complete, closePopup, onComplete, cafeId, setError, invalidatePrepare]);
 
     const handlePay = useCallback(async () => {
         if (state.iframeUrl) {
