@@ -2,8 +2,19 @@ import React from 'react';
 import { IMenuItem } from '@msdining/common/models/cafe';
 import { formatPrice } from '../../../util/cart.ts';
 import { MenuItem } from './menu-items/menu-item.tsx';
-import { IIngredientsMenu } from './ingredients-menu-parsing.ts';
+import type { Nullable } from '@msdining/common/models/util';
 import './ingredients-menu-view.css';
+
+interface IIngredientsMenu {
+    price: number;
+    logoUrl: Nullable<string>;
+    starterChoices: IMenuItem[];
+    entreeChoices: IMenuItem[];
+    dessertChoices: IMenuItem[];
+    drinkChoices: IMenuItem[];
+    sideChoices: IMenuItem[];
+    otherItems: IMenuItem[];
+}
 
 interface ICourseMenuSectionProps {
     title: string;
