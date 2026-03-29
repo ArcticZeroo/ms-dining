@@ -9,12 +9,12 @@ import { BooleanSetting } from '../../api/settings.ts';
 const ALLOWED_SETTINGS = Object.values(DebugSettings);
 
 const SETTING_DISPLAY_NAMES: Record<string, string> = {
-    [DebugSettings.allowOnlineOrdering.name]:                      'Allow Online Ordering',
+    [DebugSettings.allowOnlineOrdering.name]:                       'Allow Online Ordering',
     [DebugSettings.suppressExperimentalOnlineOrderingWarning.name]: 'Suppress Online Ordering Warning',
-    [DebugSettings.verboseLogging.name]:                           'Verbose Logging',
-    [DebugSettings.noVectorSearch.name]:                           'Disable Vector Search',
-    [DebugSettings.ingredientsMenuExperience.name]:                'in.gredients 3-Course Menu',
-    [DebugSettings.enableMapPage.name]:                            'Enable Map Page',
+    [DebugSettings.verboseLogging.name]:                            'Verbose Logging',
+    [DebugSettings.noVectorSearch.name]:                            'Disable Vector Search',
+    [DebugSettings.ingredientsMenuExperience.name]:                 'in.gredients 3-Course Menu',
+    [DebugSettings.enableMapPageSearch.name]:                       'Enable Map Page Search',
 
     [DebugSettings.showAdminReviewControls.name]:                  'Show Admin Review Controls',
     [DebugSettings.showCafeHours.name]:                            'Show Cafe Hours',

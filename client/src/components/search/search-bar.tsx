@@ -62,9 +62,7 @@ export const SearchBar = () => {
     };
 
     const onSuggestionSelected = (suggestion: IAutocompleteSuggestion) => {
-        if (suggestion.entityType === SearchEntityType.cafe
-            && suggestion.cafeId
-            && DebugSettings.enableMapPage.value) {
+        if (suggestion.entityType === SearchEntityType.cafe && suggestion.cafeId) {
             closeSearch();
             navigate(`/map/overview/${suggestion.cafeId}`);
             return;

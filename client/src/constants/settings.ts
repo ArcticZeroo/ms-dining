@@ -70,8 +70,7 @@ export const DebugSettings = {
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),
     noVectorSearch:                            new BooleanSetting('noVectorSearch', false /*defaultValue*/),
     ingredientsMenuExperience:                 new BooleanSetting('ingredientsMenuExperience', false /*defaultValue*/),
-    enableMapPage:                             new BooleanSetting('enableMapPage', false /*defaultValue*/),
-
+    enableMapPageSearch:                       new BooleanSetting('enableMapPage', false /*defaultValue*/),
     showAdminReviewControls:                   new BooleanSetting('showAdminReviewControls', false /*defaultValue*/),
     showCafeHours:                             new BooleanSetting('showCafeHours', false /*defaultValue*/),
 } as const;

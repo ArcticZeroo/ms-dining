@@ -29,6 +29,6 @@ export const getInitialDateFromUrl = () => {
 }
 
 export const getSearchUrl = (query: string) => {
-    const pageTarget = DebugSettings.enableMapPage.value ? 'map' : 'search';
+    const pageTarget = DebugSettings.enableMapPageSearch.value ? 'map' : 'search';
     return `/${pageTarget}?q=${encodeURIComponent(query)}`;
 }

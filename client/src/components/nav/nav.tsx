@@ -7,8 +7,6 @@ import { NavCafeList } from './nav-cafe-list.tsx';
 import { NavListHeaderItems } from './nav-header-buttons.tsx';
 import './nav.css';
 import { useIsAdmin } from '../../hooks/auth.js';
-import { DebugSettings } from '../../constants/settings.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
 import { NavClosingLink } from '../button/nav-closing-link.tsx';
 
 export const Nav: React.FC = () => {
@@ -16,7 +14,6 @@ export const Nav: React.FC = () => {
     const [isExpanded, setIsExpanded] = useContext(NavExpansionContext);
     const deviceType = useDeviceType();
     const isAdmin = useIsAdmin();
-    const isMapPageEnabled = useValueNotifier(DebugSettings.enableMapPage);
 
     useEffect(() => {
         setIsExpanded(false);
@@ -66,17 +63,13 @@ export const Nav: React.FC = () => {
                         </span>
                     </NavClosingLink>
                 </li>
-                {
-                    isMapPageEnabled && (
-                        <li>
-                            <NavClosingLink to="/map" className="link-button info" title="Map Page">
-                                <span className="material-symbols-outlined">
-                                    map
-                                </span>
-                            </NavClosingLink>
-                        </li>
-                    )
-                }
+                <li>
+                    <NavClosingLink to="/map" className="link-button info" title="Map Page">
+                        <span className="material-symbols-outlined">
+                            map
+                        </span>
+                    </NavClosingLink>
+                </li>
                 {
                     isAdmin && (
                         <li>
