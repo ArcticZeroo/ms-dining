@@ -1,4 +1,5 @@
 import { runPromiseWithRetries } from '../../util/async.js';
+import { rethrowWithoutStatus } from '../../util/error.js';
 import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';
 import { anthropicProvider } from './providers/anthropic.js';
 import { openAiProvider } from './providers/openai.js';
@@ -30,12 +31,12 @@ export const retrieveTextCompletion = async (request: IAiTextCompletionRequest):
     return runPromiseWithRetries(
         () => activeProvider.retrieveTextCompletion(request),
         AI_RETRY_COUNT
-    );
+    ).catch(rethrowWithoutStatus);
 };
 
 export const retrieveVisionCompletion = async (request: IAiVisionRequest): Promise<string> => {
     return runPromiseWithRetries(
         () => activeProvider.retrieveVisionCompletion(request),
         AI_RETRY_COUNT
-    );
+    ).catch(rethrowWithoutStatus);
 };

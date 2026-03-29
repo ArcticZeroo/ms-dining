@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { getOpenAiKey } from '../constants/env.js';
 import { CafeGroup, ICafe, ICafeStation } from '../models/cafe.js';
 import { lazy } from '../util/lazy.js';
+import { rethrowWithoutStatus } from '../util/error.js';
 
 const getClient = lazy(() => new OpenAI({
     apiKey: getOpenAiKey()
@@ -12,7 +13,7 @@ export const retrieveEmbeddings = async (text: string) => {
     const response = await getClient().embeddings.create({
         model: 'text-embedding-3-small',
         input: text
-    });
+    }).catch(rethrowWithoutStatus);
 
     const data = response.data[0];
     if (!data) {
