@@ -24,6 +24,7 @@
 
 .has-detail-card .map-side-panel {
     border-bottom-right-radius: 0;
+    bottom: var(--default-padding);
 }
 
 .map-side-panel .panel-header {
