@@ -1,6 +1,7 @@
 import { SearchBar } from '../search/search-bar.tsx';
 import { SiteHeader } from '../auth/site-header.tsx';
 import { NavClosingLink } from '../button/nav-closing-link.tsx';
+import React from 'react';
 
 export const NavListHeaderItems = () => {
     return (
@@ -19,6 +20,13 @@ export const NavListHeaderItems = () => {
                 <NavClosingLink to="/" className="link-button home">
                     <span className="material-symbols-outlined">
                         home
+                    </span>
+                </NavClosingLink>
+            </li>
+            <li>
+                <NavClosingLink to="/map" className="link-button info" title="Map Page">
+                    <span className="material-symbols-outlined">
+                        map
                     </span>
                 </NavClosingLink>
             </li>

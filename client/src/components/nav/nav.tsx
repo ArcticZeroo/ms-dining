@@ -5,9 +5,10 @@ import { DeviceType, useDeviceType } from '../../hooks/media-query.ts';
 import { classNames } from '../../util/react.ts';
 import { NavCafeList } from './nav-cafe-list.tsx';
 import { NavListHeaderItems } from './nav-header-buttons.tsx';
-import './nav.css';
 import { useIsAdmin } from '../../hooks/auth.js';
 import { NavClosingLink } from '../button/nav-closing-link.tsx';
+
+import './nav.css';
 
 export const Nav: React.FC = () => {
     const location = useLocation();
@@ -60,13 +61,6 @@ export const Nav: React.FC = () => {
                     <NavClosingLink to="/info" className="link-button info" title="Info Page">
                         <span className="material-symbols-outlined">
                             info
-                        </span>
-                    </NavClosingLink>
-                </li>
-                <li>
-                    <NavClosingLink to="/map" className="link-button info" title="Map Page">
-                        <span className="material-symbols-outlined">
-                            map
                         </span>
                     </NavClosingLink>
                 </li>
