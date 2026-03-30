@@ -7,7 +7,6 @@ import { NavExpansionContext } from '../../context/nav.ts';
 import { useAutocompleteSuggestions } from '../../hooks/autocomplete.ts';
 import { SearchAutocomplete } from './search-autocomplete.tsx';
 import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/models/search';
-import { BUILDINGS_BY_NAME } from '@msdining/common/constants/buildings';
 
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -70,9 +69,8 @@ export const SearchBar = () => {
 
         if (suggestion.entityType === SearchEntityType.building) {
             closeSearch();
-            const building = BUILDINGS_BY_NAME.get(suggestion.name);
-            if (building?.cafeId) {
-                navigate(`/map/overview/${building.cafeId}`);
+            if (suggestion.cafeId) {
+                navigate(`/map/overview/${suggestion.cafeId}`);
             } else {
                 navigate(`/map/building/${encodeURIComponent(suggestion.name)}`);
             }

@@ -3,8 +3,14 @@ import { type IAutocompleteMatch, matchAutocomplete } from '@msdining/common/uti
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CafeView, CafeViewType, ICafeGroup } from '../models/cafe.ts';
 import { getViewName } from './cafe.js';
-import { MICROSOFT_BUILDINGS } from '@msdining/common/constants/buildings';
-import { IBuildingOutline } from '@msdining/common/models/building';
+import type { IBuildingOutline } from '@msdining/common/models/building';
+
+const MICROSOFT_BUILDINGS_PROMISE = import('@msdining/common/constants/buildings')
+    .then(module => module.MICROSOFT_BUILDINGS)
+    .catch(err => {
+        console.error('Could not load building data for autocomplete:', err);
+        return [];
+    });
 
 const MAX_RESULTS = 5;
 
@@ -71,7 +77,7 @@ const getBestMatches = (matches: IScoredSuggestion[]): IAutocompleteSuggestion[]
     });
 
     return matches.slice(0, MAX_RESULTS).map(scored => scored.suggestion);
-}
+};
 
 export const buildNormalizedCafeViews = (
     viewsById: Map<string, CafeView>,
@@ -118,23 +124,28 @@ interface INormalizedBuilding {
     names: INormalizedName[];
 }
 
-const normalizedBuildings: INormalizedBuilding[] = MICROSOFT_BUILDINGS.map(building => {
-    const names: INormalizedName[] = [];
+const normalizedBuildings: INormalizedBuilding[] = [];
+MICROSOFT_BUILDINGS_PROMISE.then(buildings => {
+    for (const building of buildings) {
+        const names: INormalizedName[] = [];
 
-    const addName = (name: string) => {
-        const normalized = normalizeNameForSearch(name);
-        if (normalized.length > 0) {
-            names.push({ original: name, normalized });
+        const addName = (name: string) => {
+            const normalized = normalizeNameForSearch(name);
+            if (normalized.length > 0) {
+                names.push({ original: name, normalized });
+            }
+        };
+
+        addName(building.name);
+        if (building.number != null) {
+            addName(String(building.number));
         }
-    };
 
-    addName(building.name);
-    if (building.number != null) {
-        addName(String(building.number));
+        if (names.length > 0) {
+            normalizedBuildings.push({ building, names });
+        }
     }
-
-    return { building, names };
-}).filter(entry => entry.names.length > 0);
+});
 
 
 interface IAutocompleteCandidate {
@@ -147,7 +158,7 @@ const getAllAutocompleteCandidates = (normalizedViews: INormalizedCafeView[]): I
 
     for (const view of normalizedViews) {
         candidates.push({
-            names: view.names,
+            names:      view.names,
             suggestion: {
                 entityType: SearchEntityType.cafe,
                 name:       view.displayName,
@@ -160,14 +171,15 @@ const getAllAutocompleteCandidates = (normalizedViews: INormalizedCafeView[]): I
         candidates.push({
             names,
             suggestion: {
-                entityType:   SearchEntityType.building,
-                name:         building.name
+                entityType: SearchEntityType.building,
+                name:       building.name,
+                cafeId:     building.cafeId
             },
         });
     }
 
     return candidates;
-}
+};
 
 export const getLocalSuggestions = (
     query: string,
@@ -194,7 +206,7 @@ export const getLocalSuggestions = (
         if (bestMatch != null) {
             matches.push({
                 suggestion: suggestion,
-                match: bestMatch,
+                match:      bestMatch,
             });
         }
     }
