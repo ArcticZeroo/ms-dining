@@ -1,9 +1,9 @@
-import { IBuildingOutline } from '../models/building.js';
-import { BUILDING_GEO_DATA } from './buildings-geo.generated.js';
+import { IBuildingInfo } from '../models/building.js';
+import { BUILDING_INFO_DATA } from './buildings-info.generated.js';
 
 // Manual mapping of building name -> associated cafe ID (for visual styling only).
 // When adding new buildings from OSM, only this map needs updating — the geo data
-// in buildings-geo.generated.ts can be regenerated without losing these annotations.
+// in buildings-info.generated.ts can be regenerated without losing these annotations.
 const BUILDING_CAFE_ID_MAP: Record<string /*buildingDisplayName*/, string /*associatedCafeId*/> = {
     // Numbered buildings that contain (or are directly adjacent to) a cafe
     'Building 4':   'building4',
@@ -39,14 +39,13 @@ const BUILDING_CAFE_ID_MAP: Record<string /*buildingDisplayName*/, string /*asso
     'The Submixer': 'commons'
 };
 
-export const MICROSOFT_BUILDINGS: IBuildingOutline[] = BUILDING_GEO_DATA.map(geo => ({
+export const MICROSOFT_BUILDINGS: IBuildingInfo[] = BUILDING_INFO_DATA.map(geo => ({
     name:     geo.name,
     number:   geo.number,
     cafeId:   BUILDING_CAFE_ID_MAP[geo.name],
     centroid: geo.centroid,
-    polygon:  geo.polygon,
 }));
 
-export const BUILDINGS_BY_NAME = new Map<string, IBuildingOutline>(
+export const BUILDINGS_BY_NAME = new Map<string, IBuildingInfo>(
     MICROSOFT_BUILDINGS.map(b => [b.name, b])
 );

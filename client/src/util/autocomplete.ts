@@ -3,7 +3,7 @@ import { type IAutocompleteMatch, matchAutocomplete } from '@msdining/common/uti
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CafeView, CafeViewType, ICafeGroup } from '../models/cafe.ts';
 import { getViewName } from './cafe.js';
-import type { IBuildingOutline } from '@msdining/common/models/building';
+import type { IBuildingInfo } from '@msdining/common/models/building';
 
 const MICROSOFT_BUILDINGS_PROMISE = import('@msdining/common/constants/buildings')
     .then(module => module.MICROSOFT_BUILDINGS)
@@ -120,7 +120,7 @@ export const buildNormalizedCafeViews = (
 };
 
 interface INormalizedBuilding {
-    building: IBuildingOutline;
+    building: IBuildingInfo;
     names: INormalizedName[];
 }
 

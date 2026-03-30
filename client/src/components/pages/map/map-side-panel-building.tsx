@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IBuildingOutline } from '@msdining/common/models/building';
+import { IBuildingInfo } from '@msdining/common/models/building';
 import { useNearestCafes } from '../../../hooks/nearby-cafes.ts';
 import { MapSidePanelContainer } from './map-side-panel-container.tsx';
 import { NearbyCafesList } from './nearby-cafes-list.tsx';
 
 interface IMapSidePanelBuildingProps {
-    building: IBuildingOutline;
+    building: IBuildingInfo;
 }
 
 export const MapSidePanelBuilding: React.FC<IMapSidePanelBuildingProps> = ({ building }) => {

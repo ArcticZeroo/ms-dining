@@ -1,5 +1,5 @@
 // Fetches Microsoft campus building outlines from the OpenStreetMap Overpass API
-// and writes them to common/src/constants/buildings-geo.generated.ts.
+// and writes them to common/src/constants/buildings-{info,polygons}.generated.ts.
 //
 // Usage: cd server && npx tsx src/adhoc/fetch-building-outlines.ts
 
@@ -302,26 +302,49 @@ async function main() {
 
     console.log(`\nProcessed ${buildings.length} of ${allExpected.length} expected buildings`);
 
-    // Generate TypeScript output
-    const outputPath = resolve(import.meta.dirname, '../../../common/src/constants/buildings-geo.generated.ts');
+    // Generate TypeScript output — split into two files for bundle efficiency:
+    // 1. buildings-info.generated.ts: Small file with name, number, centroid (used by autocomplete, hooks)
+    // 2. buildings-polygons.generated.ts: Large file with polygon data (only needed by map outline layer)
+    const outputDir = resolve(import.meta.dirname, '../../../common/src/constants');
 
-    const lines = [
+    const infoData = buildings.map(({ name, number, centroid }) => ({ name, number, centroid }));
+    const polygonData: Record<string, number[][][]> = {};
+    for (const b of buildings) {
+        polygonData[b.name] = b.polygon;
+    }
+
+    const infoLines = [
         '// Auto-generated from OpenStreetMap Overpass API. Do not manually edit.',
         '// To regenerate, run: cd server && npx tsx src/adhoc/fetch-building-outlines.ts',
         '',
-        'interface IBuildingGeoEntry {',
+        'interface IBuildingInfoEntry {',
         '    name: string;',
         '    number?: number;',
         '    centroid: { lat: number; long: number };',
-        '    polygon: number[][][];',
         '}',
         '',
-        `export const BUILDING_GEO_DATA: IBuildingGeoEntry[] = ${JSON.stringify(buildings)};`,
+        `export const BUILDING_INFO_DATA: IBuildingInfoEntry[] = ${JSON.stringify(infoData, null, '\t')};`,
         '',
     ];
 
-    writeFileSync(outputPath, lines.join('\n'), 'utf-8');
-    console.log(`Written to ${outputPath}`);
+    const polygonLines = [
+        '// Auto-generated from OpenStreetMap Overpass API. Do not manually edit.',
+        '// To regenerate, run: cd server && npx tsx src/adhoc/fetch-building-outlines.ts',
+        '// This file contains polygon data and is large (~100KB). Only import where needed (map outline layer).',
+        '',
+        `export const BUILDING_POLYGON_DATA: Record<string, number[][][]> = ${JSON.stringify(polygonData, null, '\t')};`,
+        '',
+    ];
+
+    const infoPath = resolve(outputDir, 'buildings-info.generated.ts');
+    const polygonPath = resolve(outputDir, 'buildings-polygons.generated.ts');
+
+    writeFileSync(infoPath, infoLines.join('\n'), 'utf-8');
+    console.log(`Written info to ${infoPath}`);
+
+    writeFileSync(polygonPath, polygonLines.join('\n'), 'utf-8');
+    console.log(`Written polygons to ${polygonPath}`);
+
     console.log('Done! Remember to rebuild common (cd common && npx tsc) after regenerating.');
 }
 

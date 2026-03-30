@@ -2,11 +2,11 @@ import { BuildingOutlineLayer } from '../../map/building-outline-layer.js';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMapPageSelectedBuilding } from '../../../hooks/map.js';
-import { IBuildingOutline } from '@msdining/common/models/building';
+import { IBuildingInfo } from '@msdining/common/models/building';
 import { useMap } from 'react-leaflet';
 import { toLeafletLocation } from '../../../util/coordinates.js';
 
-const useMapFlyToBuilding = (building: IBuildingOutline | undefined) => {
+const useMapFlyToBuilding = (building: IBuildingInfo | undefined) => {
     const map = useMap();
 
     useEffect(() => {
@@ -26,11 +26,11 @@ export const MapBuildings = () => {
 
     const effectiveHighlightedBuilding = selectedBuilding?.name ?? hoveredBuildingName;
 
-    const onBuildingClick = useCallback((building: IBuildingOutline) => {
+    const onBuildingClick = useCallback((building: IBuildingInfo) => {
         navigate(`/map/building/${encodeURIComponent(building.name)}`);
     }, [navigate]);
 
-    const onBuildingHover = useCallback((building: IBuildingOutline | null) => {
+    const onBuildingHover = useCallback((building: IBuildingInfo | null) => {
         setHoveredBuildingName(building?.name ?? null);
     }, []);
 

@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { GeoJSON, useMap } from 'react-leaflet';
 import leaflet from 'leaflet';
 import { BUILDINGS_BY_NAME, MICROSOFT_BUILDINGS } from '@msdining/common/constants/buildings';
-import { IBuildingOutline } from '@msdining/common/models/building';
+import { BUILDING_POLYGON_DATA } from '@msdining/common/constants/buildings-polygons.generated';
+import { IBuildingInfo } from '@msdining/common/models/building';
 
 const BUILDING_OUTLINE_MIN_ZOOM = 15;
 
@@ -49,20 +50,26 @@ const getFeatureStyle = (feature: GeoJSON.Feature | undefined, highlightedName: 
 // Computed once at module level — the data is static
 const GEOJSON_DATA: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
-    features: MICROSOFT_BUILDINGS.map(building => ({
-        type: 'Feature' as const,
-        properties: { name: building.name, cafeId: building.cafeId },
-        geometry: {
-            type: 'Polygon' as const,
-            coordinates: building.polygon,
-        },
-    })),
+    features: MICROSOFT_BUILDINGS.flatMap(building => {
+        const polygon = BUILDING_POLYGON_DATA[building.name];
+        if (polygon == null) {
+            return [];
+        }
+        return [{
+            type: 'Feature' as const,
+            properties: { name: building.name, cafeId: building.cafeId },
+            geometry: {
+                type: 'Polygon' as const,
+                coordinates: polygon,
+            },
+        }];
+    }),
 };
 
 interface IBuildingOutlineLayerProps {
     highlightedBuildingName: string | null;
-    onBuildingClick(building: IBuildingOutline): void;
-    onBuildingHover(building: IBuildingOutline | null): void;
+    onBuildingClick(building: IBuildingInfo): void;
+    onBuildingHover(building: IBuildingInfo | null): void;
 }
 
 export const BuildingOutlineLayer: React.FC<IBuildingOutlineLayerProps> = ({ highlightedBuildingName, onBuildingClick, onBuildingHover }) => {
