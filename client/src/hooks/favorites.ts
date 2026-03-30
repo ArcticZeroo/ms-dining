@@ -26,7 +26,7 @@ export const useFavoriteSearchResults = (queries: ISearchQuery[], isEnabled: boo
         }
 
         return DiningClient.retrieveFavoriteSearchResults(queries, dateForSearch);
-    }, [queries, dateForSearch]);
+    }, [queries, isEnabled, dateForSearch]);
 
     const { stage, value, actualStage, error, run } = useDelayedPromiseState(
         retrieveFavoriteSearchResults,

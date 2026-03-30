@@ -1,10 +1,10 @@
 
 export const FavoriteItemButtonSkeleton = () => (
     <button
-        className="favorite-item-button"
+        className="favorite-item-button icon-container disabled"
         disabled={true}
     >
-        <span className="material-symbols-outlined">
+        <span className="icon-sized material-symbols-outlined">
 			favorite
         </span>
     </button>

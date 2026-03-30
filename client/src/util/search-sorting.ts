@@ -278,6 +278,7 @@ const ENTITY_TYPE_MULTIPLIERS: Record<SearchEntityType, number> = {
     [SearchEntityType.station]:      0.8,
     [SearchEntityType.cafe]:         0.6,
     [SearchEntityType.dailyStation]: 0.8,
+    [SearchEntityType.building]:     0.4,
 };
 
 const getDistanceMultiplier = (searchResult: ISearchResult, bestDistance: number) => {

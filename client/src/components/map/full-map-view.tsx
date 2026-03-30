@@ -1,12 +1,15 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
-import { useMapPageOverviewSelectedView, useMapSearchFilterViews, useMarkerLabelModes } from '../../hooks/map.ts';
+import { useNavigate } from 'react-router-dom';
+import { useMapPageOverviewSelectedView, useMapPageSelectedBuilding, useMapSearchFilterViews, useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { CafeMarker } from './popup/cafe-marker.tsx';
 import { GenericMapView } from './generic-map-view.js';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewLocation } from '../../util/view.ts';
 import { calculateCenter, toLeafletLocation } from '../../util/coordinates.ts';
+import { BuildingOutlineLayer } from './building-outline-layer.tsx';
+import { IBuildingOutline } from '@msdining/common/models/building';
 
 const viewMatchesCafeIds = (view: CafeView, cafeIds: Set<string>): boolean => {
     if (cafeIds.has(view.value.id)) {
@@ -18,6 +21,18 @@ const viewMatchesCafeIds = (view: CafeView, cafeIds: Set<string>): boolean => {
     }
 
     return false;
+};
+
+const useMapFlyToBuilding = (building: IBuildingOutline | undefined) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!building) {
+            return;
+        }
+        const target = toLeafletLocation(building.centroid);
+        map.flyTo(target, 17, { duration: 0.5 });
+    }, [building, map]);
 };
 
 const useMapFlyTo = (cafeIds?: Set<string>) => {
@@ -100,9 +115,36 @@ interface IFullMapViewProps {
     selectedCafeIds?: Set<string>;
 }
 
+// Can't do flyTo above the GenericMapView since we don't have map context yet.
+// TODO: figure out a less hacky way to do this.
+const BuildingFlyTo: React.FC<{ building: IBuildingOutline | undefined }> = ({ building }) => {
+    useMapFlyToBuilding(building);
+    return null;
+};
+
 const FullMapView: React.FC<IFullMapViewProps> = (props) => {
+    const navigate = useNavigate();
+    const selectedBuilding = useMapPageSelectedBuilding();
+    const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
+
+    const effectiveHighlightedBuilding = selectedBuilding?.name ?? hoveredBuildingName;
+
+    const onBuildingClick = useCallback((building: IBuildingOutline) => {
+        navigate(`/map/building/${encodeURIComponent(building.name)}`);
+    }, [navigate]);
+
+    const onBuildingHover = useCallback((building: IBuildingOutline | null) => {
+        setHoveredBuildingName(building?.name ?? null);
+    }, []);
+
     return (
         <GenericMapView isMapHeight={false}>
+            <BuildingFlyTo building={selectedBuilding}/>
+            <BuildingOutlineLayer
+                highlightedBuildingName={effectiveHighlightedBuilding}
+                onBuildingClick={onBuildingClick}
+                onBuildingHover={onBuildingHover}
+            />
             <FullMapMarkers {...props}/>
         </GenericMapView>
     );

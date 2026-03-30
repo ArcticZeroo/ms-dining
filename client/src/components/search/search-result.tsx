@@ -384,20 +384,32 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                     }
                     {
                         entityView && (
-                            <Link
-                                to={getViewMenuUrl({
-                                    view: entityView,
-                                    viewsById,
-                                    shouldUseGroups,
-                                })}
-                                className="search-result-link flex default-button default-container flex-center"
-                                title={`Click to view menu for "${name}"`}
-                            >
-                                <span className="material-symbols-outlined">
-                                    restaurant_menu
-                                </span>
-                                View Menu
-                            </Link>
+                            <>
+                                <Link
+                                    to={getViewMenuUrl({
+                                        view: entityView,
+                                        viewsById,
+                                        shouldUseGroups,
+                                    })}
+                                    className="search-result-link flex default-button default-container flex-center"
+                                    title={`Click to view menu for "${name}"`}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        restaurant_menu
+                                    </span>
+                                    View Menu
+                                </Link>
+                                <Link
+                                    to={`/map/overview/${cafeId}`}
+                                    className="search-result-link flex default-button default-container flex-center"
+                                    title={`Details and overview for "${name}"`}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        map
+                                    </span>
+                                    Details + Overview
+                                </Link>
+                            </>
                         )
                     }
                     {

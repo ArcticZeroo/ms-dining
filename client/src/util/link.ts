@@ -28,6 +28,7 @@ export const idPrefixByEntityType: Record<SearchEntityType, string> = {
     [SearchEntityType.station]: 'station',
     [SearchEntityType.cafe]: 'cafe',
     [SearchEntityType.dailyStation]: 'station',
+    [SearchEntityType.building]: 'building',
 };
 
 interface IScrollAnchorData {

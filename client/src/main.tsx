@@ -40,6 +40,7 @@ const startApp = () => {
                 <Route path="/map" element={<LazyMapPage/>}>
                     <Route index element={null}/>
                     <Route path="overview/:viewId" element={null}/>
+                    <Route path="building/:buildingName" element={null}/>
                 </Route>
                 <Route index={true} element={<HomePage/>}/>
                 <Route path="*" element={<NotFoundPage/>}/>

@@ -3,6 +3,8 @@ import { type IAutocompleteMatch, matchAutocomplete } from '@msdining/common/uti
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CafeView, CafeViewType, ICafeGroup } from '../models/cafe.ts';
 import { getViewName } from './cafe.js';
+import { MICROSOFT_BUILDINGS } from '@msdining/common/constants/buildings';
+import { IBuildingOutline } from '@msdining/common/models/building';
 
 const MAX_RESULTS = 5;
 
@@ -60,6 +62,17 @@ const isViewVisibleForAutocomplete = (view: CafeView, shouldUseGroups: boolean):
     return view.value.name !== view.value.group.name;
 };
 
+const getBestMatches = (matches: IScoredSuggestion[]): IAutocompleteSuggestion[] => {
+    matches.sort((a, b) => {
+        if (a.match.quality !== b.match.quality) {
+            return a.match.quality - b.match.quality;
+        }
+        return a.match.distance - b.match.distance;
+    });
+
+    return matches.slice(0, MAX_RESULTS).map(scored => scored.suggestion);
+}
+
 export const buildNormalizedCafeViews = (
     viewsById: Map<string, CafeView>,
     shouldUseGroups: boolean,
@@ -100,7 +113,63 @@ export const buildNormalizedCafeViews = (
     return result;
 };
 
-export const getLocalCafeSuggestions = (
+interface INormalizedBuilding {
+    building: IBuildingOutline;
+    names: INormalizedName[];
+}
+
+const normalizedBuildings: INormalizedBuilding[] = MICROSOFT_BUILDINGS.map(building => {
+    const names: INormalizedName[] = [];
+
+    const addName = (name: string) => {
+        const normalized = normalizeNameForSearch(name);
+        if (normalized.length > 0) {
+            names.push({ original: name, normalized });
+        }
+    };
+
+    addName(building.name);
+    if (building.number != null) {
+        addName(String(building.number));
+    }
+
+    return { building, names };
+}).filter(entry => entry.names.length > 0);
+
+
+interface IAutocompleteCandidate {
+    names: INormalizedName[];
+    suggestion: IAutocompleteSuggestion;
+}
+
+const getAllAutocompleteCandidates = (normalizedViews: INormalizedCafeView[]): IAutocompleteCandidate[] => {
+    const candidates: IAutocompleteCandidate[] = [];
+
+    for (const view of normalizedViews) {
+        candidates.push({
+            names: view.names,
+            suggestion: {
+                entityType: SearchEntityType.cafe,
+                name:       view.displayName,
+                cafeId:     view.cafeId,
+            },
+        });
+    }
+
+    for (const { building, names } of normalizedBuildings) {
+        candidates.push({
+            names,
+            suggestion: {
+                entityType:   SearchEntityType.building,
+                name:         building.name
+            },
+        });
+    }
+
+    return candidates;
+}
+
+export const getLocalSuggestions = (
     query: string,
     normalizedViews: INormalizedCafeView[],
 ): IAutocompleteSuggestion[] => {
@@ -110,11 +179,12 @@ export const getLocalCafeSuggestions = (
     }
 
     const matches: IScoredSuggestion[] = [];
+    const candidates = getAllAutocompleteCandidates(normalizedViews);
 
-    for (const view of normalizedViews) {
+    for (const { names, suggestion } of candidates) {
         let bestMatch: IAutocompleteMatch | null = null;
 
-        for (const { original, normalized } of view.names) {
+        for (const { original, normalized } of names) {
             const match = matchAutocomplete(normalized, normalizedQuery, original);
             if (match != null && (bestMatch == null || match.quality < bestMatch.quality || (match.quality === bestMatch.quality && match.distance < bestMatch.distance))) {
                 bestMatch = match;
@@ -123,22 +193,11 @@ export const getLocalCafeSuggestions = (
 
         if (bestMatch != null) {
             matches.push({
-                suggestion: {
-                    entityType: SearchEntityType.cafe,
-                    name:       view.displayName,
-                    cafeId:     view.cafeId,
-                },
+                suggestion: suggestion,
                 match: bestMatch,
             });
         }
     }
 
-    matches.sort((a, b) => {
-        if (a.match.quality !== b.match.quality) {
-            return a.match.quality - b.match.quality;
-        }
-        return a.match.distance - b.match.distance;
-    });
-
-    return matches.slice(0, MAX_RESULTS).map(scored => scored.suggestion);
+    return getBestMatches(matches);
 };

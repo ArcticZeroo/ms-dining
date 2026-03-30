@@ -95,9 +95,9 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
                 {results.length} {pluralize('result', results.length)} for "{query}"
             </span>
             <div className="map-search-results-list flex-col">
-                {results.map((result, index) => (
+                {results.map((result) => (
                     <MapSearchResultItem
-                        key={`${result.entityType}-${result.name}-${index}`}
+                        key={`${result.id}`}
                         result={result}
                         isSelected={selectedSearchResult === result}
                         onMouseEnter={() => setHighlightedCafeIds(new Set(result.locationDatesByCafeId.keys()))}

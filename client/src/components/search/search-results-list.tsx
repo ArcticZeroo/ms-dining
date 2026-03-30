@@ -132,7 +132,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
 
                 return (
                     <SearchResult
-                        key={`${searchResult.entityType}.${searchResult.name}`}
+                        key={searchResult.id}
                         isVisible={isPriceAllowed && matchesEntityFilter(filter, searchResult.entityType)}
                         name={searchResult.name}
                         description={searchResult.description}

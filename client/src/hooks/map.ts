@@ -17,6 +17,7 @@ import { getAllSingleCafesInView } from '../util/view.js';
 import { getViewName } from '../util/cafe.js';
 import { getDistanceBetweenCoordinates } from '../util/coordinates.ts';
 import { getViewLocation } from '../util/view.ts';
+import { BUILDINGS_BY_NAME } from '@msdining/common/constants/buildings';
 
 export const useMapZoom = () => {
     const map = useMap();
@@ -423,4 +424,16 @@ export const useMapPageOverviewSelectedView = () => {
         return viewsById.get(viewId);
     }, [viewId, viewsById]);
 
+}
+
+export const useMapPageSelectedBuilding = () => {
+    const { buildingName } = useParams<{ buildingName: string }>();
+
+    return useMemo(() => {
+        if (!buildingName) {
+            return undefined;
+        }
+
+        return BUILDINGS_BY_NAME.get(decodeURIComponent(buildingName));
+    }, [buildingName]);
 }

@@ -4,13 +4,15 @@ import { ApplicationContext } from '../../../context/app.ts';
 import { MapSelectedViewContext } from '../../../context/map.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
+import { useNearestCafes } from '../../../hooks/nearby-cafes.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
-import { getAllSingleCafesInView } from '../../../util/view.ts';
+import { getAllSingleCafesInView, getViewLocation } from '../../../util/view.ts';
 import { FavoriteItemButton } from '../../button/favorite/favorite-item-button.tsx';
 import { CampusMapViewDetailsMember } from '../../map/popup/campus-map-view-details-member.tsx';
 import { MapSidePanelContainer } from './map-side-panel-container.tsx';
+import { NearbyCafesList } from './nearby-cafes-list.tsx';
 
 interface IMapSidePanelOverviewProps {
     view: CafeView;
@@ -24,6 +26,19 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const cafesInView = useMemo(
         () => getAllSingleCafesInView(view, viewsById),
         [view, viewsById]
+    );
+
+    const viewLocation = useMemo(() => {
+        try {
+            return getViewLocation(view);
+        } catch {
+            return undefined;
+        }
+    }, [view]);
+
+    const nearestCafes = useNearestCafes(
+        viewLocation ?? { lat: 0, long: 0 },
+        view.value.id
     );
 
     const viewName = getViewName({ view: view, showGroupName: true, includeEmoji: true });
@@ -55,6 +70,9 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
                             />
                         ))}
                     </div>
+                    {viewLocation && (
+                        <NearbyCafesList nearestCafes={nearestCafes}/>
+                    )}
                 </div>
                 {(shouldUseGroups || view.type === CafeViewType.single) && (
                     <div className="panel-footer flex">

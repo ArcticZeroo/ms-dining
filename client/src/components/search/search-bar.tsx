@@ -7,6 +7,7 @@ import { NavExpansionContext } from '../../context/nav.ts';
 import { useAutocompleteSuggestions } from '../../hooks/autocomplete.ts';
 import { SearchAutocomplete } from './search-autocomplete.tsx';
 import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/models/search';
+import { BUILDINGS_BY_NAME } from '@msdining/common/constants/buildings';
 
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -14,7 +15,7 @@ export const SearchBar = () => {
     const searchQueryNotifier = useContext(SearchQueryContext);
     const searchQuery = useValueNotifier(searchQueryNotifier);
     const [, setIsNavExpanded] = useContext(NavExpansionContext);
-    const { suggestions, clearSuggestions } = useAutocompleteSuggestions(searchQuery);
+    const { suggestions, clearSuggestions, showSuggestions } = useAutocompleteSuggestions(searchQuery);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [isFocused, setIsFocused] = useState(false);
     
@@ -66,6 +67,18 @@ export const SearchBar = () => {
             navigate(`/map/overview/${suggestion.cafeId}`);
             return;
         }
+
+        if (suggestion.entityType === SearchEntityType.building) {
+            closeSearch();
+            const building = BUILDINGS_BY_NAME.get(suggestion.name);
+            if (building?.cafeId) {
+                navigate(`/map/overview/${building.cafeId}`);
+            } else {
+                navigate(`/map/building/${encodeURIComponent(suggestion.name)}`);
+            }
+            return;
+        }
+
         submitSearch(suggestion.name);
     };
 
@@ -92,6 +105,11 @@ export const SearchBar = () => {
 
     const showAutocomplete = isFocused && suggestions.length > 0;
 
+    const onFocus = () => {
+        setIsFocused(true);
+        showSuggestions();
+    }
+
     return (
         <li className="search-bar-container">
             <form className="search-bar" onSubmit={onFormSubmitted} style={{ position: 'relative' }}>
@@ -100,7 +118,7 @@ export const SearchBar = () => {
                     value={searchQuery}
                     onChange={onInputChanged}
                     onKeyDown={onKeyDown}
-                    onFocus={() => setIsFocused(true)}
+                    onFocus={onFocus}
                     onBlur={() => setIsFocused(false)}
                     autoComplete="off"/>
                 <button type="submit" className="search-button">

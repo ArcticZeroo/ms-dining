@@ -28,4 +28,9 @@ export const entityDisplayDataByType: Record<SearchEntityType, IEntityDisplayDat
         iconName:  'restaurant',
         displayName: 'Station',
     },
+    [SearchEntityType.building]: {
+        className: 'entity-building',
+        iconName:  'apartment',
+        displayName: 'Building',
+    },
 };

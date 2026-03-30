@@ -26,7 +26,7 @@ const groupSuggestionsByEntityType = (suggestions: IAutocompleteSuggestion[]): M
     return groupMap;
 };
 
-const AUTOCOMPLETE_GROUP_ORDER = [SearchEntityType.cafe, SearchEntityType.menuItem, SearchEntityType.station] as const;
+const AUTOCOMPLETE_GROUP_ORDER = [SearchEntityType.cafe, SearchEntityType.building, SearchEntityType.menuItem, SearchEntityType.station] as const;
 
 export const SearchAutocomplete: React.FC<ISearchAutocompleteProps> = ({ suggestions, selectedIndex, onSelect }) => {
     const listRef = useRef<HTMLDivElement>(null);

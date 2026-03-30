@@ -6,7 +6,7 @@ import { ApplicationContext } from '../context/app.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { useDebouncedValue } from './debounce.ts';
 import { useValueNotifier } from './events.ts';
-import { getLocalCafeSuggestions, buildNormalizedCafeViews } from '../util/autocomplete.ts';
+import { buildNormalizedCafeViews, getLocalSuggestions } from '../util/autocomplete.ts';
 
 const AUTOCOMPLETE_DEBOUNCE_MS = 200;
 const LOCAL_DEBOUNCE_MS = 50;
@@ -23,8 +23,8 @@ export const useAutocompleteSuggestions = (query: string) => {
         [viewsById, shouldUseGroups]
     );
 
-    const localCafeSuggestions = useMemo(
-        () => getLocalCafeSuggestions(localDebouncedQuery, normalizedCafeViews),
+    const localSuggestions = useMemo(
+        () => getLocalSuggestions(localDebouncedQuery, normalizedCafeViews),
         [localDebouncedQuery, normalizedCafeViews]
     );
 
@@ -47,13 +47,17 @@ export const useAutocompleteSuggestions = (query: string) => {
     }, [localDebouncedQuery]);
 
     const suggestions = useMemo(
-        () => isSuppressed ? [] : [...localCafeSuggestions, ...(serverSuggestions ?? [])],
-        [localCafeSuggestions, serverSuggestions, isSuppressed]
+        () => isSuppressed ? [] : [...localSuggestions, ...(serverSuggestions ?? [])],
+        [localSuggestions, serverSuggestions, isSuppressed]
     );
 
     const clearSuggestions = useCallback(() => {
         setIsSuppressed(true);
     }, []);
 
-    return { suggestions, clearSuggestions };
+    const showSuggestions = useCallback(() => {
+        setIsSuppressed(false);
+    }, []);
+
+    return { suggestions, clearSuggestions, showSuggestions };
 };

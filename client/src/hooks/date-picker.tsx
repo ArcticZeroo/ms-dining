@@ -44,3 +44,10 @@ export const useDateForSearch = () => {
     // todo: this breaks on weekends/eow?
     return undefined;
 }
+
+export const useSelectedDisplayDateString = () => {
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    return useMemo(() => {
+        return selectedDate.toLocaleDateString();
+    }, [selectedDate]);
+}
