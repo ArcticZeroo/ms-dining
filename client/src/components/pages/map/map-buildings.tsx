@@ -1,8 +1,8 @@
 import { BuildingOutlineLayer } from '../../map/building-outline-layer.js';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMapPageSelectedBuilding } from '../../../hooks/map.js';
-import { IBuildingOutline } from '@msdining/common/dist/models/building.js';
+import { IBuildingOutline } from '@msdining/common/models/building';
 import { useMap } from 'react-leaflet';
 import { toLeafletLocation } from '../../../util/coordinates.js';
 

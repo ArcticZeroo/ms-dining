@@ -1,7 +1,6 @@
 import { SearchBar } from '../search/search-bar.tsx';
 import { SiteHeader } from '../auth/site-header.tsx';
 import { NavClosingLink } from '../button/nav-closing-link.tsx';
-import React from 'react';
 
 export const NavListHeaderItems = () => {
     return (
