@@ -72,7 +72,15 @@ export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ caf
         [overviewStations, showAllStations]
     );
 
-    if (interestingStations.length === 0 && !showAllStationsIfNoneInteresting) {
+    if (overviewStations.length === 0) {
+        return <div className="flex-col">
+            <span>
+                No menu available for {dateString}.
+            </span>
+        </div>;
+    }
+
+    if (interestingStations.length === 0 && !showAllStationsIfNoneInteresting && !showAllStations) {
         return null;
     }
 
