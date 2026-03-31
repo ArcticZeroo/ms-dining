@@ -4,7 +4,7 @@ import { ICafeOverviewResponse, ICafeOverviewStation } from '@msdining/common/mo
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../../api/cache/daily-uniqueness.js';
 import { getDefaultUniquenessDataForStation } from '../../../../util/cafe.js';
-import { IRecommendationItem } from '@msdining/common/models/recommendation';
+import { IRecommendationItem, RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { getRecommendationsAsync } from '../../../../api/cache/recommendations.js';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
 import { getApplicationNameForMenuOverview } from '@msdining/common/constants/analytics';
@@ -13,6 +13,7 @@ import { supportsVersionTag, validateViewMenuAccessAsync } from '../../../../uti
 import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { jsonStringifyWithoutNull } from '../../../../util/serde.js';
 import { createSeededRandom, getUserSeededRandom, selectWithVariety } from '../../../../util/random.js';
+import { getDefaultReasonForSectionType } from '../../../../util/recommendation.js';
 
 export const registerOverviewRoutes = (router: Router) => {
 	const retrieveAllOverviewStations = async (cafes: ICafe[], dateString: string): Promise<Map<string /*cafeId**/, Array<ICafeOverviewStation>>> => {
@@ -50,12 +51,28 @@ export const registerOverviewRoutes = (router: Router) => {
 			favoriteItemNames: []
 		});
 
-		const sortedRecommendations = recommendations
-			.flatMap(section => section.items)
-			.sort((a, b) => b.score - a.score);
+		const sortedRecommendations: Array<[IRecommendationItem, RecommendationSectionType]> = [];
+		for (const recommendationSection of recommendations) {
+			for (const item of recommendationSection.items) {
+				sortedRecommendations.push([item, recommendationSection.type]);
+			}
+		}
+
+		sortedRecommendations.sort(([itemA], [itemB]) => itemB.score - itemA.score);
 
 		const random = createSeededRandom(dateString);
-		return selectWithVariety(sortedRecommendations, 10, random)
+		const selectedRecommendations = selectWithVariety(sortedRecommendations, 10, random);
+
+		const result: Array<IRecommendationItem> = [];
+		for (const [item, sectionType] of selectedRecommendations) {
+			const reason = item.reason || getDefaultReasonForSectionType(sectionType);
+			result.push({
+				...item,
+				reason
+			});
+		}
+
+		return result;
 	}
 
 	router.get('/:id/overview',

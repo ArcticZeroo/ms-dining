@@ -275,7 +275,7 @@
 
 .menu-item-tag {
     background: var(--color-menu-item-tag);
-    padding: var(--constant-padding);
+    padding: var(--constant-mini-padding);
     border-radius: var(--constant-padding);
     text-align: center;
 }

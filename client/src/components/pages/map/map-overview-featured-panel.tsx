@@ -18,7 +18,10 @@ export const MapOverviewFeaturedPanel: React.FC<IMapOverviewFeaturedPanelProps> 
             <span className="featured-panel-title">Featured Items</span>
             <div className="overview-featured-items flex horizontal-scroll">
                 {featuredItems.map(item => (
-                    <RecommendationSearchResult key={item.menuItemId} item={item}/>
+                    <RecommendationSearchResult
+                        key={item.menuItemId}
+                        item={item}
+                    />
                 ))}
             </div>
         </div>
