@@ -10,7 +10,7 @@ import { SelectedDateContext } from '../../../context/time.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { useNearestCafes } from '../../../hooks/nearby-cafes.ts';
-import { DeviceType, useDeviceType } from '../../../hooks/media-query.ts';
+import { useIsWideDesktop } from '../../../hooks/media-query.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
@@ -39,7 +39,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const navigate = useNavigate();
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const deviceType = useDeviceType();
+    const isWideDesktop = useIsWideDesktop();
 
     const viewLocation = useMemo(() => {
         try {
@@ -59,7 +59,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const { value: overviewResponse } = useViewOverview(view.value.id);
 
     const featuredItems: IRecommendationItem[] = overviewResponse?.featuredItems || [];
-    const hasFeaturedPanel = deviceType === DeviceType.Desktop && featuredItems.length > 0;
+    const showDockedPanel = isWideDesktop && featuredItems.length > 0;
 
     return (
         <MapSelectedViewContext.Provider value={view}>
@@ -85,13 +85,11 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
                             showAllStations
                         />
                     </div>
+                    {!showDockedPanel && featuredItems.length > 0 && (
+                        <MapOverviewFeaturedPanel featuredItems={featuredItems}/>
+                    )}
                     {viewLocation && (
                         <NearbyCafesList nearestCafes={nearestCafes}/>
-                    )}
-                    {deviceType === DeviceType.Mobile && featuredItems.length > 0 && (
-                        <MapOverviewFeaturedPanel
-                            featuredItems={featuredItems}
-                        />
                     )}
                 </div>
                 {(shouldUseGroups || view.type === CafeViewType.single) && (
@@ -105,10 +103,8 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
                     </div>
                 )}
             </MapSidePanelContainer>
-            {hasFeaturedPanel && (
-                <MapOverviewFeaturedPanel
-                    featuredItems={featuredItems}
-                />
+            {showDockedPanel && (
+                <MapOverviewFeaturedPanel featuredItems={featuredItems} isDocked/>
             )}
         </MapSelectedViewContext.Provider>
     );
