@@ -83,7 +83,11 @@ export class DailyCafeUpdateSession {
 				return;
 			}
 
-            await DailyMenuStorageClient.upsertDailyCafeAsync(cafe.id, this.dateString, result.isAvailable);
+            await DailyMenuStorageClient.upsertDailyCafeAsync(cafe.id, this.dateString, {
+                isAvailable:     result.isAvailable,
+                isShutDown:      result.isShutDown ?? false,
+                shutDownMessage: result.shutDownMessage,
+            });
 
             await saveDailyMenuAsync({
                 cafe,

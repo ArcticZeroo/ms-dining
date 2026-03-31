@@ -521,10 +521,10 @@ export const registerMenuRoutes = (parent: Router) => {
         sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
         memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
         async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-            const [menuStations, uniquenessData, isAvailable] = await Promise.all([
+            const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
                 retrieveDailyCafeMenuAsync(cafe.id, dateString),
                 retrieveUniquenessDataForCafe(cafe.id, dateString),
-                DailyMenuStorageClient.retrieveIsAvailableAsync(cafe.id, dateString),
+                DailyMenuStorageClient.retrieveDailyCafeStateAsync(cafe.id, dateString),
             ]);
 
             const [stations, ingredientsMenu] = await Promise.all([
@@ -532,7 +532,14 @@ export const registerMenuRoutes = (parent: Router) => {
                 resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
             ]);
 
-            const response: ICafeMenuResponse = { isAvailable, stations };
+            const response: ICafeMenuResponse = {
+                isAvailable: dailyCafeState.isAvailable,
+                stations,
+            };
+            if (dailyCafeState.isShutDown) {
+                response.isShutDown = true;
+                response.shutDownMessage = dailyCafeState.shutDownMessage;
+            }
             if (ingredientsMenu != null) {
                 response.ingredientsMenu = ingredientsMenu;
             }

@@ -771,20 +771,33 @@ export abstract class DailyMenuStorageClient {
         return hoursByCafe;
     }
 
-    public static async upsertDailyCafeAsync(cafeId: string, dateString: string, isAvailable: boolean): Promise<void> {
+    public static async upsertDailyCafeAsync(cafeId: string, dateString: string, data: {
+        isAvailable: boolean;
+        isShutDown?: boolean;
+        shutDownMessage?: string;
+    }): Promise<void> {
+        const { isAvailable, isShutDown = false, shutDownMessage } = data;
         await usePrismaClient(prismaClient => prismaClient.dailyCafe.upsert({
             where:  { dateString_cafeId: { dateString, cafeId } },
-            update: { isAvailable },
-            create: { dateString, cafeId, isAvailable },
+            update: { isAvailable, isShutDown, shutDownMessage: shutDownMessage ?? null },
+            create: { dateString, cafeId, isAvailable, isShutDown, shutDownMessage: shutDownMessage ?? null },
         }));
     }
 
-    public static async retrieveIsAvailableAsync(cafeId: string, dateString: string): Promise<boolean> {
+    public static async retrieveDailyCafeStateAsync(cafeId: string, dateString: string): Promise<{
+        isAvailable: boolean;
+        isShutDown: boolean;
+        shutDownMessage?: string;
+    }> {
         const row = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findUnique({
             where:  { dateString_cafeId: { dateString, cafeId } },
-            select: { isAvailable: true },
+            select: { isAvailable: true, isShutDown: true, shutDownMessage: true },
         }));
 
-        return row?.isAvailable ?? true;
+        return {
+            isAvailable:     row?.isAvailable ?? true,
+            isShutDown:      row?.isShutDown ?? false,
+            shutDownMessage: row?.shutDownMessage ?? undefined,
+        };
     }
 }

@@ -97,6 +97,8 @@ export type MenuResponse = Array<IStationDTO>;
 // GET /api/dining/menu/:cafeId/menu
 export interface ICafeMenuResponse {
 	isAvailable: boolean;
+	isShutDown?: boolean;
+	shutDownMessage?: string;
 	stations: IStationDTO[];
 	ingredientsMenu?: IIngredientsMenuDTO;
 }

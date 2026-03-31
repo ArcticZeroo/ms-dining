@@ -6,7 +6,7 @@ import { ICafe, ICafeConfig, IMenuItemBase } from '../models/cafe.js';
 import { Nullable } from '../models/util.js';
 import { toDateString } from '@msdining/common/util/date-util';
 
-export const getLogoUrl = (cafe: ICafe, config?: ICafeConfig) => {
+export const getLogoUrl = (cafe: ICafe, config?: Pick<ICafeConfig, 'logoName' | 'tenantId' | 'contextId'>) => {
     if (!config?.logoName) {
         return undefined;
     }

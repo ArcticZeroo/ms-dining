@@ -58,11 +58,19 @@ const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIng
 interface IStationListProps {
     stations: ICafeStation[];
     isAvailable: boolean;
+    isShutDown?: boolean;
+    shutDownMessage?: string;
     ingredientsMenu?: IIngredientsMenuDTO;
 }
 
-export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable, ingredientsMenu }) => {
+export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable, isShutDown, shutDownMessage, ingredientsMenu }) => {
     const filteredStationData = useFilteredStationData(stations, ingredientsMenu);
+
+    if (isShutDown) {
+        return (
+            <StationListEmpty message={shutDownMessage ?? 'This cafe is temporarily closed.'}/>
+        );
+    }
 
     if (stations.length === 0) {
         return (
