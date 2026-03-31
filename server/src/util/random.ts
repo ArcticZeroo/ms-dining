@@ -75,3 +75,7 @@ export const weightedRandomSample = <T>(items: readonly IWeightedItem<T>[], coun
     keyed.sort((a, b) => b.key - a.key);
     return keyed.slice(0, count).map(item => item.value);
 };
+
+export const getUserSeededRandom = (dateString: string, userId: string | null) => {
+	return createSeededRandom(`${dateString}:${userId ?? 'anon'}`);
+}

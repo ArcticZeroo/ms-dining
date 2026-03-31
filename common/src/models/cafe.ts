@@ -1,3 +1,4 @@
+import { IRecommendationItem } from './recommendation.js';
 import { Nullable } from './util.js';
 
 export const ModifierChoices = {
@@ -105,6 +106,11 @@ export interface IMenuOverviewSummary {
     newStations: number;
     newItems: number;
     rotating: number;
+}
+
+export interface ICafeOverviewResponse {
+    stations: Record<string /*cafeId**/, Array<ICafeOverviewStation>>;
+    featuredItems: IRecommendationItem[];
 }
 
 export * from './cart.js';

@@ -1,6 +1,6 @@
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
-import { ICafeOverviewStation, IMenuItemBase, IMenuItem, IMenuOverviewSummary } from '@msdining/common/models/cafe';
+import { ICafeOverviewResponse, IMenuItemBase, IMenuItem, IMenuOverviewSummary } from '@msdining/common/models/cafe';
 import {
     ICreateReviewRequest,
     ICafeMenuResponse,
@@ -111,26 +111,10 @@ export abstract class DiningClient {
         }
     }
 
-    public static async retrieveCafeMenuOverview(cafe: ICafe, dateString: string): Promise<Array<ICafeOverviewStation>> {
-        const makeRequest = async () => {
-            const response = await makeJsonRequest({
-                path: `/api/dining/menu/${cafe.id}/overview?date=${dateString}`
-            });
-
-            return response as Array<ICafeOverviewStation>;
-        };
-
-        const overviewPromise = makeRequest();
-
-        const existingMenuPromise = DiningClient._cafeMenusByIdPerDateString.get(dateString)?.get(cafe.id);
-        if (existingMenuPromise) {
-            return Promise.race([
-                overviewPromise,
-                existingMenuPromise.then(menu => menu.stations)
-            ]);
-        }
-
-        return overviewPromise;
+    public static async retrieveOverview(viewId: string, dateString: string): Promise<ICafeOverviewResponse> {
+        return makeJsonRequest({
+            path: `/api/dining/menu/${viewId}/overview?date=${dateString}`
+        });
     }
 
     public static async retrieveMenuOverviewSummary(cafeOrViewId: string, dateString: string): Promise<IMenuOverviewSummary> {

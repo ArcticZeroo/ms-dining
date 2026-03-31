@@ -1,36 +1,30 @@
 import Router from '@koa/router';
+import { IMenuItemDTO, IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
 import {
-    ICafeOverviewStation,
-    IMenuItemDTO,
-    IMenuOverviewSummary,
-    IStationUniquenessData
-} from '@msdining/common/models/cafe';
-import {
-    ICreateReviewRequest,
-    ICafeMenuResponse,
-    IUpdateReviewRequest,
-    MenuResponse,
-    REVIEW_MAX_COMMENT_LENGTH_CHARS
+	ICafeMenuResponse,
+	ICreateReviewRequest,
+	IUpdateReviewRequest,
+	MenuResponse,
+	REVIEW_MAX_COMMENT_LENGTH_CHARS
 } from '@msdining/common/models/http';
-import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBody, memoizeResponseBodyWithResetOnMenuUpdate } from '../../../middleware/cache.js';
-import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
+import { ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../util/date.js';
 import {
-    attachRouter,
-    getMaybeUserId,
-    getTrimmedQueryParam,
-    getUserIdOrThrow,
-    isAdminAsync
+	attachRouter,
+	getMaybeUserId,
+	getTrimmedQueryParam,
+	getUserIdOrThrow,
+	isAdminAsync,
+	validateCafeMenuAccessAsync
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import {
-    ANALYTICS_APPLICATION_NAMES,
-    getApplicationNameForCafeMenu,
-    getApplicationNameForMenuOverview,
-    getApplicationNameForMenuOverviewSummary,
+	ANALYTICS_APPLICATION_NAMES,
+	getApplicationNameForCafeMenu,
+	getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { StationStorageClient } from '../../../api/storage/clients/station.js';
@@ -50,7 +44,7 @@ import { logDebug } from '../../../util/log.js';
 import { retrieveReviewHeaderAsync, retrieveStationReviewHeaderAsync } from '../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../api/cache/menu-item-first-appearance.js';
 import { resolveIngredientsMenuAsync } from '../../../api/cache/ingredients-menu.js';
-import { getRecommendationsAsync } from '../../../api/cache/recommendations.js';
+import { registerOverviewRoutes } from './menu/overview.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -145,53 +139,6 @@ export const registerMenuRoutes = (parent: Router) => {
 
         return menusByStation;
     };
-
-	const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
-		const id = ctx.params.id?.toLowerCase();
-		if (!id) {
-			ctx.throw(400, 'Missing cafe id');
-		}
-		return id;
-	}
-
-    const getCafeFromRequest = async (ctx: Router.RouterContext) => {
-		const id = getCafeIdFromRequest(ctx);
-        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
-        if (!cafe) {
-            ctx.throw(404, 'Cafe not found or data is missing');
-        }
-
-        return cafe;
-    }
-
-    const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
-        const cafe = await getCafeFromRequest(ctx);
-
-        const dateString = getDateStringForMenuRequest(ctx);
-        if (dateString == null) {
-            ctx.body = JSON.stringify([]);
-            return;
-        }
-
-        return onReady(cafe, dateString);
-    };
-
-	const validateViewMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafes: ICafe[], dateString: string) => Promise<void>) => {
-		const id = getCafeIdFromRequest(ctx);
-
-		const cafes = resolveViewToCafes(id);
-		if (!cafes) {
-			ctx.throw(404, 'View not found');
-		}
-
-		const dateString = getDateStringForMenuRequest(ctx);
-		if (dateString == null) {
-			ctx.body = JSON.stringify([]);
-			return;
-		}
-
-		return onReady(cafes, dateString);
-	}
 
     const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
         const menuItemId = ctx.params.menuItemId;
@@ -540,24 +487,6 @@ export const registerMenuRoutes = (parent: Router) => {
             ctx.body = jsonStringifyWithoutNull(response);
         }));
 
-	router.get('/:id/menu/featured',
-		memoizeResponseBody({ isPublic: true }),
-		async ctx => validateViewMenuAccessAsync(ctx, async (cafes, dateString) => {
-			// Get recommendations just for this view without taking the user into account (for now)
-			const recommendations = await getRecommendationsAsync({
-				dateString,
-				cafeIdFilter: new Set<string>(cafes.map(cafe => cafe.id)),
-				userId: null,
-				homepageIds: [],
-				favoriteItemNames: []
-			});
-
-			const allItems = recommendations.flatMap(section => section.items).sort((a, b) => b.score - a.score);
-			const selectedItems = allItems.slice(0, 10);
-
-			ctx.body = jsonStringifyWithoutNull(selectedItems);
-		}));
-
     router.get('/:id',
         sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
         memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
@@ -631,22 +560,7 @@ export const registerMenuRoutes = (parent: Router) => {
             ctx.body = JSON.stringify(summary);
         });
 
-    router.get('/:id/overview',
-        sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-        memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-        async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-            const [stationHeaders, uniquenessData] = await Promise.all([
-                DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
-                retrieveUniquenessDataForCafe(cafe.id, dateString)
-            ]);
-
-            const overviewStations: ICafeOverviewStation[] = stationHeaders.map(station => ({
-                ...station,
-                uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
-            }));
-
-            ctx.body = jsonStringifyWithoutNull(overviewStations);
-        }));
+	registerOverviewRoutes(router);
 
     attachRouter(parent, router);
 };

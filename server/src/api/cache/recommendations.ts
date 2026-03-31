@@ -11,7 +11,7 @@ import { LockedExpiringMap } from '../lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
 import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
-import { createSeededRandom } from '../../util/random.js';
+import { createSeededRandom, getUserSeededRandom } from '../../util/random.js';
 import { lazy } from '../../util/lazy.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
@@ -126,10 +126,6 @@ const addToRecommendations = (existing: Map<RecommendationSectionType, Array<IRe
 	}
 }
 
-const getSeededRandom = (dateString: string, userId: string | null) => {
-	return createSeededRandom(`${dateString}:${userId ?? 'anon'}`);
-}
-
 interface IGetRecommendationsParams {
 	userId: string | null;
 	dateString: string;
@@ -149,7 +145,7 @@ export const getRecommendationsAsync = async ({
 		return [];
 	}
 
-	const random = getSeededRandom(dateString, userId);
+	const random = getUserSeededRandom(dateString, userId);
 	const cafeIds = (cafeIdFilter && cafeIdFilter.size > 0) ? Array.from(cafeIdFilter) : Array.from(CAFES_BY_ID.keys());
 	const getAllUserReviews = lazy(async () => {
 		if (!userId) {

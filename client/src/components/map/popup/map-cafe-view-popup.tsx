@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
@@ -6,25 +6,19 @@ import { useValueNotifier } from '../../../hooks/events.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
-import { getAllSingleCafesInView } from '../../../util/view.ts';
-import { CampusMapViewDetailsMember } from './campus-map-view-details-member.tsx';
+import { MapCafeViewDetails } from './map-cafe-view-details.tsx';
 import { MapSelectedViewContext } from '../../../context/map.ts';
 import { FavoriteItemButton } from '../../button/favorite/favorite-item-button.tsx';
 
-interface ICampusMapPopupProps {
+interface IMapCafeViewPopupProps {
     view: CafeView;
     showAllStations?: boolean;
     onClose(): void;
 }
 
-export const CampusMapViewDetails: React.FC<ICampusMapPopupProps> = ({ view, showAllStations = false, onClose }) => {
+export const MapCafeViewPopup: React.FC<IMapCafeViewPopupProps> = ({ view, showAllStations = false, onClose }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-
-    const cafesInView = useMemo(
-        () => getAllSingleCafesInView(view, viewsById),
-        [view, viewsById]
-    );
 
     const onPaddingClicked = () => {
         onClose();
@@ -60,17 +54,10 @@ export const CampusMapViewDetails: React.FC<ICampusMapPopupProps> = ({ view, sho
                             </span>
                         </button>
                     </div>
-                    <div className="group-member-list flex flex-wrap flex-center">
-                        {
-                            cafesInView.map(cafe => (
-                                <CampusMapViewDetailsMember
-                                    key={cafe.id}
-                                    cafe={cafe}
-                                    showAllStations={showAllStations}
-                                />
-                            ))
-                        }
-                    </div>
+                    <MapCafeViewDetails
+                        view={view}
+                        showAllStations={showAllStations}
+                    />
                     {
                         (shouldUseGroups || view.type === CafeViewType.single) && (
                             <div className="flex flex-center">

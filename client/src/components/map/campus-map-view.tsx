@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { CafeMarker } from './popup/cafe-marker.tsx';
-import { CampusMapViewDetails } from './popup/campus-map-view-details.tsx';
+import { MapCafeViewPopup } from './popup/map-cafe-view-popup.tsx';
 import { GenericMapView } from './generic-map-view.js';
 
 interface ICampusMapMarkersProps {
@@ -65,7 +65,7 @@ const CampusMapView = () => {
         <GenericMapView
             isMapHeight={true}
             popupContent={selectedView != null && (
-                <CampusMapViewDetails
+                <MapCafeViewPopup
                     view={selectedView}
                     onClose={onClose}
                 />

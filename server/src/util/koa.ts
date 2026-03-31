@@ -4,15 +4,18 @@ import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/vers
 import { IServerSearchResult } from '../models/search.js';
 import { ISearchResponseResult } from '@msdining/common/models/http';
 import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
-import { getStationLogoUrl } from './cafe.js';
+import { getStationLogoUrl, resolveViewToCafes } from './cafe.js';
 import { jsonStringifyWithoutNull } from './serde.js';
 import { getDevKey } from '../constants/env.js';
 import { UserStorageClient } from '../api/storage/clients/user.js';
 import { IServerUser } from '../models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsync } from '../api/cache/reviews.js';
+import { ICafe } from '../models/cafe.js';
+import { getDateStringForMenuRequest } from './date.js';
+import { CafeStorageClient } from '../api/storage/clients/cafe.js';
 
-export const attachRouter = (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
+export const attachRouter= (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 
 export const getTrimmedQueryParam = (ctx: Koa.Context, key: string): string | undefined => {
     const value = ctx.query[key];
@@ -233,3 +236,50 @@ export const assignCacheControl = (ctx: Koa.Context, maxAge: DurationOrMilliseco
 }
 
 export const CATCH_ALL_PATH = '(.*)';
+
+const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
+	const id = ctx.params.id?.toLowerCase();
+	if (!id) {
+		ctx.throw(400, 'Missing cafe id');
+	}
+	return id;
+}
+
+const getCafeFromRequest = async (ctx: Router.RouterContext) => {
+	const id = getCafeIdFromRequest(ctx);
+	const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+	if (!cafe) {
+		ctx.throw(404, 'Cafe not found or data is missing');
+	}
+
+	return cafe;
+}
+
+export const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
+	const cafe = await getCafeFromRequest(ctx);
+
+	const dateString = getDateStringForMenuRequest(ctx);
+	if (dateString == null) {
+		ctx.body = JSON.stringify([]);
+		return;
+	}
+
+	return onReady(cafe, dateString);
+};
+
+export const validateViewMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafes: ICafe[], dateString: string) => Promise<void>) => {
+	const id = getCafeIdFromRequest(ctx);
+
+	const cafes = resolveViewToCafes(id);
+	if (!cafes) {
+		ctx.throw(404, 'View not found');
+	}
+
+	const dateString = getDateStringForMenuRequest(ctx);
+	if (dateString == null) {
+		ctx.body = JSON.stringify([]);
+		return;
+	}
+
+	return onReady(cafes, dateString);
+}
