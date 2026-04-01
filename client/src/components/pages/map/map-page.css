@@ -22,8 +22,7 @@
     z-index: var(--z-index-above-content);
 }
 
-.has-detail-card .map-side-panel,
-.map-page:has(.map-result-detail-card) .map-side-panel {
+.has-detail-card .map-side-panel {
     border-bottom-right-radius: 0;
     bottom: var(--default-padding);
 }
@@ -265,32 +264,6 @@
     background: var(--color-foreground);
     opacity: 0.3;
     border-radius: 0.125rem;
-}
-
-.overview-featured {
-    gap: var(--constant-padding);
-}
-
-.featured-panel-title {
-    font-weight: 600;
-}
-
-.overview-featured-items .search-result {
-    min-width: 16rem;
-    align-self: stretch;
-}
-
-.map-overview-featured-card {
-    right: var(--default-padding);
-    overflow-y: hidden;
-    padding: var(--default-padding);
-}
-
-.map-overview-featured-card .search-result {
-    min-height: 0;
-    border: none;
-    box-shadow: none;
-    padding: var(--constant-padding);
 }
 
 @media (max-width: 800px) {

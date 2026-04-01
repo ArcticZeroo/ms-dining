@@ -109,8 +109,8 @@
     --color-nav-active: var(--color-theme-light);
     --color-semi-transparent-cover: rgba(0, 0, 0, 0.5);
     --color-semi-transparent-popover: color-mix(in srgb, var(--color-foreground), 75% transparent);
-    --color-button-radio-option: var(--color-theme-turquoise-dark);
-    --color-button-radio-selected: var(--color-theme-turquoise);
+    --color-button-radio-option: var(--color-theme-turquoise);
+    --color-button-radio-selected: var(--color-theme-turquoise-light);
     --color-button-radio-disabled: var(--color-theme-turquoise-disabled);
 
     --constant-padding: 0.5rem;
@@ -803,10 +803,11 @@ html, body, #root, .App {
     padding: var(--default-padding);
     background: var(--color-background-raised-2);
     border-radius: var(--default-padding);
+    justify-content: center;
 }
 
 .tab-selector .tab-option {
-    padding: var(--default-padding) 2rem var(--default-padding) 2rem;
+    padding: var(--default-padding) 1rem var(--default-padding) 1rem;
     border: none;
     border-radius: var(--default-padding);
     background: var(--color-button-radio-option);
@@ -815,6 +816,10 @@ html, body, #root, .App {
 
 .tab-selector .tab-option:hover, .tab-selector .tab-option.active {
     background: var(--color-button-radio-selected);
+}
+
+.tab-view {
+    overflow-x: hidden;
 }
 
 .height-100 {

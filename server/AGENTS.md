@@ -62,7 +62,7 @@ Always use these Koa context helpers from `util/koa.ts`:
 - User preferences stored as delimited strings, deserialized by Storage Clients
 
 ## API Design Patterns
-- **Additive-only changes** — browser JS caches may serve stale frontend code. Never break existing endpoints; add new ones or add optional fields.
+- **Additive-only changes** — browser JS caches may serve stale frontend code. Never break existing endpoints; add new ones or add optional fields. You can also use version tags to make changes client-version-aware.
 
 ## Code Style
 - Use descriptive variable names in callbacks: `snapshot => snapshot.price`, not `s => s.price`

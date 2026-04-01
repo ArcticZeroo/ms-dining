@@ -1,8 +1,7 @@
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { JSX, useCallback, useContext, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { toDateString } from '@msdining/common/util/date-util';
-import { IRecommendationItem } from '@msdining/common/models/recommendation';
 import { DiningClient } from '../../../api/client/dining.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { MapSelectedViewContext } from '../../../context/map.ts';
@@ -10,16 +9,20 @@ import { SelectedDateContext } from '../../../context/time.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
 import { useNearestCafes } from '../../../hooks/nearby-cafes.ts';
-import { useIsWideDesktop } from '../../../hooks/media-query.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { getViewLocation } from '../../../util/view.ts';
 import { FavoriteItemButton } from '../../button/favorite/favorite-item-button.tsx';
+import { RecommendationSearchResult } from '../home/recommendations/recommendation-search-result.js';
 import { MapCafeViewDetails } from '../../map/popup/map-cafe-view-details.tsx';
 import { MapSidePanelContainer } from './map-side-panel-container.tsx';
-import { MapOverviewFeaturedPanel } from './map-overview-featured-panel.tsx';
 import { NearbyCafesList } from './nearby-cafes-list.tsx';
+import { ITabOption, TabView } from '../../view/tab-view.tsx';
+
+const TAB_ID_OVERVIEW = 'overview';
+const TAB_ID_FEATURED = 'featured';
+const TAB_ID_NEARBY = 'nearby';
 
 const useViewOverview = (viewId: string) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
@@ -39,7 +42,6 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const navigate = useNavigate();
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const isWideDesktop = useIsWideDesktop();
 
     const viewLocation = useMemo(() => {
         try {
@@ -57,9 +59,51 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const viewName = getViewName({ view: view, showGroupName: true, includeEmoji: true });
 
     const { value: overviewResponse } = useViewOverview(view.value.id);
+    const featuredItems = overviewResponse?.featuredItems ?? [];
 
-    const featuredItems: IRecommendationItem[] = overviewResponse?.featuredItems || [];
-    const showDockedPanel = isWideDesktop && featuredItems.length > 0;
+    const tabOptions = useMemo(() => {
+        const tabs: ITabOption[] = [
+            { id: TAB_ID_OVERVIEW, name: 'Menu Overview' }
+        ];
+
+        if (featuredItems.length > 0) {
+            tabs.push({ id: TAB_ID_FEATURED, name: 'Featured' });
+        }
+
+        if (viewLocation && nearestCafes.length > 0) {
+            tabs.push({ id: TAB_ID_NEARBY, name: 'Nearby' });
+        }
+
+        return tabs;
+    }, [featuredItems.length, viewLocation, nearestCafes.length]);
+
+    const [selectedTabId, setSelectedTabId] = useState(TAB_ID_OVERVIEW);
+
+    // If the selected tab gets removed (e.g. data changes), fall back to overview
+    const effectiveTabId = tabOptions.some(t => t.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
+
+    const renderTab = useCallback((tabId: string): JSX.Element => {
+        switch (tabId) {
+            case TAB_ID_FEATURED:
+                return (
+                    <div className="flex-col">
+                        {featuredItems.map(item => (
+                            <RecommendationSearchResult key={item.menuItemId} item={item}/>
+                        ))}
+                    </div>
+                );
+            case TAB_ID_NEARBY:
+                return <NearbyCafesList nearestCafes={nearestCafes}/>;
+            case TAB_ID_OVERVIEW:
+            default:
+                return (
+                    <MapCafeViewDetails
+                        view={view}
+                        showAllStations
+                    />
+                );
+        }
+    }, [view, featuredItems, nearestCafes]);
 
     return (
         <MapSelectedViewContext.Provider value={view}>
@@ -79,18 +123,13 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
                     </button>
                 </div>
                 <div className="panel-content flex-col">
-                    <div className="cafe-members-list flex-col">
-                        <MapCafeViewDetails
-                            view={view}
-                            showAllStations
-                        />
-                    </div>
-                    {!showDockedPanel && featuredItems.length > 0 && (
-                        <MapOverviewFeaturedPanel featuredItems={featuredItems}/>
-                    )}
-                    {viewLocation && (
-                        <NearbyCafesList nearestCafes={nearestCafes}/>
-                    )}
+                    <TabView
+                        options={tabOptions}
+                        selectedTabId={effectiveTabId}
+                        onTabIdChanged={setSelectedTabId}
+                        renderTab={renderTab}
+                        enableSwipe
+                    />
                 </div>
                 {(shouldUseGroups || view.type === CafeViewType.single) && (
                     <div className="panel-footer flex">
@@ -103,9 +142,6 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
                     </div>
                 )}
             </MapSidePanelContainer>
-            {showDockedPanel && (
-                <MapOverviewFeaturedPanel featuredItems={featuredItems} isDocked/>
-            )}
         </MapSelectedViewContext.Provider>
     );
 };
