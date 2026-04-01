@@ -87,6 +87,8 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
 export interface IStationListResult {
     stations: Array<ICafeStation>;
     isAvailable: boolean;
+    isShutDown?: boolean;
+    shutDownMessage?: string;
 }
 
 export const retrieveStationListAsync = async (client: BuyOnDemandClient, daysInFuture: number): Promise<IStationListResult> => {

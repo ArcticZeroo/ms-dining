@@ -186,8 +186,10 @@ model DailyCafeOrderingContext {
 }
 
 model DailyCafe {
-  dateString  String
-  isAvailable Boolean @default(true)
+  dateString      String
+  isAvailable     Boolean @default(true)
+  isShutDown      Boolean @default(false)
+  shutDownMessage String?
 
   cafeId String
   cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)

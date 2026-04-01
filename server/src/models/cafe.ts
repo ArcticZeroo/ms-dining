@@ -53,6 +53,8 @@ export interface ICafeConfig {
     storeId: string;
     externalName: string;
     logoName?: Nullable<string>;
+    isShutDown: boolean;
+    shutDownMessage?: string | null;
 }
 
 export interface ICafeStation {

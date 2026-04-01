@@ -15,6 +15,12 @@ export interface ICafeConfigResponse {
         logoImage: string;
     };
     storeList: ICafeConfigStoreListItem[];
+    properties?: {
+        applicationShutOffConfig?: {
+            isShutOffEnabled: boolean;
+            instructionText?: string;
+        };
+    };
 }
 
 export interface ICafeStationCategory {

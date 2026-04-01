@@ -40,7 +40,9 @@ export class BuyOnDemandClient {
         logoName:         '',
         displayProfileId: '',
         storeId:          '',
-        externalName:     ''
+        externalName:     '',
+        isShutDown:       false,
+        shutDownMessage:  undefined,
     };
 
     private constructor(public readonly cafe: ICafe) {
@@ -148,6 +150,58 @@ export class BuyOnDemandClient {
     }
 
     async #retrieveConfigDataAsync() {
+        // Always try to fetch config from the API first so we get fresh
+        // applicationShutOffConfig state. Fall back to DB if the API fails.
+        try {
+            const response = await this.requestAsync('/config');
+
+            const json = await response.json();
+
+            if (!isDuckType<ICafeConfigResponse>(json, {
+                tenantID:  'string',
+                contextID: 'string',
+                theme:     'object',
+                storeList: 'object'
+            })) {
+                throw new Error(`JSON is missing some data!`);
+            }
+
+            const [store] = json.storeList;
+
+            if (store == null) {
+                throw new Error('Store list is empty!');
+            }
+
+            const [displayProfileId] = store.displayProfileId;
+
+            if (!displayProfileId) {
+                throw new Error('Display profile ID is missing/empty!');
+            }
+
+            const shutOffConfig = json.properties?.applicationShutOffConfig;
+
+            this.config = {
+                tenantId:        json.tenantID,
+                contextId:       json.contextID,
+                logoName:        json.theme.logoImage,
+                storeId:         store.storeInfo.storeInfoId,
+                externalName:    store.storeInfo.storeName,
+                isShutDown:      shutOffConfig?.isShutOffEnabled ?? false,
+                shutDownMessage: shutOffConfig?.isShutOffEnabled ? shutOffConfig.instructionText : undefined,
+                displayProfileId
+            };
+
+            try {
+                await CafeStorageClient.createCafeAsync(this.cafe, this.config);
+            } catch (err) {
+                logError('Unable to save cafe to database:', err);
+            }
+
+            return;
+        } catch (err) {
+            logError(`Unable to fetch config from API for ${this.cafe.id}, falling back to database:`, err);
+        }
+
         try {
             const cafeFromDatabase = await CafeStorageClient.retrieveCafeAsync(this.cafe.id);
             if (cafeFromDatabase != null
@@ -159,7 +213,9 @@ export class BuyOnDemandClient {
                     logoName:         cafeFromDatabase.logoName,
                     displayProfileId: cafeFromDatabase.displayProfileId,
                     storeId:          cafeFromDatabase.storeId,
-                    externalName:     cafeFromDatabase.externalName
+                    externalName:     cafeFromDatabase.externalName,
+                    isShutDown:       false,
+                    shutDownMessage:  undefined,
                 };
                 return;
             }
@@ -167,44 +223,6 @@ export class BuyOnDemandClient {
             logError('Unable to retrieve cafe from database:', err);
         }
 
-        const response = await this.requestAsync('/config');
-
-        const json = await response.json();
-
-        if (!isDuckType<ICafeConfigResponse>(json, {
-            tenantID:  'string',
-            contextID: 'string',
-            theme:     'object',
-            storeList: 'object'
-        })) {
-            throw new Error(`JSON is missing some data!`);
-        }
-
-        const [store] = json.storeList;
-
-        if (store == null) {
-            throw new Error('Store list is empty!');
-        }
-
-        const [displayProfileId] = store.displayProfileId;
-
-        if (!displayProfileId) {
-            throw new Error('Display profile ID is missing/empty!');
-        }
-
-        this.config = {
-            tenantId:     json.tenantID,
-            contextId:    json.contextID,
-            logoName:     json.theme.logoImage,
-            storeId:      store.storeInfo.storeInfoId,
-            externalName: store.storeInfo.storeName,
-            displayProfileId
-        };
-
-        try {
-            await CafeStorageClient.createCafeAsync(this.cafe, this.config);
-        } catch (err) {
-            logError('Unable to save cafe to database:', err);
-        }
+        throw new Error(`Unable to retrieve config for ${this.cafe.id} from API or database`);
     }
 }

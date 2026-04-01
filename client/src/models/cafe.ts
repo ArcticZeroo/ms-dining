@@ -39,6 +39,8 @@ export interface ICafeStation {
 
 export interface CafeMenu {
     isAvailable: boolean;
+    isShutDown?: boolean;
+    shutDownMessage?: string;
     stations: ICafeStation[];
     ingredientsMenu?: IIngredientsMenuDTO;
 }

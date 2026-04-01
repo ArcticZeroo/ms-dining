@@ -279,6 +279,15 @@ export class CafeMenuSession {
     }
 
     async #retrieveMenuAsync(): Promise<IStationListResult> {
+        if (this.client.config.isShutDown) {
+            return {
+                stations:        [],
+                isAvailable:     false,
+                isShutDown:      true,
+                shutDownMessage: this.client.config.shutDownMessage ?? undefined,
+            };
+        }
+
         const result = await retrieveStationListAsync(this.client, this.daysInFuture);
         await this.#populateMenuItemsForAllStationsAsync(result.stations, this.daysInFuture === 0 /*alwaysGetServerItems*/);
         return result;
