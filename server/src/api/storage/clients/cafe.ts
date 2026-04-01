@@ -1,8 +1,11 @@
 import { Cafe } from '@prisma/client';
 import { usePrismaClient } from '../client.js';
 import { ICafe, ICafeConfig } from '../../../models/cafe.js';
+import { Lock } from '../../lock/lock.js';
 
 export abstract class CafeStorageClient {
+	private static _hasInitialized = false;
+	private static _cacheLock = new Lock();
     private static readonly _cafeDataById = new Map<string, Cafe>();
     private static readonly _tagNamesById = new Map<string, string>();
 
@@ -12,14 +15,23 @@ export abstract class CafeStorageClient {
     }
 
     private static async _ensureCafesExist(): Promise<void> {
-        if (this._cafeDataById.size > 0) {
-            return;
-        }
+		if (this._hasInitialized) {
+			return;
+		}
 
-        const cafes = await usePrismaClient(prismaClient => prismaClient.cafe.findMany());
-        for (const cafe of cafes) {
-            this._cafeDataById.set(cafe.id, cafe);
-        }
+		return this._cacheLock.acquire(async () => {
+			// We initialized between the first check and acquiring the lock, so we can skip initialization.
+			if (this._hasInitialized) {
+				return;
+			}
+
+			const cafes = await usePrismaClient(prismaClient => prismaClient.cafe.findMany());
+			for (const cafe of cafes) {
+				this._cafeDataById.set(cafe.id, cafe);
+			}
+
+			this._hasInitialized = true;
+		});
     }
 
     public static async retrieveCafeAsync(id: string): Promise<Cafe | undefined> {
