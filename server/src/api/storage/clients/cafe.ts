@@ -7,11 +7,10 @@ export abstract class CafeStorageClient {
 	private static _hasInitialized = false;
 	private static _cacheLock = new Lock();
     private static readonly _cafeDataById = new Map<string, Cafe>();
-    private static readonly _tagNamesById = new Map<string, string>();
 
     public static resetCache() {
         this._cafeDataById.clear();
-        this._tagNamesById.clear();
+		this._hasInitialized = false;
     }
 
     private static async _ensureCafesExist(): Promise<void> {
