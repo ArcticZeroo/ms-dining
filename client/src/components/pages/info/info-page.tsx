@@ -49,13 +49,9 @@ export const InfoPage = () => {
                             Analytics/User Tracking
                         </div>
                         <div>
-                            Google analytics is used in this application only for tracking pageview counts.
+                            Google analytics & cloudflare analytics are used in this application only for tracking pageview counts.
                             <br/>
-                            A randomly-generated user id is also used for custom pageview tracking. Source code for the
-                            pageview
-                            tracking is available <a href="https://github.com/arcticzeroo/frozor-analytics"
-                                target="_blank">here
-                            on GitHub</a>.
+                            A randomly-generated device id is also used for server-side telemetry. It should not be possible to identify anyone from this id, and it is only used to track usage statistics such as number of unique users and user retention.
                         </div>
                     </section>
                     <section>
