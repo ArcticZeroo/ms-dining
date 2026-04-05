@@ -33,6 +33,7 @@
     "@types/koa-json": "^2.0.20",
     "@types/koa-passport": "^6.0.3",
     "@types/koa-session": "^6.4.5",
+    "applicationinsights": "^3.14.0",
     "better-sqlite3": "^11.8.1",
     "chatgpt": "^5.2.5",
     "dotenv": "^16.4.1",

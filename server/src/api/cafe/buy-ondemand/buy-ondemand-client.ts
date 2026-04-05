@@ -10,6 +10,7 @@ import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse 
 import { Semaphore } from '../../lock/lock.js';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { StringUtil } from '../../../util/string.js';
+import { TELEMETRY_CLIENT } from '../../telemetry/app-insights.js';
 import hat from 'hat';
 
 const requestSemaphore = ENVIRONMENT_SETTINGS.maxConcurrentRequests
@@ -95,9 +96,12 @@ export class BuyOnDemandClient {
 
             const url = this._getUrl(path);
 
+            const startMs = Date.now();
+            let lastRetry = 0;
             const response = await makeRequestWithRetries(
                 {
                     makeRequest: (retry) => {
+                        lastRetry = retry;
                         if (ENVIRONMENT_SETTINGS.logRequests) {
                             logDebug(`${id} ${options.method ?? 'GET'} ${url} (Attempt ${retry})`);
                             logDebug(`${id} Headers:`, optionsWithToken.headers);
@@ -109,6 +113,21 @@ export class BuyOnDemandClient {
                     shouldRetry: (response) => !isResponseServerError(response)
                 }
             );
+            const durationMs = Date.now() - startMs;
+
+            TELEMETRY_CLIENT?.trackDependency({
+                dependencyTypeName: 'BuyOnDemand',
+                name:               `${options.method ?? 'GET'} ${path}`,
+                data:               url,
+                target:             new URL(url).host,
+                duration:           durationMs,
+                resultCode:         String(response.status),
+                success:            response.ok,
+                properties: {
+                    cafeId:     this.cafe.id,
+                    retryCount: String(lastRetry),
+                },
+            });
 
             if (ENVIRONMENT_SETTINGS.logRequests) {
                 logDebug(`${id} Response ${response.status} ${response.statusText}`);

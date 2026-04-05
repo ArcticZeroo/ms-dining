@@ -18,6 +18,7 @@ import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 import { dbPriorityMiddleware } from './middleware/db-priority.js';
+import { appInsightsMiddleware } from './middleware/telemetry.js';
 
 const app = new Koa();
 
@@ -47,6 +48,7 @@ app.use(json());
 app.use(bodyParser());
 app.use(sendUniversalVisitMiddleware);
 app.use(treatZodErrorsAsBadRequest);
+app.use(appInsightsMiddleware);
 
 registerRoutes(app);
 

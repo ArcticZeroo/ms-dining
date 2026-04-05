@@ -21,6 +21,7 @@ export const WELL_KNOWN_ENVIRONMENT_VARIABLES = {
     authGoogleClientId: 'AUTH_GOOGLE_CLIENT_ID',
     authGoogleClientSecret: 'AUTH_GOOGLE_CLIENT_SECRET',
     authGoogleCallbackUrl: 'AUTH_GOOGLE_CALLBACK_URL',
+    appInsightsConnectionString: 'APPLICATIONINSIGHTS_CONNECTION_STRING',
 };
 
 export const getOpenAiKey = () => requireEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.openAi);
