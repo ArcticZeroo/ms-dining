@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { logError, logInfo } from '../../../util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { DateUtil } from '@msdining/common';
+import { runWithDbPriority } from '../../storage/db-context.js';
 
 const updateWeeklyCafeMenusAsync = async (forceUseNextWeek: boolean) => {
     logInfo('Updating weekly cafe menus...');
@@ -22,7 +23,9 @@ export const updateWeeklyCafeMenus = (forceUseNextWeek: boolean) => {
 }
 
 const scheduleWeeklyJobs = (conditions: string[], forceUseNextWeek: boolean) => {
-    const job = () => updateWeeklyCafeMenus(forceUseNextWeek);
+    const job = () => runWithDbPriority('background', () => {
+		updateWeeklyCafeMenus(forceUseNextWeek);
+	});
 
     for (const condition of conditions) {
         cron.schedule(condition, job);
