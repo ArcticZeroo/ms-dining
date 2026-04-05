@@ -173,3 +173,11 @@ export const computeNegativePenalties = async (candidateIds: string[], negativeE
 }
 
 export { type INegativePenaltyResult } from './db.js';
+
+export const sortByEmbeddingDiversity = async (candidateIds: string[], entityType: SearchEntityType, scores: number[], lambda: number, seed: string): Promise<string[]> => {
+    return SEARCH_THREAD_HANDLER.sendRequest('sortByEmbeddingDiversity', { candidateIds, entityType, scores, lambda, seed });
+}
+
+export const diverseWeightedSample = async (entityIds: string[], entityType: SearchEntityType, weights: number[], count: number, seed: string): Promise<string[]> => {
+    return SEARCH_THREAD_HANDLER.sendRequest('diverseWeightedSample', { entityIds, entityType, weights, count, seed });
+}

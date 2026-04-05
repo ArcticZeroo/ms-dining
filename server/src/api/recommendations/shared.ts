@@ -1,6 +1,4 @@
-import { IRecommendationSection } from '@msdining/common/models/recommendation';
 import { CAFES_BY_ID } from '../../constants/cafes.js';
-import { IServerReview } from '../../models/review.js';
 import { getNamespaceLogger } from '../../util/log.js';
 import { ACCOMPANIMENT_FILTER } from '../../util/menu-item-filter.js';
 import { IMenuItemCandidate } from '../../util/recommendation.js';
@@ -27,7 +25,7 @@ export interface IUserRecommendationContext {
 	userId: string;
 	dateString: string;
 	getAllMenuItems: () => Promise<Array<IMenuItemCandidate>>;
-	random: () => number;
+	seed: string;
 }
 
 export const getAllAvailableItems = async (dateString: string, cafeId?: string): Promise<IMenuItemCandidate[]> => {

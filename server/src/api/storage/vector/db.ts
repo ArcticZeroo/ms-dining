@@ -324,6 +324,166 @@ export const computeNegativePenalties = (candidateIds: string[], negativeEntitie
     });
 };
 
+const VEC_DISTANCE_COSINE_STATEMENT = createPreparedStatementFactory(
+    'SELECT vec_distance_cosine(?, ?) as distance'
+);
+
+// Uses sqlite-vec's optimized C implementation for cosine distance
+const cosineDistance = (a: Float32Array, b: Float32Array): number => {
+    const result = VEC_DISTANCE_COSINE_STATEMENT().get(a, b) as { distance: number } | undefined;
+    return result?.distance ?? 1;
+};
+
+/**
+ * Greedy MMR (Maximal Marginal Relevance) ordering with random tiebreaking.
+ * Balances relevance (score) with diversity (cosine distance from already-selected items).
+ * Items without embeddings are placed at the end in original score order.
+ */
+export const sortByEmbeddingDiversity = (
+    candidateIds: string[],
+    entityType: SearchEntityType,
+    scores: number[],
+    lambda: number,
+    random: () => number,
+): string[] => {
+    if (candidateIds.length === 0) {
+        return [];
+    }
+
+    // Normalize scores to 0-1 range for MMR
+    const maxScore = Math.max(...scores);
+    const minScore = Math.min(...scores);
+    const scoreRange = maxScore - minScore || 1;
+
+    const candidates: Array<{ id: string; embedding: Float32Array | null; normalizedScore: number }> = [];
+    for (let i = 0; i < candidateIds.length; i++) {
+        candidates.push({
+            id:              candidateIds[i]!,
+            embedding:       getSearchEntityEmbedding(entityType, candidateIds[i]!),
+            normalizedScore: (scores[i]! - minScore) / scoreRange,
+        });
+    }
+
+    const withEmbeddings = candidates.filter(c => c.embedding != null);
+    const withoutEmbeddings = candidates.filter(c => c.embedding == null);
+
+    const result: string[] = [];
+    const selectedEmbeddings: Float32Array[] = [];
+    const remaining = new Set(withEmbeddings.map((_, i) => i));
+
+    const TIEBREAK_NOISE = 0.01;
+
+    while (remaining.size > 0) {
+        let bestIndex = -1;
+        let bestMmr = -Infinity;
+
+        for (const idx of remaining) {
+            const candidate = withEmbeddings[idx]!;
+            const relevance = candidate.normalizedScore;
+
+            let maxSim = 0;
+            for (const selectedEmb of selectedEmbeddings) {
+                // cosine distance = 1 - cosine similarity
+                const sim = 1 - cosineDistance(candidate.embedding!, selectedEmb);
+                if (sim > maxSim) maxSim = sim;
+            }
+
+            const mmr = lambda * relevance - (1 - lambda) * maxSim + TIEBREAK_NOISE * random();
+
+            if (mmr > bestMmr) {
+                bestMmr = mmr;
+                bestIndex = idx;
+            }
+        }
+
+        remaining.delete(bestIndex);
+        const selected = withEmbeddings[bestIndex]!;
+        result.push(selected.id);
+        selectedEmbeddings.push(selected.embedding!);
+    }
+
+    // Append items without embeddings at the end, sorted by original score
+    withoutEmbeddings
+        .sort((a, b) => b.normalizedScore - a.normalizedScore)
+        .forEach(c => result.push(c.id));
+
+    return result;
+};
+
+/**
+ * Weighted random sampling with embedding diversity.
+ * Like weightedRandomSample but penalizes items close to already-selected items in embedding space.
+ */
+export const diverseWeightedSample = (
+    entityIds: string[],
+    entityType: SearchEntityType,
+    weights: number[],
+    count: number,
+    random: () => number,
+): string[] => {
+    if (entityIds.length <= count) {
+        return entityIds;
+    }
+
+    const candidates: Array<{ id: string; embedding: Float32Array | null; weight: number }> = [];
+    for (let i = 0; i < entityIds.length; i++) {
+        candidates.push({
+            id:        entityIds[i]!,
+            embedding: getSearchEntityEmbedding(entityType, entityIds[i]!),
+            weight:    Math.max(weights[i]!, 0.001),
+        });
+    }
+
+    const selected: string[] = [];
+    const selectedEmbeddings: Float32Array[] = [];
+    const remainingIndices = new Set(candidates.map((_, i) => i));
+
+    for (let pick = 0; pick < count && remainingIndices.size > 0; pick++) {
+        // Compute effective weights: weight * (1 + min_distance_to_selected)
+        let totalEffectiveWeight = 0;
+        const effectiveWeights: Array<{ index: number; weight: number }> = [];
+
+        for (const remainingIndex of remainingIndices) {
+            const candidate = candidates[remainingIndex]!;
+            let diversityBonus = 1;
+
+            if (candidate.embedding && selectedEmbeddings.length > 0) {
+                let minSim = 1;
+                for (const selEmb of selectedEmbeddings) {
+                    const sim = 1 - cosineDistance(candidate.embedding, selEmb);
+                    if (sim < minSim) minSim = sim;
+                }
+                // Higher distance (lower similarity) = larger bonus
+                diversityBonus = 1 + (1 - minSim);
+            }
+
+            const effectiveWeight = candidate.weight * diversityBonus;
+            effectiveWeights.push({ index: remainingIndex, weight: effectiveWeight });
+            totalEffectiveWeight += effectiveWeight;
+        }
+
+        // Weighted random selection from effective weights
+        let target = random() * totalEffectiveWeight;
+        let selectedIndex = effectiveWeights[0]!.index;
+        for (const { index, weight } of effectiveWeights) {
+            target -= weight;
+            if (target <= 0) {
+                selectedIndex = index;
+                break;
+            }
+        }
+
+        remainingIndices.delete(selectedIndex);
+        const picked = candidates[selectedIndex]!;
+        selected.push(picked.id);
+        if (picked.embedding) {
+            selectedEmbeddings.push(picked.embedding);
+        }
+    }
+
+    return selected;
+};
+
 export const searchForSimilarQueries = async (queryEmbedding: Float32Array, query: string, limit: number) => {
     // random dupes seem to appear, and I can't figure out why, so we just double the limit and slice later
     const results = SEARCH_QUERIES_STATEMENT().all(queryEmbedding, query.toLowerCase(), limit * 2);

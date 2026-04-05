@@ -1,22 +1,14 @@
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	RECOMMENDATION_SECTION_DISPLAY_NAMES,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
-import { selectWithVariety, weightedRandomSample } from '../../../../util/random.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
-import { searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
-import {
-	IRecommendationContext,
-	ITEMS_PER_SECTION, IUserRecommendationContext,
-	log,
-	POSITIVE_REVIEW_THRESHOLD,
-	VECTOR_SEARCH_LIMIT,
-} from '../../shared.js';
+import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
+import { IUserRecommendationContext, log, POSITIVE_REVIEW_THRESHOLD, VECTOR_SEARCH_LIMIT, } from '../../shared.js';
 import { IServerReview } from '../../../../models/review.js';
 
 const SOURCE_REVIEWS_COUNT = 5;
@@ -38,7 +30,7 @@ const SOURCE_REVIEWS_COUNT = 5;
 export const getBasedOnReviews = async (
     context: IUserRecommendationContext,
 	getUserReviews: () => Promise<Array<IServerReview>>,
-	random: () => number,
+	seed: string,
 ): Promise<IRecommendationSection | null> => {
     const allReviews = await getUserReviews();
     const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);
@@ -66,11 +58,18 @@ export const getBasedOnReviews = async (
         return null;
     }
 
-    const selectedReviews = weightedRandomSample(
-        positiveReviews.map(review => ({ value: review, weight: review.rating })),
+    const selectedReviewIds = await diverseWeightedSample(
+        positiveReviews.map(review => review.menuItemId!),
+        SearchEntityType.menuItem,
+        positiveReviews.map(review => review.rating),
         SOURCE_REVIEWS_COUNT,
-        random,
+        `${seed}:based-on-reviews-seeds`,
     );
+
+    const reviewById = new Map(positiveReviews.map(review => [review.menuItemId!, review]));
+    const selectedReviews = selectedReviewIds
+        .map(id => reviewById.get(id))
+        .filter((review): review is IServerReview => review != null);
 
     const candidates = new Map<string, { item: IRecommendationItem; distance: number }>();
 

@@ -1,4 +1,5 @@
 import { SearchEntityType } from '@msdining/common/models/search';
+import seedrandom from 'seedrandom';
 import { IEntityRef } from '../../models/vector.js';
 import * as db from '../storage/vector/db.js';
 import { WorkerThreadCommandHandler } from './commanding.js';
@@ -98,6 +99,30 @@ const onComputeNegativePenalties = async ({ candidateIds, negativeEntities, cand
     return db.computeNegativePenalties(candidateIds, negativeEntities, candidateEntityType);
 }
 
+interface ISortByEmbeddingDiversityRequest {
+	candidateIds: string[];
+	entityType: SearchEntityType;
+	scores: number[];
+	lambda: number;
+	seed: string;
+}
+
+const onSortByEmbeddingDiversity = async ({ candidateIds, entityType, scores, lambda, seed }: ISortByEmbeddingDiversityRequest) => {
+    return db.sortByEmbeddingDiversity(candidateIds, entityType, scores, lambda, seedrandom(seed));
+}
+
+interface IDiverseWeightedSampleRequest {
+	entityIds: string[];
+	entityType: SearchEntityType;
+	weights: number[];
+	count: number;
+	seed: string;
+}
+
+const onDiverseWeightedSample = async ({ entityIds, entityType, weights, count, seed }: IDiverseWeightedSampleRequest) => {
+    return db.diverseWeightedSample(entityIds, entityType, weights, count, seedrandom(seed));
+}
+
 const COMMANDS = {
     insertSearchEmbedding: onInsertSearchEmbedding,
     insertQueryEmbedding: onInsertQueryEmbedding,
@@ -116,6 +141,8 @@ const COMMANDS = {
     searchSimilarByEntityId: onSearchSimilarByEntityId,
     computeCentroidSearch: onComputeCentroidSearch,
     computeNegativePenalties: onComputeNegativePenalties,
+    sortByEmbeddingDiversity: onSortByEmbeddingDiversity,
+    diverseWeightedSample: onDiverseWeightedSample,
 };
 
 export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);

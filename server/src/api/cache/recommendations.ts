@@ -11,7 +11,6 @@ import { LockedExpiringMap } from '../lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
 import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
-import { createSeededRandom, getUserSeededRandom } from '../../util/random.js';
 import { lazy } from '../../util/lazy.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
@@ -93,7 +92,7 @@ const getRecommendationsForCafe = async (context: IRecommendationContext): Promi
 	});
 }
 
-const getRecommendationsForUser = async (userId: string | null, dateString: string, random: () => number, getUserReviews: () => Promise<Array<IServerReview>>): Promise<Map<RecommendationSectionType, Array<IRecommendationItem>>> => {
+const getRecommendationsForUser = async (userId: string | null, dateString: string, seed: string, getUserReviews: () => Promise<Array<IServerReview>>): Promise<Map<RecommendationSectionType, Array<IRecommendationItem>>> => {
 	if (!userId) {
 		return new Map();
 	}
@@ -101,7 +100,7 @@ const getRecommendationsForUser = async (userId: string | null, dateString: stri
 	const context: IUserRecommendationContext = {
 		userId,
 		dateString,
-		random,
+		seed,
 		getAllMenuItems: lazy(() => getAllAvailableItems(dateString)),
 	};
 
@@ -110,7 +109,7 @@ const getRecommendationsForUser = async (userId: string | null, dateString: stri
 		const recommendations = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
 
 		await Promise.all([
-			insertIfSucceeded(recommendations, getBasedOnReviews(context, getUserReviews, random)),
+			insertIfSucceeded(recommendations, getBasedOnReviews(context, getUserReviews, seed)),
 			insertIfSucceeded(recommendations, getTrySomethingDifferent(context, getUserReviews)),
 		]);
 
@@ -145,7 +144,7 @@ export const getRecommendationsAsync = async ({
 		return [];
 	}
 
-	const random = getUserSeededRandom(dateString, userId);
+	const seed = `${dateString}:${userId ?? 'anon'}`;
 	const cafeIds = (cafeIdFilter && cafeIdFilter.size > 0) ? Array.from(cafeIdFilter) : Array.from(CAFES_BY_ID.keys());
 	const getAllUserReviews = lazy(async () => {
 		if (!userId) {
@@ -173,7 +172,7 @@ export const getRecommendationsAsync = async ({
 
 			return cafeRecommendations;
 		}),
-		getRecommendationsForUser(userId, dateString, random, getAllUserReviews)
+		getRecommendationsForUser(userId, dateString, seed, getAllUserReviews)
 	]);
 
 	for (const result of recommendations) {
@@ -189,7 +188,7 @@ export const getRecommendationsAsync = async ({
 	return assembleSections({
 		claimedKeys: new Set<string>(),
 		sectionsByType,
-		random,
+		seed,
 		proximityWeights,
 	});
 };

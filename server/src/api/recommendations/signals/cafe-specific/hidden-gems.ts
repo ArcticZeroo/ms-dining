@@ -1,14 +1,13 @@
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	RECOMMENDATION_SECTION_DISPLAY_NAMES,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
-import { searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
+import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
 import {
 	HIDDEN_GEM_MAX_REVIEW_COUNT,
 	IRecommendationContext,
@@ -65,7 +64,19 @@ export const getHiddenGems = async (
     }
 
     seeds.sort((a, b) => computePopularityScore(b.header.overallRating, b.header.totalReviewCount) - computePopularityScore(a.header.overallRating, a.header.totalReviewCount));
-    const topSeeds = seeds.slice(0, TOP_RATED_SEED_COUNT);
+
+    // Select seeds using embedding-based diversity weighted by popularity
+    const seedMenuItemIds = seeds.map(s => s.item.menuItem.id);
+    const seedWeights = seeds.map(s => computePopularityScore(s.header.overallRating, s.header.totalReviewCount));
+    const selectedSeedIds = await diverseWeightedSample(
+        seedMenuItemIds,
+        SearchEntityType.menuItem,
+        seedWeights,
+        TOP_RATED_SEED_COUNT,
+        `${context.dateString}:${context.cafeId}:hidden-gems-seeds`,
+    );
+    const selectedSeedIdSet = new Set(selectedSeedIds);
+    const topSeeds = seeds.filter(s => selectedSeedIdSet.has(s.item.menuItem.id));
 
     // Build gem candidates from header results
     const seedEntityKeys = new Set(topSeeds.map(seed => getEntityKey(seed.item.menuItem)));
