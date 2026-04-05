@@ -5,7 +5,8 @@ import {
 	retrieveMenuItemEmbeddings,
 	retrieveStationEmbeddings
 } from '../../embeddings.js';
-import { IVectorSearchResult } from '../../../models/vector.js';
+import { IEntityRef, IVectorSearchResult } from '../../../models/vector.js';
+import { type INegativePenaltyResult } from './db.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
@@ -61,12 +62,11 @@ export const searchSimilarEntities = async (entityType: SearchEntityType, id: st
 }
 
 export const searchSimilarEntitiesByType = async (entityType: SearchEntityType, id: string, limit: number): Promise<Array<IVectorSearchResult>> => {
-    const embedding = await getSearchEntityEmbedding(entityType, id);
-    if (!embedding) {
-        return [];
-    }
-
-    return searchVectorRawByType(embedding, entityType, limit);
+    return SEARCH_THREAD_HANDLER.sendRequest('searchSimilarByEntityId', {
+        entityType,
+        id,
+        limit,
+    });
 }
 
 export const embedMenuItem = async (menuItem: IMenuItemBase, categoryName: string, stationName: string) => {
@@ -163,3 +163,13 @@ export const getSimilarQueries = async (query: string): Promise<Array<string>> =
         queryEmbedding: embedding
     });
 }
+
+export const computeCentroidSearch = async (entities: Array<IEntityRef>, searchEntityType: SearchEntityType, limit: number): Promise<Array<IVectorSearchResult>> => {
+    return SEARCH_THREAD_HANDLER.sendRequest('computeCentroidSearch', { entities, searchEntityType, limit });
+}
+
+export const computeNegativePenalties = async (candidateIds: string[], negativeEntities: Array<IEntityRef>, candidateEntityType: SearchEntityType): Promise<INegativePenaltyResult[]> => {
+    return SEARCH_THREAD_HANDLER.sendRequest('computeNegativePenalties', { candidateIds, negativeEntities, candidateEntityType });
+}
+
+export { type INegativePenaltyResult } from './db.js';

@@ -7,6 +7,7 @@ import {
 } from '@msdining/common/models/search';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../util/typeguard.js';
+import { IEntityRef } from '../../../models/vector.js';
 
 const createVectorDatabase = (path: string) => {
     const db = sqlite3(path);
@@ -246,6 +247,82 @@ export const getSearchEntityEmbedding = (entityType: SearchEntityType, id: strin
 
     return null;
 }
+
+export const searchSimilarByEntityId = (entityType: SearchEntityType, id: string, limit: number) => {
+    const embedding = getSearchEntityEmbedding(entityType, id);
+    if (!embedding) {
+        return [];
+    }
+    return searchVectorRawByType(embedding, entityType, limit);
+};
+
+export const computeCentroidAndSearch = (entities: Array<IEntityRef>, searchEntityType: SearchEntityType, limit: number) => {
+    const embeddings: Float32Array[] = [];
+    for (const { entityType, id } of entities) {
+        const embedding = getSearchEntityEmbedding(entityType, id);
+        if (embedding) {
+            embeddings.push(embedding);
+        }
+    }
+
+    if (embeddings.length === 0) {
+        return [];
+    }
+
+    const dim = embeddings[0]!.length;
+    const centroid = new Float32Array(dim);
+    for (const embedding of embeddings) {
+        for (let i = 0; i < dim; i++) {
+            centroid[i]! += embedding[i]!;
+        }
+    }
+    for (let i = 0; i < dim; i++) {
+        centroid[i]! /= embeddings.length;
+    }
+
+    return searchVectorRawByType(centroid, searchEntityType, limit);
+};
+
+export interface INegativePenaltyResult {
+    id: string;
+    penaltyMultiplier: number;
+}
+
+export const computeNegativePenalties = (candidateIds: string[], negativeEntities: Array<IEntityRef>, candidateEntityType: SearchEntityType): INegativePenaltyResult[] => {
+    const negativeEmbeddings: Float32Array[] = [];
+    for (const { entityType, id } of negativeEntities) {
+        const embedding = getSearchEntityEmbedding(entityType, id);
+        if (embedding) {
+            negativeEmbeddings.push(embedding);
+        }
+    }
+
+    if (negativeEmbeddings.length === 0) {
+        return candidateIds.map(id => ({ id, penaltyMultiplier: 1 }));
+    }
+
+    return candidateIds.map(id => {
+        const embedding = getSearchEntityEmbedding(candidateEntityType, id);
+        if (!embedding) {
+            return { id, penaltyMultiplier: 1 };
+        }
+
+        let penaltyMultiplier = 1;
+        for (const negativeEmbedding of negativeEmbeddings) {
+            let distance = 0;
+            for (let i = 0; i < embedding.length; i++) {
+                const d = (embedding[i] ?? 0) - (negativeEmbedding[i] ?? 0);
+                distance += d * d;
+            }
+            distance = Math.sqrt(distance);
+            if (distance < 0.5) {
+                penaltyMultiplier *= 0.5;
+            }
+        }
+
+        return { id, penaltyMultiplier };
+    });
+};
 
 export const searchForSimilarQueries = async (queryEmbedding: Float32Array, query: string, limit: number) => {
     // random dupes seem to appear, and I can't figure out why, so we just double the limit and slice later

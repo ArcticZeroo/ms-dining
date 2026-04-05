@@ -1,17 +1,14 @@
 import {
 	IRecommendationItem,
 	IRecommendationSection,
-	RECOMMENDATION_SECTION_DISPLAY_NAMES,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
-import { selectWithVariety } from '../../../../util/random.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
-import { getSearchEntityEmbedding, searchVectorRawByType, } from '../../../storage/vector/client.js';
+import { computeCentroidSearch, computeNegativePenalties } from '../../../storage/vector/client.js';
 import {
-	IRecommendationContext,
 	ITEMS_PER_SECTION, IUserRecommendationContext,
 	NEGATIVE_REVIEW_THRESHOLD,
 	VECTOR_SEARCH_LIMIT,
@@ -44,56 +41,21 @@ export const getTrySomethingDifferent = async (
         return null;
     }
 
-    const embeddingResults = await Promise.all(
-        reviews.map(async (review) => {
-            try {
-                return await getSearchEntityEmbedding(SearchEntityType.menuItem, review.menuItemId!);
-            } catch {
-                return null;
-            }
-        })
-    );
-    const embeddings = embeddingResults.filter((embedding): embedding is Float32Array => embedding != null);
+    // Compute centroid and search entirely on the worker thread — no embeddings cross the boundary
+    const reviewEntities = reviews.map(review => ({ entityType: SearchEntityType.menuItem, id: review.menuItemId! }));
+    const results = await computeCentroidSearch(reviewEntities, SearchEntityType.menuItem, VECTOR_SEARCH_LIMIT * 3);
 
-    if (embeddings.length === 0) {
+    if (results.length === 0) {
         return null;
     }
-
-    const dim = embeddings[0]!.length;
-    const centroid = new Float32Array(dim);
-    for (const embedding of embeddings) {
-        for (let i = 0; i < dim; i++) {
-			centroid[i]! += embedding[i]!;
-        }
-    }
-    for (let i = 0; i < dim; i++) {
-		centroid[i]! /= embeddings.length;
-    }
-
-    // Search broadly from the centroid, then take items with LARGEST distance
-    const results = await searchVectorRawByType(centroid, SearchEntityType.menuItem, VECTOR_SEARCH_LIMIT * 3);
 
     const reviewedItemIds = new Set(reviews.map(review => review.menuItemId!));
     const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem!)));
     const availableItems = await context.getAllMenuItems();
     const availableById = new Map(availableItems.map(item => [item.menuItem.id, item]));
 
-    // Negatively-reviewed item embeddings for penalty (parallel)
-    const negativeReviews = reviews.filter(review => review.rating <= NEGATIVE_REVIEW_THRESHOLD);
-    const negativeEmbeddingResults = await Promise.all(
-        negativeReviews.map(async (review) => {
-            try {
-                return await getSearchEntityEmbedding(SearchEntityType.menuItem, review.menuItemId!);
-            } catch {
-                return null;
-            }
-        })
-    );
-    const negativeEmbeddings = negativeEmbeddingResults.filter((embedding): embedding is Float32Array => embedding != null);
-
-    // Sort by DESCENDING distance from centroid (most different first)
-    // Apply penalty for similarity to negatively-reviewed items
-    const scored: Array<{ item: IMenuItemCandidate; score: number }> = [];
+    // Filter to available, unreviewed items
+    const candidates: Array<{ item: IMenuItemCandidate; distance: number; id: string }> = [];
     for (const result of results) {
         const item = availableById.get(result.id);
         if (!item) {
@@ -105,30 +67,27 @@ export const getTrySomethingDifferent = async (
         if (reviewedEntityKeys.has(getEntityKey(item.menuItem))) {
             continue;
         }
-
-        let score = result.distance; // Higher distance = more different = better
-
-        // Penalize items similar to negatively-reviewed items
-        if (negativeEmbeddings.length > 0) {
-            const itemEmbedding = await getSearchEntityEmbedding(SearchEntityType.menuItem, result.id);
-            if (itemEmbedding) {
-                for (const negEmb of negativeEmbeddings) {
-                    let dist = 0;
-                    for (let i = 0; i < itemEmbedding.length; i++) {
-                        const d = (itemEmbedding[i] ?? 0) - (negEmb[i] ?? 0);
-                        dist += d * d;
-                    }
-                    dist = Math.sqrt(dist);
-                    // Penalize if close to a negatively-reviewed item
-                    if (dist < 0.5) {
-                        score *= 0.5;
-                    }
-                }
-            }
-        }
-
-        scored.push({ item, score });
+        candidates.push({ item, distance: result.distance, id: result.id });
     }
+
+    // Compute negative penalties on the worker thread — all embedding lookups + distance math stay there
+    const negativeReviews = reviews.filter(review => review.rating <= NEGATIVE_REVIEW_THRESHOLD);
+    const negativeEntities = negativeReviews.map(review => ({ entityType: SearchEntityType.menuItem, id: review.menuItemId! }));
+
+    let penaltiesById = new Map<string, number>();
+    if (negativeEntities.length > 0) {
+        const penaltyResults = await computeNegativePenalties(
+            candidates.map(c => c.id),
+            negativeEntities,
+            SearchEntityType.menuItem,
+        );
+        penaltiesById = new Map(penaltyResults.map(r => [r.id, r.penaltyMultiplier]));
+    }
+
+    const scored = candidates.map(({ item, distance, id }) => ({
+        item,
+        score: distance * (penaltiesById.get(id) ?? 1),
+    }));
 
     // Only include items with decent community ratings, collect a larger pool for variety
     const qualityPoolSize = ITEMS_PER_SECTION * 3;

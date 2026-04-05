@@ -1,4 +1,5 @@
 import { SearchEntityType } from '@msdining/common/models/search';
+import { IEntityRef } from '../../models/vector.js';
 import * as db from '../storage/vector/db.js';
 import { WorkerThreadCommandHandler } from './commanding.js';
 
@@ -67,6 +68,36 @@ const onDeleteAllByEntityType = async (entityType: SearchEntityType) => {
     db.deleteAllByEntityType(entityType);
 }
 
+interface ISearchSimilarByEntityIdRequest {
+	entityType: SearchEntityType;
+	id: string;
+	limit: number;
+}
+
+const onSearchSimilarByEntityId = async ({ entityType, id, limit }: ISearchSimilarByEntityIdRequest) => {
+    return db.searchSimilarByEntityId(entityType, id, limit);
+}
+
+interface IComputeCentroidSearchRequest {
+	entities: Array<IEntityRef>;
+	searchEntityType: SearchEntityType;
+	limit: number;
+}
+
+const onComputeCentroidSearch = async ({ entities, searchEntityType, limit }: IComputeCentroidSearchRequest) => {
+    return db.computeCentroidAndSearch(entities, searchEntityType, limit);
+}
+
+interface IComputeNegativePenaltiesRequest {
+	candidateIds: string[];
+	negativeEntities: Array<IEntityRef>;
+	candidateEntityType: SearchEntityType;
+}
+
+const onComputeNegativePenalties = async ({ candidateIds, negativeEntities, candidateEntityType }: IComputeNegativePenaltiesRequest) => {
+    return db.computeNegativePenalties(candidateIds, negativeEntities, candidateEntityType);
+}
+
 const COMMANDS = {
     insertSearchEmbedding: onInsertSearchEmbedding,
     insertQueryEmbedding: onInsertQueryEmbedding,
@@ -82,6 +113,9 @@ const COMMANDS = {
     deleteSearchEmbedding: onDeleteSearchEmbedding,
     getAllEmbeddedIdsByType: onGetAllEmbeddedIdsByType,
     deleteAllByEntityType: onDeleteAllByEntityType,
+    searchSimilarByEntityId: onSearchSimilarByEntityId,
+    computeCentroidSearch: onComputeCentroidSearch,
+    computeNegativePenalties: onComputeNegativePenalties,
 };
 
 export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);
