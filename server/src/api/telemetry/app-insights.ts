@@ -20,12 +20,7 @@ const createTelemetryClient = (): appInsights.TelemetryClient | null => {
 
     client.context.tags[client.context.keys.cloudRole] = 'ms-dining-prod';
 
-    client.addTelemetryProcessor((envelope) => {
-        logger.info(`Sending: ${envelope.data?.baseType} — ${envelope.name}`);
-        return true;
-    });
-
-    logger.info('Initialized with diagnostics enabled');
+    logger.info('Initialized');
     return client;
 }
 
@@ -35,6 +30,7 @@ export const flushTelemetry = async (): Promise<void> => {
     if (!TELEMETRY_CLIENT) {
         return;
     }
+
     try {
         await TELEMETRY_CLIENT.flush();
         logger.info('Flush complete');
