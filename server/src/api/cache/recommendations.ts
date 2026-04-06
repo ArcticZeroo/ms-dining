@@ -22,7 +22,7 @@ import { assembleSections } from '../recommendations/compute.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { ensureDateIsNotWeekendForMenu, toDateString } from '@msdining/common/util/date-util';
 import { IServerReview } from '../../models/review.js';
-import { Semaphore } from '../lock/lock.js';
+import { Semaphore } from '@frozor/lock';
 
 const logger = getNamespaceLogger('recommendations');
 

@@ -1,5 +1,4 @@
-import { Lock } from './lock.js';
-import { MaybePromise } from '../../models/async.js';
+import { Lock, type MaybePromise } from '@frozor/lock';
 import { setInterval } from 'node:timers';
 import { logError } from '../../util/log.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';

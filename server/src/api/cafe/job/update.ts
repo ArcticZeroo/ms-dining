@@ -8,7 +8,7 @@ import { isCafeAvailable } from '../../../util/date.js';
 import { isCurrentlyPastMinutes, minutesToTimeString } from '@msdining/common/util/date-util';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
-import { Semaphore } from '../../lock/lock.js';
+import { Semaphore } from '@frozor/lock';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { saveDailyMenuAsync } from './storage.js';

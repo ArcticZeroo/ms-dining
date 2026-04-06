@@ -26,8 +26,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@arcticzeroo/duration": "^2.0.2",
-    "@arcticzeroo/lock": "file:../../@arcticzeroo/lock",
     "@arcticzeroo/typeguard": "^1.0.0",
+    "@frozor/lock": "^1.0.0",
     "@koa/router": "^12.0.0",
     "@prisma/client": "^6.19.2",
     "@types/hat": "^0.0.4",
