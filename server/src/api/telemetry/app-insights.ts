@@ -25,8 +25,6 @@ const createTelemetryClient = (): appInsights.TelemetryClient | null => {
         return true;
     });
 
-    client.setUseDiskRetryCaching(true);
-
     logger.info('Initialized with diagnostics enabled');
     return client;
 }
