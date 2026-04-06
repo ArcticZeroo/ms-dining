@@ -1,12 +1,8 @@
 import * as appInsights from 'applicationinsights';
-import { DiagLogLevel, diag, DiagConsoleLogger } from '@opentelemetry/api';
 import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
 import { getNamespaceLogger } from '../../util/log.js';
 
 const logger = getNamespaceLogger('AppInsights');
-
-// WARN level only — surfaces SDK export failures without noise
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.WARN);
 
 const createTelemetryClient = (): appInsights.TelemetryClient | null => {
 	const connectionString = process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.appInsightsConnectionString];
@@ -24,7 +20,7 @@ const createTelemetryClient = (): appInsights.TelemetryClient | null => {
 
     client.context.tags[client.context.keys.cloudRole] = 'ms-dining-prod';
 
-    logger.info(`Initialized (disableAppInsights=${client.config.disableAppInsights}, noDiagnosticChannel=${client.config.noDiagnosticChannel})`);
+    logger.info('Initialized');
     return client;
 }
 
