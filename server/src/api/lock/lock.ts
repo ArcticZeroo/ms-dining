@@ -1,4 +1,3 @@
-import * as SemaphoreModule from 'semaphore-async-await';
 import { MaybePromise } from '../../models/async.js';
 
 export class Lock {
@@ -48,5 +47,34 @@ export class MultiLock {
     }
 }
 
-// @ts-expect-error - this is insane
-export const Semaphore: SemaphoreModule = SemaphoreModule.default.default;
+export class Semaphore {
+	readonly #maxConcurrency: number | undefined;
+	#currentConcurrency = 0;
+	#waiters: Array<() => void> = [];
+
+	constructor(maxConcurrency?: number) {
+		if (maxConcurrency != null && maxConcurrency <= 0) {
+			throw new RangeError('maxConcurrency must be a positive integer');
+		}
+
+		this.#maxConcurrency = maxConcurrency;
+	}
+
+	async acquire<T = void>(work: () => MaybePromise<T>): Promise<T> {
+		if (this.#maxConcurrency == null) {
+			return work();
+		}
+
+		if (this.#currentConcurrency >= this.#maxConcurrency) {
+			await new Promise<void>(resolve => this.#waiters.push(resolve));
+		}
+		this.#currentConcurrency++;
+		try {
+			return await work();
+		} finally {
+			this.#currentConcurrency--;
+			const next = this.#waiters.shift();
+			next?.();
+		}
+	}
+}

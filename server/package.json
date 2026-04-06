@@ -26,6 +26,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@arcticzeroo/duration": "^2.0.2",
+    "@arcticzeroo/lock": "file:../../@arcticzeroo/lock",
     "@arcticzeroo/typeguard": "^1.0.0",
     "@koa/router": "^12.0.0",
     "@prisma/client": "^6.19.2",
@@ -55,7 +56,6 @@
     "phone": "^3.1.42",
     "rrule": "^2.8.1",
     "seedrandom": "^3.0.5",
-    "semaphore-async-await": "^1.5.1",
     "sitemap": "^7.1.1",
     "sqlite": "^5.1.1",
     "sqlite-vec": "^0.1.7-alpha.2",

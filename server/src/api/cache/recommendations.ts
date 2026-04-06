@@ -22,9 +22,11 @@ import { assembleSections } from '../recommendations/compute.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { ensureDateIsNotWeekendForMenu, toDateString } from '@msdining/common/util/date-util';
 import { IServerReview } from '../../models/review.js';
+import { Semaphore } from '../lock/lock.js';
 
 const logger = getNamespaceLogger('recommendations');
 
+const RECOMMENDATIONS_SEMAPHORE = new Semaphore(2);
 const GLOBAL_RECOMMENDATION_SECTIONS_CACHE = new Map<string /*dateString*/, LockedExpiringMap<string /*cafeId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
 const USER_RECOMMENDATION_SECTIONS_CACHE = new Map<string /*dateString*/, LockedExpiringMap<string /*userId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
 
@@ -79,7 +81,7 @@ const insertIfSucceeded = async (map: Map<RecommendationSectionType, Array<IReco
 
 const getRecommendationsForCafe = async (context: IRecommendationContext): Promise<Map<RecommendationSectionType, Array<IRecommendationItem>>> => {
 	const cacheForDateString = ensureGlobalCacheForDateString(context.dateString);
-	return cacheForDateString.getOrInsert(context.cafeId, async () => {
+	return cacheForDateString.getOrInsert(context.cafeId, () => RECOMMENDATIONS_SEMAPHORE.acquire(async () => {
 		const recommendations = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
 
 		await Promise.all([
@@ -89,7 +91,7 @@ const getRecommendationsForCafe = async (context: IRecommendationContext): Promi
 		]);
 
 		return recommendations;
-	});
+	}));
 }
 
 const getRecommendationsForUser = async (userId: string | null, dateString: string, seed: string, getUserReviews: () => Promise<Array<IServerReview>>): Promise<Map<RecommendationSectionType, Array<IRecommendationItem>>> => {
@@ -218,15 +220,6 @@ const seedCafeRecommendationsForDate = (dateString: string, cafeId: string) => {
 	getRecommendationsForCafe(context)
 		.then(() => logger.info(`Updated recommendations for cafe ${cafeId} on ${dateString}`))
 		.catch(err => logError(`Error seeding cafe recommendations for cafe ${cafeId} on ${dateString}:`, err));
-}
-
-export const seedAllCafeRecommendationsForToday = () => {
-	const todayDate = ensureDateIsNotWeekendForMenu(new Date());
-	const todayDateString = toDateString(todayDate);
-
-	for (const cafeId of CAFES_BY_ID.keys()) {
-		seedCafeRecommendationsForDate(todayDateString, cafeId);
-	}
 }
 
 CACHE_EVENTS.on('menuPublished', (event) => {

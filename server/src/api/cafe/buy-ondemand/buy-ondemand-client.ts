@@ -13,9 +13,7 @@ import { StringUtil } from '../../../util/string.js';
 import { TELEMETRY_CLIENT } from '../../telemetry/app-insights.js';
 import hat from 'hat';
 
-const requestSemaphore = ENVIRONMENT_SETTINGS.maxConcurrentRequests
-    ? new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests)
-    : null;
+const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);
 
 const getHeaders = (token: string, csrfToken: string) => token ? ({
     'Authorization': `Bearer ${token}`,
@@ -87,10 +85,8 @@ export class BuyOnDemandClient {
     }
 
     public async requestAsync(path: string, options: any = {}, shouldValidateSuccess: boolean = true) {
-        try {
+        return REQUEST_SEMAPHORE.acquire(async () => {
             const id = hat();
-
-            await requestSemaphore?.acquire();
 
             const optionsWithToken = this._getRequestOptions(options);
 
@@ -143,9 +139,7 @@ export class BuyOnDemandClient {
             }
 
             return response;
-        } finally {
-            requestSemaphore?.release();
-        }
+        });
     }
 
     async #performLoginAsync() {

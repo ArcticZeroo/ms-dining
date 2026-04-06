@@ -13,8 +13,9 @@ import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { saveDailyMenuAsync } from './storage.js';
 import { CafeMenuSession } from '../session/menu.js';
+import { IStationListResult } from '../buy-ondemand/stations.js';
 
-export const cafeSemaphore = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
+export const CAFE_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryDelayMs = 1000;
 
 export class DailyCafeUpdateSession {
@@ -41,13 +42,12 @@ export class DailyCafeUpdateSession {
         await fsp.mkdir(serverMenuItemThumbnailPath, { recursive: true });
     }
 
-    async #discoverCafeAsync(cafe: ICafe, attemptIndex: number) {
-        try {
-            await cafeSemaphore.acquire();
-
-            logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
-
-            return await CafeMenuSession.retrieveMenuAsync(cafe, this.daysInFuture);
+    async #discoverCafeAsync(cafe: ICafe, attemptIndex: number): Promise<IStationListResult> {
+		try {
+			return CAFE_SEMAPHORE.acquire(async () => {
+				logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
+				return CafeMenuSession.retrieveMenuAsync(cafe, this.daysInFuture);
+			});
         } catch (err) {
 			if (!(err instanceof PromiseCancelledException) && attemptIndex === 0) {
 				this.#firstAttemptFailureCount++;
@@ -59,8 +59,6 @@ export class DailyCafeUpdateSession {
 			}
 
             throw new Error(`Failed to discover menu for "${cafe.name}" @ ${cafe.id} (attempt ${attemptIndex}): ${err}`);
-        } finally {
-            cafeSemaphore.release();
         }
     }
 
