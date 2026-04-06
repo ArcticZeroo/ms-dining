@@ -1,6 +1,10 @@
 import Koa from 'koa';
 import { TELEMETRY_CLIENT } from '../api/telemetry/app-insights.js';
 import { getVisitorId } from './analytics.js';
+import { getNamespaceLogger } from '../util/log.js';
+
+const logger = getNamespaceLogger('AppInsights');
+let hasLoggedFirstTrack = false;
 
 export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
     if (TELEMETRY_CLIENT == null) {
@@ -27,4 +31,9 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
             route:      route,
         },
     });
+
+    if (!hasLoggedFirstTrack) {
+        hasLoggedFirstTrack = true;
+        logger.info(`First trackRequest called: ${ctx.method} ${route} (${ctx.status})`);
+    }
 };
