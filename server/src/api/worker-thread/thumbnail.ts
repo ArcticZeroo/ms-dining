@@ -67,12 +67,6 @@ const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThum
         if (thumbnailDataByMenuItemId.has(request.id)) {
             const metadata = thumbnailDataByMenuItemId.get(request.id)!;
             if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
-                if (request.lastUpdateTime == null) {
-                    logDebug(`[Thumbnail Thread] Returning existing thumbnail for menu item ${request.id} without update check due to no lastUpdateTime provided`);
-                } else {
-                    logDebug(`[Thumbnail Thread] Returning existing thumbnail for menu item ${request.id} with request lastUpdateTime ${request.lastUpdateTime.toISOString()} and metadata lastUpdateTime ${metadata.lastUpdateTime.toISOString()}`);
-                }
-
                 return metadata;
             }
         }
