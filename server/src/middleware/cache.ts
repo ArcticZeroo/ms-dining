@@ -2,6 +2,7 @@ import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import Koa from 'koa';
 import { assignCacheControl, getVersionTag } from '../util/koa.js';
 import { CACHE_EVENTS } from '../api/storage/events.js';
+import { setTelemetryProperties } from './telemetry.js';
 
 interface ICacheEntry {
     expirationTime: number;
@@ -61,7 +62,7 @@ class ExpiringCache {
     }
 }
 
-interface IMemoizeController extends Koa.Middleware {
+export interface IMemoizeController extends Koa.Middleware {
     clearCache(ctx?: Koa.Context): void;
 	getNextExpiryTime(ctx: Koa.Context): number | undefined;
 }
@@ -103,6 +104,7 @@ export const memoizeResponseBody = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_
             const remainingTimeMs = cacheEntry.expirationTime - Date.now();
             assignCacheControl(ctx, Math.floor(remainingTimeMs / 1000), isPublic);
             ctx.body = cacheEntry.value;
+            setTelemetryProperties(ctx, { cache: 'true' });
             return;
         }
 

@@ -14,6 +14,7 @@ import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsy
 import { ICafe } from '../models/cafe.js';
 import { getDateStringForMenuRequest } from './date.js';
 import { CafeStorageClient } from '../api/storage/clients/cafe.js';
+import { setTelemetryProperties } from '../middleware/telemetry.js';
 
 export const attachRouter= (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 
@@ -131,6 +132,8 @@ export const serializeSearchResults = async (ctx: Koa.Context, searchResultsById
             searchResultPromises.push(serializeSearchResult(id, searchResult, areModifiersAllowed));
         }
     }
+
+	setTelemetryProperties(ctx, { resultCount: String(searchResultPromises.length) });
 
     ctx.body = jsonStringifyWithoutNull(await Promise.all(searchResultPromises));
 };
