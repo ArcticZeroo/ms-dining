@@ -438,6 +438,7 @@ export class CafeOrderSession {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
+                    scheduleTime: { startTime: '11:00 AM', endTime: '11:15 PM' },
                     scheduledDay: 0,
                 })
             }

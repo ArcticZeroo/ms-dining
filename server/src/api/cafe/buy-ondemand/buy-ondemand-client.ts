@@ -15,6 +15,9 @@ import hat from 'hat';
 
 const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);
 
+// Per-request timeout so a hanging upstream never blocks us forever.
+const REQUEST_TIMEOUT_MS = 30_000;
+
 const getHeaders = (token: string, csrfToken: string) => token ? ({
     'Authorization': `Bearer ${token}`,
     'User-Agent':    'PostmanRuntime/7.36.0',
@@ -103,7 +106,10 @@ export class BuyOnDemandClient {
                             logDebug(`${id} Headers:`, optionsWithToken.headers);
                             logDebug(`${id} Body:`, optionsWithToken.body);
                         }
-                        return fetch(url, optionsWithToken);
+                        return fetch(url, {
+                            ...optionsWithToken,
+                            signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+                        });
                     },
                     retryCount:  ENVIRONMENT_SETTINGS.requestRetryCount,
                     shouldRetry: (response) => !isResponseServerError(response)
