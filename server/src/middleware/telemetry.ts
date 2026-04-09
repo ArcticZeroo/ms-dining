@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import { TELEMETRY_CLIENT } from '../api/telemetry/app-insights.js';
 import { getVisitorId } from './analytics.js';
+import { CATCH_ALL_PATH } from '../util/koa.js';
 
 const TELEMETRY_PROPERTIES_KEY = 'telemetryProperties';
 
@@ -31,7 +32,8 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
     } finally {
         const durationMs = Date.now() - startMs;
         const routePattern = (ctx as { _matchedRoute?: string })._matchedRoute as string | undefined;
-        const route = routePattern ?? ctx.path;
+        const routeMatched = routePattern != null;
+        const route = routePattern === CATCH_ALL_PATH ? '/' : (routePattern ?? ctx.path);
         const customProperties = ctx.state[TELEMETRY_PROPERTIES_KEY] as Record<string, string> | undefined;
         const resultCode = error ? String((error as { status?: number }).status || 500) : String(ctx.status);
 
@@ -42,9 +44,10 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
             resultCode,
             success:    Number(resultCode) < 400,
             properties: {
-                visitorId:  getVisitorId(ctx) || 'anonymous',
-                method:     ctx.method,
-                route:      route,
+                visitorId:    getVisitorId(ctx) || 'anonymous',
+                method:       ctx.method,
+                route:        route,
+                routeMatched: String(routeMatched),
                 ...customProperties,
             },
         });

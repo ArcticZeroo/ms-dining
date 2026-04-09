@@ -11,6 +11,16 @@ The project is made up of three packages:
 
 Always make a checklist with your plan before making changes.
 
+## Mandatory Plan Review
+
+**Every implementation plan must be reviewed by the `plan-critic` agent before any code is written.** This includes:
+- New plans for features, refactors, or bug fixes
+- Non-trivial updates to existing plans (e.g. changing architecture, adding/removing steps, altering data models, reworking the approach)
+
+Trivial plan edits like fixing a typo or renaming a todo do not require re-review.
+
+To run the review, invoke the plan-critic agent (via `/agent`, referencing it in a prompt, or `--agent=plan-critic`) and provide it with the plan. Address or explicitly acknowledge every issue it raises before proceeding to implementation. Do not skip this step.
+
 If you find important learnings during development, consider documenting them in this file for future reference.
 
 ## General Guidance
