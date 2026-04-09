@@ -48,6 +48,8 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
                 method:       ctx.method,
                 route:        route,
                 routeMatched: String(routeMatched),
+                // v3 SDK bug: resultCode is always 0 in Kusto, so duplicate here
+                statusCode:   resultCode,
                 ...customProperties,
             },
         });

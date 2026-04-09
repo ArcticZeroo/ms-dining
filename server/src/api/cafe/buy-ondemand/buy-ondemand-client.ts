@@ -128,6 +128,8 @@ export class BuyOnDemandClient {
                 properties: {
                     cafeId:     this.cafe.id,
                     retryCount: String(lastRetry),
+                    // v3 SDK bug: resultCode is always 0 in Kusto, so duplicate here
+                    statusCode: String(response.status),
                 },
             });
 
