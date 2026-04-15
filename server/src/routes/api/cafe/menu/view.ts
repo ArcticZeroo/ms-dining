@@ -24,6 +24,7 @@ import { resolveIngredientsMenuAsync } from '../../../../api/cache/ingredients-m
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { setTelemetryProperties } from '../../../../middleware/telemetry.js';
 import { registerOverviewRoutes } from './overview.js';
+import { getShutDownCafeStateAsync } from '../../../../api/cache/daily-cafe-state.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
     if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -182,24 +183,34 @@ export const registerViewRoutes = (parent: Router) => {
 
             const dateString = getDateStringForMenuRequest(ctx);
             if (dateString == null) {
-                ctx.body = JSON.stringify({ total: 0, traveling: 0, newStations: 0, newItems: 0, rotating: 0 });
+                ctx.body = JSON.stringify({ total: 0, traveling: 0, newStations: 0, newItems: 0, rotating: 0, shutDownState: {} });
                 return;
             }
 
-            const allOverviewStations = await Promise.all(
-                cafes.map(async (cafe) => {
-                    const [stationHeaders, uniquenessData] = await Promise.all([
-                        DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
-                        retrieveUniquenessDataForCafe(cafe.id, dateString)
-                    ]);
+            const [allOverviewStations, shutDownCafeState] = await Promise.all([
+                Promise.all(
+                    cafes.map(async (cafe) => {
+                        const [stationHeaders, uniquenessData] = await Promise.all([
+                            DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
+                            retrieveUniquenessDataForCafe(cafe.id, dateString)
+                        ]);
 
-                    return stationHeaders.map(station => ({
-                        uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
-                    }));
-                })
-            );
+                        return stationHeaders.map(station => ({
+                            uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+                        }));
+                    })
+                ),
+                getShutDownCafeStateAsync(dateString)
+            ]);
 
             const stations = allOverviewStations.flat();
+
+            const shutDownState: IMenuOverviewSummary['shutDownState'] = {};
+            for (const cafe of cafes) {
+                if (shutDownCafeState.has(cafe.id)) {
+                    shutDownState[cafe.id] = { message: shutDownCafeState.get(cafe.id) };
+                }
+            }
 
             const summary: IMenuOverviewSummary = {
                 total:       stations.length,
@@ -207,6 +218,7 @@ export const registerViewRoutes = (parent: Router) => {
                 newStations: 0,
                 newItems:    0,
                 rotating:    0,
+                shutDownState
             };
 
             for (const { uniqueness } of stations) {

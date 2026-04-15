@@ -28,18 +28,25 @@ export const CafeMarkerTooltipContent: React.FC<ICafeMarkerTooltipContentProps> 
     const { value: summary, stage } = useImmediatePromiseState(fetchOverviewSummary);
 
     const highlights: string[] = [];
+    const shutDownEntries = Object.values(summary?.shutDownState ?? {});
     if (summary) {
-        if (summary.traveling > 0) {
-            highlights.push(`🛫 ${summary.traveling} traveling ${pluralize('station', summary.traveling)}`);
-        }
-        if (summary.newStations > 0) {
-            highlights.push(`✨ ${summary.newStations} new ${pluralize('station', summary.newStations)}`);
-        }
-        if (summary.newItems > 0) {
-            highlights.push(`✨ ${summary.newItems} ${pluralize('station', summary.newItems)} with new items`);
-        }
-        if (summary.rotating > 0) {
-            highlights.push(`🔄 ${summary.rotating} rotating ${pluralize('station', summary.rotating)}`);
+        if (shutDownEntries.length > 0) {
+            for (const { message } of shutDownEntries) {
+                highlights.push(message ? `⚠️ Closed: ${message}` : '⚠️ Closed');
+            }
+        } else {
+            if (summary.traveling > 0) {
+                highlights.push(`🛫 ${summary.traveling} traveling ${pluralize('station', summary.traveling)}`);
+            }
+            if (summary.newStations > 0) {
+                highlights.push(`✨ ${summary.newStations} new ${pluralize('station', summary.newStations)}`);
+            }
+            if (summary.newItems > 0) {
+                highlights.push(`✨ ${summary.newItems} ${pluralize('station', summary.newItems)} with new items`);
+            }
+            if (summary.rotating > 0) {
+                highlights.push(`🔄 ${summary.rotating} rotating ${pluralize('station', summary.rotating)}`);
+            }
         }
     }
 
@@ -48,7 +55,9 @@ export const CafeMarkerTooltipContent: React.FC<ICafeMarkerTooltipContentProps> 
             <strong>{getViewEmoji(view)} {view.value.name}</strong>
             {summary && (
                 <div className="tooltip-details">
-                    <span>{summary.total} {pluralize('station', summary.total)} today</span>
+                    {shutDownEntries.length === 0 && (
+                        <span>{summary.total} {pluralize('station', summary.total)} today</span>
+                    )}
                     {highlights.map((text, index) => (
                         <span key={index}>{text}</span>
                     ))}

@@ -5,15 +5,20 @@ import { ExpiringCacheMap } from './expiring-cache.js';
 
 const SHUT_DOWN_CACHE_TIME = new Duration({ minutes: 5 });
 
-const SHUT_DOWN_CAFE_IDS_CACHE = new ExpiringCacheMap<string /*dateString*/, Set<string>>(
+const SHUT_DOWN_CAFE_STATE_CACHE = new ExpiringCacheMap<string /*dateString*/, Map<string /*cafeId*/, string | null /*shutDownMessage*/>>(
     SHUT_DOWN_CACHE_TIME,
-    (dateString) => DailyMenuStorageClient.getShutDownCafeIdsAsync(dateString)
+    (dateString) => DailyMenuStorageClient.getShutDownCafesAsync(dateString)
 );
 
 STORAGE_EVENTS.on('menuPublished', (event) => {
-    SHUT_DOWN_CAFE_IDS_CACHE.delete(event.dateString);
+    SHUT_DOWN_CAFE_STATE_CACHE.delete(event.dateString);
 });
 
-export const getShutDownCafeIdsAsync = (dateString: string): Promise<Set<string>> => {
-    return SHUT_DOWN_CAFE_IDS_CACHE.get(dateString);
+export const getShutDownCafeStateAsync = (dateString: string): Promise<Map<string, string | null>> => {
+    return SHUT_DOWN_CAFE_STATE_CACHE.get(dateString);
+};
+
+export const getShutDownCafeIdsAsync = async (dateString: string): Promise<Set<string>> => {
+    const state = await getShutDownCafeStateAsync(dateString);
+    return new Set(state.keys());
 };

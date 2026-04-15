@@ -1,5 +1,5 @@
 import { CafeViewType, ICafe } from '../../../../models/cafe.js';
-import { ICafeOverviewStation } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, ICafeShutDownState } from '@msdining/common/models/cafe';
 import React, { useContext, useMemo } from 'react';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getCafeName } from '../../../../util/cafe.js';
@@ -15,10 +15,11 @@ import { MapSelectedViewContext } from '../../../../context/map.js';
 interface IViewOverviewCafeProps {
     cafe: ICafe;
     overviewStations: Array<ICafeOverviewStation> | undefined;
+    shutDownState?: ICafeShutDownState;
     showAllStations: boolean;
 }
 
-export const OverviewMemberDetails: React.FC<IViewOverviewCafeProps> = ({ cafe, overviewStations, showAllStations }) => {
+export const OverviewMemberDetails: React.FC<IViewOverviewCafeProps> = ({ cafe, overviewStations, shutDownState, showAllStations }) => {
     const outerView = useContext(MapSelectedViewContext);
     const { viewsById } = useContext(ApplicationContext);
     const view = viewsById.get(cafe.id);
@@ -70,6 +71,7 @@ export const OverviewMemberDetails: React.FC<IViewOverviewCafeProps> = ({ cafe, 
             <CafeOverview
                 cafe={cafe}
                 stations={overviewStations}
+                shutDownState={shutDownState}
                 showAllStations={showAllStations}
             />
         </div>

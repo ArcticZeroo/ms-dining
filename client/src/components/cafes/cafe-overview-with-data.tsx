@@ -1,4 +1,4 @@
-import { ICafeOverviewStation } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, ICafeShutDownState } from '@msdining/common/models/cafe';
 import React, { useMemo } from 'react';
 import { sortStationUniquenessInPlace } from '../../util/sorting.js';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
@@ -19,11 +19,12 @@ const isInterestingStation = (station: ICafeOverviewStation): boolean => {
 interface ICafeOverviewWithDataProps {
     cafe: ICafe;
     overviewStations: ICafeOverviewStation[];
+    shutDownState?: ICafeShutDownState;
     showAllStationsIfNoneInteresting?: boolean;
     showAllStations?: boolean;
 }
 
-export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ cafe, overviewStations, showAllStationsIfNoneInteresting = false, showAllStations = false }) => {
+export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ cafe, overviewStations, shutDownState, showAllStationsIfNoneInteresting = false, showAllStations = false }) => {
     const dateString = useSelectedDisplayDateString();
 
     const interestingStations = useMemo(
@@ -71,6 +72,15 @@ export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ caf
         },
         [overviewStations, showAllStations]
     );
+
+    if (shutDownState) {
+        return (
+            <div className="flex-col">
+                <span>⚠️ This location is temporarily closed.</span>
+                {shutDownState.message && <span className="subtitle">{shutDownState.message}</span>}
+            </div>
+        );
+    }
 
     if (overviewStations.length === 0) {
         return <div className="flex-col">

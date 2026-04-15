@@ -787,12 +787,12 @@ export abstract class DailyMenuStorageClient {
         }));
     }
 
-    public static async getShutDownCafeIdsAsync(dateString: string): Promise<Set<string>> {
+    public static async getShutDownCafesAsync(dateString: string): Promise<Map<string, string | null /*shutdownMessage*/>> {
         const rows = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findMany({
             where:  { dateString, isShutDown: true },
-            select: { cafeId: true },
+            select: { cafeId: true, shutDownMessage: true },
         }));
-        return new Set(rows.map(row => row.cafeId));
+        return new Map(rows.map(row => [row.cafeId, row.shutDownMessage]));
     }
 
     public static async retrieveDailyCafeStateAsync(cafeId: string, dateString: string): Promise<{

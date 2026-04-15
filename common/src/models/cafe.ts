@@ -100,17 +100,23 @@ export interface ICafeOverviewStation {
     uniqueness: IStationUniquenessData;
 }
 
+export interface ICafeShutDownState {
+    message?: string | null;
+}
+
 export interface IMenuOverviewSummary {
     total: number;
     traveling: number;
     newStations: number;
     newItems: number;
     rotating: number;
+    shutDownState: Record<string /*cafeId*/, ICafeShutDownState>;
 }
 
 export interface ICafeOverviewResponse {
     stations: Record<string /*cafeId**/, Array<ICafeOverviewStation>>;
     featuredItems: IRecommendationItem[];
+    shutDownState: Record<string /*cafeId*/, ICafeShutDownState>;
 }
 
 export * from './cart.js';
