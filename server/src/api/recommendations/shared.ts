@@ -3,6 +3,7 @@ import { getNamespaceLogger } from '../../util/log.js';
 import { ACCOMPANIMENT_FILTER } from '../../util/menu-item-filter.js';
 import { IMenuItemCandidate } from '../../util/recommendation.js';
 import { retrieveDailyCafeMenuAsync } from '../cache/daily-menu.js';
+import { getShutDownCafeIdsAsync } from '../cache/daily-cafe-state.js';
 
 export const log = getNamespaceLogger('recommendations');
 
@@ -28,9 +29,15 @@ export interface IUserRecommendationContext {
 	seed: string;
 }
 
+const getCafeIds = async (dateString: string, cafeId?: string): Promise<string[]> => {
+	const shutDownCafeIds = await getShutDownCafeIdsAsync(dateString);
+	const cafeIds = cafeId ? [cafeId] : Array.from(CAFES_BY_ID.keys());
+	return cafeIds.filter(cafeId => !shutDownCafeIds.has(cafeId));
+}
+
 export const getAllAvailableItems = async (dateString: string, cafeId?: string): Promise<IMenuItemCandidate[]> => {
     const items: IMenuItemCandidate[] = [];
-	const cafeIds = cafeId ? [cafeId] : Array.from(CAFES_BY_ID.keys());
+	const cafeIds = await getCafeIds(dateString, cafeId);
 
 	await Promise.all(cafeIds.map(async (cafeId) => {
 		const cafe = CAFES_BY_ID.get(cafeId);

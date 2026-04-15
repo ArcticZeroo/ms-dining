@@ -13,6 +13,7 @@ import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
 import { lazy } from '../../util/lazy.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
+import { getShutDownCafeIdsAsync } from './daily-cafe-state.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
 import { getHiddenGems } from '../recommendations/signals/cafe-specific/hidden-gems.js';
 import { getBasedOnReviews } from '../recommendations/signals/user-specific/based-on-reviews.js';
@@ -20,7 +21,6 @@ import { getTrySomethingDifferent } from '../recommendations/signals/user-specif
 import { buildProximityWeightMap } from '../../util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
 import { CACHE_EVENTS } from '../storage/events.js';
-import { ensureDateIsNotWeekendForMenu, toDateString } from '@msdining/common/util/date-util';
 import { IServerReview } from '../../models/review.js';
 import { Semaphore } from '@frozor/lock';
 
@@ -147,7 +147,9 @@ export const getRecommendationsAsync = async ({
 	}
 
 	const seed = `${dateString}:${userId ?? 'anon'}`;
-	const cafeIds = (cafeIdFilter && cafeIdFilter.size > 0) ? Array.from(cafeIdFilter) : Array.from(CAFES_BY_ID.keys());
+	const allCafeIds = (cafeIdFilter && cafeIdFilter.size > 0) ? Array.from(cafeIdFilter) : Array.from(CAFES_BY_ID.keys());
+	const shutDownCafeIds = await getShutDownCafeIdsAsync(dateString);
+	const cafeIds = allCafeIds.filter(id => !shutDownCafeIds.has(id));
 	const getAllUserReviews = lazy(async () => {
 		if (!userId) {
 			return [];
@@ -168,7 +170,7 @@ export const getRecommendationsAsync = async ({
 			});
 
 			const cafeRecommendations = await getRecommendationsForCafe(context);
-			if (cafeRecommendations.has(RecommendationSectionType.newAtFavorites) && context.homepageIds.length > 0 && !context.homepageIds.includes(context.cafeId)) {
+			if (cafeRecommendations.has(RecommendationSectionType.newAtFavorites) && !context.homepageIds.includes(context.cafeId)) {
 				cafeRecommendations.delete(RecommendationSectionType.newAtFavorites);
 			}
 

@@ -407,7 +407,10 @@ export abstract class DailyMenuStorageClient {
             where:  {
                 dateString: {
                     in: dateStrings
-                }
+                },
+                dailyCafe: {
+					isShutDown: false
+				}
             },
             select: {
                 cafeId:     true,
@@ -782,6 +785,14 @@ export abstract class DailyMenuStorageClient {
             update: { isAvailable, isShutDown, shutDownMessage: shutDownMessage ?? null },
             create: { dateString, cafeId, isAvailable, isShutDown, shutDownMessage: shutDownMessage ?? null },
         }));
+    }
+
+    public static async getShutDownCafeIdsAsync(dateString: string): Promise<Set<string>> {
+        const rows = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findMany({
+            where:  { dateString, isShutDown: true },
+            select: { cafeId: true },
+        }));
+        return new Set(rows.map(row => row.cafeId));
     }
 
     public static async retrieveDailyCafeStateAsync(cafeId: string, dateString: string): Promise<{
