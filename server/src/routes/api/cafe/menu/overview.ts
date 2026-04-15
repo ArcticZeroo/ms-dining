@@ -75,7 +75,7 @@ export const registerOverviewRoutes = (router: Router) => {
 		return result;
 	}
 
-	router.get('/:id/overview',
+	router.get('/overview',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
 		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
 		async ctx => validateViewMenuAccessAsync(ctx, async (cafes, dateString) => {
