@@ -7,6 +7,7 @@ import { CardNumberContext } from '../../context/payment.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
 import { useCartHydration } from '../../hooks/cart.ts';
+import { useAutoAdvanceSelectedDate } from '../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ValueNotifier, ValueNotifierSet } from '../../util/events.ts';
 import { getInitialDateFromUrl } from '../../util/url.ts';
@@ -43,6 +44,8 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
             selectedDateNotifier.value = DiningClient.getTodayDateForMenu();
         }
     }, [selectedDateNotifier, allowFutureMenus]);
+
+    useAutoAdvanceSelectedDate(selectedDateNotifier);
 
     return (
         <SelectedDateContext.Provider value={selectedDateNotifier}>
