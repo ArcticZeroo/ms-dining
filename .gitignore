@@ -2,4 +2,5 @@
 memory/
 plans/
 server/static/thumbnails/
+server/src/adhoc/bench-prisma-concurrency/results
 *.har
