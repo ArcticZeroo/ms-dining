@@ -5,7 +5,7 @@ import { getNamespaceLogger } from '../../util/log.js';
 const logger = getNamespaceLogger('AppInsights');
 
 const createTelemetryClient = (): appInsights.TelemetryClient | null => {
-	const connectionString = process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.appInsightsConnectionString];
+    const connectionString = process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.appInsightsConnectionString];
 
     if (!connectionString) {
         logger.info('Connection string not set, telemetry disabled');
@@ -26,7 +26,26 @@ const createTelemetryClient = (): appInsights.TelemetryClient | null => {
 
 export const TELEMETRY_CLIENT = createTelemetryClient();
 
+type FlushCallback = () => void | Promise<void>;
+const preFlushCallbacks: FlushCallback[] = [];
+
+/**
+ * Register a callback to run before App Insights flushes. Used by the metric
+ * aggregator to drain its in-memory buckets without creating an import cycle.
+ */
+export const registerPreFlush = (callback: FlushCallback): void => {
+    preFlushCallbacks.push(callback);
+};
+
 export const flushTelemetry = async (): Promise<void> => {
+    for (const callback of preFlushCallbacks) {
+        try {
+            await callback();
+        } catch (err) {
+            logger.error('Pre-flush callback failed:', err);
+        }
+    }
+
     if (!TELEMETRY_CLIENT) {
         return;
     }

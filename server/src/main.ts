@@ -6,15 +6,28 @@ import { createAnalyticsApplications } from './api/tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from './util/env.js';
 import { EMBEDDINGS_WORKER_QUEUE } from './worker/queues/embeddings.js';
 import { flushTelemetry } from './api/telemetry/app-insights.js';
+import { disconnectPrismaClient } from './api/storage/client.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-process.on('SIGTERM', async () => {
-    logInfo('SIGTERM received, flushing telemetry...');
-    await flushTelemetry();
+const handleShutdown = async (signal: string) => {
+    logInfo(`${signal} received, shutting down gracefully...`);
+    const results = await Promise.allSettled([
+        flushTelemetry(),
+        disconnectPrismaClient(),
+    ]);
+    for (const result of results) {
+        if (result.status === 'rejected') {
+            logError('Error during graceful shutdown:', result.reason);
+        }
+    }
     process.exit(0);
-});
+};
+
+// pm2 sends SIGINT for graceful restarts; container/host shutdowns send SIGTERM.
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+process.on('SIGINT',  () => handleShutdown('SIGINT'));
 
 logDebug('Starting in debug mode');
 logInfo('Starting server on port', webserverPort);

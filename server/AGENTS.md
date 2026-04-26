@@ -16,9 +16,8 @@ Always use these Koa context helpers from `util/koa.ts`:
 ## Database Patterns
 - Never use Prisma client directly — always use Storage Clients (e.g., `UserStorageClient`)
 - Storage clients are static classes with async methods
-- Use `usePrismaClient(callback)` wrapper for database operations (better performance for sqlite)
-- Use `usePrismaTransaction(callback)` for multiple related writes that should be atomic
-- **Never use `Promise.all()` for concurrent DB operations** — SQLite + Prisma performs worse with parallel queries. The `usePrismaClient` wrapper enforces single-threaded access via a semaphore. For multiple writes, use sequential `await` inside `usePrismaTransaction` instead.
+- Use `usePrismaClient(callback)` wrapper for database operations — it goes through a `PrioritySemaphore` (default 4 concurrent, configurable via `EnvironmentSettings.dbMaxConcurrency`) and emits per-call wait/duration metrics to App Insights.
+- Use `usePrismaTransaction(callback)` for multiple related writes that should be atomic.
 - Handle unique constraint violations with `isUniqueConstraintFailedError(err)`
 - Handle missing record errors (P2025) gracefully — e.g., when updating a record that may have been deleted, catch `PrismaClientKnownRequestError` with code `P2025` and skip instead of crashing
 - **Keep in-memory caches in sync with DB writes** — when a storage client maintains an in-memory cache (e.g., maps, sets), any method that writes to the DB must also update the in-memory state. Don't rely on reboots to resync.

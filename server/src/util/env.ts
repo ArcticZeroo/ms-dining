@@ -11,6 +11,8 @@ export interface EnvironmentSettings {
 	requestRetryCount: number;
 	cafeDiscoveryRetryCount: number;
 	cafeMenuUpdateCircuitBreakerThreshold: number;
+	/** Max concurrent in-flight calls allowed through `usePrismaClient`. */
+	dbMaxConcurrency: number;
 }
 
 export const isDev = process.env.NODE_ENV?.toLowerCase() === 'dev';
@@ -26,6 +28,7 @@ const DEFAULT_ENVIRONMENT_SETTINGS: Readonly<EnvironmentSettings> = {
     requestRetryCount:                     3,
     cafeDiscoveryRetryCount:               3,
     cafeMenuUpdateCircuitBreakerThreshold: 4,
+    dbMaxConcurrency:                      4,
 };
 
 const DEV_ENVIRONMENT_SETTINGS: Partial<EnvironmentSettings> = {

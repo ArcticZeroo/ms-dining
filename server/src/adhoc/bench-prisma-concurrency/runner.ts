@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PriorityLock } from '../../api/storage/priority-lock.js';
+import { PrioritySemaphore } from '../../api/storage/priority-semaphore.js';
 
 export interface WorkloadOp {
     name: string;
@@ -50,7 +50,7 @@ export const runWorkload = async (options: RunnerOptions): Promise<RunResult> =>
     const { prisma, ops, iterations, concurrency, useLock, ctx } = options;
     const totalWeight = ops.reduce((sum, op) => sum + op.weight, 0);
 
-    const lock = useLock ? new PriorityLock() : null;
+    const lock = useLock ? new PrioritySemaphore(1) : null;
     const latenciesMs: number[] = [];
     const perOpStats = new Map<string, { count: number; errorCount: number; latencies: number[] }>();
     for (const op of ops) {
