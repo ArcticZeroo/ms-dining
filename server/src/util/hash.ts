@@ -5,6 +5,11 @@ export const md5 = (content: string) => {
     return hash.update(content).digest('hex');
 }
 
+export const sha256 = (content: string) => {
+    const hash = crypto.createHash('sha256');
+    return hash.update(content).digest('hex');
+}
+
 export const getSortedStringsHash = (values: string[]): string => {
     const sortedValues = [...values].sort((a, b) => a.localeCompare(b));
     return md5(sortedValues.join(';'));

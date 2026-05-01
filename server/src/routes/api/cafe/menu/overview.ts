@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { ICafe } from '../../../../models/cafe.js';
-import { ICafeOverviewResponse, ICafeOverviewStation, ICafeShutDownState } from '@msdining/common/models/cafe';
+import { ICafeOverviewResponse, ICafeOverviewStation, ICafeShutdownState } from '@msdining/common/models/cafe';
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../../api/cache/daily-uniqueness.js';
 import { getDefaultUniquenessDataForStation } from '../../../../util/cafe.js';
@@ -14,7 +14,7 @@ import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { jsonStringifyWithoutNull } from '../../../../util/serde.js';
 import { createSeededRandom, getUserSeededRandom, selectWithVariety } from '../../../../util/random.js';
 import { getDefaultReasonForSectionType } from '../../../../util/recommendation.js';
-import { getShutDownCafeStateAsync } from '../../../../api/cache/daily-cafe-state.js';
+import { getShutdownCafeStateAsync } from '../../../../api/cache/daily-cafe-state.js';
 
 export const registerOverviewRoutes = (router: Router) => {
 	const retrieveAllOverviewStations = async (cafes: ICafe[], dateString: string): Promise<Map<string /*cafeId**/, Array<ICafeOverviewStation>>> => {
@@ -87,19 +87,12 @@ export const registerOverviewRoutes = (router: Router) => {
 			const [
 				recommendations,
 				overviewStations,
-				shutDownCafeState
+				shutdownCafeState
 			] = await Promise.all([
 				retrieveFeaturedItemsForOverviewAsync(supportsFeaturedInOverview, cafeIds, dateString),
 				retrieveAllOverviewStations(cafes, dateString),
-				getShutDownCafeStateAsync(dateString)
+				getShutdownCafeStateAsync(dateString)
 			]);
-
-			const shutDownState: Record<string, ICafeShutDownState> = {};
-			for (const cafeId of cafeIds) {
-				if (shutDownCafeState.has(cafeId)) {
-					shutDownState[cafeId] = { message: shutDownCafeState.get(cafeId) };
-				}
-			}
 
 			if (!supportsFeaturedInOverview) {
 				ctx.body = jsonStringifyWithoutNull(overviewStations);
@@ -109,7 +102,7 @@ export const registerOverviewRoutes = (router: Router) => {
 			const response: ICafeOverviewResponse = {
 				stations:      Object.fromEntries(overviewStations),
 				featuredItems: recommendations,
-				shutDownState
+				shutdownState: Object.fromEntries(shutdownCafeState)
 			};
 
 			ctx.body = jsonStringifyWithoutNull(response);

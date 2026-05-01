@@ -2,12 +2,12 @@ import React from 'react';
 import { ICafe } from '../../../../models/cafe.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import { CafeOverviewWithData } from '../../../cafes/cafe-overview-with-data.js';
-import { ICafeOverviewStation, ICafeShutDownState } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, ICafeShutdownState } from '@msdining/common/models/cafe';
 
 interface ICafeOverviewProps {
     cafe: ICafe;
     stations: Array<ICafeOverviewStation> | undefined;
-    shutDownState?: ICafeShutDownState;
+    shutDownState?: ICafeShutdownState;
     showMessageForNoStations?: boolean;
     showAllStations?: boolean;
 }

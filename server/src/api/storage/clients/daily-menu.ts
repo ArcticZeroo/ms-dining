@@ -12,24 +12,25 @@ import { IMenuPublishEvent } from '../../../models/storage-events.js';
 import { STORAGE_EVENTS } from '../events.js';
 import Duration from '@arcticzeroo/duration';
 import { getAllMenuItemsFirstAppearance } from '@prisma/client/sql';
+import { CafeShutdownType, ICafeShutdownState } from '@msdining/common/models/cafe';
 
 const areMenuItemsByCategoryNameEqual = (left: Map<string, Array<string>>, right: Map<string, Array<string>>) => {
-    if (left.size !== right.size) {
-        return false;
-    }
+	if (left.size !== right.size) {
+		return false;
+	}
 
-    for (const [categoryName, menuItemIds] of left.entries()) {
-        const otherMenuItemIds = right.get(categoryName);
-        if (otherMenuItemIds == null || menuItemIds.length !== otherMenuItemIds.length) {
-            return false;
-        }
+	for (const [categoryName, menuItemIds] of left.entries()) {
+		const otherMenuItemIds = right.get(categoryName);
+		if (otherMenuItemIds == null || menuItemIds.length !== otherMenuItemIds.length) {
+			return false;
+		}
 
-        if (!menuItemIds.every(menuItemId => otherMenuItemIds.includes(menuItemId))) {
-            return false;
-        }
-    }
+		if (!menuItemIds.every(menuItemId => otherMenuItemIds.includes(menuItemId))) {
+			return false;
+		}
+	}
 
-    return true;
+	return true;
 }
 
 interface IPublishDailyMenuParams {
@@ -45,111 +46,116 @@ interface ICafeMenuOverviewHeader {
 }
 
 interface IPreviousDailyStationMenu {
-    stationId: string;
-    categories: Array<{
-        name: string;
-        menuItems: Array<{ menuItemId: string }>;
-    }>;
+	stationId: string;
+	categories: Array<{
+		name: string;
+		menuItems: Array<{ menuItemId: string }>;
+	}>;
+}
+
+interface ICafeDailyState {
+	isAvailable: boolean;
+	shutdownState?: ICafeShutdownState;
 }
 
 const computeMenuPublishDiff = (
-    publishEvent: IMenuPublishEvent,
-    stations: Array<ICafeStation>,
-    previousDailyStationMenus: IPreviousDailyStationMenu[],
-    dateString: string
+	publishEvent: IMenuPublishEvent,
+	stations: Array<ICafeStation>,
+	previousDailyStationMenus: IPreviousDailyStationMenu[],
+	dateString: string
 ) => {
-    for (const previousStation of previousDailyStationMenus) {
-        publishEvent.removedStations.add(previousStation.stationId);
-        publishEvent.removedMenuItemsByStation.set(
-            previousStation.stationId,
-            new Set(previousStation.categories.flatMap(category => category.menuItems.flatMap(menuItem => menuItem.menuItemId)))
-        );
-    }
+	for (const previousStation of previousDailyStationMenus) {
+		publishEvent.removedStations.add(previousStation.stationId);
+		publishEvent.removedMenuItemsByStation.set(
+			previousStation.stationId,
+			new Set(previousStation.categories.flatMap(category => category.menuItems.flatMap(menuItem => menuItem.menuItemId)))
+		);
+	}
 
-    for (const station of stations) {
-        if (publishEvent.removedStations.has(station.id)) {
-            publishEvent.removedStations.delete(station.id);
+	for (const station of stations) {
+		if (publishEvent.removedStations.has(station.id)) {
+			publishEvent.removedStations.delete(station.id);
 
-            const previousMenu = previousDailyStationMenus.find(s => s.stationId === station.id);
-            if (!previousMenu) {
-                throw new Error(`Missing previous menu for station ${station.id} on date ${dateString}`);
-            }
+			const previousMenu = previousDailyStationMenus.find(s => s.stationId === station.id);
+			if (!previousMenu) {
+				throw new Error(`Missing previous menu for station ${station.id} on date ${dateString}`);
+			}
 
-            const removedItemIds = new Set<string>(previousMenu.categories.flatMap(category => category.menuItems.map(item => item.menuItemId)));
-            const addedItemIds = new Set<string>();
+			const removedItemIds = new Set<string>(previousMenu.categories.flatMap(category => category.menuItems.map(item => item.menuItemId)));
+			const addedItemIds = new Set<string>();
 
-            for (const menuItemId of station.menuItemsById.keys()) {
-                if (removedItemIds.has(menuItemId)) {
-                    removedItemIds.delete(menuItemId);
-                } else {
-                    addedItemIds.add(menuItemId);
-                }
-            }
+			for (const menuItemId of station.menuItemsById.keys()) {
+				if (removedItemIds.has(menuItemId)) {
+					removedItemIds.delete(menuItemId);
+				} else {
+					addedItemIds.add(menuItemId);
+				}
+			}
 
-            if (removedItemIds.size != 0 || addedItemIds.size != 0) {
-                publishEvent.updatedStations.add(station.id);
-            } else {
-                const previousMenuItemIdsByCategoryName = new Map<string, Array<string>>();
-                for (const category of previousMenu.categories) {
-                    previousMenuItemIdsByCategoryName.set(category.name, category.menuItems.map(item => item.menuItemId));
-                }
+			if (removedItemIds.size != 0 || addedItemIds.size != 0) {
+				publishEvent.updatedStations.add(station.id);
+			} else {
+				const previousMenuItemIdsByCategoryName = new Map<string, Array<string>>();
+				for (const category of previousMenu.categories) {
+					previousMenuItemIdsByCategoryName.set(category.name, category.menuItems.map(item => item.menuItemId));
+				}
 
-                if (!areMenuItemsByCategoryNameEqual(previousMenuItemIdsByCategoryName, station.menuItemIdsByCategoryName)) {
-                    publishEvent.updatedStations.add(station.id);
-                }
-            }
+				if (!areMenuItemsByCategoryNameEqual(previousMenuItemIdsByCategoryName, station.menuItemIdsByCategoryName)) {
+					publishEvent.updatedStations.add(station.id);
+				}
+			}
 
-            publishEvent.removedMenuItemsByStation.set(station.id, removedItemIds);
-            publishEvent.addedMenuItemsByStation.set(station.id, addedItemIds);
-        } else {
-            publishEvent.addedStations.add(station.id);
-            publishEvent.updatedStations.add(station.id);
-            publishEvent.addedMenuItemsByStation.set(station.id, new Set(station.menuItemsById.keys()));
-        }
-    }
+			publishEvent.removedMenuItemsByStation.set(station.id, removedItemIds);
+			publishEvent.addedMenuItemsByStation.set(station.id, addedItemIds);
+		} else {
+			publishEvent.addedStations.add(station.id);
+			publishEvent.updatedStations.add(station.id);
+			publishEvent.addedMenuItemsByStation.set(station.id, new Set(station.menuItemsById.keys()));
+		}
+	}
 }
 
 const writeMenuInTransaction = async (
-    tx: PrismaTransactionClient,
-    { cafeId, dateString, stations }: { cafeId: string; dateString: string; stations: Array<ICafeStation> }
+	tx: PrismaTransactionClient,
+	{ cafeId, dateString, stations }: { cafeId: string; dateString: string; stations: Array<ICafeStation> }
 ) => {
-    await tx.dailyStation.deleteMany({
-        where: {
-            dateString,
-            cafeId
-        }
-    });
+	await tx.dailyStation.deleteMany({
+		where: {
+			dateString,
+			cafeId
+		}
+	});
 
-    // Create stations and categories individually (need autoincrement IDs),
-    // then batch-create all menu items with a single createMany.
-    const allMenuItems: Array<{ menuItemId: string; categoryId: number }> = [];
+	// Create stations and categories individually (need autoincrement IDs),
+	// then batch-create all menu items with a single createMany.
+	const allMenuItems: Array<{ menuItemId: string; categoryId: number }> = [];
 
-    for (const station of stations) {
-        const dailyStation = await tx.dailyStation.create({
-            data: {
-                cafeId,
-                dateString,
-                stationId: station.id,
-                opensAt:   station.opensAt,
-                closesAt:  station.closesAt,
-            }
-        });
+	for (const station of stations) {
+		const dailyStation = await tx.dailyStation.create({
+			data: {
+				cafeId,
+				dateString,
+				stationId: station.id,
+				opensAt:   station.opensAt,
+				closesAt:  station.closesAt,
+			}
+		});
 
-        for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName) {
-            const dailyCategory = await tx.dailyCategory.create({
-                data: {
-                    name:      categoryName,
-                    stationId: dailyStation.id
-                }
-            });
+		for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName) {
+			const dailyCategory = await tx.dailyCategory.create({
+				data: {
+					name:      categoryName,
+					stationId: dailyStation.id
+				}
+			});
 
-            for (const menuItemId of menuItemIds) {
-                allMenuItems.push({ menuItemId, categoryId: dailyCategory.id });
-            }
-        }
-    }
+			for (const menuItemId of menuItemIds) {
+				allMenuItems.push({ menuItemId, categoryId: dailyCategory.id });
+			}
+		}
+	}
 
-    await tx.dailyMenuItem.createMany({ data: allMenuItems });
+	await tx.dailyMenuItem.createMany({ data: allMenuItems });
 }
 
 const MENU_PUBLISH_TRANSACTION_TIMEOUT_MS = 15_000;
@@ -159,656 +165,707 @@ const MENU_PUBLISH_TRANSACTION_WARN_MS = 5_000;
 //   Maybe the storage clients should not have a cache, and we will rely on a higher-level orchestrator to figure out
 //   the caching story across all of the storage clients?
 export abstract class DailyMenuStorageClient {
-    public static async publishDailyStationMenuAsync({ cafe, dateString, isAvailable, stations }: IPublishDailyMenuParams) {
-        const cafeId = cafe.id;
+	public static async publishDailyStationMenuAsync({
+														 cafe,
+														 dateString,
+														 isAvailable,
+														 stations
+													 }: IPublishDailyMenuParams) {
+		const cafeId = cafe.id;
 
-        const publishEvent: IMenuPublishEvent = {
-            cafe,
-            dateString,
-            isAvailable,
-            menu:            stations,
-            addedStations:   new Set<string>(),
-            removedStations: new Set<string>(),
-            // Stations which were either just added or had their menu items changed. When a station is removed it is -not- considered updated.
-            updatedStations:           new Set<string>(),
-            dirtyStations:             new Set<string>(),
-            removedMenuItemsByStation: new Map<string, Set<string>>(),
-            addedMenuItemsByStation:   new Map<string, Set<string>>(),
-            dirtyMenuItemIds:          new Set<string>()
-        };
+		const publishEvent: IMenuPublishEvent = {
+			cafe,
+			dateString,
+			isAvailable,
+			menu:            stations,
+			addedStations:   new Set<string>(),
+			removedStations: new Set<string>(),
+			// Stations which were either just added or had their menu items changed. When a station is removed it is -not- considered updated.
+			updatedStations:           new Set<string>(),
+			dirtyStations:             new Set<string>(),
+			removedMenuItemsByStation: new Map<string, Set<string>>(),
+			addedMenuItemsByStation:   new Map<string, Set<string>>(),
+			dirtyMenuItemIds:          new Set<string>()
+		};
 
-        await usePrismaClient(async (prismaClient) => {
-            // Read previous menu + compute diffs outside the transaction.
-            // The usePrismaClient lock prevents other DB operations from interfering.
-            const previousDailyStationMenus = await prismaClient.dailyStation.findMany({
-                where:  { cafeId, dateString },
-                select: {
-                    stationId:  true,
-                    categories: {
-                        select: {
-                            name:      true,
-                            menuItems: { select: { menuItemId: true } }
-                        }
-                    }
-                }
-            });
-
-            computeMenuPublishDiff(publishEvent, stations, previousDailyStationMenus, dateString);
-
-            // Atomic write: delete old data + insert new data in a single transaction.
-            const transactionStartMs = Date.now();
-            await prismaClient.$transaction(
-                async tx => writeMenuInTransaction(tx, { cafeId, dateString, stations }),
-                { timeout: MENU_PUBLISH_TRANSACTION_TIMEOUT_MS }
-            );
-
-            const transactionElapsedMs = Date.now() - transactionStartMs;
-            if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
-                logInfo(`{${dateString}} WARNING: Menu publish transaction for cafe ${cafe.name} took ${transactionElapsedMs}ms (exceeds ${MENU_PUBLISH_TRANSACTION_WARN_MS}ms threshold)`);
-            }
-        });
-
-        publishEvent.dirtyStations = new Set([
-            ...publishEvent.addedStations,
-            ...publishEvent.updatedStations,
-            ...publishEvent.removedStations
-        ]);
-
-        publishEvent.dirtyMenuItemIds = new Set([
-            ...Array.from(publishEvent.addedMenuItemsByStation.values()).flatMap(items => Array.from(items)),
-            ...Array.from(publishEvent.removedMenuItemsByStation.values()).flatMap(items => Array.from(items))
-        ]);
-
-        STORAGE_EVENTS.emit('menuPublished', publishEvent);
-        logDebug(`{${dateString} Published daily menu for cafe ${cafeId}`);
-    }
-
-    public static async retrieveDailyMenuAsync(cafeId: string, dateString: string) {
-        const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                cafeId,
-                dateString
-            },
-            select: {
-                stationId:              true,
-                externalLastUpdateTime: true,
-                opensAt:                true,
-                closesAt:               true,
-                station:                {
-                    select: {
-                        name:    true,
-                        logoUrl: true,
-                        menuId:  true,
-                        groupId: true
-                    }
-                },
-                categories:             {
-                    select: {
-                        name:      true,
-                        menuItems: {
-                            select: {
-                                menuItemId: true
-                            }
-                        }
-                    }
-                }
-            }
-        }));
-
-        const stations: ICafeStation[] = [];
-
-        for (const dailyStation of dailyStations) {
-            const stationData = dailyStation.station;
-
-            const menuItemIdsByCategoryName = new Map<string, Array<string>>();
-            const menuItemsById = new Map<string, IMenuItemBase>();
-
-            for (const category of dailyStation.categories) {
-                const menuItemIds: string[] = [];
-
-                for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
-
-                    if (menuItem == null) {
-                        logError(`Unable to find menu item ${dailyMenuItem.menuItemId} for category ${category.name} in station ${stationData.name} (${dailyStation.stationId})`);
-                        continue;
-                    }
-
-                    menuItemIds.push(dailyMenuItem.menuItemId);
-                    menuItemsById.set(menuItem.id, menuItem);
-                }
-
-                if (menuItemsById.size > 0) {
-                    menuItemIdsByCategoryName.set(category.name, menuItemIds);
-                }
-            }
-
-            stations.push({
-                id:                 dailyStation.stationId,
-                menuId:             stationData.menuId,
-                logoUrl:            stationData.logoUrl || undefined,
-                name:               stationData.name,
-                groupId:            stationData.groupId,
-                menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
-                    ? dailyStation.externalLastUpdateTime
-                    : undefined,
-                cafeId,
-                menuItemsById,
-                menuItemIdsByCategoryName,
-                opensAt:            dailyStation.opensAt,
-                closesAt:           dailyStation.closesAt,
-            });
-        }
-
-        return stations;
-    }
-
-    public static async retrieveDailyMenuOverviewHeadersAsync(cafeId: string, dateString: string): Promise<Array<ICafeMenuOverviewHeader>> {
-        const results = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                cafeId,
-                dateString
-            },
-            select: {
-                station: {
-                    select: {
-                        name:    true,
-                        logoUrl: true
-                    }
-                }
-            }
-        }));
-
-        return results.map(({ station }) => ({
-            name:    station.name,
-            logoUrl: station.logoUrl || undefined,
-        }));
-    }
-
-    public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {
-        const dailyStation = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
-            where:  { dateString },
-            select: { id: true }
-        }));
-
-        return dailyStation != null;
-    }
-
-    public static async getCafesAvailableForDayAsync(dateString: string): Promise<Set<string /*cafeId*/>> {
-        const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  { dateString },
-            select: { cafeId: true }
-        }));
-
-        return new Set(stations.map(station => station.cafeId));
-    }
-
-    public static async isAnyAllowedMenuAvailableForCafe(cafeId: string): Promise<boolean> {
-        const currentDate = DateUtil.getMinimumDateForMenu();
-        const maximumDate = DateUtil.getMaximumDateForMenu();
-        const allowedDateStrings: string[] = [];
-        while (!DateUtil.isDateAfter(currentDate, maximumDate)) {
-            if (!DateUtil.isDateOnWeekend(currentDate)) {
-                allowedDateStrings.push(DateUtil.toDateString(currentDate));
-            }
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        const result = await usePrismaClient(client => client.dailyStation.findFirst({
-            where: {
-                cafeId,
-                dateString: {
-                    in: allowedDateStrings
-                }
-            }
-        }));
-
-        return result != null;
-    }
-
-    public static async getPendingMenusForEmbedding() {
-        const dateStrings = DateUtil.getDateStringsForWeek();
-
-        return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                dateString: {
-                    in: dateStrings
-                }
-            },
-            select: {
-                cafeId:     true,
-                dateString: true,
-                stationId:  true,
-                station:    {
-                    select: {
-                        name: true
-                    }
-                },
-                categories: {
-                    select: {
-                        name:      true,
-                        menuItems: {
-                            select: {
-                                menuItemId: true
-                            }
-                        }
-                    }
-                }
-            }
-        }));
-    }
-
-    public static getMenusForSearch(date: Date | null) {
-        const dateStrings = date != null
-            ? [DateUtil.toDateString(date)]
-            : DateUtil.getDateStringsForWeek();
-
-        return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                dateString: {
-                    in: dateStrings
-                },
-                dailyCafe: {
-					isShutDown: false
+		await usePrismaClient(async (prismaClient) => {
+			// Read previous menu + compute diffs outside the transaction.
+			// The usePrismaClient lock prevents other DB operations from interfering.
+			const previousDailyStationMenus = await prismaClient.dailyStation.findMany({
+				where:  { cafeId, dateString },
+				select: {
+					stationId:  true,
+					categories: {
+						select: {
+							name:      true,
+							menuItems: { select: { menuItemId: true } }
+						}
+					}
 				}
-            },
-            select: {
-                cafeId:     true,
-                dateString: true,
-                stationId:  true,
-                station:    {
-                    select: {
-                        name:    true,
-                        logoUrl: true,
-                        groupId: true,
-                    }
-                },
-                categories: {
-                    select: {
-                        name:      true,
-                        menuItems: {
-                            select: {
-                                menuItemId: true,
-                                menuItem:   {
-                                    select: {
-                                        tags:       true,
-                                        searchTags: {
-                                            select: {
-                                                name: true
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                        }
-                    }
-                },
-            }
-        }));
-    }
+			});
+
+			computeMenuPublishDiff(publishEvent, stations, previousDailyStationMenus, dateString);
+
+			// Atomic write: delete old data + insert new data in a single transaction.
+			const transactionStartMs = Date.now();
+			await prismaClient.$transaction(
+				async tx => writeMenuInTransaction(tx, { cafeId, dateString, stations }),
+				{ timeout: MENU_PUBLISH_TRANSACTION_TIMEOUT_MS }
+			);
+
+			const transactionElapsedMs = Date.now() - transactionStartMs;
+			if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
+				logInfo(`{${dateString}} WARNING: Menu publish transaction for cafe ${cafe.name} took ${transactionElapsedMs}ms (exceeds ${MENU_PUBLISH_TRANSACTION_WARN_MS}ms threshold)`);
+			}
+		});
+
+		publishEvent.dirtyStations = new Set([
+			...publishEvent.addedStations,
+			...publishEvent.updatedStations,
+			...publishEvent.removedStations
+		]);
+
+		publishEvent.dirtyMenuItemIds = new Set([
+			...Array.from(publishEvent.addedMenuItemsByStation.values()).flatMap(items => Array.from(items)),
+			...Array.from(publishEvent.removedMenuItemsByStation.values()).flatMap(items => Array.from(items))
+		]);
+
+		STORAGE_EVENTS.emit('menuPublished', publishEvent);
+		logDebug(`{${dateString} Published daily menu for cafe ${cafeId}`);
+	}
+
+	public static async retrieveDailyMenuAsync(cafeId: string, dateString: string) {
+		const dailyStations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				cafeId,
+				dateString
+			},
+			select: {
+				stationId:              true,
+				externalLastUpdateTime: true,
+				opensAt:                true,
+				closesAt:               true,
+				station:                {
+					select: {
+						name:    true,
+						logoUrl: true,
+						menuId:  true,
+						groupId: true
+					}
+				},
+				categories:             {
+					select: {
+						name:      true,
+						menuItems: {
+							select: {
+								menuItemId: true
+							}
+						}
+					}
+				}
+			}
+		}));
+
+		const stations: ICafeStation[] = [];
+
+		for (const dailyStation of dailyStations) {
+			const stationData = dailyStation.station;
+
+			const menuItemIdsByCategoryName = new Map<string, Array<string>>();
+			const menuItemsById = new Map<string, IMenuItemBase>();
+
+			for (const category of dailyStation.categories) {
+				const menuItemIds: string[] = [];
+
+				for (const dailyMenuItem of category.menuItems) {
+					const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+
+					if (menuItem == null) {
+						logError(`Unable to find menu item ${dailyMenuItem.menuItemId} for category ${category.name} in station ${stationData.name} (${dailyStation.stationId})`);
+						continue;
+					}
+
+					menuItemIds.push(dailyMenuItem.menuItemId);
+					menuItemsById.set(menuItem.id, menuItem);
+				}
+
+				if (menuItemsById.size > 0) {
+					menuItemIdsByCategoryName.set(category.name, menuItemIds);
+				}
+			}
+
+			stations.push({
+				id:                 dailyStation.stationId,
+				menuId:             stationData.menuId,
+				logoUrl:            stationData.logoUrl || undefined,
+				name:               stationData.name,
+				groupId:            stationData.groupId,
+				menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
+										? dailyStation.externalLastUpdateTime
+										: undefined,
+				cafeId,
+				menuItemsById,
+				menuItemIdsByCategoryName,
+				opensAt:            dailyStation.opensAt,
+				closesAt:           dailyStation.closesAt,
+			});
+		}
+
+		return stations;
+	}
+
+	public static async retrieveDailyMenuOverviewHeadersAsync(cafeId: string, dateString: string): Promise<Array<ICafeMenuOverviewHeader>> {
+		const results = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				cafeId,
+				dateString
+			},
+			select: {
+				station: {
+					select: {
+						name:    true,
+						logoUrl: true
+					}
+				}
+			}
+		}));
+
+		return results.map(({ station }) => ({
+			name:    station.name,
+			logoUrl: station.logoUrl || undefined,
+		}));
+	}
+
+	public static async isAnyMenuAvailableForDayAsync(dateString: string): Promise<boolean> {
+		const dailyStation = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
+			where:  { dateString },
+			select: { id: true }
+		}));
+
+		return dailyStation != null;
+	}
+
+	public static async getCafesAvailableForDayAsync(dateString: string): Promise<Set<string /*cafeId*/>> {
+		const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  { dateString },
+			select: { cafeId: true }
+		}));
+
+		return new Set(stations.map(station => station.cafeId));
+	}
+
+	public static async isAnyAllowedMenuAvailableForCafe(cafeId: string): Promise<boolean> {
+		const currentDate = DateUtil.getMinimumDateForMenu();
+		const maximumDate = DateUtil.getMaximumDateForMenu();
+		const allowedDateStrings: string[] = [];
+		while (!DateUtil.isDateAfter(currentDate, maximumDate)) {
+			if (!DateUtil.isDateOnWeekend(currentDate)) {
+				allowedDateStrings.push(DateUtil.toDateString(currentDate));
+			}
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+
+		const result = await usePrismaClient(client => client.dailyStation.findFirst({
+			where: {
+				cafeId,
+				dateString: {
+					in: allowedDateStrings
+				}
+			}
+		}));
+
+		return result != null;
+	}
+
+	public static async getPendingMenusForEmbedding() {
+		const dateStrings = DateUtil.getDateStringsForWeek();
+
+		return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				dateString: {
+					in: dateStrings
+				}
+			},
+			select: {
+				cafeId:     true,
+				dateString: true,
+				stationId:  true,
+				station:    {
+					select: {
+						name: true
+					}
+				},
+				categories: {
+					select: {
+						name:      true,
+						menuItems: {
+							select: {
+								menuItemId: true
+							}
+						}
+					}
+				}
+			}
+		}));
+	}
+
+	public static getMenusForSearch(date: Date | null) {
+		const dateStrings = date != null
+			? [DateUtil.toDateString(date)]
+			: DateUtil.getDateStringsForWeek();
+
+		return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				dateString: {
+					in: dateStrings
+				},
+				dailyCafe:  {
+					shutdownMessageHash: null
+				}
+			},
+			select: {
+				cafeId:     true,
+				dateString: true,
+				stationId:  true,
+				station:    {
+					select: {
+						name:    true,
+						logoUrl: true,
+						groupId: true,
+					}
+				},
+				categories: {
+					select: {
+						name:      true,
+						menuItems: {
+							select: {
+								menuItemId: true,
+								menuItem:   {
+									select: {
+										tags:       true,
+										searchTags: {
+											select: {
+												name: true
+											}
+										}
+									}
+								}
+							},
+						}
+					}
+				},
+			}
+		}));
+	}
 
 
-    public static async retrieveCafeChildAvailability(cafeId: string, startDate: Date, endDate: Date) {
-        const startString = DateUtil.toDateString(startDate);
-        const endString = DateUtil.toDateString(endDate);
+	public static async retrieveCafeChildAvailability(cafeId: string, startDate: Date, endDate: Date) {
+		const startString = DateUtil.toDateString(startDate);
+		const endString = DateUtil.toDateString(endDate);
 
-        const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                cafeId,
-                dateString: {
-                    gte: startString,
-                    lte: endString
-                }
-            },
-            select: {
-                dateString: true,
-                stationId:  true,
-                categories: {
-                    select: {
-                        menuItems: {
-                            select: {
-                                menuItemId: true
-                            }
-                        }
-                    }
-                }
-            }
-        }));
+		const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				cafeId,
+				dateString: {
+					gte: startString,
+					lte: endString
+				}
+			},
+			select: {
+				dateString: true,
+				stationId:  true,
+				categories: {
+					select: {
+						menuItems: {
+							select: {
+								menuItemId: true
+							}
+						}
+					}
+				}
+			}
+		}));
 
-        const stationVisitsById = new Map<string, Set<string>>();
-        const itemVisitsById = new Map<string, Set<string>>();
+		const stationVisitsById = new Map<string, Set<string>>();
+		const itemVisitsById = new Map<string, Set<string>>();
 
-        for (const stationVisit of visits) {
-            const stationId = stationVisit.stationId;
-            const visitDate = stationVisit.dateString;
+		for (const stationVisit of visits) {
+			const stationId = stationVisit.stationId;
+			const visitDate = stationVisit.dateString;
 
-            if (!stationVisitsById.has(stationId)) {
-                stationVisitsById.set(stationId, new Set());
-            }
+			if (!stationVisitsById.has(stationId)) {
+				stationVisitsById.set(stationId, new Set());
+			}
 
-            stationVisitsById.get(stationId)!.add(visitDate);
+			stationVisitsById.get(stationId)!.add(visitDate);
 
-            for (const category of stationVisit.categories) {
-                for (const menuItem of category.menuItems) {
-                    const menuItemId = menuItem.menuItemId;
+			for (const category of stationVisit.categories) {
+				for (const menuItem of category.menuItems) {
+					const menuItemId = menuItem.menuItemId;
 
-                    if (!itemVisitsById.has(menuItemId)) {
-                        itemVisitsById.set(menuItemId, new Set());
-                    }
-
-                    itemVisitsById.get(menuItemId)!.add(visitDate);
-                }
-            }
-        }
-
-        return {
-            stationVisitsById,
-            itemVisitsById
-        } as const;
-    }
-
-    public static async retrieveStationItemAvailability(stationId: string, startDate: Date, endDate: Date) {
-        const startString = DateUtil.toDateString(startDate);
-        const endString = DateUtil.toDateString(endDate);
-
-        const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                stationId,
-                dateString: {
-                    gte: startString,
-                    lte: endString
-                }
-            },
-            select: {
-                dateString: true,
-                categories: {
-                    select: {
-                        menuItems: {
-                            select: {
-                                menuItemId: true
-                            }
-                        }
-                    }
-                }
-            }
-        }));
-
-        const itemVisitsById = new Map<string, Set<string>>();
-        for (const stationVisit of visits) {
-            const visitDate = stationVisit.dateString;
-
-            for (const category of stationVisit.categories) {
-                for (const menuItem of category.menuItems) {
-                    const menuItemId = menuItem.menuItemId;
-                    if (!itemVisitsById.has(menuItemId)) {
-                        itemVisitsById.set(menuItemId, new Set());
-                    }
+					if (!itemVisitsById.has(menuItemId)) {
+						itemVisitsById.set(menuItemId, new Set());
+					}
 
 					itemVisitsById.get(menuItemId)!.add(visitDate);
-                }
-            }
-        }
+				}
+			}
+		}
 
-        return itemVisitsById;
-    }
+		return {
+			stationVisitsById,
+			itemVisitsById
+		} as const;
+	}
 
-    private static async retrieveMenuItemVisits(menuItemName: string, startDate: Date, endDate: Date): Promise<Array<IEntityVisitData>> {
-        const startString = DateUtil.toDateString(startDate);
-        const endString = DateUtil.toDateString(endDate);
+	public static async retrieveStationItemAvailability(stationId: string, startDate: Date, endDate: Date) {
+		const startString = DateUtil.toDateString(startDate);
+		const endString = DateUtil.toDateString(endDate);
 
-        const visits = await usePrismaClient(prismaClient => prismaClient.dailyMenuItem.findMany({
-            where:  {
-                menuItem: {
-                    normalizedName: {
-                        equals: normalizeNameForSearch(menuItemName)
-                    }
-                },
-                category: {
-                    station: {
-                        dateString: {
-                            gte: startString,
-                            lte: endString
-                        }
-                    }
-                }
-            },
-            select: {
-                category: {
-                    select: {
-                        station: {
-                            select: {
-                                dateString: true,
-                                cafeId:     true,
-                            }
-                        }
-                    }
-                }
-            }
-        }));
+		const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				stationId,
+				dateString: {
+					gte: startString,
+					lte: endString
+				}
+			},
+			select: {
+				dateString: true,
+				categories: {
+					select: {
+						menuItems: {
+							select: {
+								menuItemId: true
+							}
+						}
+					}
+				}
+			}
+		}));
 
-        return visits.map(visit => ({
-            dateString: visit.category.station.dateString,
-            cafeId:     visit.category.station.cafeId
-        }));
-    }
+		const itemVisitsById = new Map<string, Set<string>>();
+		for (const stationVisit of visits) {
+			const visitDate = stationVisit.dateString;
 
-    private static async retrieveStationVisits(stationName: string, startDate: Date, endDate: Date): Promise<Array<IEntityVisitData>> {
-        const startString = DateUtil.toDateString(startDate);
-        const endString = DateUtil.toDateString(endDate);
+			for (const category of stationVisit.categories) {
+				for (const menuItem of category.menuItems) {
+					const menuItemId = menuItem.menuItemId;
+					if (!itemVisitsById.has(menuItemId)) {
+						itemVisitsById.set(menuItemId, new Set());
+					}
 
-        const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
-            where:  {
-                station:    {
-                    name: {
-                        equals: stationName
-                    }
-                },
-                dateString: {
-                    gte: startString,
-                    lte: endString
-                }
-            },
-            select: {
-                dateString: true,
-                cafeId:     true
-            }
-        }));
+					itemVisitsById.get(menuItemId)!.add(visitDate);
+				}
+			}
+		}
 
-        return visits.map(visit => ({
-            dateString: visit.dateString,
-            cafeId:     visit.cafeId
-        }));
-    }
+		return itemVisitsById;
+	}
 
-    private static async retrieveEntityVisitsInner(entityType: SearchEntityType, entityName: string, startDate: Date, endDate: Date) {
-        if (entityType === SearchEntityType.menuItem) {
-            return this.retrieveMenuItemVisits(entityName, startDate, endDate);
-        }
+	private static async retrieveMenuItemVisits(menuItemName: string, startDate: Date, endDate: Date): Promise<Array<IEntityVisitData>> {
+		const startString = DateUtil.toDateString(startDate);
+		const endString = DateUtil.toDateString(endDate);
 
-        if (entityType === SearchEntityType.station) {
-            return this.retrieveStationVisits(entityName, startDate, endDate);
-        }
+		const visits = await usePrismaClient(prismaClient => prismaClient.dailyMenuItem.findMany({
+			where:  {
+				menuItem: {
+					normalizedName: {
+						equals: normalizeNameForSearch(menuItemName)
+					}
+				},
+				category: {
+					station: {
+						dateString: {
+							gte: startString,
+							lte: endString
+						}
+					}
+				}
+			},
+			select: {
+				category: {
+					select: {
+						station: {
+							select: {
+								dateString: true,
+								cafeId:     true,
+							}
+						}
+					}
+				}
+			}
+		}));
 
-        throw new Error('Unsupported entity type');
-    }
+		return visits.map(visit => ({
+			dateString: visit.category.station.dateString,
+			cafeId:     visit.category.station.cafeId
+		}));
+	}
 
-    public static async retrieveEntityVisits(entityType: SearchEntityType, entityName: string) {
-        const endDate = new Date();
-        const startDate = DateUtil.addDurationToDate(endDate, new Duration({ days: -31 }));
+	private static async retrieveStationVisits(stationName: string, startDate: Date, endDate: Date): Promise<Array<IEntityVisitData>> {
+		const startString = DateUtil.toDateString(startDate);
+		const endString = DateUtil.toDateString(endDate);
 
-        const visits = await this.retrieveEntityVisitsInner(entityType, entityName, startDate, endDate);
+		const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+			where:  {
+				station:    {
+					name: {
+						equals: stationName
+					}
+				},
+				dateString: {
+					gte: startString,
+					lte: endString
+				}
+			},
+			select: {
+				dateString: true,
+				cafeId:     true
+			}
+		}));
 
-        const seenVisits = new Set<string>();
-        const uniqueVisits: IEntityVisitData[] = [];
+		return visits.map(visit => ({
+			dateString: visit.dateString,
+			cafeId:     visit.cafeId
+		}));
+	}
 
-        for (const visit of visits) {
-            const key = `${visit.dateString}-${visit.cafeId}`;
-            if (seenVisits.has(key)) {
-                continue;
-            }
+	private static async retrieveEntityVisitsInner(entityType: SearchEntityType, entityName: string, startDate: Date, endDate: Date) {
+		if (entityType === SearchEntityType.menuItem) {
+			return this.retrieveMenuItemVisits(entityName, startDate, endDate);
+		}
 
-            seenVisits.add(key);
-            uniqueVisits.push(visit);
-        }
+		if (entityType === SearchEntityType.station) {
+			return this.retrieveStationVisits(entityName, startDate, endDate);
+		}
 
-        return uniqueVisits;
-    }
+		throw new Error('Unsupported entity type');
+	}
 
-    // todo: Consider doing this on boot for all cafes?
-    public static async retrieveFirstStationVisitsForCafe(cafeId: string): Promise<Map<string /*stationId*/, Date>> {
-        const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
-            by:    ['stationId'],
-            where: { cafeId },
-            _min:  {
-                dateString: true
-            }
-        }));
+	public static async retrieveEntityVisits(entityType: SearchEntityType, entityName: string) {
+		const endDate = new Date();
+		const startDate = DateUtil.addDurationToDate(endDate, new Duration({ days: -31 }));
 
-        const firstVisits = new Map<string, Date>();
+		const visits = await this.retrieveEntityVisitsInner(entityType, entityName, startDate, endDate);
 
-        for (const { stationId, _min: { dateString } } of visits) {
-            if (!dateString) {
-                continue;
-            }
+		const seenVisits = new Set<string>();
+		const uniqueVisits: IEntityVisitData[] = [];
 
-            firstVisits.set(stationId, DateUtil.fromDateString(dateString));
-        }
+		for (const visit of visits) {
+			const key = `${visit.dateString}-${visit.cafeId}`;
+			if (seenVisits.has(key)) {
+				continue;
+			}
 
-        return firstVisits;
-    }
+			seenVisits.add(key);
+			uniqueVisits.push(visit);
+		}
 
-    public static async retrieveFirstStationVisitDate(stationId: string): Promise<Date | null> {
-        const visit = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
-            where:   {
-                stationId
-            },
-            orderBy: {
-                dateString: 'asc'
-            },
-            select:  {
-                dateString: true
-            }
-        }));
+		return uniqueVisits;
+	}
 
-        if (visit == null) {
-            return null;
-        }
+	// todo: Consider doing this on boot for all cafes?
+	public static async retrieveFirstStationVisitsForCafe(cafeId: string): Promise<Map<string /*stationId*/, Date>> {
+		const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
+			by:    ['stationId'],
+			where: { cafeId },
+			_min:  {
+				dateString: true
+			}
+		}));
 
-        return DateUtil.fromDateString(visit.dateString);
-    }
+		const firstVisits = new Map<string, Date>();
 
-    public static async retrieveFirstMenuItemVisitDate(menuItemId: string): Promise<string | null> {
-        const visit = await usePrismaClient(client => client.dailyMenuItem.findFirst({
-            where:   {
-                menuItemId
-            },
-            orderBy: {
-                category: {
-                    station: {
-                        dateString: 'asc'
-                    }
-                }
-            },
-            select:  {
-                category: {
-                    select: {
-                        station: {
-                            select: {
-                                dateString: true
-                            }
-                        }
-                    }
-                }
-            }
-        }));
+		for (const { stationId, _min: { dateString } } of visits) {
+			if (!dateString) {
+				continue;
+			}
 
-        if (visit == null) {
-            return null;
-        }
+			firstVisits.set(stationId, DateUtil.fromDateString(dateString));
+		}
 
-        return visit.category.station.dateString;
-    }
+		return firstVisits;
+	}
 
-    public static async retrieveAllFirstMenuItemAppearances(): Promise<Map<string /*menuItemId*/, string /*dateString*/>> {
-        const results = await usePrismaClient(client => client.$queryRawTyped(getAllMenuItemsFirstAppearance()));
-        const firstVisitDates = new Map<string, string>();
-        for (const { menuItemId, firstAppearance } of results) {
-            if (menuItemId && firstAppearance) {
-                firstVisitDates.set(menuItemId, firstAppearance);
-            }
-        }
-        return firstVisitDates;
-    }
+	public static async retrieveFirstStationVisitDate(stationId: string): Promise<Date | null> {
+		const visit = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
+			where:   {
+				stationId
+			},
+			orderBy: {
+				dateString: 'asc'
+			},
+			select:  {
+				dateString: true
+			}
+		}));
 
-    public static async getCafeHoursForDate(cafeId: string, dateString: string): Promise<{ opensAt: number; closesAt: number } | null> {
-        const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.aggregate({
-            where:   { cafeId, dateString },
-            _min:    { opensAt: true },
-            _max:    { closesAt: true },
-            _count:  true,
-        }));
+		if (visit == null) {
+			return null;
+		}
 
-        if (result._count === 0) {
-            return null;
-        }
+		return DateUtil.fromDateString(visit.dateString);
+	}
 
-        return { opensAt: result._min.opensAt!, closesAt: result._max.closesAt! };
-    }
+	public static async retrieveFirstMenuItemVisitDate(menuItemId: string): Promise<string | null> {
+		const visit = await usePrismaClient(client => client.dailyMenuItem.findFirst({
+			where:   {
+				menuItemId
+			},
+			orderBy: {
+				category: {
+					station: {
+						dateString: 'asc'
+					}
+				}
+			},
+			select:  {
+				category: {
+					select: {
+						station: {
+							select: {
+								dateString: true
+							}
+						}
+					}
+				}
+			}
+		}));
 
-    public static async getAllCafeHoursForDate(dateString: string): Promise<Map<string, { opensAt: number; closesAt: number }>> {
-        const results = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
-            by:    ['cafeId'],
-            where: { dateString },
-            _min:  { opensAt: true },
-            _max:  { closesAt: true },
-        }));
+		if (visit == null) {
+			return null;
+		}
 
-        const hoursByCafe = new Map<string, { opensAt: number; closesAt: number }>();
-        for (const result of results) {
-            hoursByCafe.set(result.cafeId, {
-                opensAt:  result._min.opensAt!,
-                closesAt: result._max.closesAt!,
-            });
-        }
+		return visit.category.station.dateString;
+	}
 
-        return hoursByCafe;
-    }
+	public static async retrieveAllFirstMenuItemAppearances(): Promise<Map<string /*menuItemId*/, string /*dateString*/>> {
+		const results = await usePrismaClient(client => client.$queryRawTyped(getAllMenuItemsFirstAppearance()));
+		const firstVisitDates = new Map<string, string>();
+		for (const { menuItemId, firstAppearance } of results) {
+			if (menuItemId && firstAppearance) {
+				firstVisitDates.set(menuItemId, firstAppearance);
+			}
+		}
+		return firstVisitDates;
+	}
 
-    public static async upsertDailyCafeAsync(cafeId: string, dateString: string, data: {
-        isAvailable: boolean;
-        isShutDown?: boolean;
-        shutDownMessage?: string;
-    }): Promise<void> {
-        const { isAvailable, isShutDown = false, shutDownMessage } = data;
-        await usePrismaClient(prismaClient => prismaClient.dailyCafe.upsert({
-            where:  { dateString_cafeId: { dateString, cafeId } },
-            update: { isAvailable, isShutDown, shutDownMessage: shutDownMessage ?? null },
-            create: { dateString, cafeId, isAvailable, isShutDown, shutDownMessage: shutDownMessage ?? null },
-        }));
-    }
+	public static async getCafeHoursForDate(cafeId: string, dateString: string): Promise<{
+		opensAt: number;
+		closesAt: number
+	} | null> {
+		const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.aggregate({
+			where:  { cafeId, dateString },
+			_min:   { opensAt: true },
+			_max:   { closesAt: true },
+			_count: true,
+		}));
 
-    public static async getShutDownCafesAsync(dateString: string): Promise<Map<string, string | null /*shutdownMessage*/>> {
-        const rows = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findMany({
-            where:  { dateString, isShutDown: true },
-            select: { cafeId: true, shutDownMessage: true },
-        }));
-        return new Map(rows.map(row => [row.cafeId, row.shutDownMessage]));
-    }
+		if (result._count === 0) {
+			return null;
+		}
 
-    public static async retrieveDailyCafeStateAsync(cafeId: string, dateString: string): Promise<{
-        isAvailable: boolean;
-        isShutDown: boolean;
-        shutDownMessage?: string;
-    }> {
-        const row = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findUnique({
-            where:  { dateString_cafeId: { dateString, cafeId } },
-            select: { isAvailable: true, isShutDown: true, shutDownMessage: true },
-        }));
+		return { opensAt: result._min.opensAt!, closesAt: result._max.closesAt! };
+	}
 
-        return {
-            isAvailable:     row?.isAvailable ?? true,
-            isShutDown:      row?.isShutDown ?? false,
-            shutDownMessage: row?.shutDownMessage ?? undefined,
-        };
-    }
+	public static async getAllCafeHoursForDate(dateString: string): Promise<Map<string, {
+		opensAt: number;
+		closesAt: number
+	}>> {
+		const results = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
+			by:    ['cafeId'],
+			where: { dateString },
+			_min:  { opensAt: true },
+			_max:  { closesAt: true },
+		}));
+
+		const hoursByCafe = new Map<string, { opensAt: number; closesAt: number }>();
+		for (const result of results) {
+			hoursByCafe.set(result.cafeId, {
+				opensAt:  result._min.opensAt!,
+				closesAt: result._max.closesAt!,
+			});
+		}
+
+		return hoursByCafe;
+	}
+
+	public static async upsertDailyCafeAsync(cafeId: string, dateString: string, data: {
+		isAvailable: boolean;
+		shutdownMessageHash?: string | null;
+	}): Promise<void> {
+		const { isAvailable, shutdownMessageHash = null } = data;
+		await usePrismaClient(prismaClient => prismaClient.dailyCafe.upsert({
+			where:  { dateString_cafeId: { dateString, cafeId } },
+			update: { isAvailable, shutdownMessageHash },
+			create: { dateString, cafeId, isAvailable, shutdownMessageHash },
+		}));
+	}
+
+	public static async getShutDownCafesAsync(dateString: string): Promise<Map<string, ICafeShutdownState>> {
+		const rows = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findMany({
+			where:  { dateString, shutdownMessageHash: { not: null } },
+			select: {
+				cafeId:   true,
+				shutdown: {
+					select: {
+						message:      true,
+						shutdownType: true,
+						isTemporary:  true,
+						resumeInfo:   true,
+					}
+				}
+			},
+		}));
+
+		const result = new Map<string, ICafeShutdownState>();
+		for (const row of rows) {
+			if (row.shutdown) {
+				result.set(row.cafeId, {
+					message:     row.shutdown.message,
+					type:        row.shutdown.shutdownType as CafeShutdownType,
+					isTemporary: row.shutdown.isTemporary,
+					resumeInfo:  row.shutdown.resumeInfo ?? undefined,
+				});
+			}
+		}
+		return result;
+	}
+
+	public static async retrieveDailyCafeStateAsync(cafeId: string, dateString: string): Promise<ICafeDailyState> {
+		const row = await usePrismaClient(prismaClient => prismaClient.dailyCafe.findUnique({
+			where:  { dateString_cafeId: { dateString, cafeId } },
+			select: {
+				isAvailable: true,
+				shutdown:    {
+					select: {
+						message:      true,
+						shutdownType: true,
+						isTemporary:  true,
+						resumeInfo:   true,
+					}
+				}
+			},
+		}));
+
+		if (!row) {
+			return { isAvailable: false };
+		}
+
+		const result: ICafeDailyState = {
+			isAvailable: row.isAvailable,
+		};
+
+		if (row.shutdown) {
+			result.shutdownState = {
+				message:     row.shutdown.message,
+				type:        row.shutdown.shutdownType as CafeShutdownType,
+				isTemporary: row.shutdown.isTemporary,
+				resumeInfo:  row.shutdown.resumeInfo ?? undefined,
+			};
+		}
+
+		return result
+	}
 }

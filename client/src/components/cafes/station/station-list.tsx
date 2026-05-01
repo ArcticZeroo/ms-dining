@@ -9,6 +9,7 @@ import { sortStationUniquenessInPlace } from '../../../util/sorting.ts';
 import { CurrentCafeContext } from '../../../context/menu-item.js';
 import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 import { resolveIngredientsMenu } from '../../../util/in-gredients.js';
+import { ICafeShutdownState } from '@msdining/common/models/cafe';
 
 const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIngredientsMenuDTO): Array<[ICafeStation, MenuItemsByCategoryName]> => {
     const cafe = useContext(CurrentCafeContext);
@@ -41,7 +42,7 @@ const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIng
 
                 let menu: MenuItemsByCategoryName | null = station.menu;
                 if (enablePriceFilters) {
-                    menu = getFilteredMenu(station, minPrice, maxPrice)
+                    menu = getFilteredMenu(station, minPrice, maxPrice);
                 }
 
                 if (menu != null) {
@@ -53,22 +54,29 @@ const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIng
         },
         [cafe.id, enableBetterIngredientsMenu, shouldDoIntelligentOrdering, ingredientsMenu, stations, shouldHideEveryDayStations, enablePriceFilters, minPrice, maxPrice]
     );
-}
+};
 
 interface IStationListProps {
     stations: ICafeStation[];
     isAvailable: boolean;
-    isShutDown?: boolean;
-    shutDownMessage?: string;
+    shutdownState?: ICafeShutdownState;
     ingredientsMenu?: IIngredientsMenuDTO;
 }
 
-export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable, isShutDown, shutDownMessage, ingredientsMenu }) => {
+const getShutDownDisplayMessage = ({ message, isTemporary, resumeInfo }: ICafeShutdownState): string => {
+    const base = message || 'This cafe is temporarily closed.';
+    if (isTemporary && resumeInfo) {
+        return `${base} (${resumeInfo})`;
+    }
+    return base;
+};
+
+export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable, shutdownState, ingredientsMenu }) => {
     const filteredStationData = useFilteredStationData(stations, ingredientsMenu);
 
-    if (isShutDown) {
+    if (shutdownState != null && shutdownState.type !== 'online_ordering_only') {
         return (
-            <StationListEmpty message={shutDownMessage ?? 'This cafe is temporarily closed.'}/>
+            <StationListEmpty message={getShutDownDisplayMessage(shutdownState)}/>
         );
     }
 
@@ -86,6 +94,11 @@ export const StationList: React.FC<IStationListProps> = ({ stations, isAvailable
 
     return (
         <div className="stations">
+            {shutdownState != null && shutdownState.type === 'online_ordering_only' && (
+                <div className="subtitle text-center">
+                    ⚠️ Online ordering unavailable - {shutdownState.message}
+                </div>
+            )}
             {
                 filteredStationData.map(([station, menu]) => (
                     <Station

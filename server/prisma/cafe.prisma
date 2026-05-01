@@ -185,14 +185,25 @@ model DailyCafeOrderingContext {
   @@id([dateString, cafeId])
 }
 
+model CafeShutdown {
+  messageHash  String  @id
+  message      String
+  shutdownType String @default("full") // full | online_ordering
+  isTemporary  Boolean @default(false)
+  resumeInfo   String?
+
+  dailyCafes DailyCafe[]
+}
+
 model DailyCafe {
-  dateString      String
-  isAvailable     Boolean @default(true)
-  isShutDown      Boolean @default(false)
-  shutDownMessage String?
+  dateString  String
+  isAvailable Boolean @default(true)
 
   cafeId String
   cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
+  shutdownMessageHash String?
+  shutdown            CafeShutdown? @relation(fields: [shutdownMessageHash], references: [messageHash])
 
   dailyStations DailyStation[]
 

@@ -61,7 +61,7 @@ export const MapCafeViewDetails: React.FC<IMapCafeViewDetails> = ({ view, showAl
                         cafe={cafe}
                         showAllStations={showAllStations}
                         overviewStations={overviewData?.stations[cafe.id]}
-                        shutDownState={overviewData?.shutDownState[cafe.id]}
+                        shutDownState={overviewData?.shutdownState[cafe.id]}
                     />
                 ))
             }

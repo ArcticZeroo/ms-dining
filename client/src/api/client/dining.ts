@@ -63,8 +63,7 @@ export abstract class DiningClient {
 
         return {
             isAvailable:     response.isAvailable,
-            isShutDown:      response.isShutDown,
-            shutDownMessage: response.shutDownMessage,
+            shutdownState:   response.shutdownState,
             stations:        DiningClient._deserializeStations(response.stations),
             ingredientsMenu: response.ingredientsMenu,
         };

@@ -1,4 +1,4 @@
-import { ICafeOverviewStation, ICafeShutDownState } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, ICafeShutdownState } from '@msdining/common/models/cafe';
 import React, { useMemo } from 'react';
 import { sortStationUniquenessInPlace } from '../../util/sorting.js';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
@@ -19,7 +19,7 @@ const isInterestingStation = (station: ICafeOverviewStation): boolean => {
 interface ICafeOverviewWithDataProps {
     cafe: ICafe;
     overviewStations: ICafeOverviewStation[];
-    shutDownState?: ICafeShutDownState;
+    shutDownState?: ICafeShutdownState;
     showAllStationsIfNoneInteresting?: boolean;
     showAllStations?: boolean;
 }
@@ -74,12 +74,17 @@ export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ caf
     );
 
     if (shutDownState) {
-        return (
-            <div className="flex-col">
-                <span>⚠️ This location is temporarily closed.</span>
-                {shutDownState.message && <span className="subtitle">{shutDownState.message}</span>}
-            </div>
-        );
+        if (shutDownState.type !== 'online_ordering_only') {
+            return (
+                <div className="flex-col">
+                    <span>⚠️ This location is {shutDownState.isTemporary && 'temporarily '}closed.</span>
+                    {shutDownState.message && <span className="subtitle">{shutDownState.message}</span>}
+                    {shutDownState.isTemporary && shutDownState.resumeInfo && (
+                        <span className="subtitle">{shutDownState.resumeInfo}</span>
+                    )}
+                </div>
+            );
+        }
     }
 
     if (overviewStations.length === 0) {
@@ -105,6 +110,11 @@ export const CafeOverviewWithData: React.FC<ICafeOverviewWithDataProps> = ({ caf
         : overviewStations;
 
     return <div className="flex-col">
+        {shutDownState?.type === 'online_ordering_only' && (
+            <span className="subtitle">
+                ⚠️ Online ordering unavailable - {shutDownState.message}
+            </span>
+        )}
         <span>
             {title}
         </span>

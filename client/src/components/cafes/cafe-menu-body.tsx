@@ -40,8 +40,7 @@ export const CafeMenuBody: React.FC<ICollapsibleCafeMenuBodyProps> = ({
                 <StationList
                     stations={value.stations}
                     isAvailable={value.isAvailable}
-                    isShutDown={value.isShutDown}
-                    shutDownMessage={value.shutDownMessage}
+                    shutdownState={value.shutdownState}
                     ingredientsMenu={value?.ingredientsMenu}
                 />
             </>

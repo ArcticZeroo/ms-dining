@@ -1,4 +1,4 @@
-import { IMenuItemDTO, IStationUniquenessData } from './cafe.js';
+import { ICafeShutdownState, IMenuItemDTO, IStationUniquenessData } from './cafe.js';
 import { IIngredientsMenuDTO } from './ingredients.js';
 import { SearchEntityType, SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
@@ -97,8 +97,7 @@ export type MenuResponse = Array<IStationDTO>;
 // GET /api/dining/menu/:cafeId/menu
 export interface ICafeMenuResponse {
 	isAvailable: boolean;
-	isShutDown?: boolean;
-	shutDownMessage?: string;
+	shutdownState?: ICafeShutdownState;
 	stations: IStationDTO[];
 	ingredientsMenu?: IIngredientsMenuDTO;
 }

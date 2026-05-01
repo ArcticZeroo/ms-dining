@@ -100,8 +100,13 @@ export interface ICafeOverviewStation {
     uniqueness: IStationUniquenessData;
 }
 
-export interface ICafeShutDownState {
-    message?: string | null;
+export type CafeShutdownType = 'full' | 'online_ordering_only';
+
+export interface ICafeShutdownState {
+    message: string | null;
+    type: CafeShutdownType;
+    isTemporary: boolean;
+    resumeInfo?: string;
 }
 
 export interface IMenuOverviewSummary {
@@ -110,13 +115,13 @@ export interface IMenuOverviewSummary {
     newStations: number;
     newItems: number;
     rotating: number;
-    shutDownState: Record<string /*cafeId*/, ICafeShutDownState>;
+    shutdownState: Record<string /*cafeId*/, ICafeShutdownState>;
 }
 
 export interface ICafeOverviewResponse {
     stations: Record<string /*cafeId**/, Array<ICafeOverviewStation>>;
     featuredItems: IRecommendationItem[];
-    shutDownState: Record<string /*cafeId*/, ICafeShutDownState>;
+    shutdownState: Record<string /*cafeId*/, ICafeShutdownState>;
 }
 
 export * from './cart.js';

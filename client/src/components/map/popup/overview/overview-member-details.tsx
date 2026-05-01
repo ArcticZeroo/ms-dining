@@ -1,5 +1,5 @@
 import { CafeViewType, ICafe } from '../../../../models/cafe.js';
-import { ICafeOverviewStation, ICafeShutDownState } from '@msdining/common/models/cafe';
+import { ICafeOverviewStation, ICafeShutdownState } from '@msdining/common/models/cafe';
 import React, { useContext, useMemo } from 'react';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getCafeName } from '../../../../util/cafe.js';
@@ -15,7 +15,7 @@ import { MapSelectedViewContext } from '../../../../context/map.js';
 interface IViewOverviewCafeProps {
     cafe: ICafe;
     overviewStations: Array<ICafeOverviewStation> | undefined;
-    shutDownState?: ICafeShutDownState;
+    shutDownState?: ICafeShutdownState;
     showAllStations: boolean;
 }
 

@@ -14,6 +14,7 @@ import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { saveDailyMenuAsync } from './storage.js';
 import { CafeMenuSession } from '../session/menu.js';
 import { IStationListResult } from '../buy-ondemand/stations.js';
+import { classifyShutdownMessageAsync } from '../shutdown-classifier.js';
 
 export const CAFE_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCafes);
 const cafeDiscoveryRetryDelayMs = 1000;
@@ -81,10 +82,15 @@ export class DailyCafeUpdateSession {
 				return;
 			}
 
+            let shutdownMessageHash: string | null = null;
+            if (result.isShutDown && result.shutDownMessage) {
+                const classification = await classifyShutdownMessageAsync(result.shutDownMessage);
+                shutdownMessageHash = classification.messageHash;
+            }
+
             await DailyMenuStorageClient.upsertDailyCafeAsync(cafe.id, this.dateString, {
                 isAvailable:     result.isAvailable,
-                isShutDown:      result.isShutDown ?? false,
-                shutDownMessage: result.shutDownMessage,
+                shutdownMessageHash,
             });
 
             await saveDailyMenuAsync({

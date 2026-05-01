@@ -2,6 +2,7 @@ import { IDiningCoreGroup, IDiningCoreGroupMember, } from '@msdining/common/mode
 import { IMenuItem, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { Nullable } from '@msdining/common/models/util';
 import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
+import { ICafeShutdownState } from '../../../common/src/models/cafe.js';
 
 export type ICafeGroup = IDiningCoreGroup;
 export type ICafe = IDiningCoreGroupMember & { group?: ICafeGroup };
@@ -39,8 +40,7 @@ export interface ICafeStation {
 
 export interface CafeMenu {
     isAvailable: boolean;
-    isShutDown?: boolean;
-    shutDownMessage?: string;
+	shutdownState?: ICafeShutdownState;
     stations: ICafeStation[];
     ingredientsMenu?: IIngredientsMenuDTO;
 }
