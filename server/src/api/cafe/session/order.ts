@@ -1,6 +1,8 @@
 import { ICartItem, IRguestCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
-import { logError } from '../../../util/log.js';
-import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
+import { getNamespaceLogger, logError } from '../../../util/log.js';
+
+const orderLog = getNamespaceLogger('Order');
+import { BuyOnDemandClient, DEFAULT_SCHEDULE_TIME, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
@@ -125,7 +127,9 @@ export class CafeOrderSession {
     }
 
     public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
+        orderLog.info(`{${cafe.name}} Creating order session with ${cartItems.length} item(s)`);
         const client = await BuyOnDemandClient.createAsync(cafe, true /*enableHar*/);
+        orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
         return new CafeOrderSession(client, cartItems);
     }
 
@@ -158,10 +162,12 @@ export class CafeOrderSession {
     }
 
     private async _requestOrderingContextAsync(): Promise<IOrderingContext> {
+        orderLog.info(`{${this.client.cafe.name}} Fetching ordering context (site data + pay client ID)`);
         const [siteData, payClientId] = await Promise.all([
             this._fetchSiteData(),
             this._fetchPayClientId(),
         ]);
+        orderLog.info(`{${this.client.cafe.name}} Site data + pay client ID fetched`);
 
         const orderingContext: IOrderingContext = {
             onDemandTerminalId: siteData.displayOptions.onDemandTerminalId,
@@ -173,6 +179,7 @@ export class CafeOrderSession {
         };
 
         orderingContext.profitCenterName = await this._retrieveProfitCenterName(orderingContext.profitCenterId);
+        orderLog.info(`{${this.client.cafe.name}} Ordering context complete (profitCenter: ${orderingContext.profitCenterName})`);
 
         return orderingContext;
     }
@@ -208,6 +215,7 @@ export class CafeOrderSession {
                 method: 'POST',
                 headers: JSON_HEADERS,
                 body: JSON.stringify({
+                    scheduleTime: DEFAULT_SCHEDULE_TIME,
                     scheduledDay: 0,
                 })
             }
@@ -226,9 +234,11 @@ export class CafeOrderSession {
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
         const existingOrderingContext = await OrderingClient.retrieveOrderingContextAsync(this.client.cafe.id);
         if (existingOrderingContext != null) {
+            orderLog.info(`{${this.client.cafe.name}} Using cached ordering context`);
             return existingOrderingContext;
         }
 
+        orderLog.info(`{${this.client.cafe.name}} No cached ordering context, fetching fresh`);
         const orderingContext = await this._requestOrderingContextAsync();
 
         await OrderingClient.createOrderingContextAsync(this.client.cafe.id, orderingContext);
@@ -311,6 +321,7 @@ export class CafeOrderSession {
     }
 
     private async _addItemToCart(cartItem: ICartItem) {
+        orderLog.info(`{${this.client.cafe.name}} Adding item ${cartItem.itemId} (qty: ${cartItem.quantity}) to cart`);
         const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(cartItem.itemId);
 
         if (menuItem == null) {
@@ -417,28 +428,33 @@ export class CafeOrderSession {
         this.#orderTotalWithoutTax += Number(orderDetails.taxExcludedTotalAmount.amount);
         this.#orderTotalWithTax += Number(orderDetails.totalDueAmount.amount);
 
+        orderLog.info(`{${this.client.cafe.name}} Item ${cartItem.itemId} added — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#orderTotalWithTax.toFixed(2)}`);
+
         for (const lineItem of orderDetails.lineItems) {
             this.#lineItemsById.set(lineItem.lineItemId, lineItem);
         }
     }
 
     private async _populateCart() {
+        orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#cartItems.length} item(s))`);
         await this._fetchConceptSchedule();
 
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
         for (const cartItem of this.#cartItems) {
             await this._addItemToCart(cartItem);
         }
+        orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#orderTotalWithTax.toFixed(2)}`);
     }
 
     private async _fetchConceptSchedule() {
+        orderLog.info(`{${this.client.cafe.name}} Fetching concept schedule`);
         const response = await this.client.requestAsync(
             `/sites/${this.client.config.tenantId}/${this.client.config.contextId}/concepts/${this.client.config.displayProfileId}`,
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    scheduleTime: { startTime: '11:00 AM', endTime: '11:15 PM' },
+                    scheduleTime: DEFAULT_SCHEDULE_TIME,
                     scheduledDay: 0,
                 })
             }
@@ -462,6 +478,7 @@ export class CafeOrderSession {
         this.#conceptSchedule = firstConcept.schedule;
         this.#openScheduleExpression = firstConcept.openScheduleExpression;
         this.#closeScheduleExpression = firstConcept.closeScheduleExpression;
+        orderLog.info(`{${this.client.cafe.name}} Concept schedule fetched (${concepts.length} concept(s))`);
     }
 
     private async _getCardProcessorSiteToken(iframeCssUrl?: string) {
@@ -894,10 +911,13 @@ export class CafeOrderSession {
             throw new Error(`Order is in the wrong stage! Expected: ${requiredStage}, actual: ${this.#lastCompletedStage}`);
         }
 
+        orderLog.info(`{${this.client.cafe.name}} Running stage after ${requiredStage} — fetching ordering context`);
         this.#orderingContext = await this._retrieveOrderingContextAsync();
+        orderLog.info(`{${this.client.cafe.name}} Ordering context ready, executing stage callback`);
 
         try {
             await callback();
+            orderLog.info(`{${this.client.cafe.name}} Stage callback complete — now at stage ${this.#lastCompletedStage}`);
         } catch (err) {
             logError(`{${this.client.cafe.name}} Failed after stage ${this.#lastCompletedStage}:`, err);
             throw err;
@@ -917,6 +937,7 @@ export class CafeOrderSession {
      * Does NOT submit payment — the frontend iframe handles that.
      */
     public async prepareForIframe(iframeCssUrl: string): Promise<{ siteToken: string; iframeUrl: string; orderId: string; orderNumber: string }> {
+        orderLog.info(`{${this.client.cafe.name}} Preparing for iframe payment`);
         await this._runStages(SubmitOrderStage.addToCart, async () => {
             this.#cardProcessorToken = await this._getCardProcessorSiteToken(iframeCssUrl);
             this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
@@ -944,6 +965,7 @@ export class CafeOrderSession {
         paymentToken,
         cardInfo,
     }: IIframeCloseOrderParams): Promise<void> {
+        orderLog.info(`{${this.client.cafe.name}} Completing order ${this.#orderId} with iframe token`);
         try {
             await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
                 this.#lastCompletedStage = SubmitOrderStage.payment;
@@ -954,6 +976,7 @@ export class CafeOrderSession {
                     logError('Unable to report iframe data (non-fatal, continuing anyway):', err);
                 }
 
+                orderLog.info(`{${this.client.cafe.name}} Closing order ${this.#orderId}`);
                 await this._closeOrderWithIframeTokenAsync({
                     alias,
                     phoneData,
@@ -962,10 +985,12 @@ export class CafeOrderSession {
                 });
 
                 this.#lastCompletedStage = SubmitOrderStage.closeOrder;
+                orderLog.info(`{${this.client.cafe.name}} Order closed, sending phone confirmation`);
 
                 await this._sendPhoneConfirmation(phoneData);
 
                 this.#lastCompletedStage = SubmitOrderStage.complete;
+                orderLog.info(`{${this.client.cafe.name}} Order ${this.#orderNumber} complete`);
             });
         } finally {
             await this.client.harCapture?.writeToFile(this.client.cafe.id);

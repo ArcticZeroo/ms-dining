@@ -29,6 +29,12 @@ export const JSON_HEADERS = {
     'Content-Type': 'application/json'
 };
 
+/**
+ * Default schedule time window sent with BuyOnDemand concept/profile endpoints.
+ * The API requires this field on all POST requests that include scheduledDay.
+ */
+export const DEFAULT_SCHEDULE_TIME = { startTime: '11:00 AM', endTime: '11:15 PM' } as const;
+
 export class BuyOnDemandClient {
     #token: string = '';
     #csrfToken: string = '';

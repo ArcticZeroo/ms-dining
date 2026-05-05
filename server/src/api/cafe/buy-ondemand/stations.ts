@@ -1,4 +1,4 @@
-import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
+import { BuyOnDemandClient, DEFAULT_SCHEDULE_TIME, JSON_HEADERS } from './buy-ondemand-client.js';
 import { ICafeStation } from '../../../models/cafe.js';
 import { ICafeStationListItem } from '../../../models/buyondemand/responses.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
@@ -98,7 +98,7 @@ export const retrieveStationListAsync = async (client: BuyOnDemandClient, daysIn
             method:  'POST',
             headers: JSON_HEADERS,
             body:    JSON.stringify({
-                scheduleTime: { startTime: '11:00 AM', endTime: '11:15 PM' },
+                scheduleTime: DEFAULT_SCHEDULE_TIME,
                 scheduledDay: daysInFuture,
             }),
         },

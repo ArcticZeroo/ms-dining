@@ -30,6 +30,9 @@ import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { isDuckTypeSerializedCartItem, isValidItemIdsByCafeId } from '../../../util/typeguard.js';
+import { getNamespaceLogger } from '../../../util/log.js';
+
+const orderLog = getNamespaceLogger('Order');
 
 const isValidPrepareOrderParams = (data: unknown): data is IPrepareOrderRequest => {
     if (!isDuckType<IPrepareOrderRequest>(data, {
@@ -230,7 +233,12 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
+        const cafeIds = Object.keys(data.itemsByCafeId);
+        const totalItems = Object.values(data.itemsByCafeId).reduce((sum, items) => sum + items.length, 0);
+        orderLog.info(`POST /prepare/cart — ${cafeIds.length} cafe(s), ${totalItems} total item(s), cafeIds: [${cafeIds.join(', ')}]`);
+
         const cartItemsByCafeId = await validateCartData(ctx, data.itemsByCafeId);
+        orderLog.info(`Cart validation passed for ${cartItemsByCafeId.size} cafe(s)`);
 
         const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
         const prepareResults: IPrepareCartResponse = {};
@@ -245,7 +253,9 @@ export const registerOrderingRoutes = (parent: Router) => {
                     throw new Error('Order ID or order number is not set after cart population');
                 }
 
+                orderLog.info(`{${cartData.cafe.name}} Cart populated — orderId: ${orderId}, fetching wait time`);
                 const waitTime = await WaitTimeSession.retrieveWaitTimeWithCartItems(session.client, [...session.rawCartItemsForWaitTime]);
+                orderLog.info(`{${cartData.cafe.name}} Wait time: ${waitTime.minTime}-${waitTime.maxTime} min`);
 
                 storePendingSession(orderId, session, cafeId);
 
@@ -262,6 +272,7 @@ export const registerOrderingRoutes = (parent: Router) => {
             })
         );
 
+        orderLog.info(`POST /prepare/cart complete — ${Object.keys(prepareResults).length} cafe(s) prepared`);
         ctx.body = jsonStringifyWithoutNull(prepareResults);
     });
 
@@ -273,8 +284,11 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
+        orderLog.info(`POST /prepare/payment — orderId: ${data.orderId}`);
+
         const pending = pendingIframeSessions.get(data.orderId);
         if (pending == null || pending.session.lastCompletedStage !== SubmitOrderStage.addToCart) {
+            orderLog.error(`No pending cart session for orderId ${data.orderId} (stage: ${pending?.session.lastCompletedStage ?? 'none'})`);
             return ctx.throw(400, 'No pending cart session found. The session may have expired — please try again.');
         }
 
@@ -296,6 +310,7 @@ export const registerOrderingRoutes = (parent: Router) => {
         };
 
         ctx.body = jsonStringifyWithoutNull(response);
+        orderLog.info(`POST /prepare/payment complete — orderId: ${result.orderId}`);
     });
 
     router.post('/complete', async ctx => {
@@ -305,6 +320,8 @@ export const registerOrderingRoutes = (parent: Router) => {
             return ctx.throw(400, 'Invalid request body');
         }
 
+        orderLog.info(`POST /complete — orderId: ${data.orderId}`);
+
         const phoneData = phone(data.phoneNumberWithCountryCode);
 
         if (!phoneData.isValid) {
@@ -313,6 +330,7 @@ export const registerOrderingRoutes = (parent: Router) => {
 
         const pending = pendingIframeSessions.get(data.orderId);
         if (pending == null || pending.session.lastCompletedStage !== SubmitOrderStage.initializeCardProcessor) {
+            orderLog.error(`No pending order session for orderId ${data.orderId} (stage: ${pending?.session.lastCompletedStage ?? 'none'})`);
             return ctx.throw(400, 'No pending order session found. The order may have expired — please try again.');
         }
 
@@ -339,6 +357,7 @@ export const registerOrderingRoutes = (parent: Router) => {
         };
 
         ctx.body = JSON.stringify(response);
+        orderLog.info(`POST /complete done — orderNumber: ${orderNumber ?? 'Unknown'}, stage: ${pending.session.lastCompletedStage}`);
     });
 
     router.post('/hydrate',
