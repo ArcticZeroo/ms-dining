@@ -128,7 +128,7 @@ export class CafeOrderSession {
 
     public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
         orderLog.info(`{${cafe.name}} Creating order session with ${cartItems.length} item(s)`);
-        const client = await BuyOnDemandClient.createAsync(cafe, true /*enableHar*/);
+        const client = await BuyOnDemandClient.createAsync(cafe, false /*enableHar — disabled temporarily to debug hang*/);
         orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
         return new CafeOrderSession(client, cartItems);
     }
