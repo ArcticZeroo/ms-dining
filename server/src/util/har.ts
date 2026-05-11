@@ -1,4 +1,3 @@
-import { Response } from 'node-fetch';
 import { writeFile, mkdir } from 'fs/promises';
 import { logError, logInfo } from './log.js';
 import path from 'path';
@@ -66,29 +65,26 @@ export class HarCapture {
  * Captures a fetch call as a HAR entry.
  * Clones the response so the body can still be consumed by the caller.
  */
-export const captureFetchAsHarEntry = async (
+/**
+ * Build a HAR entry from already-read response data.
+ * The caller is responsible for reading the body text and providing it here
+ * so that the original response stream is not cloned (which can deadlock).
+ */
+export const buildHarEntry = (
     url: string,
     options: { method?: string; headers?: Record<string, string>; body?: string },
-    response: Response,
-): Promise<IHarEntry> => {
+    response: { status: number; statusText: string; headers: Iterable<[string, string]>; contentType?: string },
+    responseText: string,
+): IHarEntry => {
     const startedDateTime = new Date().toISOString();
 
     const requestHeaders = Object.entries(options.headers ?? {}).map(
         ([name, value]) => ({ name, value })
     );
 
-    const responseHeaders = Array.from(response.headers.entries()).map(
+    const responseHeaders = Array.from(response.headers).map(
         ([name, value]) => ({ name, value })
     );
-
-    // Clone the response to read the body without consuming it
-    let responseText = '';
-    try {
-        const cloned = response.clone();
-        responseText = await cloned.text();
-    } catch {
-        // Body may have already been consumed or not available
-    }
 
     return {
         startedDateTime,
@@ -110,7 +106,7 @@ export const captureFetchAsHarEntry = async (
             headers:    responseHeaders,
             content:    {
                 size:     responseText.length,
-                mimeType: response.headers.get('content-type') ?? 'application/json',
+                mimeType: response.contentType ?? 'application/json',
                 text:     responseText,
             }
         },

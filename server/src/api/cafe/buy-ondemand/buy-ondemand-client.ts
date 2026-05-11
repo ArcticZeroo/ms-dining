@@ -1,11 +1,11 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../../../constants/cafes.js';
 import { ICafe, ICafeConfig } from '../../../models/cafe.js';
 import { ICafeConfigResponse } from '../../../models/buyondemand/responses.js';
 import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
 import { logDebug, logError } from '../../../util/log.js';
-import { captureFetchAsHarEntry, HarCapture } from '../../../util/har.js';
+import { buildHarEntry, HarCapture } from '../../../util/har.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../util/request.js';
 import { Semaphore } from '@frozor/lock';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
@@ -144,8 +144,26 @@ export class BuyOnDemandClient {
             }
 
             if (this.#harCapture != null) {
-                const entry = await captureFetchAsHarEntry(url, optionsWithToken, response);
+                // Read body once to avoid stream cloning deadlocks.
+                // Return a new Response so the caller can still call .json().
+                const bodyText = await response.text();
+                const entry = buildHarEntry(url, optionsWithToken, {
+                    status:      response.status,
+                    statusText:  response.statusText,
+                    headers:     response.headers.entries(),
+                    contentType: response.headers.get('content-type') ?? undefined,
+                }, bodyText);
                 this.#harCapture.addEntry(entry);
+
+                if (shouldValidateSuccess) {
+                    validateSuccessResponse(response);
+                }
+
+                return new Response(bodyText, {
+                    status:     response.status,
+                    statusText: response.statusText,
+                    headers:    Object.fromEntries(response.headers.entries()),
+                });
             }
 
             if (shouldValidateSuccess) {
