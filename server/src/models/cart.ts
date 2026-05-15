@@ -5,4 +5,5 @@ export interface IOrderingContext {
     storePriceLevel: string;
     profitCenterName: string;
     payClientId: string;
+    checkTypeId?: string;
 }

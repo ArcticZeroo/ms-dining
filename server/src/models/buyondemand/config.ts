@@ -4,6 +4,7 @@ export interface ISiteDataResponseItem {
         onDemandTerminalId: string;
         onDemandEmployeeId: string;
         'profit-center-id': string;
+        'check-type'?: string;
     };
     siteStoreInfo: {
         storeInfoId: string

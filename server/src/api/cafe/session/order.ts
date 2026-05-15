@@ -4,15 +4,11 @@ import { getNamespaceLogger, logError } from '../../../util/log.js';
 const orderLog = getNamespaceLogger('Order');
 import { BuyOnDemandClient, DEFAULT_SCHEDULE_TIME, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
-import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import {
     IOrderLineItem,
-    IRetrieveCardProcessorTokenResponse,
 } from '../../../models/buyondemand/cart.js';
 import hat from 'hat';
-import { ISiteDataResponseItem } from '../../../models/buyondemand/config.js';
 import { IOrderingContext } from '../../../models/cart.js';
-import { OrderingClient } from '../../storage/clients/ordering.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { StringUtil } from '../../../util/string.js';
 import { z } from 'zod';
@@ -41,6 +37,35 @@ const addToOrderResponseSchema = z.object({
 
 type OrderDetails = z.infer<typeof orderDetailsSchema>;
 
+const pickUpConfigSchema = z.object({
+    kitchenText:             z.string().optional(),
+    buttonText:              z.string().optional(),
+    defaultConfirmationText: z.string().optional(),
+}).passthrough();
+
+const payConfigSchema = z.object({
+    pay:            z.object({ clientId: z.string() }),
+    displayOptions: z.record(z.unknown()),
+    pickUpConfig:   pickUpConfigSchema.optional(),
+    emailReceipt:   z.record(z.unknown()).optional(),
+    checkTypeId:    z.string().optional(),
+}).passthrough();
+
+type PayConfig = z.infer<typeof payConfigSchema>;
+
+const siteStoreInfoSchema = z.record(z.unknown());
+
+const siteDataItemSchema = z.object({
+    storePriceLevel: z.string(),
+    displayOptions:  z.object({
+        onDemandTerminalId: z.string(),
+        onDemandEmployeeId: z.string(),
+        'profit-center-id': z.string(),
+        'check-type':       z.string().optional(),
+    }).passthrough(),
+    siteStoreInfo: siteStoreInfoSchema.optional(),
+}).passthrough();
+
 // are preserved when we spread the response into the cart request body.
 const kioskItemDetailSchema = z.object({
     id:                      z.string(),
@@ -63,6 +88,8 @@ const kioskItemDetailSchema = z.object({
     // These are stripped before sending to the cart endpoint
     childGroups:             z.unknown().optional(),
     modifiers:               z.unknown().optional(),
+    // Preserved and merged with cart-specific fields (e.g. calories)
+    properties:              z.record(z.unknown()).optional(),
 }).passthrough();
 
 interface ISerializedModifier {
@@ -114,13 +141,17 @@ export class CafeOrderSession {
     // The full orderDetails from the last POST /orders response,
     // echoed back to the close order endpoint as-is.
     #lastOrderDetails: OrderDetails | null = null;
-    #conceptSchedule: Array<unknown> = [];
-    #openScheduleExpression: string = '0 0 0 * * *';
-    #closeScheduleExpression: string = '0 0 0 * * *';
+    // The full response from POST /sites/{contextId}/{displayProfileId},
+    // used to populate igSettings, deliveryProperties, emailInfo, etc. in the close order.
+    #payConfig: PayConfig | null = null;
+    // The site data from GET /sites/{contextId}, used for siteStoreInfo in locizeConfig.
+    #siteStoreInfo: z.infer<typeof siteStoreInfoSchema> = {};
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #rawCartItemsForWaitTime: unknown[] = [];
     readonly #conceptIds = new Set<string>();
+    // Per-concept schedule data, keyed by concept ID
+    readonly #conceptDataById = new Map<string, { schedule: unknown[]; openScheduleExpression: string; closeScheduleExpression: string }>();
 
     constructor(public client: BuyOnDemandClient, cartItems: ICartItem[]) {
         this.#cartItems = cartItems;
@@ -165,7 +196,7 @@ export class CafeOrderSession {
         orderLog.info(`{${this.client.cafe.name}} Fetching ordering context (site data + pay client ID)`);
         const [siteData, payClientId] = await Promise.all([
             this._fetchSiteData(),
-            this._fetchPayClientId(),
+            this._fetchPayConfig(),
         ]);
         orderLog.info(`{${this.client.cafe.name}} Site data + pay client ID fetched`);
 
@@ -176,6 +207,7 @@ export class CafeOrderSession {
             storePriceLevel:    siteData.storePriceLevel,
             profitCenterName:   '',
             payClientId,
+            checkTypeId:        siteData.displayOptions['check-type'],
         };
 
         orderingContext.profitCenterName = await this._retrieveProfitCenterName(orderingContext.profitCenterId);
@@ -184,7 +216,7 @@ export class CafeOrderSession {
         return orderingContext;
     }
 
-    private async _fetchSiteData(): Promise<ISiteDataResponseItem> {
+    private async _fetchSiteData() {
         const response = await this.client.requestAsync(`/sites/${this.client.config.contextId}`, {
             method:  'GET',
             headers: JSON_HEADERS
@@ -192,23 +224,20 @@ export class CafeOrderSession {
 
         const json = await response.json();
 
-        if (!isDuckTypeArray<ISiteDataResponseItem>(json, {
-            storePriceLevel: 'string',
-            displayOptions:  'object'
-        })) {
-            throw new Error('Site data is not in the correct format');
-        }
+        const siteDataArray = z.array(siteDataItemSchema).parse(json);
 
-        const [siteData] = json;
+        const siteData = siteDataArray[0];
 
         if (!siteData) {
             throw new Error('Site data is empty!');
         }
 
+        this.#siteStoreInfo = siteData.siteStoreInfo ?? {};
+
         return siteData;
     }
 
-    private async _fetchPayClientId(): Promise<string> {
+    private async _fetchPayConfig(): Promise<string> {
         const response = await this.client.requestAsync(
             `/sites/${this.client.config.contextId}/${this.client.config.displayProfileId}`,
             {
@@ -222,28 +251,13 @@ export class CafeOrderSession {
         );
 
         const json = await response.json();
-        const result = z.object({
-            pay: z.object({
-                clientId: z.string(),
-            }),
-        }).parse(json);
+        this.#payConfig = payConfigSchema.parse(json);
 
-        return result.pay.clientId;
+        return this.#payConfig.pay.clientId;
     }
 
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
-        const existingOrderingContext = await OrderingClient.retrieveOrderingContextAsync(this.client.cafe.id);
-        if (existingOrderingContext != null) {
-            orderLog.info(`{${this.client.cafe.name}} Using cached ordering context`);
-            return existingOrderingContext;
-        }
-
-        orderLog.info(`{${this.client.cafe.name}} No cached ordering context, fetching fresh`);
-        const orderingContext = await this._requestOrderingContextAsync();
-
-        await OrderingClient.createOrderingContextAsync(this.client.cafe.id, orderingContext);
-
-        return orderingContext;
+        return this._requestOrderingContextAsync();
     }
 
     private _serializeModifiers(cartItem: ICartItem, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
@@ -338,6 +352,11 @@ export class CafeOrderSession {
 
         this.#conceptIds.add(station.id);
 
+        const conceptData = this.#conceptDataById.get(station.id);
+        if (conceptData == null) {
+            throw new Error(`No concept schedule data found for concept "${station.id}" (${station.name}). Available: ${[...this.#conceptDataById.keys()].join(', ')}`);
+        }
+
         const serializedModifiers = this._serializeModifiers(cartItem, menuItem);
         const cartItemId = hat();
         const cartGuid = `${menuItem.id}-${Date.now()}`;
@@ -356,6 +375,7 @@ export class CafeOrderSession {
             item:               {
                 ...rawItemFields,
                 properties:           {
+                    ...rawItemFields.properties,
                     cartGuid,
                     scannedItem:  false,
                     priceLevelId: this.#orderingContext.storePriceLevel,
@@ -379,13 +399,14 @@ export class CafeOrderSession {
                 currencyCode:          'USD',
                 currencySymbol:        '$',
             },
-            schedule:           this.#conceptSchedule,
+            schedule:           conceptData.schedule,
             orderTimeZone:      'PST8PDT',
             storePriceLevel:    this.#orderingContext.storePriceLevel,
             scheduledDay:       0,
             useIgOrderApi:      true,
             onDemandTerminalId: this.#orderingContext.onDemandTerminalId,
             properties:         {
+                checkTypeId:               this.#orderingContext.checkTypeId,
                 employeeId:                this.#orderingContext.onDemandEmployeeId,
                 profitCenterId:            this.#orderingContext.profitCenterId,
                 orderSourceSystem:         'onDemand',
@@ -396,8 +417,8 @@ export class CafeOrderSession {
                 priceLevelId:              this.#orderingContext.storePriceLevel,
             },
             conceptSchedule:    {
-                openScheduleExpression:  this.#openScheduleExpression,
-                closeScheduleExpression: this.#closeScheduleExpression,
+                openScheduleExpression:  conceptData.openScheduleExpression,
+                closeScheduleExpression: conceptData.closeScheduleExpression,
             },
             isMultiItem:        false,
             scannedOrder:       false,
@@ -463,21 +484,26 @@ export class CafeOrderSession {
         const json = await response.json();
 
         const conceptSchema = z.object({
+            id:                      z.string(),
             schedule:                z.array(z.unknown()),
             openScheduleExpression:  z.string(),
             closeScheduleExpression: z.string(),
         }).passthrough();
 
         const concepts = z.array(conceptSchema).parse(json);
-        const firstConcept = concepts[0];
 
-        if (firstConcept == null) {
+        if (concepts.length === 0) {
             throw new Error('No concepts returned from API');
         }
 
-        this.#conceptSchedule = firstConcept.schedule;
-        this.#openScheduleExpression = firstConcept.openScheduleExpression;
-        this.#closeScheduleExpression = firstConcept.closeScheduleExpression;
+        for (const concept of concepts) {
+            this.#conceptDataById.set(concept.id, {
+                schedule:                concept.schedule,
+                openScheduleExpression:  concept.openScheduleExpression,
+                closeScheduleExpression: concept.closeScheduleExpression,
+            });
+        }
+
         orderLog.info(`{${this.client.cafe.name}} Concept schedule fetched (${concepts.length} concept(s))`);
     }
 
@@ -524,14 +550,9 @@ export class CafeOrderSession {
             });
 
         const json = await response.json();
+        const { token } = z.object({ token: z.string() }).parse(json);
 
-        if (!isDuckType<IRetrieveCardProcessorTokenResponse>(json, {
-            token: 'string'
-        })) {
-            throw new Error('Data is not in the correct format');
-        }
-
-        return json.token;
+        return token;
     }
 
     private _getCardProcessorUrl(token: string, iframeCssUrl?: string) {
@@ -656,12 +677,13 @@ export class CafeOrderSession {
                     cyberSourceTransactionData:      null,
                     deliveryProperties:              {
                         deliveryOption:     {
-                            conceptEntries:          {},
-                            defaultConfirmationText: 'Thank you for your order! You will be notified when your order is ready for pick-up at the Mobile Order Pick-Up station.',
-                            displayText:             'PICKUP',
                             id:                      'pickup',
+                            kitchenText:             this.#payConfig?.pickUpConfig?.kitchenText ?? 'PICKUP',
+                            displayText:             this.#payConfig?.pickUpConfig?.buttonText ?? 'PICKUP',
+                            defaultConfirmationText: this.#payConfig?.pickUpConfig?.defaultConfirmationText ?? 'Thank you!',
+                            conceptEntries:          {},
                             isEnabled:               true,
-                            kitchenText:             'PICKUP'
+                            orderSequence:           1,
                         },
                         fulfillmentDetails: {
                             fulfillmentType: 'pickupFormFields',
@@ -676,14 +698,8 @@ export class CafeOrderSession {
                     discountInfo:                    [],
                     displayProfileId:                this.client.config.displayProfileId,
                     emailInfo:                       {
-                        featureEnabled:     true,
-                        customerAddress:    [],
-                        headerText:         'Email receipt',
-                        instructionText:    'Please use your MICROSOFT email for receipt & reception ',
-                        receiptFooter:      'Thanks for using dining.frozor.io!',
-                        receiptFromAddress: 'noreply@rguest.com',
-                        receiptFromName:    this.client.cafe.name,
-                        receiptSubject:     `Receipt from ${this.client.cafe.name}`,
+                        ...(this.#payConfig?.emailReceipt ?? {}),
+                        customerAddress: [],
                     },
                     engageAccrualEnabled:            false,
                     engagePromotionAppliedPromotions: [],
@@ -694,35 +710,7 @@ export class CafeOrderSession {
                     graceCompletionTime:             false,
                     gratuityBreakupConfigEnabled:    false,
                     igOrderStatusConfig:             {},
-                    igSettings:                      {
-                        'discountStateTitle':              'Check for loyalty discounts',
-                        'timezone':                        'PST8PDT',
-                        'LOYALTY/uiNoTendersAvailableMsg': 'You do not have available points or vouchers to apply. \nPlease use a different payment entityType or cancel this order.',
-                        'isSmsEnabled':                    'true',
-                        'greetingText':                    'Select to begin',
-                        'currency/currencyCultureName':    'en-US',
-                        'smsInstructionText':              'You\'ll receive a text when order is ready for PICK-UP.',
-                        'isMobileNumberRequired':          'true',
-                        'isProfileValid':                  'true',
-                        'limitGaTenderIds':                '11,111,12,13,9',
-                        'currency/currencyCode':           'USD',
-                        'onDemandIgVerificationCodeId':    'MSFT152',
-                        'useIgOrderApi':                   'true',
-                        'roomCharge/paymentIds':           '',
-                        'LOYALTY/bannedPlayerMessage':     'Please see cashier.',
-                        'LOYALTY/pinNumberLength':         '4',
-                        'currency/currencySymbol':         '$',
-                        'gaPaymentName':                   'Badge / Coupon',
-                        'onDemandTenderId':                '94',
-                        'onDemandEmployeeId':              this.#orderingContext.onDemandEmployeeId,
-                        'profit-center-id':                this.#orderingContext.profitCenterId,
-                        'LOYALTY/uiSystemBrandingLabel':   'Player card',
-                        'currency/currencyDecimalDigits':  '2',
-                        'LOYALTY/restrictBannedPlayers':   'true',
-                        'useIgPosApi':                     'false',
-                        'onDemandTerminalId':              this.#orderingContext.onDemandTerminalId,
-                        'smsHeaderText':                   'Text order status requires mobile number.'
-                    },
+                    igSettings:                      this.#payConfig?.displayOptions ?? {},
                     isGaPaymentAvailable:            false,
                     itemCountdown:                   {},
                     kitchenContextId:                null,
@@ -732,66 +720,32 @@ export class CafeOrderSession {
                         shouldUseLocizeText: false,
                         domain:              `${this.client.cafe.id}.buy-ondemand.com`,
                         storeInfo:           {
-                            businessContextId:       this.client.config.contextId,
-                            tenantId:                this.client.config.tenantId,
-                            storeInfoId:             this.client.config.storeId,
-                            storeName:               this.client.cafe.name,
-                            timezone:                'PST8PDT',
-                            properties:              {
-                                selectedLanguage:        'en_US',
-                                taxIdentificationNumber: ''
-                            },
-                            storeInfoOptions:        {
-                                calories:  {
-                                    abbreviation: 'Cal',
-                                    fullName:     'Calories'
-                                },
-                                birConfig: {
-                                    displayText:                       'OR#',
-                                    acknowledgementReceiptDisplayText: 'AR#',
-                                    acknowledgementReceiptIndicator:   'Acknowledgement Receipt#',
-                                    officialReceiptIndicator:          'Official Receipt#'
-                                }
-                            },
-                            receiptConfigProperties: {
-                                smsBody:                      'true',
-                                smsHeader:                    'true',
-                                smsFooter:                    'true',
-                                showCompleteCheckNumberInSms: 'true'
-                            },
-                            address:                 [
-                                ' ',
-                                '  '
-                            ]
+                            ...this.#siteStoreInfo,
+                            businessContextId: this.client.config.contextId,
+                            tenantId:          this.client.config.tenantId,
+                            storeInfoId:       this.client.config.storeId,
+                            storeName:         this.client.config.externalName,
                         },
                         scheduledDay:        0,
                         dateTime:            'en',
                         readyTime:           {
                             minTime: {
                                 minutes:    0,
-                                fieldType:  {
-                                    name: 'minutes'
-                                },
-                                periodType: {
-                                    name: 'Minutes'
-                                }
+                                fieldType:  { name: 'minutes' },
+                                periodType: { name: 'Minutes' }
                             },
                             maxTime: {
                                 minutes:    0,
-                                fieldType:  {
-                                    name: 'minutes'
-                                },
-                                periodType: {
-                                    name: 'Minutes'
-                                }
+                                fieldType:  { name: 'minutes' },
+                                periodType: { name: 'Minutes' }
                             }
                         },
                         deliveryProperties:  {
                             deliveryOption:     {
                                 id:                      'pickup',
-                                kitchenText:             'PICKUP',
-                                displayText:             'PICKUP',
-                                defaultConfirmationText: 'Thank you for your order! You will be notified when your order is ready for pick-up at the Mobile Order Pick-Up station.',
+                                kitchenText:             this.#payConfig?.pickUpConfig?.kitchenText ?? 'PICKUP',
+                                displayText:             this.#payConfig?.pickUpConfig?.buttonText ?? 'PICKUP',
+                                defaultConfirmationText: this.#payConfig?.pickUpConfig?.defaultConfirmationText ?? 'Thank you!',
                                 conceptEntries:          {},
                                 isEnabled:               true
                             },
@@ -809,7 +763,7 @@ export class CafeOrderSession {
                     },
                     loyaltyGuestInfo:                {},
                     loyaltyPayment:                  false,
-                    mealPeriodId:                    MEAL_PERIOD.lunch,
+                    mealPeriodId:                    String(MEAL_PERIOD.lunch),
                     mobileNumber:                    phoneData.phoneNumber,
                     mobileNumberCountryCode:         phoneData.countryCode,
                     multiPassEnabled:                false,
@@ -825,7 +779,7 @@ export class CafeOrderSession {
                             openTerminalId:            this.#orderingContext.onDemandTerminalId,
                             priceLevelId:              this.#orderingContext.storePriceLevel,
                             employeeId:                this.#orderingContext.onDemandEmployeeId,
-                            mealPeriodId:              MEAL_PERIOD.lunch,
+                            mealPeriodId:              String(MEAL_PERIOD.lunch),
                             closedTerminalId:          this.#orderingContext.onDemandTerminalId,
                             voidReasonId:              '11',
                             orderSourceSystem:         'onDemand',
@@ -863,7 +817,7 @@ export class CafeOrderSession {
                         paymentDetails: {
                             taxAmount:              this.orderTotalTax.toString(),
                             invoiceId:              this.#orderNumber,
-                            billDate:               nowString,
+                            billDate:               this.#lastOrderDetails.created ?? nowString,
                             userCurrentDate:        nowString,
                             currencyUnit:           'USD',
                             description:            `Order ${this.#orderNumber}`,
