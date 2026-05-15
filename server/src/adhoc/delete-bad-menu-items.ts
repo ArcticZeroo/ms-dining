@@ -1,7 +1,7 @@
 import { getBadMenuItems } from '@prisma/client/sql';
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaWrite } from '../api/storage/client.js';
 
-const badMenuItems = await usePrismaClient(prisma => {
+const badMenuItems = await usePrismaWrite(prisma => {
     return prisma.$queryRawTyped(getBadMenuItems());
 });
 
@@ -15,7 +15,7 @@ for (const item of badMenuItems) {
     console.log(` - [${item.id}] ${item.name} (station id: ${item.stationId})`);
 }
 
-await usePrismaClient(prisma => {
+await usePrismaWrite(prisma => {
     return prisma.menuItem.deleteMany({
         where: {
             id: {

@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaWrite } from '../api/storage/client.js';
 
 const ALLOWED_ROLES = new Set([
     'user',
@@ -18,7 +18,7 @@ if (!ALLOWED_ROLES.has(role)) {
     process.exit(1);
 }
 
-await usePrismaClient(client => client.user.update({
+await usePrismaWrite(client => client.user.update({
     where: { id },
     data: { role: role }
 }));

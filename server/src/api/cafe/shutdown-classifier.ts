@@ -3,7 +3,7 @@ import { retrieveTextCompletion } from '../ai/index.js';
 import { LockedMap } from '../lock/map.js';
 import { logDebug, logError } from '../../util/log.js';
 import { sha256 } from '../../util/hash.js';
-import { usePrismaClient } from '../storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../storage/client.js';
 
 export interface IShutdownClassification {
 	messageHash: string;
@@ -71,7 +71,7 @@ const classifyAndPersistAsync = async (messageHash: string, message: string): Pr
 	const classification = parseClassificationResponse(response);
 	const result: IShutdownClassification = { messageHash, message, ...classification };
 
-	await usePrismaClient(prisma => prisma.cafeShutdown.upsert({
+	await usePrismaWrite(prisma => prisma.cafeShutdown.upsert({
 		where:  { messageHash },
 		update: {
 			shutdownType: result.shutdownType,

@@ -1,10 +1,10 @@
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 
 export abstract class SearchQueryClient {
     public static async incrementSearchCount(query: string) {
         query = query.trim().toLowerCase();
 
-        return usePrismaClient(prisma => prisma.searchQuery.upsert({
+        return usePrismaWrite(prisma => prisma.searchQuery.upsert({
             where:  { query },
             update: { count: { increment: 1 } },
             create: { query, count: 1 }

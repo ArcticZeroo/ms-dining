@@ -1,9 +1,9 @@
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaTransaction } from '../api/storage/client.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 console.log('Backfilling Station.normalizedName...');
 
-await usePrismaClient(async prisma => prisma.$transaction(async tx => {
+await usePrismaTransaction(async tx => {
     const stations = await tx.station.findMany({
         where:  { normalizedName: '' },
         select: { id: true, name: true }
@@ -19,4 +19,4 @@ await usePrismaClient(async prisma => prisma.$transaction(async tx => {
     }
 
     console.log('Done.');
-}));
+});

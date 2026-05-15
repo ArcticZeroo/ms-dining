@@ -1,9 +1,9 @@
 import { getAllMenuItemsWithBadImageUrl } from '@prisma/client/sql';
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaTransaction } from '../api/storage/client.js';
 
 console.log('Searching for menu items with bad image URLs...');
 
-await usePrismaClient(async prisma => prisma.$transaction(async tx => {
+await usePrismaTransaction(async tx => {
     const menuItemsWithBadImageUrl = await tx.$queryRawTyped(getAllMenuItemsWithBadImageUrl())
 
     console.log(`Found ${menuItemsWithBadImageUrl.length} menu items with bad image URLs.`);
@@ -22,4 +22,4 @@ await usePrismaClient(async prisma => prisma.$transaction(async tx => {
             data:  { imageUrl: url.href }
         });
     }
-}));
+});

@@ -5,7 +5,7 @@ import { md5 } from '../../../util/hash.js';
 import { logDebug, logError } from '../../../util/log.js';
 import { localeCompareSortAsc } from '../../../util/sort.js';
 import { retrieveTextCompletion } from '../../ai/index.js';
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 
 const STATION_THEME_SYSTEM_PROMPT = 'You are an expert writer who summarizes rotating cafeteria menus.';
 
@@ -95,7 +95,7 @@ abstract class StationThemeLocalClient {
             theme = '';
         }
 
-        await usePrismaClient(prismaClient => prismaClient.stationTheme.create({
+        await usePrismaWrite(prismaClient => prismaClient.stationTheme.create({
             data: {
                 itemHash: hash,
                 theme:    theme!

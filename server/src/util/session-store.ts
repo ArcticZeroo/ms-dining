@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../api/storage/client.js';
 import { z } from 'zod';
 
 const SessionDataSchema = z.object({
@@ -15,30 +15,32 @@ export interface ISessionStore {
 
 export class PrismaSessionStore implements ISessionStore {
     async get(sessionId: string): Promise<unknown> {
-        return usePrismaClient(async (prisma) => {
-            const session = await prisma.session.findUnique({
+        const session = await usePrismaClient(async (prisma) => {
+            return prisma.session.findUnique({
                 where: { id: sessionId }
             });
+        });
 
-            if (!session) {
-                return undefined;
-            }
+        if (!session) {
+            return undefined;
+        }
 
-            // Check if session has expired (only if expiresAt is set)
-            if (session.expiresAt && session.expiresAt < new Date()) {
-                // Session expired, clean it up
+        // Check if session has expired (only if expiresAt is set)
+        if (session.expiresAt && session.expiresAt < new Date()) {
+            // Session expired, clean it up
+            await usePrismaWrite(async (prisma) => {
                 await prisma.session.delete({
                     where: { id: sessionId }
                 });
-                return undefined;
-            }
+            });
+            return undefined;
+        }
 
-            return {
-                passport: {
-                    user: session.userId
-                }
-            };
-        });
+        return {
+            passport: {
+                user: session.userId
+            }
+        };
     }
 
     /**
@@ -61,7 +63,7 @@ export class PrismaSessionStore implements ISessionStore {
         // Calculate expiration date (null for never-expiring sessions)
         const expiresAt = maxAge ? new Date(Date.now() + maxAge) : null;
 
-        return usePrismaClient(async (prisma) => {
+        return usePrismaWrite(async (prisma) => {
             await prisma.session.upsert({
                 where: { id: sessionId },
                 update: {
@@ -81,7 +83,7 @@ export class PrismaSessionStore implements ISessionStore {
      * Delete a session
      */
     async destroy(sessionId: string): Promise<void> {
-        return usePrismaClient(async (prisma) => {
+        return usePrismaWrite(async (prisma) => {
             await prisma.session.delete({
                 where: { id: sessionId }
             }).catch(() => {

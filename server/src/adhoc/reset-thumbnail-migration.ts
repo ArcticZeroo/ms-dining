@@ -1,6 +1,6 @@
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaWrite } from '../api/storage/client.js';
 
-await usePrismaClient(client => client.runtimeMigration.update({
+await usePrismaWrite(client => client.runtimeMigration.update({
     where: { name: 'backfill-thumbnail-hashes' },
     data:  { status: 'pending', completedAt: null, error: null }
 }));

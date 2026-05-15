@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { IMenuItemTag } from '../../../models/cafe.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 
@@ -21,7 +21,7 @@ export abstract class TagStorageClient {
     }
 
     public static async createTags(tags: IMenuItemTag[]): Promise<void> {
-        await usePrismaClient(async prismaClient => {
+        await usePrismaWrite(async prismaClient => {
             for (const tag of tags) {
                 try {
                     await prismaClient.menuItemTag.create({ data: tag });

@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../storage/client.js';
 import { logError, logInfo } from '../../util/log.js';
 import { IRuntimeMigration } from './types.js';
 import { MIGRATION_REGISTRY } from './registry.js';
@@ -34,7 +34,7 @@ const runMigrationIfNeeded = async (migration: IRuntimeMigration) => {
     logInfo(`[Migrations] Running: ${migration.name} (${migration.runMode})...`);
 
     // Mark as running
-    await usePrismaClient(client =>
+    await usePrismaWrite(client =>
         client.runtimeMigration.upsert({
             where:  { name: migration.name },
             create: { name: migration.name, status: 'running' },
@@ -45,7 +45,7 @@ const runMigrationIfNeeded = async (migration: IRuntimeMigration) => {
     try {
         await migration.run();
 
-        await usePrismaClient(client =>
+        await usePrismaWrite(client =>
             client.runtimeMigration.update({
                 where: { name: migration.name },
                 data:  { status: 'completed', completedAt: new Date() }
@@ -56,7 +56,7 @@ const runMigrationIfNeeded = async (migration: IRuntimeMigration) => {
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
 
-        await usePrismaClient(client =>
+        await usePrismaWrite(client =>
             client.runtimeMigration.update({
                 where: { name: migration.name },
                 data:  { status: 'failed', error: errorMessage }

@@ -1,5 +1,5 @@
 import { Cafe } from '@prisma/client';
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { ICafe, ICafeConfig } from '../../../models/cafe.js';
 import { Lock } from '@frozor/lock';
 
@@ -59,7 +59,7 @@ export abstract class CafeStorageClient {
             externalName:     config.externalName
         };
 
-        await usePrismaClient(prismaClient => prismaClient.cafe.upsert({
+        await usePrismaWrite(prismaClient => prismaClient.cafe.upsert({
             where:  { id: cafe.id },
             update: cafeWithConfig,
             create: {

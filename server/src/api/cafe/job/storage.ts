@@ -1,9 +1,9 @@
 import { ICafe, ICafeStation } from '../../../models/cafe.js';
-import { logError } from '../../../util/log.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
+import { usePrismaTransaction } from '../../storage/client.js';
 
 interface ISaveStationParams {
     station: ICafeStation;
@@ -11,23 +11,16 @@ interface ISaveStationParams {
 }
 
 // Saves only the "static" data for a station (including menu items), but not the daily menu itself.
+// Station + all menu items are saved in a single transaction to minimize
+// SQLite write-lock contention and avoid socket timeouts under concurrency.
 const saveStaticStationDataAsync = async ({ station, shouldUpdateExistingItems }: ISaveStationParams) => {
-    try {
-        await StationStorageClient.createStationAsync(station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
-    } catch (err) {
-        logError('Unable to save station to database:', err);
-        return;
-    }
+    await usePrismaTransaction(async (client) => {
+        await StationStorageClient.createStationWithClientAsync(client, station, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
 
-    for (const menuItem of station.menuItemsById.values()) {
-        try {
-            await MenuItemStorageClient.saveMenuItemAsync(menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
-        } catch (err) {
-            logError(`Unable to save menu item "${menuItem.name}" @ ${menuItem.id} to the database:`, err);
-            // if we fail here, we will fail later when creating the daily menu
-            return;
+        for (const menuItem of station.menuItemsById.values()) {
+            await MenuItemStorageClient.saveMenuItemWithClientAsync(client, menuItem, shouldUpdateExistingItems /*allowUpdateIfExisting*/);
         }
-    }
+    });
 }
 
 interface ISaveSessionParams {

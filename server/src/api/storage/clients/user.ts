@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { IServerUser } from '../../../models/auth.js';
 import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
@@ -20,7 +20,7 @@ interface IUpdateUserSettingsPrismaData {
 
 export abstract class UserStorageClient {
     static async createUserAsync(userToCreate: Prisma.UserCreateInput): Promise<IServerUser> {
-        const newUser = await usePrismaClient(async prismaClient => {
+        const newUser = await usePrismaWrite(async prismaClient => {
             try {
                 const user = await prismaClient.user.create({ data: userToCreate });
 
@@ -81,7 +81,7 @@ export abstract class UserStorageClient {
     }
 
     static async updateUserDisplayNameAsync(id: string, displayName: string): Promise<void> {
-        await usePrismaClient(prismaClient => prismaClient.user.update({
+        await usePrismaWrite(prismaClient => prismaClient.user.update({
             where:  {
                 id
             },
@@ -142,7 +142,7 @@ export abstract class UserStorageClient {
             data.homepageIds = UserStorageClient._serializeSetting(homepageIds);
         }
 
-        await usePrismaClient(async prismaClient => {
+        await usePrismaWrite(async prismaClient => {
             const user = await prismaClient.user.findUnique({ where: { id }, select: { lastSettingsUpdate: true } });
 
             if (user == null) {

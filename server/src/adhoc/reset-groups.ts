@@ -1,8 +1,8 @@
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaWrite } from '../api/storage/client.js';
 
 console.log('Deleting all cross-cafe group entries...');
 
-const result = await usePrismaClient(prisma => {
+const result = await usePrismaWrite(prisma => {
     return prisma.crossCafeGroup.deleteMany({});
 });
 

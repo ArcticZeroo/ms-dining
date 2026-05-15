@@ -6,7 +6,7 @@ import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/ca
 import { logDebug, logInfo } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
-import { usePrismaClient, usePrismaTransaction } from '../client.js';
+import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { getDateStringsForWeek } from '@msdining/common/util/date-util';
 import { PrismaLikeClient } from '../../../models/prisma.js';
 
@@ -178,7 +178,7 @@ export abstract class MenuItemStorageClient {
         }
     }
 
-    private static async _doSaveMenuItemAsync(menuItem: IMenuItemBase, allowUpdateIfExisting: boolean): Promise<void> {
+    private static async _doSaveMenuItemWithClient(prismaClient: PrismaLikeClient, menuItem: IMenuItemBase, allowUpdateIfExisting: boolean): Promise<void> {
         const lastUpdateTime = menuItem.lastUpdateTime == null || Number.isNaN(menuItem.lastUpdateTime.getTime())
             ? null
             : menuItem.lastUpdateTime;
@@ -215,97 +215,101 @@ export abstract class MenuItemStorageClient {
             ...dataWithoutId
         };
 
-        await usePrismaTransaction(async prismaClient => {
-            // This is kind of messy, but I've chosen this after considering other options.
-            // We are many:many, and we don't want to just clear all the modifiers themselves,
-            // since that will either throw foreign key errors or sever the connection to other menu items
-            // (depending on how we've set up cascade, which at the time of writing is not configured at all).
-            // We also want to make sure that options are up-to-date for each modifier: the price, description,
-            // or id can change at any time. So, we pull modifiers from db, check if there are any changes, then
-            // clear all existing options and do an upsert.
-            for (const modifier of menuItem.modifiers) {
-                await this._doCreateSingleModifierAsync(prismaClient, modifier);
-            }
+        // This is kind of messy, but I've chosen this after considering other options.
+        // We are many:many, and we don't want to just clear all the modifiers themselves,
+        // since that will either throw foreign key errors or sever the connection to other menu items
+        // (depending on how we've set up cascade, which at the time of writing is not configured at all).
+        // We also want to make sure that options are up-to-date for each modifier: the price, description,
+        // or id can change at any time. So, we pull modifiers from db, check if there are any changes, then
+        // clear all existing options and do an upsert.
+        for (const modifier of menuItem.modifiers) {
+            await this._doCreateSingleModifierAsync(prismaClient, modifier);
+        }
 
-            if (allowUpdateIfExisting) {
-                const existingItem = await prismaClient.menuItem.findUnique({
-                    where:  {
-                        id: menuItem.id
-                    },
-                    select: {
-                        modifiers: {
-                            select: {
-                                modifierId: true
-                            }
+        if (allowUpdateIfExisting) {
+            const existingItem = await prismaClient.menuItem.findUnique({
+                where:  {
+                    id: menuItem.id
+                },
+                select: {
+                    modifiers: {
+                        select: {
+                            modifierId: true
                         }
                     }
-                });
+                }
+            });
 
-                if (existingItem != null) {
-                    // Menu items should have only a few modifiers, this complexity is fine.
-                    const modifierIdsRemovedFromThisItem: string[] = [];
-                    for (const existingModifier of existingItem.modifiers) {
-                        if (!modifierIdsToCreate.has(existingModifier.modifierId)) {
-                            modifierIdsRemovedFromThisItem.push(existingModifier.modifierId);
-                        } else {
-                            modifierIdsToCreate.delete(existingModifier.modifierId);
-                        }
+            if (existingItem != null) {
+                // Menu items should have only a few modifiers, this complexity is fine.
+                const modifierIdsRemovedFromThisItem: string[] = [];
+                for (const existingModifier of existingItem.modifiers) {
+                    if (!modifierIdsToCreate.has(existingModifier.modifierId)) {
+                        modifierIdsRemovedFromThisItem.push(existingModifier.modifierId);
+                    } else {
+                        modifierIdsToCreate.delete(existingModifier.modifierId);
                     }
+                }
 
-                    if (modifierIdsRemovedFromThisItem.length > 0) {
-                        await prismaClient.menuItemModifierEntry.deleteMany({
-                            where: {
-                                menuItemId: menuItem.id,
-                                modifierId: {
-                                    in: modifierIdsRemovedFromThisItem
-                                }
-                            }
-                        });
-                    }
-
-                    await prismaClient.menuItem.update({
+                if (modifierIdsRemovedFromThisItem.length > 0) {
+                    await prismaClient.menuItemModifierEntry.deleteMany({
                         where: {
-                            id: menuItem.id
-                        },
-                        data:  {
-                            ...dataWithoutId
+                            menuItemId: menuItem.id,
+                            modifierId: {
+                                in: modifierIdsRemovedFromThisItem
+                            }
                         }
                     });
-                } else {
-                    await prismaClient.menuItem.create({ data });
                 }
-            } else {
-                try {
-                    await prismaClient.menuItem.create({ data });
-                } catch (err) {
-                    // OK to fail unique constraint validation since we don't want to update existing items
-                    if (!isUniqueConstraintFailedError(err)) {
-                        throw err;
-                    }
-                }
-            }
 
-            if (modifierIdsToCreate.size > 0) {
-                const existingItems = await prismaClient.menuItemModifierEntry.findMany({
+                await prismaClient.menuItem.update({
                     where: {
-                        menuItemId: menuItem.id,
-                        modifierId: {
-                            in: Array.from(modifierIdsToCreate)
-                        }
+                        id: menuItem.id
                     },
-                    select: {
-                        modifierId: true
+                    data:  {
+                        ...dataWithoutId
                     }
                 });
-
-                for (const existingItem of existingItems) {
-                    modifierIdsToCreate.delete(existingItem.modifierId);
-                }
-
-                await prismaClient.menuItemModifierEntry.createMany({
-                    data: Array.from(modifierIdsToCreate).map(modifierId => modifierEntriesById.get(modifierId)!)
-                });
+            } else {
+                await prismaClient.menuItem.create({ data });
             }
+        } else {
+            try {
+                await prismaClient.menuItem.create({ data });
+            } catch (err) {
+                // OK to fail unique constraint validation since we don't want to update existing items
+                if (!isUniqueConstraintFailedError(err)) {
+                    throw err;
+                }
+            }
+        }
+
+        if (modifierIdsToCreate.size > 0) {
+            const existingItems = await prismaClient.menuItemModifierEntry.findMany({
+                where: {
+                    menuItemId: menuItem.id,
+                    modifierId: {
+                        in: Array.from(modifierIdsToCreate)
+                    }
+                },
+                select: {
+                    modifierId: true
+                }
+            });
+
+            for (const existingItem of existingItems) {
+                modifierIdsToCreate.delete(existingItem.modifierId);
+            }
+
+            await prismaClient.menuItemModifierEntry.createMany({
+                data: Array.from(modifierIdsToCreate).map(modifierId => modifierEntriesById.get(modifierId)!)
+            });
+        }
+    }
+
+    private static async _doSaveMenuItemAsync(menuItem: IMenuItemBase, allowUpdateIfExisting: boolean): Promise<void> {
+        await usePrismaTransaction(async prismaClient => {
+            await this._doSaveMenuItemWithClient(prismaClient, menuItem, allowUpdateIfExisting);
         });
     }
 
@@ -320,8 +324,17 @@ export abstract class MenuItemStorageClient {
         this._saveMenuItemIntoCache(menuItem);
     }
 
+    public static async saveMenuItemWithClientAsync(client: PrismaLikeClient, menuItem: IMenuItemBase, allowUpdateIfExisting: boolean): Promise<void> {
+        if (!allowUpdateIfExisting && MenuItemStorageClient._menuItemsById.has(menuItem.id)) {
+            return;
+        }
+
+        await this._doSaveMenuItemWithClient(client, menuItem, allowUpdateIfExisting);
+        this._saveMenuItemIntoCache(menuItem);
+    }
+
     public static async saveMenuItemSearchTagsAsync(menuItemId: string, searchTags: Set<string>): Promise<void> {
-        await usePrismaClient(async prismaClient => {
+        await usePrismaWrite(async prismaClient => {
             await prismaClient.menuItem.update({
                 where: {
                     id: menuItemId
@@ -529,7 +542,7 @@ export abstract class MenuItemStorageClient {
 
     public static async updateThumbnailHash(menuItemId: string, hash: string): Promise<void> {
         try {
-            await usePrismaClient(prismaClient => prismaClient.menuItem.update({
+            await usePrismaWrite(prismaClient => prismaClient.menuItem.update({
                 where: { id: menuItemId },
                 data:  { thumbnailHash: hash }
             }));

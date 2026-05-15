@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { STORAGE_EVENTS } from '../events.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
@@ -102,7 +102,7 @@ export abstract class ReviewStorageClient {
         const userId = review.userId;
 
         if (userId) {
-            result = await usePrismaClient(client => client.review.upsert({
+            result = await usePrismaWrite(client => client.review.upsert({
                 create: {
                     menuItemId:  review.menuItemId,
                     userId:      userId,
@@ -127,7 +127,7 @@ export abstract class ReviewStorageClient {
                 }
             }));
         } else {
-            result = await usePrismaClient(client => client.review.create({
+            result = await usePrismaWrite(client => client.review.create({
                 data: {
                     menuItemId:  review.menuItemId,
                     displayName: review.displayName,
@@ -155,7 +155,7 @@ export abstract class ReviewStorageClient {
         const userId = review.userId;
 
         if (userId) {
-            result = await usePrismaClient(client => client.review.upsert({
+            result = await usePrismaWrite(client => client.review.upsert({
                 create: {
                     stationId:   review.stationId,
                     userId:      userId,
@@ -180,7 +180,7 @@ export abstract class ReviewStorageClient {
                 }
             }));
         } else {
-            result = await usePrismaClient(client => client.review.create({
+            result = await usePrismaWrite(client => client.review.create({
                 data: {
                     stationId:   review.stationId,
                     displayName: review.displayName,
@@ -264,7 +264,7 @@ export abstract class ReviewStorageClient {
     }
 
     public static async updateReviewAsync(reviewId: string, data: IUpdateReviewItem) {
-        const result = await usePrismaClient(client => client.review.update({
+        const result = await usePrismaWrite(client => client.review.update({
             where: {
                 id: reviewId
             },
@@ -302,7 +302,7 @@ export abstract class ReviewStorageClient {
     }
 
     public static async deleteReviewAsync(reviewId: string) {
-        const result = await usePrismaClient(client => client.review.delete({
+        const result = await usePrismaWrite(client => client.review.delete({
             where:   {
                 id: reviewId
             },

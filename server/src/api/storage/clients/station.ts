@@ -1,11 +1,12 @@
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { Prisma, Station } from '@prisma/client';
 import { ICafeStation } from '../../../models/cafe.js';
+import { PrismaLikeClient } from '../../../models/prisma.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 export abstract class StationStorageClient {
-    public static async createStationAsync(station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
+    private static _getStationData(station: ICafeStation) {
         const updateData = {
             name:           station.name,
             normalizedName: normalizeNameForSearch(station.name),
@@ -23,22 +24,32 @@ export abstract class StationStorageClient {
             ...updateData,
         } satisfies Prisma.StationCreateArgs['data'];
 
+        return { updateData, createData };
+    }
+
+    public static async createStationWithClientAsync(client: PrismaLikeClient, station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
+        const { updateData, createData } = this._getStationData(station);
+
         if (allowUpdateIfExisting) {
-            await usePrismaClient(prismaClient => prismaClient.station.upsert({
+            await client.station.upsert({
                 where:  { id: station.id },
                 update: updateData,
                 create: createData
-            }));
+            });
             return;
         }
 
         try {
-            await usePrismaClient(prismaClient => prismaClient.station.create({ data: createData }));
+            await client.station.create({ data: createData });
         } catch (err) {
             if (!isUniqueConstraintFailedError(err)) {
                 throw err;
             }
         }
+    }
+
+    public static async createStationAsync(station: ICafeStation, allowUpdateIfExisting: boolean = false): Promise<void> {
+        await usePrismaWrite(client => this.createStationWithClientAsync(client, station, allowUpdateIfExisting));
     }
 
     public static async retrieveStationAsync(stationId: string): Promise<Station | null> {

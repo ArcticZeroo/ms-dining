@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { isSameDate, toDateString } from '@msdining/common/util/date-util';
 import { Lock } from '@frozor/lock';
 import { IOrderingContext } from '../../../models/cart.js';
@@ -59,7 +59,7 @@ export abstract class OrderingClient {
         return orderingContextLock.acquire(async () => {
             const dateString = toDateString(new Date());
 
-            await usePrismaClient(
+            await usePrismaWrite(
                 async prismaClient => {
                     await prismaClient.dailyCafeOrderingContext.upsert({
                         where: {

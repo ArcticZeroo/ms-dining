@@ -4,7 +4,7 @@ import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { PrismaTransactionClient } from '../../../models/prisma.js';
 import { isDateValid } from '../../../util/date.js';
 import { logDebug, logError, logInfo } from '../../../util/log.js';
-import { usePrismaClient } from '../client.js';
+import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
@@ -158,7 +158,6 @@ const writeMenuInTransaction = async (
 	await tx.dailyMenuItem.createMany({ data: allMenuItems });
 }
 
-const MENU_PUBLISH_TRANSACTION_TIMEOUT_MS = 15_000;
 const MENU_PUBLISH_TRANSACTION_WARN_MS = 5_000;
 
 // TODO: Clean this up so that it doesn't rely on the MenuItemStorageClient directly.
@@ -189,8 +188,7 @@ export abstract class DailyMenuStorageClient {
 		};
 
 		await usePrismaClient(async (prismaClient) => {
-			// Read previous menu + compute diffs outside the transaction.
-			// The usePrismaClient lock prevents other DB operations from interfering.
+			// Read previous menu + compute diffs outside the write transaction.
 			const previousDailyStationMenus = await prismaClient.dailyStation.findMany({
 				where:  { cafeId, dateString },
 				select: {
@@ -205,19 +203,19 @@ export abstract class DailyMenuStorageClient {
 			});
 
 			computeMenuPublishDiff(publishEvent, stations, previousDailyStationMenus, dateString);
-
-			// Atomic write: delete old data + insert new data in a single transaction.
-			const transactionStartMs = Date.now();
-			await prismaClient.$transaction(
-				async tx => writeMenuInTransaction(tx, { cafeId, dateString, stations }),
-				{ timeout: MENU_PUBLISH_TRANSACTION_TIMEOUT_MS }
-			);
-
-			const transactionElapsedMs = Date.now() - transactionStartMs;
-			if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
-				logInfo(`{${dateString}} WARNING: Menu publish transaction for cafe ${cafe.name} took ${transactionElapsedMs}ms (exceeds ${MENU_PUBLISH_TRANSACTION_WARN_MS}ms threshold)`);
-			}
 		});
+
+		// Atomic write: delete old data + insert new data in a single transaction.
+		// Goes through the write semaphore to avoid SQLite write-lock contention.
+		const transactionStartMs = Date.now();
+		await usePrismaTransaction(
+			async tx => writeMenuInTransaction(tx, { cafeId, dateString, stations }),
+		);
+
+		const transactionElapsedMs = Date.now() - transactionStartMs;
+		if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
+			logInfo(`{${dateString}} WARNING: Menu publish transaction for cafe ${cafe.name} took ${transactionElapsedMs}ms (exceeds ${MENU_PUBLISH_TRANSACTION_WARN_MS}ms threshold)`);
+		}
 
 		publishEvent.dirtyStations = new Set([
 			...publishEvent.addedStations,
@@ -796,7 +794,7 @@ export abstract class DailyMenuStorageClient {
 		shutdownMessageHash?: string | null;
 	}): Promise<void> {
 		const { isAvailable, shutdownMessageHash = null } = data;
-		await usePrismaClient(prismaClient => prismaClient.dailyCafe.upsert({
+		await usePrismaWrite(prismaClient => prismaClient.dailyCafe.upsert({
 			where:  { dateString_cafeId: { dateString, cafeId } },
 			update: { isAvailable, shutdownMessageHash },
 			create: { dateString, cafeId, isAvailable, shutdownMessageHash },
