@@ -3,8 +3,7 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { MapSelectedViewContext } from '../../../../context/map.ts';
-import { SelectedDateContext } from '../../../../context/time.ts';
-import { useValueNotifierContext } from '../../../../hooks/events.ts';
+import { useSelectedDate } from '../../../../store/zustand/selected-date.ts';
 import { ICafe } from '../../../../models/cafe.ts';
 import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
@@ -77,7 +76,7 @@ interface ICafePopupOverviewStationProps {
 
 export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> = ({ cafe, station }) => {
     const popupView = useContext(MapSelectedViewContext);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     const didOpenRecently = getIsRecentlyAvailable(station.uniqueness.firstAppearance);
     const badge = getStationBadge(station, didOpenRecently);

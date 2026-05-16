@@ -1,7 +1,6 @@
-import { useValueNotifierContext } from "./events.ts";
-import { SelectedDateContext } from "../context/time.ts";
+import { useSelectedDate } from "../store/zustand/selected-date.ts";
 
 export const useTitleWithSelectedDate = (text: string) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     return `${text} on ${selectedDate.toLocaleDateString()}`;
 }

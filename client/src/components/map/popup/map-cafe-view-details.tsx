@@ -1,8 +1,7 @@
 import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
-import { useValueNotifierContext } from '../../../hooks/events.ts';
 import { CafeView } from '../../../models/cafe.ts';
-import { SelectedDateContext } from '../../../context/time.js';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { useCafeOverviewQuery } from '../../../store/queries/cafe.ts';
 import { getAllSingleCafesInView } from '../../../util/view.js';
 import { OverviewMemberDetails } from './overview/overview-member-details.js';
@@ -15,7 +14,7 @@ interface IMapCafeViewDetails {
 
 export const MapCafeViewDetails: React.FC<IMapCafeViewDetails> = ({ view, showAllStations = false }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     const { data: overviewData, isError, refetch } = useCafeOverviewQuery(view.value.id, selectedDate);
 

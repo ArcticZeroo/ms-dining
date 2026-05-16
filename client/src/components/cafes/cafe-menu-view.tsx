@@ -3,7 +3,7 @@ import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts'
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { useValueNotifier, useValueNotifierContext, useValueNotifierSetTarget } from '../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
@@ -13,7 +13,7 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable, minutesToTimeString } from '@msdining/common/util/date-util';
-import { SelectedDateContext } from '../../context/time.js';
+import { useSelectedDate } from '../../store/zustand/selected-date.ts';
 import { useCafeMenuQuery } from '../../store/queries/cafe.ts';
 import { CafeMenuControls } from './cafe-menu-controls.js';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
@@ -33,7 +33,7 @@ export interface ICafeMenuView {
 }
 
 const useCafeMenu = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): ICafeMenuView => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     const query = useCafeMenuQuery(cafe.id, selectedDate, shouldCountTowardsLastUsed);
     return {
         data:    query.data,

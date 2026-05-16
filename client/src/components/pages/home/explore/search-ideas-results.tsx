@@ -1,6 +1,5 @@
 import React from 'react';
-import { useValueNotifierContext } from '../../../../hooks/events.js';
-import { SelectedDateContext } from '../../../../context/time.js';
+import { useSelectedDate } from '../../../../store/zustand/selected-date.ts';
 import { useExploreSearchResultsQuery } from '../../../../store/queries/search.js';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.js';
 import { SearchResultsList } from '../../../search/search-results-list.js';
@@ -14,7 +13,7 @@ interface ISearchIdeasResults {
 }
 
 export const SearchIdeasResults: React.FC<ISearchIdeasResults> = ({ searchQuery }) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     const { data, isError, refetch } = useExploreSearchResultsQuery(searchQuery, selectedDate);
     const isLoading = !data && !isError;

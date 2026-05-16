@@ -1,8 +1,7 @@
 import { ISearchQuery } from '@msdining/common/models/search';
 import { getFridayForWeek, getMondayForWeek, isDateInRangeInclusive } from '@msdining/common/util/date-util';
 import React, { useMemo } from 'react';
-import { SelectedDateContext } from '../../../../context/time.ts';
-import { useValueNotifierContext } from '../../../../hooks/events.ts';
+import { useSelectedDate } from '../../../../store/zustand/selected-date.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { HomeFavoriteResult } from './home-favorite-result.tsx';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.tsx';
@@ -16,7 +15,7 @@ interface IHomeFavoritesViewProps {
 }
 
 export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     const title = useTitleWithSelectedDate('Favorites Across Campus');
 
     const { isPending, isError, results, retry } = useFavoriteSearchResults(queries);

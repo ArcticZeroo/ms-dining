@@ -1,6 +1,5 @@
-import { SelectedDateContext } from '../../../context/time.ts';
-import React, { useContext, useMemo } from 'react';
-import { useValueNotifier } from '../../../hooks/events.ts';
+import React, { useMemo } from 'react';
+import { useSelectedDate, setSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { DiningClient } from '../../../api/client/dining.ts';
 
 import { FutureMenuOutOfDateNotice } from '../../notice/future-menu-out-of-date-notice.tsx';
@@ -35,8 +34,7 @@ const MINIMUM_DATE = DateUtil.getMinimumDateForMenu();
 const MAXIMUM_DATE = DateUtil.getMaximumDateForMenu();
 
 export const CafeDatePicker: React.FC = () => {
-    const selectedDateNotifier = useContext(SelectedDateContext);
-    const selectedDate = useValueNotifier(selectedDateNotifier);
+    const selectedDate = useSelectedDate();
 
     const {
         previousDate,
@@ -75,7 +73,7 @@ export const CafeDatePicker: React.FC = () => {
             return;
         }
 
-        selectedDateNotifier.value = previousDate;
+        setSelectedDate(previousDate);
     };
 
     const goToToday = () => {
@@ -83,7 +81,7 @@ export const CafeDatePicker: React.FC = () => {
             return;
         }
 
-        selectedDateNotifier.value = DiningClient.getTodayDateForMenu();
+        setSelectedDate(DiningClient.getTodayDateForMenu());
     };
 
     const goForwards = () => {
@@ -91,7 +89,7 @@ export const CafeDatePicker: React.FC = () => {
             return;
         }
 
-        selectedDateNotifier.value = nextDate;
+        setSelectedDate(nextDate);
     };
 
     return (

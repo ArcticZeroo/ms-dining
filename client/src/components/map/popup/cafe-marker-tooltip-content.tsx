@@ -1,6 +1,5 @@
 import React from 'react';
-import { SelectedDateContext } from '../../../context/time.ts';
-import { useValueNotifierContext } from '../../../hooks/events.ts';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { useCafeMenuOverviewSummaryQuery } from '../../../store/queries/cafe.ts';
 import { getViewEmoji } from '../../../util/view.ts';
@@ -46,7 +45,7 @@ const getShutdownMessage = (view: CafeView, shutdownStateByCafeId: Record<string
 }
 
 export const CafeMarkerTooltipContent: React.FC<ICafeMarkerTooltipContentProps> = ({ view }) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     const { data: summary, isPending, isError } = useCafeMenuOverviewSummaryQuery(view.value.id, selectedDate);
 

@@ -5,8 +5,7 @@ import {
 } from '@msdining/common/models/recommendation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationSettings } from '../../../../constants/settings.ts';
-import { SelectedDateContext } from '../../../../context/time.ts';
-import { useValueNotifierContext } from '../../../../hooks/events.ts';
+import { useSelectedDate } from '../../../../store/zustand/selected-date.ts';
 import { useTitleWithSelectedDate } from '../../../../hooks/string.ts';
 import { useRecommendationsQuery } from '../../../../store/queries/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
@@ -61,7 +60,7 @@ const useSelectedTabState = (tabOptions: ITabOption[]) => {
 
 export const HomeRecommendationsView: React.FC = () => {
     const title = useTitleWithSelectedDate('Recommended for You');
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     const favorites = useFavoritesSection();
     const recommendationsQuery = useRecommendationsQuery(selectedDate);

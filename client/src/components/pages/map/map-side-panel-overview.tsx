@@ -2,9 +2,9 @@ import React, { JSX, useCallback, useContext, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApplicationContext } from '../../../context/app.ts';
 import { MapSelectedViewContext } from '../../../context/map.ts';
-import { SelectedDateContext } from '../../../context/time.ts';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { useNearestCafes } from '../../../hooks/nearby-cafes.ts';
 import { useCafeOverviewQuery } from '../../../store/queries/cafe.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
@@ -30,7 +30,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const navigate = useNavigate();
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     const viewLocation = useMemo(() => {
         try {

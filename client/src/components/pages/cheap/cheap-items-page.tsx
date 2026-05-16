@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { ICheapItemSearchResult } from '../../../models/search.ts';
 import { isSearchResultVisible } from '../../../util/search.ts';
 import { CheapItemResult } from './cheap-item-result.tsx';
-import { SelectedDateContext } from '../../../context/time.ts';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { setPageData } from '../../../util/title.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
@@ -22,7 +22,7 @@ interface ICheapItemsResults {
 
 const useCheapItems = (): ICheapItemsResults => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     const searchDate = useDateForSearch();
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);

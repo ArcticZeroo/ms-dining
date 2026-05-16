@@ -1,7 +1,6 @@
 import { ISearchQuery } from '@msdining/common/models/search';
 import { useMemo } from 'react';
-import { useValueNotifierContext } from './events.js';
-import { SelectedDateContext } from '../context/time.js';
+import { useSelectedDate } from '../store/zustand/selected-date.ts';
 import { useDateForSearch } from './date-picker.js';
 import { isAnyDateToday } from '../util/search.js';
 import { IQuerySearchResult } from '../models/search.js';
@@ -15,7 +14,7 @@ export interface IFavoriteSearchResultsData {
 }
 
 export const useFavoriteSearchResults = (queries: ISearchQuery[], isEnabled: boolean = true): IFavoriteSearchResultsData => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     const dateForSearch = useDateForSearch();
 
     const query = useFavoriteSearchResultsQuery(queries, dateForSearch, isEnabled);
