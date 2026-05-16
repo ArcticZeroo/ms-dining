@@ -1,12 +1,11 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { IOrderCompletionResponse } from '@msdining/common/models/cart';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OrderingClient } from '../../../api/order.ts';
 import { DebugSettings } from '../../../constants/settings.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { useCartStore } from '../../../store/zustand/cart.ts';
 import { useCartHydrationStatus } from '../../../store/queries/cart.ts';
+import { usePrepareAllPaymentsMutation, useCartSessionQuery } from '../../../store/queries/ordering.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
+import { useAllCafesComplete, useCompletionResults, useOrderingStore } from '../../../store/zustand/ordering.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
@@ -21,6 +20,7 @@ import { CafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import './order-page.css';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
+import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
@@ -29,63 +29,16 @@ export const OrderPage = () => {
     const hydrationStatus = useCartHydrationStatus();
     const navigate = useNavigate();
 
-    const [orderResult, setOrderResult] = useState<IOrderCompletionResponse | null>(null);
+    const cartSessionQuery = useCartSessionQuery();
+    const prepareAllPayments = usePrepareAllPaymentsMutation();
+    const formData = useOrderingStore((state) => state.formData);
+    const allCafesComplete = useAllCafesComplete();
+    const completionResults = useCompletionResults();
 
-    const formDataRef = useRef<IPaymentFormData | null>(null);
-
-    // Phase 1: Build cart on server + get price data (runs on cart change)
-    const {
-        stage: cartSessionStage,
-        value: cartSessionData,
-        error: cartSessionError,
-        run: runCartSession
-    } = useDelayedPromiseState(
-        useCallback(async () => {
-            if (cart.size === 0) {
-                return null;
-            }
-            return await OrderingClient.prepareCart(cart);
-        }, [cart])
-    );
-
+    // Clear any prior in-progress / completed checkout state on mount so a fresh
+    // visit to /order doesn't show stale "paid" badges.
     useEffect(() => {
-        runCartSession();
-    }, [runCartSession]);
-
-    // Phase 2: Get card processor token (runs when user clicks "Pay with Card")
-    const {
-        stage: paymentStage,
-        value: paymentResults,
-        error: paymentError,
-        run: runPayment
-    } = useDelayedPromiseState(
-        useCallback(async () => {
-            if (!cartSessionData) {
-                throw new Error('Cart session not ready');
-            }
-
-            const results: Record<string, { siteToken: string; iframeUrl: string; orderId: string; orderNumber: string; expiresAt: string }> = {};
-
-            await Promise.all(
-                Object.entries(cartSessionData).map(async ([cafeId, cafeData]) => {
-                    results[cafeId] = await OrderingClient.preparePayment(cafeData.orderId);
-                })
-            );
-
-            return results;
-        }, [cartSessionData])
-    );
-
-    const onFormSubmitted = useCallback((formData: IPaymentFormData) => {
-        if (paymentStage === PromiseStage.running) {
-            return;
-        }
-        formDataRef.current = formData;
-        runPayment();
-    }, [paymentStage, runPayment]);
-
-    const onAllCafesComplete = useCallback((results: IOrderCompletionResponse) => {
-        setOrderResult(results);
+        useOrderingStore.getState().reset();
     }, []);
 
     if (hydrationStatus.isPending) {
@@ -97,16 +50,20 @@ export const OrderPage = () => {
         );
     }
 
-    const isPaymentStarted = paymentStage !== PromiseStage.notRun;
-    const isPaymentComplete = paymentResults != null;
-
+    const isPaymentStarted = formData != null;
     const hasUnhydratedItems = missingItemsByCafeId.size > 0;
-
     const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
 
     if (!isCheckoutAllowed && !hasUnhydratedItems) {
         return <EmptyCartNotice/>;
     }
+
+    const onFormSubmitted = (submittedFormData: IPaymentFormData) => {
+        if (prepareAllPayments.isPending) {
+            return;
+        }
+        prepareAllPayments.mutate(submittedFormData);
+    };
 
     return (
         <div id="order-checkout" className="flex-col">
@@ -123,51 +80,45 @@ export const OrderPage = () => {
                                 showFullDetails={true}
                                 showTotalPrice={true}
                                 readOnly={isPaymentStarted}
-                                cartSessionData={cartSessionData}
-                                cartSessionError={cartSessionError}
                             />
-                            <WaitTime cartSessionData={cartSessionData}/>
+                            <WaitTime/>
                         </div>
                         {cart.size > 1 && <MultiCafeOrderWarning/>}
                         <PaymentInfoForm
                             isPrepareStarted={isPaymentStarted}
-                            isCartReady={cartSessionData != null}
+                            isCartReady={cartSessionQuery.data != null}
                             onSubmit={onFormSubmitted}
                         />
                         <OrderPrivacyPolicy/>
-                        {cartSessionStage === PromiseStage.running && (
+                        {cartSessionQuery.isFetching && (
                             <div className="flex flex-justify-center">
                                 <HourglassLoadingSpinner/>
                                 Building your order...
                             </div>
                         )}
-                        {paymentStage === PromiseStage.running && (
+                        {prepareAllPayments.isPending && (
                             <div className="flex flex-justify-center">
                                 <HourglassLoadingSpinner/>
                                 Preparing payment...
                             </div>
                         )}
-                        {paymentStage === PromiseStage.error && (
+                        {prepareAllPayments.isError && (
                             <div className="card error">
-                                {paymentError instanceof Error ? paymentError.message : 'Failed to prepare payment'}
-                                <RetryButton onClick={runPayment}/>
+                                {prepareAllPayments.error instanceof Error ? prepareAllPayments.error.message : 'Failed to prepare payment'}
+                                <RetryButton onClick={() => formData && prepareAllPayments.mutate(formData)}/>
                             </div>
                         )}
                         {
-                            isPaymentComplete && (
-                                <CafePayment
-                                    prepareResults={paymentResults}
-                                    formData={formDataRef.current!}
-                                    onAllComplete={onAllCafesComplete}
-                                />
+                            isPaymentStarted && !allCafesComplete && (
+                                <CafePayment formData={formData}/>
                             )
                         }
                         {
-                            orderResult != null && (
+                            allCafesComplete && (
                                 <>
                                     <OrderStatus
                                         stage={PromiseStage.success}
-                                        value={orderResult}
+                                        value={completionResults}
                                         error={undefined}
                                     />
                                     <div className="flex flex-justify-center">

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
+import { mutative } from 'zustand-mutative';
 import { InternalSettings } from '../../constants/settings.ts';
 import { CartItemsByCafeId, ICartItemWithMetadata, ISerializedCartItemsByCafeId, ISerializedCartItemWithName } from '../../models/cart.ts';
-import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../util/cart.ts';
 import { queryKeys } from '../queries/keys.ts';
 import { queryClient } from '../query-client.ts';
 
@@ -12,7 +12,6 @@ interface ICartStore {
     missingItemsByCafeId: MissingItemsByCafeId;
 
     setItems(items: CartItemsByCafeId): void;
-    updateItems(updater: (current: CartItemsByCafeId) => CartItemsByCafeId): void;
     addOrEditItem(item: ICartItemWithMetadata): void;
     removeItem(item: ICartItemWithMetadata): void;
     removeCafe(cafeId: string): void;
@@ -22,53 +21,61 @@ interface ICartStore {
     clearMissingItems(): void;
 }
 
-export const useCartStore = create<ICartStore>()((set) => ({
+export const useCartStore = create<ICartStore>()(mutative((set) => ({
     items:                new Map(),
     missingItemsByCafeId: new Map(),
 
-    setItems: (items) => set({ items }),
-    updateItems: (updater) => set((state) => ({ items: updater(state.items) })),
-    addOrEditItem: (item) => set((state) => {
-        const next = shallowCloneCart(state.items);
-        addOrEditCartItem(next, item);
-        return { items: next };
-    }),
-    removeItem: (item) => set((state) => {
-        const next = shallowCloneCart(state.items);
-        removeFromCart(next, item);
-        return { items: next };
-    }),
-    removeCafe: (cafeId) => set((state) => {
-        if (!state.items.has(cafeId)) {
-            return state;
-        }
-        const next = shallowCloneCart(state.items);
-        next.delete(cafeId);
-        return { items: next };
+    setItems: (items) => set((state) => {
+        state.items = items;
     }),
 
-    setMissingItems: (missingItems) => set({ missingItemsByCafeId: missingItems }),
+    addOrEditItem: (item) => set((state) => {
+        let cafeItems = state.items.get(item.cafeId);
+        if (!cafeItems) {
+            cafeItems = new Map();
+            state.items.set(item.cafeId, cafeItems);
+        }
+        cafeItems.set(item.id, item);
+    }),
+
+    removeItem: (item) => set((state) => {
+        const cafeItems = state.items.get(item.cafeId);
+        if (!cafeItems) {
+            return;
+        }
+        cafeItems.delete(item.id);
+        if (cafeItems.size === 0) {
+            state.items.delete(item.cafeId);
+        }
+    }),
+
+    removeCafe: (cafeId) => set((state) => {
+        state.items.delete(cafeId);
+    }),
+
+    setMissingItems: (missingItems) => set((state) => {
+        state.missingItemsByCafeId = missingItems;
+    }),
+
     removeMissingItem: (cafeId, item) => set((state) => {
-        const currentForCafe = state.missingItemsByCafeId.get(cafeId);
-        if (!currentForCafe) {
-            return state;
+        const list = state.missingItemsByCafeId.get(cafeId);
+        if (!list) {
+            return;
         }
-        const remaining = currentForCafe.filter((other) => other !== item);
-        const next = new Map(state.missingItemsByCafeId);
+        const remaining = list.filter((other) => other !== item);
         if (remaining.length === 0) {
-            next.delete(cafeId);
+            state.missingItemsByCafeId.delete(cafeId);
         } else {
-            next.set(cafeId, remaining);
+            state.missingItemsByCafeId.set(cafeId, remaining);
         }
-        return { missingItemsByCafeId: next };
     }),
+
     clearMissingItems: () => set((state) => {
-        if (state.missingItemsByCafeId.size === 0) {
-            return state;
+        if (state.missingItemsByCafeId.size > 0) {
+            state.missingItemsByCafeId = new Map();
         }
-        return { missingItemsByCafeId: new Map() };
     }),
-}));
+})));
 
 const serializeCartForPersistence = (
     items: CartItemsByCafeId,
@@ -121,7 +128,7 @@ useCartStore.subscribe((state, prev) => {
     }
 
     const hydrationStatus = queryClient.getQueryState(queryKeys.cart.hydration)?.status;
-    if (hydrationStatus !== 'success') {
+    if (hydrationStatus !== 'success' && hydrationStatus !== 'error') {
         return;
     }
 

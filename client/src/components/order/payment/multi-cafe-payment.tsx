@@ -1,34 +1,31 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IOrderCompletionData, IOrderCompletionResponse, IPreparePaymentResponse } from '@msdining/common/models/cart';
+import React, { useMemo } from 'react';
+import { useOrderingStore, IPaymentFormData } from '../../../store/zustand/ordering.ts';
 import { CafePaymentRow } from './cafe-payment-row.tsx';
 
 import './multi-cafe-payment.css';
 
 interface ICafePaymentProps {
-    prepareResults: Record<string, IPreparePaymentResponse>;
-    formData: { phoneNumberWithCountryCode: string; alias: string };
-    onAllComplete: (results: IOrderCompletionResponse) => void;
+    formData: IPaymentFormData;
 }
 
-export const CafePayment: React.FC<ICafePaymentProps> = ({ prepareResults, formData, onAllComplete }) => {
-    const cafeIds = useMemo(() => Object.keys(prepareResults), [prepareResults]);
+export const CafePayment: React.FC<ICafePaymentProps> = ({ formData }) => {
+    const paymentsByCafeId = useOrderingStore((state) => state.paymentsByCafeId);
+    const cafeIds = useMemo(() => Array.from(paymentsByCafeId.keys()), [paymentsByCafeId]);
 
-    const [completedResults, setCompletedResults] = useState<IOrderCompletionResponse>({});
+    const completedCount = useMemo(
+        () => {
+            let count = 0;
+            for (const slice of paymentsByCafeId.values()) {
+                if (slice.completionResult != null) {
+                    count++;
+                }
+            }
+            return count;
+        },
+        [paymentsByCafeId]
+    );
 
     const popupId = useMemo(() => Symbol('rguest-payment'), []);
-
-    const handleCafeComplete = useCallback((cafeId: string, result: IOrderCompletionData) => {
-        setCompletedResults(prev => ({ ...prev, [cafeId]: result }));
-    }, []);
-
-    useEffect(() => {
-        const completedCount = Object.keys(completedResults).length;
-        if (completedCount > 0 && completedCount >= cafeIds.length) {
-            onAllComplete(completedResults);
-        }
-    }, [completedResults, cafeIds.length, onAllComplete]);
-
-    const completedCount = Object.keys(completedResults).length;
 
     return (
         <div className="multi-cafe-payment card">
@@ -50,11 +47,9 @@ export const CafePayment: React.FC<ICafePaymentProps> = ({ prepareResults, formD
                     <CafePaymentRow
                         key={cafeId}
                         cafeId={cafeId}
-                        initialPrepareData={prepareResults[cafeId]!}
                         formData={formData}
                         popupId={popupId}
                         disabled={false}
-                        onComplete={handleCafeComplete}
                     />
                 ))}
             </div>
