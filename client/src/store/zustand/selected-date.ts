@@ -15,8 +15,12 @@ interface ISelectedDateStore {
     resetToToday(): void;
 }
 
+// Initialized to today as a safe placeholder. main.tsx calls
+// initializeSelectedDate() after checkMigrationCookie() so the real initial
+// value reflects any migration-applied settings (allowFutureMenus) and the
+// `date` URL parameter.
 export const useSelectedDateStore = create<ISelectedDateStore>()(mutative((set) => ({
-    date: computeInitialDate(),
+    date: DiningClient.getTodayDateForMenu(),
     setDate:      (date) => set((state) => {
         state.date = date;
     }),
@@ -24,6 +28,15 @@ export const useSelectedDateStore = create<ISelectedDateStore>()(mutative((set) 
         state.date = DiningClient.getTodayDateForMenu();
     }),
 })));
+
+/**
+ * Computes the initial selected date from settings + URL and writes it into
+ * the store. Must run after any startup migration that may toggle
+ * ApplicationSettings.allowFutureMenus.
+ */
+export const initializeSelectedDate = () => {
+    useSelectedDateStore.setState({ date: computeInitialDate() });
+};
 
 /**
  * Per-setting selector hook. Components only re-render when the date itself

@@ -19,6 +19,7 @@ import { removeSourceQueryParamIfNeeded } from './util/telemetry.ts';
 import { App } from './components/app.tsx';
 import { LazyDevPage } from './components/pages/dev/lazy-dev-page.js';
 import { LazyMapPage } from './components/pages/map/lazy-map-page.js';
+import { initializeSelectedDate } from './store/zustand/selected-date.ts';
 
 import './index.css';
 
@@ -60,5 +61,6 @@ if (window.location.hostname === 'msdining.frozor.io') {
 } else {
     checkMigrationCookie();
     removeSourceQueryParamIfNeeded();
+    initializeSelectedDate();
     startApp();
 }
