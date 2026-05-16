@@ -6,6 +6,7 @@ import { ICancellationToken, pause } from '../../util/async.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 import { queryClient } from '../query-client.ts';
 import { queryKeys } from './keys.ts';
+import { longLivedQueryOptions } from './options.ts';
 
 const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
 const RECENT_MENUS_PREFETCH_LIMIT = 5;
@@ -13,14 +14,9 @@ const RECENT_MENUS_PREFETCH_LIMIT = 5;
 export const useCafeMenuQuery = (cafeId: string, date: Date) => {
     const dateString = toDateString(date);
     return useQuery({
-        queryKey:  queryKeys.cafe.menu(cafeId, dateString),
-        queryFn:   () => DiningClient.retrieveCafeMenu(cafeId, date),
-        // Menus only change when the server's cron job re-fetches them. There's
-        // no point in TanStack re-fetching on stale-time intervals — invalidate
-        // explicitly (e.g. via useForceRefreshCafesMutation) when we know fresh
-        // data is available. See Tier 2 plan in the team notes for a future
-        // freshness-probe endpoint.
-        staleTime: Infinity,
+        queryKey: queryKeys.cafe.menu(cafeId, dateString),
+        queryFn:  () => DiningClient.retrieveCafeMenu(cafeId, date),
+        ...longLivedQueryOptions,
     });
 };
 
@@ -29,6 +25,7 @@ export const useCafeOverviewQuery = (viewId: string, date: Date) => {
     return useQuery({
         queryKey: queryKeys.cafe.overview(viewId, dateString),
         queryFn:  () => DiningClient.retrieveOverview(viewId, dateString),
+        ...longLivedQueryOptions,
     });
 };
 
@@ -37,6 +34,7 @@ export const useCafeMenuOverviewSummaryQuery = (viewId: string, date: Date) => {
     return useQuery({
         queryKey: queryKeys.cafe.overviewSummary(viewId, dateString),
         queryFn:  () => DiningClient.retrieveMenuOverviewSummary(viewId, dateString),
+        ...longLivedQueryOptions,
     });
 };
 
@@ -63,9 +61,9 @@ export const prefetchRecentMenusInOrder = async (
         }
 
         await queryClient.prefetchQuery({
-            queryKey:  queryKeys.cafe.menu(cafe.id, dateString),
-            queryFn:   () => DiningClient.retrieveCafeMenu(cafe.id, today),
-            staleTime: Infinity,
+            queryKey: queryKeys.cafe.menu(cafe.id, dateString),
+            queryFn:  () => DiningClient.retrieveCafeMenu(cafe.id, today),
+            ...longLivedQueryOptions,
         });
     }
 };
