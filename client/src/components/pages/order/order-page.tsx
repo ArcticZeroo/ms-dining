@@ -12,6 +12,7 @@ import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
+import { CartHydrationView } from '../../order/cart/cart-hydration-view.tsx';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
 import { IPaymentFormData, PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
 import { CafePayment } from '../../order/payment/multi-cafe-payment.tsx';
@@ -97,75 +98,84 @@ export const OrderPage = () => {
     const isPaymentStarted = paymentStage !== PromiseStage.notRun;
     const isPaymentComplete = paymentResults != null;
 
+    const hasUnhydratedItems = cartHydrationState.missingItemsByCafeId.size > 0;
+
     const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
 
-    if (!isCheckoutAllowed) {
+    if (!isCheckoutAllowed && !hasUnhydratedItems) {
         return <EmptyCartNotice/>;
     }
 
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
-            <div className="card dark-blue">
-                <div className="title">
-                    Your Order
-                </div>
-                <CartContentsTable
-                    showFullDetails={true}
-                    showTotalPrice={true}
-                    readOnly={isPaymentStarted}
-                    cartSessionData={cartSessionData}
-                    cartSessionError={cartSessionError}
-                />
-                <WaitTime cartSessionData={cartSessionData}/>
-            </div>
-            {cart.size > 1 && <MultiCafeOrderWarning/>}
-            <PaymentInfoForm
-                isPrepareStarted={isPaymentStarted}
-                isCartReady={cartSessionData != null}
-                onSubmit={onFormSubmitted}
-            />
-            <OrderPrivacyPolicy/>
-            {cartSessionStage === PromiseStage.running && (
-                <div className="flex flex-justify-center">
-                    <HourglassLoadingSpinner/>
-                    Building your order...
-                </div>
-            )}
-            {paymentStage === PromiseStage.running && (
-                <div className="flex flex-justify-center">
-                    <HourglassLoadingSpinner/>
-                    Preparing payment...
-                </div>
-            )}
-            {paymentStage === PromiseStage.error && (
-                <div className="card error">
-                    {paymentError instanceof Error ? paymentError.message : 'Failed to prepare payment'}
-                    <RetryButton onClick={runPayment}/>
-                </div>
-            )}
+            <CartHydrationView/>
             {
-                isPaymentComplete && (
-                    <CafePayment
-                        prepareResults={paymentResults}
-                        formData={formDataRef.current!}
-                        onAllComplete={onAllCafesComplete}
-                    />
-                )
-            }
-            {
-                orderResult != null && (
+                isCheckoutAllowed && (
                     <>
-                        <OrderStatus
-                            stage={PromiseStage.success}
-                            value={orderResult}
-                            error={undefined}
-                        />
-                        <div className="flex flex-justify-center">
-                            <button className="default-container" onClick={() => navigate('/')}>
-                                Return Home
-                            </button>
+                        <div className="card dark-blue">
+                            <div className="title">
+                                Your Order
+                            </div>
+                            <CartContentsTable
+                                showFullDetails={true}
+                                showTotalPrice={true}
+                                readOnly={isPaymentStarted}
+                                cartSessionData={cartSessionData}
+                                cartSessionError={cartSessionError}
+                            />
+                            <WaitTime cartSessionData={cartSessionData}/>
                         </div>
+                        {cart.size > 1 && <MultiCafeOrderWarning/>}
+                        <PaymentInfoForm
+                            isPrepareStarted={isPaymentStarted}
+                            isCartReady={cartSessionData != null}
+                            onSubmit={onFormSubmitted}
+                        />
+                        <OrderPrivacyPolicy/>
+                        {cartSessionStage === PromiseStage.running && (
+                            <div className="flex flex-justify-center">
+                                <HourglassLoadingSpinner/>
+                                Building your order...
+                            </div>
+                        )}
+                        {paymentStage === PromiseStage.running && (
+                            <div className="flex flex-justify-center">
+                                <HourglassLoadingSpinner/>
+                                Preparing payment...
+                            </div>
+                        )}
+                        {paymentStage === PromiseStage.error && (
+                            <div className="card error">
+                                {paymentError instanceof Error ? paymentError.message : 'Failed to prepare payment'}
+                                <RetryButton onClick={runPayment}/>
+                            </div>
+                        )}
+                        {
+                            isPaymentComplete && (
+                                <CafePayment
+                                    prepareResults={paymentResults}
+                                    formData={formDataRef.current!}
+                                    onAllComplete={onAllCafesComplete}
+                                />
+                            )
+                        }
+                        {
+                            orderResult != null && (
+                                <>
+                                    <OrderStatus
+                                        stage={PromiseStage.success}
+                                        value={orderResult}
+                                        error={undefined}
+                                    />
+                                    <div className="flex flex-justify-center">
+                                        <button className="default-container" onClick={() => navigate('/')}>
+                                            Return Home
+                                        </button>
+                                    </div>
+                                </>
+                            )
+                        }
                     </>
                 )
             }

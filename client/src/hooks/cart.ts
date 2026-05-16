@@ -1,17 +1,16 @@
+import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { useCallback, useEffect, useMemo } from 'react';
-import { CartItemsByCafeId, ICartHydrationState } from '../context/cart.ts';
-import { useValueNotifier } from './events.ts';
-import { InternalSettings } from '../constants/settings.ts';
 import { OrderingClient } from '../api/order.ts';
-import { IHydratedCartData, ISerializedCartItemsByCafeId, ISerializedCartItemWithName } from '../models/cart.ts';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
+import { InternalSettings } from '../constants/settings.ts';
+import { CartItemsByCafeId, ICartHydrationState } from '../context/cart.ts';
+import { ISerializedCartItemsByCafeId, ISerializedCartItemWithName } from '../models/cart.ts';
 import { ValueNotifier } from '../util/events.ts';
+import { useValueNotifier } from './events.ts';
 
-const BOOT_CART_DATA = InternalSettings.cart.value;
+type MissingItemsByCafeId = Map<string, Array<ISerializedCartItemWithName>>;
 
-const serializeCart = (cart: CartItemsByCafeId, cartHydrationNotifier: ValueNotifier<ICartHydrationState>): ISerializedCartItemsByCafeId => {
-    const serializedValue: Record<string /*cafeId*/, Array<ISerializedCartItemWithName>> = {};
-    const missingItemsByCafeId = cartHydrationNotifier.value.missingItemsByCafeId;
+const serializeCart = (cart: CartItemsByCafeId, missingItemsByCafeId: MissingItemsByCafeId): ISerializedCartItemsByCafeId => {
+    const serializedValue: ISerializedCartItemsByCafeId = {};
 
     for (const [cafeId, itemsById] of cart.entries()) {
         const serializedItems: ISerializedCartItemWithName[] = [];
@@ -29,68 +28,98 @@ const serializeCart = (cart: CartItemsByCafeId, cartHydrationNotifier: ValueNoti
             });
         }
 
-        if (missingItemsByCafeId != null) {
-            const missingItemsForCafe = missingItemsByCafeId.get(cafeId) ?? [];
-            serializedItems.push(...missingItemsForCafe);
-        }
+        const missingItemsForCafe = missingItemsByCafeId.get(cafeId) ?? [];
+        serializedItems.push(...missingItemsForCafe);
 
         serializedValue[cafeId] = serializedItems;
     }
 
+    // Also persist cafes that exist only as missing items (e.g. hydration failed
+    // and nothing has been added to the live cart yet). Without this, the next
+    // save would wipe the un-hydrated items from localStorage.
+    for (const [cafeId, missingItems] of missingItemsByCafeId.entries()) {
+        if (missingItems.length === 0 || serializedValue[cafeId] != null) {
+            continue;
+        }
+
+        serializedValue[cafeId] = [...missingItems];
+    }
+
     return serializedValue;
-}
+};
 
 export const useCartHydration = (cartNotifier: ValueNotifier<CartItemsByCafeId>) => {
     const cart = useValueNotifier(cartNotifier);
+
+    const missingItemsNotifier = useMemo(
+        () => new ValueNotifier<MissingItemsByCafeId>(new Map()),
+        []
+    );
+    const missingItems = useValueNotifier(missingItemsNotifier);
+
+    const { stage, run: retry } = useDelayedPromiseState(
+        useCallback(async () => {
+            const bootCartData = InternalSettings.cart.value;
+            if (!bootCartData || Object.keys(bootCartData).length === 0) {
+                cartNotifier.value = new Map();
+                missingItemsNotifier.value = new Map();
+                return;
+            }
+
+            try {
+                const data = await OrderingClient.hydrateCart(bootCartData);
+                cartNotifier.value = data.foundItemsByCafeId;
+                missingItemsNotifier.value = data.missingItemsByCafeId;
+            } catch (err) {
+                // Preserve every booted item as "missing" so the user can retry
+                // or remove them manually rather than losing their cart silently.
+                missingItemsNotifier.value = new Map(Object.entries(bootCartData));
+                throw err;
+            }
+        }, [cartNotifier, missingItemsNotifier])
+    );
+
+    const clearMissingItems = useCallback(() => {
+        missingItemsNotifier.value = new Map();
+    }, [missingItemsNotifier]);
+
+    useEffect(() => {
+        retry();
+    }, [retry]);
+
+    // Persist cart + missing items to localStorage whenever they change, but
+    // not while hydration is in flight (that would clobber the persisted data
+    // before we know what the server is going to give us back).
+    useEffect(() => {
+        if (stage === PromiseStage.notRun || stage === PromiseStage.running) {
+            return;
+        }
+
+        InternalSettings.cart.value = serializeCart(cart, missingItems);
+    }, [cart, missingItems, stage]);
+
+    // Expose a single ValueNotifier so context consumers can subscribe to the
+    // combined hydration state in one place.
     const cartHydrationNotifier = useMemo(
         () => new ValueNotifier<ICartHydrationState>({
-            stage: PromiseStage.notRun
+            stage:                PromiseStage.notRun,
+            missingItemsByCafeId: new Map(),
+            retry,
+            clearMissingItems
         }),
+        // retry/clearMissingItems are stable - safe to omit
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         []
     );
 
     useEffect(() => {
-        // Don't overwrite persisted cart data before hydration finishes
-        const hydrationStage = cartHydrationNotifier.value.stage;
-        if (hydrationStage === PromiseStage.notRun || hydrationStage === PromiseStage.running) {
-            return;
-        }
-
-        InternalSettings.cart.value = serializeCart(cart, cartHydrationNotifier);
-    }, [cart, cartHydrationNotifier]);
-
-    const hydrateCart = useCallback(async (bootCartData: ISerializedCartItemsByCafeId) => {
-        try {
-            cartHydrationNotifier.value = { stage: PromiseStage.running };
-
-            const hydratedCartData: IHydratedCartData = await OrderingClient.hydrateCart(bootCartData);
-
-            cartHydrationNotifier.value = {
-                stage:                PromiseStage.success,
-                missingItemsByCafeId: hydratedCartData.missingItemsByCafeId
-            };
-
-            cartNotifier.value = hydratedCartData.foundItemsByCafeId;
-        } catch (err) {
-            console.error('Could not hydrate cart:', err);
-            cartHydrationNotifier.value = {
-                stage:                PromiseStage.error,
-                missingItemsByCafeId: new Map(Object.entries(bootCartData))
-            };
-        }
-
-        // Ok, this is pretty hacky, but prevents us from losing cart data on initial boot.
-        InternalSettings.cart.value = bootCartData;
-    }, [cartHydrationNotifier, cartNotifier]);
-
-    useEffect(() => {
-        if (!BOOT_CART_DATA || Object.keys(BOOT_CART_DATA).length === 0) {
-            return;
-        }
-
-        hydrateCart(BOOT_CART_DATA)
-            .catch(err => console.error('Could not hydrate cart:', err));
-    }, [hydrateCart]);
+        cartHydrationNotifier.value = {
+            stage,
+            missingItemsByCafeId: missingItems,
+            retry,
+            clearMissingItems
+        };
+    }, [stage, missingItems, retry, clearMissingItems, cartHydrationNotifier]);
 
     return cartHydrationNotifier;
 };

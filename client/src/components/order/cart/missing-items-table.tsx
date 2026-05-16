@@ -4,7 +4,6 @@ import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { CartHydrationContext } from '../../../context/cart.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
-import { ISerializedCartItemWithName } from '../../../models/cart.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { MissingCartItemRow } from './missing-cart-item-row.tsx';
@@ -13,7 +12,7 @@ export const MissingItemsTable = () => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartHydration = useValueNotifierContext(CartHydrationContext);
-    const missingItems = cartHydration.missingItemsByCafeId ?? new Map<string, Array<ISerializedCartItemWithName>>();
+    const missingItems = cartHydration.missingItemsByCafeId;
 
     // TODO: Consider folding this table into the main one
     return (

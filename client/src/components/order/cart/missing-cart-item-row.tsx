@@ -15,7 +15,13 @@ export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId,
     const onRemove = () => {
         const newMissingItemsByCafeId = new Map(cartHydrationNotifier.value.missingItemsByCafeId);
         const missingItemsForCafe = newMissingItemsByCafeId.get(cafeId) ?? [];
-        newMissingItemsByCafeId.set(cafeId, missingItemsForCafe.filter(missingItem => missingItem !== item));
+        const remainingForCafe = missingItemsForCafe.filter(missingItem => missingItem !== item);
+
+        if (remainingForCafe.length === 0) {
+            newMissingItemsByCafeId.delete(cafeId);
+        } else {
+            newMissingItemsByCafeId.set(cafeId, remainingForCafe);
+        }
 
         cartHydrationNotifier.value = {
             ...cartHydrationNotifier.value,

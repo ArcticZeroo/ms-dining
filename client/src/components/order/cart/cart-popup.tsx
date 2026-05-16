@@ -38,7 +38,7 @@ export const CartPopup = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    const hasMissingItems = cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
+    const hasMissingItems = cartHydration.missingItemsByCafeId.size > 0;
     const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
 
     if (!allowOnlineOrdering) {
