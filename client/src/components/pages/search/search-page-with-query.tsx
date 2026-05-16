@@ -4,13 +4,12 @@ import { useDateForSearch } from '../../../hooks/date-picker.tsx';
 import { SearchEntityFilterType } from '../../../models/search.ts';
 import { useSearchResultsQuery } from '../../../store/queries/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
+import { SimilarQueries } from '../../search/similar-queries.tsx';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { SearchFilters } from '../../search/filters/search-filters.tsx';
-import { classNames, repeatComponent } from '../../../util/react.ts';
-import { useAllowedSearchViewIds, useRecommendedQueries } from '../../../hooks/search.ts';
-import { Link } from 'react-router-dom';
-import { getSearchUrl } from '../../../util/url.js';
+import { classNames } from '../../../util/react.ts';
+import { useAllowedSearchViewIds } from '../../../hooks/search.ts';
 import { EntityTypeSelector } from './entity-type-selector.js';
 
 interface ISearchPageWithQueryProps {
@@ -34,8 +33,6 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
         }
         return counts;
     }, [results]);
-
-    const recommendedQueries = useRecommendedQueries(queryText);
 
     useEffect(() => {
         setEntityFilterType(SearchEntityFilterType.all);
@@ -89,39 +86,7 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     </div>
                 )
             }
-            <div className="similar-queries flex flex-center flex-wrap">
-                <span>
-                    Similar:
-                </span>
-                {
-                    !recommendedQueries.data && (
-                        <>
-                            {
-                                repeatComponent(
-                                    5,
-                                    () => (
-                                        <div className="recommended-query default-container default-button loading-skeleton">
-                                            Loading...
-                                        </div>
-                                    )
-                                )
-                            }
-                        </>
-                    )
-                }
-                {
-                    recommendedQueries.data && recommendedQueries.data.map(recommendedQuery => (
-                        <Link
-                            key={recommendedQuery}
-                            to={getSearchUrl(recommendedQuery)}
-                            className="recommended-query default-container default-button"
-                            title={`Click to search for "${recommendedQuery}"`}
-                        >
-                            {recommendedQuery}
-                        </Link>
-                    ))
-                }
-            </div>
+            <SimilarQueries queryText={queryText}/>
             {
                 searchQuery.isSuccess && (
                     <SearchResultsList

@@ -7,6 +7,7 @@ import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.ts
 import { MapEntityFilterDropdown } from './map-entity-filter-dropdown.tsx';
 import { MapSearchResultItem } from './map-search-result-item.tsx';
 import { MapSearchSortSelector } from './map-search-sort-selector.tsx';
+import { SimilarQueries } from '../../search/similar-queries.tsx';
 import starIcon from '../../../assets/icons/filled/star-white.svg';
 import { classNames } from '../../../util/react.ts';
 import { RetryButton } from '../../button/retry-button.js';
@@ -60,6 +61,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
         return (
             <div className="panel-content map-search-status flex-col">
                 <span className="subtitle">No results for "{query}"</span>
+                <SimilarQueries queryText={query}/>
             </div>
         );
     }
@@ -90,6 +92,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
                     </button>
                 )}
             </div>
+            <SimilarQueries queryText={query}/>
             <span className="subtitle map-search-result-count">
                 {results.length} {pluralize('result', results.length)} for "{query}"
             </span>
