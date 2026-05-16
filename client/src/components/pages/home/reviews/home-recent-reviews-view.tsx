@@ -1,29 +1,27 @@
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { ReviewCard } from '../../../reviews/review-card.tsx';
 import { toDateString } from '@msdining/common/util/date-util';
-import { REVIEW_STORE } from '../../../../store/reviews.ts';
-import { useValueNotifier } from '../../../../hooks/events.ts';
+import { useRecentReviews } from '../../../../store/queries/reviews.ts';
 
 export const HomeRecentReviewsView = () => {
-    const { stage, value, run } = useValueNotifier(REVIEW_STORE.recentReviews);
+    const { isError, data, refetch } = useRecentReviews();
 
-    if (stage === PromiseStage.error) {
+    if (isError) {
         return (
             <div className="card flex-col">
                 <span>
                     Couldn't load recent reviews!
                 </span>
-                <RetryButton onClick={run}/>
+                <RetryButton onClick={() => refetch()}/>
             </div>
         );
     }
 
-    if (value != null) {
+    if (data != null) {
         return (
             <div className="flex horizontal-scroll">
                 {
-                    value.map(review => (
+                    data.map(review => (
                         <ReviewCard
                             key={review.id}
                             review={review}

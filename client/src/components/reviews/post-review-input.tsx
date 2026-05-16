@@ -1,13 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { StarRating } from './star-rating.tsx';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { IReview } from '@msdining/common/models/review';
 import { fromDateString } from '@msdining/common/util/date-util';
 import { useIsAdmin } from '../../hooks/auth.ts';
 import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { DebugSettings } from '../../constants/settings.ts';
-import { REVIEW_STORE } from '../../store/reviews.ts';
+import { useCreateReview, useDeleteReview } from '../../store/queries/reviews.ts';
 import { UserContext } from '../../context/auth.ts';
 import { IReviewLookup, IReviewLookupForStation } from '../../models/reviews.js';
 
@@ -71,9 +70,10 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
     const lastSavedComment = isStationReview ? stationLastSavedComment : menuItemLastSavedComment;
     const setLastSavedComment = isStationReview ? setStationLastSavedComment : setMenuItemLastSavedComment;
 
-    const [reviewCreationStage, setReviewCreationStage] = useState<PromiseStage>(PromiseStage.notRun);
+    const createMutation = useCreateReview();
+    const deleteMutation = useDeleteReview();
 
-    const isCurrentlyMakingRequest = reviewCreationStage === PromiseStage.running;
+    const isCurrentlyMakingRequest = createMutation.isPending || deleteMutation.isPending;
     const canSaveComment = stars !== 0 && lastSavedComment !== activeComment;
     const canDeleteOrClear = !isCurrentlyMakingRequest && (activeReviewId != null || lastSavedComment.length > 0);
 
@@ -89,15 +89,19 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                 : 'You have nothing to save! Your comment is the same as what\'s on the server.'
         );
 
-    const postReview = useCallback(
-        (request: ICreateReviewRequest) => {
-            setReviewCreationStage(PromiseStage.running);
-            REVIEW_STORE.createReview(activeLookup, request, {
-                userId:          user?.id,
-                userDisplayName: user?.displayName ?? 'Anonymous',
-                cafeId,
-            })
-                .then(id => {
+    const postReview = (request: ICreateReviewRequest) => {
+        createMutation.mutate(
+            {
+                lookup:  activeLookup,
+                request,
+                context: {
+                    userId:          user?.id,
+                    userDisplayName: user?.displayName ?? 'Anonymous',
+                    cafeId,
+                },
+            },
+            {
+                onSuccess: (id) => {
                     if (request.anonymous) {
                         setActiveRating(0);
                         setActiveComment('');
@@ -107,15 +111,13 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
                         setActiveReviewId(id);
                         setLastSavedComment(request.comment || '');
                     }
-                    setReviewCreationStage(PromiseStage.success);
-                })
-                .catch(err => {
+                },
+                onError: (err) => {
                     console.error('Could not create review:', err);
-                    setReviewCreationStage(PromiseStage.error);
-                });
-        },
-        [activeLookup, cafeId, user, setActiveRating, setActiveComment, setActiveReviewId, setLastSavedComment]
-    );
+                },
+            },
+        );
+    };
 
     // If a user clicks on the stars, it'll try to set them to null.
     // We don't want to support null as a possible value, stars must exist in a review.
@@ -158,19 +160,20 @@ export const PostReviewInput: React.FC<IPostReviewInputProps> = ({
             return;
         }
 
-        setReviewCreationStage(PromiseStage.running);
-        REVIEW_STORE.deleteReview(activeReviewId, activeLookup)
-            .then(() => {
-                setActiveRating(0);
-                setActiveReviewId(undefined);
-                setActiveComment('');
-                setLastSavedComment('');
-                setReviewCreationStage(PromiseStage.notRun);
-            })
-            .catch(err => {
-                console.error('Could not delete review:', err);
-                setReviewCreationStage(PromiseStage.error);
-            });
+        deleteMutation.mutate(
+            { reviewId: activeReviewId, lookup: activeLookup },
+            {
+                onSuccess: () => {
+                    setActiveRating(0);
+                    setActiveReviewId(undefined);
+                    setActiveComment('');
+                    setLastSavedComment('');
+                },
+                onError: (err) => {
+                    console.error('Could not delete review:', err);
+                },
+            },
+        );
     };
 
     const onSaveClicked = () => {

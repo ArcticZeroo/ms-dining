@@ -1,5 +1,4 @@
 import React from 'react';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { IReviewSummary } from '@msdining/common/models/review';
 import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
 import { RetryButton } from '../button/retry-button.tsx';
@@ -7,7 +6,7 @@ import { ReviewsViewWithData } from './reviews-view-with-data.tsx';
 import { IReviewLookup, IReviewLookupForStation } from '../../models/reviews.js';
 
 interface IReviewsViewProps {
-    stage: PromiseStage;
+    status: 'pending' | 'success' | 'error';
     response: IReviewSummary | undefined;
     onRetry: () => void;
     cafeId: string;
@@ -15,8 +14,8 @@ interface IReviewsViewProps {
     stationLookup?: IReviewLookupForStation;
 }
 
-export const ReviewsView: React.FC<IReviewsViewProps> = ({ stage, response, onRetry, cafeId, lookup, stationLookup }) => {
-    if ([PromiseStage.notRun, PromiseStage.running].includes(stage)) {
+export const ReviewsView: React.FC<IReviewsViewProps> = ({ status, response, onRetry, cafeId, lookup, stationLookup }) => {
+    if (status === 'pending') {
         return (
             <div className="flex flex-center">
                 <span>
@@ -27,7 +26,7 @@ export const ReviewsView: React.FC<IReviewsViewProps> = ({ stage, response, onRe
         );
     }
 
-    if (stage === PromiseStage.error || response == null) {
+    if (status === 'error' || response == null) {
         return (
             <div className="flex flex-center">
                 <span>Could not load reviews!</span>

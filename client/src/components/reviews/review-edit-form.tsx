@@ -1,10 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { IReview } from '@msdining/common/models/review';
 import { REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { StarRating } from './star-rating.tsx';
-import { useDelayedPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { classNames } from '../../util/react.ts';
-import { REVIEW_STORE } from '../../store/reviews.ts';
+import { useUpdateReview } from '../../store/queries/reviews.ts';
 import { IReviewLookup } from '../../models/reviews.ts';
 
 interface IReviewEditFormProps {
@@ -31,21 +30,8 @@ export const ReviewEditForm: React.FC<IReviewEditFormProps> = ({
         return { menuItemId: review.menuItemId ?? '', menuItemName: review.menuItemName ?? '' };
     }, [review.stationId, review.stationName, review.menuItemId, review.menuItemName]);
 
-    const { actualStage: saveStage, run: saveReview } = useDelayedPromiseState(
-        useCallback(
-            async () => {
-                await REVIEW_STORE.updateReview(review.id, lookup, {
-                    rating:      editRating,
-                    comment:     editComment.trim() || undefined,
-                    displayName: !review.userId ? editDisplayName.trim() || undefined : undefined,
-                });
-                onSaved();
-            },
-            [review.id, review.userId, lookup, editRating, editComment, editDisplayName, onSaved]
-        )
-    );
-
-    const isSaving = saveStage === PromiseStage.running;
+    const updateMutation = useUpdateReview();
+    const isSaving = updateMutation.isPending;
 
     const onCancelClicked = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -54,9 +40,21 @@ export const ReviewEditForm: React.FC<IReviewEditFormProps> = ({
 
     const onSaveClicked = (event: React.MouseEvent) => {
         event.preventDefault();
-        if (!isSaving) {
-            saveReview();
+        if (isSaving) {
+            return;
         }
+        updateMutation.mutate(
+            {
+                reviewId: review.id,
+                lookup,
+                request:  {
+                    rating:      editRating,
+                    comment:     editComment.trim() || undefined,
+                    displayName: !review.userId ? editDisplayName.trim() || undefined : undefined,
+                },
+            },
+            { onSuccess: onSaved },
+        );
     };
 
     return (

@@ -10,4 +10,11 @@ export const queryKeys = {
         zeroContext:       ['groups', 'zero-context'] as const,
         itemsWithoutGroup: ['groups', 'items-without-group'] as const,
     },
+    reviews: {
+        // [...summary, entityId] for per-entity summaries.
+        summary:    ['reviews', 'summary'] as const,
+        recent:     ['reviews', 'recent'] as const,
+        mine:       ['reviews', 'mine'] as const,
+        entityById: (entityId: string) => ['reviews', 'summary', entityId] as const,
+    },
 } as const;

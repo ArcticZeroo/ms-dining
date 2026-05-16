@@ -12,11 +12,10 @@ import { fromDateString } from '@msdining/common/util/date-util';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeName } from '../../util/string.ts';
 import { StarRating } from './star-rating.tsx';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { useIsAdmin } from '../../hooks/auth.ts';
 import { DebugSettings } from '../../constants/settings.ts';
 import { ReviewEditForm } from './review-edit-form.tsx';
-import { REVIEW_STORE } from '../../store/reviews.ts';
+import { useDeleteReview } from '../../store/queries/reviews.ts';
 import { getReviewEntityName, IReviewLookup, isStationReview } from '../../models/reviews.ts';
 
 const getLookupFromReview = (review: IReview): IReviewLookup => {
@@ -50,7 +49,7 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
     const view = viewsById.get(review.cafeId);
     const [isEditing, setIsEditing] = useState(false);
 
-    const [deleteStage, setDeleteStage] = useState(PromiseStage.notRun);
+    const deleteMutation = useDeleteReview();
 
     if (!isSkeleton && view == null) {
         return null;
@@ -81,19 +80,14 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
     const onDeleteClicked = (event: React.MouseEvent) => {
         event.preventDefault();
 
-        if (deleteStage === PromiseStage.running) {
+        if (deleteMutation.isPending) {
             return;
         }
 
-        setDeleteStage(PromiseStage.running);
-        REVIEW_STORE.deleteReview(review.id, lookup)
-            .then(() => {
-                setDeleteStage(PromiseStage.success);
-            })
-            .catch(err => {
-                console.error('failed to delete:', err);
-                setDeleteStage(PromiseStage.error);
-            });
+        deleteMutation.mutate(
+            { reviewId: review.id, lookup },
+            { onError: (err) => console.error('failed to delete:', err) },
+        );
     };
 
     const onEditClicked = (event: React.MouseEvent) => {
@@ -189,7 +183,7 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
                             className="default-button default-container icon-container"
                             onClick={onDeleteClicked}
                             title="Delete this review"
-                            disabled={deleteStage === PromiseStage.running}
+                            disabled={deleteMutation.isPending}
                         >
                             <span className="material-symbols-outlined">
                                 delete

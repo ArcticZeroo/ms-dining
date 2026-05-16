@@ -1,12 +1,10 @@
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { ReviewCard } from '../../reviews/review-card.tsx';
 import { IReview } from '@msdining/common/models/review';
 import { useMemo } from 'react';
 import { ReviewStats } from '../../reviews/review-stats.tsx';
-import { REVIEW_STORE } from '../../../store/reviews.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
+import { useMyReviews } from '../../../store/queries/reviews.ts';
 
 interface IReviewStats {
     counts: Record<number, number>;
@@ -50,16 +48,16 @@ const useReviewStats = (reviews: Array<IReview> | undefined): IReviewStats => {
 }
 
 export const ProfileReviews = () => {
-    const { stage, value: reviews, run } = useValueNotifier(REVIEW_STORE.myReviews);
+    const { isError, data: reviews, refetch } = useMyReviews();
     const stats = useReviewStats(reviews);
 
-    if (stage === PromiseStage.error) {
+    if (isError) {
         return (
             <div className="card error">
                 <span>
                     Unable to load your reviews!
                 </span>
-                <RetryButton onClick={run}/>
+                <RetryButton onClick={() => refetch()}/>
             </div>
         );
     }
