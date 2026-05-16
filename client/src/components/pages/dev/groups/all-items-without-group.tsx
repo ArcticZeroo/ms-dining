@@ -1,13 +1,11 @@
 import './groups.css';
-import { GROUP_STORE } from '../../../../store/groups.js';
-import { useValueNotifier } from '../../../../hooks/events.js';
+import { useItemsWithoutGroup } from '../../../../store/queries/groups.ts';
 import { AllItemsWithoutGroupWithData } from './all-items-without-group-with-data.js';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 
 export const AllItemsWithoutGroup = () => {
-    const { stage: allItemsWithoutGroupStage, value: allItemsWithoutGroup, run: retryGetAllItemsWithoutGroup } = useValueNotifier(GROUP_STORE.allItemsWithoutGroup);
+    const { data: allItemsWithoutGroup, error, refetch } = useItemsWithoutGroup();
 
     if (allItemsWithoutGroup) {
         return (
@@ -17,13 +15,13 @@ export const AllItemsWithoutGroup = () => {
         );
     }
 
-    if (allItemsWithoutGroupStage === PromiseStage.error) {
+    if (error) {
         return (
             <div className="flex-col">
                 <span>
                     Failed to load list of items without a group.
                 </span>
-                <RetryButton onClick={retryGetAllItemsWithoutGroup}/>
+                <RetryButton onClick={() => refetch()}/>
             </div>
         );
     }

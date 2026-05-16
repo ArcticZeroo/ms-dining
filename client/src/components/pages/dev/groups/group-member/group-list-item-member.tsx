@@ -1,10 +1,9 @@
 import { IGroupMember } from '@msdining/common/models/group';
 import { GroupMember } from './group-member.js';
-import React, { useCallback } from 'react';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { GROUP_STORE } from '../../../../../store/groups.js';
+import React from 'react';
+import { useDeleteGroupMember } from '../../../../../store/queries/groups.ts';
 import { classNames } from '../../../../../util/react.js';
-import { promiseStageToButtonClass } from '../../../../../util/async.js';
+import { mutationButtonClass } from '../../../../../util/mutation.js';
 
 interface IGroupListItemMemberProps {
     groupId: string;
@@ -12,18 +11,14 @@ interface IGroupListItemMemberProps {
 }
 
 export const GroupListItemMember: React.FC<IGroupListItemMemberProps> = ({ groupId, member }) => {
-    const { actualStage: deleteStage, error, run: deleteGroupMember } = useDelayedPromiseState(useCallback(
-        () => GROUP_STORE.deleteGroupMember(groupId, member.id),
-        [groupId, member.id]
-    ));
-
-    const canDelete = deleteStage !== PromiseStage.running;
+    const deleteMutation = useDeleteGroupMember();
 
     const onDeleteClicked = () => {
-        if (canDelete) {
-            deleteGroupMember();
+        if (deleteMutation.isPending) {
+            return;
         }
-    }
+        deleteMutation.mutate({ groupId, memberId: member.id });
+    };
 
     return (
         <div className="card">
@@ -32,10 +27,10 @@ export const GroupListItemMember: React.FC<IGroupListItemMemberProps> = ({ group
                 member={member}
             />
             <button
-                className={classNames("material-symbols-outlined icon-container default-button default-container", promiseStageToButtonClass(deleteStage))}
+                className={classNames("material-symbols-outlined icon-container default-button default-container", mutationButtonClass(deleteMutation))}
                 onClick={onDeleteClicked}
-                disabled={!canDelete}
-                title={error}
+                disabled={deleteMutation.isPending}
+                title={deleteMutation.error?.message}
             >
                 delete
             </button>

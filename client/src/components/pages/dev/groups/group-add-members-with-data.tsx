@@ -1,11 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { IGroupData, IGroupMember } from '@msdining/common/models/group';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { GroupMember } from './group-member/group-member.js';
 import { classNames } from '../../../../util/react.js';
 import { pluralize } from '../../../../util/string.js';
-import { GROUP_STORE } from '../../../../store/groups.js';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useAddGroupMembers } from '../../../../store/queries/groups.ts';
 import { AllItemsWithoutGroupByType } from '../../../../models/groups.js';
 
 interface IGroupAddMembersWithDataProps {
@@ -115,10 +114,14 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
         [availableItemsOfType, group.type, selectedMemberIds]
     );
 
-    const { stage: addStage, run: addMembers } = useDelayedPromiseState(useCallback(async () => {
-        await GROUP_STORE.addGroupMembers(group.id, selectedMembers);
-        setSelectedMemberIds(new Set());
-    }, [group.id, selectedMembers]));
+    const addMutation = useAddGroupMembers();
+
+    const onAddClicked = () => {
+        addMutation.mutate(
+            { groupId: group.id, members: selectedMembers },
+            { onSuccess: () => setSelectedMemberIds(new Set()) },
+        );
+    };
 
     if (allItemsWithoutGroup.size === 0) {
         return (
@@ -128,8 +131,8 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
         );
     }
 
-    const isAddDisabled = addStage === PromiseStage.running || selectedCount === 0;
-    const isSelectDisabled = addStage === PromiseStage.running;
+    const isAddDisabled = addMutation.isPending || selectedCount === 0;
+    const isSelectDisabled = addMutation.isPending;
 
     const toggleSelection = (member: IGroupMember) => {
         if (isSelectDisabled) {
@@ -150,7 +153,7 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
 
     return (
         <div className={classNames('flex-col', isSelectDisabled && 'disabled')}>
-            <button className="default-button default-container" onClick={addMembers} disabled={isAddDisabled}>
+            <button className="default-button default-container" onClick={onAddClicked} disabled={isAddDisabled}>
                 Add {String(selectedCount)} {pluralize('member', selectedCount)} to Group
             </button>
             <div className="flex flex-center">

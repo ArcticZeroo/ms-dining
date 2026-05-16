@@ -1,11 +1,14 @@
-import { useValueNotifier } from '../../../../hooks/events.ts';
-import { GROUP_STORE } from '../../../../store/groups.ts';
+import { useItemsWithoutGroup, useZeroContextCandidates } from '../../../../store/queries/groups.ts';
 import { useMemo } from 'react';
 import { GroupZeroContextCandidateListBody } from './group-zero-context-candidate-list-body.js';
 import './groups.css';
 
 export const GroupZeroContextCandidateList= () => {
-    const { value: candidates } = useValueNotifier(GROUP_STORE.zeroContextCandidates);
+    // Pre-warm items-without-group so candidate accept doesn't need to refetch
+    // it when patching the cache.
+    useItemsWithoutGroup();
+
+    const { data: candidates } = useZeroContextCandidates();
     const candidateCount = useMemo(
         () => candidates
             ? Array.from(candidates.values()).length

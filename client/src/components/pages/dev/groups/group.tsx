@@ -1,8 +1,7 @@
-import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IGroupData } from '@msdining/common/models/group';
 import React, { useCallback, useState } from 'react';
-import { GROUP_STORE } from '../../../../store/groups.ts';
-import { canUseControllingButton, promiseStageToButtonClass } from '../../../../util/async.js';
+import { useDeleteGroup, useUpdateGroup } from '../../../../store/queries/groups.ts';
+import { canUseMutationButton, mutationButtonClass } from '../../../../util/mutation.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupAddMembers } from './group-add-members.js';
 import { GroupListItemMember } from './group-member/group-list-item-member.js';
@@ -30,20 +29,18 @@ const useEditControls = (group: IGroupData) => {
     const [notes, setNotes] = useState<string>(group.notes ?? '');
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
-    const { actualStage: updateStage, run: updateGroup } = useDelayedPromiseState(useCallback(
-        async () => {
-            await GROUP_STORE.updateGroup(group.id, { name, notes });
-            setIsEditing(false);
-        },
-        [group.id, name, notes]
-    ));
+    const updateMutation = useUpdateGroup();
 
-    const canSaveOrCancelEditing = canUseControllingButton(updateStage);
+    const canSaveOrCancelEditing = canUseMutationButton(updateMutation);
 
     const onSaveClicked = useAccordionButtonHandler(() => {
-        if (canSaveOrCancelEditing) {
-            updateGroup();
+        if (!canSaveOrCancelEditing) {
+            return;
         }
+        updateMutation.mutate(
+            { groupId: group.id, request: { name, notes } },
+            { onSuccess: () => setIsEditing(false) },
+        );
     });
 
     const onCancelClicked = useAccordionButtonHandler(() => {
@@ -60,7 +57,7 @@ const useEditControls = (group: IGroupData) => {
         name,
         notes,
         isEditing,
-        updateStage,
+        updateButtonClass: mutationButtonClass(updateMutation),
         canSaveOrCancelEditing,
         onNameChanged:  setName,
         onNotesChanged: setNotes,
@@ -71,21 +68,16 @@ const useEditControls = (group: IGroupData) => {
 };
 
 const useDeleteControls = (group: IGroupData) => {
-    const { actualStage: deleteStage, run: deleteGroup } = useDelayedPromiseState(useCallback(
-        () => GROUP_STORE.deleteGroup(group.id),
-        [group.id]
-    ));
+    const deleteMutation = useDeleteGroup();
 
     const onDeleteClicked = useAccordionButtonHandler(() => {
-        deleteGroup();
+        deleteMutation.mutate({ groupId: group.id });
     });
 
-    const canUseDeleteButton = canUseControllingButton(deleteStage);
-
     return {
-        deleteStage,
+        deleteButtonClass:  mutationButtonClass(deleteMutation),
+        canUseDeleteButton: canUseMutationButton(deleteMutation),
         onDeleteClicked,
-        canUseDeleteButton
     };
 };
 
@@ -107,13 +99,13 @@ export const Group: React.FC<IGroupProps> = ({ group, suggestedMemberCount }) =>
                                             <input
                                                 type="text"
                                                 value={editControls.name}
-                                                onChange={(e) => editControls.onNameChanged(e.target.value)}
+                                                onChange={(event) => editControls.onNameChanged(event.target.value)}
                                                 placeholder="Group Name"
                                             />
                                             <input
                                                 type="text"
                                                 value={editControls.notes}
-                                                onChange={(e) => editControls.onNotesChanged(e.target.value)}
+                                                onChange={(event) => editControls.onNotesChanged(event.target.value)}
                                                 placeholder="Notes"
                                             />
                                         </>
@@ -150,7 +142,7 @@ export const Group: React.FC<IGroupProps> = ({ group, suggestedMemberCount }) =>
                                 editControls.isEditing && (
                                     <>
                                         <button
-                                            className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(editControls.updateStage))}
+                                            className={classNames('material-symbols-outlined default-button default-container icon-container', editControls.updateButtonClass)}
                                             disabled={!editControls.canSaveOrCancelEditing}
                                             onClick={editControls.onSaveClicked}
                                         >
@@ -170,7 +162,7 @@ export const Group: React.FC<IGroupProps> = ({ group, suggestedMemberCount }) =>
                                 !editControls.isEditing && (
                                     <>
                                         <button
-                                            className={classNames('material-symbols-outlined default-button default-container icon-container', promiseStageToButtonClass(deleteControls.deleteStage))}
+                                            className={classNames('material-symbols-outlined default-button default-container icon-container', deleteControls.deleteButtonClass)}
                                             disabled={!deleteControls.canUseDeleteButton}
                                             onClick={deleteControls.onDeleteClicked}
                                         >

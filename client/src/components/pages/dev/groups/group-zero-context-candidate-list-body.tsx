@@ -1,11 +1,10 @@
-import { useValueNotifier } from '../../../../hooks/events.ts';
-import { GROUP_STORE } from '../../../../store/groups.ts';
+import { useZeroContextCandidates } from '../../../../store/queries/groups.ts';
 import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GroupZeroContextCandidateListItem } from './group-zero-context-candidate-list-item.js';
 
 export const GroupZeroContextCandidateListBody = () => {
-    const { value: candidates, error } = useValueNotifier(GROUP_STORE.zeroContextCandidates);
+    const { data: candidates, error, refetch } = useZeroContextCandidates();
 
     if (error) {
         return (
@@ -13,7 +12,7 @@ export const GroupZeroContextCandidateListBody = () => {
                 <span>
                     Unable to load group candidates. Please try again.
                 </span>
-                <RetryButton onClick={() => GROUP_STORE.refreshGroups()}/>
+                <RetryButton onClick={() => refetch()}/>
             </div>
         );
     }

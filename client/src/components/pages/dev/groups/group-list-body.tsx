@@ -1,11 +1,10 @@
 import { RetryButton } from '../../../button/retry-button.js';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
-import { useValueNotifier } from '../../../../hooks/events.js';
-import { GROUP_STORE } from '../../../../store/groups.js';
+import { useGroups } from '../../../../store/queries/groups.ts';
 import { GroupListWithData } from './group-list-with-data.js';
 
 export const GroupListBody = () => {
-    const { value: groupList, error, run: runRetrieveGroupList } = useValueNotifier(GROUP_STORE.groups);
+    const { data: groupList, error, refetch } = useGroups();
 
     if (groupList) {
         if (groupList.size === 0) {
@@ -27,7 +26,7 @@ export const GroupListBody = () => {
                 <span>
                     Failed to load groups
                 </span>
-                <RetryButton onClick={runRetrieveGroupList}/>
+                <RetryButton onClick={() => refetch()}/>
             </div>
         );
     }

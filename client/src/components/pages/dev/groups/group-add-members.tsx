@@ -1,9 +1,7 @@
 import React, { useCallback } from 'react';
 import { IGroupData, IGroupMember } from '@msdining/common/models/group';
-import { useValueNotifier } from '../../../../hooks/events.js';
-import { GROUP_STORE } from '../../../../store/groups.js';
+import { useItemsWithoutGroup } from '../../../../store/queries/groups.ts';
 import { RetryButton } from '../../../button/retry-button.js';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GroupAddMembersWithData } from './group-add-members-with-data.js';
 import { SearchEntityType } from '@msdining/common/models/search';
@@ -21,11 +19,11 @@ interface IGroupAddMembersBodyProps {
     group: IGroupData;
     allItemsWithoutGroup: Map<SearchEntityType, Map<string, IGroupMember>> | undefined;
     suggestedCandidates: IGroupMember[] | undefined;
-    allItemsWithoutGroupStage: PromiseStage;
+    isError: boolean;
     onRetryClicked: () => void;
 }
 
-const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allItemsWithoutGroup, suggestedCandidates, allItemsWithoutGroupStage, onRetryClicked }) => {
+const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allItemsWithoutGroup, suggestedCandidates, isError, onRetryClicked }) => {
     if (allItemsWithoutGroup && suggestedCandidates) {
         return (
             <GroupAddMembersWithData
@@ -36,7 +34,7 @@ const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allIt
         );
     }
 
-    if (allItemsWithoutGroupStage === PromiseStage.error) {
+    if (isError) {
         return (
             <div>
                 <span>
@@ -58,14 +56,14 @@ const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allIt
 }
 
 export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
-    const { stage: allItemsWithoutGroupStage, value: allItemsWithoutGroup, run: retryGetAllItemsWithoutGroup } = useValueNotifier(GROUP_STORE.allItemsWithoutGroup);
+    const { data: allItemsWithoutGroup, isError, refetch } = useItemsWithoutGroup();
     const suggestedCandidates = useSuggestedGroupMembers(group);
 
     const onRetryClicked = useCallback(() => {
-        if (allItemsWithoutGroupStage === PromiseStage.error) {
-            retryGetAllItemsWithoutGroup();
+        if (isError) {
+            void refetch();
         }
-    }, [allItemsWithoutGroupStage, retryGetAllItemsWithoutGroup]);
+    }, [isError, refetch]);
 
     let title = 'Search For New Group Members';
     if (suggestedCandidates && suggestedCandidates.length > 0) {
@@ -89,7 +87,7 @@ export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
                     group={group}
                     allItemsWithoutGroup={allItemsWithoutGroup}
                     suggestedCandidates={suggestedCandidates}
-                    allItemsWithoutGroupStage={allItemsWithoutGroupStage}
+                    isError={isError}
                     onRetryClicked={onRetryClicked}
                 />
             </CollapsibleBody>
