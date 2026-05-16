@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts';
-import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { useValueNotifier, useValueNotifierSetTarget } from '../../hooks/events.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
@@ -14,6 +13,7 @@ import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable, minutesToTimeString } from '@msdining/common/util/date-util';
 import { useSelectedDate } from '../../store/zustand/selected-date.ts';
+import { collapseCafe, expandCafe, useIsCafeCollapsed } from '../../store/zustand/collapse.ts';
 import { useCafeMenuQuery } from '../../store/queries/cafe.ts';
 import { CafeMenuControls } from './cafe-menu-controls.js';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
@@ -84,7 +84,6 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     const deviceType = useDeviceType();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCafeHours = useValueNotifier(DebugSettings.showCafeHours);
-    const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
     const menuData = useCafeMenu(cafe, shouldCountTowardsLastUsed);
@@ -93,7 +92,7 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
 
-    const isCollapsed = useValueNotifierSetTarget(collapsedCafeIdsNotifier, cafe.id);
+    const isCollapsed = useIsCafeCollapsed(cafe.id);
 
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
 
@@ -104,20 +103,20 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
 
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
-            collapsedCafeIdsNotifier.add(cafe.id);
+            collapseCafe(cafe.id);
         }
-    }, [collapsedCafeIdsNotifier, cafe.id]);
+    }, [cafe.id]);
 
-    const toggleIsExpanded = () => {
+    const toggleIsExpanded = useCallback(() => {
         const isNowCollapsed = !isCollapsed;
 
         if (isNowCollapsed) {
-            collapsedCafeIdsNotifier.add(cafe.id);
+            collapseCafe(cafe.id);
             scrollIntoViewIfNeeded();
         } else {
-            collapsedCafeIdsNotifier.delete(cafe.id);
+            expandCafe(cafe.id);
         }
-    };
+    }, [isCollapsed, cafe.id, scrollIntoViewIfNeeded]);
 
     return (
         <CurrentCafeContext.Provider value={cafe}>

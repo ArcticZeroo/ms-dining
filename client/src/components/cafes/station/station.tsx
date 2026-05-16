@@ -4,12 +4,12 @@ import { minutesToTimeString } from '@msdining/common/util/date-util';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { ApplicationSettings, DebugSettings } from '../../../constants/settings.ts';
-import { StationCollapseContext } from '../../../context/collapse.ts';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../context/html.ts';
 import { CurrentCafeContext, CurrentStationScrollIdContext, StationInfoContext } from '../../../context/menu-item.ts';
 import { useIsFavoriteItem } from '../../../hooks/cafe.ts';
-import { useValueNotifier, useValueNotifierSetTarget } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../../hooks/html.ts';
+import { collapseStation, expandStation, useIsStationCollapsed } from '../../../store/zustand/collapse.ts';
 import { ICafeStation, MenuItemsByCategoryName } from '../../../models/cafe.ts';
 import { getSearchAnchorId } from '../../../util/link.ts';
 import { classNames } from '../../../util/react.ts';
@@ -20,9 +20,8 @@ import { StationMenu } from './menu-items/station-menu.tsx';
 
 const useStationExpansion = (scrollAnchorId: string) => {
     const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
-    const collapsedStationsNotifier = useContext(StationCollapseContext);
 
-    const isCollapsed = useValueNotifierSetTarget(collapsedStationsNotifier, scrollAnchorId);
+    const isCollapsed = useIsStationCollapsed(scrollAnchorId);
 
     const stationHeaderStyle = useMemo(
         () => ({ top: `calc(${cafeHeaderHeight}px - var(--default-padding))` }),
@@ -34,13 +33,13 @@ const useStationExpansion = (scrollAnchorId: string) => {
     const updateIsCollapsed = useCallback(
         (isNowCollapsed: boolean) => {
             if (isNowCollapsed) {
-                collapsedStationsNotifier.add(scrollAnchorId);
+                collapseStation(scrollAnchorId);
                 scrollIntoViewIfNeeded();
             } else {
-                collapsedStationsNotifier.delete(scrollAnchorId);
+                expandStation(scrollAnchorId);
             }
         },
-        [collapsedStationsNotifier, scrollAnchorId, scrollIntoViewIfNeeded]
+        [scrollAnchorId, scrollIntoViewIfNeeded]
     );
 
     const onTitleClick = () => {
@@ -49,9 +48,9 @@ const useStationExpansion = (scrollAnchorId: string) => {
 
     useEffect(() => {
         if (ApplicationSettings.collapseStationsByDefault.value) {
-            collapsedStationsNotifier.add(scrollAnchorId);
+            collapseStation(scrollAnchorId);
         }
-    }, [collapsedStationsNotifier, scrollAnchorId]);
+    }, [scrollAnchorId]);
 
     return {
         isExpanded: !isCollapsed,

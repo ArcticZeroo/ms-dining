@@ -1,6 +1,6 @@
 import React, { useContext, useLayoutEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
+import { expandCafe, expandStation } from '../../store/zustand/collapse.ts';
 import { CurrentCafeContext, CurrentStationScrollIdContext } from '../../context/menu-item.ts';
 
 const SCROLL_DELAY_MS = 50;
@@ -14,8 +14,6 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
     const [element, setElement] = useState<HTMLAnchorElement | null>();
     const location = useLocation();
 
-    const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
-    const collapsedStationNamesNotifier = useContext(StationCollapseContext);
     const cafe = useContext(CurrentCafeContext);
     const stationId = useContext(CurrentStationScrollIdContext);
 
@@ -31,10 +29,10 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
         }
 
         if (cafe.id !== '') {
-            collapsedCafeIdsNotifier.delete(cafe.id);
+            expandCafe(cafe.id);
 
             if (stationId.length > 0) {
-                collapsedStationNamesNotifier.delete(stationId);
+                expandStation(stationId);
             }
         }
 
@@ -46,7 +44,7 @@ export const ScrollAnchor: React.FC<IScrollAnchorProps> = ({ id, margin }) => {
         // Remove hash from URL after jumping
         // This leaves an empty hash in the URL but that's OK for now...
         window.location.hash = '';
-    }, [id, element, location.hash, collapsedCafeIdsNotifier, cafe.id, collapsedStationNamesNotifier, stationId, anchorId]);
+    }, [id, element, location.hash, cafe.id, stationId, anchorId]);
 
     return (
         <a className="scroll-anchor" href={`#${id}`} ref={setElement} style={{ scrollMargin: margin }}/>
