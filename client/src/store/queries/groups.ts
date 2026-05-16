@@ -240,8 +240,6 @@ export const useItemsWithoutGroupByNormalizedName = () =>
  * Cancel any in-flight fetch for `queryKey` before applying `updater` to the
  * cached value. Without the cancel, an older `queryFn` response could resolve
  * after a mutation's `onSuccess` patch and overwrite the post-mutation cache.
- *
- * Equivalent to the protection `LazyResource.updateExisting` used to provide.
  */
 const patchQueryData = async <T>(
     queryClient: ReturnType<typeof useQueryClient>,

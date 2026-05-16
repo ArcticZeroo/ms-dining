@@ -4,9 +4,9 @@ import { UseMutationResult } from '@tanstack/react-query';
 type AnyMutation = UseMutationResult<any, any, any, any>;
 
 /**
- * Map a TanStack mutation result onto the legacy `promiseStageToButtonClass`
- * vocabulary so existing button styling (success, error, disabled) keeps
- * working without per-call boilerplate.
+ * Adapter for the legacy `promiseStageToButtonClass` vocabulary used by some
+ * existing button styling. Use for mutation buttons that have not migrated to
+ * their own success/error CSS classes.
  */
 export const mutationButtonClass = (mutation: AnyMutation): string => {
     if (mutation.isPending) {
@@ -22,9 +22,9 @@ export const mutationButtonClass = (mutation: AnyMutation): string => {
 };
 
 /**
- * "Is the user allowed to click this button right now?". Matches
- * `canUseControllingButton` for the legacy PromiseStage flow: idle or errored
- * (so the user can retry) are OK; pending or success are not.
+ * "Is the user allowed to click this button right now?". Mutation is idle or
+ * errored (so a retry click should go through). Pending or just-succeeded
+ * buttons are disabled.
  */
 export const canUseMutationButton = (mutation: AnyMutation): boolean => {
     return !mutation.isPending && !mutation.isSuccess;

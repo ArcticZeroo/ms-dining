@@ -1,6 +1,6 @@
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUser } from '@msdining/common/models/auth';
+import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { DiningClient } from '../../../api/client/dining.ts';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { classNames } from '../../../util/react.ts';
@@ -14,15 +14,27 @@ export const DisplayNameControl: React.FC<IDisplayNameControlProps> = ({ user })
     const [userDisplayName, setUserDisplayName] = useState(user.displayName);
     const [isEditActive, setEditActive] = useState(false);
     const [editDisplayNameValue, setEditDisplayNameValue] = useState(user.displayName);
-    const [editSaveStage, setEditSaveStage] = useState(PromiseStage.notRun);
+
+    const saveMutation = useMutation<void, Error, string>({
+        mutationFn: (value) => DiningClient.updateMyDisplayName(value),
+        onSuccess:  (_void, value) => {
+            setUserDisplayName(value);
+            setEditActive(false);
+        },
+        onError: (err) => {
+            console.error('Failed to update display name:', err);
+        },
+    });
 
     useEffect(() => {
         setEditDisplayNameValue(userDisplayName);
-        setEditSaveStage(PromiseStage.notRun);
+        saveMutation.reset();
+        // saveMutation.reset is a stable function from useMutation
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditActive, userDisplayName]);
 
     if (isEditActive) {
-        const isCurrentlySaving = editSaveStage === PromiseStage.running;
+        const isCurrentlySaving = saveMutation.isPending;
 
         const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
             const value = event.target.value;
@@ -56,17 +68,7 @@ export const DisplayNameControl: React.FC<IDisplayNameControlProps> = ({ user })
                 return;
             }
 
-            setEditSaveStage(PromiseStage.running);
-            DiningClient.updateMyDisplayName(valueToSet)
-                .then(() => {
-                    setUserDisplayName(valueToSet);
-                    setEditActive(false);
-                    setEditSaveStage(PromiseStage.notRun);
-                })
-                .catch(err => {
-                    console.error('Failed to update display name:', err);
-                    setEditSaveStage(PromiseStage.error);
-                });
+            saveMutation.mutate(valueToSet);
         }
 
         return (
@@ -90,7 +92,7 @@ export const DisplayNameControl: React.FC<IDisplayNameControlProps> = ({ user })
                             Cancel
                         </span>
                     </button>
-                    <button type="submit" className={classNames("default-button default-container flex", editSaveStage === PromiseStage.error && 'error')} disabled={isCurrentlySaving}>
+                    <button type="submit" className={classNames("default-button default-container flex", saveMutation.isError && 'error')} disabled={isCurrentlySaving}>
                         <span className="material-symbols-outlined">
                             save
                         </span>

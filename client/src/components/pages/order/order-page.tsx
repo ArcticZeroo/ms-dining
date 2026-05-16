@@ -20,7 +20,6 @@ import { CafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import './order-page.css';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
@@ -127,11 +126,7 @@ export const OrderPage = () => {
             {
                 isShowingCompletion && (
                     <>
-                        <OrderStatus
-                            stage={PromiseStage.success}
-                            value={completionResults}
-                            error={undefined}
-                        />
+                        <OrderStatus value={completionResults}/>
                         <div className="flex flex-justify-center">
                             <button className="default-container" onClick={() => navigate('/')}>
                                 Return Home
