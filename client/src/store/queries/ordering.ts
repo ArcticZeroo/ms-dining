@@ -73,9 +73,11 @@ interface IPrepareAllPaymentsResult {
 }
 
 /**
- * "Click Pay → preparePayment(orderId) for every cafe in parallel". Ensures the
- * underlying cart session is fresh (avoiding the 5-minute server expiry) before
- * issuing the per-cafe calls, then writes the results into the ordering store.
+ * "Click Pay → preparePayment(orderId) for every cafe in parallel". Issues a
+ * fresh cart-session fetch (bypassing TanStack's cached value) so the per-cafe
+ * orderIds handed to the iframes are guaranteed to be inside the server's
+ * ~5-minute cart-session expiry window, then writes the results into the
+ * ordering store.
  */
 export const usePrepareAllPaymentsMutation = () => {
     const startCheckout = useOrderingStore((state) => state.startCheckout);
@@ -83,7 +85,9 @@ export const usePrepareAllPaymentsMutation = () => {
     return useMutation<IPrepareAllPaymentsResult, Error, IPaymentFormData>({
         mutationFn: async (formData) => {
             const cart = useCartStore.getState().items;
-            const cartSession = await queryClient.ensureQueryData<IPrepareCartResponse>({
+            // fetchQuery (not ensureQueryData) guarantees a network round-trip
+            // — ensureQueryData would return cached-but-stale data.
+            const cartSession = await queryClient.fetchQuery<IPrepareCartResponse>({
                 queryKey:  cartSessionQueryKey(cart),
                 queryFn:   () => OrderingClient.prepareCart(cart),
                 staleTime: 0,

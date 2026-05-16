@@ -54,7 +54,13 @@ export const OrderPage = () => {
     const hasUnhydratedItems = missingItemsByCafeId.size > 0;
     const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
 
-    if (!isCheckoutAllowed && !hasUnhydratedItems) {
+    // Show the completion view even after the cart has been emptied (each
+    // successful cafe payment removes that cafe from the cart, so the very last
+    // completion takes us to size === 0). Without this guard, the empty-cart
+    // notice would briefly replace the receipt UI.
+    const isShowingCompletion = isPaymentStarted && allCafesComplete;
+
+    if (!isCheckoutAllowed && !hasUnhydratedItems && !isShowingCompletion) {
         return <EmptyCartNotice/>;
     }
 
@@ -65,12 +71,14 @@ export const OrderPage = () => {
         prepareAllPayments.mutate(submittedFormData);
     };
 
+    const isShowingActiveCheckout = isCheckoutAllowed && !isShowingCompletion;
+
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
             <CartHydrationView/>
             {
-                isCheckoutAllowed && (
+                isShowingActiveCheckout && (
                     <>
                         <div className="card dark-blue">
                             <div className="title">
@@ -113,22 +121,22 @@ export const OrderPage = () => {
                                 <CafePayment formData={formData}/>
                             )
                         }
-                        {
-                            allCafesComplete && (
-                                <>
-                                    <OrderStatus
-                                        stage={PromiseStage.success}
-                                        value={completionResults}
-                                        error={undefined}
-                                    />
-                                    <div className="flex flex-justify-center">
-                                        <button className="default-container" onClick={() => navigate('/')}>
-                                            Return Home
-                                        </button>
-                                    </div>
-                                </>
-                            )
-                        }
+                    </>
+                )
+            }
+            {
+                isShowingCompletion && (
+                    <>
+                        <OrderStatus
+                            stage={PromiseStage.success}
+                            value={completionResults}
+                            error={undefined}
+                        />
+                        <div className="flex flex-justify-center">
+                            <button className="default-container" onClick={() => navigate('/')}>
+                                Return Home
+                            </button>
+                        </div>
                     </>
                 )
             }
