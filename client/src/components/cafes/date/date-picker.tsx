@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+import { ApplicationSettings } from '../../../constants/settings.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { useSelectedDate, setSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { DiningClient } from '../../../api/client/dining.ts';
 
@@ -33,19 +35,21 @@ const getNextDate = (date: Date) => {
 const MINIMUM_DATE = DateUtil.getMinimumDateForMenu();
 const MAXIMUM_DATE = DateUtil.getMaximumDateForMenu();
 
-interface ICafeDatePickerProps {
-    /**
-     * When false, the prev/today/next buttons are hidden and the picker is
-     * just an informational display of the currently-selected date. Used when
-     * future menus are disabled but the selected date is still not today
-     * (e.g. weekend rollover landed on Monday) so the user understands what
-     * date the menu is for.
-     */
-    showControls?: boolean;
-}
-
-export const CafeDatePicker: React.FC<ICafeDatePickerProps> = ({ showControls = true }) => {
+export const CafeDatePicker: React.FC = () => {
     const selectedDate = useSelectedDate();
+    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+
+    // Don't render anything when the user can't change the date AND the
+    // selected date already matches today's actual calendar date. The
+    // weekend-rollover case (selected date is Monday but today is Saturday)
+    // still falls through so the user knows what date the menu reflects.
+    if (!allowFutureMenus && DateUtil.isSameDate(selectedDate, new Date())) {
+        return null;
+    }
+
+    // When future menus are disabled, the user can't actually change the
+    // selected date, so we render as a read-only display.
+    const showControls = allowFutureMenus;
 
     const {
         previousDate,
