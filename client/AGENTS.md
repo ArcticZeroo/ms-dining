@@ -19,48 +19,78 @@ export const MyComponent: React.FC<IMyComponentProps> = ({ prop1, prop2 = false 
 ```
 
 ### Promise Handling
-Use `@arcticzeroo/react-promise-hook` for async operations:
-```typescript
-// Runs immediately on mount (and when the callback identity changes):
-const response = useImmediatePromiseState(asyncFunction);
 
-// Runs only when you call run() explicitly:
-const { value, error, run } = useDelayedPromiseState(asyncFunction);
+#### Server state — TanStack Query (preferred)
+
+Anything fetched from the API lives in `client/src/store/queries/` as a TanStack Query hook. Query keys are centralized in `client/src/store/queries/keys.ts` as a typed factory:
+
+```ts
+// keys.ts
+export const queryKeys = {
+    groups: {
+        list: ['groups', 'list'] as const,
+    },
+} as const;
+
+// store/queries/groups.ts
+export const useGroups = () =>
+    useQuery({
+        queryKey: queryKeys.groups.list,
+        queryFn:  () => GroupClient.retrieveGroupList().then(toGroupMap),
+    });
 ```
 
-**You MUST handle all three states**: loading, error, and success. Never skip loading or error handling. **Never return `null` for loading or error** — always show a spinner or error message.
+Consumers:
 
-- **Error state**: Check `response.stage === PromiseStage.error` and render an error message with a `<RetryButton onClick={response.run}/>`.
-- **Loading state**: Check that the value is still `null`/`undefined` and render a loading indicator (e.g. `<HourglassLoadingSpinner/>` or a skeleton).
-- **Success state**: Render the data only after confirming the value is available.
-
-Both hooks return `{ stage, value, error, run }`. Always import `PromiseStage` alongside the hook.
-
-**Prefer these hooks over manual state management.** Don't use `useState` + `try/catch` + manual `isPending`/`error` state when `useDelayedPromiseState` or `useImmediatePromiseState` can handle it. The hooks provide consistent loading/error/success tracking without reimplementing the pattern.
-
-#### Example (useImmediatePromiseState)
 ```tsx
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { RetryButton } from '../button/retry-button.tsx';
-import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
+import { useGroups } from '../../../store/queries/groups.ts';
 
-const response = useImmediatePromiseState(fetchData);
+export const GroupList = () => {
+    const { data, isPending, isError, refetch } = useGroups();
 
-if (response.stage === PromiseStage.error) {
-    return (
-        <div className="card error">
-            <span>Unable to load data!</span>
-            <RetryButton onClick={response.run}/>
-        </div>
-    );
-}
-
-if (response.value == null) {
-    return <HourglassLoadingSpinner/>;
-}
-
-return <MyDataView data={response.value}/>;
+    if (isError) {
+        return <RetryButton onClick={() => refetch()}/>;
+    }
+    if (isPending) {
+        return <HourglassLoadingSpinner/>;
+    }
+    return <GroupListWithData groups={Array.from(data.values())}/>;
+};
 ```
+
+Mutations follow the same module convention; they patch affected caches in `onSuccess` via `queryClient.setQueryData`. **Always `await queryClient.cancelQueries({ queryKey })` before `setQueryData`** so an in-flight refetch can't clobber the post-mutation state. See `client/src/store/queries/groups.ts` (`patchQueryData` helper) for the pattern.
+
+Extract pure projection / patch helpers to module scope and unit-test them under `client/test/store/queries/`. The mutation hooks themselves are not unit-tested (would require RTL); the cache patches are.
+
+#### Client state — Zustand (with `zustand-mutative`)
+
+Durable client state — anything not from the server — lives in `client/src/store/zustand/`. Use `zustand-mutative` middleware so actions can write to a draft:
+
+```ts
+import { create } from 'zustand';
+import { mutative } from 'zustand-mutative';
+
+export const useCartStore = create<ICartStore>()(mutative((set) => ({
+    items: new Map(),
+    addOrEditItem: (item) => set((state) => {
+        // draft mutations — no manual cloning
+        let bucket = state.items.get(item.cafeId);
+        if (!bucket) {
+            bucket = new Map();
+            state.items.set(item.cafeId, bucket);
+        }
+        bucket.set(item.id, item);
+    }),
+})));
+```
+
+**Watch out**: inside a mutative draft callback, array/object entries reached from the draft are proxies. Identity comparisons (`other === item`) against an externally-passed object will fail. Identify entries by id or index, not reference.
+
+#### Legacy: `@arcticzeroo/react-promise-hook`
+
+Still installed and used in one place (`payment-iframe.tsx` for UI-local state). Do not add new server-fetch usages — use TanStack Query instead. The custom `msdining/require-promise-state-stage` lint rule still applies to the legacy hooks if you do encounter them.
+
+**Loading + error + success handling is still required.** Express it via the TanStack Query vocabulary (`isPending` / `isError` / `data`) instead of the legacy `PromiseStage` enum.
 
 ### Error Handling in Components
 Follow the pattern in `app.tsx` for error boundaries:
