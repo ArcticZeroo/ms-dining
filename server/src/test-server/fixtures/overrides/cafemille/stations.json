@@ -1,0 +1,395 @@
+[
+  {
+    "id": "cafemille-stn-mediterranean-5891",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "cafemille-menu-97660"
+    },
+    "menus": [
+      {
+        "id": "cafemille-menu-97660",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "cafemille-cat-0-5361",
+            "name": "Bowls",
+            "items": [
+              "cafemille-item-1-4446",
+              "cafemille-item-2-4597",
+              "cafemille-item-3-3257",
+              "cafemille-item-4-9353",
+              "cafemille-item-5-9137",
+              "cafemille-item-6-1872"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-1-9903",
+            "name": "Wraps",
+            "items": [
+              "cafemille-item-7-5999",
+              "cafemille-item-8-7788",
+              "cafemille-item-9-9654",
+              "cafemille-item-10-8312",
+              "cafemille-item-11-1255",
+              "cafemille-item-12-1671"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-2-5442",
+            "name": "Sides",
+            "items": [
+              "cafemille-item-13-4842",
+              "cafemille-item-14-9807",
+              "cafemille-item-15-3290",
+              "cafemille-item-16-7820",
+              "cafemille-item-17-5965",
+              "cafemille-item-18-6738"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafemille-stn-mediterranean-5891",
+              "menuId": "cafemille-menu-97660"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafemille-stn-pizza---pasta-6563",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "cafemille-menu-77703"
+    },
+    "menus": [
+      {
+        "id": "cafemille-menu-77703",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "cafemille-cat-0-8821",
+            "name": "Pizza",
+            "items": [
+              "cafemille-item-19-4967",
+              "cafemille-item-20-8199",
+              "cafemille-item-21-7912",
+              "cafemille-item-22-1251",
+              "cafemille-item-23-1614",
+              "cafemille-item-24-3515",
+              "cafemille-item-25-7629",
+              "cafemille-item-26-4419",
+              "cafemille-item-27-7170"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-1-1356",
+            "name": "Pasta",
+            "items": [
+              "cafemille-item-28-7883",
+              "cafemille-item-29-9157",
+              "cafemille-item-30-8048",
+              "cafemille-item-31-2793",
+              "cafemille-item-32-2440",
+              "cafemille-item-33-1739"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-2-1454",
+            "name": "Sides",
+            "items": [
+              "cafemille-item-34-3422",
+              "cafemille-item-35-5232",
+              "cafemille-item-36-1674"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafemille-stn-pizza---pasta-6563",
+              "menuId": "cafemille-menu-77703"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafemille-stn-espresso-5137",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "cafemille-menu-62163"
+    },
+    "menus": [
+      {
+        "id": "cafemille-menu-62163",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "cafemille-cat-0-4705",
+            "name": "Hot Drinks",
+            "items": [
+              "cafemille-item-37-9340",
+              "cafemille-item-38-5096",
+              "cafemille-item-39-3272",
+              "cafemille-item-40-9243",
+              "cafemille-item-41-9644",
+              "cafemille-item-42-3380",
+              "cafemille-item-43-7487",
+              "cafemille-item-44-2963",
+              "cafemille-item-45-7301",
+              "cafemille-item-46-2332",
+              "cafemille-item-47-9092",
+              "cafemille-item-48-7219"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-1-2337",
+            "name": "Cold Drinks",
+            "items": [
+              "cafemille-item-49-3027",
+              "cafemille-item-50-8454",
+              "cafemille-item-51-8582",
+              "cafemille-item-52-4516",
+              "cafemille-item-53-6499",
+              "cafemille-item-54-1328"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-2-1161",
+            "name": "Bakery",
+            "items": [
+              "cafemille-item-55-1948",
+              "cafemille-item-56-9508",
+              "cafemille-item-57-7951",
+              "cafemille-item-58-5862",
+              "cafemille-item-59-7729",
+              "cafemille-item-60-6958",
+              "cafemille-item-61-4221",
+              "cafemille-item-62-3461",
+              "cafemille-item-63-7840"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafemille-stn-espresso-5137",
+              "menuId": "cafemille-menu-62163"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafemille-stn-taqueria-9948",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "cafemille-menu-61629"
+    },
+    "menus": [
+      {
+        "id": "cafemille-menu-61629",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "cafemille-cat-0-9710",
+            "name": "Tacos",
+            "items": [
+              "cafemille-item-64-2868",
+              "cafemille-item-65-9302",
+              "cafemille-item-66-3380",
+              "cafemille-item-67-6214",
+              "cafemille-item-68-3247",
+              "cafemille-item-69-1843",
+              "cafemille-item-70-4307",
+              "cafemille-item-71-1010",
+              "cafemille-item-72-8695"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-1-2062",
+            "name": "Burritos",
+            "items": [
+              "cafemille-item-73-1139",
+              "cafemille-item-74-2157",
+              "cafemille-item-75-2396",
+              "cafemille-item-76-2779",
+              "cafemille-item-77-7268",
+              "cafemille-item-78-6126"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-2-8878",
+            "name": "Bowls",
+            "items": [
+              "cafemille-item-79-9044",
+              "cafemille-item-80-6269",
+              "cafemille-item-81-8877"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-3-5774",
+            "name": "Build Your Own",
+            "items": [
+              "cafemille-item-64-2868",
+              "cafemille-item-65-9302",
+              "cafemille-item-66-3380",
+              "cafemille-item-67-6214",
+              "cafemille-item-68-3247",
+              "cafemille-item-69-1843",
+              "cafemille-item-73-1139",
+              "cafemille-item-74-2157",
+              "cafemille-item-75-2396"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafemille-stn-taqueria-9948",
+              "menuId": "cafemille-menu-61629"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafemille-stn-poke-bar-5580",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "cafemille-menu-35685"
+    },
+    "menus": [
+      {
+        "id": "cafemille-menu-35685",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafemille-cat-0-5879",
+            "name": "Poke Bowls",
+            "items": [
+              "cafemille-item-82-2147",
+              "cafemille-item-83-6696",
+              "cafemille-item-84-1967",
+              "cafemille-item-85-3462",
+              "cafemille-item-86-4231",
+              "cafemille-item-87-9087",
+              "cafemille-item-88-5206",
+              "cafemille-item-89-6946",
+              "cafemille-item-90-5142",
+              "cafemille-item-91-8139",
+              "cafemille-item-92-8190",
+              "cafemille-item-93-9407"
+            ]
+          },
+          {
+            "categoryId": "cafemille-cat-1-4933",
+            "name": "Extras",
+            "items": [
+              "cafemille-item-94-2970",
+              "cafemille-item-95-9193",
+              "cafemille-item-96-2278",
+              "cafemille-item-97-9118",
+              "cafemille-item-98-1736",
+              "cafemille-item-99-1191"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafemille-stn-poke-bar-5580",
+              "menuId": "cafemille-menu-35685"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

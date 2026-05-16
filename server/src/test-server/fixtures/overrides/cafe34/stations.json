@@ -1,0 +1,205 @@
+[
+  {
+    "id": "cafe34-stn-pizza---pasta-6245",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "cafe34-menu-71844"
+    },
+    "menus": [
+      {
+        "id": "cafe34-menu-71844",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "cafe34-cat-0-9282",
+            "name": "Pizza",
+            "items": [
+              "cafe34-item-1-7589",
+              "cafe34-item-2-3912",
+              "cafe34-item-3-8698",
+              "cafe34-item-4-1591",
+              "cafe34-item-5-4609",
+              "cafe34-item-6-9508"
+            ]
+          },
+          {
+            "categoryId": "cafe34-cat-1-8463",
+            "name": "Pasta",
+            "items": [
+              "cafe34-item-7-1533",
+              "cafe34-item-8-5897",
+              "cafe34-item-9-3515",
+              "cafe34-item-10-4407"
+            ]
+          },
+          {
+            "categoryId": "cafe34-cat-2-7901",
+            "name": "Sides",
+            "items": [
+              "cafe34-item-11-5468",
+              "cafe34-item-12-7909"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe34-stn-pizza---pasta-6245",
+              "menuId": "cafe34-menu-71844"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe34-stn-comfort-kitchen-9683",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe34-menu-97974"
+    },
+    "menus": [
+      {
+        "id": "cafe34-menu-97974",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe34-cat-0-5608",
+            "name": "Comfort Classics",
+            "items": [
+              "cafe34-item-13-6480",
+              "cafe34-item-14-2090",
+              "cafe34-item-15-6721",
+              "cafe34-item-16-4996",
+              "cafe34-item-17-2745",
+              "cafe34-item-18-2385"
+            ]
+          },
+          {
+            "categoryId": "cafe34-cat-1-2136",
+            "name": "Specials",
+            "items": [
+              "cafe34-item-17-2745",
+              "cafe34-item-18-2385",
+              "cafe34-item-19-4010",
+              "cafe34-item-20-3333"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe34-stn-comfort-kitchen-9683",
+              "menuId": "cafe34-menu-97974"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe34-stn-deli-1681",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "cafe34-menu-10892"
+    },
+    "menus": [
+      {
+        "id": "cafe34-menu-10892",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "cafe34-cat-0-1595",
+            "name": "Half Sandwiches",
+            "items": [
+              "cafe34-item-21-6999",
+              "cafe34-item-22-3305",
+              "cafe34-item-23-9626",
+              "cafe34-item-24-7516",
+              "cafe34-item-25-5086",
+              "cafe34-item-26-7644"
+            ]
+          },
+          {
+            "categoryId": "cafe34-cat-1-8857",
+            "name": "Whole Sandwiches",
+            "items": [
+              "cafe34-item-27-9369",
+              "cafe34-item-28-9335",
+              "cafe34-item-29-9438",
+              "cafe34-item-30-2624",
+              "cafe34-item-31-1174",
+              "cafe34-item-32-1062"
+            ]
+          },
+          {
+            "categoryId": "cafe34-cat-2-6360",
+            "name": "Soups",
+            "items": [
+              "cafe34-item-33-1411",
+              "cafe34-item-34-5285",
+              "cafe34-item-35-5360",
+              "cafe34-item-36-4931"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe34-stn-deli-1681",
+              "menuId": "cafe34-menu-10892"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

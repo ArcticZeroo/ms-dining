@@ -1,0 +1,2698 @@
+[
+  {
+    "id": "studiod-item-1-4469",
+    "amount": "14.50",
+    "displayText": "Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-2-1282",
+    "amount": "14.50",
+    "displayText": "Deluxe Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-3-3791",
+    "amount": "12.50",
+    "displayText": "Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-4-5265",
+    "amount": "12.50",
+    "displayText": "Deluxe Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-5-6827",
+    "amount": "11.99",
+    "displayText": "Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN SHWARMA",
+    "tagIds": [
+      "tag-medium-emissions",
+      "tag-new",
+      "tag-medium-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-6-8517",
+    "amount": "11.99",
+    "displayText": "Deluxe Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHKN SHWARMA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-7-1994",
+    "amount": "10.50",
+    "displayText": "Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL WRAP",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-8-5241",
+    "amount": "10.50",
+    "displayText": "Deluxe Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-9-4659",
+    "amount": "5.50",
+    "displayText": "Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "HUMMUS PITA",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-10-6469",
+    "amount": "5.50",
+    "displayText": "Deluxe Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU HUMMUS PITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-11-6590",
+    "amount": "4.50",
+    "displayText": "Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TABBOULEH",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-12-2670",
+    "amount": "4.50",
+    "displayText": "Deluxe Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU TABBOULEH",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-13-6095",
+    "amount": "7.99",
+    "displayText": "Half Turkey Avocado",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "420"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-14-7854",
+    "amount": "7.99",
+    "displayText": "Lite Half Turkey Avocado",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "420"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE 1/2 TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-15-8333",
+    "amount": "7.50",
+    "displayText": "Half Italian",
+    "properties": {
+      "calories": "410",
+      "maxCalories": "430"
+    },
+    "description": "Salami, capicola, provolone, pepperoncini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 ITALIAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-16-8128",
+    "amount": "7.50",
+    "displayText": "Lite Half Italian",
+    "properties": {
+      "calories": "410",
+      "maxCalories": "430"
+    },
+    "description": "Salami, capicola, provolone, pepperoncini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE 1/2 ITALIAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-17-3791",
+    "amount": "6.99",
+    "displayText": "Half Veggie",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "310"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 VEGGIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-18-8792",
+    "amount": "6.99",
+    "displayText": "Lite Half Veggie",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "310"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE 1/2 VEGGIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-19-4163",
+    "amount": "11.99",
+    "displayText": "Whole Turkey Avocado",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-20-3278",
+    "amount": "11.99",
+    "displayText": "Lite Whole Turkey Avocado",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-21-9698",
+    "amount": "11.50",
+    "displayText": "Whole Italian Sub",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "810"
+    },
+    "description": "Salami, capicola, mortadella, provolone, oil & vinegar",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-21-9698-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-21-9698-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "studiod-item-21-9698-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "studiod-item-21-9698-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "studiod-item-21-9698-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-21-9698-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-21-9698-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-21-9698-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-21-9698-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-21-9698-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-22-4144",
+    "amount": "11.50",
+    "displayText": "Lite Whole Italian Sub",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "810"
+    },
+    "description": "Salami, capicola, mortadella, provolone, oil & vinegar",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-23-5398",
+    "amount": "10.50",
+    "displayText": "Whole Veggie",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "560"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "VEGGIE SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-24-7589",
+    "amount": "10.50",
+    "displayText": "Lite Whole Veggie",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "560"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE VEGGIE SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-25-2501",
+    "amount": "5.50",
+    "displayText": "Tomato Basil Soup",
+    "properties": {
+      "calories": "220",
+      "maxCalories": "220"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TOMATO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-26-4241",
+    "amount": "5.50",
+    "displayText": "Lite Tomato Basil Soup",
+    "properties": {
+      "calories": "220",
+      "maxCalories": "220"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE TOMATO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-27-3893",
+    "amount": "5.50",
+    "displayText": "Chicken Noodle Soup",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN NOODLE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-28-5091",
+    "amount": "5.50",
+    "displayText": "Lite Chicken Noodle Soup",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE CHKN NOODLE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-29-1748",
+    "amount": "4.25",
+    "displayText": "Drip Coffee",
+    "properties": {
+      "calories": "5",
+      "maxCalories": "5"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DRIP COFFEE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-30-1457",
+    "amount": "4.25",
+    "displayText": "Loaded Drip Coffee",
+    "properties": {
+      "calories": "5",
+      "maxCalories": "5"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD DRIP COFFEE",
+    "tagIds": [
+      "tag-vegan",
+      "tag-low-circle",
+      "tag-healthy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-31-8183",
+    "amount": "4.75",
+    "displayText": "Caffè Latte",
+    "properties": {
+      "calories": "190",
+      "maxCalories": "250"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-31-8183-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-31-8183-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-31-8183-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-31-8183-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-31-8183-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-32-7136",
+    "amount": "4.75",
+    "displayText": "Loaded Caffè Latte",
+    "properties": {
+      "calories": "190",
+      "maxCalories": "250"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-32-7136-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-32-7136-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-32-7136-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-32-7136-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-32-7136-mod-2",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-32-7136-mod-2-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-2-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-2-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-2-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-32-7136-mod-2-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-33-1959",
+    "amount": "4.50",
+    "displayText": "Cappuccino",
+    "properties": {
+      "calories": "130",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CAPPUCCINO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-33-1959-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-33-1959-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-33-1959-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-33-1959-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-33-1959-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-34-3297",
+    "amount": "4.50",
+    "displayText": "Loaded Cappuccino",
+    "properties": {
+      "calories": "130",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD CAPPUCCINO",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-medium-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-34-3297-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-34-3297-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-34-3297-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-34-3297-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-34-3297-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-34-3297-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-34-3297-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-35-2729",
+    "amount": "5.25",
+    "displayText": "Caffè Mocha",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "400"
+    },
+    "description": "Espresso with steamed milk and chocolate",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MOCHA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-35-2729-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-35-2729-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-35-2729-mod-1",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-35-2729-mod-1-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-1-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-1-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-1-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-1-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-1-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-35-2729-mod-2",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-35-2729-mod-2-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-2-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-2-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-35-2729-mod-2-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-36-1693",
+    "amount": "5.25",
+    "displayText": "Loaded Caffè Mocha",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "400"
+    },
+    "description": "Espresso with steamed milk and chocolate",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD MOCHA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-36-1693-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-36-1693-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-36-1693-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-36-1693-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-36-1693-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-36-1693-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-36-1693-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-37-7880",
+    "amount": "5.25",
+    "displayText": "Iced Latte",
+    "properties": {
+      "calories": "170",
+      "maxCalories": "230"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "ICED LATTE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-37-7880-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-37-7880-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-37-7880-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-37-7880-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "studiod-item-37-7880-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "studiod-item-37-7880-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-38-2286",
+    "amount": "5.25",
+    "displayText": "Loaded Iced Latte",
+    "properties": {
+      "calories": "170",
+      "maxCalories": "230"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD ICED LATTE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-38-2286-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-38-2286-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-38-2286-mod-1",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-38-2286-mod-1-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-1-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-1-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-1-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-38-2286-mod-2",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-38-2286-mod-2-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-2-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-2-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "studiod-item-38-2286-mod-2-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-39-5782",
+    "amount": "4.50",
+    "displayText": "Cold Brew",
+    "properties": {
+      "calories": "10",
+      "maxCalories": "10"
+    },
+    "description": "Slow-steeped for 20 hours",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "COLD BREW",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-40-1489",
+    "amount": "4.50",
+    "displayText": "Loaded Cold Brew",
+    "properties": {
+      "calories": "10",
+      "maxCalories": "10"
+    },
+    "description": "Slow-steeped for 20 hours",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD COLD BREW",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-41-8801",
+    "amount": "3.50",
+    "displayText": "Blueberry Muffin",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BLBRY MUFFIN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-41-8801-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-41-8801-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-41-8801-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-41-8801-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-41-8801-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-42-9181",
+    "amount": "3.50",
+    "displayText": "Loaded Blueberry Muffin",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD BLBRY MUFFIN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-43-6579",
+    "amount": "4.00",
+    "displayText": "Chocolate Croissant",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHOC CROISSANT",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-44-3790",
+    "amount": "4.00",
+    "displayText": "Loaded Chocolate Croissant",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD CHOC CROISSANT",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-45-3860",
+    "amount": "3.75",
+    "displayText": "Banana Bread",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "310"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BANANA BREAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-46-9327",
+    "amount": "3.75",
+    "displayText": "Loaded Banana Bread",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "310"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD BANANA BREAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-47-7394",
+    "amount": "14.99",
+    "displayText": "Ahi Tuna Poke Bowl",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "600"
+    },
+    "description": "Fresh ahi tuna, sushi rice, cucumber, avocado, sesame",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "AHI TUNA POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-47-7394-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-47-7394-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-47-7394-mod-1",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-47-7394-mod-1-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-1-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-1-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-1-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-47-7394-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-47-7394-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-47-7394-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-48-6009",
+    "amount": "14.99",
+    "displayText": "Loaded Ahi Tuna Poke Bowl",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "600"
+    },
+    "description": "Fresh ahi tuna, sushi rice, cucumber, avocado, sesame",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD AHI TUNA POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-48-6009-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-48-6009-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-48-6009-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-48-6009-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-48-6009-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-49-5598",
+    "amount": "15.50",
+    "displayText": "Salmon Poke Bowl",
+    "properties": {
+      "calories": "540",
+      "maxCalories": "620"
+    },
+    "description": "Fresh salmon, sushi rice, mango, edamame, ponzu",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SALMON POKE",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-49-5598-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-49-5598-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-49-5598-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-49-5598-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-49-5598-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-49-5598-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-49-5598-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-50-9777",
+    "amount": "15.50",
+    "displayText": "Loaded Salmon Poke Bowl",
+    "properties": {
+      "calories": "540",
+      "maxCalories": "620"
+    },
+    "description": "Fresh salmon, sushi rice, mango, edamame, ponzu",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD SALMON POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-50-9777-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-50-9777-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-50-9777-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-50-9777-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-50-9777-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-50-9777-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-50-9777-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-51-8796",
+    "amount": "12.50",
+    "displayText": "Tofu Poke Bowl",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "480"
+    },
+    "description": "Marinated tofu, sushi rice, cucumber, avocado, ginger",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TOFU POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-51-8796-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-51-8796-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-51-8796-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-51-8796-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-51-8796-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-51-8796-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-51-8796-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "studiod-item-51-8796-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-52-7005",
+    "amount": "12.50",
+    "displayText": "Loaded Tofu Poke Bowl",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "480"
+    },
+    "description": "Marinated tofu, sushi rice, cucumber, avocado, ginger",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD TOFU POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-52-7005-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-52-7005-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-52-7005-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "studiod-item-52-7005-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-52-7005-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-53-3559",
+    "amount": "15.99",
+    "displayText": "Shrimp Poke Bowl",
+    "properties": {
+      "calories": "490",
+      "maxCalories": "560"
+    },
+    "description": "Cooked shrimp, sushi rice, seaweed salad, pickled ginger",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SHRIMP POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-53-3559-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-53-3559-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-53-3559-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-53-3559-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-53-3559-mod-2",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-53-3559-mod-2-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-2-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-2-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-53-3559-mod-2-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-54-8140",
+    "amount": "15.99",
+    "displayText": "Loaded Shrimp Poke Bowl",
+    "properties": {
+      "calories": "490",
+      "maxCalories": "560"
+    },
+    "description": "Cooked shrimp, sushi rice, seaweed salad, pickled ginger",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD SHRIMP POKE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-54-8140-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-54-8140-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "studiod-item-54-8140-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-54-8140-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "studiod-item-54-8140-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "studiod-item-55-5918",
+    "amount": "3.50",
+    "displayText": "Extra Protein",
+    "properties": {
+      "calories": "120",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "EXTRA PROTEIN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-56-2884",
+    "amount": "3.50",
+    "displayText": "Loaded Extra Protein",
+    "properties": {
+      "calories": "120",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD EXTRA PROTEIN",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-57-9265",
+    "amount": "3.75",
+    "displayText": "Miso Soup",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MISO SOUP",
+    "tagIds": [
+      "tag-vegan",
+      "tag-high-circle",
+      "tag-high-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "studiod-item-58-9269",
+    "amount": "3.75",
+    "displayText": "Loaded Miso Soup",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD MISO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "studiod-item-58-9269-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "studiod-item-58-9269-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-58-9269-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-58-9269-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "studiod-item-58-9269-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

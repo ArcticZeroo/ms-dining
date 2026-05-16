@@ -1,0 +1,2789 @@
+[
+  {
+    "id": "bobae-item-1-9077",
+    "amount": "14.50",
+    "displayText": "Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TONKOTSU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-1-9077-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-1-9077-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-1-9077-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-2-1983",
+    "amount": "14.50",
+    "displayText": "Family-Size Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI TONKOTSU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-2-1983-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "bobae-item-2-1983-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-2-1983-mod-1",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-2-1983-mod-1-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-1-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-1-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-1-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-1-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-1-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-2-1983-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-2-1983-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-2-1983-mod-3",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-2-1983-mod-3-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-3-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-3-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-3-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-3-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-2-1983-mod-4",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-2-1983-mod-4-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-4-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-4-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-4-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-2-1983-mod-5",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-2-1983-mod-5-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-5-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-5-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-5-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-2-1983-mod-5-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-3-8088",
+    "amount": "13.75",
+    "displayText": "Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MISO RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-3-8088-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-3-8088-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-3-8088-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-3-8088-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-3-8088-mod-2",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "bobae-item-3-8088-mod-2-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-2-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-2-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "bobae-item-3-8088-mod-2-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-4-6803",
+    "amount": "13.75",
+    "displayText": "Family-Size Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI MISO RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-4-6803-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-4-6803-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-4-6803-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-4-6803-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-4-6803-mod-2",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-4-6803-mod-2-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-2-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-2-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-2-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-4-6803-mod-2-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-5-8245",
+    "amount": "13.50",
+    "displayText": "Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SHOYU RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-6-8258",
+    "amount": "13.50",
+    "displayText": "Family-Size Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI SHOYU RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-7-2619",
+    "amount": "15.00",
+    "displayText": "Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPICY TANTAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-7-2619-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-7-2619-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-7-2619-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-7-2619-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-7-2619-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-7-2619-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-8-8447",
+    "amount": "15.00",
+    "displayText": "Family-Size Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI SPICY TANTAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-8-8447-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-8-8447-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-8-8447-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-8-8447-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-8-8447-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-8-8447-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-8-8447-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-9-7660",
+    "amount": "6.50",
+    "displayText": "Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "GYOZA 6PC",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-10-6245",
+    "amount": "6.50",
+    "displayText": "Family-Size Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI GYOZA 6PC",
+    "tagIds": [
+      "tag-low-emissions",
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-10-6245-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "bobae-item-10-6245-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-10-6245-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-10-6245-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-10-6245-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-10-6245-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-10-6245-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-11-8942",
+    "amount": "4.25",
+    "displayText": "Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "EDAMAME",
+    "tagIds": [
+      "tag-vegan",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-12-4898",
+    "amount": "4.25",
+    "displayText": "Family-Size Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI EDAMAME",
+    "tagIds": [
+      "tag-vegan",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-12-4898-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-12-4898-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-12-4898-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-12-4898-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "bobae-item-12-4898-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-13-1290",
+    "amount": "7.75",
+    "displayText": "Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN KARAAGE",
+    "tagIds": [
+      "tag-high-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-14-2836",
+    "amount": "7.75",
+    "displayText": "Family-Size Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CHKN KARAAGE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-15-5296",
+    "amount": "4.25",
+    "displayText": "Drip Coffee",
+    "properties": {
+      "calories": "5",
+      "maxCalories": "5"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DRIP COFFEE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-16-5384",
+    "amount": "4.25",
+    "displayText": "Loaded Drip Coffee",
+    "properties": {
+      "calories": "5",
+      "maxCalories": "5"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD DRIP COFFEE",
+    "tagIds": [
+      "tag-vegan",
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-17-6837",
+    "amount": "4.75",
+    "displayText": "Caffè Latte",
+    "properties": {
+      "calories": "190",
+      "maxCalories": "250"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-17-6837-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-17-6837-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-17-6837-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-17-6837-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-17-6837-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-17-6837-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-18-6325",
+    "amount": "4.75",
+    "displayText": "Loaded Caffè Latte",
+    "properties": {
+      "calories": "190",
+      "maxCalories": "250"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD LATTE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-18-6325-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-18-6325-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-18-6325-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-18-6325-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-18-6325-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-18-6325-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-19-9363",
+    "amount": "4.50",
+    "displayText": "Cappuccino",
+    "properties": {
+      "calories": "130",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CAPPUCCINO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-19-9363-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-19-9363-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-19-9363-mod-1",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "bobae-item-19-9363-mod-1-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-1-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-1-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-1-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-1-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-19-9363-mod-1-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-20-4589",
+    "amount": "4.50",
+    "displayText": "Loaded Cappuccino",
+    "properties": {
+      "calories": "130",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD CAPPUCCINO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-20-4589-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-20-4589-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-20-4589-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-20-4589-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-20-4589-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-20-4589-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-21-2227",
+    "amount": "5.25",
+    "displayText": "Caffè Mocha",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "400"
+    },
+    "description": "Espresso with steamed milk and chocolate",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MOCHA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-21-2227-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-21-2227-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-21-2227-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-21-2227-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-21-2227-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-22-4610",
+    "amount": "5.25",
+    "displayText": "Loaded Caffè Mocha",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "400"
+    },
+    "description": "Espresso with steamed milk and chocolate",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD MOCHA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-22-4610-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-22-4610-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-22-4610-mod-1",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "bobae-item-22-4610-mod-1-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-1-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-1-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-1-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-22-4610-mod-2",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-22-4610-mod-2-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-2-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-2-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-22-4610-mod-2-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-23-5156",
+    "amount": "5.25",
+    "displayText": "Iced Latte",
+    "properties": {
+      "calories": "170",
+      "maxCalories": "230"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "ICED LATTE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-23-5156-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-23-5156-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-23-5156-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-23-5156-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-23-5156-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-23-5156-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-24-1751",
+    "amount": "5.25",
+    "displayText": "Loaded Iced Latte",
+    "properties": {
+      "calories": "170",
+      "maxCalories": "230"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD ICED LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-24-1751-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-24-1751-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-24-1751-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "bobae-item-24-1751-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "bobae-item-24-1751-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-25-3804",
+    "amount": "4.50",
+    "displayText": "Cold Brew",
+    "properties": {
+      "calories": "10",
+      "maxCalories": "10"
+    },
+    "description": "Slow-steeped for 20 hours",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "COLD BREW",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-26-9481",
+    "amount": "4.50",
+    "displayText": "Loaded Cold Brew",
+    "properties": {
+      "calories": "10",
+      "maxCalories": "10"
+    },
+    "description": "Slow-steeped for 20 hours",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD COLD BREW",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-27-4296",
+    "amount": "3.50",
+    "displayText": "Blueberry Muffin",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BLBRY MUFFIN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-28-8854",
+    "amount": "3.50",
+    "displayText": "Loaded Blueberry Muffin",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD BLBRY MUFFIN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-28-8854-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-28-8854-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-28-8854-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-29-9422",
+    "amount": "4.00",
+    "displayText": "Chocolate Croissant",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHOC CROISSANT",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-29-9422-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-29-9422-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-29-9422-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-29-9422-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-29-9422-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-29-9422-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-29-9422-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-30-7003",
+    "amount": "4.00",
+    "displayText": "Loaded Chocolate Croissant",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD CHOC CROISSANT",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-30-7003-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-30-7003-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-30-7003-mod-1",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-30-7003-mod-1-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-1-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-1-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-1-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-30-7003-mod-2",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-30-7003-mod-2-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-2-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-2-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-2-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-2-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-30-7003-mod-2-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-31-1521",
+    "amount": "3.75",
+    "displayText": "Banana Bread",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "310"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BANANA BREAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-31-1521-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-31-1521-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-31-1521-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-31-1521-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-31-1521-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-32-2563",
+    "amount": "3.75",
+    "displayText": "Loaded Banana Bread",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "310"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD BANANA BREAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-33-7495",
+    "amount": "14.50",
+    "displayText": "Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-34-4273",
+    "amount": "14.50",
+    "displayText": "Family-Size Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI LAMB GYRO BWL",
+    "tagIds": [
+      "tag-medium-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-34-4273-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-34-4273-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-34-4273-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "bobae-item-34-4273-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-34-4273-mod-2",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-34-4273-mod-2-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-34-4273-mod-2-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-35-7167",
+    "amount": "12.50",
+    "displayText": "Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-35-7167-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-35-7167-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-35-7167-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-35-7167-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-35-7167-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-35-7167-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-35-7167-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-36-5874",
+    "amount": "12.50",
+    "displayText": "Family-Size Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-37-8083",
+    "amount": "11.99",
+    "displayText": "Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN SHWARMA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-37-8083-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-37-8083-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-37-8083-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-37-8083-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "bobae-item-37-8083-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-38-5619",
+    "amount": "11.99",
+    "displayText": "Family-Size Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CHKN SHWARMA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-39-5995",
+    "amount": "10.50",
+    "displayText": "Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-40-9708",
+    "amount": "10.50",
+    "displayText": "Family-Size Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI FALAFEL WRAP",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-41-1665",
+    "amount": "5.50",
+    "displayText": "Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "HUMMUS PITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-42-8100",
+    "amount": "5.50",
+    "displayText": "Family-Size Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI HUMMUS PITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-43-9279",
+    "amount": "4.50",
+    "displayText": "Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TABBOULEH",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-43-9279-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-43-9279-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-43-9279-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-43-9279-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "bobae-item-43-9279-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-43-9279-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "bobae-item-43-9279-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-44-7612",
+    "amount": "4.50",
+    "displayText": "Family-Size Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI TABBOULEH",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-45-3952",
+    "amount": "12.99",
+    "displayText": "Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN WAFFLES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-46-7274",
+    "amount": "12.99",
+    "displayText": "Loaded Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD CHKN WAFFLES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-47-5671",
+    "amount": "15.99",
+    "displayText": "Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SEARED SALMON",
+    "tagIds": [
+      "tag-gf",
+      "tag-new"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-48-6666",
+    "amount": "15.99",
+    "displayText": "Loaded Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD SEARED SALMON",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "bobae-item-49-1930",
+    "amount": "16.50",
+    "displayText": "Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SHORT RIBS",
+    "tagIds": [
+      "tag-medium-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "bobae-item-49-1930-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "bobae-item-49-1930-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-49-1930-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-49-1930-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "bobae-item-49-1930-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-49-1930-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "bobae-item-49-1930-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bobae-item-50-9154",
+    "amount": "16.50",
+    "displayText": "Loaded Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD SHORT RIBS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    }
+  }
+]

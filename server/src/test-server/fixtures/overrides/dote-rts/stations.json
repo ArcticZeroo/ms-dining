@@ -1,0 +1,290 @@
+[
+  {
+    "id": "dote-rts-stn-poke-bar-9092",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "dote-rts-menu-90630"
+    },
+    "menus": [
+      {
+        "id": "dote-rts-menu-90630",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "dote-rts-cat-0-9258",
+            "name": "Poke Bowls",
+            "items": [
+              "dote-rts-item-1-8034",
+              "dote-rts-item-2-8360",
+              "dote-rts-item-3-7723",
+              "dote-rts-item-4-8376",
+              "dote-rts-item-5-1030",
+              "dote-rts-item-6-3482",
+              "dote-rts-item-7-9090",
+              "dote-rts-item-8-8203",
+              "dote-rts-item-9-9005",
+              "dote-rts-item-10-1515",
+              "dote-rts-item-11-6412",
+              "dote-rts-item-12-6614"
+            ]
+          },
+          {
+            "categoryId": "dote-rts-cat-1-9380",
+            "name": "Extras",
+            "items": [
+              "dote-rts-item-13-7853",
+              "dote-rts-item-14-7703",
+              "dote-rts-item-15-3340",
+              "dote-rts-item-16-1754",
+              "dote-rts-item-17-4264",
+              "dote-rts-item-18-3503"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "dote-rts-stn-poke-bar-9092",
+              "menuId": "dote-rts-menu-90630"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "dote-rts-stn-grill-5054",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "dote-rts-menu-39650"
+    },
+    "menus": [
+      {
+        "id": "dote-rts-menu-39650",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "dote-rts-cat-0-5123",
+            "name": "Burgers",
+            "items": [
+              "dote-rts-item-19-9030",
+              "dote-rts-item-20-4159",
+              "dote-rts-item-21-9331",
+              "dote-rts-item-22-6990",
+              "dote-rts-item-23-3446",
+              "dote-rts-item-24-7498",
+              "dote-rts-item-25-8275",
+              "dote-rts-item-26-8314",
+              "dote-rts-item-27-7036"
+            ]
+          },
+          {
+            "categoryId": "dote-rts-cat-1-3084",
+            "name": "Sides",
+            "items": [
+              "dote-rts-item-28-4177",
+              "dote-rts-item-29-1915",
+              "dote-rts-item-30-2500",
+              "dote-rts-item-31-9431",
+              "dote-rts-item-32-5815",
+              "dote-rts-item-33-4682"
+            ]
+          },
+          {
+            "categoryId": "dote-rts-cat-2-9487",
+            "name": "Salads",
+            "items": [
+              "dote-rts-item-34-5399",
+              "dote-rts-item-35-3315",
+              "dote-rts-item-36-7864",
+              "dote-rts-item-37-9285",
+              "dote-rts-item-38-8746",
+              "dote-rts-item-39-2301"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "dote-rts-stn-grill-5054",
+              "menuId": "dote-rts-menu-39650"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "dote-rts-stn-pacific-rim-9513",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "dote-rts-menu-90315"
+    },
+    "menus": [
+      {
+        "id": "dote-rts-menu-90315",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "dote-rts-cat-0-8908",
+            "name": "Entrees",
+            "items": [
+              "dote-rts-item-40-8526",
+              "dote-rts-item-41-4682",
+              "dote-rts-item-42-7046",
+              "dote-rts-item-43-6838",
+              "dote-rts-item-44-2814",
+              "dote-rts-item-45-2934",
+              "dote-rts-item-46-9280",
+              "dote-rts-item-47-1728",
+              "dote-rts-item-48-1383",
+              "dote-rts-item-49-6241",
+              "dote-rts-item-50-7167",
+              "dote-rts-item-51-2717"
+            ]
+          },
+          {
+            "categoryId": "dote-rts-cat-1-9676",
+            "name": "Sides",
+            "items": [
+              "dote-rts-item-52-5362",
+              "dote-rts-item-53-9526",
+              "dote-rts-item-54-4577",
+              "dote-rts-item-55-7967",
+              "dote-rts-item-56-7106",
+              "dote-rts-item-57-8423"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "dote-rts-stn-pacific-rim-9513",
+              "menuId": "dote-rts-menu-90315"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "dote-rts-stn-ramen-bar-4288",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "dote-rts-menu-88813"
+    },
+    "menus": [
+      {
+        "id": "dote-rts-menu-88813",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "dote-rts-cat-0-6484",
+            "name": "Ramen Bowls",
+            "items": [
+              "dote-rts-item-58-1330",
+              "dote-rts-item-59-6934",
+              "dote-rts-item-60-3114",
+              "dote-rts-item-61-9440",
+              "dote-rts-item-62-5222",
+              "dote-rts-item-63-6502",
+              "dote-rts-item-64-9773",
+              "dote-rts-item-65-3128",
+              "dote-rts-item-66-2209",
+              "dote-rts-item-67-4652",
+              "dote-rts-item-68-5573",
+              "dote-rts-item-69-6903"
+            ]
+          },
+          {
+            "categoryId": "dote-rts-cat-1-2349",
+            "name": "Sides & Apps",
+            "items": [
+              "dote-rts-item-70-1818",
+              "dote-rts-item-71-5622",
+              "dote-rts-item-72-6064",
+              "dote-rts-item-73-5382",
+              "dote-rts-item-74-7328",
+              "dote-rts-item-75-8899",
+              "dote-rts-item-76-2361",
+              "dote-rts-item-77-8931",
+              "dote-rts-item-78-8738"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "dote-rts-stn-ramen-bar-4288",
+              "menuId": "dote-rts-menu-88813"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

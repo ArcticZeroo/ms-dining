@@ -1,0 +1,221 @@
+[
+  {
+    "id": "cafe86-stn-indian-kitchen-3997",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe86-menu-62580"
+    },
+    "menus": [
+      {
+        "id": "cafe86-menu-62580",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe86-cat-0-5109",
+            "name": "Curries",
+            "items": [
+              "cafe86-item-1-4957",
+              "cafe86-item-2-3035",
+              "cafe86-item-3-9522",
+              "cafe86-item-4-8489",
+              "cafe86-item-5-1388",
+              "cafe86-item-6-2116",
+              "cafe86-item-7-2501",
+              "cafe86-item-8-3832",
+              "cafe86-item-9-5810"
+            ]
+          },
+          {
+            "categoryId": "cafe86-cat-1-2687",
+            "name": "Sides & Bread",
+            "items": [
+              "cafe86-item-10-4363",
+              "cafe86-item-11-7613",
+              "cafe86-item-12-4487",
+              "cafe86-item-13-2385",
+              "cafe86-item-14-5088",
+              "cafe86-item-15-6869",
+              "cafe86-item-16-8557",
+              "cafe86-item-17-6610",
+              "cafe86-item-18-8332"
+            ]
+          },
+          {
+            "categoryId": "cafe86-cat-2-5649",
+            "name": "Combo Meals",
+            "items": [
+              "cafe86-item-1-4957",
+              "cafe86-item-2-3035",
+              "cafe86-item-3-9522",
+              "cafe86-item-10-4363",
+              "cafe86-item-11-7613",
+              "cafe86-item-12-4487",
+              "cafe86-item-16-8557",
+              "cafe86-item-17-6610",
+              "cafe86-item-18-8332"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe86-stn-indian-kitchen-3997",
+              "menuId": "cafe86-menu-62580"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe86-stn-pacific-rim-6711",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "cafe86-menu-42703"
+    },
+    "menus": [
+      {
+        "id": "cafe86-menu-42703",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "cafe86-cat-0-8145",
+            "name": "Entrees",
+            "items": [
+              "cafe86-item-19-8800",
+              "cafe86-item-20-4762",
+              "cafe86-item-21-3069",
+              "cafe86-item-22-9776",
+              "cafe86-item-23-3852",
+              "cafe86-item-24-5052",
+              "cafe86-item-25-6805",
+              "cafe86-item-26-3714",
+              "cafe86-item-27-3486",
+              "cafe86-item-28-2404",
+              "cafe86-item-29-2483",
+              "cafe86-item-30-7203"
+            ]
+          },
+          {
+            "categoryId": "cafe86-cat-1-4031",
+            "name": "Sides",
+            "items": [
+              "cafe86-item-31-8027",
+              "cafe86-item-32-3859",
+              "cafe86-item-33-2308",
+              "cafe86-item-34-5970",
+              "cafe86-item-35-5791",
+              "cafe86-item-36-4877"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe86-stn-pacific-rim-6711",
+              "menuId": "cafe86-menu-42703"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe86-stn-comfort-kitchen-5045",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe86-menu-69590"
+    },
+    "menus": [
+      {
+        "id": "cafe86-menu-69590",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe86-cat-0-9506",
+            "name": "Comfort Classics",
+            "items": [
+              "cafe86-item-37-4686",
+              "cafe86-item-38-4079",
+              "cafe86-item-39-7018",
+              "cafe86-item-40-2928",
+              "cafe86-item-41-5807",
+              "cafe86-item-42-1068",
+              "cafe86-item-43-3679",
+              "cafe86-item-44-4179",
+              "cafe86-item-45-2637"
+            ]
+          },
+          {
+            "categoryId": "cafe86-cat-1-4658",
+            "name": "Specials",
+            "items": [
+              "cafe86-item-43-3679",
+              "cafe86-item-44-4179",
+              "cafe86-item-45-2637",
+              "cafe86-item-46-3368",
+              "cafe86-item-47-7566",
+              "cafe86-item-48-8059"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe86-stn-comfort-kitchen-5045",
+              "menuId": "cafe86-menu-69590"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

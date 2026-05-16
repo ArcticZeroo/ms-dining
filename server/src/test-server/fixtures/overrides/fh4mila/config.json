@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-fh4mila",
+  "contextID": "ctx-fh4mila-6087",
+  "theme": {
+    "logoImage": "fh4mila-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-fh4mila-981",
+        "storeName": "fh4mila"
+      },
+      "displayProfileId": [
+        "dp-fh4mila-416"
+      ]
+    }
+  ],
+  "properties": {}
+}

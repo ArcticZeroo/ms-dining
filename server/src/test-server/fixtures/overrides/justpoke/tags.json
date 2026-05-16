@@ -1,0 +1,86 @@
+{
+  "justpoke-stn-pizza---pasta-2270": {
+    "customLabels": {
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      }
+    }
+  },
+  "justpoke-stn-chef-s-table-8266": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  },
+  "justpoke-stn-grill-7478": {
+    "customLabels": {
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-medium-circle": {
+        "tagId": "tag-medium-circle",
+        "tagName": "medium_circle"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-healthy": {
+        "tagId": "tag-healthy",
+        "tagName": "healthy"
+      }
+    }
+  },
+  "justpoke-stn-indian-kitchen-5442": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  }
+}

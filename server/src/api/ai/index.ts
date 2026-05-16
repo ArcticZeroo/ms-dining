@@ -9,7 +9,7 @@ import { logInfo } from '../../util/log.js';
 const AI_PROVIDER_ENV_VAR = 'AI_PROVIDER';
 const AI_RETRY_COUNT = 3;
 
-const getProvider = (): IAiProvider => {
+const computeDefaultProvider = (): IAiProvider => {
     const providerName = process.env[AI_PROVIDER_ENV_VAR]?.toLowerCase();
 
     if (providerName === 'openai') {
@@ -25,18 +25,43 @@ const getProvider = (): IAiProvider => {
     return openAiProvider;
 };
 
-const activeProvider = getProvider();
+// Held in a mutable cell so integration tests can inject a mock implementation
+// via setAiProvider(...). The default is computed lazily on first use so tests
+// can override before any AI call fires.
+let activeProvider: IAiProvider | null = null;
+
+export const getActiveAiProvider = (): IAiProvider => {
+    if (activeProvider == null) {
+        activeProvider = computeDefaultProvider();
+    }
+    return activeProvider;
+};
+
+export const setAiProvider = (provider: IAiProvider | null): void => {
+    activeProvider = provider;
+};
+
+export const resetAiProvider = (): void => {
+    activeProvider = null;
+};
 
 export const retrieveTextCompletion = async (request: IAiTextCompletionRequest): Promise<string> => {
     return runPromiseWithRetries(
-        () => activeProvider.retrieveTextCompletion(request),
+        () => getActiveAiProvider().retrieveTextCompletion(request),
         AI_RETRY_COUNT
     ).catch(rethrowWithoutStatus);
 };
 
 export const retrieveVisionCompletion = async (request: IAiVisionRequest): Promise<string> => {
     return runPromiseWithRetries(
-        () => activeProvider.retrieveVisionCompletion(request),
+        () => getActiveAiProvider().retrieveVisionCompletion(request),
+        AI_RETRY_COUNT
+    ).catch(rethrowWithoutStatus);
+};
+
+export const retrieveEmbedding = async (text: string): Promise<number[]> => {
+    return runPromiseWithRetries(
+        () => getActiveAiProvider().retrieveEmbedding(text),
         AI_RETRY_COUNT
     ).catch(rethrowWithoutStatus);
 };

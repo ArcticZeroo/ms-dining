@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-studiod",
+  "contextID": "ctx-studiod-9801",
+  "theme": {
+    "logoImage": "studiod-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-studiod-915",
+        "storeName": "studiod"
+      },
+      "displayProfileId": [
+        "dp-studiod-262"
+      ]
+    }
+  ],
+  "properties": {}
+}

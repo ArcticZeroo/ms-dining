@@ -108,11 +108,14 @@ class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
 
 export const SEARCH_TAG_WORKER_QUEUE = new SearchTagsWorkerQueue();
 
-const startQueue = () => {
+/**
+ * Starts the search-tag worker queue and primes it with any pending DB
+ * entries. Must be called explicitly during boot (not at module load) so
+ * tests can override DATABASE_URL before the first DB query fires.
+ */
+export const startSearchTagWorkerQueue = () => {
     SEARCH_TAG_WORKER_QUEUE.start();
     MenuItemStorageClient.retrievePendingSearchTagQueueEntries()
         .then(entries => SEARCH_TAG_WORKER_QUEUE.add(...entries))
         .catch(err => logError('Unable to retrieve pending search tag queue entries:', err));
 }
-
-startQueue();

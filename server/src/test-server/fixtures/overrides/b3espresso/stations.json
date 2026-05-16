@@ -1,0 +1,371 @@
+[
+  {
+    "id": "b3espresso-stn-comfort-kitchen-9223",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "b3espresso-menu-32158"
+    },
+    "menus": [
+      {
+        "id": "b3espresso-menu-32158",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "b3espresso-cat-0-9733",
+            "name": "Comfort Classics",
+            "items": [
+              "b3espresso-item-1-4178",
+              "b3espresso-item-2-2283",
+              "b3espresso-item-3-9619",
+              "b3espresso-item-4-5356",
+              "b3espresso-item-5-7012",
+              "b3espresso-item-6-9747",
+              "b3espresso-item-7-3370",
+              "b3espresso-item-8-8400",
+              "b3espresso-item-9-1520"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-1-3999",
+            "name": "Specials",
+            "items": [
+              "b3espresso-item-7-3370",
+              "b3espresso-item-8-8400",
+              "b3espresso-item-9-1520",
+              "b3espresso-item-10-4858",
+              "b3espresso-item-11-7485",
+              "b3espresso-item-12-4484"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b3espresso-stn-comfort-kitchen-9223",
+              "menuId": "b3espresso-menu-32158"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b3espresso-stn-poke-bar-4332",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "b3espresso-menu-88694"
+    },
+    "menus": [
+      {
+        "id": "b3espresso-menu-88694",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "b3espresso-cat-0-6821",
+            "name": "Poke Bowls",
+            "items": [
+              "b3espresso-item-13-6079",
+              "b3espresso-item-14-7504",
+              "b3espresso-item-15-3894",
+              "b3espresso-item-16-8759",
+              "b3espresso-item-17-6691",
+              "b3espresso-item-18-7360",
+              "b3espresso-item-19-3530",
+              "b3espresso-item-20-7524",
+              "b3espresso-item-21-8393",
+              "b3espresso-item-22-2040",
+              "b3espresso-item-23-1496",
+              "b3espresso-item-24-3594"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-1-9257",
+            "name": "Extras",
+            "items": [
+              "b3espresso-item-25-7303",
+              "b3espresso-item-26-9269",
+              "b3espresso-item-27-9651",
+              "b3espresso-item-28-2463",
+              "b3espresso-item-29-6379",
+              "b3espresso-item-30-7983"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b3espresso-stn-poke-bar-4332",
+              "menuId": "b3espresso-menu-88694"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b3espresso-stn-mediterranean-7129",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "b3espresso-menu-18613"
+    },
+    "menus": [
+      {
+        "id": "b3espresso-menu-18613",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "b3espresso-cat-0-6920",
+            "name": "Bowls",
+            "items": [
+              "b3espresso-item-31-6944",
+              "b3espresso-item-32-4658",
+              "b3espresso-item-33-7875",
+              "b3espresso-item-34-6749",
+              "b3espresso-item-35-9074",
+              "b3espresso-item-36-1480"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-1-4046",
+            "name": "Wraps",
+            "items": [
+              "b3espresso-item-37-7476",
+              "b3espresso-item-38-2957",
+              "b3espresso-item-39-1157",
+              "b3espresso-item-40-6187",
+              "b3espresso-item-41-9079",
+              "b3espresso-item-42-9833"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-2-3475",
+            "name": "Sides",
+            "items": [
+              "b3espresso-item-43-4635",
+              "b3espresso-item-44-7604",
+              "b3espresso-item-45-5765",
+              "b3espresso-item-46-9160",
+              "b3espresso-item-47-8442",
+              "b3espresso-item-48-1381"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b3espresso-stn-mediterranean-7129",
+              "menuId": "b3espresso-menu-18613"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b3espresso-stn-pizza---pasta-2822",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "b3espresso-menu-40500"
+    },
+    "menus": [
+      {
+        "id": "b3espresso-menu-40500",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "b3espresso-cat-0-9225",
+            "name": "Pizza",
+            "items": [
+              "b3espresso-item-49-3734",
+              "b3espresso-item-50-5480",
+              "b3espresso-item-51-8974",
+              "b3espresso-item-52-8142",
+              "b3espresso-item-53-6919",
+              "b3espresso-item-54-8960",
+              "b3espresso-item-55-9574",
+              "b3espresso-item-56-3666",
+              "b3espresso-item-57-5268"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-1-9539",
+            "name": "Pasta",
+            "items": [
+              "b3espresso-item-58-1287",
+              "b3espresso-item-59-3640",
+              "b3espresso-item-60-1875",
+              "b3espresso-item-61-5909",
+              "b3espresso-item-62-9243",
+              "b3espresso-item-63-9978"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-2-5200",
+            "name": "Sides",
+            "items": [
+              "b3espresso-item-64-4395",
+              "b3espresso-item-65-7976",
+              "b3espresso-item-66-4620"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b3espresso-stn-pizza---pasta-2822",
+              "menuId": "b3espresso-menu-40500"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b3espresso-stn-indian-kitchen-1485",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "b3espresso-menu-62980"
+    },
+    "menus": [
+      {
+        "id": "b3espresso-menu-62980",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "b3espresso-cat-0-5476",
+            "name": "Curries",
+            "items": [
+              "b3espresso-item-67-9471",
+              "b3espresso-item-68-4796",
+              "b3espresso-item-69-5583",
+              "b3espresso-item-70-5522",
+              "b3espresso-item-71-7984",
+              "b3espresso-item-72-8717",
+              "b3espresso-item-73-2262",
+              "b3espresso-item-74-7386",
+              "b3espresso-item-75-9903"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-1-6572",
+            "name": "Sides & Bread",
+            "items": [
+              "b3espresso-item-76-8067",
+              "b3espresso-item-77-4632",
+              "b3espresso-item-78-1482",
+              "b3espresso-item-79-5864",
+              "b3espresso-item-80-9987",
+              "b3espresso-item-81-1502",
+              "b3espresso-item-82-6648",
+              "b3espresso-item-83-3586",
+              "b3espresso-item-84-5980"
+            ]
+          },
+          {
+            "categoryId": "b3espresso-cat-2-2713",
+            "name": "Combo Meals",
+            "items": [
+              "b3espresso-item-67-9471",
+              "b3espresso-item-68-4796",
+              "b3espresso-item-69-5583",
+              "b3espresso-item-76-8067",
+              "b3espresso-item-77-4632",
+              "b3espresso-item-78-1482",
+              "b3espresso-item-82-6648",
+              "b3espresso-item-83-3586",
+              "b3espresso-item-84-5980"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b3espresso-stn-indian-kitchen-1485",
+              "menuId": "b3espresso-menu-62980"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

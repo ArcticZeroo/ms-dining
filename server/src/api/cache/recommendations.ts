@@ -11,7 +11,7 @@ import { LockedExpiringMap } from '../lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
 import { CAFES_BY_ID } from '../../constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
-import { lazy } from '../../util/lazy.js';
+import { lazyAsync } from '../../util/lazy.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { getShutDownCafeIdsAsync } from './daily-cafe-state.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
@@ -59,12 +59,13 @@ const buildContext = ({
 						  homepageIds,
 						  cafeId,
 					  }: BuildContextParams): IRecommendationContext => {
+	const allMenuItems = lazyAsync(() => getAllAvailableItems(dateString, cafeId));
 	return {
 		userId,
 		dateString,
 		homepageIds,
 		cafeId,
-		getAllMenuItems: lazy(() => getAllAvailableItems(dateString, cafeId))
+		getAllMenuItems: () => allMenuItems.value,
 	} satisfies IRecommendationContext;
 };
 
@@ -99,11 +100,12 @@ const getRecommendationsForUser = async (userId: string | null, dateString: stri
 		return new Map();
 	}
 
+	const allMenuItems = lazyAsync(() => getAllAvailableItems(dateString));
 	const context: IUserRecommendationContext = {
 		userId,
 		dateString,
 		seed,
-		getAllMenuItems: lazy(() => getAllAvailableItems(dateString)),
+		getAllMenuItems: () => allMenuItems.value,
 	};
 
 	const cacheForDateString = ensureUserCacheForDateString(dateString, userId);
@@ -150,13 +152,14 @@ export const getRecommendationsAsync = async ({
 	const allCafeIds = (cafeIdFilter && cafeIdFilter.size > 0) ? Array.from(cafeIdFilter) : Array.from(CAFES_BY_ID.keys());
 	const shutDownCafeIds = await getShutDownCafeIdsAsync(dateString);
 	const cafeIds = allCafeIds.filter(id => !shutDownCafeIds.has(id));
-	const getAllUserReviews = lazy(async () => {
+	const allUserReviews = lazyAsync(async () => {
 		if (!userId) {
-			return [];
+			return [] as Array<IServerReview>;
 		}
 
 		return ReviewStorageClient.getReviewsForUserAsync({ userId });
 	});
+	const getAllUserReviews = () => allUserReviews.value;
 
 	const sectionsByType = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
 

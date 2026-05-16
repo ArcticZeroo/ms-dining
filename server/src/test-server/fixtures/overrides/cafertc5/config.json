@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-cafertc5",
+  "contextID": "ctx-cafertc5-1208",
+  "theme": {
+    "logoImage": "cafertc5-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-cafertc5-998",
+        "storeName": "cafertc5"
+      },
+      "displayProfileId": [
+        "dp-cafertc5-337"
+      ]
+    }
+  ],
+  "properties": {}
+}

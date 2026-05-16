@@ -1,0 +1,162 @@
+[
+  {
+    "id": "item-1",
+    "amount": "9.99",
+    "displayText": "Classic Burger",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "800"
+    },
+    "description": "A classic beef burger with lettuce, tomato, and special sauce",
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CLASSIC BURGER",
+    "tagIds": ["tag-1"],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "9.99" }
+      }
+    }
+  },
+  {
+    "id": "item-2",
+    "amount": "12.50",
+    "displayText": "Grilled Chicken Salad",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "450"
+    },
+    "description": "Fresh mixed greens with grilled chicken, cherry tomatoes, and vinaigrette",
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "GRLD CHKN SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "12.50" }
+      }
+    }
+  },
+  {
+    "id": "item-3",
+    "amount": "11.25",
+    "displayText": "Fish Tacos",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "600"
+    },
+    "description": "Beer-battered cod with cabbage slaw and chipotle crema",
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "receiptText": "FISH TACOS",
+    "tagIds": [],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "11.25" }
+      }
+    }
+  },
+  {
+    "id": "item-4",
+    "amount": "4.50",
+    "displayText": "French Fries",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "receiptText": "FRENCH FRIES",
+    "tagIds": [],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "4.50" }
+      }
+    }
+  },
+  {
+    "id": "item-5",
+    "amount": "3.75",
+    "displayText": "Side Salad",
+    "properties": {
+      "calories": "120",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SIDE SALAD",
+    "tagIds": ["tag-1"],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "3.75" }
+      }
+    }
+  },
+  {
+    "id": "item-6",
+    "amount": "10.75",
+    "displayText": "Turkey Club",
+    "properties": {
+      "calories": "580",
+      "maxCalories": "620"
+    },
+    "description": "Sliced turkey, bacon, lettuce, tomato on sourdough",
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "receiptText": "TURKEY CLUB",
+    "tagIds": [],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "10.75" }
+      }
+    }
+  },
+  {
+    "id": "item-7",
+    "amount": "9.50",
+    "displayText": "Italian Sub",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "720"
+    },
+    "description": "Salami, capicola, ham, provolone with oil and vinegar",
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "receiptText": "ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "9.50" }
+      }
+    }
+  },
+  {
+    "id": "item-8",
+    "amount": "3.50",
+    "displayText": "Fountain Soda",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "200"
+    },
+    "lastUpdateTime": "2025-01-01T00:00:00.000Z",
+    "receiptText": "FOUNTAIN SODA",
+    "tagIds": [],
+    "priceLevels": {
+      "price-level-1": {
+        "priceLevelId": "price-level-1",
+        "name": "Default",
+        "price": { "currencyUnit": "USD", "amount": "3.50" }
+      }
+    }
+  }
+]

@@ -1,0 +1,214 @@
+[
+  {
+    "id": "cafe31-item-1-4057",
+    "amount": "13.50",
+    "displayText": "Teriyaki Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken, steamed rice, stir-fried vegetables, teriyaki glaze",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TERIYAKI CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe31-item-2-5057",
+    "amount": "12.50",
+    "displayText": "Kung Pao Tofu",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Crispy tofu, peanuts, bell peppers, chili sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "KUNG PAO TOFU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe31-item-3-2150",
+    "amount": "13.00",
+    "displayText": "Orange Chicken",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "Crispy chicken in sweet orange glaze with broccoli",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "ORANGE CHKN",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe31-item-4-1541",
+    "amount": "14.25",
+    "displayText": "Beef Bulgogi Bowl",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Marinated beef, steamed rice, pickled vegetables, gochujang",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BULGOGI BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe31-item-4-1541-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe31-item-4-1541-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe31-item-4-1541-mod-1",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe31-item-4-1541-mod-1-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-1-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-1-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe31-item-4-1541-mod-1-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe31-item-5-4409",
+    "amount": "4.25",
+    "displayText": "Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe31-item-6-6536",
+    "amount": "3.75",
+    "displayText": "Miso Soup",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MISO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  }
+]

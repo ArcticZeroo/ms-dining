@@ -70,7 +70,7 @@
     "predeploy": "npx tsc --project ../common/tsconfig.json && npx prisma migrate deploy && npx prisma generate",
     "deploy": "npm run predeploy && npm run start",
     "deploy-dev": "npm run predeploy && npm run start-dev",
-    "test": "npx tsc && node --test dist/**/*.test.js",
+    "test": "npx tsc && node --test --test-force-exit dist/**/*.test.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   }

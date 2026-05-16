@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-dote-rts",
+  "contextID": "ctx-dote-rts-8894",
+  "theme": {
+    "logoImage": "dote-rts-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-dote-rts-475",
+        "storeName": "dote-rts"
+      },
+      "displayProfileId": [
+        "dp-dote-rts-759"
+      ]
+    }
+  ],
+  "properties": {}
+}

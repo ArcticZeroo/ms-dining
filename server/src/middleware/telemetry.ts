@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import { TELEMETRY_CLIENT } from '../api/telemetry/app-insights.js';
+import { getTelemetryClient } from '../api/telemetry/app-insights.js';
 import { getVisitorId } from './analytics.js';
 import { CATCH_ALL_PATH } from '../util/koa.js';
 
@@ -17,7 +17,8 @@ export const setTelemetryProperties = (ctx: Koa.Context, properties: Record<stri
 };
 
 export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
-    if (TELEMETRY_CLIENT == null) {
+    const telemetryClient = getTelemetryClient();
+    if (telemetryClient == null) {
         return next();
     }
 
@@ -37,7 +38,7 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
         const customProperties = ctx.state[TELEMETRY_PROPERTIES_KEY] as Record<string, string> | undefined;
         const resultCode = error ? String((error as { status?: number }).status || 500) : String(ctx.status);
 
-        TELEMETRY_CLIENT.trackRequest({
+        telemetryClient.trackRequest({
             name:       `${ctx.method} ${route}`,
             url:        ctx.href,
             duration:   durationMs,

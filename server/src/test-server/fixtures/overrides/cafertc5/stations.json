@@ -1,0 +1,209 @@
+[
+  {
+    "id": "cafertc5-stn-comfort-kitchen-9042",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafertc5-menu-72675"
+    },
+    "menus": [
+      {
+        "id": "cafertc5-menu-72675",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafertc5-cat-0-6637",
+            "name": "Comfort Classics",
+            "items": [
+              "cafertc5-item-1-3812",
+              "cafertc5-item-2-5042",
+              "cafertc5-item-3-4827",
+              "cafertc5-item-4-4127",
+              "cafertc5-item-5-3163",
+              "cafertc5-item-6-5313"
+            ]
+          },
+          {
+            "categoryId": "cafertc5-cat-1-1687",
+            "name": "Specials",
+            "items": [
+              "cafertc5-item-5-3163",
+              "cafertc5-item-6-5313",
+              "cafertc5-item-7-3186",
+              "cafertc5-item-8-3822"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafertc5-stn-comfort-kitchen-9042",
+              "menuId": "cafertc5-menu-72675"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafertc5-stn-grill-1224",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "cafertc5-menu-97396"
+    },
+    "menus": [
+      {
+        "id": "cafertc5-menu-97396",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "cafertc5-cat-0-5453",
+            "name": "Burgers",
+            "items": [
+              "cafertc5-item-9-9717",
+              "cafertc5-item-10-6414",
+              "cafertc5-item-11-3892",
+              "cafertc5-item-12-4821",
+              "cafertc5-item-13-6587",
+              "cafertc5-item-14-1065"
+            ]
+          },
+          {
+            "categoryId": "cafertc5-cat-1-6203",
+            "name": "Sides",
+            "items": [
+              "cafertc5-item-15-8747",
+              "cafertc5-item-16-2410",
+              "cafertc5-item-17-1232",
+              "cafertc5-item-18-2824"
+            ]
+          },
+          {
+            "categoryId": "cafertc5-cat-2-7081",
+            "name": "Salads",
+            "items": [
+              "cafertc5-item-19-6718",
+              "cafertc5-item-20-1616",
+              "cafertc5-item-21-4229",
+              "cafertc5-item-22-9637"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafertc5-stn-grill-1224",
+              "menuId": "cafertc5-menu-97396"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafertc5-stn-espresso-9911",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "cafertc5-menu-72925"
+    },
+    "menus": [
+      {
+        "id": "cafertc5-menu-72925",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "cafertc5-cat-0-4242",
+            "name": "Hot Drinks",
+            "items": [
+              "cafertc5-item-23-3517",
+              "cafertc5-item-24-4175",
+              "cafertc5-item-25-3673",
+              "cafertc5-item-26-7574",
+              "cafertc5-item-27-2702",
+              "cafertc5-item-28-7867",
+              "cafertc5-item-29-6588",
+              "cafertc5-item-30-2641"
+            ]
+          },
+          {
+            "categoryId": "cafertc5-cat-1-5697",
+            "name": "Cold Drinks",
+            "items": [
+              "cafertc5-item-31-3365",
+              "cafertc5-item-32-9596",
+              "cafertc5-item-33-4980",
+              "cafertc5-item-34-2225"
+            ]
+          },
+          {
+            "categoryId": "cafertc5-cat-2-1450",
+            "name": "Bakery",
+            "items": [
+              "cafertc5-item-35-2038",
+              "cafertc5-item-36-5508",
+              "cafertc5-item-37-1598",
+              "cafertc5-item-38-6015",
+              "cafertc5-item-39-1773",
+              "cafertc5-item-40-6402"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafertc5-stn-espresso-9911",
+              "menuId": "cafertc5-menu-72925"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

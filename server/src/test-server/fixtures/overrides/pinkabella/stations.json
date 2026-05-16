@@ -1,0 +1,601 @@
+[
+  {
+    "id": "pinkabella-stn-espresso-5543",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-48892"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-48892",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-3949",
+            "name": "Hot Drinks",
+            "items": [
+              "pinkabella-item-1-2343",
+              "pinkabella-item-2-4230",
+              "pinkabella-item-3-9675",
+              "pinkabella-item-4-1105",
+              "pinkabella-item-5-8691",
+              "pinkabella-item-6-9898",
+              "pinkabella-item-7-3921",
+              "pinkabella-item-8-6899"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-8724",
+            "name": "Cold Drinks",
+            "items": [
+              "pinkabella-item-9-7060",
+              "pinkabella-item-10-3223",
+              "pinkabella-item-11-7095",
+              "pinkabella-item-12-5093"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-2-9970",
+            "name": "Bakery",
+            "items": [
+              "pinkabella-item-13-7464",
+              "pinkabella-item-14-5517",
+              "pinkabella-item-15-2510",
+              "pinkabella-item-16-1175",
+              "pinkabella-item-17-4550",
+              "pinkabella-item-18-2253"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-espresso-5543",
+              "menuId": "pinkabella-menu-48892"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-comfort-kitchen-7700",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-81837"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-81837",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-2065",
+            "name": "Comfort Classics",
+            "items": [
+              "pinkabella-item-19-5526",
+              "pinkabella-item-20-9195",
+              "pinkabella-item-21-8044",
+              "pinkabella-item-22-8443",
+              "pinkabella-item-23-2540",
+              "pinkabella-item-24-7376"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-1822",
+            "name": "Specials",
+            "items": [
+              "pinkabella-item-23-2540",
+              "pinkabella-item-24-7376",
+              "pinkabella-item-25-3734",
+              "pinkabella-item-26-8018"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-comfort-kitchen-7700",
+              "menuId": "pinkabella-menu-81837"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-pacific-rim-3706",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-31446"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-31446",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-4478",
+            "name": "Entrees",
+            "items": [
+              "pinkabella-item-27-6277",
+              "pinkabella-item-28-9618",
+              "pinkabella-item-29-1583",
+              "pinkabella-item-30-8026",
+              "pinkabella-item-31-2714",
+              "pinkabella-item-32-6438",
+              "pinkabella-item-33-8199",
+              "pinkabella-item-34-7646"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-9294",
+            "name": "Sides",
+            "items": [
+              "pinkabella-item-35-8186",
+              "pinkabella-item-36-3980",
+              "pinkabella-item-37-4571",
+              "pinkabella-item-38-3439"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-pacific-rim-3706",
+              "menuId": "pinkabella-menu-31446"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-chef-s-table-8954",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-97520"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-97520",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-3431",
+            "name": "Chef's Table",
+            "items": [
+              "pinkabella-item-39-1768",
+              "pinkabella-item-40-7041",
+              "pinkabella-item-41-8099",
+              "pinkabella-item-42-4354",
+              "pinkabella-item-43-3620",
+              "pinkabella-item-44-1183"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-chef-s-table-8954",
+              "menuId": "pinkabella-menu-97520"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-indian-kitchen-2478",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-76554"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-76554",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-6850",
+            "name": "Curries",
+            "items": [
+              "pinkabella-item-45-9130",
+              "pinkabella-item-46-2273",
+              "pinkabella-item-47-6150",
+              "pinkabella-item-48-5584",
+              "pinkabella-item-49-5923",
+              "pinkabella-item-50-5415"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-5681",
+            "name": "Sides & Bread",
+            "items": [
+              "pinkabella-item-51-5709",
+              "pinkabella-item-52-4201",
+              "pinkabella-item-53-3725",
+              "pinkabella-item-54-5158",
+              "pinkabella-item-55-7788",
+              "pinkabella-item-56-1782"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-2-1275",
+            "name": "Combo Meals",
+            "items": [
+              "pinkabella-item-45-9130",
+              "pinkabella-item-46-2273",
+              "pinkabella-item-51-5709",
+              "pinkabella-item-52-4201",
+              "pinkabella-item-55-7788",
+              "pinkabella-item-56-1782"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-indian-kitchen-2478",
+              "menuId": "pinkabella-menu-76554"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-poke-bar-8594",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-89096"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-89096",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-3656",
+            "name": "Poke Bowls",
+            "items": [
+              "pinkabella-item-57-9481",
+              "pinkabella-item-58-4772",
+              "pinkabella-item-59-4227",
+              "pinkabella-item-60-9619",
+              "pinkabella-item-61-2993",
+              "pinkabella-item-62-5219",
+              "pinkabella-item-63-5956",
+              "pinkabella-item-64-2830"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-7219",
+            "name": "Extras",
+            "items": [
+              "pinkabella-item-65-3149",
+              "pinkabella-item-66-2832",
+              "pinkabella-item-67-4440",
+              "pinkabella-item-68-5474"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-poke-bar-8594",
+              "menuId": "pinkabella-menu-89096"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-deli-4032",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-33954"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-33954",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-8143",
+            "name": "Half Sandwiches",
+            "items": [
+              "pinkabella-item-69-6220",
+              "pinkabella-item-70-5424",
+              "pinkabella-item-71-4895",
+              "pinkabella-item-72-4013",
+              "pinkabella-item-73-2501",
+              "pinkabella-item-74-5899"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-1156",
+            "name": "Whole Sandwiches",
+            "items": [
+              "pinkabella-item-75-9948",
+              "pinkabella-item-76-9584",
+              "pinkabella-item-77-8948",
+              "pinkabella-item-78-6221",
+              "pinkabella-item-79-9910",
+              "pinkabella-item-80-1076"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-2-3221",
+            "name": "Soups",
+            "items": [
+              "pinkabella-item-81-2820",
+              "pinkabella-item-82-5104",
+              "pinkabella-item-83-3621",
+              "pinkabella-item-84-4919"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-deli-4032",
+              "menuId": "pinkabella-menu-33954"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-pizza---pasta-7826",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-40891"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-40891",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-6417",
+            "name": "Pizza",
+            "items": [
+              "pinkabella-item-85-5063",
+              "pinkabella-item-86-7356",
+              "pinkabella-item-87-7903",
+              "pinkabella-item-88-3185",
+              "pinkabella-item-89-9790",
+              "pinkabella-item-90-5327"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-6735",
+            "name": "Pasta",
+            "items": [
+              "pinkabella-item-91-7960",
+              "pinkabella-item-92-8286",
+              "pinkabella-item-93-3388",
+              "pinkabella-item-94-6103"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-2-6540",
+            "name": "Sides",
+            "items": [
+              "pinkabella-item-95-5126",
+              "pinkabella-item-96-1336"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-pizza---pasta-7826",
+              "menuId": "pinkabella-menu-40891"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "pinkabella-stn-mediterranean-2714",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "pinkabella-menu-40774"
+    },
+    "menus": [
+      {
+        "id": "pinkabella-menu-40774",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "pinkabella-cat-0-6378",
+            "name": "Bowls",
+            "items": [
+              "pinkabella-item-97-2610",
+              "pinkabella-item-98-1101",
+              "pinkabella-item-99-9984",
+              "pinkabella-item-100-3910"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-1-9477",
+            "name": "Wraps",
+            "items": [
+              "pinkabella-item-101-5669",
+              "pinkabella-item-102-9635",
+              "pinkabella-item-103-9911",
+              "pinkabella-item-104-5890"
+            ]
+          },
+          {
+            "categoryId": "pinkabella-cat-2-6857",
+            "name": "Sides",
+            "items": [
+              "pinkabella-item-105-4417",
+              "pinkabella-item-106-4100",
+              "pinkabella-item-107-9925",
+              "pinkabella-item-108-2326"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "pinkabella-stn-mediterranean-2714",
+              "menuId": "pinkabella-menu-40774"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

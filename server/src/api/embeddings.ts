@@ -1,26 +1,10 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import OpenAI from 'openai';
-import { getOpenAiKey } from '../constants/env.js';
 import { CafeGroup, ICafe, ICafeStation } from '../models/cafe.js';
-import { lazy } from '../util/lazy.js';
 import { rethrowWithoutStatus } from '../util/error.js';
-
-const getClient = lazy(() => new OpenAI({
-    apiKey: getOpenAiKey()
-}));
+import { retrieveEmbedding as retrieveEmbeddingFromAi } from './ai/index.js';
 
 export const retrieveEmbeddings = async (text: string) => {
-    const response = await getClient().embeddings.create({
-        model: 'text-embedding-3-small',
-        input: text
-    }).catch(rethrowWithoutStatus);
-
-    const data = response.data[0];
-    if (!data) {
-        throw new Error('AI did not return embeddings');
-    }
-
-    return data.embedding;
+    return retrieveEmbeddingFromAi(text).catch(rethrowWithoutStatus);
 }
 
 const serializeMenuItemForEmbeddings = (menuItem: IMenuItemBase): string => {

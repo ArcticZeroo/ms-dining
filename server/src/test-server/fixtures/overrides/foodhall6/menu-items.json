@@ -1,0 +1,1426 @@
+[
+  {
+    "id": "foodhall6-item-1-7736",
+    "amount": "5.50",
+    "displayText": "Carnitas Taco",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "350"
+    },
+    "description": "Slow-roasted pork with salsa verde, cilantro, and onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CARNITAS TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-2-5721",
+    "amount": "5.50",
+    "displayText": "Lite Carnitas Taco",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "350"
+    },
+    "description": "Slow-roasted pork with salsa verde, cilantro, and onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE CARNITAS TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-3-3737",
+    "amount": "5.50",
+    "displayText": "Pollo Asado Taco",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "320"
+    },
+    "description": "Grilled chicken with pico de gallo and crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "POLLO TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-4-8272",
+    "amount": "5.50",
+    "displayText": "Lite Pollo Asado Taco",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "320"
+    },
+    "description": "Grilled chicken with pico de gallo and crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE POLLO TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-5-6650",
+    "amount": "6.00",
+    "displayText": "Barbacoa Taco",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "380"
+    },
+    "description": "Braised beef cheek with pickled red onion and cotija",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BARBACOA TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-6-6110",
+    "amount": "6.00",
+    "displayText": "Lite Barbacoa Taco",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "380"
+    },
+    "description": "Braised beef cheek with pickled red onion and cotija",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE BARBACOA TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-7-2278",
+    "amount": "12.50",
+    "displayText": "Carne Asada Burrito",
+    "properties": {
+      "calories": "980",
+      "maxCalories": "1050"
+    },
+    "description": "Grilled steak, rice, beans, cheese, pico, sour cream",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CARNE BURRITO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-7-2278-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-7-2278-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-7-2278-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-7-2278-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-7-2278-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-7-2278-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-8-9839",
+    "amount": "12.50",
+    "displayText": "Lite Carne Asada Burrito",
+    "properties": {
+      "calories": "980",
+      "maxCalories": "1050"
+    },
+    "description": "Grilled steak, rice, beans, cheese, pico, sour cream",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LITE CARNE BURRITO",
+    "tagIds": [
+      "tag-new"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-8-9839-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-8-9839-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-8-9839-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-8-9839-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-8-9839-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-9-6486",
+    "amount": "10.50",
+    "displayText": "Veggie Burrito",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "820"
+    },
+    "description": "Grilled peppers, onions, rice, beans, cheese, guacamole",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "VEGGIE BURRITO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-9-6486-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-9-6486-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-9-6486-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-9-6486-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "foodhall6-item-9-6486-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-10-7143",
+    "amount": "10.50",
+    "displayText": "Lite Veggie Burrito",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "820"
+    },
+    "description": "Grilled peppers, onions, rice, beans, cheese, guacamole",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LITE VEGGIE BURRITO",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-10-7143-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-10-7143-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-10-7143-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-11-4668",
+    "amount": "11.75",
+    "displayText": "Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken over rice with beans, corn salsa, and chipotle crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHICKEN BOWL",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-11-4668-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-11-4668-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-11-4668-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-11-4668-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-11-4668-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-12-9811",
+    "amount": "11.75",
+    "displayText": "Lite Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken over rice with beans, corn salsa, and chipotle crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LITE CHICKEN BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-12-9811-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-12-9811-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "foodhall6-item-12-9811-mod-1",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "foodhall6-item-12-9811-mod-1-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-1-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-1-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "foodhall6-item-12-9811-mod-1-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-13-5288",
+    "amount": "10.50",
+    "displayText": "Margherita Pizza",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "720"
+    },
+    "description": "Fresh mozzarella, San Marzano tomatoes, basil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MARG PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-13-5288-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-13-5288-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-13-5288-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-13-5288-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "foodhall6-item-13-5288-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-14-6571",
+    "amount": "10.50",
+    "displayText": "Family-Size Margherita Pizza",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "720"
+    },
+    "description": "Fresh mozzarella, San Marzano tomatoes, basil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI MARG PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-15-5334",
+    "amount": "11.50",
+    "displayText": "Pepperoni Pizza",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "820"
+    },
+    "description": "Classic pepperoni with mozzarella and red sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PEP PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-16-5208",
+    "amount": "11.50",
+    "displayText": "Family-Size Pepperoni Pizza",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "820"
+    },
+    "description": "Classic pepperoni with mozzarella and red sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI PEP PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-17-2489",
+    "amount": "12.50",
+    "displayText": "BBQ Chicken Pizza",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "800"
+    },
+    "description": "BBQ sauce, grilled chicken, red onion, cilantro",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BBQ CHKN PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-18-5485",
+    "amount": "12.50",
+    "displayText": "Family-Size BBQ Chicken Pizza",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "800"
+    },
+    "description": "BBQ sauce, grilled chicken, red onion, cilantro",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI BBQ CHKN PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-18-5485-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-18-5485-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-18-5485-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-18-5485-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-18-5485-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "foodhall6-item-18-5485-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-19-6054",
+    "amount": "9.50",
+    "displayText": "Penne Marinara",
+    "properties": {
+      "calories": "580",
+      "maxCalories": "580"
+    },
+    "description": "Penne with house marinara and parmesan",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "PENNE MRNRA",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-new"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-19-6054-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-19-6054-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-19-6054-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-19-6054-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-19-6054-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-20-1619",
+    "amount": "9.50",
+    "displayText": "Family-Size Penne Marinara",
+    "properties": {
+      "calories": "580",
+      "maxCalories": "580"
+    },
+    "description": "Penne with house marinara and parmesan",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI PENNE MRNRA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-21-9554",
+    "amount": "12.75",
+    "displayText": "Chicken Alfredo",
+    "properties": {
+      "calories": "850",
+      "maxCalories": "900"
+    },
+    "description": "Fettuccine with grilled chicken in creamy alfredo sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN ALFREDO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-21-9554-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-21-9554-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "foodhall6-item-21-9554-mod-1",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-21-9554-mod-1-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-1-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-1-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-1-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-1-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-1-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "foodhall6-item-21-9554-mod-2",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-21-9554-mod-2-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-2-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-2-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-21-9554-mod-2-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-22-7211",
+    "amount": "12.75",
+    "displayText": "Family-Size Chicken Alfredo",
+    "properties": {
+      "calories": "850",
+      "maxCalories": "900"
+    },
+    "description": "Fettuccine with grilled chicken in creamy alfredo sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI CHKN ALFREDO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-22-7211-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-22-7211-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-22-7211-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-23-9191",
+    "amount": "3.99",
+    "displayText": "Garlic Bread",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "280"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "GARLIC BREAD",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-24-3327",
+    "amount": "3.99",
+    "displayText": "Family-Size Garlic Bread",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "280"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI GARLIC BREAD",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-25-7417",
+    "amount": "14.50",
+    "displayText": "Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-26-6894",
+    "amount": "14.50",
+    "displayText": "Family-Size Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-26-6894-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-26-6894-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-26-6894-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-27-3970",
+    "amount": "12.50",
+    "displayText": "Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-28-7615",
+    "amount": "12.50",
+    "displayText": "Family-Size Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-29-5125",
+    "amount": "11.99",
+    "displayText": "Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN SHWARMA",
+    "tagIds": [
+      "tag-medium-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-30-1569",
+    "amount": "11.99",
+    "displayText": "Family-Size Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CHKN SHWARMA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-31-8406",
+    "amount": "10.50",
+    "displayText": "Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL WRAP",
+    "tagIds": [
+      "tag-vegan",
+      "tag-medium-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-32-6796",
+    "amount": "10.50",
+    "displayText": "Family-Size Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-33-1761",
+    "amount": "5.50",
+    "displayText": "Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "HUMMUS PITA",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-34-8756",
+    "amount": "5.50",
+    "displayText": "Family-Size Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI HUMMUS PITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "foodhall6-item-34-8756-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-34-8756-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-34-8756-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-34-8756-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-34-8756-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "foodhall6-item-34-8756-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "foodhall6-item-34-8756-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "foodhall6-item-34-8756-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "foodhall6-item-34-8756-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "foodhall6-item-35-5458",
+    "amount": "4.50",
+    "displayText": "Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TABBOULEH",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "foodhall6-item-36-7443",
+    "amount": "4.50",
+    "displayText": "Family-Size Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI TABBOULEH",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  }
+]

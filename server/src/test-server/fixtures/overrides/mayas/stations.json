@@ -1,0 +1,593 @@
+[
+  {
+    "id": "mayas-stn-pizza---pasta-4325",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-35407"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-35407",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-5805",
+            "name": "Pizza",
+            "items": [
+              "mayas-item-1-1220",
+              "mayas-item-2-6001",
+              "mayas-item-3-8383",
+              "mayas-item-4-9791",
+              "mayas-item-5-6224",
+              "mayas-item-6-8707"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-6826",
+            "name": "Pasta",
+            "items": [
+              "mayas-item-7-7314",
+              "mayas-item-8-7288",
+              "mayas-item-9-2336",
+              "mayas-item-10-7914"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-2-3087",
+            "name": "Sides",
+            "items": [
+              "mayas-item-11-7602",
+              "mayas-item-12-8115"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-pizza---pasta-4325",
+              "menuId": "mayas-menu-35407"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-ramen-bar-8867",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-23652"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-23652",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-5731",
+            "name": "Ramen Bowls",
+            "items": [
+              "mayas-item-13-3464",
+              "mayas-item-14-1284",
+              "mayas-item-15-6504",
+              "mayas-item-16-3237",
+              "mayas-item-17-2709",
+              "mayas-item-18-3182",
+              "mayas-item-19-8389",
+              "mayas-item-20-2142"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-7018",
+            "name": "Sides & Apps",
+            "items": [
+              "mayas-item-21-3122",
+              "mayas-item-22-6094",
+              "mayas-item-23-4716",
+              "mayas-item-24-9375",
+              "mayas-item-25-9186",
+              "mayas-item-26-2305"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-ramen-bar-8867",
+              "menuId": "mayas-menu-23652"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-chef-s-table-4787",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-91293"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-91293",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-3626",
+            "name": "Chef's Table",
+            "items": [
+              "mayas-item-27-1765",
+              "mayas-item-28-4490",
+              "mayas-item-29-6368",
+              "mayas-item-30-4979",
+              "mayas-item-31-4829",
+              "mayas-item-32-7280"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-chef-s-table-4787",
+              "menuId": "mayas-menu-91293"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-pacific-rim-8058",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-68943"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-68943",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-5619",
+            "name": "Entrees",
+            "items": [
+              "mayas-item-33-1240",
+              "mayas-item-34-2987",
+              "mayas-item-35-8567",
+              "mayas-item-36-7615",
+              "mayas-item-37-6478",
+              "mayas-item-38-8065",
+              "mayas-item-39-5086",
+              "mayas-item-40-9035"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-1562",
+            "name": "Sides",
+            "items": [
+              "mayas-item-41-2916",
+              "mayas-item-42-3652",
+              "mayas-item-43-1495",
+              "mayas-item-44-8878"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-pacific-rim-8058",
+              "menuId": "mayas-menu-68943"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-poke-bar-7886",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-94100"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-94100",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-2607",
+            "name": "Poke Bowls",
+            "items": [
+              "mayas-item-45-5111",
+              "mayas-item-46-8236",
+              "mayas-item-47-4995",
+              "mayas-item-48-1603",
+              "mayas-item-49-4885",
+              "mayas-item-50-5187",
+              "mayas-item-51-5165",
+              "mayas-item-52-7981"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-8601",
+            "name": "Extras",
+            "items": [
+              "mayas-item-53-3501",
+              "mayas-item-54-9859",
+              "mayas-item-55-1695",
+              "mayas-item-56-6984"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-poke-bar-7886",
+              "menuId": "mayas-menu-94100"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-comfort-kitchen-4292",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-41332"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-41332",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-3066",
+            "name": "Comfort Classics",
+            "items": [
+              "mayas-item-57-7529",
+              "mayas-item-58-5786",
+              "mayas-item-59-3013",
+              "mayas-item-60-8211",
+              "mayas-item-61-6286",
+              "mayas-item-62-2369"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-6535",
+            "name": "Specials",
+            "items": [
+              "mayas-item-61-6286",
+              "mayas-item-62-2369",
+              "mayas-item-63-2657",
+              "mayas-item-64-1390"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-comfort-kitchen-4292",
+              "menuId": "mayas-menu-41332"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-espresso-7853",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-82813"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-82813",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-7152",
+            "name": "Hot Drinks",
+            "items": [
+              "mayas-item-65-4240",
+              "mayas-item-66-5562",
+              "mayas-item-67-1421",
+              "mayas-item-68-7856",
+              "mayas-item-69-3015",
+              "mayas-item-70-2780",
+              "mayas-item-71-4429",
+              "mayas-item-72-3783"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-3328",
+            "name": "Cold Drinks",
+            "items": [
+              "mayas-item-73-3099",
+              "mayas-item-74-1348",
+              "mayas-item-75-2824",
+              "mayas-item-76-6144"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-2-5121",
+            "name": "Bakery",
+            "items": [
+              "mayas-item-77-3381",
+              "mayas-item-78-1941",
+              "mayas-item-79-8091",
+              "mayas-item-80-5180",
+              "mayas-item-81-3602",
+              "mayas-item-82-3591"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-espresso-7853",
+              "menuId": "mayas-menu-82813"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-grill-3365",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-85904"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-85904",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-8532",
+            "name": "Burgers",
+            "items": [
+              "mayas-item-83-8325",
+              "mayas-item-84-4495",
+              "mayas-item-85-8283",
+              "mayas-item-86-9838",
+              "mayas-item-87-6047",
+              "mayas-item-88-8694"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-9218",
+            "name": "Sides",
+            "items": [
+              "mayas-item-89-7429",
+              "mayas-item-90-2962",
+              "mayas-item-91-1439",
+              "mayas-item-92-8617"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-2-9898",
+            "name": "Salads",
+            "items": [
+              "mayas-item-93-6223",
+              "mayas-item-94-4080",
+              "mayas-item-95-8760",
+              "mayas-item-96-9192"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-grill-3365",
+              "menuId": "mayas-menu-85904"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "mayas-stn-deli-4241",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "mayas-menu-57863"
+    },
+    "menus": [
+      {
+        "id": "mayas-menu-57863",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "mayas-cat-0-9978",
+            "name": "Half Sandwiches",
+            "items": [
+              "mayas-item-97-4480",
+              "mayas-item-98-7003",
+              "mayas-item-99-8589",
+              "mayas-item-100-8217",
+              "mayas-item-101-7528",
+              "mayas-item-102-6943"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-1-1902",
+            "name": "Whole Sandwiches",
+            "items": [
+              "mayas-item-103-1361",
+              "mayas-item-104-9091",
+              "mayas-item-105-6245",
+              "mayas-item-106-5022",
+              "mayas-item-107-4763",
+              "mayas-item-108-1785"
+            ]
+          },
+          {
+            "categoryId": "mayas-cat-2-4229",
+            "name": "Soups",
+            "items": [
+              "mayas-item-109-4624",
+              "mayas-item-110-9837",
+              "mayas-item-111-4205",
+              "mayas-item-112-9375"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "mayas-stn-deli-4241",
+              "menuId": "mayas-menu-57863"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

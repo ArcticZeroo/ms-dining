@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-cafe16",
+  "contextID": "ctx-cafe16-9196",
+  "theme": {
+    "logoImage": "cafe16-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-cafe16-734",
+        "storeName": "cafe16"
+      },
+      "displayProfileId": [
+        "dp-cafe16-674"
+      ]
+    }
+  ],
+  "properties": {}
+}

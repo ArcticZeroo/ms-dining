@@ -4,11 +4,12 @@ import { StationStorageClient } from '../storage/clients/station.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../lock/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { lazyAsync } from '../../util/lazy.js';
 
 const MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
 const STATION_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
 
-const initialize = async () => {
+const INITIALIZED = lazyAsync(async () => {
     const [nameHeaders, groupHeaders, stationNameHeaders, stationGroupHeaders] = await Promise.all([
         ReviewStorageClient.getAllMenuItemReviewHeaders(),
         ReviewStorageClient.getAllMenuItemReviewHeadersByGroupId(),
@@ -29,9 +30,7 @@ const initialize = async () => {
             () => ({ overallRating: header.overallRating, totalReviewCount: header.totalReviewCount })
         ))
     ]);
-}
-
-await initialize();
+});
 
 STORAGE_EVENTS.on('reviewDirty', (event) => {
     const entityKey = getReviewEntityKeyFromParts(event.groupId, event.normalizedName);
@@ -73,6 +72,7 @@ const combineHeaders = (menuItemHeader: IMenuItemReviewHeader, stationHeader: IM
 };
 
 const retrieveMenuItemOnlyReviewHeaderAsync = async (menuItem: IMenuItemBase): Promise<IMenuItemReviewHeader> => {
+    await INITIALIZED.value;
     const entityKey = getReviewEntityKey(menuItem);
     return MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.update(
         entityKey,
@@ -105,6 +105,7 @@ export const retrieveReviewHeaderAsync = async (menuItem: IMenuItemBase): Promis
 }
 
 export const retrieveReviewHeaderByPartsAsync = async (groupId: string | null | undefined, name: string): Promise<IMenuItemReviewHeader> => {
+    await INITIALIZED.value;
     const entityKey = getReviewEntityKeyFromParts(groupId, normalizeNameForSearch(name));
 
     return MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.update(
@@ -128,6 +129,7 @@ interface IStationEntity {
 }
 
 export const retrieveStationReviewHeaderAsync = async (station: IStationEntity): Promise<IMenuItemReviewHeader> => {
+    await INITIALIZED.value;
     const entityKey = getReviewEntityKeyFromParts(station.groupId, normalizeNameForSearch(station.name));
     return STATION_REVIEW_DATA_BY_ENTITY_KEY.update(
         entityKey,
@@ -143,6 +145,7 @@ export const retrieveStationReviewHeaderAsync = async (station: IStationEntity):
 }
 
 export const retrieveStationReviewHeaderByPartsAsync = async (groupId: string | null | undefined, name: string): Promise<IMenuItemReviewHeader> => {
+    await INITIALIZED.value;
     const entityKey = getReviewEntityKeyFromParts(groupId, normalizeNameForSearch(name));
     return STATION_REVIEW_DATA_BY_ENTITY_KEY.update(
         entityKey,

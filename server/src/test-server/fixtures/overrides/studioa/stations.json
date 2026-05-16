@@ -1,0 +1,59 @@
+[
+  {
+    "id": "studioa-stn-poke-bar-1930",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "studioa-menu-29996"
+    },
+    "menus": [
+      {
+        "id": "studioa-menu-29996",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "studioa-cat-0-8685",
+            "name": "Poke Bowls",
+            "items": [
+              "studioa-item-1-1445",
+              "studioa-item-2-1575",
+              "studioa-item-3-4097",
+              "studioa-item-4-1095"
+            ]
+          },
+          {
+            "categoryId": "studioa-cat-1-5641",
+            "name": "Extras",
+            "items": [
+              "studioa-item-5-1836",
+              "studioa-item-6-6122"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "studioa-stn-poke-bar-1930",
+              "menuId": "studioa-menu-29996"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -1,0 +1,292 @@
+[
+  {
+    "id": "cafe121-stn-indian-kitchen-9948",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe121-menu-25288"
+    },
+    "menus": [
+      {
+        "id": "cafe121-menu-25288",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe121-cat-0-5139",
+            "name": "Curries",
+            "items": [
+              "cafe121-item-1-6406",
+              "cafe121-item-2-5440",
+              "cafe121-item-3-9559",
+              "cafe121-item-4-7639",
+              "cafe121-item-5-9801",
+              "cafe121-item-6-3738"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-1-1966",
+            "name": "Sides & Bread",
+            "items": [
+              "cafe121-item-7-5066",
+              "cafe121-item-8-7838",
+              "cafe121-item-9-8447",
+              "cafe121-item-10-5991",
+              "cafe121-item-11-1956",
+              "cafe121-item-12-1607"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-2-3982",
+            "name": "Combo Meals",
+            "items": [
+              "cafe121-item-1-6406",
+              "cafe121-item-2-5440",
+              "cafe121-item-7-5066",
+              "cafe121-item-8-7838",
+              "cafe121-item-11-1956",
+              "cafe121-item-12-1607"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe121-stn-indian-kitchen-9948",
+              "menuId": "cafe121-menu-25288"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe121-stn-taqueria-5624",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "cafe121-menu-42627"
+    },
+    "menus": [
+      {
+        "id": "cafe121-menu-42627",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "cafe121-cat-0-2173",
+            "name": "Tacos",
+            "items": [
+              "cafe121-item-13-6497",
+              "cafe121-item-14-4399",
+              "cafe121-item-15-6646",
+              "cafe121-item-16-6175",
+              "cafe121-item-17-4374",
+              "cafe121-item-18-1364"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-1-1549",
+            "name": "Burritos",
+            "items": [
+              "cafe121-item-19-6092",
+              "cafe121-item-20-8162",
+              "cafe121-item-21-4598",
+              "cafe121-item-22-9639"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-2-3300",
+            "name": "Bowls",
+            "items": [
+              "cafe121-item-23-7976",
+              "cafe121-item-24-1517"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-3-1853",
+            "name": "Build Your Own",
+            "items": [
+              "cafe121-item-13-6497",
+              "cafe121-item-14-4399",
+              "cafe121-item-15-6646",
+              "cafe121-item-16-6175",
+              "cafe121-item-19-6092",
+              "cafe121-item-20-8162"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe121-stn-taqueria-5624",
+              "menuId": "cafe121-menu-42627"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe121-stn-ramen-bar-9637",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "cafe121-menu-27367"
+    },
+    "menus": [
+      {
+        "id": "cafe121-menu-27367",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafe121-cat-0-1802",
+            "name": "Ramen Bowls",
+            "items": [
+              "cafe121-item-25-7070",
+              "cafe121-item-26-1046",
+              "cafe121-item-27-1586",
+              "cafe121-item-28-3568",
+              "cafe121-item-29-8392",
+              "cafe121-item-30-6899",
+              "cafe121-item-31-8712",
+              "cafe121-item-32-1103"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-1-3255",
+            "name": "Sides & Apps",
+            "items": [
+              "cafe121-item-33-1514",
+              "cafe121-item-34-2144",
+              "cafe121-item-35-2272",
+              "cafe121-item-36-6127",
+              "cafe121-item-37-3948",
+              "cafe121-item-38-3981"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe121-stn-ramen-bar-9637",
+              "menuId": "cafe121-menu-27367"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe121-stn-pizza---pasta-2206",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "cafe121-menu-56162"
+    },
+    "menus": [
+      {
+        "id": "cafe121-menu-56162",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "cafe121-cat-0-3271",
+            "name": "Pizza",
+            "items": [
+              "cafe121-item-39-9338",
+              "cafe121-item-40-2206",
+              "cafe121-item-41-8609",
+              "cafe121-item-42-1454",
+              "cafe121-item-43-5896",
+              "cafe121-item-44-3206"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-1-5970",
+            "name": "Pasta",
+            "items": [
+              "cafe121-item-45-6781",
+              "cafe121-item-46-8383",
+              "cafe121-item-47-4873",
+              "cafe121-item-48-3258"
+            ]
+          },
+          {
+            "categoryId": "cafe121-cat-2-5500",
+            "name": "Sides",
+            "items": [
+              "cafe121-item-49-4194",
+              "cafe121-item-50-7220"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe121-stn-pizza---pasta-2206",
+              "menuId": "cafe121-menu-56162"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

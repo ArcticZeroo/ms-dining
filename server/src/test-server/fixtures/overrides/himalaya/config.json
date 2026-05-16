@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-himalaya",
+  "contextID": "ctx-himalaya-4468",
+  "theme": {
+    "logoImage": "himalaya-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-himalaya-792",
+        "storeName": "himalaya"
+      },
+      "displayProfileId": [
+        "dp-himalaya-666"
+      ]
+    }
+  ],
+  "properties": {}
+}

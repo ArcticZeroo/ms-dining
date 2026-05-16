@@ -2,12 +2,15 @@ import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { ICafeOverviewResponse, IMenuItemBase, IMenuItem, IMenuOverviewSummary } from '@msdining/common/models/cafe';
 import {
+    CafeMenuResponseSchema,
+    DiningCoreResponseSchema,
     ICreateReviewRequest,
-    ICafeMenuResponse,
     IDiningCoreResponse,
-    ISearchResponseResult, IUpdateReviewRequest, IUpdateUserSettingsInput,
+    ISearchResponse,
+    IUpdateReviewRequest, IUpdateUserSettingsInput,
     IStationDTO,
     IWaitTimeResponse,
+    SearchResponseSchema,
 } from '@msdining/common/models/http';
 import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from '@msdining/common/models/search';
 import { IAutocompleteSuggestion, IAutocompleteResponse } from '@msdining/common/models/search';
@@ -18,7 +21,7 @@ import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResul
 import { ICancellationToken, pause } from '../../util/async.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 import { FavoritesCache } from '../cache/favorites.ts';
-import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse } from '../request.ts';
+import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse, makeJsonRequestWithSchema } from '../request.ts';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/models/auth';
 import { IReview, IReviewSummary } from '@msdining/common/models/review';
@@ -45,21 +48,17 @@ export abstract class DiningClient {
     private static readonly _favoritesCache = new FavoritesCache();
 
     public static async retrieveCoreData(): Promise<IDiningCoreResponse> {
-        const response = await makeJsonRequest({
-            path: '/api/dining'
+        return makeJsonRequestWithSchema({
+            path: '/api/dining',
+            schema: DiningCoreResponseSchema,
         });
-
-        if (!isDuckType<IDiningCoreResponse>(response, { groups: 'object', isTrackingEnabled: 'boolean' })) {
-            throw new Error('Response is not in the expected format');
-        }
-
-        return response;
     }
 
     private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<CafeMenu> {
-        const response = await makeJsonRequest({
-            path: `/api/dining/menu/${id}/menu?date=${dateString}`
-        }) as ICafeMenuResponse;
+        const response = await makeJsonRequestWithSchema({
+            path: `/api/dining/menu/${id}/menu?date=${dateString}`,
+            schema: CafeMenuResponseSchema,
+        });
 
         return {
             isAvailable:     response.isAvailable,
@@ -204,12 +203,7 @@ export abstract class DiningClient {
         return matchedModifiers;
     }
 
-    private static _deserializeSearchResults(response: unknown) {
-        if (!Array.isArray(response) || response.length === 0) {
-            return [];
-        }
-
-        const serverResults = response as Array<ISearchResponseResult>;
+    private static _deserializeSearchResults(serverResults: ISearchResponse) {
         const results: Array<IQuerySearchResult> = [];
 
         for (const serverResult of serverResults) {
@@ -269,8 +263,9 @@ export abstract class DiningClient {
             searchParams.set('date', DateUtil.toDateString(date));
         }
 
-        const response = await makeJsonRequest({
-            path: `/api/dining/search?${searchParams.toString()}`
+        const response = await makeJsonRequestWithSchema({
+            path: `/api/dining/search?${searchParams.toString()}`,
+            schema: SearchResponseSchema,
         });
 
         return DiningClient._deserializeSearchResults(response);
@@ -289,13 +284,14 @@ export abstract class DiningClient {
             }
         }
 
-        const response = await makeJsonRequest({
+        const response = await makeJsonRequestWithSchema({
             path:    `/api/dining/search/favorites${date != null ? `?date=${DateUtil.toDateString(date)}` : ''}`,
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify(remoteQueries)
-            }
+            },
+            schema: SearchResponseSchema,
         });
 
         for (const result of DiningClient._deserializeSearchResults(response)) {

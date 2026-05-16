@@ -1,0 +1,556 @@
+[
+  {
+    "id": "fh4papparepas-item-1-3974",
+    "amount": "7.99",
+    "displayText": "Half Turkey Avocado",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "420"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-2-3555",
+    "amount": "7.99",
+    "displayText": "Mini Half Turkey Avocado",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "420"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI 1/2 TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-3-5772",
+    "amount": "7.50",
+    "displayText": "Half Italian",
+    "properties": {
+      "calories": "410",
+      "maxCalories": "430"
+    },
+    "description": "Salami, capicola, provolone, pepperoncini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 ITALIAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-4-3229",
+    "amount": "7.50",
+    "displayText": "Mini Half Italian",
+    "properties": {
+      "calories": "410",
+      "maxCalories": "430"
+    },
+    "description": "Salami, capicola, provolone, pepperoncini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI 1/2 ITALIAN",
+    "tagIds": [
+      "tag-high-circle",
+      "tag-healthy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-5-7414",
+    "amount": "6.99",
+    "displayText": "Half Veggie",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "310"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "1/2 VEGGIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4papparepas-item-5-7414-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4papparepas-item-5-7414-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-5-7414-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-5-7414-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-5-7414-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4papparepas-item-6-8417",
+    "amount": "6.99",
+    "displayText": "Mini Half Veggie",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "310"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI 1/2 VEGGIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-7-8388",
+    "amount": "11.99",
+    "displayText": "Whole Turkey Avocado",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4papparepas-item-7-8388-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4papparepas-item-7-8388-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "fh4papparepas-item-7-8388-mod-1",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4papparepas-item-7-8388-mod-1-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-1-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-1-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-1-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4papparepas-item-7-8388-mod-2",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4papparepas-item-7-8388-mod-2-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-2-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-2-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-2-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4papparepas-item-7-8388-mod-2-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4papparepas-item-8-5432",
+    "amount": "11.99",
+    "displayText": "Mini Whole Turkey Avocado",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI TURKEY AVO",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-9-6527",
+    "amount": "11.50",
+    "displayText": "Whole Italian Sub",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "810"
+    },
+    "description": "Salami, capicola, mortadella, provolone, oil & vinegar",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-10-5357",
+    "amount": "11.50",
+    "displayText": "Mini Whole Italian Sub",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "810"
+    },
+    "description": "Salami, capicola, mortadella, provolone, oil & vinegar",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-11-8277",
+    "amount": "10.50",
+    "displayText": "Whole Veggie",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "560"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "VEGGIE SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4papparepas-item-11-8277-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4papparepas-item-11-8277-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-11-8277-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4papparepas-item-11-8277-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4papparepas-item-11-8277-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4papparepas-item-11-8277-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4papparepas-item-12-7562",
+    "amount": "10.50",
+    "displayText": "Mini Whole Veggie",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "560"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI VEGGIE SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-13-7067",
+    "amount": "5.50",
+    "displayText": "Tomato Basil Soup",
+    "properties": {
+      "calories": "220",
+      "maxCalories": "220"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TOMATO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-14-9288",
+    "amount": "5.50",
+    "displayText": "Mini Tomato Basil Soup",
+    "properties": {
+      "calories": "220",
+      "maxCalories": "220"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI TOMATO SOUP",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-15-9878",
+    "amount": "5.50",
+    "displayText": "Chicken Noodle Soup",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN NOODLE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4papparepas-item-16-1118",
+    "amount": "5.50",
+    "displayText": "Mini Chicken Noodle Soup",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI CHKN NOODLE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  }
+]

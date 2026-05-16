@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-foodhall4",
+  "contextID": "ctx-foodhall4-5563",
+  "theme": {
+    "logoImage": "foodhall4-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-foodhall4-765",
+        "storeName": "foodhall4"
+      },
+      "displayProfileId": [
+        "dp-foodhall4-671"
+      ]
+    }
+  ],
+  "properties": {}
+}
