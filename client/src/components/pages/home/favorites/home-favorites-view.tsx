@@ -1,4 +1,3 @@
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { ISearchQuery } from '@msdining/common/models/search';
 import { getFridayForWeek, getMondayForWeek, isDateInRangeInclusive } from '@msdining/common/util/date-util';
 import React, { useMemo } from 'react';
@@ -20,7 +19,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     const selectedDate = useValueNotifierContext(SelectedDateContext);
     const title = useTitleWithSelectedDate('Favorites Across Campus');
 
-    const { stage, results, actualStage, retry } = useFavoriteSearchResults(queries);
+    const { isPending, isError, results, retry } = useFavoriteSearchResults(queries);
 
     const areFavoritesAllowedForSelectedDay = useMemo(
         () => {
@@ -33,7 +32,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
     );
 
     const bodyView = useMemo(() => {
-        if (!results || stage === PromiseStage.running) {
+        if (isPending || !results) {
             return (
                 <div id="home-favorites-results">
                     <SearchResultSkeleton
@@ -44,14 +43,14 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
             );
         }
 
-        if (stage === PromiseStage.error) {
+        if (isError) {
             return (
                 <div className="error-card">
                     <span>
                         Could not load favorites.
                     </span>
                     <span className="centered-content">
-                        <RetryButton onClick={retry} isDisabled={actualStage !== PromiseStage.error}/>
+                        <RetryButton onClick={retry}/>
                     </span>
                 </div>
             );
@@ -78,7 +77,7 @@ export const HomeFavoritesView: React.FC<IHomeFavoritesViewProps> = ({ queries }
                 }
             </div>
         );
-    }, [stage, results, actualStage, retry, selectedDate]);
+    }, [isPending, isError, results, retry, selectedDate]);
 
     if (!areFavoritesAllowedForSelectedDay) {
         return null;

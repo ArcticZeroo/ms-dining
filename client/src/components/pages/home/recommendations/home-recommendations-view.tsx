@@ -1,16 +1,14 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import {
     IRecommendationsResponse,
     RECOMMENDATION_SECTION_DISPLAY_NAMES,
     RecommendationSectionType
 } from '@msdining/common/models/recommendation';
-import { toDateString } from '@msdining/common/util/date-util';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DiningClient } from '../../../../api/client/dining.ts';
 import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { SelectedDateContext } from '../../../../context/time.ts';
 import { useValueNotifierContext } from '../../../../hooks/events.ts';
 import { useTitleWithSelectedDate } from '../../../../hooks/string.ts';
+import { useRecommendationsQuery } from '../../../../store/queries/search.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { ITabOption, TabView } from '../../../view/tab-view.tsx';
 import { HomeCollapse } from '../home-collapse.tsx';
@@ -21,27 +19,6 @@ import { RecommendationSectionItemsSkeleton } from './recommendation-section-ite
 
 const FAVORITES_TAB_ID = RecommendationSectionType.favorites;
 const LOADING_TAB_COUNT_WHILE_FETCHING = 3;
-
-const useRecommendations = () => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-    const dateString = toDateString(selectedDate);
-
-    const retrieveRecommendations= useCallback(async () => {
-        return DiningClient.retrieveRecommendations(dateString);
-    }, [dateString]);
-
-    const recommendationsState = useDelayedPromiseState(
-        retrieveRecommendations,
-        true /*keepLastValue*/
-    );
-
-    const { run } = recommendationsState;
-    useEffect(() => {
-        run();
-    }, [run]);
-
-    return recommendationsState;
-}
 
 // --- Main view ---
 
@@ -78,21 +55,19 @@ const useSelectedTabState = (tabOptions: ITabOption[]) => {
             setSelectedTabId(tabOptions[0]!.id);
         }
     }, [tabOptions, selectedTabId]);
-    
+
     return [selectedTabId, setSelectedTabId] as const;
 }
 
 export const HomeRecommendationsView: React.FC = () => {
     const title = useTitleWithSelectedDate('Recommended for You');
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
     const favorites = useFavoritesSection();
-    const {
-        stage: recommendationsStage,
-        value: recommendationsValue,
-        run: recommendationsRun,
-    } = useRecommendations();
+    const recommendationsQuery = useRecommendationsQuery(selectedDate);
+    const recommendationsValue = recommendationsQuery.data;
 
-    const isRecommendationsLoading = !recommendationsValue && recommendationsStage !== PromiseStage.error;
+    const isRecommendationsLoading = !recommendationsValue && !recommendationsQuery.isError;
 
     const tabOptions = useTabOptions(favorites.shouldShow, recommendationsValue);
     const [selectedTabId, setSelectedTabId] = useSelectedTabState(tabOptions);
@@ -110,19 +85,19 @@ export const HomeRecommendationsView: React.FC = () => {
             }
         }
 
-        if (recommendationsStage === PromiseStage.error) {
+        if (recommendationsQuery.isError) {
             return (
                 <div className="error-card">
                     <span>Could not load recommendations.</span>
                     <span className="centered-content">
-                        <RetryButton onClick={recommendationsRun} isDisabled={recommendationsStage !== PromiseStage.error}/>
+                        <RetryButton onClick={() => recommendationsQuery.refetch()}/>
                     </span>
                 </div>
             );
         }
 
         return <RecommendationSectionItemsSkeleton/>;
-    }, [favorites, recommendationsValue, recommendationsStage, recommendationsRun]);
+    }, [favorites, recommendationsValue, recommendationsQuery]);
 
     return (
         <HomeCollapse

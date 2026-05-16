@@ -1,18 +1,16 @@
 import { ISearchQuery } from '@msdining/common/models/search';
+import { useMemo } from 'react';
 import { useValueNotifierContext } from './events.js';
 import { SelectedDateContext } from '../context/time.js';
 import { useDateForSearch } from './date-picker.js';
-import { useCallback, useEffect, useMemo } from 'react';
-import { DiningClient } from '../api/client/dining.js';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { isAnyDateToday } from '../util/search.js';
 import { IQuerySearchResult } from '../models/search.js';
+import { useFavoriteSearchResultsQuery } from '../store/queries/search.ts';
 
-interface IFavoriteSearchResultsData {
-    stage: PromiseStage;
-    results?: IQuerySearchResult[];
-    error?: unknown;
-    actualStage: PromiseStage;
+export interface IFavoriteSearchResultsData {
+    isPending: boolean;
+    isError: boolean;
+    results: IQuerySearchResult[] | undefined;
     retry: () => void;
 }
 
@@ -20,29 +18,19 @@ export const useFavoriteSearchResults = (queries: ISearchQuery[], isEnabled: boo
     const selectedDate = useValueNotifierContext(SelectedDateContext);
     const dateForSearch = useDateForSearch();
 
-    const retrieveFavoriteSearchResults = useCallback(async () => {
-        if (queries.length === 0 || !isEnabled) {
-            return [];
-        }
-
-        return DiningClient.retrieveFavoriteSearchResults(queries, dateForSearch);
-    }, [queries, isEnabled, dateForSearch]);
-
-    const { stage, value, actualStage, error, run } = useDelayedPromiseState(
-        retrieveFavoriteSearchResults,
-        true /*keepLastValue*/
-    );
-
-    useEffect(() => {
-        run();
-    }, [run]);
+    const query = useFavoriteSearchResultsQuery(queries, dateForSearch, isEnabled);
 
     const filteredResults = useMemo(
-        () => {
-            return value?.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate));
-        },
-        [value, selectedDate]
+        () => query.data?.filter(item => isAnyDateToday(item.locationDatesByCafeId, selectedDate)),
+        [query.data, selectedDate]
     );
 
-    return { stage, results: filteredResults, actualStage, error, retry: run };
+    return {
+        isPending: query.isPending,
+        isError:   query.isError,
+        results:   filteredResults,
+        retry:     () => {
+            void query.refetch();
+        },
+    };
 };
