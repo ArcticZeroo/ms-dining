@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# Runs lint-staged for client/ on every commit. Only lints files actually
+# staged for commit, so the hook is fast and unrelated baseline issues
+# won't block work.
+#
+# Bypass with `git commit --no-verify` if you genuinely need to.
+
+set -e
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+# Only run if there are staged files under client/. Lets server-only or
+# docs-only commits skip the hook entirely.
+if ! git diff --cached --name-only | grep -q '^client/'; then
+    exit 0
+fi
+
+cd "$repo_root/client"
+npx lint-staged

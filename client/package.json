@@ -9,7 +9,11 @@
     "test": "vitest run",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "analyze": "vite build --mode analyze && start stats.html"
+    "analyze": "vite build --mode analyze && start stats.html",
+    "prepare": "git -C .. config core.hooksPath .githooks"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": "eslint --max-warnings 0 --report-unused-disable-directives"
   },
   "workspaces": [
     "../common"
