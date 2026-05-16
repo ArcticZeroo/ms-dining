@@ -88,13 +88,18 @@ export const useSearchResultsQuery = (query: string, dateForSearch: Date | undef
 /**
  * Search results for the map view — no date filter (the map shows availability
  * across all dates), and disabled when the query is empty.
+ *
+ * Intentionally does NOT set placeholderData: the map view's loading state is
+ * a full-panel takeover, so we want results to clear and the spinner to show
+ * when the query changes. See useSearchResultsQuery above for the alternate
+ * pattern that keeps stale data visible while a small spinner indicates the
+ * refetch.
  */
 export const useMapSearchResultsQuery = (query: string) =>
     useQuery({
-        queryKey:        queryKeys.search.mapResults(query),
-        queryFn:         () => DiningClient.retrieveSearchResults({ query }),
-        enabled:         query.length > 0,
-        placeholderData: (previous) => previous,
+        queryKey: queryKeys.search.mapResults(query),
+        queryFn:  () => DiningClient.retrieveSearchResults({ query }),
+        enabled:  query.length > 0,
     });
 
 /**
