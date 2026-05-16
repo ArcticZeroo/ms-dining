@@ -19,7 +19,7 @@ export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuI
         [stationId, stationName]
     );
 
-    const { status, data, refetch } = useReviewSummary(lookup);
+    const { status, data, refetch } = useReviewSummary(lookup, stationId);
 
     return (
         <div className="default-container bg-raised-3 flex-col">

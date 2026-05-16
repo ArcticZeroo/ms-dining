@@ -2,11 +2,33 @@ import { ICreateReviewRequest, IUpdateReviewRequest } from '@msdining/common/mod
 import { IReview, IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { toDateString } from '@msdining/common/util/date-util';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
 import { getReviewEntityId, getReviewEntityName, IReviewLookup, isStationReview } from '../../models/reviews.ts';
 import { queryKeys } from './keys.ts';
 
 const RECENT_REVIEWS_COUNT = 10;
+
+// ---------- Station→menuItem index ----------
+
+/**
+ * Tracks which menu-item summaries are currently associated with each station,
+ * so a station-review mutation can patch the affected menu-item caches.
+ *
+ * Populated lazily by `useReviewSummary(lookup, stationId)`. We never remove
+ * entries — the Map only grows with the number of unique menu items viewed in
+ * a session, which is small.
+ */
+const menuItemsByStationId = new Map<string /*stationId*/, Set<string /*menuItemId*/>>();
+
+const recordStationAssociation = (menuItemId: string, stationId: string) => {
+    let bucket = menuItemsByStationId.get(stationId);
+    if (!bucket) {
+        bucket = new Set();
+        menuItemsByStationId.set(stationId, bucket);
+    }
+    bucket.add(menuItemId);
+};
 
 // ---------- Pure projection / patch helpers (exported for testing) ----------
 
@@ -49,7 +71,31 @@ export const buildReview = ({ reviewId, lookup, request, context }: IBuildReview
     };
 };
 
+/**
+ * Add-or-replace semantics. Non-anonymous create where the user already has a
+ * review for this entity (the server upserts) is treated as a replacement:
+ * counts rebalance, the prior review is removed from reviewsWithComments, and
+ * myReview/myStationReview is updated in place. Anonymous and first-time
+ * creates are pure adds.
+ */
 export const patchSummaryAddReview = (
+    current: IReviewSummary,
+    review: IReview,
+    isStation: boolean,
+    isAnonymous: boolean,
+): IReviewSummary => {
+    const existingMine = isAnonymous
+        ? undefined
+        : (isStation ? current.myStationReview : current.myReview);
+
+    if (existingMine == null) {
+        return patchSummaryPureAdd(current, review, isStation, isAnonymous);
+    }
+
+    return patchSummaryReplaceOwnReview(current, existingMine, review, isStation);
+};
+
+const patchSummaryPureAdd = (
     current: IReviewSummary,
     review: IReview,
     isStation: boolean,
@@ -74,6 +120,33 @@ export const patchSummaryAddReview = (
         myStationReview: isStation
             ? (isAnonymous ? current.myStationReview : review)
             : current.myStationReview,
+    };
+};
+
+const patchSummaryReplaceOwnReview = (
+    current: IReviewSummary,
+    existing: IReview,
+    replacement: IReview,
+    isStation: boolean,
+): IReviewSummary => {
+    const counts = { ...current.counts };
+    if (existing.rating !== replacement.rating) {
+        counts[existing.rating] = (counts[existing.rating] ?? 1) - 1;
+        counts[replacement.rating] = (counts[replacement.rating] ?? 0) + 1;
+    }
+
+    const withoutOld = current.reviewsWithComments.filter((other) => other.id !== existing.id);
+    const reviewsWithComments = replacement.comment
+        ? [replacement as IReviewWithComment, ...withoutOld]
+        : withoutOld;
+
+    return {
+        counts,
+        totalCount:      current.totalCount,
+        overallRating:   recomputeOverallRating(counts, current.totalCount),
+        reviewsWithComments,
+        myReview:        isStation ? current.myReview : replacement,
+        myStationReview: isStation ? replacement : current.myStationReview,
     };
 };
 
@@ -172,8 +245,23 @@ export interface ICreateReviewContext {
 
 // ---------- Queries ----------
 
-export const useReviewSummary = (lookup: IReviewLookup) => {
+/**
+ * Loads the review summary for a menu item or station. When viewing a menu
+ * item that belongs to a station, pass the `stationId` so station-review
+ * mutations elsewhere in the app can patch this menu-item summary too.
+ */
+export const useReviewSummary = (lookup: IReviewLookup, stationId?: string) => {
     const entityId = getReviewEntityId(lookup);
+    const menuItemId = !isStationReview(lookup) ? entityId : undefined;
+
+    // Record association once we know both ids — used by station-review
+    // mutations to find affected menu-item summaries.
+    useEffect(() => {
+        if (menuItemId && stationId) {
+            recordStationAssociation(menuItemId, stationId);
+        }
+    }, [menuItemId, stationId]);
+
     return useQuery({
         queryKey: queryKeys.reviews.entityById(entityId),
         queryFn:  () => DiningClient.retrieveReviews(lookup),
@@ -218,23 +306,22 @@ const patchMine = (queryClient: QueryClientInstance, updater: (reviews: IReview[
     patchQueryData<IReview[]>(queryClient, queryKeys.reviews.mine, updater);
 
 /**
- * Walks every cached summary and applies `updater` to those whose myStationReview
- * matches `stationEntityId`. Replaces the old `#menuItemIdsByStationId` mapping —
- * we just ask the cache directly instead of maintaining a parallel index.
+ * Applies `updater` to every cached menu-item summary that belongs to the
+ * given station. Replaces the old hand-maintained `#menuItemIdsByStationId`
+ * mapping from `REVIEW_STORE`.
  */
-const patchSummariesContainingStation = async (
+const patchMenuItemSummariesForStation = async (
     queryClient: QueryClientInstance,
-    stationEntityId: string,
+    stationId: string,
     updater: (current: IReviewSummary) => IReviewSummary,
 ): Promise<void> => {
-    const entries = queryClient.getQueryCache().findAll({ queryKey: queryKeys.reviews.summary });
+    const menuItemIds = menuItemsByStationId.get(stationId);
+    if (!menuItemIds || menuItemIds.size === 0) {
+        return;
+    }
     const tasks: Promise<void>[] = [];
-    for (const entry of entries) {
-        const summary = entry.state.data as IReviewSummary | undefined;
-        if (!summary?.myStationReview || summary.myStationReview.stationId !== stationEntityId) {
-            continue;
-        }
-        tasks.push(patchQueryData<IReviewSummary>(queryClient, entry.queryKey, updater));
+    for (const menuItemId of menuItemIds) {
+        tasks.push(patchSummary(queryClient, menuItemId, updater));
     }
     await Promise.all(tasks);
 };
@@ -254,10 +341,14 @@ export const useCreateReview = () => {
             const entityId = getReviewEntityId(lookup);
             const isStation = isStationReview(lookup);
             const isAnonymous = request.anonymous === true;
+            const summaryUpdater = (current: IReviewSummary) =>
+                patchSummaryAddReview(current, review, isStation, isAnonymous);
 
-            await patchSummary(queryClient, entityId, (current) =>
-                patchSummaryAddReview(current, review, isStation, isAnonymous),
-            );
+            await patchSummary(queryClient, entityId, summaryUpdater);
+
+            if (isStation) {
+                await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+            }
 
             await patchRecent(queryClient, (recent) => {
                 const filtered = recent.filter((existing) => (existing.menuItemId ?? existing.stationId) !== entityId);
@@ -286,12 +377,12 @@ export const useUpdateReview = () => {
         mutationFn: ({ reviewId, request }) => DiningClient.updateReview(reviewId, request),
         onSuccess:  async (_void, { reviewId, lookup, request }) => {
             const entityId = getReviewEntityId(lookup);
-            const updater = (current: IReviewSummary) => patchSummaryUpdateReview(current, reviewId, request);
+            const summaryUpdater = (current: IReviewSummary) => patchSummaryUpdateReview(current, reviewId, request);
 
-            await patchSummary(queryClient, entityId, updater);
+            await patchSummary(queryClient, entityId, summaryUpdater);
 
             if (isStationReview(lookup)) {
-                await patchSummariesContainingStation(queryClient, entityId, updater);
+                await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
             }
 
             const patchReview = (review: IReview): IReview =>
@@ -314,12 +405,12 @@ export const useDeleteReview = () => {
         mutationFn: ({ reviewId }) => DiningClient.deleteReview(reviewId),
         onSuccess:  async (_void, { reviewId, lookup }) => {
             const entityId = getReviewEntityId(lookup);
-            const updater = (current: IReviewSummary) => patchSummaryRemoveReview(current, reviewId);
+            const summaryUpdater = (current: IReviewSummary) => patchSummaryRemoveReview(current, reviewId);
 
-            await patchSummary(queryClient, entityId, updater);
+            await patchSummary(queryClient, entityId, summaryUpdater);
 
             if (isStationReview(lookup)) {
-                await patchSummariesContainingStation(queryClient, entityId, updater);
+                await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
             }
 
             await patchRecent(queryClient, (recent) => recent.filter((review) => review.id !== reviewId));

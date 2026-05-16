@@ -154,6 +154,86 @@ describe('patchSummaryAddReview', () => {
         assert.strictEqual(result.myReview?.id, 'existing-mine');
         assert.strictEqual(result.myStationReview?.id, 'station-r');
     });
+
+    // Upsert semantics: the server upserts authenticated reviews, so a "create"
+    // call from a user that already has a review must replace counts instead of
+    // double-counting.
+
+    it('treats a non-anonymous create as a replacement when myReview already exists', () => {
+        const existing = makeReview({ id: 'r-old', rating: 8, comment: 'old' });
+        const summary: IReviewSummary = {
+            counts:              { 8: 1 },
+            totalCount:          1,
+            overallRating:       8,
+            reviewsWithComments: [existing as never],
+            myReview:            existing,
+        };
+        const replacement = makeReview({ id: 'r-old', rating: 4, comment: 'updated' });
+
+        const result = patchSummaryAddReview(summary, replacement, false /*isStation*/, false /*isAnonymous*/);
+
+        assert.strictEqual(result.totalCount, 1, 'totalCount unchanged on upsert');
+        assert.strictEqual(result.counts[8], 0);
+        assert.strictEqual(result.counts[4], 1);
+        assert.strictEqual(result.reviewsWithComments.length, 1);
+        assert.strictEqual(result.reviewsWithComments[0]?.comment, 'updated');
+        assert.strictEqual(result.myReview?.comment, 'updated');
+    });
+
+    it('treats a non-anonymous station create as a replacement when myStationReview already exists', () => {
+        const existing = makeReview({ id: 'r-station', stationId: 'station-1', menuItemId: undefined, rating: 10 });
+        const summary: IReviewSummary = {
+            counts:              { 10: 1 },
+            totalCount:          1,
+            overallRating:       10,
+            reviewsWithComments: [],
+            myStationReview:     existing,
+        };
+        const replacement = makeReview({ id: 'r-station', stationId: 'station-1', menuItemId: undefined, rating: 6, comment: 'new' });
+
+        const result = patchSummaryAddReview(summary, replacement, true /*isStation*/, false);
+
+        assert.strictEqual(result.totalCount, 1);
+        assert.strictEqual(result.counts[10], 0);
+        assert.strictEqual(result.counts[6], 1);
+        assert.strictEqual(result.myStationReview?.rating, 6);
+        assert.strictEqual(result.reviewsWithComments.length, 1, 'comment added when replacement has one');
+    });
+
+    it('drops the prior comment entry when replacement removes its comment', () => {
+        const existing = makeReview({ id: 'r-1', rating: 8, comment: 'had comment' });
+        const summary: IReviewSummary = {
+            counts:              { 8: 1 },
+            totalCount:          1,
+            overallRating:       8,
+            reviewsWithComments: [existing as never],
+            myReview:            existing,
+        };
+        const replacement = makeReview({ id: 'r-1', rating: 8, comment: undefined });
+
+        const result = patchSummaryAddReview(summary, replacement, false, false);
+
+        assert.strictEqual(result.reviewsWithComments.length, 0);
+    });
+
+    it('anonymous create always adds (server does not upsert anonymous reviews)', () => {
+        const existing = makeReview({ id: 'r-old', rating: 8, comment: 'mine' });
+        const summary: IReviewSummary = {
+            counts:              { 8: 1 },
+            totalCount:          1,
+            overallRating:       8,
+            reviewsWithComments: [existing as never],
+            myReview:            existing,
+        };
+        const anon = makeReview({ id: 'r-anon', userId: undefined, userDisplayName: 'Anonymous', rating: 4 });
+
+        const result = patchSummaryAddReview(summary, anon, false, true /*isAnonymous*/);
+
+        assert.strictEqual(result.totalCount, 2, 'anonymous = pure add');
+        assert.strictEqual(result.counts[8], 1);
+        assert.strictEqual(result.counts[4], 1);
+        assert.strictEqual(result.myReview?.id, 'r-old', 'anon does not clobber my own review');
+    });
 });
 
 describe('patchReviewFields', () => {
