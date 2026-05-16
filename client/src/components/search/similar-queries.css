@@ -1,0 +1,23 @@
+.similar-queries {
+    /* Single-row pill strip in compact mode for narrow containers (e.g. the
+       map side panel). Wider parents using the default layout flex-wrap
+       across multiple rows as usual. */
+}
+
+.similar-queries.compact {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    /* Hide the scrollbar but keep scrolling. Touch + trackpad still scroll. */
+    scrollbar-width: none;
+    justify-content: flex-start;
+}
+
+.similar-queries.compact::-webkit-scrollbar {
+    display: none;
+}
+
+.similar-queries.compact .recommended-query {
+    /* Stop pills from collapsing into ellipsis when the strip overflows. */
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
