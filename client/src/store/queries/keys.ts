@@ -1,4 +1,7 @@
 export const queryKeys = {
+    app: {
+        coreData: ['app', 'core-data'] as const,
+    },
     cart: {
         hydration: ['cart', 'hydration'] as const,
     },
