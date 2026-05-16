@@ -307,8 +307,7 @@ const patchMine = (queryClient: QueryClientInstance, updater: (reviews: IReview[
 
 /**
  * Applies `updater` to every cached menu-item summary that belongs to the
- * given station. Replaces the old hand-maintained `#menuItemIdsByStationId`
- * mapping from `REVIEW_STORE`.
+ * given station, using the menuItemsByStationId index.
  */
 const patchMenuItemSummariesForStation = async (
     queryClient: QueryClientInstance,

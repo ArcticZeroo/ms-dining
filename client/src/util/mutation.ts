@@ -4,9 +4,8 @@ import { UseMutationResult } from '@tanstack/react-query';
 type AnyMutation = UseMutationResult<any, any, any, any>;
 
 /**
- * Adapter for the legacy `promiseStageToButtonClass` vocabulary used by some
- * existing button styling. Use for mutation buttons that have not migrated to
- * their own success/error CSS classes.
+ * Maps a TanStack mutation's state to the disabled/error/success class
+ * vocabulary used by buttons that don't define their own success/error CSS.
  */
 export const mutationButtonClass = (mutation: AnyMutation): string => {
     if (mutation.isPending) {

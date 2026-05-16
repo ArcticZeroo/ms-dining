@@ -37,14 +37,10 @@ const useCafeMenu = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): ICafeMen
     const selectedDate = useSelectedDate();
     const query = useCafeMenuQuery(cafe.id, selectedDate);
 
-    // Side effect previously done inside DiningClient.retrieveCafeMenu when
-    // shouldCountTowardsLastUsed was true. Done here so it isn't part of the
-    // query key (which would otherwise force duplicate fetches between the
-    // boot-time warm-up and a real component render).
-    //
-    // Gated on isSuccess (not just first render) so we don't add invalid cafe
-    // ids to the recently-used list — e.g. when the user navigates to a cafe
-    // route that fails to load.
+    // Tracked outside the queryFn so the side effect isn't baked into the
+    // query key — the boot-time warm-up and a real component render share one
+    // cache entry instead of two. Gated on isSuccess so we don't add invalid
+    // cafe ids to the recently-used list when a cafe route fails to load.
     useEffect(() => {
         if (shouldCountTowardsLastUsed && query.isSuccess) {
             DiningClient.addToLastUsedCafeIds(cafe.id);
