@@ -6,14 +6,15 @@ import { pluralize } from '../../../util/string.ts';
 interface IMissingCartItemRowProps {
     cafeId: string;
     item: ISerializedCartItemWithName;
+    index: number;
 }
 
-export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId, item }) => {
-    const removeMissingItem = useCartStore((state) => state.removeMissingItem);
+export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId, item, index }) => {
+    const removeMissingItemAt = useCartStore((state) => state.removeMissingItemAt);
     const modifierCount = item.modifiers.reduce((count, modifier) => count + modifier.choiceIds.length, 0);
 
     const onRemove = () => {
-        removeMissingItem(cafeId, item);
+        removeMissingItemAt(cafeId, index);
     };
 
     return (

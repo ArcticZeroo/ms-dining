@@ -41,11 +41,12 @@ export const MissingItemsTable = () => {
                                         }
                                     </th>
                                     {
-                                        items.map(item => (
+                                        items.map((item, index) => (
                                             <MissingCartItemRow
                                                 key={item.itemId}
                                                 cafeId={cafeId}
                                                 item={item}
+                                                index={index}
                                             />
                                         ))
                                     }

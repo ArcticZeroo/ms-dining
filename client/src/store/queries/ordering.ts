@@ -15,8 +15,10 @@ const CART_SESSION_STALE_MS = 4 * 60 * 1000;
 /**
  * Stable hash over the cart contents that affect server-side preparation.
  * Two identical carts hash to the same value so TanStack Query can dedupe.
+ *
+ * Exported for testing.
  */
-const cartHashForKey = (cart: CartItemsByCafeId): string => {
+export const cartHashForKey = (cart: CartItemsByCafeId): string => {
     const cafeParts: string[] = [];
 
     for (const [cafeId, items] of cart) {

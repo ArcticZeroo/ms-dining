@@ -17,7 +17,7 @@ interface ICartStore {
     removeCafe(cafeId: string): void;
 
     setMissingItems(missingItems: MissingItemsByCafeId): void;
-    removeMissingItem(cafeId: string, item: ISerializedCartItemWithName): void;
+    removeMissingItemAt(cafeId: string, index: number): void;
     clearMissingItems(): void;
 }
 
@@ -57,16 +57,14 @@ export const useCartStore = create<ICartStore>()(mutative((set) => ({
         state.missingItemsByCafeId = missingItems;
     }),
 
-    removeMissingItem: (cafeId, item) => set((state) => {
+    removeMissingItemAt: (cafeId, index) => set((state) => {
         const list = state.missingItemsByCafeId.get(cafeId);
-        if (!list) {
+        if (!list || index < 0 || index >= list.length) {
             return;
         }
-        const remaining = list.filter((other) => other !== item);
-        if (remaining.length === 0) {
+        list.splice(index, 1);
+        if (list.length === 0) {
             state.missingItemsByCafeId.delete(cafeId);
-        } else {
-            state.missingItemsByCafeId.set(cafeId, remaining);
         }
     }),
 
@@ -77,7 +75,7 @@ export const useCartStore = create<ICartStore>()(mutative((set) => ({
     }),
 })));
 
-const serializeCartForPersistence = (
+export const serializeCartForPersistence = (
     items: CartItemsByCafeId,
     missingItemsByCafeId: MissingItemsByCafeId
 ): ISerializedCartItemsByCafeId => {
