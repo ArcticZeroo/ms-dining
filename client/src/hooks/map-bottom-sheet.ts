@@ -124,29 +124,29 @@ export const useBottomSheetDrag = () => {
             return;
         }
 
-        const onPointerDown = (e: PointerEvent) => {
+        const onPointerDown = (event: PointerEvent) => {
             isDraggingRef.current = true;
-            dragStartRef.current = { y: e.clientY, fraction: heightRef.current };
-            lastMoveRef.current = { y: e.clientY, time: Date.now() };
+            dragStartRef.current = { y: event.clientY, fraction: heightRef.current };
+            lastMoveRef.current = { y: event.clientY, time: Date.now() };
             prevMoveRef.current = lastMoveRef.current;
-            handle.setPointerCapture(e.pointerId);
+            handle.setPointerCapture(event.pointerId);
             setIsDragging(true);
-            e.preventDefault();
+            event.preventDefault();
         };
 
-        const onPointerMove = (e: PointerEvent) => {
+        const onPointerMove = (event: PointerEvent) => {
             if (!isDraggingRef.current) {
                 return;
             }
 
-            const dy = dragStartRef.current.y - e.clientY;
+            const dy = dragStartRef.current.y - event.clientY;
             const containerHeight = handle.closest('.map-page')?.clientHeight ?? window.innerHeight;
             const deltaFraction = dy / containerHeight;
             const newFraction = Math.max(0.15, Math.min(0.95, dragStartRef.current.fraction + deltaFraction));
             heightRef.current = newFraction;
             setHeightFraction(newFraction);
             prevMoveRef.current = lastMoveRef.current;
-            lastMoveRef.current = { y: e.clientY, time: Date.now() };
+            lastMoveRef.current = { y: event.clientY, time: Date.now() };
         };
 
         const onPointerUp = () => {
@@ -179,7 +179,7 @@ export const useBottomSheetDrag = () => {
             handle.removeEventListener('pointerup', onPointerUp);
             handle.removeEventListener('pointercancel', onPointerUp);
         };
-    }, [isMobile, showHandle]);
+    }, [isMobile, showHandle, setHeightFraction]);
 
     const sheetStyle = isMobile
         ? {

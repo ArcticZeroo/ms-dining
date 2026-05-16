@@ -48,7 +48,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const viewName = getViewName({ view: view, showGroupName: true, includeEmoji: true });
 
     const { data: overviewResponse } = useCafeOverviewQuery(view.value.id, selectedDate);
-    const featuredItems = overviewResponse?.featuredItems ?? [];
+    const featuredItems = useMemo(() => overviewResponse?.featuredItems ?? [], [overviewResponse]);
 
     const tabOptions = useMemo(() => {
         const tabs: ITabOption[] = [
@@ -69,28 +69,28 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const [selectedTabId, setSelectedTabId] = useState(TAB_ID_OVERVIEW);
 
     // If the selected tab gets removed (e.g. data changes), fall back to overview
-    const effectiveTabId = tabOptions.some(t => t.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
+    const effectiveTabId = tabOptions.some(tab => tab.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
 
     const renderTab = useCallback((tabId: string): JSX.Element => {
         switch (tabId) {
-            case TAB_ID_FEATURED:
-                return (
-                    <div className="flex-col">
-                        {featuredItems.map(item => (
-                            <RecommendationSearchResult key={item.menuItemId} item={item}/>
-                        ))}
-                    </div>
-                );
-            case TAB_ID_NEARBY:
-                return <NearbyCafesList nearestCafes={nearestCafes}/>;
-            case TAB_ID_OVERVIEW:
-            default:
-                return (
-                    <MapCafeViewDetails
-                        view={view}
-                        showAllStations
-                    />
-                );
+        case TAB_ID_FEATURED:
+            return (
+                <div className="flex-col">
+                    {featuredItems.map(item => (
+                        <RecommendationSearchResult key={item.menuItemId} item={item}/>
+                    ))}
+                </div>
+            );
+        case TAB_ID_NEARBY:
+            return <NearbyCafesList nearestCafes={nearestCafes}/>;
+        case TAB_ID_OVERVIEW:
+        default:
+            return (
+                <MapCafeViewDetails
+                    view={view}
+                    showAllStations
+                />
+            );
         }
     }, [view, featuredItems, nearestCafes]);
 
