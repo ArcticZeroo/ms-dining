@@ -15,6 +15,7 @@ import { classNames } from '../util/react.ts';
 import { UserContext } from '../context/auth.ts';
 import { ValueNotifier } from '../util/events.ts';
 import { IClientUser } from '@msdining/common/models/auth';
+import { useCartHydrationQuery } from '../store/queries/cart.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -50,6 +51,7 @@ const AppWithData: React.FC<IAppWithDataProps> = ({ coreData, user }) => {
     const { viewsById, viewsInOrder, cafes } = useViewDataFromResponse(groups);
 
     useBackgroundMenuUpdate(viewsById, cafes);
+    useCartHydrationQuery();
 
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const [isNavExpanded, setIsNavExpanded] = useState(false);

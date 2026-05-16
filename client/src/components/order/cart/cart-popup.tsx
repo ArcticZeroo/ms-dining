@@ -1,9 +1,9 @@
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
+import { useCartHydrationStatus } from '../../../store/queries/cart.ts';
 import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { useClickTracker } from '../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
 import { classNames } from '../../../util/react.ts';
@@ -16,8 +16,9 @@ import './cart-popup.css';
 
 export const CartPopup = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
-    const cart = useValueNotifierContext(CartContext);
-    const cartHydration = useValueNotifierContext(CartHydrationContext);
+    const cart = useCartStore((state) => state.items);
+    const missingItemsByCafeId = useCartStore((state) => state.missingItemsByCafeId);
+    const hydrationStatus = useCartHydrationStatus();
     const isTodaySelected = useIsTodaySelected();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -38,8 +39,8 @@ export const CartPopup = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    const hasMissingItems = cartHydration.missingItemsByCafeId.size > 0;
-    const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
+    const hasMissingItems = missingItemsByCafeId.size > 0;
+    const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || hydrationStatus.isPending);
 
     if (!allowOnlineOrdering) {
         return;
@@ -71,7 +72,7 @@ export const CartPopup = () => {
                 </span>
                 <span className="cart-count">
                     {
-                        cartHydration.stage === PromiseStage.running
+                        hydrationStatus.isPending
                             ? 'Loading...'
                             : totalItemCount
                     }

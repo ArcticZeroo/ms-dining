@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
-import { CartContext, CartHydrationContext, CartItemsByCafeId } from '../../context/cart.ts';
 import { CafeCollapseContext, StationCollapseContext } from '../../context/collapse.ts';
 import { CardNumberContext } from '../../context/payment.ts';
 import { SearchQueryContext } from '../../context/search.ts';
 import { SelectedDateContext } from '../../context/time.ts';
-import { useCartHydration } from '../../hooks/cart.ts';
 import { useAutoAdvanceSelectedDate } from '../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ValueNotifier, ValueNotifierSet } from '../../util/events.ts';
@@ -35,9 +33,6 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
     const cardNumberNotifier = useMemo(() => new ValueNotifier<string>(''), []);
     const stationCollapseNotifier = useMemo(() => new ValueNotifierSet<string>(new Set()), []);
     const cafesOnPageNotifier = useMemo(() => new CafesOnPageNotifier(), []);
-    const cartItemNotifier = useMemo(() => new ValueNotifier<CartItemsByCafeId>(new Map()), []);
-
-    const cartHydrationNotifier = useCartHydration(cartItemNotifier);
 
     useEffect(() => {
         if (!allowFutureMenus) {
@@ -50,19 +45,15 @@ export const StaticContextProviders: React.FC<IStaticContextProvidersProps> = ({
     return (
         <SelectedDateContext.Provider value={selectedDateNotifier}>
             <SearchQueryContext.Provider value={searchQueryNotifier}>
-                <CartContext.Provider value={cartItemNotifier}>
-                    <CartHydrationContext.Provider value={cartHydrationNotifier}>
-                        <CafeCollapseContext.Provider value={cafeCollapseNotifier}>
-                            <StationCollapseContext.Provider value={stationCollapseNotifier}>
-                                <CardNumberContext.Provider value={cardNumberNotifier}>
-                                    <CafesOnPageContext.Provider value={cafesOnPageNotifier}>
-                                        {children}
-                                    </CafesOnPageContext.Provider>
-                                </CardNumberContext.Provider>
-                            </StationCollapseContext.Provider>
-                        </CafeCollapseContext.Provider>
-                    </CartHydrationContext.Provider>
-                </CartContext.Provider>
+                <CafeCollapseContext.Provider value={cafeCollapseNotifier}>
+                    <StationCollapseContext.Provider value={stationCollapseNotifier}>
+                        <CardNumberContext.Provider value={cardNumberNotifier}>
+                            <CafesOnPageContext.Provider value={cafesOnPageNotifier}>
+                                {children}
+                            </CafesOnPageContext.Provider>
+                        </CardNumberContext.Provider>
+                    </StationCollapseContext.Provider>
+                </CafeCollapseContext.Provider>
             </SearchQueryContext.Provider>
         </SelectedDateContext.Provider>
     );

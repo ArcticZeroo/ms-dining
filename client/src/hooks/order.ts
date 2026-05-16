@@ -1,8 +1,7 @@
 import { IOrderCompletionData, IPreparePaymentResponse } from '@msdining/common/models/cart';
-import { useCallback, useContext, useState } from 'react';
-import { CartContext } from '../context/cart.ts';
+import { useCallback, useState } from 'react';
 import { OrderingClient } from '../api/order.ts';
-import { shallowCloneCart } from '../util/cart.ts';
+import { useCartStore } from '../store/zustand/cart.ts';
 import { IRguestPaymentResult } from '../components/order/payment/payment-iframe.tsx';
 import { ValidationState, Validator } from '../models/validation.ts';
 
@@ -34,7 +33,7 @@ interface ICafePaymentFormData {
 }
 
 export const useCafePayment = (cafeId: string, initialPrepareData: IPreparePaymentResponse, formData: ICafePaymentFormData) => {
-    const cartNotifier = useContext(CartContext);
+    const removeCafe = useCartStore((state) => state.removeCafe);
 
     const [state, setState] = useState<ICafePaymentState>({
         isPreparing:  false,
@@ -74,9 +73,7 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPreparePayme
                 alias:                      formData.alias,
                 phoneNumberWithCountryCode: formData.phoneNumberWithCountryCode,
             });
-            const newCart = shallowCloneCart(cartNotifier.value);
-            newCart.delete(cafeId);
-            cartNotifier.value = newCart;
+            removeCafe(cafeId);
             setState(prev => ({ ...prev, isCompleting: false, completionResult: completeResult }));
             return completeResult;
         } catch (err) {
@@ -87,7 +84,7 @@ export const useCafePayment = (cafeId: string, initialPrepareData: IPreparePayme
             }));
             throw err;
         }
-    }, [cafeId, state.orderId, formData.alias, formData.phoneNumberWithCountryCode, cartNotifier]);
+    }, [cafeId, state.orderId, formData.alias, formData.phoneNumberWithCountryCode, removeCafe]);
 
     const invalidatePrepare = useCallback(() => {
         setState(prev => ({ ...prev, iframeUrl: undefined }));

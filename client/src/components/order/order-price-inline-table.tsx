@@ -1,6 +1,5 @@
-import { CartContext } from '../../context/cart.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
-import { useMemo } from 'react';
+import { useCartStore } from '../../store/zustand/cart.ts';
+import React, { useMemo } from 'react';
 import { IPrepareCartResponse } from '@msdining/common/models/cart';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
 
@@ -10,7 +9,7 @@ interface IOrderPriceInlineTableProps {
 }
 
 export const OrderPriceInlineTable: React.FC<IOrderPriceInlineTableProps> = ({ cartSessionData, cartSessionError }) => {
-    const cart = useValueNotifierContext(CartContext);
+    const cart = useCartStore((state) => state.items);
 
     const localTotalWithoutTax = useMemo(
         () => {

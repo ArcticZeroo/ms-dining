@@ -8,9 +8,8 @@ import {
     ISerializedModifier,
     ISubmitOrderItems
 } from '@msdining/common/models/cart';
-import { CartItemsByCafeId } from '../context/cart.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
-import { ICartItemWithMetadata, IHydratedCartData, ISerializedCartItemWithName } from '../models/cart.ts';
+import { CartItemsByCafeId, ICartItemWithMetadata, IHydratedCartData, ISerializedCartItemWithName } from '../models/cart.ts';
 import { getRandomId } from '../util/id.ts';
 import { calculatePrice } from '../util/cart.ts';
 

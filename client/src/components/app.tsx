@@ -1,5 +1,8 @@
 import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { DiningClient } from '../api/client/dining.ts';
+import { queryClient } from '../store/query-client.ts';
 import { updateRoamingSettingsOnBoot } from '../util/settings.ts';
 import AppWithData from './app-with-data.tsx';
 import { RetryButton } from './button/retry-button.tsx';
@@ -22,7 +25,7 @@ const coreDataLoader = async () => {
     return Promise.all([DiningClient.retrieveCoreData(), userDataLoader()]);
 };
 
-export const App = () => {
+const AppInner = () => {
     const responseStatus = useImmediatePromiseState(coreDataLoader);
 
     if (responseStatus.stage === PromiseStage.error) {
@@ -58,5 +61,14 @@ export const App = () => {
         <FullHeightCenteredContainer>
             <HourglassLoadingSpinner/>
         </FullHeightCenteredContainer>
+    );
+};
+
+export const App = () => {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AppInner/>
+            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false}/>}
+        </QueryClientProvider>
     );
 };

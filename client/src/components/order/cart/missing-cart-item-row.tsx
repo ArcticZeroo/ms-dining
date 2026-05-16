@@ -1,6 +1,6 @@
 import { ISerializedCartItemWithName } from '../../../models/cart.ts';
-import React, { useContext } from 'react';
-import { CartHydrationContext } from '../../../context/cart.ts';
+import React from 'react';
+import { useCartStore } from '../../../store/zustand/cart.ts';
 import { pluralize } from '../../../util/string.ts';
 
 interface IMissingCartItemRowProps {
@@ -9,24 +9,11 @@ interface IMissingCartItemRowProps {
 }
 
 export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId, item }) => {
-    const cartHydrationNotifier = useContext(CartHydrationContext);
+    const removeMissingItem = useCartStore((state) => state.removeMissingItem);
     const modifierCount = item.modifiers.reduce((count, modifier) => count + modifier.choiceIds.length, 0);
 
     const onRemove = () => {
-        const newMissingItemsByCafeId = new Map(cartHydrationNotifier.value.missingItemsByCafeId);
-        const missingItemsForCafe = newMissingItemsByCafeId.get(cafeId) ?? [];
-        const remainingForCafe = missingItemsForCafe.filter(missingItem => missingItem !== item);
-
-        if (remainingForCafe.length === 0) {
-            newMissingItemsByCafeId.delete(cafeId);
-        } else {
-            newMissingItemsByCafeId.set(cafeId, remainingForCafe);
-        }
-
-        cartHydrationNotifier.value = {
-            ...cartHydrationNotifier.value,
-            missingItemsByCafeId: newMissingItemsByCafeId
-        };
+        removeMissingItem(cafeId, item);
     };
 
     return (

@@ -1,8 +1,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { IOrderCompletionData, IPreparePaymentResponse } from '@msdining/common/models/cart';
 import { ApplicationContext } from '../../../context/app.ts';
-import { CartContext } from '../../../context/cart.ts';
-import { useValueNotifierContext } from '../../../hooks/events.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
 import { useCafePayment } from '../../../hooks/order.ts';
 import { formatPrice } from '../../../util/cart.ts';
@@ -21,7 +20,7 @@ interface ICafePaymentRowProps {
 
 export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, initialPrepareData, formData, popupId, disabled, onComplete }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const cart = useValueNotifierContext(CartContext);
+    const cart = useCartStore((state) => state.items);
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
 

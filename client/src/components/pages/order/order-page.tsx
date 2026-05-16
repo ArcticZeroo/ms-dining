@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OrderingClient } from '../../../api/order.ts';
 import { DebugSettings } from '../../../constants/settings.ts';
-import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
+import { useCartHydrationStatus } from '../../../store/queries/cart.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
@@ -23,8 +24,9 @@ import { WaitTime } from '../../order/wait-time.tsx';
 
 export const OrderPage = () => {
     const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
-    const cart = useValueNotifierContext(CartContext);
-    const cartHydrationState = useValueNotifierContext(CartHydrationContext);
+    const cart = useCartStore((state) => state.items);
+    const missingItemsByCafeId = useCartStore((state) => state.missingItemsByCafeId);
+    const hydrationStatus = useCartHydrationStatus();
     const navigate = useNavigate();
 
     const [orderResult, setOrderResult] = useState<IOrderCompletionResponse | null>(null);
@@ -86,7 +88,7 @@ export const OrderPage = () => {
         setOrderResult(results);
     }, []);
 
-    if (cartHydrationState.stage === PromiseStage.running) {
+    if (hydrationStatus.isPending) {
         return (
             <div className="flex">
                 <HourglassLoadingSpinner/>
@@ -98,7 +100,7 @@ export const OrderPage = () => {
     const isPaymentStarted = paymentStage !== PromiseStage.notRun;
     const isPaymentComplete = paymentResults != null;
 
-    const hasUnhydratedItems = cartHydrationState.missingItemsByCafeId.size > 0;
+    const hasUnhydratedItems = missingItemsByCafeId.size > 0;
 
     const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
 

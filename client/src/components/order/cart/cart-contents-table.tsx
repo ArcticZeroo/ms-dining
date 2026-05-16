@@ -2,13 +2,12 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { CartContext } from '../../../context/cart.ts';
 import { PopupContext } from '../../../context/modal.ts';
-import { useValueNotifier, useValueNotifierAsState } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import { ICartItemWithMetadata } from '../../../models/cart.ts';
 import { getViewName } from '../../../util/cafe.ts';
-import { addOrEditCartItem, removeFromCart, shallowCloneCart } from '../../../util/cart.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { sortViews } from '../../../util/sorting.ts';
 import { MenuItemPopup } from '../../cafes/station/menu-items/popup/menu-item-popup.tsx';
@@ -30,15 +29,14 @@ interface ICartContentsTableProps {
 export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false, readOnly = false, cartSessionData = null, cartSessionError }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const cartItemsNotifier = useContext(CartContext);
-    const [cart, setCart] = useValueNotifierAsState(cartItemsNotifier);
+    const cart = useCartStore((state) => state.items);
+    const removeItem = useCartStore((state) => state.removeItem);
+    const addOrEditItem = useCartStore((state) => state.addOrEditItem);
     const modalNotifier = useContext(PopupContext);
-    
+
     const onRemove = useCallback((item: ICartItemWithMetadata) => {
-        const newCart = shallowCloneCart(cart);
-        removeFromCart(newCart, item);
-        setCart(newCart);
-    }, [cart, setCart]);
+        removeItem(item);
+    }, [removeItem]);
 
     const onEdit = useCallback((item: ICartItemWithMetadata) => {
         if (modalNotifier.value != null) {
@@ -61,15 +59,11 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
             return;
         }
 
-        const newCart = shallowCloneCart(cart);
-
-        addOrEditCartItem(newCart, {
+        addOrEditItem({
             ...item,
             quantity
         });
-
-        setCart(newCart);
-    }, [cart, setCart]);
+    }, [addOrEditItem]);
 
     const cartItemsByView = useMemo(
         () => {
