@@ -33,7 +33,18 @@ const getNextDate = (date: Date) => {
 const MINIMUM_DATE = DateUtil.getMinimumDateForMenu();
 const MAXIMUM_DATE = DateUtil.getMaximumDateForMenu();
 
-export const CafeDatePicker: React.FC = () => {
+interface ICafeDatePickerProps {
+    /**
+     * When false, the prev/today/next buttons are hidden and the picker is
+     * just an informational display of the currently-selected date. Used when
+     * future menus are disabled but the selected date is still not today
+     * (e.g. weekend rollover landed on Monday) so the user understands what
+     * date the menu is for.
+     */
+    showControls?: boolean;
+}
+
+export const CafeDatePicker: React.FC<ICafeDatePickerProps> = ({ showControls = true }) => {
     const selectedDate = useSelectedDate();
 
     const {
@@ -94,25 +105,27 @@ export const CafeDatePicker: React.FC = () => {
 
     return (
         <div className="date-picker">
-            <div className="date-picker-buttons">
-                <button onClick={goBackwards} className="date-picker-button" disabled={!canGoBackwards}
-                    title={`Go to ${previousDateDisplay}`}>
-                    <span className="material-symbols-outlined">
-                        arrow_back
-                    </span>
-                </button>
-                <button onClick={goToToday} className="date-picker-button" disabled={isAtToday} title={'Go to Today'}>
-                    <span className="material-symbols-outlined">
-                        today
-                    </span>
-                </button>
-                <button onClick={goForwards} className="date-picker-button" disabled={!canGoForwards}
-                    title={`Go to ${nextDateDisplay}`}>
-                    <span className="material-symbols-outlined">
-                        arrow_forward
-                    </span>
-                </button>
-            </div>
+            {showControls && (
+                <div className="date-picker-buttons">
+                    <button onClick={goBackwards} className="date-picker-button" disabled={!canGoBackwards}
+                        title={`Go to ${previousDateDisplay}`}>
+                        <span className="material-symbols-outlined">
+                            arrow_back
+                        </span>
+                    </button>
+                    <button onClick={goToToday} className="date-picker-button" disabled={isAtToday} title={'Go to Today'}>
+                        <span className="material-symbols-outlined">
+                            today
+                        </span>
+                    </button>
+                    <button onClick={goForwards} className="date-picker-button" disabled={!canGoForwards}
+                        title={`Go to ${nextDateDisplay}`}>
+                        <span className="material-symbols-outlined">
+                            arrow_forward
+                        </span>
+                    </button>
+                </div>
+            )}
             {selectedDateDisplay}
             <FutureMenuOutOfDateNotice/>
         </div>

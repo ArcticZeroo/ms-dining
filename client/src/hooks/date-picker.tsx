@@ -1,3 +1,4 @@
+import { DateUtil } from '@msdining/common';
 import { isSameDate } from '@msdining/common/util/date-util';
 import { useEffect, useMemo, useRef } from 'react';
 import { DiningClient } from '../api/client/dining.ts';
@@ -9,16 +10,25 @@ import { useValueNotifier } from './events.ts';
 
 export const useDatePicker = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
+    const selectedDate = useSelectedDate();
 
     useSelectedDateInUrl();
 
     return useMemo(() => {
-        if (!allowFutureMenus) {
-            return null;
+        if (allowFutureMenus) {
+            return <CafeDatePicker/>;
         }
 
-        return <CafeDatePicker/>
-    }, [allowFutureMenus]);
+        // Even with future menus disabled, the selected date may not be
+        // "today" — e.g. on weekends DiningClient.getTodayDateForMenu() shifts
+        // forward to Monday. Surface the date as a read-only display so the
+        // user understands what the menu reflects.
+        if (!DateUtil.isSameDate(selectedDate, new Date())) {
+            return <CafeDatePicker showControls={false}/>;
+        }
+
+        return null;
+    }, [allowFutureMenus, selectedDate]);
 }
 
 export const useSelectedDateInUrl = () => {
