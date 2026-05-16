@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SearchQueryContext } from '../../context/search.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
+import { setSearchQuery, useSearchQuery } from '../../store/zustand/search-query.ts';
 import { navigateToSearch } from '../../util/search.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { useAutocompleteSuggestions } from '../../hooks/autocomplete.ts';
@@ -11,8 +10,7 @@ import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/mode
 export const SearchBar = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
-    const searchQueryNotifier = useContext(SearchQueryContext);
-    const searchQuery = useValueNotifier(searchQueryNotifier);
+    const searchQuery = useSearchQuery();
     const [, setIsNavExpanded] = useContext(NavExpansionContext);
     const { suggestions, clearSuggestions, showSuggestions } = useAutocompleteSuggestions(searchQuery);
     const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -56,7 +54,7 @@ export const SearchBar = () => {
     };
 
     const onInputChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
-        searchQueryNotifier.value = event.target.value;
+        setSearchQuery(event.target.value);
         deselectSuggestion();
     };
 
