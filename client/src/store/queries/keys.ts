@@ -32,8 +32,8 @@ export const queryKeys = {
         visitHistory:       (entityType: string, name: string) => ['search', 'visit-history', entityType, name] as const,
     },
     cafe: {
-        menu:                (cafeId: string, date: string, shouldCountTowardsLastUsed: boolean) =>
-            ['cafe', 'menu', cafeId, date, shouldCountTowardsLastUsed] as const,
+        menu:                (cafeId: string, date: string) =>
+            ['cafe', 'menu', cafeId, date] as const,
         overview:            (viewId: string, date: string) => ['cafe', 'overview', viewId, date] as const,
         overviewSummary:     (viewId: string, date: string) => ['cafe', 'overview-summary', viewId, date] as const,
     },

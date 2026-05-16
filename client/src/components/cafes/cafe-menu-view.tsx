@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { DiningClient } from '../../api/client/dining.ts';
 import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
@@ -34,7 +35,22 @@ export interface ICafeMenuView {
 
 const useCafeMenu = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): ICafeMenuView => {
     const selectedDate = useSelectedDate();
-    const query = useCafeMenuQuery(cafe.id, selectedDate, shouldCountTowardsLastUsed);
+    const query = useCafeMenuQuery(cafe.id, selectedDate);
+
+    // Side effect previously done inside DiningClient.retrieveCafeMenu when
+    // shouldCountTowardsLastUsed was true. Done here so it isn't part of the
+    // query key (which would otherwise force duplicate fetches between the
+    // boot-time warm-up and a real component render).
+    //
+    // Gated on isSuccess (not just first render) so we don't add invalid cafe
+    // ids to the recently-used list — e.g. when the user navigates to a cafe
+    // route that fails to load.
+    useEffect(() => {
+        if (shouldCountTowardsLastUsed && query.isSuccess) {
+            DiningClient.addToLastUsedCafeIds(cafe.id);
+        }
+    }, [shouldCountTowardsLastUsed, query.isSuccess, cafe.id]);
+
     return {
         data:    query.data,
         isError: query.isError,

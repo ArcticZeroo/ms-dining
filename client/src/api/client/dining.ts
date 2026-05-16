@@ -16,24 +16,14 @@ import { ISearchQuery, SEARCH_ENTITY_TYPE_NAME_TO_ENUM, SearchEntityType } from 
 import { IAutocompleteSuggestion, IAutocompleteResponse } from '@msdining/common/models/search';
 import { IRecommendationsResponse } from '@msdining/common/models/recommendation';
 import { ApplicationSettings, DebugSettings, InternalSettings } from '../../constants/settings.ts';
-import { CafeMenu, CafeView, ICafe, ICafeStation } from '../../models/cafe.ts';
+import { CafeMenu, ICafeStation } from '../../models/cafe.ts';
 import { ICheapItemSearchResult, IQuerySearchResult, IServerCheapItemSearchResult, } from '../../models/search.ts';
-import { ICancellationToken, pause } from '../../util/async.ts';
-import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
 import { FavoritesCache } from '../cache/favorites.ts';
 import { JSON_HEADERS, makeJsonRequest, makeJsonRequestNoParse, makeJsonRequestWithSchema } from '../request.ts';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IClientUser, IClientUserDTO } from '@msdining/common/models/auth';
 import { IReview, IReviewSummary } from '@msdining/common/models/review';
 import { IReviewLookup, isStationReview, getReviewEntityId } from '../../models/reviews.ts';
-
-const TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS = 1000;
-
-interface IRetrieveCafeMenuParams {
-    id: string;
-    date?: Date;
-    shouldCountTowardsLastUsed?: boolean;
-}
 
 interface IRetrieveSearchResultsParams {
     query: string;
@@ -44,7 +34,6 @@ interface IRetrieveSearchResultsParams {
 }
 
 export abstract class DiningClient {
-    private static readonly _cafeMenusByIdPerDateString: Map<string, Map<string, Promise<CafeMenu>>> = new Map();
     private static readonly _favoritesCache = new FavoritesCache();
 
     public static async retrieveCoreData(): Promise<IDiningCoreResponse> {
@@ -68,7 +57,7 @@ export abstract class DiningClient {
         };
     }
 
-    private static _addToLastUsedCafeIds(id: string) {
+    public static addToLastUsedCafeIds(id: string) {
         // Most recently used IDs are at the end of the list.
         InternalSettings.lastUsedCafeIds.value = [
             ...InternalSettings.lastUsedCafeIds.value.filter(existingId => existingId !== id),
@@ -80,35 +69,9 @@ export abstract class DiningClient {
         return DateUtil.ensureDateIsNotWeekendForMenu(new Date());
     }
 
-    public static async retrieveCafeMenu({
-        id,
-        shouldCountTowardsLastUsed,
-        date,
-    }: IRetrieveCafeMenuParams): Promise<CafeMenu> {
+    public static async retrieveCafeMenu(id: string, date?: Date): Promise<CafeMenu> {
         const dateString = DateUtil.toDateString(date ?? DiningClient.getTodayDateForMenu());
-
-        try {
-            if (!DiningClient._cafeMenusByIdPerDateString.has(dateString)) {
-                DiningClient._cafeMenusByIdPerDateString.set(dateString, new Map());
-            }
-
-            const cafeMenusById = DiningClient._cafeMenusByIdPerDateString.get(dateString)!;
-            if (!cafeMenusById.has(id)) {
-                cafeMenusById.set(id, DiningClient._retrieveCafeMenuInner(id, dateString));
-            }
-
-            const menu = await cafeMenusById.get(id)!;
-
-            // Wait until retrieving successfully first so that we avoid holding a bunch of invalid cafes
-            if (shouldCountTowardsLastUsed) {
-                DiningClient._addToLastUsedCafeIds(id);
-            }
-
-            return menu;
-        } catch (err) {
-            DiningClient._cafeMenusByIdPerDateString.get(dateString)?.delete(id);
-            throw err;
-        }
+        return DiningClient._retrieveCafeMenuInner(id, dateString);
     }
 
     public static async retrieveOverview(viewId: string, dateString: string): Promise<ICafeOverviewResponse> {
@@ -143,24 +106,6 @@ export abstract class DiningClient {
             });
         }
         return stations;
-    }
-
-    public static async retrieveRecentMenusInOrder(cafes: ICafe[], viewsById: Map<string, CafeView>, cancellationToken?: ICancellationToken) {
-        console.log('Retrieving cafe menus...');
-        const priorityOrder = sortCafesInPriorityOrder(cafes, viewsById);
-
-        for (const cafe of priorityOrder.slice(0, 5)) {
-            await pause(TIME_BETWEEN_BACKGROUND_MENU_REQUESTS_MS);
-
-            if (cancellationToken?.isCancelled) {
-                break;
-            }
-
-            await DiningClient.retrieveCafeMenu({
-                id:                         cafe.id,
-                shouldCountTowardsLastUsed: false
-            });
-        }
     }
 
     public static getThumbnailUrlForMenuItem(menuItem: IMenuItemBase) {
