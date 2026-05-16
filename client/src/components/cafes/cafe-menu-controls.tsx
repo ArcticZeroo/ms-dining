@@ -2,11 +2,10 @@ import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 import React, { useContext } from 'react';
 import { Modal } from '../popup/modal.js';
 import { CafeOverviewWithData } from './cafe-overview-with-data.js';
-import { CafeMenu } from '../../models/cafe.js';
-import { IDelayedPromiseState, PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { usePopupOpener } from '../../hooks/popup.js';
 import { CurrentCafeContext } from '../../context/menu-item.js';
 import { classNames } from '../../util/react.js';
+import { ICafeMenuView } from './cafe-menu-view.js';
 
 const menuOverviewSymbol = Symbol();
 
@@ -23,12 +22,12 @@ const getOrderButtonTitle = (cafeId: string): string => {
     return 'Click to open online ordering menu at buy-ondemand.com';
 }
 
-const getOverviewTitle = (menuData: IDelayedPromiseState<CafeMenu>, isDisabled: boolean) => {
-    if (menuData.stage === PromiseStage.error) {
+const getOverviewTitle = (menuData: ICafeMenuView, isDisabled: boolean) => {
+    if (menuData.isError) {
         return 'Menu overview is unavailable due to an error loading the menu';
     }
 
-    if (menuData.stage === PromiseStage.success) {
+    if (menuData.data != null) {
         if (isDisabled) {
             return 'There are no stations on the menu today';
         }
@@ -41,7 +40,7 @@ const getOverviewTitle = (menuData: IDelayedPromiseState<CafeMenu>, isDisabled: 
 
 interface ICafeMenuControlsProps {
     cafeName: string;
-    menuData: IDelayedPromiseState<CafeMenu>;
+    menuData: ICafeMenuView;
 }
 
 export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, menuData }) => {
@@ -49,7 +48,7 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
     const openPopup = usePopupOpener();
     const deviceType = useDeviceType();
 
-    const stations = menuData.value?.stations;
+    const stations = menuData.data?.stations;
     const isOverviewDisabled = !stations || stations.length === 0;
     const overviewTitle = getOverviewTitle(menuData, isOverviewDisabled);
 

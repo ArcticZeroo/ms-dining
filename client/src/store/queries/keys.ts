@@ -24,5 +24,18 @@ export const queryKeys = {
         favorites:          (date: string, queryHashes: string[]) => ['search', 'favorites', date, queryHashes] as const,
         recommendations:    (date: string) => ['search', 'recommendations', date] as const,
         results:            (date: string, query: string) => ['search', 'results', date, query] as const,
+        mapResults:         (query: string) => ['search', 'map-results', query] as const,
+        exploreResults:     (date: string, query: string) => ['search', 'explore-results', date, query] as const,
+        visitHistory:       (entityType: string, name: string) => ['search', 'visit-history', entityType, name] as const,
+    },
+    cafe: {
+        menu:                (cafeId: string, date: string, shouldCountTowardsLastUsed: boolean) =>
+            ['cafe', 'menu', cafeId, date, shouldCountTowardsLastUsed] as const,
+        overview:            (viewId: string, date: string) => ['cafe', 'overview', viewId, date] as const,
+        overviewSummary:     (viewId: string, date: string) => ['cafe', 'overview-summary', viewId, date] as const,
+    },
+    analytics: {
+        hourlyVisits: (daysAgo: number, scenarioName: string | undefined) =>
+            ['analytics', 'hourly-visits', daysAgo, scenarioName ?? null] as const,
     },
 } as const;

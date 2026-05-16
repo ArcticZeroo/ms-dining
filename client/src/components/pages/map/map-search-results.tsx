@@ -9,7 +9,6 @@ import { MapSearchResultItem } from './map-search-result-item.tsx';
 import { MapSearchSortSelector } from './map-search-sort-selector.tsx';
 import starIcon from '../../../assets/icons/filled/star-white.svg';
 import { classNames } from '../../../util/react.ts';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { RetryButton } from '../../button/retry-button.js';
 
 interface IMapSearchResultsProps {
@@ -19,7 +18,7 @@ interface IMapSearchResultsProps {
 }
 
 export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, isFilteredToHomeCafes, onFilterToHomeCafes }) => {
-    const { query, allResults, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, stage, retry } = useMapSearchContext();
+    const { query, allResults, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, isPending, isError, retry } = useMapSearchContext();
     const { selectedSearchResult, selectSearchResult, setHighlightedCafeIds } = useMapHighlightContext();
 
     const clearHighlight = useCallback(
@@ -37,7 +36,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
         return counts;
     }, [allResults]);
 
-    if (stage === PromiseStage.error) {
+    if (isError) {
         return (
             <div className="panel-content map-search-status flex-col">
                 <span>
@@ -48,7 +47,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
         );
     }
 
-    if (stage === PromiseStage.running) {
+    if (isPending) {
         return (
             <div className="panel-content map-search-status flex-col">
                 <HourglassLoadingSpinner/>

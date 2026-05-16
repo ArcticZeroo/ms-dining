@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts';
 import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
@@ -13,9 +13,8 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable, minutesToTimeString } from '@msdining/common/util/date-util';
-import { IDelayedPromiseState, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SelectedDateContext } from '../../context/time.js';
-import { DiningClient } from '../../api/client/dining.js';
+import { useCafeMenuQuery } from '../../store/queries/cafe.ts';
 import { CafeMenuControls } from './cafe-menu-controls.js';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 
@@ -23,24 +22,31 @@ const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
 };
 
-const useMenuData = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-
-    const retrieveMenu = useCallback(
-        () => DiningClient.retrieveCafeMenu({
-            id: cafe.id,
-            date: selectedDate,
-            shouldCountTowardsLastUsed
-        }),
-        [cafe, selectedDate, shouldCountTowardsLastUsed]
-    );
-
-    return useDelayedPromiseState(retrieveMenu);
+/**
+ * Minimal view passed down to body/controls so they can consume the cafe menu
+ * without knowing whether it's backed by TanStack Query or anything else.
+ */
+export interface ICafeMenuView {
+    data: CafeMenu | undefined;
+    isError: boolean;
+    refetch: () => void;
 }
 
-const useCafeHoursString = (menuData: IDelayedPromiseState<CafeMenu>): string | undefined => {
+const useCafeMenu = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): ICafeMenuView => {
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const query = useCafeMenuQuery(cafe.id, selectedDate, shouldCountTowardsLastUsed);
+    return {
+        data:    query.data,
+        isError: query.isError,
+        refetch: () => {
+            void query.refetch();
+        },
+    };
+};
+
+const useCafeHoursString = (menuData: ICafeMenuView): string | undefined => {
     return useMemo(() => {
-        const stations = menuData.value?.stations;
+        const stations = menuData.data?.stations;
         if (!stations || stations.length === 0) {
             return undefined;
         }
@@ -58,7 +64,7 @@ const useCafeHoursString = (menuData: IDelayedPromiseState<CafeMenu>): string | 
         }
 
         return `${minutesToTimeString(minOpensAt)} – ${minutesToTimeString(maxClosesAt)}`;
-    }, [menuData.value]);
+    }, [menuData.data]);
 }
 
 interface ICafeMenuViewProps {
@@ -81,7 +87,7 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
-    const menuData = useMenuData(cafe, shouldCountTowardsLastUsed);
+    const menuData = useCafeMenu(cafe, shouldCountTowardsLastUsed);
     const cafeHoursString = useCafeHoursString(menuData);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
@@ -95,11 +101,6 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
         () => getIsRecentlyAvailable(cafe.firstAvailableDate),
         [cafe]
     );
-
-    const { run: retrieveMenuData } = menuData;
-    useEffect(() => {
-        retrieveMenuData();
-    }, [retrieveMenuData]);
 
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {

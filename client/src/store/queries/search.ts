@@ -84,3 +84,40 @@ export const useSearchResultsQuery = (query: string, dateForSearch: Date | undef
         placeholderData: (previous) => previous,
     });
 };
+
+/**
+ * Search results for the map view — no date filter (the map shows availability
+ * across all dates), and disabled when the query is empty.
+ */
+export const useMapSearchResultsQuery = (query: string) =>
+    useQuery({
+        queryKey:        queryKeys.search.mapResults(query),
+        queryFn:         () => DiningClient.retrieveSearchResults({ query }),
+        enabled:         query.length > 0,
+        placeholderData: (previous) => previous,
+    });
+
+/**
+ * "Explore"-mode search: applies the selected date, only returns currently-
+ * available results, and surfaces the `isExplore` flag for server-side
+ * recommendation tweaks.
+ */
+export const useExploreSearchResultsQuery = (query: string, dateForSearch: Date | undefined) => {
+    const dateString = dateForSearch ? toDateString(dateForSearch) : '';
+    return useQuery({
+        queryKey: queryKeys.search.exploreResults(dateString, query),
+        queryFn:  () => DiningClient.retrieveSearchResults({
+            query,
+            date:                 dateForSearch,
+            isExplore:            true,
+            onlyAvailableResults: true,
+        }),
+        enabled: query.length > 0,
+    });
+};
+
+export const useVisitHistoryQuery = (entityType: SearchEntityType, name: string) =>
+    useQuery({
+        queryKey: queryKeys.search.visitHistory(entityType, name),
+        queryFn:  () => DiningClient.retrieveVisitHistory(entityType, name),
+    });

@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { useValueNotifierContext } from '../../../../hooks/events.js';
 import { SelectedDateContext } from '../../../../context/time.js';
-import { DiningClient } from '../../../../api/client/dining.js';
-import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useExploreSearchResultsQuery } from '../../../../store/queries/search.js';
 import { SearchResultSkeleton } from '../../../search/search-result-skeleton.js';
 import { SearchResultsList } from '../../../search/search-results-list.js';
 import { SearchEntityFilterType, SearchResultsViewMode } from '../../../../models/search.js';
@@ -17,27 +16,8 @@ interface ISearchIdeasResults {
 export const SearchIdeasResults: React.FC<ISearchIdeasResults> = ({ searchQuery }) => {
     const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    const retrieveSearchResultsCallback = useCallback(
-        () => DiningClient.retrieveSearchResults({
-            query:                searchQuery,
-            date:                 selectedDate,
-            isExplore:            true,
-            onlyAvailableResults: true
-        }),
-        [searchQuery, selectedDate]
-    );
-
-    const {
-        run: runRetrieveSearchResults,
-        value,
-        error
-    } = useDelayedPromiseState(retrieveSearchResultsCallback, false /*keepLastValue*/);
-
-    const isLoading = !value && !error;
-
-    useEffect(() => {
-        runRetrieveSearchResults();
-    }, [runRetrieveSearchResults]);
+    const { data, isError, refetch } = useExploreSearchResultsQuery(searchQuery, selectedDate);
+    const isLoading = !data && !isError;
 
     return (
         <>
@@ -54,9 +34,9 @@ export const SearchIdeasResults: React.FC<ISearchIdeasResults> = ({ searchQuery 
                 )
             }
             {
-                value && (
+                data && (
                     <SearchResultsList
-                        searchResults={value}
+                        searchResults={data}
                         queryText={searchQuery}
                         filter={SearchEntityFilterType.all}
                         viewMode={SearchResultsViewMode.horizontalScroll}
@@ -72,10 +52,10 @@ export const SearchIdeasResults: React.FC<ISearchIdeasResults> = ({ searchQuery 
                 )
             }
             {
-                error && (
+                isError && (
                     <div className="centered-content">
                         Could not load search results.
-                        <RetryButton onClick={runRetrieveSearchResults}/>
+                        <RetryButton onClick={() => refetch()}/>
                     </div>
                 )
             }

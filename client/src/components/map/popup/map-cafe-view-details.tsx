@@ -1,30 +1,12 @@
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { useValueNotifierContext } from '../../../hooks/events.ts';
 import { CafeView } from '../../../models/cafe.ts';
-import { toDateString } from '@msdining/common/util/date-util';
 import { SelectedDateContext } from '../../../context/time.js';
-import { DiningClient } from '../../../api/client/dining.js';
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
+import { useCafeOverviewQuery } from '../../../store/queries/cafe.ts';
 import { getAllSingleCafesInView } from '../../../util/view.js';
 import { OverviewMemberDetails } from './overview/overview-member-details.js';
 import { RetryButton } from '../../button/retry-button.js';
-
-const useOverviewData = (viewId: string) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-
-    const selectedDateString = useMemo(
-        () => toDateString(selectedDate),
-        [selectedDate]
-    );
-
-    const retrieveOverview = useCallback(
-        () => DiningClient.retrieveOverview(viewId, selectedDateString),
-        [viewId, selectedDateString]
-    );
-
-    return useImmediatePromiseState(retrieveOverview);
-};
 
 interface IMapCafeViewDetails {
     view: CafeView;
@@ -33,21 +15,22 @@ interface IMapCafeViewDetails {
 
 export const MapCafeViewDetails: React.FC<IMapCafeViewDetails> = ({ view, showAllStations = false }) => {
     const { viewsById } = useContext(ApplicationContext);
+    const selectedDate = useValueNotifierContext(SelectedDateContext);
 
-    const { value: overviewData, error, run } = useOverviewData(view.value.id);
+    const { data: overviewData, isError, refetch } = useCafeOverviewQuery(view.value.id, selectedDate);
 
     const cafesInView = useMemo(
         () => getAllSingleCafesInView(view, viewsById),
         [view, viewsById]
     );
 
-    if (error) {
+    if (isError) {
         return (
             <div>
                 <span>
                     Error loading overview data. Please try again.
                 </span>
-                <RetryButton onClick={run}/>
+                <RetryButton onClick={() => refetch()}/>
             </div>
         );
     }

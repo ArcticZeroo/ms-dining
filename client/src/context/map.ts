@@ -1,5 +1,4 @@
 import React, { Dispatch, SetStateAction, useContext } from 'react';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { CafeView } from '../models/cafe.ts';
 import { IQuerySearchResult, MapSearchSortType, SearchEntityFilterType } from '../models/search.ts';
 
@@ -16,7 +15,8 @@ export interface IMapSearchContext {
     setSortType: (type: MapSearchSortType) => void;
     hasUserLocation: boolean;
     hasHomeCafes: boolean;
-    stage: PromiseStage;
+    isPending: boolean;
+    isError: boolean;
 
     retry(): void;
 }
@@ -30,7 +30,8 @@ export const MapSearchContext = React.createContext<IMapSearchContext>({
     sortType:              MapSearchSortType.relevance,
     hasUserLocation:       false,
     hasHomeCafes:          false,
-    stage:                 PromiseStage.notRun,
+    isPending:             false,
+    isError:               false,
     setEntityFilter:       () => {},
     setSortType:           () => {},
     retry:                 () => {},

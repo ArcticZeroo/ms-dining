@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useMap, useMapEvents } from 'react-leaflet';
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
 import { useVisibleViewsForNav } from './views.ts';
 import { useSortContext } from './search-sorting.ts';
 import { computeLabelModes, MarkerLabelMode } from '../util/map.ts';
@@ -8,7 +7,7 @@ import { matchesEntityFilter } from '../util/search.ts';
 import { sortSearchResultsInPlace } from '../util/search-sorting.ts';
 import { CafeView } from '../models/cafe.ts';
 import { IQuerySearchResult, MapSearchSortType, SearchEntityFilterType } from '../models/search.ts';
-import { DiningClient } from '../api/client/dining.ts';
+import { useMapSearchResultsQuery } from '../store/queries/search.ts';
 import { useValueNotifier } from './events.js';
 import { ApplicationSettings } from '../constants/settings.js';
 import { ApplicationContext } from '../context/app.js';
@@ -44,14 +43,14 @@ export const useMarkerLabelModes = (): { views: CafeView[]; labelModes: Map<stri
 };
 
 const useSearchResults = (query: string) => {
-    const callback = useMemo(
-        () => query.length > 0
-            ? () => DiningClient.retrieveSearchResults({ query })
-            : async () => [],
-        [query]
-    );
-
-    return useImmediatePromiseState(callback);
+    const { data, isPending, isError, refetch } = useMapSearchResultsQuery(query);
+    // Empty query short-circuits the query (`enabled: false`), which leaves
+    // it in 'pending'. Mask that for downstream consumers so the search panel
+    // doesn't render a permanent spinner for the empty case.
+    if (query.length === 0) {
+        return { data: [] as IQuerySearchResult[], isPending: false, isError: false, refetch };
+    }
+    return { data, isPending, isError, refetch };
 };
 
 const getMinPrice = (result: IQuerySearchResult): number | null => {
@@ -124,7 +123,7 @@ export const useMapSearch = (query: string) => {
         ApplicationSettings.mapSearchSortType.value = type;
     }, []);
 
-    const { value: searchResults, stage: searchResultStage, run: retrySearch } = useSearchResults(query);
+    const { data: searchResults, isPending: searchResultIsPending, isError: searchResultIsError, refetch: retrySearch } = useSearchResults(query);
 
     const searchSortingContext = useSortContext(query, false /*shouldPromptUserForLocation*/);
 
@@ -255,7 +254,8 @@ export const useMapSearch = (query: string) => {
         setSortType,
         hasUserLocation,
         hasHomeCafes,
-        searchResultStage,
+        searchResultIsPending,
+        searchResultIsError,
         retrySearch
     };
 };

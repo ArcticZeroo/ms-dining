@@ -145,7 +145,7 @@ export const MapPage = () => {
         allResults, entityFilteredResults, searchResultCafeIds,
         entityFilter, setEntityFilter,
         sortType, setSortType, hasUserLocation, hasHomeCafes,
-        searchResultStage, retrySearch
+        searchResultIsPending, searchResultIsError, retrySearch
     } = useMapSearch(query);
 
     const highlight = useMapHighlight(allResults ?? []);
@@ -161,9 +161,10 @@ export const MapPage = () => {
         allResults: allResults ?? [],
         entityFilteredResults: entityFilteredResults ?? [],
         searchResultCafeIds: searchResultCafeIds ?? new Set<string>(),
-        stage: searchResultStage,
+        isPending: searchResultIsPending,
+        isError: searchResultIsError,
         retry: retrySearch
-    } satisfies IMapSearchContext), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, searchResultStage, retrySearch]);
+    } satisfies IMapSearchContext), [query, allResults, entityFilteredResults, searchResultCafeIds, entityFilter, setEntityFilter, sortType, setSortType, hasUserLocation, hasHomeCafes, searchResultIsPending, searchResultIsError, retrySearch]);
 
     return (
         <MapSearchContext.Provider value={searchContextValue}>
