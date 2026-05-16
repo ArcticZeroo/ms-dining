@@ -1,16 +1,10 @@
 import { isSameDate } from '@msdining/common/util/date-util';
 import { useEffect, useMemo, useRef } from 'react';
 import { DiningClient } from '../api/client/dining.ts';
-import { CafeDatePicker } from '../components/cafes/date/date-picker.tsx';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { setSelectedDate, useSelectedDate, useSelectedDateStore } from '../store/zustand/selected-date.ts';
 import { addDateToUrl } from '../util/url.ts';
 import { useValueNotifier } from './events.ts';
-
-export const useDatePicker = () => {
-    useSelectedDateInUrl();
-    return <CafeDatePicker/>;
-}
 
 export const useSelectedDateInUrl = () => {
     const selectedDate = useSelectedDate();

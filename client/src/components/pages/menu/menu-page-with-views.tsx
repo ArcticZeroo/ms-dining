@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDatePicker } from '../../../hooks/date-picker.tsx';
+import { CafeDatePicker } from '../../cafes/date/date-picker.tsx';
 import { CafeView } from '../../../models/cafe.ts';
 import { setPageData } from '../../../util/title.ts';
 import { MoreSettingsButton } from '../../button/more-settings-button.tsx';
@@ -10,8 +10,6 @@ interface ICafePageWithViewProps {
 }
 
 export const MenuPageWithViews: React.FC<ICafePageWithViewProps> = ({ views }) => {
-    const datePicker = useDatePicker();
-
     useEffect(() => {
         const viewNames = views.map(view => view.value.name).join(' + ');
         setPageData(viewNames, `View the cafe menu for ${viewNames} on Microsoft Redmond Campus.`);
@@ -19,7 +17,7 @@ export const MenuPageWithViews: React.FC<ICafePageWithViewProps> = ({ views }) =
 
     return (
         <>
-            {datePicker}
+            <CafeDatePicker/>
             <CombinedCafeMenuList
                 views={views}
                 countTowardsLastUsed={true}

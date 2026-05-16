@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ApplicationSettings } from '../../../constants/settings.ts';
+import { useSelectedDateInUrl } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { useSelectedDate, setSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { DiningClient } from '../../../api/client/dining.ts';
@@ -39,17 +40,7 @@ export const CafeDatePicker: React.FC = () => {
     const selectedDate = useSelectedDate();
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
 
-    // Don't render anything when the user can't change the date AND the
-    // selected date already matches today's actual calendar date. The
-    // weekend-rollover case (selected date is Monday but today is Saturday)
-    // still falls through so the user knows what date the menu reflects.
-    if (!allowFutureMenus && DateUtil.isSameDate(selectedDate, new Date())) {
-        return null;
-    }
-
-    // When future menus are disabled, the user can't actually change the
-    // selected date, so we render as a read-only display.
-    const showControls = allowFutureMenus;
+    useSelectedDateInUrl();
 
     const {
         previousDate,
@@ -82,6 +73,18 @@ export const CafeDatePicker: React.FC = () => {
             selectedDateDisplay
         };
     }, [selectedDate]);
+
+    // Don't render anything when the user can't change the date AND the
+    // selected date already matches today's actual calendar date. The
+    // weekend-rollover case (selected date is Monday but today is Saturday)
+    // still falls through so the user knows what date the menu reflects.
+    if (!allowFutureMenus && DateUtil.isSameDate(selectedDate, new Date())) {
+        return null;
+    }
+
+    // When future menus are disabled, the user can't actually change the
+    // selected date, so we render as a read-only display.
+    const showControls = allowFutureMenus;
 
     const goBackwards = () => {
         if (!canGoBackwards) {
