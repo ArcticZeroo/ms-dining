@@ -24,16 +24,17 @@ export const doMigrationAndRedirectToDiningSite = () => {
     if (!InternalSettings.hasMigratedToDiningSite.value) {
         const migrationData: IMigrationData = {
             internalSettings: {
-                lastUsedCafeIds: serializeIterableStringSetting(InternalSettings.lastUsedCafeIds.value),
-                collapsedStations: serializeIterableStringSetting(InternalSettings.collapsedStations.value),
-                visitorId: InternalSettings.visitorId.value,
-                alias: InternalSettings.alias.value,
-                phoneNumber: InternalSettings.phoneNumber.value,
-                nameOnCard: InternalSettings.nameOnCard.value,
-                postalCode: InternalSettings.postalCode.value,
-                cart: JSON.stringify(InternalSettings.cart.value),
-                hasMigratedToDiningSite: 'true',
+                lastUsedCafeIds:              serializeIterableStringSetting(InternalSettings.lastUsedCafeIds.value),
+                collapsedStations:            serializeIterableStringSetting(InternalSettings.collapsedStations.value),
+                visitorId:                    InternalSettings.visitorId.value,
+                alias:                        InternalSettings.alias.value,
+                phoneNumber:                  InternalSettings.phoneNumber.value,
+                nameOnCard:                   InternalSettings.nameOnCard.value,
+                postalCode:                   InternalSettings.postalCode.value,
+                cart:                         JSON.stringify(InternalSettings.cart.value),
+                hasMigratedToDiningSite:      'true',
                 lastRoamingSettingsUpdateTime: '',
+                mapBottomSheetHeightFraction: InternalSettings.mapBottomSheetHeightFraction.value.toString(),
             },
             applicationSettings: {
                 shouldUseGroups: ApplicationSettings.shouldUseGroups.value.toString(),
@@ -137,6 +138,7 @@ export const checkMigrationCookie = () => {
     InternalSettings.postalCode.value = migrationData.internalSettings.postalCode;
     InternalSettings.cart.value = JSON.parse(migrationData.internalSettings.cart);
     InternalSettings.hasMigratedToDiningSite.value = true;
+    InternalSettings.mapBottomSheetHeightFraction.value = deserializeNumberSetting(migrationData.internalSettings.mapBottomSheetHeightFraction);
 
     ApplicationSettings.shouldUseGroups.value = deserializeBooleanSetting(migrationData.applicationSettings.shouldUseGroups);
     ApplicationSettings.shouldCondenseNumbers.value = deserializeBooleanSetting(migrationData.applicationSettings.shouldCondenseNumbers);

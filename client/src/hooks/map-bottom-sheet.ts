@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { InternalSettings } from '../constants/settings.ts';
 import { DeviceType, useDeviceType } from './media-query.ts';
+import { useValueNotifier } from './events.ts';
 
 const SNAP_POINTS: readonly [number, number, number] = [0.3, 0.5, 0.95] as const;
-const DEFAULT_SNAP = SNAP_POINTS[1];
 const MIN_SNAP = SNAP_POINTS[0];
 
 const FLING_VELOCITY_THRESHOLD = 0.8; // fraction per second
@@ -47,15 +48,28 @@ export const useBottomSheetDrag = () => {
 
     const handleRef = useRef<HTMLDivElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
-    const [heightFraction, setHeightFraction] = useState(DEFAULT_SNAP);
+    // Persisted as an InternalSetting (localStorage) so the panel keeps its
+    // snap position both when the user navigates between map sub-routes (e.g.
+    // closes search and searches again) and across full page reloads.
+    const heightFraction = useValueNotifier(InternalSettings.mapBottomSheetHeightFraction);
+    const setHeightFraction = useCallback((value: number) => {
+        InternalSettings.mapBottomSheetHeightFraction.value = value;
+    }, []);
     const [isDragging, setIsDragging] = useState(false);
     const [showHandle, setShowHandle] = useState(false);
 
-    const heightRef = useRef(DEFAULT_SNAP);
+    const heightRef = useRef(heightFraction);
     const isDraggingRef = useRef(false);
-    const dragStartRef = useRef({ y: 0, fraction: DEFAULT_SNAP });
+    const dragStartRef = useRef({ y: 0, fraction: heightFraction });
     const lastMoveRef = useRef({ y: 0, time: 0 });
     const prevMoveRef = useRef({ y: 0, time: 0 });
+
+    // Keep the ref in sync if some other consumer updates the setting while
+    // we're mounted (or on first mount, when the setting value differs from
+    // the initial useRef seed).
+    useEffect(() => {
+        heightRef.current = heightFraction;
+    }, [heightFraction]);
 
     const checkIfHandleNeeded = useCallback(() => {
         const panel = panelRef.current;
