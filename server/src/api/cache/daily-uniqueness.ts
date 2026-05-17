@@ -6,7 +6,6 @@ import {
 	getFridayForWeek,
 	getIsRecentlyAvailable,
 	getMondayForWeek,
-	isDateOnWeekend,
 	toDateString,
 	yieldDaysInRange
 } from '@msdining/common/util/date-util';
@@ -19,11 +18,18 @@ import { StationThemeClient } from '../storage/clients/station-theme.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
-import { isDateStringWithinMenuWindow } from '../../util/date.js';
+import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../util/date.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 
-const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>>();
+const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, ICafeWeeklyUniqueness>>();
+
+interface ICafeWeeklyUniqueness {
+    uniquenessByStation: Map<string /*stationName*/, IStationUniquenessData>;
+    // Per-station map of normalized item name → number of weekdays the item appeared at that station this week.
+    // Populated from the same metrics pass that produces uniqueness data so callers don't re-walk Mon–Fri menus.
+    itemDaysByStation: Map<string /*stationName*/, Map<string /*normalizedItemName*/, number>>;
+}
 
 const getMenuEntriesForWeek = async (cafeId: string, targetDate: Date): Promise<Array<[Date, Array<ICafeStation>]>> => {
     const mondayDate = getMondayForWeek(targetDate);
@@ -78,12 +84,12 @@ const calculateWeeklyUniquenessMetrics = (entries: Array<[Date, Array<ICafeStati
     return { stationItemsByDay, stationDaysByName, itemCountsByStationName } as const;
 }
 
-const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateString: string): Promise<Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>> => {
+const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateString: string): Promise<Map<string /*dateString*/, ICafeWeeklyUniqueness>> => {
     const targetDate = fromDateString(targetDateString);
     const menuEntries = await getMenuEntriesForWeek(cafeId, targetDate);
 
     const metrics = calculateWeeklyUniquenessMetrics(menuEntries);
-    const uniquenessData = new Map<string /*dateString*/, Map<string /*stationName*/, IStationUniquenessData>>();
+    const weeklyData = new Map<string /*dateString*/, ICafeWeeklyUniqueness>();
     const firstVisitByStationIdPromises = new Map<string, Promise<Date>>();
     const firstVisitByMenuItemIdPromises = new Map<string, Promise<string>>();
 
@@ -92,8 +98,12 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
     for (const [todayDate, todayMenu] of menuEntries) {
         const todayDateString = toDateString(todayDate);
 
-        const todayUniquenessData = uniquenessData.get(todayDateString) ?? new Map<string, IStationUniquenessData>();
-        uniquenessData.set(todayDateString, todayUniquenessData);
+        const todayWeeklyData = weeklyData.get(todayDateString) ?? {
+            uniquenessByStation: new Map<string, IStationUniquenessData>(),
+            itemDaysByStation:   metrics.itemCountsByStationName,
+        };
+        weeklyData.set(todayDateString, todayWeeklyData);
+        const todayUniquenessData = todayWeeklyData.uniquenessByStation;
 
         for (const station of todayMenu) {
             todayUniquenessData.set(station.name, getDefaultUniquenessDataForStation());
@@ -113,11 +123,12 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
     const calculateUniquenessDataForDay = async ([todayDate, todayMenu]: [Date, Array<ICafeStation>], i: number) => {
         const todayDateString = toDateString(todayDate);
 
-        const todayUniquenessData = uniquenessData.get(todayDateString);
-        if (todayUniquenessData == null) {
+        const todayWeeklyData = weeklyData.get(todayDateString);
+        if (todayWeeklyData == null) {
             logError(cafeId, 'Missing uniqueness data for dateString', todayDateString);
             return;
         }
+        const todayUniquenessData = todayWeeklyData.uniquenessByStation;
 
         let yesterdayUniquenessData: Map<string, IStationUniquenessData> | undefined;
         let yesterdayItemsByStation: Map<string /*stationName*/, Set<string>> | undefined;
@@ -125,7 +136,7 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
         const [yesterdayDate] = menuEntries[i - 1] ?? [];
         if (yesterdayDate) {
             const yesterdayDateString = toDateString(yesterdayDate);
-            yesterdayUniquenessData = uniquenessData.get(yesterdayDateString);
+            yesterdayUniquenessData = weeklyData.get(yesterdayDateString)?.uniquenessByStation;
             yesterdayItemsByStation = metrics.stationItemsByDay.get(yesterdayDateString);
         }
 
@@ -216,36 +227,48 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
 
     await Promise.all(menuEntries.map(calculateUniquenessDataForDay));
 
-    return uniquenessData;
+    return weeklyData;
 }
 
-export const retrieveUniquenessDataForCafe = async (cafeId: string, targetDateString: string, forceUpdate: boolean = false) => {
-    const targetDate = fromDateString(targetDateString);
-
-    if (isDateOnWeekend(targetDate)) {
-        throw new Error('Cannot retrieve uniqueness data for a weekend date');
+const retrieveWeeklyDataForCafe = async (cafeId: string, targetDateString: string, forceUpdate: boolean): Promise<ICafeWeeklyUniqueness> => {
+    if (!canFetchMenuForDateString(targetDateString)) {
+        throw new Error(`Cannot retrieve uniqueness data for ${targetDateString} (outside menu window or weekend)`);
     }
 
     // Lock the whole date-string map for each cafe since we update multiple date strings at once.
-    const cafeUniquenessData = await UNIQUENESS_DATA.update(cafeId, async (cafeUniquenessData = new Map()) => {
-        if (!cafeUniquenessData.has(targetDateString) || forceUpdate) {
-            const calculatedUniquenessData = await calculateWeeklyUniquenessDataForCafe(cafeId, targetDateString);
-            for (const [dateString, data] of calculatedUniquenessData.entries()) {
-                cafeUniquenessData.set(dateString, data);
+    const cafeWeeklyData = await UNIQUENESS_DATA.update(cafeId, async (cafeWeeklyData = new Map()) => {
+        if (!cafeWeeklyData.has(targetDateString) || forceUpdate) {
+            const calculated = await calculateWeeklyUniquenessDataForCafe(cafeId, targetDateString);
+            for (const [dateString, data] of calculated.entries()) {
+                cafeWeeklyData.set(dateString, data);
             }
         }
 
-        return cafeUniquenessData;
+        return cafeWeeklyData;
     });
 
-    // Map<stationName, IStationUniquenessData>
-    const uniquenessDataForDate = cafeUniquenessData.get(targetDateString);
-    if (uniquenessDataForDate == null) {
+    const weeklyDataForDate = cafeWeeklyData.get(targetDateString);
+    if (weeklyDataForDate == null) {
         // Probably shouldn't ever happen. Could happen if we don't have menus for the given date.
         throw new Error(`Unable to find uniqueness data for date ${targetDateString} in cafe id ${cafeId}`);
     }
 
-    return uniquenessDataForDate;
+    return weeklyDataForDate;
+}
+
+export const retrieveUniquenessDataForCafe = async (cafeId: string, targetDateString: string, forceUpdate: boolean = false): Promise<Map<string /*stationName*/, IStationUniquenessData>> => {
+    const weeklyData = await retrieveWeeklyDataForCafe(cafeId, targetDateString, forceUpdate);
+    return weeklyData.uniquenessByStation;
+}
+
+/**
+ * Returns the per-station-per-normalized-item-name count of weekdays each item appeared at
+ * the cafe during the week containing the target date. Shares the uniqueness cache so this
+ * is essentially free if uniqueness data for the same date was already computed.
+ */
+export const retrieveItemAppearancesForCafe = async (cafeId: string, targetDateString: string): Promise<Map<string /*stationName*/, Map<string /*normalizedItemName*/, number>>> => {
+    const weeklyData = await retrieveWeeklyDataForCafe(cafeId, targetDateString, false);
+    return weeklyData.itemDaysByStation;
 }
 
 CACHE_EVENTS.on('menuPublished', (event: IMenuPublishEvent) => {

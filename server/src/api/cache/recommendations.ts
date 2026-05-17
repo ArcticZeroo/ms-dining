@@ -5,7 +5,7 @@ import {
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { setInterval } from 'node:timers';
-import { isDateStringWithinMenuWindow } from '../../util/date.js';
+import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../util/date.js';
 import { getNamespaceLogger, logError } from '../../util/log.js';
 import { LockedExpiringMap } from '../lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
@@ -20,6 +20,7 @@ import { getBasedOnReviews } from '../recommendations/signals/user-specific/base
 import { getTrySomethingDifferent } from '../recommendations/signals/user-specific/try-something-different.js';
 import { buildProximityWeightMap } from '../../util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
+import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { IServerReview } from '../../models/review.js';
 import { Semaphore } from '@frozor/lock';
@@ -144,7 +145,7 @@ export const getRecommendationsAsync = async ({
 												  favoriteItemNames,
 												  cafeIdFilter,
 											  }: IGetRecommendationsParams): Promise<Array<IRecommendationSection>> => {
-	if (!isDateStringWithinMenuWindow(dateString)) {
+	if (!canFetchMenuForDateString(dateString)) {
 		return [];
 	}
 
@@ -162,6 +163,7 @@ export const getRecommendationsAsync = async ({
 	const getAllUserReviews = () => allUserReviews.value;
 
 	const sectionsByType = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
+	const itemWeights = new Map<string, number>();
 
 	const recommendations = await Promise.allSettled([
 		...cafeIds.map(async (cafeId) => {
@@ -172,7 +174,14 @@ export const getRecommendationsAsync = async ({
 				cafeId
 			});
 
-			const cafeRecommendations = await getRecommendationsForCafe(context);
+			const [cafeRecommendations, cafeItemWeights] = await Promise.all([
+				getRecommendationsForCafe(context),
+				buildItemWeightsForCafe(cafeId, dateString),
+			]);
+			for (const [menuItemId, weight] of cafeItemWeights) {
+				itemWeights.set(menuItemId, weight);
+			}
+
 			if (cafeRecommendations.has(RecommendationSectionType.newAtFavorites) && !context.homepageIds.includes(context.cafeId)) {
 				cafeRecommendations.delete(RecommendationSectionType.newAtFavorites);
 			}
@@ -197,6 +206,7 @@ export const getRecommendationsAsync = async ({
 		sectionsByType,
 		seed,
 		proximityWeights,
+		itemWeights: itemWeights.size > 0 ? itemWeights : null,
 	});
 };
 
