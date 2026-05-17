@@ -37,7 +37,7 @@ export const mergeHydratedItems = (
     return merged;
 };
 
-const hydrateCartIntoStore = async (): Promise<void> => {
+const hydrateCartIntoStore = async (): Promise<true> => {
     // Read the latest persisted cart at call time. A snapshot at module load
     // would mean a retry after the user removed missing items / added items
     // rehydrates the original (stale) boot data.
@@ -46,7 +46,7 @@ const hydrateCartIntoStore = async (): Promise<void> => {
     if (!hasBootData(cartData)) {
         useCartStore.getState().setItems(new Map());
         useCartStore.getState().setMissingItems(new Map());
-        return;
+        return true;
     }
 
     try {
@@ -56,6 +56,7 @@ const hydrateCartIntoStore = async (): Promise<void> => {
         const current = useCartStore.getState().items;
         useCartStore.getState().setItems(mergeHydratedItems(current, data.foundItemsByCafeId));
         useCartStore.getState().setMissingItems(data.missingItemsByCafeId);
+        return true;
     } catch (err) {
         // Preserve every booted item as "missing" so the user can retry or
         // remove them manually rather than losing their cart silently.

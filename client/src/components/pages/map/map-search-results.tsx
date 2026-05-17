@@ -61,7 +61,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
         return (
             <div className="panel-content map-search-status flex-col">
                 <span className="subtitle">No results for "{query}"</span>
-                <SimilarQueries queryText={query} compact/>
+                <SimilarQueries queryText={query}/>
             </div>
         );
     }
@@ -92,7 +92,6 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
                     </button>
                 )}
             </div>
-            <SimilarQueries queryText={query} compact/>
             <span className="subtitle map-search-result-count">
                 {results.length} {pluralize('result', results.length)} for "{query}"
             </span>
@@ -111,6 +110,7 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
                     />
                 ))}
             </div>
+            <SimilarQueries queryText={query}/>
         </div>
     );
 };
