@@ -20,7 +20,7 @@
  * the real shape of the production code.
  */
 
-import { after, before, test } from 'node:test';
+import { after, before, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
 import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
@@ -44,11 +44,21 @@ const SHUTDOWN_CAFE_ID = 'cafe83';     // small kiosk — closed for maintenance
 const UNAVAILABLE_CAFE_ID = 'cafe109'; // returns 410 on concepts call
 const SHUTDOWN_MESSAGE = 'Closed for maintenance — back Monday';
 
+// Pinned weekday so production weekend-skip logic doesn't short-circuit boot.
+const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday
+
 let ctx: IntegrationTestContext;
 let baseUrl: string;
 let todayString: string;
 
 before(async () => {
+    // Pin "now" to a weekday so production weekend-skip logic doesn't
+    // short-circuit boot, AND so any time-sensitive code path during the
+    // test (cache TTLs, menu date filters, etc.) sees a stable clock.
+    // Restored in after().
+    mock.timers.enable({ apis: ['Date'], now: FAKE_NOW });
+    todayString = DateUtil.toDateString(new Date());
+
     ctx = await createIntegrationTestContext();
 
     // Skip weekly repair so the test only syncs today (not 5+ days).
@@ -71,11 +81,11 @@ before(async () => {
     await performMenuBootTasks();
 
     baseUrl = await ctx.startWebserver();
-    todayString = DateUtil.toDateString(new Date());
 }, { timeout: 120_000 });
 
 after(async () => {
     await ctx.cleanup();
+    mock.timers.reset();
 });
 
 test('boot syncs all cafes with the expected entity counts', async () => {
