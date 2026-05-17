@@ -74,4 +74,18 @@ describe('mergeHydratedItems', () => {
 
         assert.strictEqual(result.get('cafe-1')?.get('shared')?.quantity, 3);
     });
+
+    it('skips empty hydrated buckets so ghost cafes do not appear in the merged cart', () => {
+        // Regression: if every item for a cafe was missing during hydration,
+        // upstream callers used to register an empty cafe-bucket. That
+        // showed up as a ghost cafe header in the order UI and bumped
+        // cart.size enough to trip the multi-cafe warning.
+        const current: CartItemsByCafeId = new Map();
+        const hydrated: CartItemsByCafeId = new Map([['cafe-ghost', new Map()]]);
+
+        const result = mergeHydratedItems(current, hydrated);
+
+        assert.strictEqual(result.size, 0);
+        assert.strictEqual(result.has('cafe-ghost'), false);
+    });
 });

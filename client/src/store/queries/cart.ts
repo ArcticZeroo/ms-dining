@@ -25,6 +25,14 @@ export const mergeHydratedItems = (
         merged.set(cafeId, new Map(cafeItems));
     }
     for (const [cafeId, hydratedItems] of hydrated) {
+        // Defensive: skip empty buckets so a hydration response missing every
+        // item for a cafe doesn't show up as a ghost cafe-header in the order
+        // UI. OrderingClient.hydrateCart already filters these out, but a
+        // future code path that calls setItems directly could reintroduce
+        // them.
+        if (hydratedItems.size === 0) {
+            continue;
+        }
         let bucket = merged.get(cafeId);
         if (!bucket) {
             bucket = new Map();

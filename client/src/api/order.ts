@@ -146,7 +146,12 @@ export abstract class OrderingClient {
                 itemsForCafeById.set(cartItem.id, cartItem);
             }
 
-            hydratedData.foundItemsByCafeId.set(cafeId, itemsForCafeById);
+            // Don't register empty buckets — they'd show up downstream as
+            // ghost cafes in "Your Order" (header + no items) and bump
+            // cart.size enough to trip the multi-cafe warning.
+            if (itemsForCafeById.size > 0) {
+                hydratedData.foundItemsByCafeId.set(cafeId, itemsForCafeById);
+            }
         }
 
         return hydratedData;
