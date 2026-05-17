@@ -15,7 +15,12 @@ export const useSelectedDateInUrl = () => {
 
 export const useIsTodaySelected = () => {
     const selectedDate = useSelectedDate();
-    return isSameDate(selectedDate, new Date());
+    // Compare against DiningClient.getTodayDateForMenu() (not new Date()) so
+    // weekends — when "today's menu" is Monday's — still count as "today" for
+    // gating order/cart UI. Otherwise add-to-cart and the cart popup vanish
+    // on Saturday/Sunday despite the user looking at the menu they could
+    // actually order from.
+    return isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
 }
 
 export const useDateForSearch = () => {
