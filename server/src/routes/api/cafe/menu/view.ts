@@ -3,6 +3,7 @@ import { IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/m
 import { ICafeMenuResponse, MenuResponse } from '@msdining/common/models/http';
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
+import { menuEtagMiddleware } from '../../../../middleware/menu-etag.js';
 import { ICafeStation, IMenuItemBase } from '../../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../../util/date.js';
@@ -127,6 +128,7 @@ export const registerViewRoutes = (parent: Router) => {
 
 	router.get('/menu',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+		menuEtagMiddleware,
 		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 			const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
@@ -152,6 +154,7 @@ export const registerViewRoutes = (parent: Router) => {
 
 	router.get('/',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+		menuEtagMiddleware,
 		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
 		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 			const [menuStations, uniquenessData] = await Promise.all([
@@ -164,6 +167,7 @@ export const registerViewRoutes = (parent: Router) => {
 
 	router.get('/overview-summary',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverviewSummary),
+		menuEtagMiddleware,
 		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
 		async ctx => {
 			const id = ctx.params.id?.toLowerCase();
