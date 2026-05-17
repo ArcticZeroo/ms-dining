@@ -8,21 +8,26 @@
  * dirty set, so a cron re-sync that produced identical data does NOT bump
  * the watermark and clients keep getting 304s.
  *
- * Server restart resets the map. Clients then get one full payload (no
- * If-None-Match → 200 with the fresh ETag) and revalidations resume.
- * No persistence is needed.
+ * Cafe-days that haven't seen a menuPublished event in this server's
+ * lifetime — typically every cafe-day right after a restart, since boot
+ * skips re-sync when the DB already has today's menus — fall back to the
+ * server-start timestamp. That gives every menu response a stable ETag
+ * for the duration of one server lifetime; a restart bumps every fallback
+ * ETag once and clients re-download once.
  */
 
 import { CACHE_EVENTS } from '../storage/events.js';
 import { hasAnythingChangedInPublishedMenu } from '../../models/storage-events.js';
+
+const SERVER_START_MS = Date.now();
 
 const watermarks = new Map<string, number>();
 
 const getKey = (cafeId: string, dateString: string): string =>
     `${cafeId}@${dateString}`;
 
-export const getMenuWatermark = (cafeId: string, dateString: string): number | undefined =>
-    watermarks.get(getKey(cafeId, dateString));
+export const getMenuWatermark = (cafeId: string, dateString: string): number =>
+    watermarks.get(getKey(cafeId, dateString)) ?? SERVER_START_MS;
 
 CACHE_EVENTS.on('menuPublished', (event) => {
     if (!hasAnythingChangedInPublishedMenu(event)) {

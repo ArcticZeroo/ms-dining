@@ -28,13 +28,7 @@ export const menuEtagMiddleware = async (ctx: Router.RouterContext, next: Koa.Ne
         return;
     }
 
-    const watermark = getMenuWatermark(cafeId, dateString);
-    if (watermark == null) {
-        await next();
-        return;
-    }
-
-    const etag = formatEtag(watermark);
+    const etag = formatEtag(getMenuWatermark(cafeId, dateString));
 
     if (ctx.get('If-None-Match') === etag) {
         ctx.status = 304;
