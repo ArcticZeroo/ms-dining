@@ -6,7 +6,7 @@ import { ApplicationSettings } from '../../../../constants/settings.ts';
 import { knownTags } from '../../../../constants/tags.tsx';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../../context/html.ts';
 import { CurrentCafeContext, StationInfoContext } from '../../../../context/menu-item.ts';
-import { useIsFavoriteItem, useIsOnlineOrderingAllowedForSelectedDate } from '../../../../hooks/cafe.ts';
+import { useIsFavoriteItem, useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { formatPrice, getMinRequiredPrice, hasModifierPriceBeyondMinimum } from '../../../../util/cart.ts';
 import { getSearchAnchorId } from '../../../../util/link.ts';
@@ -53,7 +53,7 @@ const menuItemModalSymbol = Symbol('menuItem');
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const cafe = useContext(CurrentCafeContext);
     const stationInfo = useContext(StationInfoContext);
-    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowedForSelectedDate();
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCalories = useValueNotifier(ApplicationSettings.showCalories);
     const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);

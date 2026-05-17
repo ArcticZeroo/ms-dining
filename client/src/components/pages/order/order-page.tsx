@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DebugSettings } from '../../../constants/settings.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { useCartHydrationStatus } from '../../../store/queries/cart.ts';
+import { useOnlineOrderingState } from '../../../hooks/cafe.ts';
+import { useCartHydrationQuery, useCartHydrationStatus } from '../../../store/queries/cart.ts';
 import { usePrepareAllPaymentsMutation, useCartSessionQuery } from '../../../store/queries/ordering.ts';
 import { useCartStore } from '../../../store/zustand/cart.ts';
 import { useAllCafesComplete, useCompletionResults, useOrderingStore } from '../../../store/zustand/ordering.ts';
@@ -11,6 +10,7 @@ import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.ts
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
+import { OnlineOrderingUnavailableNotice } from '../../notice/online-ordering-unavailable-notice.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { CartHydrationView } from '../../order/cart/cart-hydration-view.tsx';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
@@ -22,9 +22,13 @@ import { OrderStatus } from '../../order/status/order-status.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 
 export const OrderPage = () => {
-    const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
+    const orderingState = useOnlineOrderingState();
     const cart = useCartStore((state) => state.items);
     const missingItemsByCafeId = useCartStore((state) => state.missingItemsByCafeId);
+    // Mount the hydration query so it kicks off when the user lands here.
+    // It self-gates on useIsOnlineOrderingAllowed, so this is a no-op when
+    // ordering isn't allowed (we return early below).
+    useCartHydrationQuery();
     const hydrationStatus = useCartHydrationStatus();
     const navigate = useNavigate();
 
@@ -40,6 +44,10 @@ export const OrderPage = () => {
         useOrderingStore.getState().reset();
     }, []);
 
+    if (!orderingState.allowed) {
+        return <OnlineOrderingUnavailableNotice state={orderingState}/>;
+    }
+
     if (hydrationStatus.isPending) {
         return (
             <div className="flex">
@@ -51,7 +59,7 @@ export const OrderPage = () => {
 
     const isPaymentStarted = formData != null;
     const hasUnhydratedItems = missingItemsByCafeId.size > 0;
-    const isCheckoutAllowed = allowOnlineOrdering && cart.size > 0;
+    const isCheckoutAllowed = cart.size > 0;
 
     // Show the completion view even after the cart has been emptied (each
     // successful cafe payment removes that cafe from the cart, so the very last

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrderingClient } from '../../api/order.ts';
 import { InternalSettings } from '../../constants/settings.ts';
+import { useIsOnlineOrderingAllowed } from '../../hooks/cafe.ts';
 import { CartItemsByCafeId, ISerializedCartItemsByCafeId, ISerializedCartItemWithName } from '../../models/cart.ts';
 import { useCartStore } from '../zustand/cart.ts';
 import { queryKeys } from './keys.ts';
@@ -80,17 +81,24 @@ const hydrateCartIntoStore = async (): Promise<true> => {
  * the Zustand cart store; the query itself only tracks {pending, success, error}
  * so consumers can render loading / retry UI.
  *
- * Mount this once near the root so hydration kicks off even when no cart UI is
- * visible (otherwise navigating to a cart-free page would skip hydration and
- * any later add-to-cart would clobber the saved cart).
+ * Lazy and self-gating: only fires when online ordering is currently allowed
+ * (no weekend, today selected, setting enabled). Probing the server outside
+ * that window is guaranteed to fail because today's menu doesn't exist on
+ * weekends, etc.
+ *
+ * Mount this from every surface that reads cart items. Multiple mounts share
+ * the same query — TanStack dedupes by queryKey, so the request fires at
+ * most once per page load when ordering is allowed.
  */
 export const useCartHydrationQuery = () => {
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
     return useQuery({
         queryKey:  queryKeys.cart.hydration,
         queryFn:   hydrateCartIntoStore,
         staleTime: Infinity,
         gcTime:    Infinity,
         retry:     false,
+        enabled:   isOnlineOrderingAllowed,
     });
 };
 
@@ -103,11 +111,15 @@ export interface ICartHydrationStatus {
 /**
  * Consumer-facing slice of the hydration query: just {pending, error, retry}.
  * Read missing items separately via `useCartStore(s => s.missingItemsByCafeId)`.
+ *
+ * Reports isPending=false when ordering isn't allowed so consumers don't
+ * render a perpetual loading spinner.
  */
 export const useCartHydrationStatus = (): ICartHydrationStatus => {
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
     const query = useCartHydrationQuery();
     return {
-        isPending: query.isPending,
+        isPending: isOnlineOrderingAllowed && query.isPending,
         isError:   query.isError,
         retry: () => {
             void query.refetch();

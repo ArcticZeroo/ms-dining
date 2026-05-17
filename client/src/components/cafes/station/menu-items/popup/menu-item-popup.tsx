@@ -10,7 +10,7 @@ import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
-import { useIsOnlineOrderingAllowedForSelectedDate } from '../../../../../hooks/cafe.ts';
+import { useIsOnlineOrderingAllowed } from '../../../../../hooks/cafe.ts';
 import { MenuItemButtons } from './menu-item-buttons.tsx';
 import { usePopupCloserSymbol } from '../../../../../hooks/popup.ts';
 
@@ -57,8 +57,11 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
     const cartAddOrEditItem = useCartStore((state) => state.addOrEditItem);
     const closeModal = usePopupCloserSymbol();
 
-    const isOnlineOrderingAllowedForSelectedDate = useIsOnlineOrderingAllowedForSelectedDate();
-    const isOnlineOrderingAllowed = fromCartItem != null || isOnlineOrderingAllowedForSelectedDate;
+    const isOnlineOrderingAllowedNow = useIsOnlineOrderingAllowed();
+    // Editing an existing cart item is always allowed (the user clearly
+    // already had ordering on when they put it there); only block new
+    // adds when ordering isn't allowed right now.
+    const isOnlineOrderingAllowed = fromCartItem != null || isOnlineOrderingAllowedNow;
 
     const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
         return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();

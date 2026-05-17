@@ -2,8 +2,7 @@ import { CafeTypes } from '@msdining/common';
 import React from 'react';
 import { getChoiceHtmlId, maybeFormatPrice } from '../../../util/cart.ts';
 import { classNames } from '../../../util/react.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { DebugSettings } from '../../../constants/settings.ts';
+import { useIsOnlineOrderingAllowed } from '../../../hooks/cafe.ts';
 
 interface IModifierCheckboxesProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -17,7 +16,7 @@ export const ModifierCheckboxes: React.FC<IModifierCheckboxesProps> = ({
     selectedChoiceIds,
     onSelectedChoiceIdsChanged
 }) => {
-    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
     const isAtMaximum = selectedChoiceIds.size >= modifier.maximum;
 
     const handleChoiceChange = (choiceId: string) => {

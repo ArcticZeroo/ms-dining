@@ -117,16 +117,19 @@ export const serializeCartForPersistence = (
     return serializedValue;
 };
 
-// Persist cart + missing items whenever they change, but only after the
-// hydration query has settled. Persisting before that would overwrite the
-// boot data before we have a chance to read it back from the server.
+// Persist cart + missing items whenever they change, BUT skip writes while a
+// hydration query is actively in-flight. Persisting mid-hydration could
+// clobber the boot data before we've finished reading it back. If hydration
+// never ran (status === undefined, e.g. user never opened a cart surface)
+// writes are still safe because nothing has been pulled into memory yet —
+// the localStorage entry stays as-is until something does pull it.
 useCartStore.subscribe((state, prev) => {
     if (state.items === prev.items && state.missingItemsByCafeId === prev.missingItemsByCafeId) {
         return;
     }
 
     const hydrationStatus = queryClient.getQueryState(queryKeys.cart.hydration)?.status;
-    if (hydrationStatus !== 'success' && hydrationStatus !== 'error') {
+    if (hydrationStatus === 'pending') {
         return;
     }
 
