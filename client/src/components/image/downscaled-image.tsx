@@ -43,10 +43,13 @@ export const DownscaledImage: React.FC<IDownscaledImageProps> = ({
             .catch(err => console.error('Could not decode image:', err));
     }, [src, maxWidth, maxHeight]);
 
+    // Pass undefined (not '') so React omits the src attribute entirely
+    // while the off-screen decode + downscale is in flight. Firefox warns
+    // on src="" and historically some browsers would re-download the page.
     return (
         <img
             decoding="async"
-            src={imageData}
+            src={imageData || undefined}
             alt={alt}
             className={className}
             {...imageProps}
