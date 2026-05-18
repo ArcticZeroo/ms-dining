@@ -3,7 +3,7 @@ import Koa, { Middleware } from 'koa';
 import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
 import { IServerSearchResult } from '../models/search.js';
 import { ISearchResponseResult } from '@msdining/common/models/http';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
+import { SearchEntityType } from '@msdining/common/models/search';
 import { getStationLogoUrl, resolveViewToCafes } from './cafe.js';
 import { jsonStringifyWithoutNull } from './serde.js';
 import { getDevKey } from '../constants/env.js';

@@ -2,7 +2,6 @@ import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
 import { NumberUtil } from '@msdining/common';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
-import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { ISearchQuery } from '@msdining/common/models/search';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
@@ -12,8 +11,7 @@ import {
 	getEntityTypeAndName,
 	getTrimmedQueryParam,
 	serializeMapOfStringToSet,
-	serializeSearchResults,
-	supportsVersionTag
+	serializeSearchResults
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug, logError } from '../../../util/log.js';
