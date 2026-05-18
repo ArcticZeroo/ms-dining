@@ -1,8 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
 import { getChoiceHtmlId, maybeFormatPrice } from '../../../util/cart.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { DebugSettings } from '../../../constants/settings.ts';
+import { useIsOnlineOrderingAllowed } from '../../../hooks/cafe.ts';
 
 interface IModifierRadioProps {
     modifier: CafeTypes.IMenuItemModifier;
@@ -16,7 +15,7 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({
     selectedChoiceId,
     onSelectedChoiceIdChanged
 }) => {
-    const isOnlineOrderingAllowed = useValueNotifier(DebugSettings.allowOnlineOrdering);
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
     const noneChoiceId = `${modifier.id}-none`;
 
     return (

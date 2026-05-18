@@ -1,0 +1,90 @@
+{
+  "cafe121-stn-indian-kitchen-9948": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-healthy": {
+        "tagId": "tag-healthy",
+        "tagName": "healthy"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  },
+  "cafe121-stn-taqueria-5624": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      }
+    }
+  },
+  "cafe121-stn-ramen-bar-9637": {
+    "customLabels": {
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      }
+    }
+  },
+  "cafe121-stn-pizza---pasta-2206": {
+    "customLabels": {
+      "tag-healthy": {
+        "tagId": "tag-healthy",
+        "tagName": "healthy"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  }
+}

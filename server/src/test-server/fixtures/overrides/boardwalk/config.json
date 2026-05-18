@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-boardwalk",
+  "contextID": "ctx-boardwalk-2065",
+  "theme": {
+    "logoImage": "boardwalk-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-boardwalk-475",
+        "storeName": "boardwalk"
+      },
+      "displayProfileId": [
+        "dp-boardwalk-868"
+      ]
+    }
+  ],
+  "properties": {}
+}

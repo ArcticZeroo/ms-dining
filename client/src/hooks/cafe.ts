@@ -1,3 +1,4 @@
+import { DateUtil } from '@msdining/common';
 import { ISearchQuery, SearchEntityType } from '@msdining/common/models/search';
 import { ILocationCoordinates } from '@msdining/common/models/util';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
@@ -80,11 +81,46 @@ export const useIsPriceAllowed = () => {
     );
 };
 
-export const useIsOnlineOrderingAllowedForSelectedDate = () => {
-    const isTodaySelected = useIsTodaySelected();
+export type OnlineOrderingBlockedReason = 'setting-disabled' | 'weekend' | 'today-not-selected';
+
+/**
+ * Discriminated description of whether online ordering is currently usable
+ * end-to-end. When `allowed` is false, `reason` tells consumers WHY so
+ * notices can be contextual.
+ *
+ * Reasons:
+ *  - 'setting-disabled': debug-flag is off (the default; ordering is an
+ *    experimental opt-in feature).
+ *  - 'weekend': the server has no menu for today's calendar date because
+ *    today is Saturday/Sunday. Hydration would fail and the server-side
+ *    order-prepare endpoint can't price anything.
+ *  - 'today-not-selected': the user is browsing a future/past menu via the
+ *    date picker. Ordering targets the current calendar day's menu only.
+ */
+export type IOnlineOrderingState =
+    | { allowed: true }
+    | { allowed: false; reason: OnlineOrderingBlockedReason };
+
+export const useOnlineOrderingState = (): IOnlineOrderingState => {
     const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
-    return isTodaySelected && isOnlineOrderingEnabled;
+    const isTodaySelected = useIsTodaySelected();
+
+    if (!isOnlineOrderingEnabled) {
+        return { allowed: false, reason: 'setting-disabled' };
+    }
+
+    if (DateUtil.isDateOnWeekend(new Date())) {
+        return { allowed: false, reason: 'weekend' };
+    }
+
+    if (!isTodaySelected) {
+        return { allowed: false, reason: 'today-not-selected' };
+    }
+
+    return { allowed: true };
 };
+
+export const useIsOnlineOrderingAllowed = (): boolean => useOnlineOrderingState().allowed;
 
 export const useViewsSortedByDistance = (locations: ILocationCoordinates[]) => {
     const views = useViewsForNav();

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { InternalSettings } from '../../../constants/settings.ts';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
+import { IPaymentFormData } from '../../../store/zustand/ordering.ts';
 import { classNames } from '../../../util/react.ts';
 import {
     expectValid,
@@ -10,10 +11,7 @@ import { PaymentField } from './payment-field.tsx';
 
 import './payment-info-form.css';
 
-export interface IPaymentFormData {
-    phoneNumberWithCountryCode: string;
-    alias: string;
-}
+export type { IPaymentFormData };
 
 interface IPaymentInfoFormProps {
     isPrepareStarted: boolean;

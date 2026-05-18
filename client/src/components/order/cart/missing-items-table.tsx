@@ -2,9 +2,8 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { CartHydrationContext } from '../../../context/cart.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
-import { ISerializedCartItemWithName } from '../../../models/cart.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { MissingCartItemRow } from './missing-cart-item-row.tsx';
@@ -12,8 +11,7 @@ import { MissingCartItemRow } from './missing-cart-item-row.tsx';
 export const MissingItemsTable = () => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const cartHydration = useValueNotifierContext(CartHydrationContext);
-    const missingItems = cartHydration.missingItemsByCafeId ?? new Map<string, Array<ISerializedCartItemWithName>>();
+    const missingItems = useCartStore((state) => state.missingItemsByCafeId);
 
     // TODO: Consider folding this table into the main one
     return (
@@ -43,11 +41,12 @@ export const MissingItemsTable = () => {
                                         }
                                     </th>
                                     {
-                                        items.map(item => (
+                                        items.map((item, index) => (
                                             <MissingCartItemRow
                                                 key={item.itemId}
                                                 cafeId={cafeId}
                                                 item={item}
+                                                index={index}
                                             />
                                         ))
                                     }

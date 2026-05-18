@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-one-esterra",
+  "contextID": "ctx-one-esterra-2055",
+  "theme": {
+    "logoImage": "one-esterra-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-one-esterra-580",
+        "storeName": "one-esterra"
+      },
+      "displayProfileId": [
+        "dp-one-esterra-629"
+      ]
+    }
+  ],
+  "properties": {}
+}

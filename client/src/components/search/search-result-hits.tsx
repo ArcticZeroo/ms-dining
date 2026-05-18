@@ -7,7 +7,7 @@ import { getViewName } from '../../util/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import React, { useContext } from 'react';
-import { SelectedDateContext } from '../../context/time.ts';
+import { setSelectedDate } from '../../store/zustand/selected-date.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { isSameDate } from '@msdining/common/util/date-util';
@@ -41,7 +41,6 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-    const selectedDateNotifier = useContext(SelectedDateContext);
     const shouldCondenseNumbers = useValueNotifier(ApplicationSettings.shouldCondenseNumbers);
     const shouldUseCompactMode = useValueNotifier(ApplicationSettings.shouldUseCompactMode);
     const shouldShowPriceInSearch = useValueNotifier(ApplicationSettings.showPriceInSearch);
@@ -79,7 +78,7 @@ export const SearchResultHits: React.FC<ISearchResultHitsProps> = ({
 
         const onLinkClick = () => {
             if (targetDate != null) {
-                selectedDateNotifier.value = targetDate;
+                setSelectedDate(targetDate);
             }
         };
 

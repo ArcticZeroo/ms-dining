@@ -5,13 +5,13 @@ import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from '../prov
 
 const DEFAULT_MAX_TOKENS = 1024;
 
-const getClient = lazy(() => new OpenAI({
+const CLIENT = lazy(() => new OpenAI({
     apiKey: getOpenAiKey()
 }));
 
 export const openAiProvider: IAiProvider = {
     async retrieveTextCompletion(request: IAiTextCompletionRequest): Promise<string> {
-        const response = await getClient().chat.completions.create({
+        const response = await CLIENT.value.chat.completions.create({
             model:                'gpt-5.2',
             max_completion_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             messages:             [
@@ -40,7 +40,7 @@ export const openAiProvider: IAiProvider = {
     },
 
     async retrieveVisionCompletion(request: IAiVisionRequest): Promise<string> {
-        const response = await getClient().chat.completions.create({
+        const response = await CLIENT.value.chat.completions.create({
             model:                'gpt-5.2',
             max_completion_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             messages:             [
@@ -77,5 +77,19 @@ export const openAiProvider: IAiProvider = {
         }
 
         return message;
+    },
+
+    async retrieveEmbedding(text: string): Promise<number[]> {
+        const response = await CLIENT.value.embeddings.create({
+            model: 'text-embedding-3-small',
+            input: text
+        });
+
+        const data = response.data[0];
+        if (!data) {
+            throw new Error('OpenAI did not return embeddings');
+        }
+
+        return data.embedding;
     }
 };

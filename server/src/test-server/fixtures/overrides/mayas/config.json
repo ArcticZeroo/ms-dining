@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-mayas",
+  "contextID": "ctx-mayas-1126",
+  "theme": {
+    "logoImage": "mayas-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-mayas-252",
+        "storeName": "mayas"
+      },
+      "displayProfileId": [
+        "dp-mayas-544"
+      ]
+    }
+  ],
+  "properties": {}
+}

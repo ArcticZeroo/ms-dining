@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-studioa",
+  "contextID": "ctx-studioa-7058",
+  "theme": {
+    "logoImage": "studioa-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-studioa-203",
+        "storeName": "studioa"
+      },
+      "displayProfileId": [
+        "dp-studioa-470"
+      ]
+    }
+  ],
+  "properties": {}
+}

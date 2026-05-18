@@ -1,7 +1,7 @@
 import { ApplicationSettings } from '../../../constants/settings.ts';
-import { useDatePicker } from '../../../hooks/date-picker.tsx';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { MoreSettingsButton } from '../../button/more-settings-button.tsx';
+import { CafeDatePicker } from '../../cafes/date/date-picker.tsx';
 import { HomepageSettings } from '../../settings/homepage-settings.tsx';
 import { HomeExplore } from './explore/home-explore.tsx';
 import { HomeMap } from './home-map.tsx';
@@ -21,7 +21,6 @@ const useShouldShowWelcomeMessage = () => {
 };
 
 export const HomePage = () => {
-    const datePicker = useDatePicker();
     const isNewUser = useShouldShowWelcomeMessage();
     const isRecommendationsEnabled = useValueNotifier(ApplicationSettings.showRecommendationsOnHome);
 
@@ -34,9 +33,7 @@ export const HomePage = () => {
                     <HomeWelcomeMessage/>
                 )
             }
-            {
-                datePicker
-            }
+            <CafeDatePicker/>
             {
                 isRecommendationsEnabled && (
                     <HomeRecommendationsView/>

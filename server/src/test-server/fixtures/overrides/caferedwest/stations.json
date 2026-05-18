@@ -1,0 +1,290 @@
+[
+  {
+    "id": "caferedwest-stn-chef-s-table-5082",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "caferedwest-menu-89284"
+    },
+    "menus": [
+      {
+        "id": "caferedwest-menu-89284",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "caferedwest-cat-0-4801",
+            "name": "Chef's Table",
+            "items": [
+              "caferedwest-item-1-1421",
+              "caferedwest-item-2-3487",
+              "caferedwest-item-3-9376",
+              "caferedwest-item-4-1842",
+              "caferedwest-item-5-7922",
+              "caferedwest-item-6-7494",
+              "caferedwest-item-7-5044",
+              "caferedwest-item-8-8158",
+              "caferedwest-item-9-4077"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "caferedwest-stn-chef-s-table-5082",
+              "menuId": "caferedwest-menu-89284"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "caferedwest-stn-taqueria-9672",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "caferedwest-menu-70845"
+    },
+    "menus": [
+      {
+        "id": "caferedwest-menu-70845",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "caferedwest-cat-0-5263",
+            "name": "Tacos",
+            "items": [
+              "caferedwest-item-10-5775",
+              "caferedwest-item-11-7282",
+              "caferedwest-item-12-8608",
+              "caferedwest-item-13-6879",
+              "caferedwest-item-14-1114",
+              "caferedwest-item-15-4183",
+              "caferedwest-item-16-9414",
+              "caferedwest-item-17-9139",
+              "caferedwest-item-18-9776"
+            ]
+          },
+          {
+            "categoryId": "caferedwest-cat-1-3739",
+            "name": "Burritos",
+            "items": [
+              "caferedwest-item-19-5457",
+              "caferedwest-item-20-2059",
+              "caferedwest-item-21-4766",
+              "caferedwest-item-22-8198",
+              "caferedwest-item-23-7894",
+              "caferedwest-item-24-2600"
+            ]
+          },
+          {
+            "categoryId": "caferedwest-cat-2-2770",
+            "name": "Bowls",
+            "items": [
+              "caferedwest-item-25-7976",
+              "caferedwest-item-26-7815",
+              "caferedwest-item-27-3227"
+            ]
+          },
+          {
+            "categoryId": "caferedwest-cat-3-5701",
+            "name": "Build Your Own",
+            "items": [
+              "caferedwest-item-10-5775",
+              "caferedwest-item-11-7282",
+              "caferedwest-item-12-8608",
+              "caferedwest-item-13-6879",
+              "caferedwest-item-14-1114",
+              "caferedwest-item-15-4183",
+              "caferedwest-item-19-5457",
+              "caferedwest-item-20-2059",
+              "caferedwest-item-21-4766"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "caferedwest-stn-taqueria-9672",
+              "menuId": "caferedwest-menu-70845"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "caferedwest-stn-poke-bar-7426",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "caferedwest-menu-96314"
+    },
+    "menus": [
+      {
+        "id": "caferedwest-menu-96314",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "caferedwest-cat-0-5695",
+            "name": "Poke Bowls",
+            "items": [
+              "caferedwest-item-28-3208",
+              "caferedwest-item-29-1848",
+              "caferedwest-item-30-9371",
+              "caferedwest-item-31-4143",
+              "caferedwest-item-32-9300",
+              "caferedwest-item-33-8846",
+              "caferedwest-item-34-8480",
+              "caferedwest-item-35-7633",
+              "caferedwest-item-36-8818",
+              "caferedwest-item-37-8183",
+              "caferedwest-item-38-1994",
+              "caferedwest-item-39-3648"
+            ]
+          },
+          {
+            "categoryId": "caferedwest-cat-1-5797",
+            "name": "Extras",
+            "items": [
+              "caferedwest-item-40-7824",
+              "caferedwest-item-41-8111",
+              "caferedwest-item-42-9318",
+              "caferedwest-item-43-9338",
+              "caferedwest-item-44-1545",
+              "caferedwest-item-45-7221"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "caferedwest-stn-poke-bar-7426",
+              "menuId": "caferedwest-menu-96314"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "caferedwest-stn-pizza---pasta-8441",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "caferedwest-menu-89730"
+    },
+    "menus": [
+      {
+        "id": "caferedwest-menu-89730",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "caferedwest-cat-0-1084",
+            "name": "Pizza",
+            "items": [
+              "caferedwest-item-46-3473",
+              "caferedwest-item-47-8964",
+              "caferedwest-item-48-5342",
+              "caferedwest-item-49-6076",
+              "caferedwest-item-50-6246",
+              "caferedwest-item-51-3183",
+              "caferedwest-item-52-8113",
+              "caferedwest-item-53-5595",
+              "caferedwest-item-54-3479"
+            ]
+          },
+          {
+            "categoryId": "caferedwest-cat-1-4787",
+            "name": "Pasta",
+            "items": [
+              "caferedwest-item-55-3709",
+              "caferedwest-item-56-5066",
+              "caferedwest-item-57-3012",
+              "caferedwest-item-58-5060",
+              "caferedwest-item-59-9458",
+              "caferedwest-item-60-4206"
+            ]
+          },
+          {
+            "categoryId": "caferedwest-cat-2-7916",
+            "name": "Sides",
+            "items": [
+              "caferedwest-item-61-4805",
+              "caferedwest-item-62-4911",
+              "caferedwest-item-63-2565"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "caferedwest-stn-pizza---pasta-8441",
+              "menuId": "caferedwest-menu-89730"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -1,0 +1,250 @@
+[
+  {
+    "id": "cafe40-41-stn-chef-s-table-3664",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "cafe40-41-menu-69343"
+    },
+    "menus": [
+      {
+        "id": "cafe40-41-menu-69343",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "cafe40-41-cat-0-6207",
+            "name": "Chef's Table",
+            "items": [
+              "cafe40-41-item-1-9719",
+              "cafe40-41-item-2-9330",
+              "cafe40-41-item-3-3665",
+              "cafe40-41-item-4-2691",
+              "cafe40-41-item-5-4582",
+              "cafe40-41-item-6-6566"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe40-41-stn-chef-s-table-3664",
+              "menuId": "cafe40-41-menu-69343"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe40-41-stn-pizza---pasta-8754",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "cafe40-41-menu-27314"
+    },
+    "menus": [
+      {
+        "id": "cafe40-41-menu-27314",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "cafe40-41-cat-0-7412",
+            "name": "Pizza",
+            "items": [
+              "cafe40-41-item-7-2511",
+              "cafe40-41-item-8-2153",
+              "cafe40-41-item-9-3176",
+              "cafe40-41-item-10-5959",
+              "cafe40-41-item-11-4966",
+              "cafe40-41-item-12-8192"
+            ]
+          },
+          {
+            "categoryId": "cafe40-41-cat-1-1606",
+            "name": "Pasta",
+            "items": [
+              "cafe40-41-item-13-8675",
+              "cafe40-41-item-14-1549",
+              "cafe40-41-item-15-5078",
+              "cafe40-41-item-16-7449"
+            ]
+          },
+          {
+            "categoryId": "cafe40-41-cat-2-7912",
+            "name": "Sides",
+            "items": [
+              "cafe40-41-item-17-8878",
+              "cafe40-41-item-18-1570"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe40-41-stn-pizza---pasta-8754",
+              "menuId": "cafe40-41-menu-27314"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe40-41-stn-ramen-bar-7780",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "cafe40-41-menu-52609"
+    },
+    "menus": [
+      {
+        "id": "cafe40-41-menu-52609",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafe40-41-cat-0-2995",
+            "name": "Ramen Bowls",
+            "items": [
+              "cafe40-41-item-19-1135",
+              "cafe40-41-item-20-8935",
+              "cafe40-41-item-21-8106",
+              "cafe40-41-item-22-7782",
+              "cafe40-41-item-23-3402",
+              "cafe40-41-item-24-7889",
+              "cafe40-41-item-25-5833",
+              "cafe40-41-item-26-8759"
+            ]
+          },
+          {
+            "categoryId": "cafe40-41-cat-1-1806",
+            "name": "Sides & Apps",
+            "items": [
+              "cafe40-41-item-27-3380",
+              "cafe40-41-item-28-7110",
+              "cafe40-41-item-29-9061",
+              "cafe40-41-item-30-9466",
+              "cafe40-41-item-31-6013",
+              "cafe40-41-item-32-1134"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe40-41-stn-ramen-bar-7780",
+              "menuId": "cafe40-41-menu-52609"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe40-41-stn-poke-bar-8198",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "cafe40-41-menu-93234"
+    },
+    "menus": [
+      {
+        "id": "cafe40-41-menu-93234",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafe40-41-cat-0-1695",
+            "name": "Poke Bowls",
+            "items": [
+              "cafe40-41-item-33-9528",
+              "cafe40-41-item-34-6710",
+              "cafe40-41-item-35-2584",
+              "cafe40-41-item-36-2138",
+              "cafe40-41-item-37-9947",
+              "cafe40-41-item-38-6474",
+              "cafe40-41-item-39-1780",
+              "cafe40-41-item-40-1355"
+            ]
+          },
+          {
+            "categoryId": "cafe40-41-cat-1-3189",
+            "name": "Extras",
+            "items": [
+              "cafe40-41-item-41-3713",
+              "cafe40-41-item-42-4471",
+              "cafe40-41-item-43-4061",
+              "cafe40-41-item-44-2069"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe40-41-stn-poke-bar-8198",
+              "menuId": "cafe40-41-menu-93234"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

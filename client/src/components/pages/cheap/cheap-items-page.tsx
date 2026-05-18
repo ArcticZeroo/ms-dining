@@ -1,53 +1,48 @@
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { DiningClient } from '../../../api/client/dining.ts';
+import React, { useEffect, useMemo } from 'react';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { ICheapItemSearchResult } from '../../../models/search.ts';
 import { isSearchResultVisible } from '../../../util/search.ts';
 import { CheapItemResult } from './cheap-item-result.tsx';
-import { SelectedDateContext } from '../../../context/time.ts';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { setPageData } from '../../../util/title.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { SearchResultSkeleton } from '../../search/search-result-skeleton.tsx';
 import { SearchWaiting } from "../../search/search-waiting.tsx";
+import { useCheapItemsQuery } from '../../../store/queries/search.ts';
 
 interface ICheapItemsResults {
-    stage: PromiseStage;
-    error?: unknown;
+    isPending: boolean;
+    isError: boolean;
+    error: unknown;
     results: ICheapItemSearchResult[];
     retry: () => void;
 }
 
 const useCheapItems = (): ICheapItemsResults => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     const searchDate = useDateForSearch();
     const enablePriceFilters = useValueNotifier(ApplicationSettings.enablePriceFilters);
     const minPrice = useValueNotifier(ApplicationSettings.minimumPrice);
     const maxPrice = useValueNotifier(ApplicationSettings.maximumPrice);
 
-    const retrieveCheapItems = useCallback(
-        () => DiningClient.retrieveCheapItems(searchDate),
-        [searchDate]
-    );
-
-    const { stage, value: results, error, run } = useImmediatePromiseState(retrieveCheapItems);
+    const { isPending, isError, error, data, refetch } = useCheapItemsQuery(searchDate);
 
     const filteredResults = useMemo(
         () => {
-            if (!results) {
+            if (!data) {
                 return [];
             }
 
             if (allowFutureMenus && !enablePriceFilters) {
-                return results;
+                return data;
             }
 
             const filteredResults: ICheapItemSearchResult[] = [];
 
-            for (const item of results) {
+            for (const item of data) {
                 if (enablePriceFilters && (item.price < minPrice || item.price > maxPrice)) {
                     continue;
                 }
@@ -61,14 +56,10 @@ const useCheapItems = (): ICheapItemsResults => {
 
             return filteredResults;
         },
-        [results, allowFutureMenus, enablePriceFilters, minPrice, maxPrice, selectedDate]
+        [data, allowFutureMenus, enablePriceFilters, minPrice, maxPrice, selectedDate]
     );
 
     const sortedResults = useMemo(() => {
-        if (!filteredResults) {
-            return [];
-        }
-
         const newSortedResults = [...filteredResults];
 
         return newSortedResults.sort((a, b) => {
@@ -83,21 +74,24 @@ const useCheapItems = (): ICheapItemsResults => {
     }, [filteredResults]);
 
     return {
-        stage,
+        isPending,
+        isError,
         error,
         results: sortedResults,
-        retry: run
+        retry:   () => {
+            void refetch();
+        },
     };
 }
 
 export const CheapItemsPage: React.FC = () => {
-    const { stage, results, error, retry } = useCheapItems();
+    const { isPending, isError, results, error, retry } = useCheapItems();
 
     useEffect(() => {
         setPageData('Cheap Items', 'View a leaderboard of all menu items offered today at the Microsoft Redmond Campus by calories per dollar');
     }, []);
 
-    if (stage === PromiseStage.error) {
+    if (isError) {
         return (
             <div className="error-card">
                 Could not load cheap items.
@@ -113,24 +107,16 @@ export const CheapItemsPage: React.FC = () => {
             <div className="search-info default-border-radius">
                 <div className="query default-container flex flex-between">
                     <span className="icon-sized number-badge">
-                        {
-                            stage === PromiseStage.success
-                                ? results.length
-                                : '?'
-                        }
+                        {isPending ? '?' : results.length}
                     </span>
                     <span>
                         Cheap Items
                     </span>
-                    <SearchWaiting stage={stage}/>
+                    <SearchWaiting isPending={isPending}/>
                 </div>
             </div>
             <div className="flex-col">
-                {
-                    stage === PromiseStage.running && (
-                        <SearchResultSkeleton/>
-                    )
-                }
+                {isPending && <SearchResultSkeleton/>}
                 {
                     results.map(result => (
                         <CheapItemResult key={`${result.name} ${result.price}`} item={result}/>

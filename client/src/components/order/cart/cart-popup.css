@@ -100,12 +100,7 @@
 }
 
 .cart-popup .cart-hydration-error {
-    background: var(--color-error);
-    padding: var(--default-padding);
     border-bottom-left-radius: var(--default-padding);
-    display: flex;
-    flex-direction: column;
-    /* no gap because the table has border-spacing */
 }
 
 .cart-popup .cart-warning {

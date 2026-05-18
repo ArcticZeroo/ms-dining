@@ -1,8 +1,7 @@
 import Duration from '@arcticzeroo/duration';
 import { useCallback, useEffect, useState } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
-import { SelectedDateContext } from '../../context/time.ts';
-import { useValueNotifierContext } from '../../hooks/events.ts';
+import { useSelectedDate } from '../../store/zustand/selected-date.ts';
 import { classNames } from '../../util/react.ts';
 
 import './notice.css';
@@ -10,7 +9,7 @@ import './notice.css';
 const updateIntervalMs = new Duration({ minutes: 1 }).inMilliseconds;
 
 export const FutureMenuOutOfDateNotice = () => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     const [isProbablyOutdated, setIsProbablyOutdated] = useState(false);
 
     const doUpdateStatus = useCallback(() => {

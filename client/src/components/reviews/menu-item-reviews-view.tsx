@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { ReviewsView } from './reviews-view.tsx';
-import { REVIEW_STORE } from '../../store/reviews.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
+import { useReviewSummary } from '../../store/queries/reviews.ts';
 
 import './reviews.css';
 
@@ -19,7 +18,8 @@ export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuI
         () => stationId ? { stationId, stationName: stationName ?? '' } : undefined,
         [stationId, stationName]
     );
-    const { stage, value, run } = useValueNotifier(REVIEW_STORE.getReviews(lookup, stationId));
+
+    const { status, data, refetch } = useReviewSummary(lookup, stationId);
 
     return (
         <div className="default-container bg-raised-3 flex-col">
@@ -27,9 +27,9 @@ export const MenuItemReviewsView: React.FC<IMenuItemReviewsViewProps> = ({ menuI
                 Reviews
             </div>
             <ReviewsView
-                stage={stage}
-                response={value}
-                onRetry={run}
+                status={status}
+                response={data}
+                onRetry={() => refetch()}
                 cafeId={cafeId}
                 lookup={lookup}
                 stationLookup={stationLookup}

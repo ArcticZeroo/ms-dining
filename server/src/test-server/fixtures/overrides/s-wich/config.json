@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-s-wich",
+  "contextID": "ctx-s-wich-1888",
+  "theme": {
+    "logoImage": "s-wich-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-s-wich-322",
+        "storeName": "s-wich"
+      },
+      "displayProfileId": [
+        "dp-s-wich-103"
+      ]
+    }
+  ],
+  "properties": {}
+}

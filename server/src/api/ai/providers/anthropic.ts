@@ -2,16 +2,17 @@ import Anthropic from '@anthropic-ai/sdk';
 import { getAnthropicKey } from '../../../constants/env.js';
 import { lazy } from '../../../util/lazy.js';
 import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
+import { openAiProvider } from './openai.js';
 
 const DEFAULT_MAX_TOKENS = 1024;
 
-const getClient = lazy(() => new Anthropic({
+const CLIENT = lazy(() => new Anthropic({
     apiKey: getAnthropicKey()
 }));
 
 export const anthropicProvider: IAiProvider = {
     async retrieveTextCompletion(request: IAiTextCompletionRequest): Promise<string> {
-        const response = await getClient().messages.create({
+        const response = await CLIENT.value.messages.create({
             model:      'claude-sonnet-4-20250514',
             max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             system:     request.systemPrompt,
@@ -32,7 +33,7 @@ export const anthropicProvider: IAiProvider = {
     },
 
     async retrieveVisionCompletion(request: IAiVisionRequest): Promise<string> {
-        const response = await getClient().messages.create({
+        const response = await CLIENT.value.messages.create({
             model:      'claude-sonnet-4-20250514',
             max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             system:     request.systemPrompt,
@@ -63,5 +64,11 @@ export const anthropicProvider: IAiProvider = {
         }
 
         return block.text;
+    },
+
+    // Anthropic has no embeddings API; delegate to OpenAI (which is always
+    // configured because we still use it for embeddings + as the AI fallback).
+    async retrieveEmbedding(text: string): Promise<number[]> {
+        return openAiProvider.retrieveEmbedding(text);
     }
 };

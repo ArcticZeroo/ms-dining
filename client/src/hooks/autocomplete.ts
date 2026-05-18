@@ -1,9 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { SearchEntityType } from '@msdining/common/models/search';
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../api/client/dining.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
+import { useAutocompleteSuggestionsQuery } from '../store/queries/search.ts';
 import { useDebouncedValue } from './debounce.ts';
 import { useValueNotifier } from './events.ts';
 import { buildNormalizedCafeViews, getLocalSuggestions } from '../util/autocomplete.ts';
@@ -28,17 +26,8 @@ export const useAutocompleteSuggestions = (query: string) => {
         [localDebouncedQuery, normalizedCafeViews]
     );
 
-    const fetchServerSuggestions = useCallback(async () => {
-        if (serverDebouncedQuery.length === 0) {
-            return [];
-        }
-        const results = await DiningClient.retrieveAutocompleteSuggestions(serverDebouncedQuery);
-        return results.filter(result => result.entityType !== SearchEntityType.cafe);
-    }, [serverDebouncedQuery]);
-
-    // If there's an error we intentionally show nothing for now.
-    // eslint-disable-next-line msdining/require-promise-state-stage
-    const { value: serverSuggestions } = useImmediatePromiseState(fetchServerSuggestions);
+    // Server suggestions intentionally render nothing on error.
+    const { data: serverSuggestions } = useAutocompleteSuggestionsQuery(serverDebouncedQuery);
 
     const [isSuppressed, setIsSuppressed] = useState(false);
 

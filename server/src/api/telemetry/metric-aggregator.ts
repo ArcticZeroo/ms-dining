@@ -1,4 +1,4 @@
-import { TELEMETRY_CLIENT } from './app-insights.js';
+import { getTelemetryClient } from './app-insights.js';
 import { getNamespaceLogger } from '../../util/log.js';
 
 const logger = getNamespaceLogger('MetricAggregator');
@@ -91,7 +91,8 @@ export class MetricAggregator {
     }
 
     flush(): void {
-        if (this.#buckets.size === 0 || TELEMETRY_CLIENT == null) {
+        const telemetryClient = getTelemetryClient();
+        if (this.#buckets.size === 0 || telemetryClient == null) {
             this.#buckets.clear();
             return;
         }
@@ -108,7 +109,7 @@ export class MetricAggregator {
             const stdDev = Math.sqrt(variance);
 
             try {
-                TELEMETRY_CLIENT.trackMetric({
+                telemetryClient.trackMetric({
                     name,
                     value:      bucket.sum,
                     count:      bucket.count,

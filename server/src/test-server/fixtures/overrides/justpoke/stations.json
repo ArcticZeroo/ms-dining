@@ -1,0 +1,268 @@
+[
+  {
+    "id": "justpoke-stn-pizza---pasta-2270",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "justpoke-menu-23808"
+    },
+    "menus": [
+      {
+        "id": "justpoke-menu-23808",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "justpoke-cat-0-1327",
+            "name": "Pizza",
+            "items": [
+              "justpoke-item-1-4505",
+              "justpoke-item-2-4403",
+              "justpoke-item-3-6093",
+              "justpoke-item-4-8219",
+              "justpoke-item-5-1076",
+              "justpoke-item-6-3990"
+            ]
+          },
+          {
+            "categoryId": "justpoke-cat-1-1204",
+            "name": "Pasta",
+            "items": [
+              "justpoke-item-7-3542",
+              "justpoke-item-8-1353",
+              "justpoke-item-9-6118",
+              "justpoke-item-10-7697"
+            ]
+          },
+          {
+            "categoryId": "justpoke-cat-2-2387",
+            "name": "Sides",
+            "items": [
+              "justpoke-item-11-3484",
+              "justpoke-item-12-1009"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "justpoke-stn-pizza---pasta-2270",
+              "menuId": "justpoke-menu-23808"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "justpoke-stn-chef-s-table-8266",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "justpoke-menu-63764"
+    },
+    "menus": [
+      {
+        "id": "justpoke-menu-63764",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "justpoke-cat-0-1109",
+            "name": "Chef's Table",
+            "items": [
+              "justpoke-item-13-6465",
+              "justpoke-item-14-7642",
+              "justpoke-item-15-4363",
+              "justpoke-item-16-7432",
+              "justpoke-item-17-9897",
+              "justpoke-item-18-8325"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "justpoke-stn-chef-s-table-8266",
+              "menuId": "justpoke-menu-63764"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "justpoke-stn-grill-7478",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "justpoke-menu-23254"
+    },
+    "menus": [
+      {
+        "id": "justpoke-menu-23254",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "justpoke-cat-0-9246",
+            "name": "Burgers",
+            "items": [
+              "justpoke-item-19-1680",
+              "justpoke-item-20-1851",
+              "justpoke-item-21-3331",
+              "justpoke-item-22-3318",
+              "justpoke-item-23-8585",
+              "justpoke-item-24-9608"
+            ]
+          },
+          {
+            "categoryId": "justpoke-cat-1-1971",
+            "name": "Sides",
+            "items": [
+              "justpoke-item-25-5132",
+              "justpoke-item-26-4208",
+              "justpoke-item-27-3580",
+              "justpoke-item-28-4907"
+            ]
+          },
+          {
+            "categoryId": "justpoke-cat-2-8373",
+            "name": "Salads",
+            "items": [
+              "justpoke-item-29-7006",
+              "justpoke-item-30-4377",
+              "justpoke-item-31-2504",
+              "justpoke-item-32-8703"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "justpoke-stn-grill-7478",
+              "menuId": "justpoke-menu-23254"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "justpoke-stn-indian-kitchen-5442",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "justpoke-menu-10465"
+    },
+    "menus": [
+      {
+        "id": "justpoke-menu-10465",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "justpoke-cat-0-9473",
+            "name": "Curries",
+            "items": [
+              "justpoke-item-33-9717",
+              "justpoke-item-34-8571",
+              "justpoke-item-35-9757",
+              "justpoke-item-36-3982",
+              "justpoke-item-37-5725",
+              "justpoke-item-38-5549"
+            ]
+          },
+          {
+            "categoryId": "justpoke-cat-1-5862",
+            "name": "Sides & Bread",
+            "items": [
+              "justpoke-item-39-1339",
+              "justpoke-item-40-6813",
+              "justpoke-item-41-9085",
+              "justpoke-item-42-5288",
+              "justpoke-item-43-2431",
+              "justpoke-item-44-9110"
+            ]
+          },
+          {
+            "categoryId": "justpoke-cat-2-2778",
+            "name": "Combo Meals",
+            "items": [
+              "justpoke-item-33-9717",
+              "justpoke-item-34-8571",
+              "justpoke-item-39-1339",
+              "justpoke-item-40-6813",
+              "justpoke-item-43-2431",
+              "justpoke-item-44-9110"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "justpoke-stn-indian-kitchen-5442",
+              "menuId": "justpoke-menu-10465"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

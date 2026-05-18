@@ -1,0 +1,400 @@
+[
+  {
+    "id": "cafe16-stn-mediterranean-2409",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "cafe16-menu-48690"
+    },
+    "menus": [
+      {
+        "id": "cafe16-menu-48690",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "cafe16-cat-0-1908",
+            "name": "Bowls",
+            "items": [
+              "cafe16-item-1-9921",
+              "cafe16-item-2-4266",
+              "cafe16-item-3-2155",
+              "cafe16-item-4-8534"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-1-8675",
+            "name": "Wraps",
+            "items": [
+              "cafe16-item-5-8788",
+              "cafe16-item-6-4711",
+              "cafe16-item-7-4526",
+              "cafe16-item-8-2204"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-2-6499",
+            "name": "Sides",
+            "items": [
+              "cafe16-item-9-5357",
+              "cafe16-item-10-8315",
+              "cafe16-item-11-6333",
+              "cafe16-item-12-5669"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe16-stn-mediterranean-2409",
+              "menuId": "cafe16-menu-48690"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe16-stn-espresso-9991",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "cafe16-menu-30569"
+    },
+    "menus": [
+      {
+        "id": "cafe16-menu-30569",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "cafe16-cat-0-9891",
+            "name": "Hot Drinks",
+            "items": [
+              "cafe16-item-13-8569",
+              "cafe16-item-14-7296",
+              "cafe16-item-15-4860",
+              "cafe16-item-16-6556",
+              "cafe16-item-17-6675",
+              "cafe16-item-18-5059",
+              "cafe16-item-19-2347",
+              "cafe16-item-20-8009"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-1-4543",
+            "name": "Cold Drinks",
+            "items": [
+              "cafe16-item-21-9776",
+              "cafe16-item-22-2191",
+              "cafe16-item-23-2491",
+              "cafe16-item-24-4659"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-2-8414",
+            "name": "Bakery",
+            "items": [
+              "cafe16-item-25-9042",
+              "cafe16-item-26-4271",
+              "cafe16-item-27-2295",
+              "cafe16-item-28-3285",
+              "cafe16-item-29-1226",
+              "cafe16-item-30-4280"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe16-stn-espresso-9991",
+              "menuId": "cafe16-menu-30569"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe16-stn-pacific-rim-8945",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "cafe16-menu-57436"
+    },
+    "menus": [
+      {
+        "id": "cafe16-menu-57436",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "cafe16-cat-0-2783",
+            "name": "Entrees",
+            "items": [
+              "cafe16-item-31-9847",
+              "cafe16-item-32-4165",
+              "cafe16-item-33-3265",
+              "cafe16-item-34-6372",
+              "cafe16-item-35-3567",
+              "cafe16-item-36-7402",
+              "cafe16-item-37-5601",
+              "cafe16-item-38-9624"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-1-1605",
+            "name": "Sides",
+            "items": [
+              "cafe16-item-39-4923",
+              "cafe16-item-40-1882",
+              "cafe16-item-41-9663",
+              "cafe16-item-42-1273"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe16-stn-pacific-rim-8945",
+              "menuId": "cafe16-menu-57436"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe16-stn-chef-s-table-4063",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "cafe16-menu-46967"
+    },
+    "menus": [
+      {
+        "id": "cafe16-menu-46967",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "cafe16-cat-0-7711",
+            "name": "Chef's Table",
+            "items": [
+              "cafe16-item-43-1777",
+              "cafe16-item-44-3574",
+              "cafe16-item-45-8585",
+              "cafe16-item-46-9483",
+              "cafe16-item-47-2802",
+              "cafe16-item-48-4453"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe16-stn-chef-s-table-4063",
+              "menuId": "cafe16-menu-46967"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe16-stn-ramen-bar-1107",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "cafe16-menu-34408"
+    },
+    "menus": [
+      {
+        "id": "cafe16-menu-34408",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafe16-cat-0-3017",
+            "name": "Ramen Bowls",
+            "items": [
+              "cafe16-item-49-9103",
+              "cafe16-item-50-6913",
+              "cafe16-item-51-6478",
+              "cafe16-item-52-2316",
+              "cafe16-item-53-2667",
+              "cafe16-item-54-1347",
+              "cafe16-item-55-2622",
+              "cafe16-item-56-8791"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-1-3066",
+            "name": "Sides & Apps",
+            "items": [
+              "cafe16-item-57-6540",
+              "cafe16-item-58-2648",
+              "cafe16-item-59-7647",
+              "cafe16-item-60-4834",
+              "cafe16-item-61-6458",
+              "cafe16-item-62-8786"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe16-stn-ramen-bar-1107",
+              "menuId": "cafe16-menu-34408"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe16-stn-indian-kitchen-9166",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe16-menu-49247"
+    },
+    "menus": [
+      {
+        "id": "cafe16-menu-49247",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe16-cat-0-5391",
+            "name": "Curries",
+            "items": [
+              "cafe16-item-63-4352",
+              "cafe16-item-64-9842",
+              "cafe16-item-65-5962",
+              "cafe16-item-66-4316",
+              "cafe16-item-67-7688",
+              "cafe16-item-68-3754"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-1-9860",
+            "name": "Sides & Bread",
+            "items": [
+              "cafe16-item-69-2449",
+              "cafe16-item-70-3841",
+              "cafe16-item-71-1683",
+              "cafe16-item-72-8224",
+              "cafe16-item-73-2762",
+              "cafe16-item-74-2060"
+            ]
+          },
+          {
+            "categoryId": "cafe16-cat-2-3741",
+            "name": "Combo Meals",
+            "items": [
+              "cafe16-item-63-4352",
+              "cafe16-item-64-9842",
+              "cafe16-item-69-2449",
+              "cafe16-item-70-3841",
+              "cafe16-item-73-2762",
+              "cafe16-item-74-2060"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe16-stn-indian-kitchen-9166",
+              "menuId": "cafe16-menu-49247"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -8,9 +8,8 @@ import {
     ISerializedModifier,
     ISubmitOrderItems
 } from '@msdining/common/models/cart';
-import { CartItemsByCafeId } from '../context/cart.ts';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
-import { ICartItemWithMetadata, IHydratedCartData, ISerializedCartItemWithName } from '../models/cart.ts';
+import { CartItemsByCafeId, ICartItemWithMetadata, IHydratedCartData, ISerializedCartItemWithName } from '../models/cart.ts';
 import { getRandomId } from '../util/id.ts';
 import { calculatePrice } from '../util/cart.ts';
 
@@ -147,7 +146,12 @@ export abstract class OrderingClient {
                 itemsForCafeById.set(cartItem.id, cartItem);
             }
 
-            hydratedData.foundItemsByCafeId.set(cafeId, itemsForCafeById);
+            // Don't register empty buckets — they'd show up downstream as
+            // ghost cafes in "Your Order" (header + no items) and bump
+            // cart.size enough to trip the multi-cafe warning.
+            if (itemsForCafeById.size > 0) {
+                hydratedData.foundItemsByCafeId.set(cafeId, itemsForCafeById);
+            }
         }
 
         return hydratedData;

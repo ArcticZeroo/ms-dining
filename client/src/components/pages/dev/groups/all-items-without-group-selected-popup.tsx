@@ -1,15 +1,13 @@
-import { useValueNotifier } from '../../../../hooks/events.js';
-import { GROUP_STORE } from '../../../../store/groups.js';
+import { useAddGroupMembers, useCreateGroup, useGroups } from '../../../../store/queries/groups.ts';
 import React, { useCallback, useMemo, useState } from 'react';
 import { pluralize } from '../../../../util/string.js';
-import { useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { IGroupMember } from '@msdining/common/models/group';
 import { classNames } from '../../../../util/react.js';
-import { canUseControllingButton, promiseStageToButtonClass } from '../../../../util/async.js';
+import { canUseMutationButton, mutationButtonClass } from '../../../../util/mutation.js';
 
 const useGroupList = (selectedType: SearchEntityType) => {
-    const { value: groupsById } = useValueNotifier(GROUP_STORE.groups);
+    const { data: groupsById } = useGroups();
     return useMemo(
         () => {
             const groupList = groupsById ? Array.from(groupsById.values()) : [];
@@ -34,35 +32,33 @@ export const AllItemsWithoutGroupSelectedPopup: React.FC<IAllItemsWithoutGroupSe
     const [groupName, setGroupName] = useState<string>('');
     const [existingGroupId, setExistingGroupId] = useState<string | null>(null);
 
-    const { stage: commitStage, run: commitMembers } = useDelayedPromiseState(useCallback(
-        async () => {
-            const members = Array.from(selectedMembers.values());
+    const addMutation = useAddGroupMembers();
+    const createMutation = useCreateGroup();
 
-            if (existingGroupId) {
-                await GROUP_STORE.addGroupMembers(
-                    existingGroupId,
-                    members,
-                );
-            } else {
-                await GROUP_STORE.createGroup(
-                    groupName,
-                    selectedType,
-                    members,
-                );
-            }
-            onClearSelection();
-        },
-        [existingGroupId, onClearSelection, selectedMembers, groupName, selectedType]
-    ));
+    const isCommittingExisting = existingGroupId != null;
+    const activeMutation = isCommittingExisting ? addMutation : createMutation;
+    const canCommit = canUseMutationButton(activeMutation);
+    const commitButtonClass = mutationButtonClass(activeMutation);
 
-    const canCommit = canUseControllingButton(commitStage);
     const onCommitClicked = useCallback(() => {
         if (!canCommit) {
             return;
         }
 
-        commitMembers();
-    }, [canCommit, commitMembers]);
+        const members = Array.from(selectedMembers.values());
+
+        if (existingGroupId) {
+            addMutation.mutate(
+                { groupId: existingGroupId, members },
+                { onSuccess: onClearSelection },
+            );
+        } else {
+            createMutation.mutate(
+                { name: groupName, type: selectedType, initialMembers: members },
+                { onSuccess: onClearSelection },
+            );
+        }
+    }, [canCommit, selectedMembers, existingGroupId, addMutation, onClearSelection, createMutation, groupName, selectedType]);
 
     const optionComponents = useMemo(() =>
         groupList.map(group => (
@@ -129,7 +125,7 @@ export const AllItemsWithoutGroupSelectedPopup: React.FC<IAllItemsWithoutGroupSe
                 />
             </div>
             <button
-                className={classNames('default-button default-container', promiseStageToButtonClass(commitStage))}
+                className={classNames('default-button default-container', commitButtonClass)}
                 onClick={onCommitClicked}
                 disabled={!canCommit}
             >

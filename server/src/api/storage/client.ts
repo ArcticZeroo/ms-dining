@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../models/prisma.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
+import { lazy, lazyAsync } from '../../util/lazy.js';
 import { getDbPriority } from './db-context.js';
 import { DB_METRIC_NAMES, DB_METRICS } from './db-metrics.js';
 import { PrioritySemaphore } from './priority-semaphore.js';
@@ -24,8 +25,6 @@ import { PrioritySemaphore } from './priority-semaphore.js';
 const readSemaphore = new PrioritySemaphore(ENVIRONMENT_SETTINGS.dbMaxConcurrency);
 const writeSemaphore = new PrioritySemaphore(1);
 
-const prismaClient = new PrismaClient();
-
 const SQLITE_BUSY_TIMEOUT_MS = 30_000;
 const PRISMA_TRANSACTION_MAX_WAIT_MS = 15_000;
 const PRISMA_TRANSACTION_TIMEOUT_MS = 30_000;
@@ -39,16 +38,34 @@ const PRISMA_TRANSACTION_TIMEOUT_MS = 30_000;
 //     serialisation. 30s gives substantial headroom.
 //
 // All three are idempotent. We run them on every startup so a fresh PrismaClient
-// is always tuned correctly. Queued behind a `ready` promise so the first
+// is always tuned correctly. Queued behind a `READY` promise so the first
 // caller waits for tuning to finish before issuing real work.
-const ready = (async () => {
-    await prismaClient.$queryRawUnsafe('PRAGMA journal_mode=WAL;');
-    await prismaClient.$queryRawUnsafe('PRAGMA synchronous=NORMAL;');
-    await prismaClient.$queryRawUnsafe(`PRAGMA busy_timeout=${SQLITE_BUSY_TIMEOUT_MS};`);
-})();
+
+// The URL is passed to PrismaClient explicitly (rather than letting it read
+// process.env on construction) so the snapshot taken by @prisma/client's
+// bundled dotenv on import doesn't leak into integration tests.
+const PRISMA_CLIENT = lazy(() => {
+    const databaseUrl = process.env.DATABASE_URL;
+    return databaseUrl
+        ? new PrismaClient({ datasourceUrl: databaseUrl })
+        : new PrismaClient();
+});
+
+const READY = lazyAsync(async () => {
+    const client = PRISMA_CLIENT.value;
+    await client.$queryRawUnsafe('PRAGMA journal_mode=WAL;');
+    await client.$queryRawUnsafe('PRAGMA synchronous=NORMAL;');
+    await client.$queryRawUnsafe(`PRAGMA busy_timeout=${SQLITE_BUSY_TIMEOUT_MS};`);
+});
 
 export const disconnectPrismaClient = async (): Promise<void> => {
-    await prismaClient.$disconnect();
+    if (!PRISMA_CLIENT.isInitialized) {
+        return;
+    }
+    const client = PRISMA_CLIENT.value;
+    PRISMA_CLIENT.reset();
+    READY.reset();
+    await client.$disconnect();
 };
 
 const recordSemaphoreMetrics = (
@@ -76,12 +93,12 @@ export const usePrismaClient = async <T>(callback: (client: ReadOnlyPrismaClient
     const queuedAt = performance.now();
 
     return readSemaphore.acquire(priority, async () => {
-        await ready;
+        await READY.value;
 
         const { startedAt, tags } = recordSemaphoreMetrics(readSemaphore, 'read', priority, queuedAt);
 
         try {
-            return await callback(prismaClient);
+            return await callback(PRISMA_CLIENT.value);
         } finally {
             const durationMs = performance.now() - startedAt;
             DB_METRICS.record(DB_METRIC_NAMES.durationMs, durationMs, tags);
@@ -98,12 +115,12 @@ export const usePrismaWrite = async <T>(callback: (client: PrismaClient) => Prom
     const queuedAt = performance.now();
 
     return writeSemaphore.acquire(priority, async () => {
-        await ready;
+        await READY.value;
 
         const { startedAt, tags } = recordSemaphoreMetrics(writeSemaphore, 'write', priority, queuedAt);
 
         try {
-            return await callback(prismaClient);
+            return await callback(PRISMA_CLIENT.value);
         } finally {
             const durationMs = performance.now() - startedAt;
             DB_METRICS.record(DB_METRIC_NAMES.durationMs, durationMs, tags);
@@ -120,12 +137,12 @@ export const usePrismaTransaction = async <T>(callback: (tx: PrismaTransactionCl
     const queuedAt = performance.now();
 
     return writeSemaphore.acquire(priority, async () => {
-        await ready;
+        await READY.value;
 
         const { startedAt, tags } = recordSemaphoreMetrics(writeSemaphore, 'transaction', priority, queuedAt);
 
         try {
-            return await prismaClient.$transaction(async (tx) => {
+            return await PRISMA_CLIENT.value.$transaction(async (tx) => {
                 return callback(tx);
             }, {
                 maxWait: PRISMA_TRANSACTION_MAX_WAIT_MS,

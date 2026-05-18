@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-fh4papparepas",
+  "contextID": "ctx-fh4papparepas-6238",
+  "theme": {
+    "logoImage": "fh4papparepas-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-fh4papparepas-362",
+        "storeName": "fh4papparepas"
+      },
+      "displayProfileId": [
+        "dp-fh4papparepas-435"
+      ]
+    }
+  ],
+  "properties": {}
+}

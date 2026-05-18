@@ -1,9 +1,9 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { DiningClient } from '../../api/client/dining.ts';
 import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts';
-import { CafeCollapseContext } from '../../context/collapse.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { useValueNotifier, useValueNotifierContext, useValueNotifierSetTarget } from '../../hooks/events.ts';
+import { useValueNotifier } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
 import { getCafeName } from '../../util/cafe.ts';
@@ -13,9 +13,9 @@ import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
 import { getIsRecentlyAvailable, minutesToTimeString } from '@msdining/common/util/date-util';
-import { IDelayedPromiseState, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import { SelectedDateContext } from '../../context/time.js';
-import { DiningClient } from '../../api/client/dining.js';
+import { useSelectedDate } from '../../store/zustand/selected-date.ts';
+import { collapseCafe, expandCafe, useIsCafeCollapsed } from '../../store/zustand/collapse.ts';
+import { useCafeMenuQuery } from '../../store/queries/cafe.ts';
 import { CafeMenuControls } from './cafe-menu-controls.js';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 
@@ -23,24 +23,42 @@ const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
     return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
 };
 
-const useMenuData = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): IDelayedPromiseState<CafeMenu> => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-
-    const retrieveMenu = useCallback(
-        () => DiningClient.retrieveCafeMenu({
-            id: cafe.id,
-            date: selectedDate,
-            shouldCountTowardsLastUsed
-        }),
-        [cafe, selectedDate, shouldCountTowardsLastUsed]
-    );
-
-    return useDelayedPromiseState(retrieveMenu);
+/**
+ * Minimal view passed down to body/controls so they can consume the cafe menu
+ * without knowing whether it's backed by TanStack Query or anything else.
+ */
+export interface ICafeMenuView {
+    data: CafeMenu | undefined;
+    isError: boolean;
+    refetch: () => void;
 }
 
-const useCafeHoursString = (menuData: IDelayedPromiseState<CafeMenu>): string | undefined => {
+const useCafeMenu = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): ICafeMenuView => {
+    const selectedDate = useSelectedDate();
+    const query = useCafeMenuQuery(cafe.id, selectedDate);
+
+    // Tracked outside the queryFn so the side effect isn't baked into the
+    // query key — the boot-time warm-up and a real component render share one
+    // cache entry instead of two. Gated on isSuccess so we don't add invalid
+    // cafe ids to the recently-used list when a cafe route fails to load.
+    useEffect(() => {
+        if (shouldCountTowardsLastUsed && query.isSuccess) {
+            DiningClient.addToLastUsedCafeIds(cafe.id);
+        }
+    }, [shouldCountTowardsLastUsed, query.isSuccess, cafe.id]);
+
+    return {
+        data:    query.data,
+        isError: query.isError,
+        refetch: () => {
+            void query.refetch();
+        },
+    };
+};
+
+const useCafeHoursString = (menuData: ICafeMenuView): string | undefined => {
     return useMemo(() => {
-        const stations = menuData.value?.stations;
+        const stations = menuData.data?.stations;
         if (!stations || stations.length === 0) {
             return undefined;
         }
@@ -58,7 +76,7 @@ const useCafeHoursString = (menuData: IDelayedPromiseState<CafeMenu>): string | 
         }
 
         return `${minutesToTimeString(minOpensAt)} – ${minutesToTimeString(maxClosesAt)}`;
-    }, [menuData.value]);
+    }, [menuData.data]);
 }
 
 interface ICafeMenuViewProps {
@@ -78,16 +96,15 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     const deviceType = useDeviceType();
     const showImages = useValueNotifier(ApplicationSettings.showImages);
     const showCafeHours = useValueNotifier(DebugSettings.showCafeHours);
-    const collapsedCafeIdsNotifier = useContext(CafeCollapseContext);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
-    const menuData = useMenuData(cafe, shouldCountTowardsLastUsed);
+    const menuData = useCafeMenu(cafe, shouldCountTowardsLastUsed);
     const cafeHoursString = useCafeHoursString(menuData);
 
     const showCafeLogo = showImages && cafe.logoUrl != null;
     const cafeName = useCafeName(cafe, showGroupName);
 
-    const isCollapsed = useValueNotifierSetTarget(collapsedCafeIdsNotifier, cafe.id);
+    const isCollapsed = useIsCafeCollapsed(cafe.id);
 
     const scrollIntoViewIfNeeded = useScrollCollapsedHeaderIntoView(cafe.id);
 
@@ -96,27 +113,22 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
         [cafe]
     );
 
-    const { run: retrieveMenuData } = menuData;
-    useEffect(() => {
-        retrieveMenuData();
-    }, [retrieveMenuData]);
-
     useEffect(() => {
         if (ApplicationSettings.collapseCafesByDefault.value) {
-            collapsedCafeIdsNotifier.add(cafe.id);
+            collapseCafe(cafe.id);
         }
-    }, [collapsedCafeIdsNotifier, cafe.id]);
+    }, [cafe.id]);
 
-    const toggleIsExpanded = () => {
+    const toggleIsExpanded = useCallback(() => {
         const isNowCollapsed = !isCollapsed;
 
         if (isNowCollapsed) {
-            collapsedCafeIdsNotifier.add(cafe.id);
+            collapseCafe(cafe.id);
             scrollIntoViewIfNeeded();
         } else {
-            collapsedCafeIdsNotifier.delete(cafe.id);
+            expandCafe(cafe.id);
         }
-    };
+    }, [isCollapsed, cafe.id, scrollIntoViewIfNeeded]);
 
     return (
         <CurrentCafeContext.Provider value={cafe}>

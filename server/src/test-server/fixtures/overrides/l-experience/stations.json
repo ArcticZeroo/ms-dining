@@ -1,0 +1,339 @@
+[
+  {
+    "id": "l-experience-stn-chef-s-table-7504",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "l-experience-menu-18472"
+    },
+    "menus": [
+      {
+        "id": "l-experience-menu-18472",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "l-experience-cat-0-6043",
+            "name": "Chef's Table",
+            "items": [
+              "l-experience-item-1-8264",
+              "l-experience-item-2-4840",
+              "l-experience-item-3-3186",
+              "l-experience-item-4-3431",
+              "l-experience-item-5-9304",
+              "l-experience-item-6-8985"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "l-experience-stn-chef-s-table-7504",
+              "menuId": "l-experience-menu-18472"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "l-experience-stn-deli-8696",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "l-experience-menu-53289"
+    },
+    "menus": [
+      {
+        "id": "l-experience-menu-53289",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "l-experience-cat-0-5392",
+            "name": "Half Sandwiches",
+            "items": [
+              "l-experience-item-7-9258",
+              "l-experience-item-8-7302",
+              "l-experience-item-9-9901",
+              "l-experience-item-10-3376",
+              "l-experience-item-11-8514",
+              "l-experience-item-12-9774"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-1-4606",
+            "name": "Whole Sandwiches",
+            "items": [
+              "l-experience-item-13-3252",
+              "l-experience-item-14-8599",
+              "l-experience-item-15-3189",
+              "l-experience-item-16-4804",
+              "l-experience-item-17-5072",
+              "l-experience-item-18-4749"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-2-4909",
+            "name": "Soups",
+            "items": [
+              "l-experience-item-19-9451",
+              "l-experience-item-20-3358",
+              "l-experience-item-21-8759",
+              "l-experience-item-22-8677"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "l-experience-stn-deli-8696",
+              "menuId": "l-experience-menu-53289"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "l-experience-stn-espresso-4353",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "l-experience-menu-27887"
+    },
+    "menus": [
+      {
+        "id": "l-experience-menu-27887",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "l-experience-cat-0-4901",
+            "name": "Hot Drinks",
+            "items": [
+              "l-experience-item-23-9479",
+              "l-experience-item-24-8346",
+              "l-experience-item-25-3092",
+              "l-experience-item-26-7608",
+              "l-experience-item-27-2294",
+              "l-experience-item-28-5852",
+              "l-experience-item-29-1146",
+              "l-experience-item-30-2940"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-1-7628",
+            "name": "Cold Drinks",
+            "items": [
+              "l-experience-item-31-3502",
+              "l-experience-item-32-3770",
+              "l-experience-item-33-2304",
+              "l-experience-item-34-8325"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-2-4997",
+            "name": "Bakery",
+            "items": [
+              "l-experience-item-35-4691",
+              "l-experience-item-36-3861",
+              "l-experience-item-37-5410",
+              "l-experience-item-38-2397",
+              "l-experience-item-39-1474",
+              "l-experience-item-40-7452"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "l-experience-stn-espresso-4353",
+              "menuId": "l-experience-menu-27887"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "l-experience-stn-poke-bar-4430",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "l-experience-menu-53672"
+    },
+    "menus": [
+      {
+        "id": "l-experience-menu-53672",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "l-experience-cat-0-2548",
+            "name": "Poke Bowls",
+            "items": [
+              "l-experience-item-41-2481",
+              "l-experience-item-42-6016",
+              "l-experience-item-43-3169",
+              "l-experience-item-44-4632",
+              "l-experience-item-45-4116",
+              "l-experience-item-46-8065",
+              "l-experience-item-47-9198",
+              "l-experience-item-48-8263"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-1-2161",
+            "name": "Extras",
+            "items": [
+              "l-experience-item-49-9770",
+              "l-experience-item-50-6159",
+              "l-experience-item-51-1192",
+              "l-experience-item-52-8170"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "l-experience-stn-poke-bar-4430",
+              "menuId": "l-experience-menu-53672"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "l-experience-stn-indian-kitchen-5975",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "l-experience-menu-51313"
+    },
+    "menus": [
+      {
+        "id": "l-experience-menu-51313",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "l-experience-cat-0-7906",
+            "name": "Curries",
+            "items": [
+              "l-experience-item-53-4421",
+              "l-experience-item-54-5935",
+              "l-experience-item-55-1727",
+              "l-experience-item-56-4011",
+              "l-experience-item-57-5175",
+              "l-experience-item-58-7125"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-1-6352",
+            "name": "Sides & Bread",
+            "items": [
+              "l-experience-item-59-7795",
+              "l-experience-item-60-7780",
+              "l-experience-item-61-4855",
+              "l-experience-item-62-8143",
+              "l-experience-item-63-2927",
+              "l-experience-item-64-1586"
+            ]
+          },
+          {
+            "categoryId": "l-experience-cat-2-2444",
+            "name": "Combo Meals",
+            "items": [
+              "l-experience-item-53-4421",
+              "l-experience-item-54-5935",
+              "l-experience-item-59-7795",
+              "l-experience-item-60-7780",
+              "l-experience-item-63-2927",
+              "l-experience-item-64-1586"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "l-experience-stn-indian-kitchen-5975",
+              "menuId": "l-experience-menu-51313"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -1,21 +1,18 @@
 import Router from '@koa/router';
-import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/models/http';
-import { getMinimumDateForMenu, toMaybeDateString } from '@msdining/common/util/date-util';
+import { toMaybeDateString } from '@msdining/common/util/date-util';
 import { CafeStorageClient } from '../../../api/storage/clients/cafe.js';
 import * as diningConfig from '../../../constants/cafes.js';
 import { ApplicationContext } from '../../../constants/context.js';
 import { getLogoUrl } from '../../../util/cafe.js';
-import { isCafeAvailable } from '../../../util/date.js';
-import { attachRouter, getUserIdOrThrow, supportsVersionTag } from '../../../util/koa.js';
+import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerOrderingRoutes } from './ordering.js';
 import { registerSearchRoutes } from './search.js';
-import { logDebug } from '../../../util/log.js';
-import { UserStorageClient } from '../../../api/storage/clients/user.js';
 import { registerRecommendationsRoutes } from './recommendations.js';
 import { registerGroupsRoutes } from './groups.js';
+import { memoizeResponseBody } from '../../../middleware/cache.js';
 
 export const registerCafeRoutes = (parent: Router) => {
     const router = new Router({
@@ -43,14 +40,6 @@ export const registerCafeRoutes = (parent: Router) => {
             };
 
             for (const cafe of group.members) {
-                // Allows us to add cafes before they've officially opened, without polluting the menu list.
-                // For instance, when Food Hall 4 was added, the online ordering menu became available more than
-                // a week early.
-                if (!supportsVersionTag(ctx, VERSION_TAG.unreleasedCafes) && !isCafeAvailable(cafe, getMinimumDateForMenu())) {
-                    logDebug(`Skipping cafe ${cafe.id} because it is not yet available & client does not support unreleased cafes`);
-                    continue;
-                }
-
                 const cafeData = cafeDataById.get(cafe.id);
                 if (!cafeData) {
                     // Expected in case we have a cafe in config which isn't available online for some reason
@@ -78,54 +67,17 @@ export const registerCafeRoutes = (parent: Router) => {
         }
     }
 
-    const populateUserDataAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
-        if (!ctx.isAuthenticated()) {
-            return;
-        }
-
-        const userId = getUserIdOrThrow(ctx);
-        const user = await UserStorageClient.getUserAsync({ id: userId });
-
-        // If we have to swap out the database for any reason, just sign out users who had previously authed.
-        if (user == null) {
-            await ctx.logout();
-            return;
-        }
-
-        response.user = {
-            id: userId,
-            role: user.role
-        };
-
-        if (user.settings) {
-            response.user.settings = {
-                ...user.settings,
-                lastUpdate: user.settings.lastUpdate.getTime()
-            };
-        }
-    }
-
     router.get('/',
-        // can't memoize because it depends on auth now
-        // todo: add a way to memoize just the cafes part?
-        // memoizeResponseBodyByQueryParams(),
+        memoizeResponseBody(),
         async ctx => {
             const response: IDiningCoreResponse = {
                 isTrackingEnabled: ApplicationContext.analyticsApplicationsReady.size > 0,
                 groups:            []
             };
 
-            const userDataPromise: Promise<void> = supportsVersionTag(ctx, VERSION_TAG.userNotInCafeList)
-                ? Promise.resolve()
-                : populateUserDataAsync(ctx, response);
-
-            await Promise.all([
-                populateCafesAsync(ctx, response),
-                userDataPromise
-            ]);
+            await populateCafesAsync(ctx, response);
 
             ctx.body = jsonStringifyWithoutNull(response);
-            // assignCacheControl(ctx, DEFAULT_CACHE_EXPIRATION_TIME, false /*isPublic*/);
         });
 
     attachRouter(parent, router);

@@ -1,0 +1,110 @@
+{
+  "boardwalk-stn-espresso-1716": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-healthy": {
+        "tagId": "tag-healthy",
+        "tagName": "healthy"
+      },
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      }
+    }
+  },
+  "boardwalk-stn-pizza---pasta-1743": {
+    "customLabels": {
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      }
+    }
+  },
+  "boardwalk-stn-deli-9327": {
+    "customLabels": {
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-healthy": {
+        "tagId": "tag-healthy",
+        "tagName": "healthy"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      },
+      "tag-medium-circle": {
+        "tagId": "tag-medium-circle",
+        "tagName": "medium_circle"
+      }
+    }
+  },
+  "boardwalk-stn-poke-bar-4300": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      }
+    }
+  },
+  "boardwalk-stn-indian-kitchen-8872": {
+    "customLabels": {
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  }
+}

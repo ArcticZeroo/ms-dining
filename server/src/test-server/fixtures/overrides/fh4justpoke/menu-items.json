@@ -1,0 +1,2288 @@
+[
+  {
+    "id": "fh4justpoke-item-1-9586",
+    "amount": "10.50",
+    "displayText": "Margherita Pizza",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "720"
+    },
+    "description": "Fresh mozzarella, San Marzano tomatoes, basil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MARG PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-2-5389",
+    "amount": "10.50",
+    "displayText": "Deluxe Margherita Pizza",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "720"
+    },
+    "description": "Fresh mozzarella, San Marzano tomatoes, basil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU MARG PIZZA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-3-8292",
+    "amount": "11.50",
+    "displayText": "Pepperoni Pizza",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "820"
+    },
+    "description": "Classic pepperoni with mozzarella and red sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PEP PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-4-8891",
+    "amount": "11.50",
+    "displayText": "Deluxe Pepperoni Pizza",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "820"
+    },
+    "description": "Classic pepperoni with mozzarella and red sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU PEP PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-5-5719",
+    "amount": "12.50",
+    "displayText": "BBQ Chicken Pizza",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "800"
+    },
+    "description": "BBQ sauce, grilled chicken, red onion, cilantro",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BBQ CHKN PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-5-5719-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-5-5719-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-5-5719-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-5-5719-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-5-5719-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-6-7894",
+    "amount": "12.50",
+    "displayText": "Deluxe BBQ Chicken Pizza",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "800"
+    },
+    "description": "BBQ sauce, grilled chicken, red onion, cilantro",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU BBQ CHKN PIZZA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-7-2748",
+    "amount": "9.50",
+    "displayText": "Penne Marinara",
+    "properties": {
+      "calories": "580",
+      "maxCalories": "580"
+    },
+    "description": "Penne with house marinara and parmesan",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PENNE MRNRA",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-low-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-8-4509",
+    "amount": "9.50",
+    "displayText": "Deluxe Penne Marinara",
+    "properties": {
+      "calories": "580",
+      "maxCalories": "580"
+    },
+    "description": "Penne with house marinara and parmesan",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU PENNE MRNRA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-8-4509-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-8-4509-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-8-4509-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-8-4509-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4justpoke-item-8-4509-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-9-8724",
+    "amount": "12.75",
+    "displayText": "Chicken Alfredo",
+    "properties": {
+      "calories": "850",
+      "maxCalories": "900"
+    },
+    "description": "Fettuccine with grilled chicken in creamy alfredo sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN ALFREDO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-10-1515",
+    "amount": "12.75",
+    "displayText": "Deluxe Chicken Alfredo",
+    "properties": {
+      "calories": "850",
+      "maxCalories": "900"
+    },
+    "description": "Fettuccine with grilled chicken in creamy alfredo sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHKN ALFREDO",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-11-6103",
+    "amount": "3.99",
+    "displayText": "Garlic Bread",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "280"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "GARLIC BREAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-12-8674",
+    "amount": "3.99",
+    "displayText": "Deluxe Garlic Bread",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "280"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU GARLIC BREAD",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-13-7774",
+    "amount": "14.50",
+    "displayText": "Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-13-7774-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-13-7774-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-13-7774-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-13-7774-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-13-7774-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-13-7774-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-13-7774-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-14-9004",
+    "amount": "14.50",
+    "displayText": "Family-Size Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-15-7953",
+    "amount": "12.50",
+    "displayText": "Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-16-4489",
+    "amount": "12.50",
+    "displayText": "Family-Size Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI FALAFEL BWL",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-17-1906",
+    "amount": "11.99",
+    "displayText": "Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN SHWARMA",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-18-8650",
+    "amount": "11.99",
+    "displayText": "Family-Size Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CHKN SHWARMA",
+    "tagIds": [
+      "tag-low-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-19-8752",
+    "amount": "10.50",
+    "displayText": "Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-20-5330",
+    "amount": "10.50",
+    "displayText": "Family-Size Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI FALAFEL WRAP",
+    "tagIds": [
+      "tag-vegan",
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-20-5330-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-20-5330-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-20-5330-mod-1",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-20-5330-mod-1-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-1-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-1-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-1-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-20-5330-mod-2",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-20-5330-mod-2-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-2-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-2-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-20-5330-mod-2-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-21-6116",
+    "amount": "5.50",
+    "displayText": "Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "HUMMUS PITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-22-8243",
+    "amount": "5.50",
+    "displayText": "Family-Size Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI HUMMUS PITA",
+    "tagIds": [
+      "tag-vegan",
+      "tag-new"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-22-8243-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-22-8243-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-22-8243-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-22-8243-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-22-8243-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-23-4253",
+    "amount": "4.50",
+    "displayText": "Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TABBOULEH",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-23-4253-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-23-4253-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-23-4253-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-23-4253-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-23-4253-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-24-7346",
+    "amount": "4.50",
+    "displayText": "Family-Size Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI TABBOULEH",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-24-7346-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-24-7346-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-24-7346-mod-1",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-24-7346-mod-1-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-1-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-1-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-1-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-1-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-24-7346-mod-1-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-25-1315",
+    "amount": "11.99",
+    "displayText": "Classic Cheeseburger",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Angus beef patty with cheddar, lettuce, tomato, special sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CLASSIC CHZBRGR",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-25-1315-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-25-1315-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-25-1315-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-25-1315-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-25-1315-mod-2",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-25-1315-mod-2-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-2-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-2-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4justpoke-item-25-1315-mod-2-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-26-5509",
+    "amount": "11.99",
+    "displayText": "Deluxe Classic Cheeseburger",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Angus beef patty with cheddar, lettuce, tomato, special sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU CLASSIC CHZBRGR",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-26-5509-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-26-5509-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-26-5509-mod-1",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-26-5509-mod-1-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-1-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-1-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-1-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-26-5509-mod-2",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-26-5509-mod-2-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-2-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-2-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-2-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-2-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-26-5509-mod-2-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-27-4793",
+    "amount": "12.99",
+    "displayText": "BBQ Bacon Burger",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "980"
+    },
+    "description": "Angus beef with applewood bacon, cheddar, crispy onion rings, BBQ sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BBQ BACON BURGER",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-27-4793-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-27-4793-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh4justpoke-item-27-4793-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4justpoke-item-27-4793-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4justpoke-item-27-4793-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-27-4793-mod-1",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-27-4793-mod-1-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-27-4793-mod-1-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-27-4793-mod-1-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-27-4793-mod-1-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-28-3582",
+    "amount": "12.99",
+    "displayText": "Deluxe BBQ Bacon Burger",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "980"
+    },
+    "description": "Angus beef with applewood bacon, cheddar, crispy onion rings, BBQ sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU BBQ BACON BURGER",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-28-3582-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-28-3582-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-28-3582-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-28-3582-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-28-3582-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-28-3582-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-28-3582-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-28-3582-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-28-3582-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-29-1154",
+    "amount": "13.50",
+    "displayText": "Impossible Burger",
+    "properties": {
+      "calories": "630",
+      "maxCalories": "700"
+    },
+    "description": "Plant-based patty with lettuce, tomato, pickles",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "IMPOSSIBLE BRGR",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-29-1154-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-29-1154-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-29-1154-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-29-1154-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-29-1154-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-29-1154-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-30-4461",
+    "amount": "13.50",
+    "displayText": "Deluxe Impossible Burger",
+    "properties": {
+      "calories": "630",
+      "maxCalories": "700"
+    },
+    "description": "Plant-based patty with lettuce, tomato, pickles",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU IMPOSSIBLE BRGR",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-30-4461-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-30-4461-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-30-4461-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-30-4461-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-30-4461-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-30-4461-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-30-4461-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-30-4461-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-30-4461-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-30-4461-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-31-3724",
+    "amount": "4.50",
+    "displayText": "Seasoned Fries",
+    "properties": {
+      "calories": "400",
+      "maxCalories": "400"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SEASONED FRIES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-31-3724-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-31-3724-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-31-3724-mod-1",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-31-3724-mod-1-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-1-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-1-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4justpoke-item-31-3724-mod-1-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-32-5462",
+    "amount": "4.50",
+    "displayText": "Deluxe Seasoned Fries",
+    "properties": {
+      "calories": "400",
+      "maxCalories": "400"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU SEASONED FRIES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-33-6058",
+    "amount": "5.25",
+    "displayText": "Onion Rings",
+    "properties": {
+      "calories": "450",
+      "maxCalories": "450"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "ONION RINGS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-33-6058-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-33-6058-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-33-6058-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-34-4480",
+    "amount": "5.25",
+    "displayText": "Deluxe Onion Rings",
+    "properties": {
+      "calories": "450",
+      "maxCalories": "450"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU ONION RINGS",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh4justpoke-item-35-8210",
+    "amount": "9.50",
+    "displayText": "Caesar Salad",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "380"
+    },
+    "description": "Romaine, parmesan, croutons, caesar dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CAESAR SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-35-8210-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-35-8210-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-35-8210-mod-1",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-35-8210-mod-1-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-1-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-1-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-1-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-35-8210-mod-1-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-36-5890",
+    "amount": "9.50",
+    "displayText": "Deluxe Caesar Salad",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "380"
+    },
+    "description": "Romaine, parmesan, croutons, caesar dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU CAESAR SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-36-5890-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-36-5890-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-36-5890-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-36-5890-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-36-5890-mod-2",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-36-5890-mod-2-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-2-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-2-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-36-5890-mod-2-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-37-4886",
+    "amount": "8.75",
+    "displayText": "Garden Salad",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "250"
+    },
+    "description": "Mixed greens, tomato, cucumber, carrots, choice of dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "GARDEN SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-37-4886-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-37-4886-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-37-4886-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-37-4886-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-37-4886-mod-2",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-37-4886-mod-2-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-2-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-2-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-2-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-2-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-37-4886-mod-3",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh4justpoke-item-37-4886-mod-3-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-3-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-3-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-3-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-3-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-3-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-37-4886-mod-4",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-37-4886-mod-4-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-4-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-4-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh4justpoke-item-37-4886-mod-4-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh4justpoke-item-38-5029",
+    "amount": "8.75",
+    "displayText": "Deluxe Garden Salad",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "250"
+    },
+    "description": "Mixed greens, tomato, cucumber, carrots, choice of dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU GARDEN SALAD",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh4justpoke-item-38-5029-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-38-5029-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh4justpoke-item-38-5029-mod-1",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh4justpoke-item-38-5029-mod-1-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-1-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-1-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-1-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh4justpoke-item-38-5029-mod-1-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

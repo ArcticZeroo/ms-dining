@@ -1,24 +1,22 @@
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CartContext, CartHydrationContext } from '../../../context/cart.ts';
-import { useIsTodaySelected } from '../../../hooks/date-picker.tsx';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
+import { useCartHydrationStatus } from '../../../store/queries/cart.ts';
+import { useIsOnlineOrderingAllowed } from '../../../hooks/cafe.ts';
 import { useClickTracker } from '../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
 import { classNames } from '../../../util/react.ts';
 import { WaitTime } from '../wait-time.tsx';
 import { CartContentsTable } from './cart-contents-table.tsx';
 import { CartHydrationView } from './cart-hydration-view.tsx';
-import { DebugSettings } from '../../../constants/settings.ts';
 
 import './cart-popup.css';
 
 export const CartPopup = () => {
-    const allowOnlineOrdering = useValueNotifier(DebugSettings.allowOnlineOrdering);
-    const cart = useValueNotifierContext(CartContext);
-    const cartHydration = useValueNotifierContext(CartHydrationContext);
-    const isTodaySelected = useIsTodaySelected();
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
+    const cart = useCartStore((state) => state.items);
+    const missingItemsByCafeId = useCartStore((state) => state.missingItemsByCafeId);
+    const hydrationStatus = useCartHydrationStatus();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
@@ -38,12 +36,12 @@ export const CartPopup = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    const hasMissingItems = cartHydration.missingItemsByCafeId != null && cartHydration.missingItemsByCafeId.size > 0;
-    const shouldShow = isTodaySelected && (totalItemCount > 0 || hasMissingItems || cartHydration.stage === PromiseStage.running);
-
-    if (!allowOnlineOrdering) {
+    if (!isOnlineOrderingAllowed) {
         return;
     }
+
+    const hasMissingItems = missingItemsByCafeId.size > 0;
+    const shouldShow = totalItemCount > 0 || hasMissingItems || hydrationStatus.isPending;
 
     return (
         <div
@@ -71,7 +69,7 @@ export const CartPopup = () => {
                 </span>
                 <span className="cart-count">
                     {
-                        cartHydration.stage === PromiseStage.running
+                        hydrationStatus.isPending
                             ? 'Loading...'
                             : totalItemCount
                     }

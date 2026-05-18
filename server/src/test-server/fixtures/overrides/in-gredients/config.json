@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-in-gredients",
+  "contextID": "ctx-in-gredients-3903",
+  "theme": {
+    "logoImage": "in-gredients-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-in-gredients-713",
+        "storeName": "in-gredients"
+      },
+      "displayProfileId": [
+        "dp-in-gredients-598"
+      ]
+    }
+  ],
+  "properties": {}
+}

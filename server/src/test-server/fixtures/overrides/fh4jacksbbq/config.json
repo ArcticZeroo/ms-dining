@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-fh4jacksbbq",
+  "contextID": "ctx-fh4jacksbbq-2617",
+  "theme": {
+    "logoImage": "fh4jacksbbq-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-fh4jacksbbq-273",
+        "storeName": "fh4jacksbbq"
+      },
+      "displayProfileId": [
+        "dp-fh4jacksbbq-358"
+      ]
+    }
+  ],
+  "properties": {}
+}

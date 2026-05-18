@@ -2,6 +2,7 @@ import { ICafeShutdownState, IMenuItemDTO, IStationUniquenessData } from './cafe
 import { IIngredientsMenuDTO } from './ingredients.js';
 import { SearchEntityType, SearchMatchReason } from './search.js';
 import { ILocationCoordinates, Nullable } from './util.js';
+import { z } from 'zod';
 
 export interface IDiningCoreEntity {
 	name: string;
@@ -44,24 +45,23 @@ interface IDiningCoreGroupWithLocationOnGroup extends IDiningCoreGroupBase {
 
 export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCoreGroupWithLocationOnGroup;
 
-export interface IUser {
-    id: string;
-    role: string;
-}
+// ── Response schemas ──────────────────────────────────────────────────
+//
+// These zod schemas are the source of truth for HTTP response shapes —
+// the server constructs objects matching these via `satisfies`, the client
+// validates incoming responses with `.parse()`, and integration tests use
+// them via the fetchJson() helper. Where embedded types haven't been
+// migrated to zod yet (e.g. IMenuItemDTO), z.custom<T>() preserves the
+// TypeScript shape but skips runtime validation for those subtrees.
 
 // GET /api/dining/
-export interface IDiningCoreResponse {
-	isTrackingEnabled: boolean;
-	groups: IDiningCoreGroup[];
-	user?: IUser & {
-		settings?: {
-			favoriteStations: string[];
-			favoriteMenuItems: string[];
-			homepageIds: string[];
-			lastUpdate: number;
-		}
-	};
-}
+
+export const DiningCoreResponseSchema = z.object({
+	isTrackingEnabled: z.boolean(),
+	groups: z.array(z.custom<IDiningCoreGroup>()),
+});
+
+export type IDiningCoreResponse = z.infer<typeof DiningCoreResponseSchema>;
 
 // GET /api/dining/order/wait/:cafeId?items=$number
 export interface IWaitTimeResponse {
@@ -94,34 +94,52 @@ export interface IStationDTO {
 // GET /api/dining/menu/:cafeId
 export type MenuResponse = Array<IStationDTO>;
 
+/**
+ * Runtime schema for the legacy GET /api/dining/menu/:cafeId response.
+ * Server returns this shape when the client does NOT send the
+ * `menuRouteIsObjectInsteadOfArray` version tag. Tests can validate
+ * either shape by selecting between this schema and CafeMenuResponseSchema.
+ */
+export const MenuResponseSchema = z.array(z.custom<IStationDTO>());
+
 // GET /api/dining/menu/:cafeId/menu
-export interface ICafeMenuResponse {
-	isAvailable: boolean;
-	shutdownState?: ICafeShutdownState;
-	stations: IStationDTO[];
-	ingredientsMenu?: IIngredientsMenuDTO;
-}
+
+export const CafeMenuResponseSchema = z.object({
+	isAvailable: z.boolean(),
+	shutdownState: z.custom<ICafeShutdownState>().optional(),
+	stations: z.array(z.custom<IStationDTO>()),
+	ingredientsMenu: z.custom<IIngredientsMenuDTO>().optional(),
+});
+
+export type ICafeMenuResponse = z.infer<typeof CafeMenuResponseSchema>;
 
 export type AllMenusResponse = Record<string /*cafeId*/, MenuResponse>;
 
-export interface ISearchResponseResult {
-	id: string;
-	type: SearchEntityType;
-	name: string;
-	description?: string;
-	imageUrl?: string;
-	locations: Record<string, Array<string>>;
-	prices: Record<string, number>;
-	stations: Record<string /*cafeId*/, string /*stationName*/>;
-	matchReasons: Array<SearchMatchReason>;
-	tags?: Array<string>;
-	searchTags?: Array<string>;
-	matchedModifiers: Record<string, Array<string>>;
-	vectorDistance?: number;
-	cafeId?: string;
-	overallRating?: number;
-	totalReviewCount?: number;
-}
+// GET /api/dining/search
+
+export const SearchResponseResultSchema = z.object({
+	id: z.string(),
+	type: z.nativeEnum(SearchEntityType),
+	name: z.string(),
+	description: z.string().optional(),
+	imageUrl: z.string().optional(),
+	locations: z.record(z.string(), z.array(z.string())),
+	prices: z.record(z.string(), z.number()),
+	stations: z.record(z.string(), z.string()),
+	matchReasons: z.array(z.nativeEnum(SearchMatchReason)),
+	tags: z.array(z.string()).optional(),
+	searchTags: z.array(z.string()).optional(),
+	matchedModifiers: z.record(z.string(), z.array(z.string())),
+	vectorDistance: z.number().optional(),
+	cafeId: z.string().optional(),
+	overallRating: z.number().optional(),
+	totalReviewCount: z.number().optional(),
+});
+
+export type ISearchResponseResult = z.infer<typeof SearchResponseResultSchema>;
+
+export const SearchResponseSchema = z.array(SearchResponseResultSchema);
+export type ISearchResponse = z.infer<typeof SearchResponseSchema>;
 
 export interface ICreateReviewRequest {
 	rating: number;

@@ -3,7 +3,6 @@ import { ISerializedCartItemsByCafeId } from '../models/cart.ts';
 import { isDuckTypeSerializedCartItem } from '../util/typeguard.ts';
 import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
 import { DiningClient } from './client/dining.ts';
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 
 export const ARRAY_DELIMITER = ';';
 
@@ -128,7 +127,6 @@ interface IRoamingData {
 }
 
 export class StringSetSetting extends Setting<Set<string>> {
-    private _roamingStage: PromiseStage = PromiseStage.notRun;
     public readonly isRoamingEnabled: boolean;
 
     constructor(name: string, roamingData?: IRoamingData) {
@@ -139,17 +137,13 @@ export class StringSetSetting extends Setting<Set<string>> {
 
         if (roamingData != null) {
             this.addListener(value => {
-                this._roamingStage = PromiseStage.running;
                 roamingData.lastUpdateSetting.updateToNow();
 
                 DiningClient.updateSettings({
                     [roamingData.key]: Array.from(value)
-                }).then(() => {
-                    this._roamingStage = PromiseStage.success;
                 }).catch(err => {
                     // todo: handle case where page thinks they're signed in but their session has expired
                     console.error(`Failed to roam setting ${this.name}`, err);
-                    this._roamingStage = PromiseStage.error;
                 });
             });
         }
@@ -157,10 +151,6 @@ export class StringSetSetting extends Setting<Set<string>> {
 
     protected save(value: Set<string>) {
         setStringArraySetting(this.name, Array.from(value));
-    }
-
-    public get roamingStage() {
-        return this._roamingStage;
     }
 
     add(...values: string[]) {

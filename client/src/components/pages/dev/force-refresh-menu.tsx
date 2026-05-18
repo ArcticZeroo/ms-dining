@@ -1,24 +1,27 @@
 import { classNames } from '../../../util/react.js';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.js';
-import { DiningClient } from '../../../api/client/dining.js';
+import { useForceRefreshCafesMutation } from '../../../store/queries/cafe.js';
 
 export const ForceRefreshMenu = () => {
-    const refreshState = useDelayedPromiseState(DiningClient.forceRefreshCafes);
+    const refreshMutation = useForceRefreshCafesMutation();
 
     const onRefreshPressed = () => {
-        if (refreshState.actualStage === PromiseStage.running) {
+        if (refreshMutation.isPending) {
             return;
         }
 
-        refreshState.run();
+        refreshMutation.mutate();
     };
 
     return (
         <>
             <button
-                className={classNames('default-button default-container flex flex-center', refreshState.stage === PromiseStage.error && 'error', refreshState.stage === PromiseStage.success && 'success')}
-                disabled={refreshState.actualStage === PromiseStage.running}
+                className={classNames(
+                    'default-button default-container flex flex-center',
+                    refreshMutation.isError && 'error',
+                    refreshMutation.isSuccess && 'success',
+                )}
+                disabled={refreshMutation.isPending}
                 onClick={onRefreshPressed}
             >
                 <span className="material-symbols-outlined">
@@ -27,16 +30,10 @@ export const ForceRefreshMenu = () => {
                 <span>
                         Force Refresh Cafes
                 </span>
-                {
-                    refreshState.actualStage === PromiseStage.running && (
-                        <HourglassLoadingSpinner/>
-                    )
-                }
+                {refreshMutation.isPending && <HourglassLoadingSpinner/>}
             </button>
             <div>
-                {
-                    refreshState.error && String(refreshState.error)
-                }
+                {refreshMutation.error && String(refreshMutation.error)}
             </div>
         </>
     );

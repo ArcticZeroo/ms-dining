@@ -13,24 +13,50 @@ const ACCOMPANIMENT_FILTER_TERMS = [
     'dressing',
 ];
 
-// Non-entree items: accompaniments + beverages, desserts, snacks, etc.
-// Used by cheap items search to focus on actual entrees.
-const NON_ENTREE_FILTER_TERMS = [
-    ...ACCOMPANIMENT_FILTER_TERMS,
+// Drink/beverage items. Includes both AI-generated search-tag strings
+// (e.g. "beverage", "hotdrink") and human-readable name/category words
+// (e.g. "cold brew", "starbucks") so a single filter covers both pathways.
+// Plurals are handled automatically by MenuItemFilter; list singulars only.
+const DRINK_FILTER_TERMS = [
+    'beverage',
+    'drink',
     'coffee',
     'espresso',
     'latte',
-    'drink',
-    'dessert',
-    'snack',
+    'mocha',
+    'cappuccino',
+    'americano',
+    'macchiato',
     'tea',
-    'sweet',
-    'sweet street',
-    'starbucks',
+    'chai',
+    'matcha',
+    'smoothie',
+    'milkshake',
+    'shake',
+    'boba',
+    'bubbletea',
+    'cocktail',
     'mocktail',
     'soda',
-    'french press',
+    'juice',
+    'hotdrink',
+    'colddrink',
+    'softdrink',
+    'sparkling',
     'cold brew',
+    'french press',
+    'starbucks',
+];
+
+// Non-entree items: accompaniments + drinks + desserts, snacks, etc.
+// Used by cheap items search to focus on actual entrees.
+const NON_ENTREE_FILTER_TERMS = [
+    ...ACCOMPANIMENT_FILTER_TERMS,
+    ...DRINK_FILTER_TERMS,
+    'dessert',
+    'snack',
+    'sweet',
+    'sweet street',
     'bakery',
 ];
 
@@ -43,7 +69,16 @@ export class MenuItemFilter {
         const pattern = `(${terms.join('|')})s?`;
         this.wordBoundaryRegex = new RegExp(`\\b${pattern}\\b`, 'i');
         this.substringRegex = new RegExp(pattern, 'i');
-        this.termSet = new Set(terms.map(term => term.toLowerCase()));
+        // Mirror the regex's trailing-s tolerance for exact tag matches:
+        // include both the bare and +s form so a tag like "sides" matches "side".
+        this.termSet = new Set<string>();
+        for (const term of terms) {
+            const lower = term.toLowerCase();
+            this.termSet.add(lower);
+            if (!lower.endsWith('s')) {
+                this.termSet.add(`${lower}s`);
+            }
+        }
     }
 
     /**
@@ -83,4 +118,5 @@ export class MenuItemFilter {
 }
 
 export const ACCOMPANIMENT_FILTER = new MenuItemFilter(ACCOMPANIMENT_FILTER_TERMS);
+export const DRINK_FILTER = new MenuItemFilter(DRINK_FILTER_TERMS);
 export const NON_ENTREE_FILTER = new MenuItemFilter(NON_ENTREE_FILTER_TERMS);

@@ -7,6 +7,7 @@ import {
 } from '@msdining/common/models/search';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../util/typeguard.js';
+import { lazy } from '../../../util/lazy.js';
 import { IEntityRef } from '../../../models/vector.js';
 
 const createVectorDatabase = (path: string) => {
@@ -16,12 +17,14 @@ const createVectorDatabase = (path: string) => {
     return db;
 };
 
-const createDatabaseFactory = (path: string) => {
+const pathResolver = () => process.env.SEARCH_DB_PATH ?? 'search.db';
+
+const createDatabaseFactory = () => {
     let db: sqlite3.Database | null = null;
 
     return () => {
         if (!db) {
-            db = createVectorDatabase(path);
+            db = createVectorDatabase(pathResolver());
 
             db.exec(`
 CREATE VIRTUAL TABLE IF NOT EXISTS query_vec USING vec0(
@@ -53,7 +56,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS query_vec USING vec0(
     }
 }
 
-const getSearchVectorDatabase = createDatabaseFactory('search.db');
+const getSearchVectorDatabase = createDatabaseFactory();
 
 const createPreparedStatementFactory = (sql: string) => {
     let statement: sqlite3.Statement | null = null;
@@ -149,23 +152,24 @@ const populateAllEmbeddedItems = () => {
     return embeddedItems;
 };
 
-const ALL_EMBEDDED_ITEMS = populateAllEmbeddedItems();
+const ALL_EMBEDDED_ITEMS = lazy(populateAllEmbeddedItems);
 
-export const getAllEmbeddedEntities = () => ALL_EMBEDDED_ITEMS;
+export const getAllEmbeddedEntities = () => ALL_EMBEDDED_ITEMS.value;
 
 export const isEmbeddedEntity = (entityType: SearchEntityType, id: string) => {
-    return ALL_EMBEDDED_ITEMS.get(entityType)?.has(id) === true;
+    return ALL_EMBEDDED_ITEMS.value.get(entityType)?.has(id) === true;
 }
 
 const markEmbeddedItem = (entityType: SearchEntityType, id: string) => {
-    if (!ALL_EMBEDDED_ITEMS.has(entityType)) {
-        ALL_EMBEDDED_ITEMS.set(entityType, new Set());
+    const map = ALL_EMBEDDED_ITEMS.value;
+    if (!map.has(entityType)) {
+        map.set(entityType, new Set());
     }
-	ALL_EMBEDDED_ITEMS.get(entityType)!.add(id);
+	map.get(entityType)!.add(id);
 }
 
 const unmarkEmbeddedItem = (entityType: SearchEntityType, id: string) => {
-    ALL_EMBEDDED_ITEMS.get(entityType)?.delete(id);
+    ALL_EMBEDDED_ITEMS.value.get(entityType)?.delete(id);
 }
 
 export const insertSearchEntityEmbedding = (embedding: Float32Array, id: string, entityType: SearchEntityType) => {
@@ -179,12 +183,12 @@ export const deleteSearchEntityEmbedding = (entityType: SearchEntityType, id: st
 }
 
 export const getAllEmbeddedIdsByType = (entityType: SearchEntityType): Set<string> => {
-    return ALL_EMBEDDED_ITEMS.get(entityType) ?? new Set();
+    return ALL_EMBEDDED_ITEMS.value.get(entityType) ?? new Set();
 }
 
 export const deleteAllByEntityType = (entityType: SearchEntityType) => {
     DELETE_ALL_BY_TYPE_STATEMENT().run(SEARCH_ENTITY_TYPE_TO_DB_ID[entityType]);
-    ALL_EMBEDDED_ITEMS.delete(entityType);
+    ALL_EMBEDDED_ITEMS.value.delete(entityType);
 }
 
 export const insertQueryEmbedding = (embedding: Float32Array, query: string) => {

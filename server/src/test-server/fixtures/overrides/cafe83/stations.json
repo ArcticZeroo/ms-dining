@@ -1,0 +1,404 @@
+[
+  {
+    "id": "cafe83-stn-grill-5515",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "cafe83-menu-73748"
+    },
+    "menus": [
+      {
+        "id": "cafe83-menu-73748",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "cafe83-cat-0-5539",
+            "name": "Burgers",
+            "items": [
+              "cafe83-item-1-7127",
+              "cafe83-item-2-5638",
+              "cafe83-item-3-2573",
+              "cafe83-item-4-4934",
+              "cafe83-item-5-9238",
+              "cafe83-item-6-8491"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-1-4401",
+            "name": "Sides",
+            "items": [
+              "cafe83-item-7-9764",
+              "cafe83-item-8-8334",
+              "cafe83-item-9-6676",
+              "cafe83-item-10-3580"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-2-4171",
+            "name": "Salads",
+            "items": [
+              "cafe83-item-11-4984",
+              "cafe83-item-12-1436",
+              "cafe83-item-13-5217",
+              "cafe83-item-14-3167"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe83-stn-grill-5515",
+              "menuId": "cafe83-menu-73748"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe83-stn-comfort-kitchen-6081",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe83-menu-83341"
+    },
+    "menus": [
+      {
+        "id": "cafe83-menu-83341",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe83-cat-0-6247",
+            "name": "Comfort Classics",
+            "items": [
+              "cafe83-item-15-3496",
+              "cafe83-item-16-8814",
+              "cafe83-item-17-4434",
+              "cafe83-item-18-7738",
+              "cafe83-item-19-8240",
+              "cafe83-item-20-9945"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-1-9249",
+            "name": "Specials",
+            "items": [
+              "cafe83-item-19-8240",
+              "cafe83-item-20-9945",
+              "cafe83-item-21-8272",
+              "cafe83-item-22-9179"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe83-stn-comfort-kitchen-6081",
+              "menuId": "cafe83-menu-83341"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe83-stn-poke-bar-5920",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "cafe83-menu-27511"
+    },
+    "menus": [
+      {
+        "id": "cafe83-menu-27511",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafe83-cat-0-7579",
+            "name": "Poke Bowls",
+            "items": [
+              "cafe83-item-23-3924",
+              "cafe83-item-24-9455",
+              "cafe83-item-25-1079",
+              "cafe83-item-26-5000",
+              "cafe83-item-27-7594",
+              "cafe83-item-28-7129",
+              "cafe83-item-29-9136",
+              "cafe83-item-30-5876"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-1-8274",
+            "name": "Extras",
+            "items": [
+              "cafe83-item-31-4002",
+              "cafe83-item-32-9338",
+              "cafe83-item-33-4909",
+              "cafe83-item-34-7341"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe83-stn-poke-bar-5920",
+              "menuId": "cafe83-menu-27511"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe83-stn-chef-s-table-3120",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "cafe83-menu-61789"
+    },
+    "menus": [
+      {
+        "id": "cafe83-menu-61789",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "cafe83-cat-0-4995",
+            "name": "Chef's Table",
+            "items": [
+              "cafe83-item-35-8480",
+              "cafe83-item-36-9789",
+              "cafe83-item-37-2013",
+              "cafe83-item-38-8392",
+              "cafe83-item-39-5061",
+              "cafe83-item-40-3849"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe83-stn-chef-s-table-3120",
+              "menuId": "cafe83-menu-61789"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe83-stn-taqueria-9728",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "cafe83-menu-75134"
+    },
+    "menus": [
+      {
+        "id": "cafe83-menu-75134",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "cafe83-cat-0-5717",
+            "name": "Tacos",
+            "items": [
+              "cafe83-item-41-9409",
+              "cafe83-item-42-7615",
+              "cafe83-item-43-3195",
+              "cafe83-item-44-8300",
+              "cafe83-item-45-7747",
+              "cafe83-item-46-3806"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-1-4330",
+            "name": "Burritos",
+            "items": [
+              "cafe83-item-47-8423",
+              "cafe83-item-48-5127",
+              "cafe83-item-49-6724",
+              "cafe83-item-50-2015"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-2-8430",
+            "name": "Bowls",
+            "items": [
+              "cafe83-item-51-9965",
+              "cafe83-item-52-6997"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-3-1923",
+            "name": "Build Your Own",
+            "items": [
+              "cafe83-item-41-9409",
+              "cafe83-item-42-7615",
+              "cafe83-item-43-3195",
+              "cafe83-item-44-8300",
+              "cafe83-item-47-8423",
+              "cafe83-item-48-5127"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe83-stn-taqueria-9728",
+              "menuId": "cafe83-menu-75134"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe83-stn-espresso-5038",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "cafe83-menu-41758"
+    },
+    "menus": [
+      {
+        "id": "cafe83-menu-41758",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "cafe83-cat-0-1558",
+            "name": "Hot Drinks",
+            "items": [
+              "cafe83-item-53-8362",
+              "cafe83-item-54-5550",
+              "cafe83-item-55-5958",
+              "cafe83-item-56-3938",
+              "cafe83-item-57-5831",
+              "cafe83-item-58-7186",
+              "cafe83-item-59-1226",
+              "cafe83-item-60-8160"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-1-4956",
+            "name": "Cold Drinks",
+            "items": [
+              "cafe83-item-61-6998",
+              "cafe83-item-62-8384",
+              "cafe83-item-63-3710",
+              "cafe83-item-64-3564"
+            ]
+          },
+          {
+            "categoryId": "cafe83-cat-2-6798",
+            "name": "Bakery",
+            "items": [
+              "cafe83-item-65-8438",
+              "cafe83-item-66-4828",
+              "cafe83-item-67-9712",
+              "cafe83-item-68-4631",
+              "cafe83-item-69-9565",
+              "cafe83-item-70-7475"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe83-stn-espresso-5038",
+              "menuId": "cafe83-menu-41758"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

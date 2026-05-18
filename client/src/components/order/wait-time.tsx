@@ -1,16 +1,20 @@
 import React, { useMemo } from 'react';
-import { IPrepareCartResponse } from '@msdining/common/models/cart';
+import { useCartStore } from '../../store/zustand/cart.ts';
+import { useCartSessionQuery } from '../../store/queries/ordering.ts';
 import { pluralize } from '../../util/string.js';
 
-interface IWaitTimeProps {
-    cartSessionData?: IPrepareCartResponse | null;
-}
+export const WaitTime: React.FC = () => {
+    const cart = useCartStore((state) => state.items);
+    const { data: cartSessionData, isPending } = useCartSessionQuery();
 
-export const WaitTime: React.FC<IWaitTimeProps> = ({ cartSessionData }) => {
     const waitTimeView = useMemo(
         () => {
+            if (cart.size === 0) {
+                return null;
+            }
+
             if (!cartSessionData) {
-                return 'Loading wait time...';
+                return isPending ? 'Loading wait time...' : null;
             }
 
             let minTime = 0;
@@ -27,8 +31,12 @@ export const WaitTime: React.FC<IWaitTimeProps> = ({ cartSessionData }) => {
 
             return `Estimated wait time: ${minTime} - ${maxTime} minutes`;
         },
-        [cartSessionData]
+        [cart.size, cartSessionData, isPending]
     );
+
+    if (waitTimeView == null) {
+        return null;
+    }
 
     return (
         <div className="centered-content">

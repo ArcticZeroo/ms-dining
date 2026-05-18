@@ -1,0 +1,353 @@
+[
+  {
+    "id": "chandys-stn-espresso-4515",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "chandys-menu-45313"
+    },
+    "menus": [
+      {
+        "id": "chandys-menu-45313",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "chandys-cat-0-8610",
+            "name": "Hot Drinks",
+            "items": [
+              "chandys-item-1-3425",
+              "chandys-item-2-5658",
+              "chandys-item-3-5478",
+              "chandys-item-4-8521",
+              "chandys-item-5-7670",
+              "chandys-item-6-5874",
+              "chandys-item-7-2887",
+              "chandys-item-8-9514"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-1-7472",
+            "name": "Cold Drinks",
+            "items": [
+              "chandys-item-9-3434",
+              "chandys-item-10-2443",
+              "chandys-item-11-5468",
+              "chandys-item-12-9880"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-2-7896",
+            "name": "Bakery",
+            "items": [
+              "chandys-item-13-5317",
+              "chandys-item-14-8499",
+              "chandys-item-15-8043",
+              "chandys-item-16-4655",
+              "chandys-item-17-1635",
+              "chandys-item-18-2748"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "chandys-stn-espresso-4515",
+              "menuId": "chandys-menu-45313"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "chandys-stn-indian-kitchen-3020",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "chandys-menu-59837"
+    },
+    "menus": [
+      {
+        "id": "chandys-menu-59837",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "chandys-cat-0-4115",
+            "name": "Curries",
+            "items": [
+              "chandys-item-19-8807",
+              "chandys-item-20-7910",
+              "chandys-item-21-8412",
+              "chandys-item-22-3408",
+              "chandys-item-23-8875",
+              "chandys-item-24-8407"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-1-6232",
+            "name": "Sides & Bread",
+            "items": [
+              "chandys-item-25-8650",
+              "chandys-item-26-9873",
+              "chandys-item-27-9621",
+              "chandys-item-28-4717",
+              "chandys-item-29-5376",
+              "chandys-item-30-3407"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-2-8210",
+            "name": "Combo Meals",
+            "items": [
+              "chandys-item-19-8807",
+              "chandys-item-20-7910",
+              "chandys-item-25-8650",
+              "chandys-item-26-9873",
+              "chandys-item-29-5376",
+              "chandys-item-30-3407"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "chandys-stn-indian-kitchen-3020",
+              "menuId": "chandys-menu-59837"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "chandys-stn-deli-6555",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "chandys-menu-88155"
+    },
+    "menus": [
+      {
+        "id": "chandys-menu-88155",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "chandys-cat-0-7373",
+            "name": "Half Sandwiches",
+            "items": [
+              "chandys-item-31-5154",
+              "chandys-item-32-6980",
+              "chandys-item-33-9271",
+              "chandys-item-34-3339",
+              "chandys-item-35-7066",
+              "chandys-item-36-3405"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-1-6215",
+            "name": "Whole Sandwiches",
+            "items": [
+              "chandys-item-37-9467",
+              "chandys-item-38-2003",
+              "chandys-item-39-4442",
+              "chandys-item-40-4917",
+              "chandys-item-41-4794",
+              "chandys-item-42-7608"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-2-2240",
+            "name": "Soups",
+            "items": [
+              "chandys-item-43-8876",
+              "chandys-item-44-4098",
+              "chandys-item-45-7917",
+              "chandys-item-46-3453"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "chandys-stn-deli-6555",
+              "menuId": "chandys-menu-88155"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "chandys-stn-pacific-rim-4242",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "chandys-menu-75501"
+    },
+    "menus": [
+      {
+        "id": "chandys-menu-75501",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "chandys-cat-0-1870",
+            "name": "Entrees",
+            "items": [
+              "chandys-item-47-6313",
+              "chandys-item-48-3118",
+              "chandys-item-49-9313",
+              "chandys-item-50-5013",
+              "chandys-item-51-5298",
+              "chandys-item-52-9730",
+              "chandys-item-53-5353",
+              "chandys-item-54-5941"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-1-7476",
+            "name": "Sides",
+            "items": [
+              "chandys-item-55-9838",
+              "chandys-item-56-9462",
+              "chandys-item-57-8938",
+              "chandys-item-58-2283"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "chandys-stn-pacific-rim-4242",
+              "menuId": "chandys-menu-75501"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "chandys-stn-ramen-bar-4633",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "chandys-menu-65259"
+    },
+    "menus": [
+      {
+        "id": "chandys-menu-65259",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "chandys-cat-0-2899",
+            "name": "Ramen Bowls",
+            "items": [
+              "chandys-item-59-2320",
+              "chandys-item-60-3278",
+              "chandys-item-61-6377",
+              "chandys-item-62-3127",
+              "chandys-item-63-2926",
+              "chandys-item-64-8405",
+              "chandys-item-65-7210",
+              "chandys-item-66-8617"
+            ]
+          },
+          {
+            "categoryId": "chandys-cat-1-3461",
+            "name": "Sides & Apps",
+            "items": [
+              "chandys-item-67-1437",
+              "chandys-item-68-6400",
+              "chandys-item-69-6890",
+              "chandys-item-70-6587",
+              "chandys-item-71-3465",
+              "chandys-item-72-4821"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "chandys-stn-ramen-bar-4633",
+              "menuId": "chandys-menu-65259"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -1,0 +1,170 @@
+{
+  "mayas-stn-pizza---pasta-4325": {
+    "customLabels": {
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-medium-circle": {
+        "tagId": "tag-medium-circle",
+        "tagName": "medium_circle"
+      }
+    }
+  },
+  "mayas-stn-ramen-bar-8867": {
+    "customLabels": {
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      }
+    }
+  },
+  "mayas-stn-chef-s-table-4787": {
+    "customLabels": {
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-medium-circle": {
+        "tagId": "tag-medium-circle",
+        "tagName": "medium_circle"
+      }
+    }
+  },
+  "mayas-stn-pacific-rim-8058": {
+    "customLabels": {
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      }
+    }
+  },
+  "mayas-stn-poke-bar-7886": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-healthy": {
+        "tagId": "tag-healthy",
+        "tagName": "healthy"
+      },
+      "tag-medium-circle": {
+        "tagId": "tag-medium-circle",
+        "tagName": "medium_circle"
+      }
+    }
+  },
+  "mayas-stn-comfort-kitchen-4292": {
+    "customLabels": {
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      }
+    }
+  },
+  "mayas-stn-espresso-7853": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      }
+    }
+  },
+  "mayas-stn-grill-3365": {
+    "customLabels": {
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      }
+    }
+  },
+  "mayas-stn-deli-4241": {
+    "customLabels": {
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      }
+    }
+  }
+}

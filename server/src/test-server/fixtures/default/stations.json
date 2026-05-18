@@ -1,0 +1,100 @@
+[
+  {
+    "id": "station-1",
+    "name": "Test Grill",
+    "priceLevelConfig": {
+      "menuId": "menu-1"
+    },
+    "menus": [
+      {
+        "id": "menu-1",
+        "name": "Main Menu",
+        "categories": [
+          {
+            "categoryId": "cat-1",
+            "name": "Entrees",
+            "items": ["item-1", "item-2", "item-3"]
+          },
+          {
+            "categoryId": "cat-2",
+            "name": "Sides",
+            "items": ["item-4", "item-5"]
+          }
+        ],
+        "lastUpdateTime": "2025-01-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Test Grill",
+      "displayText": "Test Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "station-1",
+              "menuId": "menu-1"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "station-2",
+    "name": "Test Deli",
+    "priceLevelConfig": {
+      "menuId": "menu-2"
+    },
+    "menus": [
+      {
+        "id": "menu-2",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "cat-3",
+            "name": "Sandwiches",
+            "items": ["item-6", "item-7"]
+          },
+          {
+            "categoryId": "cat-4",
+            "name": "Beverages",
+            "items": ["item-8"]
+          }
+        ],
+        "lastUpdateTime": "2025-01-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Test Deli",
+      "displayText": "Test Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "station-2",
+              "menuId": "menu-2"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 8 * * *",
+    "closeScheduleExpression": "0 0 14 * * *"
+  }
+]

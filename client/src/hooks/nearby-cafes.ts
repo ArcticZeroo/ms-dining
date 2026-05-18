@@ -4,8 +4,7 @@ import { ApplicationContext } from '../context/app.ts';
 import { convertKmToMiles, getDistanceBetweenCoordinates } from '../util/coordinates.ts';
 import { getViewLocation, isViewVisibleForNav } from '../util/view.ts';
 import { CafeView } from '../models/cafe.ts';
-import { useValueNotifierContext } from './events.js';
-import { SelectedDateContext } from '../context/time.js';
+import { useSelectedDate } from '../store/zustand/selected-date.ts';
 
 const MAX_NEARBY_CAFES = 5;
 
@@ -16,7 +15,7 @@ export interface INearestCafe {
 
 export const useNearestCafes = (origin: ILocationCoordinates, excludeViewId?: string): INearestCafe[] => {
     const { viewsInOrder } = useContext(ApplicationContext);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     return useMemo(() => {
         const results: INearestCafe[] = [];

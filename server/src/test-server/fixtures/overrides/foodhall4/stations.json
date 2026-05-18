@@ -1,0 +1,65 @@
+[
+  {
+    "id": "foodhall4-stn-pacific-rim-8315",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "foodhall4-menu-39851"
+    },
+    "menus": [
+      {
+        "id": "foodhall4-menu-39851",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "foodhall4-cat-0-3470",
+            "name": "Entrees",
+            "items": [
+              "foodhall4-item-1-3161",
+              "foodhall4-item-2-1751",
+              "foodhall4-item-3-5068",
+              "foodhall4-item-4-9098",
+              "foodhall4-item-5-8972",
+              "foodhall4-item-6-6000",
+              "foodhall4-item-7-1916",
+              "foodhall4-item-8-2516"
+            ]
+          },
+          {
+            "categoryId": "foodhall4-cat-1-8258",
+            "name": "Sides",
+            "items": [
+              "foodhall4-item-9-3436",
+              "foodhall4-item-10-1396",
+              "foodhall4-item-11-4852",
+              "foodhall4-item-12-4131"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "foodhall4-stn-pacific-rim-8315",
+              "menuId": "foodhall4-menu-39851"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

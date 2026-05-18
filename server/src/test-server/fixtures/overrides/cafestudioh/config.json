@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-cafestudioh",
+  "contextID": "ctx-cafestudioh-9521",
+  "theme": {
+    "logoImage": "cafestudioh-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-cafestudioh-167",
+        "storeName": "cafestudioh"
+      },
+      "displayProfileId": [
+        "dp-cafestudioh-619"
+      ]
+    }
+  ],
+  "properties": {}
+}

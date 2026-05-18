@@ -1,0 +1,19 @@
+{
+  "tenantID": "test-tenant-001",
+  "contextID": "test-context-001",
+  "theme": {
+    "logoImage": "default-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "test-store-001",
+        "storeName": "Test Café"
+      },
+      "displayProfileId": [
+        "test-display-profile-001"
+      ]
+    }
+  ],
+  "properties": {}
+}

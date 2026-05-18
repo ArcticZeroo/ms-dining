@@ -19,6 +19,18 @@ export const isDateStringWithinMenuWindow = (dateString: string): boolean => {
     return daysFromNow <= MENU_REQUEST_DAYS_WINDOW;
 };
 
+/**
+ * True when we both have menus for the date (within the request window) and operate on it
+ * (weekdays only). Use at any entry point that fetches or computes per-day menu data; cache
+ * cleanup and pure range iteration should keep using the individual predicates.
+ */
+export const canFetchMenuForDateString = (dateString: string): boolean => {
+    if (!isDateStringWithinMenuWindow(dateString)) {
+        return false;
+    }
+    return !DateUtil.isDateOnWeekend(DateUtil.fromDateString(dateString));
+};
+
 export const getDateForMenuRequest = (ctx: Router.RouterContext): Date | null => {
     const queryDateRaw = getTrimmedQueryParam(ctx, 'date');
     if (!queryDateRaw) {

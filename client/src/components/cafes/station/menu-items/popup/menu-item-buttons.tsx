@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { ApplicationContext } from '../../../../../context/app.ts';
 import { useValueNotifier } from '../../../../../hooks/events.ts';
 import { ApplicationSettings } from '../../../../../constants/settings.ts';
-import { SelectedDateContext } from '../../../../../context/time.ts';
+import { useSelectedDateStore } from '../../../../../store/zustand/selected-date.ts';
 import { SearchResultVisitHistoryButton } from '../../../../search/schedule/search-result-visit-history-button.tsx';
 
 interface IMenuItemButtonsProps {
@@ -21,7 +21,6 @@ interface IMenuItemButtonsProps {
 export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuItem, onClose }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const selectedDateNotifier = useContext(SelectedDateContext);
     const navigate = useNavigate();
 
     const [copyButtonBackground, setCopyButtonBackground] = useState<string | undefined>(undefined);
@@ -63,7 +62,7 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
             view: parentView,
             name: menuItem.name,
             entityType: SearchEntityType.menuItem,
-            date: selectedDateNotifier.value
+            date: useSelectedDateStore.getState().date
         });
 
         copyToClipboard(`${window.location.origin}${viewPath}`)

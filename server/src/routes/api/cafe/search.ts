@@ -2,7 +2,6 @@ import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import Router from '@koa/router';
 import { NumberUtil } from '@msdining/common';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
-import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { ISearchQuery } from '@msdining/common/models/search';
 import { SearchManager } from '../../../api/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
@@ -12,8 +11,7 @@ import {
 	getEntityTypeAndName,
 	getTrimmedQueryParam,
 	serializeMapOfStringToSet,
-	serializeSearchResults,
-	supportsVersionTag
+	serializeSearchResults
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../util/serde.js';
 import { logDebug, logError } from '../../../util/log.js';
@@ -85,7 +83,7 @@ export const registerSearchRoutes = (parent: Router) => {
                 // If a date is specified, we clearly only want appearances from that date.
                 // Otherwise, we only want appearances from this week if the client supports it (since otherwise it shows weird hidden UI)
                 // and the client hasn't told us to filter out results without appearances (e.g. search ideas)
-                const allowResultsWithoutAppearances = date == null && supportsVersionTag(ctx, VERSION_TAG.searchResultsNotHereThisWeek) && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
+                const allowResultsWithoutAppearances = date == null && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
                 const results = await SearchManager.searchVector(searchQuery, date, allowResultsWithoutAppearances);
                 await serializeSearchResults(ctx, results);
                 const endTime = Date.now();

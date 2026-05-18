@@ -1,42 +1,31 @@
 import { isSameDate } from '@msdining/common/util/date-util';
 import { useEffect, useMemo, useRef } from 'react';
 import { DiningClient } from '../api/client/dining.ts';
-import { CafeDatePicker } from '../components/cafes/date/date-picker.tsx';
 import { ApplicationSettings } from '../constants/settings.ts';
-import { SelectedDateContext } from '../context/time.ts';
-import { ValueNotifier } from '../util/events.ts';
+import { setSelectedDate, useSelectedDate, useSelectedDateStore } from '../store/zustand/selected-date.ts';
 import { addDateToUrl } from '../util/url.ts';
-import { useValueNotifier, useValueNotifierContext } from './events.ts';
-
-export const useDatePicker = () => {
-    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-
-    useSelectedDateInUrl();
-
-    return useMemo(() => {
-        if (!allowFutureMenus) {
-            return null;
-        }
-
-        return <CafeDatePicker/>
-    }, [allowFutureMenus]);
-}
+import { useValueNotifier } from './events.ts';
 
 export const useSelectedDateInUrl = () => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     useEffect(() => {
         addDateToUrl(selectedDate);
     }, [selectedDate]);
 };
 
 export const useIsTodaySelected = () => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-    return isSameDate(selectedDate, new Date());
+    const selectedDate = useSelectedDate();
+    // Compare against DiningClient.getTodayDateForMenu() (not new Date()) so
+    // weekends — when "today's menu" is Monday's — still count as "today" for
+    // gating order/cart UI. Otherwise add-to-cart and the cart popup vanish
+    // on Saturday/Sunday despite the user looking at the menu they could
+    // actually order from.
+    return isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
 }
 
 export const useDateForSearch = () => {
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
     if (!allowFutureMenus) {
         return selectedDate;
@@ -48,7 +37,7 @@ export const useDateForSearch = () => {
 }
 
 export const useSelectedDisplayDateString = () => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
     return useMemo(() => {
         return selectedDate.toLocaleDateString();
     }, [selectedDate]);
@@ -59,7 +48,9 @@ export const useSelectedDisplayDateString = () => {
 // advance to the new "today" when the calendar day rolls over while the page
 // stays open. This avoids stale menu fetches when the browser is left open
 // overnight.
-export const useAutoAdvanceSelectedDate = (selectedDateNotifier: ValueNotifier<Date>) => {
+//
+// Must be called once near the root.
+export const useAutoAdvanceSelectedDate = () => {
     const lastKnownTodayRef = useRef<Date | null>(null);
 
     useEffect(() => {
@@ -68,13 +59,13 @@ export const useAutoAdvanceSelectedDate = (selectedDateNotifier: ValueNotifier<D
             lastKnownTodayRef.current = isSameDate(value, today) ? today : null;
         };
 
-        updateLastKnownToday(selectedDateNotifier.value);
+        updateLastKnownToday(useSelectedDateStore.getState().date);
 
-        const onSelectedDateChanged = (value: Date) => {
-            updateLastKnownToday(value);
-        };
-
-        selectedDateNotifier.addListener(onSelectedDateChanged);
+        const unsubscribe = useSelectedDateStore.subscribe((state, prev) => {
+            if (state.date !== prev.date) {
+                updateLastKnownToday(state.date);
+            }
+        });
 
         const maybeAdvanceToToday = () => {
             const lastKnownToday = lastKnownTodayRef.current;
@@ -84,7 +75,7 @@ export const useAutoAdvanceSelectedDate = (selectedDateNotifier: ValueNotifier<D
 
             const today = DiningClient.getTodayDateForMenu();
             if (!isSameDate(lastKnownToday, today)) {
-                selectedDateNotifier.value = today;
+                setSelectedDate(today);
             }
         };
 
@@ -100,9 +91,9 @@ export const useAutoAdvanceSelectedDate = (selectedDateNotifier: ValueNotifier<D
         const intervalId = window.setInterval(maybeAdvanceToToday, 60 * 1000);
 
         return () => {
-            selectedDateNotifier.removeListener(onSelectedDateChanged);
+            unsubscribe();
             document.removeEventListener('visibilitychange', onVisibilityChange);
             window.clearInterval(intervalId);
         };
-    }, [selectedDateNotifier]);
+    }, []);
 };

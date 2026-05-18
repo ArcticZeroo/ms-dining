@@ -1,12 +1,11 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SearchQueryContext } from '../../../context/search.ts';
+import { setSearchQuery } from '../../../store/zustand/search-query.ts';
 import { SearchPageWithQuery } from './search-page-with-query.tsx';
 import { setPageData } from '../../../util/title.ts';
 
 export const SearchPage = () => {
     const [searchParams] = useSearchParams();
-    const searchQueryNotifier = useContext(SearchQueryContext);
 
     const query = searchParams.get('q');
 
@@ -15,8 +14,8 @@ export const SearchPage = () => {
             return;
         }
 
-        searchQueryNotifier.value = query;
-    }, [searchQueryNotifier, query]);
+        setSearchQuery(query);
+    }, [query]);
 
     useEffect(() => {
         setPageData(`Search for "${query}"`, `Search results for menu items and stations across Microsoft Redmond Campus for "${query}"`);

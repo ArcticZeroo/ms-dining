@@ -1,0 +1,262 @@
+[
+  {
+    "id": "craft75-stn-ramen-bar-5651",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "craft75-menu-13462"
+    },
+    "menus": [
+      {
+        "id": "craft75-menu-13462",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "craft75-cat-0-2235",
+            "name": "Ramen Bowls",
+            "items": [
+              "craft75-item-1-1630",
+              "craft75-item-2-6721",
+              "craft75-item-3-4680",
+              "craft75-item-4-8190",
+              "craft75-item-5-5325",
+              "craft75-item-6-8456",
+              "craft75-item-7-5285",
+              "craft75-item-8-9570"
+            ]
+          },
+          {
+            "categoryId": "craft75-cat-1-9860",
+            "name": "Sides & Apps",
+            "items": [
+              "craft75-item-9-6716",
+              "craft75-item-10-2693",
+              "craft75-item-11-4696",
+              "craft75-item-12-1685",
+              "craft75-item-13-9454",
+              "craft75-item-14-6016"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "craft75-stn-ramen-bar-5651",
+              "menuId": "craft75-menu-13462"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "craft75-stn-chef-s-table-2094",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "craft75-menu-90694"
+    },
+    "menus": [
+      {
+        "id": "craft75-menu-90694",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "craft75-cat-0-5493",
+            "name": "Chef's Table",
+            "items": [
+              "craft75-item-15-6692",
+              "craft75-item-16-9805",
+              "craft75-item-17-3978",
+              "craft75-item-18-7264",
+              "craft75-item-19-7765",
+              "craft75-item-20-3992"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "craft75-stn-chef-s-table-2094",
+              "menuId": "craft75-menu-90694"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "craft75-stn-espresso-9232",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "craft75-menu-30150"
+    },
+    "menus": [
+      {
+        "id": "craft75-menu-30150",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "craft75-cat-0-7385",
+            "name": "Hot Drinks",
+            "items": [
+              "craft75-item-21-3246",
+              "craft75-item-22-7337",
+              "craft75-item-23-1993",
+              "craft75-item-24-4764",
+              "craft75-item-25-7342",
+              "craft75-item-26-2974",
+              "craft75-item-27-1715",
+              "craft75-item-28-8458"
+            ]
+          },
+          {
+            "categoryId": "craft75-cat-1-1172",
+            "name": "Cold Drinks",
+            "items": [
+              "craft75-item-29-8109",
+              "craft75-item-30-7113",
+              "craft75-item-31-4793",
+              "craft75-item-32-6179"
+            ]
+          },
+          {
+            "categoryId": "craft75-cat-2-6064",
+            "name": "Bakery",
+            "items": [
+              "craft75-item-33-6507",
+              "craft75-item-34-8833",
+              "craft75-item-35-6913",
+              "craft75-item-36-9996",
+              "craft75-item-37-3288",
+              "craft75-item-38-4055"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "craft75-stn-espresso-9232",
+              "menuId": "craft75-menu-30150"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "craft75-stn-mediterranean-3454",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "craft75-menu-20656"
+    },
+    "menus": [
+      {
+        "id": "craft75-menu-20656",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "craft75-cat-0-4384",
+            "name": "Bowls",
+            "items": [
+              "craft75-item-39-3031",
+              "craft75-item-40-1356",
+              "craft75-item-41-4151",
+              "craft75-item-42-9744"
+            ]
+          },
+          {
+            "categoryId": "craft75-cat-1-4454",
+            "name": "Wraps",
+            "items": [
+              "craft75-item-43-2591",
+              "craft75-item-44-1662",
+              "craft75-item-45-9856",
+              "craft75-item-46-5669"
+            ]
+          },
+          {
+            "categoryId": "craft75-cat-2-8023",
+            "name": "Sides",
+            "items": [
+              "craft75-item-47-7974",
+              "craft75-item-48-6596",
+              "craft75-item-49-7598",
+              "craft75-item-50-1422"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "craft75-stn-mediterranean-3454",
+              "menuId": "craft75-menu-20656"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

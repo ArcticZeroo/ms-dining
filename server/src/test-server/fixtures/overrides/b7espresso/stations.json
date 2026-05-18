@@ -1,0 +1,746 @@
+[
+  {
+    "id": "b7espresso-stn-indian-kitchen-3426",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-29846"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-29846",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-5124",
+            "name": "Curries",
+            "items": [
+              "b7espresso-item-1-6771",
+              "b7espresso-item-2-9511",
+              "b7espresso-item-3-6978",
+              "b7espresso-item-4-1337",
+              "b7espresso-item-5-4155",
+              "b7espresso-item-6-6077",
+              "b7espresso-item-7-4911",
+              "b7espresso-item-8-8045",
+              "b7espresso-item-9-6247"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-3909",
+            "name": "Sides & Bread",
+            "items": [
+              "b7espresso-item-10-2118",
+              "b7espresso-item-11-4396",
+              "b7espresso-item-12-5706",
+              "b7espresso-item-13-3770",
+              "b7espresso-item-14-6500",
+              "b7espresso-item-15-6873",
+              "b7espresso-item-16-6476",
+              "b7espresso-item-17-1633",
+              "b7espresso-item-18-9700"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-2-7646",
+            "name": "Combo Meals",
+            "items": [
+              "b7espresso-item-1-6771",
+              "b7espresso-item-2-9511",
+              "b7espresso-item-3-6978",
+              "b7espresso-item-10-2118",
+              "b7espresso-item-11-4396",
+              "b7espresso-item-12-5706",
+              "b7espresso-item-16-6476",
+              "b7espresso-item-17-1633",
+              "b7espresso-item-18-9700"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-indian-kitchen-3426",
+              "menuId": "b7espresso-menu-29846"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-deli-6968",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-22069"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-22069",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-3299",
+            "name": "Half Sandwiches",
+            "items": [
+              "b7espresso-item-19-6714",
+              "b7espresso-item-20-6251",
+              "b7espresso-item-21-7389",
+              "b7espresso-item-22-2496",
+              "b7espresso-item-23-9559",
+              "b7espresso-item-24-3886",
+              "b7espresso-item-25-9301",
+              "b7espresso-item-26-2979",
+              "b7espresso-item-27-7497"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-1726",
+            "name": "Whole Sandwiches",
+            "items": [
+              "b7espresso-item-28-4301",
+              "b7espresso-item-29-2557",
+              "b7espresso-item-30-2304",
+              "b7espresso-item-31-2644",
+              "b7espresso-item-32-5207",
+              "b7espresso-item-33-8568",
+              "b7espresso-item-34-4302",
+              "b7espresso-item-35-2199",
+              "b7espresso-item-36-6066"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-2-4641",
+            "name": "Soups",
+            "items": [
+              "b7espresso-item-37-6085",
+              "b7espresso-item-38-1854",
+              "b7espresso-item-39-1767",
+              "b7espresso-item-40-2697",
+              "b7espresso-item-41-9846",
+              "b7espresso-item-42-3523"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-deli-6968",
+              "menuId": "b7espresso-menu-22069"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-pizza---pasta-1576",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-41529"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-41529",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-6366",
+            "name": "Pizza",
+            "items": [
+              "b7espresso-item-43-6941",
+              "b7espresso-item-44-8149",
+              "b7espresso-item-45-4219",
+              "b7espresso-item-46-6033",
+              "b7espresso-item-47-2565",
+              "b7espresso-item-48-7667",
+              "b7espresso-item-49-3192",
+              "b7espresso-item-50-2770",
+              "b7espresso-item-51-7514"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-6821",
+            "name": "Pasta",
+            "items": [
+              "b7espresso-item-52-4922",
+              "b7espresso-item-53-7987",
+              "b7espresso-item-54-6153",
+              "b7espresso-item-55-9919",
+              "b7espresso-item-56-1553",
+              "b7espresso-item-57-8526"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-2-7409",
+            "name": "Sides",
+            "items": [
+              "b7espresso-item-58-1658",
+              "b7espresso-item-59-1748",
+              "b7espresso-item-60-4967"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-pizza---pasta-1576",
+              "menuId": "b7espresso-menu-41529"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-ramen-bar-4606",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-29681"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-29681",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-2637",
+            "name": "Ramen Bowls",
+            "items": [
+              "b7espresso-item-61-6857",
+              "b7espresso-item-62-3903",
+              "b7espresso-item-63-1475",
+              "b7espresso-item-64-1738",
+              "b7espresso-item-65-7386",
+              "b7espresso-item-66-9976",
+              "b7espresso-item-67-2432",
+              "b7espresso-item-68-8025",
+              "b7espresso-item-69-1107",
+              "b7espresso-item-70-1171",
+              "b7espresso-item-71-5373",
+              "b7espresso-item-72-6150"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-5885",
+            "name": "Sides & Apps",
+            "items": [
+              "b7espresso-item-73-5039",
+              "b7espresso-item-74-4797",
+              "b7espresso-item-75-3431",
+              "b7espresso-item-76-8963",
+              "b7espresso-item-77-5167",
+              "b7espresso-item-78-7360",
+              "b7espresso-item-79-8283",
+              "b7espresso-item-80-2630",
+              "b7espresso-item-81-9701"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-ramen-bar-4606",
+              "menuId": "b7espresso-menu-29681"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-mediterranean-3635",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-98494"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-98494",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-6841",
+            "name": "Bowls",
+            "items": [
+              "b7espresso-item-82-1005",
+              "b7espresso-item-83-3186",
+              "b7espresso-item-84-3854",
+              "b7espresso-item-85-8513",
+              "b7espresso-item-86-3999",
+              "b7espresso-item-87-5516"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-3074",
+            "name": "Wraps",
+            "items": [
+              "b7espresso-item-88-2913",
+              "b7espresso-item-89-5870",
+              "b7espresso-item-90-3681",
+              "b7espresso-item-91-2178",
+              "b7espresso-item-92-5591",
+              "b7espresso-item-93-4993"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-2-4082",
+            "name": "Sides",
+            "items": [
+              "b7espresso-item-94-4100",
+              "b7espresso-item-95-6334",
+              "b7espresso-item-96-1572",
+              "b7espresso-item-97-5680",
+              "b7espresso-item-98-3930",
+              "b7espresso-item-99-3485"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-mediterranean-3635",
+              "menuId": "b7espresso-menu-98494"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-grill-6343",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-30128"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-30128",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-8999",
+            "name": "Burgers",
+            "items": [
+              "b7espresso-item-100-5057",
+              "b7espresso-item-101-2534",
+              "b7espresso-item-102-3049",
+              "b7espresso-item-103-7623",
+              "b7espresso-item-104-5602",
+              "b7espresso-item-105-6916",
+              "b7espresso-item-106-2862",
+              "b7espresso-item-107-7890",
+              "b7espresso-item-108-7381"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-6958",
+            "name": "Sides",
+            "items": [
+              "b7espresso-item-109-2970",
+              "b7espresso-item-110-1422",
+              "b7espresso-item-111-7328",
+              "b7espresso-item-112-4583",
+              "b7espresso-item-113-7100",
+              "b7espresso-item-114-1736"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-2-9944",
+            "name": "Salads",
+            "items": [
+              "b7espresso-item-115-2560",
+              "b7espresso-item-116-8179",
+              "b7espresso-item-117-6533",
+              "b7espresso-item-118-4680",
+              "b7espresso-item-119-9958",
+              "b7espresso-item-120-9215"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-grill-6343",
+              "menuId": "b7espresso-menu-30128"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-comfort-kitchen-6428",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-95782"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-95782",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-6783",
+            "name": "Comfort Classics",
+            "items": [
+              "b7espresso-item-121-4158",
+              "b7espresso-item-122-1129",
+              "b7espresso-item-123-3248",
+              "b7espresso-item-124-4305",
+              "b7espresso-item-125-1392",
+              "b7espresso-item-126-7568",
+              "b7espresso-item-127-4421",
+              "b7espresso-item-128-1230",
+              "b7espresso-item-129-1709"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-8078",
+            "name": "Specials",
+            "items": [
+              "b7espresso-item-127-4421",
+              "b7espresso-item-128-1230",
+              "b7espresso-item-129-1709",
+              "b7espresso-item-130-1628",
+              "b7espresso-item-131-3811",
+              "b7espresso-item-132-4750"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-comfort-kitchen-6428",
+              "menuId": "b7espresso-menu-95782"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-poke-bar-6253",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-83195"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-83195",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-8044",
+            "name": "Poke Bowls",
+            "items": [
+              "b7espresso-item-133-8199",
+              "b7espresso-item-134-7393",
+              "b7espresso-item-135-8825",
+              "b7espresso-item-136-9912",
+              "b7espresso-item-137-2167",
+              "b7espresso-item-138-2747",
+              "b7espresso-item-139-1265",
+              "b7espresso-item-140-6950",
+              "b7espresso-item-141-3612",
+              "b7espresso-item-142-4883",
+              "b7espresso-item-143-1661",
+              "b7espresso-item-144-9115"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-4855",
+            "name": "Extras",
+            "items": [
+              "b7espresso-item-145-2579",
+              "b7espresso-item-146-3646",
+              "b7espresso-item-147-2707",
+              "b7espresso-item-148-7504",
+              "b7espresso-item-149-2943",
+              "b7espresso-item-150-5214"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-poke-bar-6253",
+              "menuId": "b7espresso-menu-83195"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-chef-s-table-6596",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-69329"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-69329",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-1991",
+            "name": "Chef's Table",
+            "items": [
+              "b7espresso-item-151-8004",
+              "b7espresso-item-152-8886",
+              "b7espresso-item-153-9632",
+              "b7espresso-item-154-2164",
+              "b7espresso-item-155-4066",
+              "b7espresso-item-156-9108",
+              "b7espresso-item-157-8994",
+              "b7espresso-item-158-3999",
+              "b7espresso-item-159-9215"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-chef-s-table-6596",
+              "menuId": "b7espresso-menu-69329"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "b7espresso-stn-taqueria-5031",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "b7espresso-menu-69042"
+    },
+    "menus": [
+      {
+        "id": "b7espresso-menu-69042",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "b7espresso-cat-0-6637",
+            "name": "Tacos",
+            "items": [
+              "b7espresso-item-160-7897",
+              "b7espresso-item-161-3112",
+              "b7espresso-item-162-4737",
+              "b7espresso-item-163-3605",
+              "b7espresso-item-164-1775",
+              "b7espresso-item-165-5872",
+              "b7espresso-item-166-7417",
+              "b7espresso-item-167-3043",
+              "b7espresso-item-168-9550"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-1-2277",
+            "name": "Burritos",
+            "items": [
+              "b7espresso-item-169-3972",
+              "b7espresso-item-170-3759",
+              "b7espresso-item-171-7911",
+              "b7espresso-item-172-3639",
+              "b7espresso-item-173-2381",
+              "b7espresso-item-174-5006"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-2-2564",
+            "name": "Bowls",
+            "items": [
+              "b7espresso-item-175-2662",
+              "b7espresso-item-176-1886",
+              "b7espresso-item-177-2197"
+            ]
+          },
+          {
+            "categoryId": "b7espresso-cat-3-4357",
+            "name": "Build Your Own",
+            "items": [
+              "b7espresso-item-160-7897",
+              "b7espresso-item-161-3112",
+              "b7espresso-item-162-4737",
+              "b7espresso-item-163-3605",
+              "b7espresso-item-164-1775",
+              "b7espresso-item-165-5872",
+              "b7espresso-item-169-3972",
+              "b7espresso-item-170-3759",
+              "b7espresso-item-171-7911"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "b7espresso-stn-taqueria-5031",
+              "menuId": "b7espresso-menu-69042"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

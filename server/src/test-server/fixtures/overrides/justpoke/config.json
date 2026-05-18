@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-justpoke",
+  "contextID": "ctx-justpoke-5780",
+  "theme": {
+    "logoImage": "justpoke-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-justpoke-252",
+        "storeName": "justpoke"
+      },
+      "displayProfileId": [
+        "dp-justpoke-630"
+      ]
+    }
+  ],
+  "properties": {}
+}

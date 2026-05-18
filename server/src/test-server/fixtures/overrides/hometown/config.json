@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-hometown",
+  "contextID": "ctx-hometown-7830",
+  "theme": {
+    "logoImage": "hometown-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-hometown-966",
+        "storeName": "hometown"
+      },
+      "displayProfileId": [
+        "dp-hometown-609"
+      ]
+    }
+  ],
+  "properties": {}
+}

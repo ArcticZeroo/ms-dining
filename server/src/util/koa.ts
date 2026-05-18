@@ -3,7 +3,7 @@ import Koa, { Middleware } from 'koa';
 import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
 import { IServerSearchResult } from '../models/search.js';
 import { ISearchResponseResult } from '@msdining/common/models/http';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
+import { SearchEntityType } from '@msdining/common/models/search';
 import { getStationLogoUrl, resolveViewToCafes } from './cafe.js';
 import { jsonStringifyWithoutNull } from './serde.js';
 import { getDevKey } from '../constants/env.js';
@@ -76,11 +76,8 @@ export const serializeMapOfStringToSet = (deserialized: Map<string, Set<string>>
     return serialized;
 };
 
-const serializeSearchResult = async (id: string, searchResult: IServerSearchResult, allowModifiers: boolean): Promise<ISearchResponseResult> => {
+const serializeSearchResult = async (id: string, searchResult: IServerSearchResult): Promise<ISearchResponseResult> => {
     const matchReasons = new Set(searchResult.matchReasons);
-    if (!allowModifiers) {
-        matchReasons.delete(SearchMatchReason.modifier);
-    }
 
     const imageUrl = typeof searchResult.imageUrl === 'function'
         ? await searchResult.imageUrl()
@@ -114,7 +111,7 @@ const serializeSearchResult = async (id: string, searchResult: IServerSearchResu
         stations:         Object.fromEntries(searchResult.stationByCafeId),
         tags:             searchResult.tags ? Array.from(searchResult.tags) : undefined,
         searchTags:       searchResult.searchTags ? Array.from(searchResult.searchTags) : undefined,
-        matchedModifiers: allowModifiers ? serializeMapOfStringToSet(searchResult.matchedModifiers) : {},
+        matchedModifiers: serializeMapOfStringToSet(searchResult.matchedModifiers),
         matchReasons:     Array.from(matchReasons),
         vectorDistance:   searchResult.vectorDistance,
         cafeId:           searchResult.cafeId || undefined,
@@ -125,11 +122,10 @@ const serializeSearchResult = async (id: string, searchResult: IServerSearchResu
 
 export const serializeSearchResults = async (ctx: Koa.Context, searchResultsByIdPerEntityType: Map<SearchEntityType, Map<string, IServerSearchResult>>) => {
     const searchResultPromises: Array<Promise<ISearchResponseResult>> = [];
-    const areModifiersAllowed = supportsVersionTag(ctx, VERSION_TAG.modifiersInSearchResults);
 
     for (const searchResultsById of searchResultsByIdPerEntityType.values()) {
         for (const [id, searchResult] of searchResultsById.entries()) {
-            searchResultPromises.push(serializeSearchResult(id, searchResult, areModifiersAllowed));
+            searchResultPromises.push(serializeSearchResult(id, searchResult));
         }
     }
 

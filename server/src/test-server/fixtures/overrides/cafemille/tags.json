@@ -1,0 +1,122 @@
+{
+  "cafemille-stn-mediterranean-5891": {
+    "customLabels": {
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      }
+    }
+  },
+  "cafemille-stn-pizza---pasta-6563": {
+    "customLabels": {
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      }
+    }
+  },
+  "cafemille-stn-espresso-5137": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      }
+    }
+  },
+  "cafemille-stn-taqueria-9948": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  },
+  "cafemille-stn-poke-bar-5580": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-low-emissions": {
+        "tagId": "tag-low-emissions",
+        "tagName": "low emissions"
+      },
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      }
+    }
+  }
+}

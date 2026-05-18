@@ -1,8 +1,7 @@
 import { IGroupData, IGroupMember } from '@msdining/common/models/group';
-import { useMemo } from 'react';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { useValueNotifier } from './events.js';
-import { GROUP_STORE } from '../store/groups.js';
+import { useMemo } from 'react';
+import { useItemsWithoutGroupByNormalizedName } from '../store/queries/groups.ts';
 
 export const useSuggestedGroupMembers = (group: IGroupData) => {
     const normalizedNames = useMemo(
@@ -10,17 +9,17 @@ export const useSuggestedGroupMembers = (group: IGroupData) => {
         [group.members]
     );
 
-    const allItemsWithoutGroupByNormalizedName = useValueNotifier(GROUP_STORE.allItemsWithoutGroupByNormalizedName);
+    const { data: itemsByNormalizedName } = useItemsWithoutGroupByNormalizedName();
 
     return useMemo(
         () => {
-            if (!allItemsWithoutGroupByNormalizedName) {
+            if (!itemsByNormalizedName) {
                 return [];
             }
 
             const suggestions: IGroupMember[] = [];
             for (const normalizedName of normalizedNames) {
-                const items = allItemsWithoutGroupByNormalizedName.get(normalizedName) ?? [];
+                const items = itemsByNormalizedName.get(normalizedName) ?? [];
                 for (const item of items) {
                     if (item.type === group.type) {
                         suggestions.push(item);
@@ -30,15 +29,15 @@ export const useSuggestedGroupMembers = (group: IGroupData) => {
 
             return suggestions;
         },
-        [allItemsWithoutGroupByNormalizedName, group.type, normalizedNames]
+        [itemsByNormalizedName, group.type, normalizedNames]
     );
 }
 
 export const useSuggestedGroupMembersForAllGroups = (groups: IGroupData[]) => {
-    const allItemsWithoutGroupByNormalizedName = useValueNotifier(GROUP_STORE.allItemsWithoutGroupByNormalizedName);
+    const { data: itemsByNormalizedName } = useItemsWithoutGroupByNormalizedName();
     return useMemo(
         () => {
-            if (!allItemsWithoutGroupByNormalizedName) {
+            if (!itemsByNormalizedName) {
                 return new Map<string, Array<IGroupMember>>();
             }
 
@@ -51,7 +50,7 @@ export const useSuggestedGroupMembersForAllGroups = (groups: IGroupData[]) => {
 
                 const suggestions: IGroupMember[] = [];
                 for (const normalizedName of normalizedNames) {
-                    const items = allItemsWithoutGroupByNormalizedName.get(normalizedName) ?? [];
+                    const items = itemsByNormalizedName.get(normalizedName) ?? [];
                     for (const item of items) {
                         if (item.type === group.type) {
                             suggestions.push(item);
@@ -64,6 +63,6 @@ export const useSuggestedGroupMembersForAllGroups = (groups: IGroupData[]) => {
 
             return groupSuggestionsById;
         },
-        [allItemsWithoutGroupByNormalizedName, groups]
+        [itemsByNormalizedName, groups]
     );
 }

@@ -1,6 +1,4 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
-import { AnalyticsClient } from '../../../api/analytics.ts';
+import React, { Suspense, useState } from 'react';
 import { IScenario, STATIC_SCENARIOS } from '../../../util/analytics.ts';
 import { classNames } from '../../../util/react.ts';
 import { pluralize } from '../../../util/string.ts';
@@ -11,6 +9,7 @@ import { VolumeTypeButton } from './volume-type-button.tsx';
 import { HourglassLoadingSpinner } from "../../icon/hourglass-loading-spinner.tsx";
 import { SCENARIO_NAMES } from "@msdining/common/constants/analytics";
 import { AnalyticsLoadingChart } from "./analytics-loading-chart.tsx";
+import { useHourlyVisitsQuery } from '../../../store/queries/analytics.ts';
 
 const TOTAL_REQUEST_VOLUME_IMPLEMENTED_DATE = new Date('2024-06-17');
 const NON_PRIMARY_SCENARIO_FIX_DATE = new Date('2024-06-18');
@@ -60,22 +59,9 @@ export const AnalyticsView = () => {
     const [isTotalCount, setIsTotalCount] = useState(false);
     const [selectedScenario, setSelectedScenario] = useState(STATIC_SCENARIOS[0]!);
 
-    const retrieveVisitsCallback = useCallback(
-        () => AnalyticsClient.retrieveHourlyVisitCountAsync(currentDaysAgo, selectedScenario.scenarioName),
-        [currentDaysAgo, selectedScenario]
-    );
+    const { isError, isPending, data: visits, refetch } = useHourlyVisitsQuery(currentDaysAgo, selectedScenario.scenarioName);
 
-    const {
-        stage: visitLoadingStage,
-        run: loadVisits,
-        value: visits
-    } = useDelayedPromiseState(retrieveVisitsCallback, true /*keepLastValue*/);
-
-    useEffect(() => {
-        loadVisits();
-    }, [loadVisits]);
-
-    const isLoading = visits == null && visitLoadingStage !== PromiseStage.error;
+    const isLoading = visits == null && !isError;
     const missingDataMessage = getMissingDataMessage(selectedScenario, isTotalCount, currentDaysAgo);
 
     const onSelectedScenarioChange = (newScenario: IScenario) => {
@@ -145,7 +131,7 @@ export const AnalyticsView = () => {
                     )
                 }
                 {
-                    isLoading && (
+                    isLoading && isPending && (
                         <>
                             <HourglassLoadingSpinner/>
                             <span>
@@ -155,12 +141,12 @@ export const AnalyticsView = () => {
                     )
                 }
                 {
-                    visitLoadingStage === PromiseStage.error && (
+                    isError && (
                         <>
                             <span>
                                 Could not load visit data!
                             </span>
-                            <RetryButton onClick={loadVisits}/>
+                            <RetryButton onClick={() => refetch()}/>
                         </>
                     )
                 }

@@ -5,9 +5,9 @@ import React, { useContext, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
-import { SelectedDateContext } from '../../context/time.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { useSelectedDate } from '../../store/zustand/selected-date.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
 import { compareNormalizedCafeIds, compareViewNames } from '../../util/sorting.ts';
@@ -190,8 +190,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const showReviews = useValueNotifier(ApplicationSettings.showReviews);
-    const selectedDateNotifier = useContext(SelectedDateContext);
-    const selectedDate = useValueNotifier(selectedDateNotifier);
+    const selectedDate = useSelectedDate();
     const navigate = useNavigate();
 
     const entityDisplayData = entityDisplayDataByType[entityType];

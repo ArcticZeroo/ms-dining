@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-fh4boonboona",
+  "contextID": "ctx-fh4boonboona-9393",
+  "theme": {
+    "logoImage": "fh4boonboona-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-fh4boonboona-861",
+        "storeName": "fh4boonboona"
+      },
+      "displayProfileId": [
+        "dp-fh4boonboona-516"
+      ]
+    }
+  ],
+  "properties": {}
+}

@@ -1,18 +1,17 @@
 import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
-import { useCallback, useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
+import { CafeView } from '../models/cafe.js';
+import { useRecommendedQueriesQuery } from '../store/queries/search.ts';
 import { getAllSingleCafesInView, isViewVisibleForNav } from '../util/view.ts';
 import { useValueNotifier } from './events.ts';
-import { DiningClient } from '../api/client/dining.js';
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { CafeView } from '../models/cafe.js';
 
 export const useAllowedSearchViewIds = () => {
     const { viewsById } = useContext(ApplicationContext);
     const allowedViewIds = useValueNotifier(ApplicationSettings.searchAllowedViewIds);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    
+
     return useMemo(
         () => {
             if (allowedViewIds.size === 0) {
@@ -20,7 +19,7 @@ export const useAllowedSearchViewIds = () => {
             }
 
             const minMenuDate = getMinimumDateForMenu();
-            
+
             const visibleIds = new Set<string>();
             for (const viewId of allowedViewIds) {
                 const view = viewsById.get(viewId);
@@ -35,14 +34,10 @@ export const useAllowedSearchViewIds = () => {
     );
 }
 
-export const useRecommendedQueries = (query: string) => {
-    const retrieveQueries = useCallback(
-        () => DiningClient.retrieveRecommendedQueries(query),
-        [query]
-    );
-
-    return useImmediatePromiseState(retrieveQueries);
-}
+// Thin re-export so existing imports of `useRecommendedQueries` from
+// `hooks/search` keep working without churn. New code should import from
+// `store/queries/search.ts` directly.
+export const useRecommendedQueries = useRecommendedQueriesQuery;
 
 export const useExpandedViewIds = (allowedViewIds: Set<string>, viewsById: Map<string, CafeView>) => {
     return useMemo(

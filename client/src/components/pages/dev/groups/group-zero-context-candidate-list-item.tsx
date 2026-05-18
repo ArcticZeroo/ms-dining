@@ -1,8 +1,7 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { IGroupData } from '@msdining/common/models/group';
-import React, { useCallback, useState } from 'react';
-import { GROUP_STORE } from '../../../../store/groups.ts';
-import { promiseStageToButtonClass } from '../../../../util/async.js';
+import React, { useState } from 'react';
+import { useAcceptCandidateMembers } from '../../../../store/queries/groups.ts';
+import { mutationButtonClass } from '../../../../util/mutation.js';
 import { classNames } from '../../../../util/react.js';
 import { GroupMember } from './group-member/group-member.js';
 import { GroupTypeIcon } from './group-type-icon.js';
@@ -20,13 +19,10 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
 
     const isAcceptingAll = possibleMembers.length > 0 && acceptedMemberIds.size === possibleMembers.length;
 
-    const { actualStage: acceptStage, run: acceptGroup } = useDelayedPromiseState(useCallback(async () => {
-        await GROUP_STORE.acceptCandidateMembers(group, acceptedMemberIds);
-        setAcceptedMemberIds(new Set());
-    }, [acceptedMemberIds, group]));
+    const acceptMutation = useAcceptCandidateMembers();
 
-    const canAccept = acceptStage !== PromiseStage.running && acceptedMemberIds.size > 0;
-    const canSelectMembers = acceptStage !== PromiseStage.running;
+    const canAccept = !acceptMutation.isPending && acceptedMemberIds.size > 0;
+    const canSelectMembers = !acceptMutation.isPending;
 
     const onAcceptGroupClicked = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -36,7 +32,10 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
             return;
         }
 
-        acceptGroup();
+        acceptMutation.mutate(
+            { candidate: group, acceptedMemberIds },
+            { onSuccess: () => setAcceptedMemberIds(new Set()) },
+        );
     };
 
     const onToggleMemberAccepted = (memberId: string) => {
@@ -65,7 +64,7 @@ export const GroupZeroContextCandidateListItem: React.FC<IGroupCandidateListItem
                     </div>
                     <div className="flex">
                         <button
-                            className={classNames('default-container default-button flex flex-center', promiseStageToButtonClass(acceptStage), !canAccept && 'disabled')}
+                            className={classNames('default-container default-button flex flex-center', mutationButtonClass(acceptMutation), !canAccept && 'disabled')}
                             onClick={onAcceptGroupClicked}
                             disabled={!canAccept}
                         >

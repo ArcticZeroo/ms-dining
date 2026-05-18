@@ -1,0 +1,2487 @@
+[
+  {
+    "id": "cafe86-item-1-4957",
+    "amount": "13.50",
+    "displayText": "Butter Chicken",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "720"
+    },
+    "description": "Tender chicken in creamy tomato-butter sauce with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BUTTER CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-1-4957-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-1-4957-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-1-4957-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-1-4957-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-1-4957-mod-2",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafe86-item-1-4957-mod-2-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-2-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-2-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-2-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-2-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-1-4957-mod-2-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-2-3035",
+    "amount": "13.50",
+    "displayText": "Premium Butter Chicken",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "720"
+    },
+    "description": "Tender chicken in creamy tomato-butter sauce with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM BUTTER CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-3-9522",
+    "amount": "13.50",
+    "displayText": "Deluxe Butter Chicken",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "720"
+    },
+    "description": "Tender chicken in creamy tomato-butter sauce with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU BUTTER CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-4-8489",
+    "amount": "11.50",
+    "displayText": "Chana Masala",
+    "properties": {
+      "calories": "480",
+      "maxCalories": "520"
+    },
+    "description": "Chickpeas in spiced tomato gravy with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHANA MASALA",
+    "tagIds": [
+      "tag-vegan",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-5-1388",
+    "amount": "11.50",
+    "displayText": "Premium Chana Masala",
+    "properties": {
+      "calories": "480",
+      "maxCalories": "520"
+    },
+    "description": "Chickpeas in spiced tomato gravy with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM CHANA MASALA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-6-2116",
+    "amount": "11.50",
+    "displayText": "Deluxe Chana Masala",
+    "properties": {
+      "calories": "480",
+      "maxCalories": "520"
+    },
+    "description": "Chickpeas in spiced tomato gravy with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHANA MASALA",
+    "tagIds": [
+      "tag-vegan",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-7-2501",
+    "amount": "15.00",
+    "displayText": "Lamb Vindaloo",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Tender lamb in fiery vindaloo sauce with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LAMB VINDALOO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-7-2501-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-7-2501-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-7-2501-mod-1",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafe86-item-7-2501-mod-1-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-1-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-1-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-1-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-1-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-1-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-7-2501-mod-2",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-7-2501-mod-2-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-2-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-2-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-2-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe86-item-7-2501-mod-2-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-8-3832",
+    "amount": "15.00",
+    "displayText": "Premium Lamb Vindaloo",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Tender lamb in fiery vindaloo sauce with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "PREM LAMB VINDALOO",
+    "tagIds": [
+      "tag-spicy",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-8-3832-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-8-3832-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-8-3832-mod-1",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-8-3832-mod-1-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-1-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-1-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-1-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-8-3832-mod-1-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-9-5810",
+    "amount": "15.00",
+    "displayText": "Deluxe Lamb Vindaloo",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Tender lamb in fiery vindaloo sauce with basmati rice",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU LAMB VINDALOO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-9-5810-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-9-5810-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-9-5810-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafe86-item-9-5810-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-9-5810-mod-2",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-9-5810-mod-2-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-2-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-9-5810-mod-3",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-9-5810-mod-3-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-3-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-3-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-3-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-3-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-9-5810-mod-4",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-9-5810-mod-4-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-4-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-4-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-9-5810-mod-4-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-10-4363",
+    "amount": "3.50",
+    "displayText": "Garlic Naan",
+    "properties": {
+      "calories": "260",
+      "maxCalories": "260"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "GARLIC NAAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-11-7613",
+    "amount": "3.50",
+    "displayText": "Premium Garlic Naan",
+    "properties": {
+      "calories": "260",
+      "maxCalories": "260"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM GARLIC NAAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-12-4487",
+    "amount": "3.50",
+    "displayText": "Deluxe Garlic Naan",
+    "properties": {
+      "calories": "260",
+      "maxCalories": "260"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU GARLIC NAAN",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-13-2385",
+    "amount": "4.50",
+    "displayText": "Samosa (2pc)",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "description": "Crispy pastry filled with spiced potato and peas",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SAMOSA 2PC",
+    "tagIds": [
+      "tag-vegan",
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-14-5088",
+    "amount": "4.50",
+    "displayText": "Premium Samosa (2pc)",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "description": "Crispy pastry filled with spiced potato and peas",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM SAMOSA 2PC",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-15-6869",
+    "amount": "4.50",
+    "displayText": "Deluxe Samosa (2pc)",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "description": "Crispy pastry filled with spiced potato and peas",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU SAMOSA 2PC",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-16-8557",
+    "amount": "2.50",
+    "displayText": "Raita",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "RAITA",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "2.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-17-6610",
+    "amount": "2.50",
+    "displayText": "Premium Raita",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM RAITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "2.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-18-8332",
+    "amount": "2.50",
+    "displayText": "Deluxe Raita",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU RAITA",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "2.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-18-8332-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafe86-item-18-8332-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-18-8332-mod-1",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-18-8332-mod-1-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-1-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-1-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-1-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-1-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-1-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-18-8332-mod-2",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-18-8332-mod-2-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-2-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-2-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-2-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-18-8332-mod-3",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-18-8332-mod-3-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-3-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-3-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-3-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-3-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-18-8332-mod-4",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-18-8332-mod-4-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-18-8332-mod-4-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-19-8800",
+    "amount": "13.50",
+    "displayText": "Teriyaki Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken, steamed rice, stir-fried vegetables, teriyaki glaze",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TERIYAKI CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-20-4762",
+    "amount": "13.50",
+    "displayText": "Family-Size Teriyaki Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken, steamed rice, stir-fried vegetables, teriyaki glaze",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI TERIYAKI CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-21-3069",
+    "amount": "13.50",
+    "displayText": "Loaded Teriyaki Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken, steamed rice, stir-fried vegetables, teriyaki glaze",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD TERIYAKI CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-22-9776",
+    "amount": "12.50",
+    "displayText": "Kung Pao Tofu",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Crispy tofu, peanuts, bell peppers, chili sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "KUNG PAO TOFU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-22-9776-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-22-9776-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-22-9776-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-23-3852",
+    "amount": "12.50",
+    "displayText": "Family-Size Kung Pao Tofu",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Crispy tofu, peanuts, bell peppers, chili sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI KUNG PAO TOFU",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-24-5052",
+    "amount": "12.50",
+    "displayText": "Loaded Kung Pao Tofu",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Crispy tofu, peanuts, bell peppers, chili sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD KUNG PAO TOFU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-25-6805",
+    "amount": "13.00",
+    "displayText": "Orange Chicken",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "Crispy chicken in sweet orange glaze with broccoli",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "ORANGE CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-25-6805-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-25-6805-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-25-6805-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-25-6805-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe86-item-25-6805-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe86-item-25-6805-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-26-3714",
+    "amount": "13.00",
+    "displayText": "Family-Size Orange Chicken",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "Crispy chicken in sweet orange glaze with broccoli",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI ORANGE CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-27-3486",
+    "amount": "13.00",
+    "displayText": "Loaded Orange Chicken",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "Crispy chicken in sweet orange glaze with broccoli",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD ORANGE CHKN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-28-2404",
+    "amount": "14.25",
+    "displayText": "Beef Bulgogi Bowl",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Marinated beef, steamed rice, pickled vegetables, gochujang",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BULGOGI BOWL",
+    "tagIds": [
+      "tag-medium-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-28-2404-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-28-2404-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-28-2404-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-28-2404-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-28-2404-mod-2",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-28-2404-mod-2-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-2-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-2-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-28-2404-mod-2-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-29-2483",
+    "amount": "14.25",
+    "displayText": "Family-Size Beef Bulgogi Bowl",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Marinated beef, steamed rice, pickled vegetables, gochujang",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI BULGOGI BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-29-2483-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-29-2483-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-29-2483-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafe86-item-29-2483-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-29-2483-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-30-7203",
+    "amount": "14.25",
+    "displayText": "Loaded Beef Bulgogi Bowl",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Marinated beef, steamed rice, pickled vegetables, gochujang",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD BULGOGI BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-30-7203-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-30-7203-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-30-7203-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-30-7203-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-30-7203-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-30-7203-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-31-8027",
+    "amount": "4.25",
+    "displayText": "Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-31-8027-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-31-8027-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-31-8027-mod-1",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-31-8027-mod-1-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-1-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-1-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-1-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-31-8027-mod-2",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-31-8027-mod-2-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-2-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-2-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-2-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-2-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-31-8027-mod-2-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-32-3859",
+    "amount": "4.25",
+    "displayText": "Family-Size Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-33-2308",
+    "amount": "4.25",
+    "displayText": "Loaded Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-33-2308-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-33-2308-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-33-2308-mod-1",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-33-2308-mod-1-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-1-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-1-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-1-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-33-2308-mod-2",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-33-2308-mod-2-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-33-2308-mod-2-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-34-5970",
+    "amount": "3.75",
+    "displayText": "Miso Soup",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MISO SOUP",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-35-5791",
+    "amount": "3.75",
+    "displayText": "Family-Size Miso Soup",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI MISO SOUP",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-36-4877",
+    "amount": "3.75",
+    "displayText": "Loaded Miso Soup",
+    "properties": {
+      "calories": "80",
+      "maxCalories": "80"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD MISO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-37-4686",
+    "amount": "10.99",
+    "displayText": "Beef Lasagna",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "700"
+    },
+    "description": "Layers of pasta, seasoned beef, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BEEF LASAGNA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-37-4686-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-37-4686-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-37-4686-mod-1",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-37-4686-mod-1-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-1-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-1-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-1-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-37-4686-mod-1-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-38-4079",
+    "amount": "10.99",
+    "displayText": "Deluxe Beef Lasagna",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "700"
+    },
+    "description": "Layers of pasta, seasoned beef, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU BEEF LASAGNA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-39-7018",
+    "amount": "10.99",
+    "displayText": "Mini Beef Lasagna",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "700"
+    },
+    "description": "Layers of pasta, seasoned beef, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI BEEF LASAGNA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-40-2928",
+    "amount": "10.99",
+    "displayText": "Veggie Lasagna",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Layers of pasta, roasted vegetables, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "VEGGIE LASAGNA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-41-5807",
+    "amount": "10.99",
+    "displayText": "Deluxe Veggie Lasagna",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Layers of pasta, roasted vegetables, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU VEGGIE LASAGNA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-42-1068",
+    "amount": "10.99",
+    "displayText": "Mini Veggie Lasagna",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Layers of pasta, roasted vegetables, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI VEGGIE LASAGNA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-43-3679",
+    "amount": "8.99",
+    "displayText": "Mac & Cheese",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "750"
+    },
+    "description": "Creamy four-cheese blend with elbow pasta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MAC CHEESE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-43-3679-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-43-3679-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-43-3679-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-43-3679-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-43-3679-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-44-4179",
+    "amount": "8.99",
+    "displayText": "Deluxe Mac & Cheese",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "750"
+    },
+    "description": "Creamy four-cheese blend with elbow pasta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU MAC CHEESE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-44-4179-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-44-4179-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-44-4179-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-44-4179-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafe86-item-44-4179-mod-2",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-44-4179-mod-2-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-2-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-2-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-2-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-44-4179-mod-2-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-45-2637",
+    "amount": "8.99",
+    "displayText": "Mini Mac & Cheese",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "750"
+    },
+    "description": "Creamy four-cheese blend with elbow pasta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MINI MAC CHEESE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-45-2637-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-45-2637-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-45-2637-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-45-2637-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-45-2637-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafe86-item-45-2637-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-46-3368",
+    "amount": "11.50",
+    "displayText": "Chicken Pot Pie",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "730"
+    },
+    "description": "Flaky crust with chicken, peas, carrots in cream sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN POT PIE",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafe86-item-46-3368-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafe86-item-46-3368-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafe86-item-46-3368-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafe86-item-46-3368-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafe86-item-46-3368-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe86-item-47-7566",
+    "amount": "11.50",
+    "displayText": "Deluxe Chicken Pot Pie",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "730"
+    },
+    "description": "Flaky crust with chicken, peas, carrots in cream sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHKN POT PIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafe86-item-48-8059",
+    "amount": "11.50",
+    "displayText": "Mini Chicken Pot Pie",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "730"
+    },
+    "description": "Flaky crust with chicken, peas, carrots in cream sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI CHKN POT PIE",
+    "tagIds": [
+      "tag-new"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  }
+]

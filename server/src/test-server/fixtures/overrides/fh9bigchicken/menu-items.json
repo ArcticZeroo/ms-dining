@@ -1,0 +1,3983 @@
+[
+  {
+    "id": "fh9bigchicken-item-1-8483",
+    "amount": "5.50",
+    "displayText": "Carnitas Taco",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "350"
+    },
+    "description": "Slow-roasted pork with salsa verde, cilantro, and onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CARNITAS TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-1-8483-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-1-8483-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-1-8483-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-1-8483-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-1-8483-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-1-8483-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-2-4279",
+    "amount": "5.50",
+    "displayText": "Deluxe Carnitas Taco",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "350"
+    },
+    "description": "Slow-roasted pork with salsa verde, cilantro, and onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CARNITAS TACO",
+    "tagIds": [
+      "tag-gf",
+      "tag-low-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-3-2329",
+    "amount": "5.50",
+    "displayText": "Family-Size Carnitas Taco",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "350"
+    },
+    "description": "Slow-roasted pork with salsa verde, cilantro, and onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CARNITAS TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-4-7604",
+    "amount": "5.50",
+    "displayText": "Pollo Asado Taco",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "320"
+    },
+    "description": "Grilled chicken with pico de gallo and crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "POLLO TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-4-7604-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-4-7604-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-4-7604-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-4-7604-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-4-7604-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-4-7604-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-4-7604-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-5-5857",
+    "amount": "5.50",
+    "displayText": "Deluxe Pollo Asado Taco",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "320"
+    },
+    "description": "Grilled chicken with pico de gallo and crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU POLLO TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-6-7468",
+    "amount": "5.50",
+    "displayText": "Family-Size Pollo Asado Taco",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "320"
+    },
+    "description": "Grilled chicken with pico de gallo and crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI POLLO TACO",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-6-7468-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-6-7468-mod-1",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-1-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-1-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-1-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-1-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-6-7468-mod-2",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-2-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-2-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-2-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-6-7468-mod-2-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-7-9882",
+    "amount": "6.00",
+    "displayText": "Barbacoa Taco",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "380"
+    },
+    "description": "Braised beef cheek with pickled red onion and cotija",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BARBACOA TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-8-9402",
+    "amount": "6.00",
+    "displayText": "Deluxe Barbacoa Taco",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "380"
+    },
+    "description": "Braised beef cheek with pickled red onion and cotija",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU BARBACOA TACO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-8-9402-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-8-9402-mod-1",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-1-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-1-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-1-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-1-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-8-9402-mod-2",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-2-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-2-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-2-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-8-9402-mod-2-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-9-1701",
+    "amount": "6.00",
+    "displayText": "Family-Size Barbacoa Taco",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "380"
+    },
+    "description": "Braised beef cheek with pickled red onion and cotija",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI BARBACOA TACO",
+    "tagIds": [
+      "tag-low-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-10-3690",
+    "amount": "12.50",
+    "displayText": "Carne Asada Burrito",
+    "properties": {
+      "calories": "980",
+      "maxCalories": "1050"
+    },
+    "description": "Grilled steak, rice, beans, cheese, pico, sour cream",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CARNE BURRITO",
+    "tagIds": [
+      "tag-low-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-10-3690-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-10-3690-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-10-3690-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-10-3690-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-10-3690-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-10-3690-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-11-5756",
+    "amount": "12.50",
+    "displayText": "Deluxe Carne Asada Burrito",
+    "properties": {
+      "calories": "980",
+      "maxCalories": "1050"
+    },
+    "description": "Grilled steak, rice, beans, cheese, pico, sour cream",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU CARNE BURRITO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-11-5756-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-11-5756-mod-1",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-1-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-1-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-1-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-1-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-11-5756-mod-2",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-2-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-2-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-2-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-2-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-11-5756-mod-2-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-12-6679",
+    "amount": "12.50",
+    "displayText": "Family-Size Carne Asada Burrito",
+    "properties": {
+      "calories": "980",
+      "maxCalories": "1050"
+    },
+    "description": "Grilled steak, rice, beans, cheese, pico, sour cream",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI CARNE BURRITO",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-1",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-1-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-1-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-1-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-1-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-2",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-2-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-2-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-3",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-3-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-3-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-3-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-3-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-3-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-4",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-4-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-4-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-4-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-4-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-5",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-5-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-5-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-5-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-5-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-5-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-5-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-12-6679-mod-6",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-6-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-6-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-6-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-6-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-12-6679-mod-6-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-13-1163",
+    "amount": "10.50",
+    "displayText": "Veggie Burrito",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "820"
+    },
+    "description": "Grilled peppers, onions, rice, beans, cheese, guacamole",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "VEGGIE BURRITO",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-13-1163-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-13-1163-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-13-1163-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-14-4884",
+    "amount": "10.50",
+    "displayText": "Deluxe Veggie Burrito",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "820"
+    },
+    "description": "Grilled peppers, onions, rice, beans, cheese, guacamole",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU VEGGIE BURRITO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-14-4884-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-14-4884-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-14-4884-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-15-4236",
+    "amount": "10.50",
+    "displayText": "Family-Size Veggie Burrito",
+    "properties": {
+      "calories": "750",
+      "maxCalories": "820"
+    },
+    "description": "Grilled peppers, onions, rice, beans, cheese, guacamole",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI VEGGIE BURRITO",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-15-4236-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-15-4236-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-15-4236-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-15-4236-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-15-4236-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-15-4236-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-15-4236-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-15-4236-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-16-8683",
+    "amount": "11.75",
+    "displayText": "Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken over rice with beans, corn salsa, and chipotle crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHICKEN BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-16-8683-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-16-8683-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-16-8683-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-16-8683-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-16-8683-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-16-8683-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-17-9815",
+    "amount": "11.75",
+    "displayText": "Deluxe Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken over rice with beans, corn salsa, and chipotle crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU CHICKEN BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-17-9815-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-17-9815-mod-1",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-1-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-1-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-1-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-1-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-1-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-1-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-17-9815-mod-2",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-2-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-2-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-2-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-2-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-17-9815-mod-2-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-18-6416",
+    "amount": "11.75",
+    "displayText": "Family-Size Chicken Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "750"
+    },
+    "description": "Grilled chicken over rice with beans, corn salsa, and chipotle crema",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI CHICKEN BOWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-18-6416-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-18-6416-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-18-6416-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-18-6416-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-18-6416-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-19-7268",
+    "amount": "14.50",
+    "displayText": "Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TONKOTSU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-19-7268-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-19-7268-mod-1",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-1-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-1-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-1-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-19-7268-mod-1-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-20-6650",
+    "amount": "14.50",
+    "displayText": "Family-Size Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI TONKOTSU",
+    "tagIds": [
+      "tag-high-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-20-6650-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-20-6650-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-20-6650-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-20-6650-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-20-6650-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-20-6650-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-20-6650-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-21-7157",
+    "amount": "14.50",
+    "displayText": "Spicy Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPIC TONKOTSU",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-21-7157-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-21-7157-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-21-7157-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-22-3989",
+    "amount": "13.75",
+    "displayText": "Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MISO RAMEN",
+    "tagIds": [
+      "tag-medium-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-22-3989-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-22-3989-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-22-3989-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-22-3989-mod-3",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-3-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-3-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-22-3989-mod-4",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-4-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-4-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-4-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-4-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-4-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-22-3989-mod-4-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-23-4658",
+    "amount": "13.75",
+    "displayText": "Family-Size Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI MISO RAMEN",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-23-4658-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-23-4658-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-23-4658-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-23-4658-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-23-4658-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-24-2706",
+    "amount": "13.75",
+    "displayText": "Spicy Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPIC MISO RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-24-2706-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-24-2706-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-24-2706-mod-2",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-2-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-2-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-2-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-2-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-24-2706-mod-2-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-25-4099",
+    "amount": "13.50",
+    "displayText": "Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SHOYU RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-26-1431",
+    "amount": "13.50",
+    "displayText": "Family-Size Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI SHOYU RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-27-5679",
+    "amount": "13.50",
+    "displayText": "Spicy Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPIC SHOYU RAMEN",
+    "tagIds": [
+      "tag-healthy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-27-5679-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-27-5679-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-27-5679-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-27-5679-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-27-5679-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-27-5679-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-27-5679-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-28-3978",
+    "amount": "15.00",
+    "displayText": "Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPICY TANTAN",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-28-3978-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-28-3978-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-28-3978-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-28-3978-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-28-3978-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-28-3978-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-29-8083",
+    "amount": "15.00",
+    "displayText": "Family-Size Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI SPICY TANTAN",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-29-8083-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-29-8083-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "fh9bigchicken-item-29-8083-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-30-1542",
+    "amount": "15.00",
+    "displayText": "Spicy Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPIC SPICY TANTAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-30-1542-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-30-1542-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-30-1542-mod-2",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-2-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-2-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-2-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-30-1542-mod-2-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-31-2809",
+    "amount": "6.50",
+    "displayText": "Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "GYOZA 6PC",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-32-1164",
+    "amount": "6.50",
+    "displayText": "Family-Size Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI GYOZA 6PC",
+    "tagIds": [
+      "tag-healthy",
+      "tag-high-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-33-5331",
+    "amount": "6.50",
+    "displayText": "Spicy Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC GYOZA 6PC",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-34-4579",
+    "amount": "4.25",
+    "displayText": "Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-35-5053",
+    "amount": "4.25",
+    "displayText": "Family-Size Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-35-5053-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-35-5053-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-35-5053-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-35-5053-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-35-5053-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-36-4909",
+    "amount": "4.25",
+    "displayText": "Spicy Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC EDAMAME",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-37-7872",
+    "amount": "7.75",
+    "displayText": "Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN KARAAGE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-37-7872-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-37-7872-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-37-7872-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-37-7872-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-37-7872-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-37-7872-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-38-5746",
+    "amount": "7.75",
+    "displayText": "Family-Size Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CHKN KARAAGE",
+    "tagIds": [
+      "tag-medium-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-39-1929",
+    "amount": "7.75",
+    "displayText": "Spicy Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPIC CHKN KARAAGE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-39-1929-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-39-1929-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-39-1929-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-40-5803",
+    "amount": "14.50",
+    "displayText": "Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-41-7168",
+    "amount": "14.50",
+    "displayText": "Deluxe Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU LAMB GYRO BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-42-6019",
+    "amount": "14.50",
+    "displayText": "Spicy Lamb Gyro Bowl",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "740"
+    },
+    "description": "Seasoned lamb, rice, hummus, tzatziki, tomato-cucumber salad",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC LAMB GYRO BWL",
+    "tagIds": [
+      "tag-healthy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-43-5891",
+    "amount": "12.50",
+    "displayText": "Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-43-5891-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-43-5891-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-43-5891-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-43-5891-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-43-5891-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-43-5891-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-43-5891-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-44-9088",
+    "amount": "12.50",
+    "displayText": "Deluxe Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU FALAFEL BWL",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-44-9088-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-44-9088-mod-1",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-1-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-1-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-1-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-1-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-44-9088-mod-2",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-2-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-2-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-2-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-44-9088-mod-2-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-45-1299",
+    "amount": "12.50",
+    "displayText": "Spicy Falafel Bowl",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "620"
+    },
+    "description": "Crispy falafel, rice, hummus, pickled turnips, tahini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC FALAFEL BWL",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-46-5940",
+    "amount": "11.99",
+    "displayText": "Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN SHWARMA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-46-5940-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-46-5940-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-46-5940-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-46-5940-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-46-5940-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-47-8502",
+    "amount": "11.99",
+    "displayText": "Deluxe Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHKN SHWARMA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-48-3049",
+    "amount": "11.99",
+    "displayText": "Spicy Chicken Shawarma Wrap",
+    "properties": {
+      "calories": "620",
+      "maxCalories": "680"
+    },
+    "description": "Marinated chicken, pickles, garlic sauce in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC CHKN SHWARMA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-49-8098",
+    "amount": "10.50",
+    "displayText": "Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-50-1404",
+    "amount": "10.50",
+    "displayText": "Deluxe Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-51-5770",
+    "amount": "10.50",
+    "displayText": "Spicy Falafel Wrap",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Falafel, hummus, tomato, pickled vegetables in lavash",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC FALAFEL WRAP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-52-2722",
+    "amount": "5.50",
+    "displayText": "Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "HUMMUS PITA",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-52-2722-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-52-2722-mod-1",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-1-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-1-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-1-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-1-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-52-2722-mod-2",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-2-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-2-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-2-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-2-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-52-2722-mod-2-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-53-4518",
+    "amount": "5.50",
+    "displayText": "Deluxe Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU HUMMUS PITA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-54-5523",
+    "amount": "5.50",
+    "displayText": "Spicy Hummus & Pita",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "320"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPIC HUMMUS PITA",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-54-5523-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-54-5523-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-54-5523-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-54-5523-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-54-5523-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-54-5523-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-54-5523-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-55-9681",
+    "amount": "4.50",
+    "displayText": "Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TABBOULEH",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-56-6574",
+    "amount": "4.50",
+    "displayText": "Deluxe Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU TABBOULEH",
+    "tagIds": [
+      "tag-vegan",
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-57-3081",
+    "amount": "4.50",
+    "displayText": "Spicy Tabbouleh",
+    "properties": {
+      "calories": "150",
+      "maxCalories": "150"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SPIC TABBOULEH",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-58-6856",
+    "amount": "12.99",
+    "displayText": "Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN WAFFLES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-59-7569",
+    "amount": "12.99",
+    "displayText": "Premium Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM CHKN WAFFLES",
+    "tagIds": [
+      "tag-medium-emissions",
+      "tag-high-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-60-8643",
+    "amount": "12.99",
+    "displayText": "Mini Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "MINI CHKN WAFFLES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-61-5234",
+    "amount": "15.99",
+    "displayText": "Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SEARED SALMON",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-62-7917",
+    "amount": "15.99",
+    "displayText": "Premium Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "PREM SEARED SALMON",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-63-9383",
+    "amount": "15.99",
+    "displayText": "Mini Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MINI SEARED SALMON",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-63-9383-mod-0",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-0-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-0-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-0-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-0-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-0-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-0-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-63-9383-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-63-9383-mod-2",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-2-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-2-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-2-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "fh9bigchicken-item-63-9383-mod-2-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-64-6310",
+    "amount": "16.50",
+    "displayText": "Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SHORT RIBS",
+    "tagIds": [
+      "tag-medium-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-65-7248",
+    "amount": "16.50",
+    "displayText": "Premium Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "PREM SHORT RIBS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-65-7248-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "fh9bigchicken-item-65-7248-mod-1",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-1-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-1-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-1-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-1-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "fh9bigchicken-item-65-7248-mod-1-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fh9bigchicken-item-66-6668",
+    "amount": "16.50",
+    "displayText": "Mini Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MINI SHORT RIBS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "fh9bigchicken-item-66-6668-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "fh9bigchicken-item-66-6668-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-66-6668-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-66-6668-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "fh9bigchicken-item-66-6668-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "fh9bigchicken-item-66-6668-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

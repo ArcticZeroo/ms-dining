@@ -23,11 +23,11 @@ interface IMapEntityFilterDropdownProps {
 
 export const MapEntityFilterDropdown: React.FC<IMapEntityFilterDropdownProps> = ({ selectedType, onSelectedTypeChanged, tabCounts }) => {
     const totalCount = useMemo(() => {
-        let count = 0;
-        for (const c of tabCounts.values()) {
-            count += c;
+        let total = 0;
+        for (const count of tabCounts.values()) {
+            total += count;
         }
-        return count;
+        return total;
     }, [tabCounts]);
 
     const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

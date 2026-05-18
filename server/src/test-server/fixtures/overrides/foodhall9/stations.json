@@ -1,0 +1,286 @@
+[
+  {
+    "id": "foodhall9-stn-poke-bar-2363",
+    "name": "Poke Bar",
+    "priceLevelConfig": {
+      "menuId": "foodhall9-menu-57658"
+    },
+    "menus": [
+      {
+        "id": "foodhall9-menu-57658",
+        "name": "Poke Bar Menu",
+        "categories": [
+          {
+            "categoryId": "foodhall9-cat-0-7388",
+            "name": "Poke Bowls",
+            "items": [
+              "foodhall9-item-1-5743",
+              "foodhall9-item-2-3447",
+              "foodhall9-item-3-4716",
+              "foodhall9-item-4-1256",
+              "foodhall9-item-5-9744",
+              "foodhall9-item-6-2758",
+              "foodhall9-item-7-7301",
+              "foodhall9-item-8-1819"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-1-5921",
+            "name": "Extras",
+            "items": [
+              "foodhall9-item-9-6132",
+              "foodhall9-item-10-4436",
+              "foodhall9-item-11-5180",
+              "foodhall9-item-12-6456"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Poke Bar",
+      "displayText": "Poke Bar"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "foodhall9-stn-poke-bar-2363",
+              "menuId": "foodhall9-menu-57658"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "foodhall9-stn-pizza---pasta-2800",
+    "name": "Pizza & Pasta",
+    "priceLevelConfig": {
+      "menuId": "foodhall9-menu-12252"
+    },
+    "menus": [
+      {
+        "id": "foodhall9-menu-12252",
+        "name": "Pizza & Pasta Menu",
+        "categories": [
+          {
+            "categoryId": "foodhall9-cat-0-6001",
+            "name": "Pizza",
+            "items": [
+              "foodhall9-item-13-2403",
+              "foodhall9-item-14-5759",
+              "foodhall9-item-15-2761",
+              "foodhall9-item-16-9290",
+              "foodhall9-item-17-4959",
+              "foodhall9-item-18-5286"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-1-7536",
+            "name": "Pasta",
+            "items": [
+              "foodhall9-item-19-8749",
+              "foodhall9-item-20-2221",
+              "foodhall9-item-21-9648",
+              "foodhall9-item-22-7983"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-2-3893",
+            "name": "Sides",
+            "items": [
+              "foodhall9-item-23-8451",
+              "foodhall9-item-24-7882"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pizza & Pasta",
+      "displayText": "Pizza & Pasta"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "foodhall9-stn-pizza---pasta-2800",
+              "menuId": "foodhall9-menu-12252"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "foodhall9-stn-taqueria-1710",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "foodhall9-menu-65194"
+    },
+    "menus": [
+      {
+        "id": "foodhall9-menu-65194",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "foodhall9-cat-0-3699",
+            "name": "Tacos",
+            "items": [
+              "foodhall9-item-25-2013",
+              "foodhall9-item-26-4381",
+              "foodhall9-item-27-2260",
+              "foodhall9-item-28-4880",
+              "foodhall9-item-29-4336",
+              "foodhall9-item-30-3329"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-1-7806",
+            "name": "Burritos",
+            "items": [
+              "foodhall9-item-31-9625",
+              "foodhall9-item-32-6699",
+              "foodhall9-item-33-5958",
+              "foodhall9-item-34-1055"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-2-8534",
+            "name": "Bowls",
+            "items": [
+              "foodhall9-item-35-5626",
+              "foodhall9-item-36-7285"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-3-3139",
+            "name": "Build Your Own",
+            "items": [
+              "foodhall9-item-25-2013",
+              "foodhall9-item-26-4381",
+              "foodhall9-item-27-2260",
+              "foodhall9-item-28-4880",
+              "foodhall9-item-31-9625",
+              "foodhall9-item-32-6699"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "foodhall9-stn-taqueria-1710",
+              "menuId": "foodhall9-menu-65194"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "foodhall9-stn-grill-8864",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "foodhall9-menu-92924"
+    },
+    "menus": [
+      {
+        "id": "foodhall9-menu-92924",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "foodhall9-cat-0-9829",
+            "name": "Burgers",
+            "items": [
+              "foodhall9-item-37-7975",
+              "foodhall9-item-38-3944",
+              "foodhall9-item-39-7099",
+              "foodhall9-item-40-1542",
+              "foodhall9-item-41-9621",
+              "foodhall9-item-42-3085"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-1-4942",
+            "name": "Sides",
+            "items": [
+              "foodhall9-item-43-2545",
+              "foodhall9-item-44-4450",
+              "foodhall9-item-45-1436",
+              "foodhall9-item-46-1768"
+            ]
+          },
+          {
+            "categoryId": "foodhall9-cat-2-6912",
+            "name": "Salads",
+            "items": [
+              "foodhall9-item-47-2965",
+              "foodhall9-item-48-7841",
+              "foodhall9-item-49-9545",
+              "foodhall9-item-50-5542"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "foodhall9-stn-grill-8864",
+              "menuId": "foodhall9-menu-92924"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

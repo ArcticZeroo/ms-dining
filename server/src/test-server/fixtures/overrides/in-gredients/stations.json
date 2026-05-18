@@ -1,0 +1,323 @@
+[
+  {
+    "id": "in-gredients-stn-grill-6615",
+    "name": "Grill",
+    "priceLevelConfig": {
+      "menuId": "in-gredients-menu-59848"
+    },
+    "menus": [
+      {
+        "id": "in-gredients-menu-59848",
+        "name": "Grill Menu",
+        "categories": [
+          {
+            "categoryId": "in-gredients-cat-0-8599",
+            "name": "Burgers",
+            "items": [
+              "in-gredients-item-1-6484",
+              "in-gredients-item-2-4746",
+              "in-gredients-item-3-9852",
+              "in-gredients-item-4-4454",
+              "in-gredients-item-5-1339",
+              "in-gredients-item-6-5613",
+              "in-gredients-item-7-6606",
+              "in-gredients-item-8-3533",
+              "in-gredients-item-9-6563"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-1-2020",
+            "name": "Sides",
+            "items": [
+              "in-gredients-item-10-1287",
+              "in-gredients-item-11-8191",
+              "in-gredients-item-12-6381",
+              "in-gredients-item-13-1451",
+              "in-gredients-item-14-4838",
+              "in-gredients-item-15-1562"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-2-9094",
+            "name": "Salads",
+            "items": [
+              "in-gredients-item-16-9352",
+              "in-gredients-item-17-4554",
+              "in-gredients-item-18-9707",
+              "in-gredients-item-19-3197",
+              "in-gredients-item-20-4474",
+              "in-gredients-item-21-2601"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Grill",
+      "displayText": "Grill"
+    },
+    "availableAt": {
+      "open": "7:00 AM",
+      "close": "3:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "in-gredients-stn-grill-6615",
+              "menuId": "in-gredients-menu-59848"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "in-gredients-stn-deli-7676",
+    "name": "Deli",
+    "priceLevelConfig": {
+      "menuId": "in-gredients-menu-27769"
+    },
+    "menus": [
+      {
+        "id": "in-gredients-menu-27769",
+        "name": "Deli Menu",
+        "categories": [
+          {
+            "categoryId": "in-gredients-cat-0-7469",
+            "name": "Half Sandwiches",
+            "items": [
+              "in-gredients-item-22-3470",
+              "in-gredients-item-23-7027",
+              "in-gredients-item-24-9107",
+              "in-gredients-item-25-9487",
+              "in-gredients-item-26-1289",
+              "in-gredients-item-27-7622",
+              "in-gredients-item-28-3872",
+              "in-gredients-item-29-3005",
+              "in-gredients-item-30-2383"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-1-8915",
+            "name": "Whole Sandwiches",
+            "items": [
+              "in-gredients-item-31-6220",
+              "in-gredients-item-32-3736",
+              "in-gredients-item-33-9208",
+              "in-gredients-item-34-4688",
+              "in-gredients-item-35-4471",
+              "in-gredients-item-36-1628",
+              "in-gredients-item-37-3734",
+              "in-gredients-item-38-7452",
+              "in-gredients-item-39-9013"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-2-8555",
+            "name": "Soups",
+            "items": [
+              "in-gredients-item-40-5839",
+              "in-gredients-item-41-4713",
+              "in-gredients-item-42-1018",
+              "in-gredients-item-43-4958",
+              "in-gredients-item-44-6896",
+              "in-gredients-item-45-8414"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Deli",
+      "displayText": "Deli"
+    },
+    "availableAt": {
+      "open": "8:00 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "in-gredients-stn-deli-7676",
+              "menuId": "in-gredients-menu-27769"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "in-gredients-stn-ramen-bar-4123",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "in-gredients-menu-64826"
+    },
+    "menus": [
+      {
+        "id": "in-gredients-menu-64826",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "in-gredients-cat-0-5264",
+            "name": "Ramen Bowls",
+            "items": [
+              "in-gredients-item-46-5363",
+              "in-gredients-item-47-8672",
+              "in-gredients-item-48-7302",
+              "in-gredients-item-49-1548",
+              "in-gredients-item-50-3834",
+              "in-gredients-item-51-3857",
+              "in-gredients-item-52-2441",
+              "in-gredients-item-53-2014",
+              "in-gredients-item-54-4450",
+              "in-gredients-item-55-5861",
+              "in-gredients-item-56-8540",
+              "in-gredients-item-57-3988"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-1-6252",
+            "name": "Sides & Apps",
+            "items": [
+              "in-gredients-item-58-5203",
+              "in-gredients-item-59-5906",
+              "in-gredients-item-60-1468",
+              "in-gredients-item-61-5256",
+              "in-gredients-item-62-8292",
+              "in-gredients-item-63-2768",
+              "in-gredients-item-64-4638",
+              "in-gredients-item-65-7401",
+              "in-gredients-item-66-6196"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "in-gredients-stn-ramen-bar-4123",
+              "menuId": "in-gredients-menu-64826"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "in-gredients-stn-taqueria-9490",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "in-gredients-menu-11800"
+    },
+    "menus": [
+      {
+        "id": "in-gredients-menu-11800",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "in-gredients-cat-0-6412",
+            "name": "Tacos",
+            "items": [
+              "in-gredients-item-67-3529",
+              "in-gredients-item-68-8700",
+              "in-gredients-item-69-6039",
+              "in-gredients-item-70-3440",
+              "in-gredients-item-71-6132",
+              "in-gredients-item-72-4985",
+              "in-gredients-item-73-6921",
+              "in-gredients-item-74-5121",
+              "in-gredients-item-75-4169"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-1-4989",
+            "name": "Burritos",
+            "items": [
+              "in-gredients-item-76-5107",
+              "in-gredients-item-77-3220",
+              "in-gredients-item-78-5740",
+              "in-gredients-item-79-4990",
+              "in-gredients-item-80-2512",
+              "in-gredients-item-81-9270"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-2-7453",
+            "name": "Bowls",
+            "items": [
+              "in-gredients-item-82-8997",
+              "in-gredients-item-83-8033",
+              "in-gredients-item-84-4103"
+            ]
+          },
+          {
+            "categoryId": "in-gredients-cat-3-7605",
+            "name": "Build Your Own",
+            "items": [
+              "in-gredients-item-67-3529",
+              "in-gredients-item-68-8700",
+              "in-gredients-item-69-6039",
+              "in-gredients-item-70-3440",
+              "in-gredients-item-71-6132",
+              "in-gredients-item-72-4985",
+              "in-gredients-item-76-5107",
+              "in-gredients-item-77-3220",
+              "in-gredients-item-78-5740"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "in-gredients-stn-taqueria-9490",
+              "menuId": "in-gredients-menu-11800"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -1,0 +1,262 @@
+[
+  {
+    "id": "bobae-stn-ramen-bar-9270",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "bobae-menu-11826"
+    },
+    "menus": [
+      {
+        "id": "bobae-menu-11826",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "bobae-cat-0-8460",
+            "name": "Ramen Bowls",
+            "items": [
+              "bobae-item-1-9077",
+              "bobae-item-2-1983",
+              "bobae-item-3-8088",
+              "bobae-item-4-6803",
+              "bobae-item-5-8245",
+              "bobae-item-6-8258",
+              "bobae-item-7-2619",
+              "bobae-item-8-8447"
+            ]
+          },
+          {
+            "categoryId": "bobae-cat-1-6799",
+            "name": "Sides & Apps",
+            "items": [
+              "bobae-item-9-7660",
+              "bobae-item-10-6245",
+              "bobae-item-11-8942",
+              "bobae-item-12-4898",
+              "bobae-item-13-1290",
+              "bobae-item-14-2836"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "bobae-stn-ramen-bar-9270",
+              "menuId": "bobae-menu-11826"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "bobae-stn-espresso-2608",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "bobae-menu-96259"
+    },
+    "menus": [
+      {
+        "id": "bobae-menu-96259",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "bobae-cat-0-3406",
+            "name": "Hot Drinks",
+            "items": [
+              "bobae-item-15-5296",
+              "bobae-item-16-5384",
+              "bobae-item-17-6837",
+              "bobae-item-18-6325",
+              "bobae-item-19-9363",
+              "bobae-item-20-4589",
+              "bobae-item-21-2227",
+              "bobae-item-22-4610"
+            ]
+          },
+          {
+            "categoryId": "bobae-cat-1-3455",
+            "name": "Cold Drinks",
+            "items": [
+              "bobae-item-23-5156",
+              "bobae-item-24-1751",
+              "bobae-item-25-3804",
+              "bobae-item-26-9481"
+            ]
+          },
+          {
+            "categoryId": "bobae-cat-2-2017",
+            "name": "Bakery",
+            "items": [
+              "bobae-item-27-4296",
+              "bobae-item-28-8854",
+              "bobae-item-29-9422",
+              "bobae-item-30-7003",
+              "bobae-item-31-1521",
+              "bobae-item-32-2563"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "bobae-stn-espresso-2608",
+              "menuId": "bobae-menu-96259"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "bobae-stn-mediterranean-1745",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "bobae-menu-65016"
+    },
+    "menus": [
+      {
+        "id": "bobae-menu-65016",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "bobae-cat-0-5847",
+            "name": "Bowls",
+            "items": [
+              "bobae-item-33-7495",
+              "bobae-item-34-4273",
+              "bobae-item-35-7167",
+              "bobae-item-36-5874"
+            ]
+          },
+          {
+            "categoryId": "bobae-cat-1-2231",
+            "name": "Wraps",
+            "items": [
+              "bobae-item-37-8083",
+              "bobae-item-38-5619",
+              "bobae-item-39-5995",
+              "bobae-item-40-9708"
+            ]
+          },
+          {
+            "categoryId": "bobae-cat-2-6088",
+            "name": "Sides",
+            "items": [
+              "bobae-item-41-1665",
+              "bobae-item-42-8100",
+              "bobae-item-43-9279",
+              "bobae-item-44-7612"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "bobae-stn-mediterranean-1745",
+              "menuId": "bobae-menu-65016"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "bobae-stn-chef-s-table-5842",
+    "name": "Chef's Table",
+    "priceLevelConfig": {
+      "menuId": "bobae-menu-41825"
+    },
+    "menus": [
+      {
+        "id": "bobae-menu-41825",
+        "name": "Chef's Table Menu",
+        "categories": [
+          {
+            "categoryId": "bobae-cat-0-8293",
+            "name": "Chef's Table",
+            "items": [
+              "bobae-item-45-3952",
+              "bobae-item-46-7274",
+              "bobae-item-47-5671",
+              "bobae-item-48-6666",
+              "bobae-item-49-1930",
+              "bobae-item-50-9154"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Chef's Table",
+      "displayText": "Chef's Table"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "1:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "bobae-stn-chef-s-table-5842",
+              "menuId": "bobae-menu-41825"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

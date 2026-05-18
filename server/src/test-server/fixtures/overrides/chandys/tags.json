@@ -1,0 +1,106 @@
+{
+  "chandys-stn-espresso-4515": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-new": {
+        "tagId": "tag-new",
+        "tagName": "new"
+      }
+    }
+  },
+  "chandys-stn-indian-kitchen-3020": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      }
+    }
+  },
+  "chandys-stn-deli-6555": {
+    "customLabels": {
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-low-circle": {
+        "tagId": "tag-low-circle",
+        "tagName": "low_circle"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  },
+  "chandys-stn-pacific-rim-4242": {
+    "customLabels": {
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      },
+      "tag-medium-emissions": {
+        "tagId": "tag-medium-emissions",
+        "tagName": "medium emissions"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      }
+    }
+  },
+  "chandys-stn-ramen-bar-4633": {
+    "customLabels": {
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-high-circle": {
+        "tagId": "tag-high-circle",
+        "tagName": "high_circle"
+      },
+      "tag-spicy": {
+        "tagId": "tag-spicy",
+        "tagName": "spicy"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      }
+    }
+  }
+}

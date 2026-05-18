@@ -1,31 +1,43 @@
+import { ICompleteOrderRequest } from '@msdining/common/models/cart';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { IOrderCompletionData, IPreparePaymentResponse } from '@msdining/common/models/cart';
 import { ApplicationContext } from '../../../context/app.ts';
-import { CartContext } from '../../../context/cart.ts';
-import { useValueNotifierContext } from '../../../hooks/events.ts';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
-import { useCafePayment } from '../../../hooks/order.ts';
-import { formatPrice } from '../../../util/cart.ts';
+import { useCafeCompleteMutation, useCafeRepreparePaymentMutation } from '../../../store/queries/ordering.ts';
+import { useCartStore } from '../../../store/zustand/cart.ts';
+import { ICafePaymentSlice, IPaymentFormData, useOrderingStore } from '../../../store/zustand/ordering.ts';
 import { getViewName } from '../../../util/cafe.ts';
+import { formatPrice } from '../../../util/cart.ts';
 import { classNames } from '../../../util/react.ts';
-import { PaymentIframe } from './payment-iframe.tsx';
+import { IRguestPaymentResult, PaymentIframe } from './payment-iframe.tsx';
 
 interface ICafePaymentRowProps {
     cafeId: string;
-    initialPrepareData: IPreparePaymentResponse;
-    formData: { phoneNumberWithCountryCode: string; alias: string };
+    formData: IPaymentFormData;
     popupId: symbol;
     disabled: boolean;
-    onComplete: (cafeId: string, result: IOrderCompletionData) => void;
 }
 
-export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, initialPrepareData, formData, popupId, disabled, onComplete }) => {
+const buildCompleteRequest = (
+    slice: ICafePaymentSlice,
+    formData: IPaymentFormData,
+    paymentResult: IRguestPaymentResult,
+): ICompleteOrderRequest => ({
+    orderId:                    slice.orderId,
+    paymentToken:               paymentResult.token,
+    cardInfo:                   paymentResult.cardInfo,
+    alias:                      formData.alias,
+    phoneNumberWithCountryCode: formData.phoneNumberWithCountryCode,
+});
+
+export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, formData, popupId, disabled }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const cart = useValueNotifierContext(CartContext);
+    const slice = useOrderingStore((state) => state.paymentsByCafeId.get(cafeId));
+    const cart = useCartStore((state) => state.items);
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
 
-    const { state, prepare, complete, invalidatePrepare, setError } = useCafePayment(cafeId, initialPrepareData, formData);
+    const reprepareMutation = useCafeRepreparePaymentMutation(cafeId, slice?.orderId ?? '');
+    const completeMutation = useCafeCompleteMutation();
 
     const view = viewsById.get(cafeId);
     const cafeName = view
@@ -41,48 +53,66 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, initial
     }, [cart, cafeId]);
 
     const openPaymentPopup = useCallback((iframeUrl: string) => {
+        if (!slice) {
+            return;
+        }
+
         openPopup({
             id:   popupId,
             body: (
                 <PaymentIframe
                     iframeUrl={iframeUrl}
-                    onPaymentComplete={async (result) => {
-                        const completeResult = await complete(result);
+                    onPaymentComplete={async (paymentResult): Promise<void> => {
+                        await completeMutation.mutateAsync({
+                            cafeId,
+                            request: buildCompleteRequest(slice, formData, paymentResult),
+                        });
                         closePopup();
-                        onComplete(cafeId, completeResult);
                     }}
                     onPaymentError={(error) => {
-                        setError(error);
+                        useOrderingStore.getState().setError(cafeId, error);
                     }}
                     onClose={() => {
-                        invalidatePrepare();
+                        // The single-use iframe URL is consumed once opened; the
+                        // next "Pay" click will re-prepare a fresh URL.
+                        useOrderingStore.getState().setIframeUrl(cafeId, undefined);
                         closePopup();
                     }}
                 />
             ),
         });
-    }, [openPopup, popupId, complete, closePopup, onComplete, cafeId, setError, invalidatePrepare]);
+    }, [openPopup, popupId, completeMutation, formData, closePopup, cafeId, slice]);
 
     const handlePay = useCallback(async () => {
-        if (state.iframeUrl) {
-            openPaymentPopup(state.iframeUrl);
+        if (!slice) {
             return;
         }
 
-        await prepare();
-    }, [state.iframeUrl, prepare, openPaymentPopup]);
+        if (slice.iframeUrl) {
+            openPaymentPopup(slice.iframeUrl);
+            return;
+        }
 
-    // After a re-prepare completes, auto-open if we now have an iframe URL
-    // This is handled by the user clicking "Pay" again after an error/close
+        const fresh = await reprepareMutation.mutateAsync();
+        openPaymentPopup(fresh.iframeUrl);
+    }, [slice, reprepareMutation, openPaymentPopup]);
 
-    const isBusy = state.isPreparing || state.isCompleting;
-    const buttonLabel = state.isPreparing ? 'Preparing...' : state.isCompleting ? 'Completing...' : 'Pay';
+    if (!slice) {
+        return null;
+    }
+
+    const isBusy = reprepareMutation.isPending || completeMutation.isPending;
+    const buttonLabel = reprepareMutation.isPending
+        ? 'Preparing...'
+        : completeMutation.isPending
+            ? 'Completing...'
+            : 'Pay';
 
     return (
         <div
             className={classNames(
                 'multi-cafe-payment-row',
-                state.completionResult && 'completed',
+                slice.completionResult && 'completed',
             )}
         >
             <div className="multi-cafe-payment-row-info">
@@ -93,13 +123,13 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, initial
                     </span>
                 )}
             </div>
-            {state.error && (
+            {slice.error && (
                 <div className="multi-cafe-payment-row-error">
-                    {state.error}
+                    {slice.error}
                 </div>
             )}
             <div className="multi-cafe-payment-row-action">
-                {state.completionResult ? (
+                {slice.completionResult ? (
                     <span className="multi-cafe-payment-check" title="Paid">✅</span>
                 ) : (
                     <button

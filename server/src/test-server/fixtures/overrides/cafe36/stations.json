@@ -1,0 +1,494 @@
+[
+  {
+    "id": "cafe36-stn-mediterranean-6120",
+    "name": "Mediterranean",
+    "priceLevelConfig": {
+      "menuId": "cafe36-menu-25413"
+    },
+    "menus": [
+      {
+        "id": "cafe36-menu-25413",
+        "name": "Mediterranean Menu",
+        "categories": [
+          {
+            "categoryId": "cafe36-cat-0-2389",
+            "name": "Bowls",
+            "items": [
+              "cafe36-item-1-5121",
+              "cafe36-item-2-4595",
+              "cafe36-item-3-4517",
+              "cafe36-item-4-9156",
+              "cafe36-item-5-1109",
+              "cafe36-item-6-5286",
+              "cafe36-item-7-8533",
+              "cafe36-item-8-7242"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-1-2147",
+            "name": "Wraps",
+            "items": [
+              "cafe36-item-9-9344",
+              "cafe36-item-10-7570",
+              "cafe36-item-11-5086",
+              "cafe36-item-12-7294",
+              "cafe36-item-13-3860",
+              "cafe36-item-14-1846",
+              "cafe36-item-15-4452",
+              "cafe36-item-16-8566"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-2-7292",
+            "name": "Sides",
+            "items": [
+              "cafe36-item-17-2768",
+              "cafe36-item-18-2010",
+              "cafe36-item-19-5156",
+              "cafe36-item-20-6177",
+              "cafe36-item-21-8787",
+              "cafe36-item-22-5282",
+              "cafe36-item-23-3014",
+              "cafe36-item-24-8878"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Mediterranean",
+      "displayText": "Mediterranean"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe36-stn-mediterranean-6120",
+              "menuId": "cafe36-menu-25413"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe36-stn-espresso-4052",
+    "name": "Espresso",
+    "priceLevelConfig": {
+      "menuId": "cafe36-menu-17745"
+    },
+    "menus": [
+      {
+        "id": "cafe36-menu-17745",
+        "name": "Espresso Menu",
+        "categories": [
+          {
+            "categoryId": "cafe36-cat-0-9166",
+            "name": "Hot Drinks",
+            "items": [
+              "cafe36-item-25-3218",
+              "cafe36-item-26-3693",
+              "cafe36-item-27-9191",
+              "cafe36-item-28-5189",
+              "cafe36-item-29-5825",
+              "cafe36-item-30-4129",
+              "cafe36-item-31-4535",
+              "cafe36-item-32-9452",
+              "cafe36-item-33-6946",
+              "cafe36-item-34-9732",
+              "cafe36-item-35-8363",
+              "cafe36-item-36-5182",
+              "cafe36-item-37-3145",
+              "cafe36-item-38-4469",
+              "cafe36-item-39-1324",
+              "cafe36-item-40-6613"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-1-5697",
+            "name": "Cold Drinks",
+            "items": [
+              "cafe36-item-41-7234",
+              "cafe36-item-42-1224",
+              "cafe36-item-43-4448",
+              "cafe36-item-44-3486",
+              "cafe36-item-45-8162",
+              "cafe36-item-46-9613",
+              "cafe36-item-47-1201",
+              "cafe36-item-48-5505"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-2-1798",
+            "name": "Bakery",
+            "items": [
+              "cafe36-item-49-2999",
+              "cafe36-item-50-8539",
+              "cafe36-item-51-8583",
+              "cafe36-item-52-5779",
+              "cafe36-item-53-3476",
+              "cafe36-item-54-7974",
+              "cafe36-item-55-1561",
+              "cafe36-item-56-4268",
+              "cafe36-item-57-9417",
+              "cafe36-item-58-6931",
+              "cafe36-item-59-8991",
+              "cafe36-item-60-9929"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Espresso",
+      "displayText": "Espresso"
+    },
+    "availableAt": {
+      "open": "6:30 AM",
+      "close": "4:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe36-stn-espresso-4052",
+              "menuId": "cafe36-menu-17745"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe36-stn-indian-kitchen-5776",
+    "name": "Indian Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe36-menu-24958"
+    },
+    "menus": [
+      {
+        "id": "cafe36-menu-24958",
+        "name": "Indian Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe36-cat-0-6488",
+            "name": "Curries",
+            "items": [
+              "cafe36-item-61-6250",
+              "cafe36-item-62-6914",
+              "cafe36-item-63-1408",
+              "cafe36-item-64-2886",
+              "cafe36-item-65-6434",
+              "cafe36-item-66-7581",
+              "cafe36-item-67-1171",
+              "cafe36-item-68-1601",
+              "cafe36-item-69-3917",
+              "cafe36-item-70-9775",
+              "cafe36-item-71-7460",
+              "cafe36-item-72-2836"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-1-9051",
+            "name": "Sides & Bread",
+            "items": [
+              "cafe36-item-73-3031",
+              "cafe36-item-74-5633",
+              "cafe36-item-75-4619",
+              "cafe36-item-76-5813",
+              "cafe36-item-77-6558",
+              "cafe36-item-78-6121",
+              "cafe36-item-79-2249",
+              "cafe36-item-80-8727",
+              "cafe36-item-81-6045",
+              "cafe36-item-82-8428",
+              "cafe36-item-83-1748",
+              "cafe36-item-84-5434"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-2-8155",
+            "name": "Combo Meals",
+            "items": [
+              "cafe36-item-61-6250",
+              "cafe36-item-62-6914",
+              "cafe36-item-63-1408",
+              "cafe36-item-64-2886",
+              "cafe36-item-73-3031",
+              "cafe36-item-74-5633",
+              "cafe36-item-75-4619",
+              "cafe36-item-76-5813",
+              "cafe36-item-81-6045",
+              "cafe36-item-82-8428",
+              "cafe36-item-83-1748",
+              "cafe36-item-84-5434"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Indian Kitchen",
+      "displayText": "Indian Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe36-stn-indian-kitchen-5776",
+              "menuId": "cafe36-menu-24958"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe36-stn-comfort-kitchen-4561",
+    "name": "Comfort Kitchen",
+    "priceLevelConfig": {
+      "menuId": "cafe36-menu-48747"
+    },
+    "menus": [
+      {
+        "id": "cafe36-menu-48747",
+        "name": "Comfort Kitchen Menu",
+        "categories": [
+          {
+            "categoryId": "cafe36-cat-0-7736",
+            "name": "Comfort Classics",
+            "items": [
+              "cafe36-item-85-2930",
+              "cafe36-item-86-5955",
+              "cafe36-item-87-5240",
+              "cafe36-item-88-1391",
+              "cafe36-item-89-9821",
+              "cafe36-item-90-6087",
+              "cafe36-item-91-6646",
+              "cafe36-item-92-5966",
+              "cafe36-item-93-9342",
+              "cafe36-item-94-9990",
+              "cafe36-item-95-2537",
+              "cafe36-item-96-9301"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-1-5268",
+            "name": "Specials",
+            "items": [
+              "cafe36-item-93-9342",
+              "cafe36-item-94-9990",
+              "cafe36-item-95-2537",
+              "cafe36-item-96-9301",
+              "cafe36-item-97-1429",
+              "cafe36-item-98-5655",
+              "cafe36-item-99-5128",
+              "cafe36-item-100-4956"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Comfort Kitchen",
+      "displayText": "Comfort Kitchen"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe36-stn-comfort-kitchen-4561",
+              "menuId": "cafe36-menu-48747"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe36-stn-pacific-rim-2468",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "cafe36-menu-45896"
+    },
+    "menus": [
+      {
+        "id": "cafe36-menu-45896",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "cafe36-cat-0-3875",
+            "name": "Entrees",
+            "items": [
+              "cafe36-item-101-7616",
+              "cafe36-item-102-2506",
+              "cafe36-item-103-6249",
+              "cafe36-item-104-8096",
+              "cafe36-item-105-9457",
+              "cafe36-item-106-8035",
+              "cafe36-item-107-5304",
+              "cafe36-item-108-2929",
+              "cafe36-item-109-4379",
+              "cafe36-item-110-4345",
+              "cafe36-item-111-7126",
+              "cafe36-item-112-7911",
+              "cafe36-item-113-1376",
+              "cafe36-item-114-6321",
+              "cafe36-item-115-5990",
+              "cafe36-item-116-7394"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-1-7553",
+            "name": "Sides",
+            "items": [
+              "cafe36-item-117-4208",
+              "cafe36-item-118-3530",
+              "cafe36-item-119-2131",
+              "cafe36-item-120-9526",
+              "cafe36-item-121-5756",
+              "cafe36-item-122-3110",
+              "cafe36-item-123-4752",
+              "cafe36-item-124-5722"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe36-stn-pacific-rim-2468",
+              "menuId": "cafe36-menu-45896"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "cafe36-stn-ramen-bar-5119",
+    "name": "Ramen Bar",
+    "priceLevelConfig": {
+      "menuId": "cafe36-menu-84021"
+    },
+    "menus": [
+      {
+        "id": "cafe36-menu-84021",
+        "name": "Ramen Bar Menu",
+        "categories": [
+          {
+            "categoryId": "cafe36-cat-0-4861",
+            "name": "Ramen Bowls",
+            "items": [
+              "cafe36-item-125-1615",
+              "cafe36-item-126-3806",
+              "cafe36-item-127-2726",
+              "cafe36-item-128-8627",
+              "cafe36-item-129-8336",
+              "cafe36-item-130-1822",
+              "cafe36-item-131-8664",
+              "cafe36-item-132-7715",
+              "cafe36-item-133-5047",
+              "cafe36-item-134-1504",
+              "cafe36-item-135-9793",
+              "cafe36-item-136-1876",
+              "cafe36-item-137-5389",
+              "cafe36-item-138-3867",
+              "cafe36-item-139-2747",
+              "cafe36-item-140-4585"
+            ]
+          },
+          {
+            "categoryId": "cafe36-cat-1-6347",
+            "name": "Sides & Apps",
+            "items": [
+              "cafe36-item-141-2718",
+              "cafe36-item-142-8994",
+              "cafe36-item-143-7534",
+              "cafe36-item-144-5638",
+              "cafe36-item-145-2325",
+              "cafe36-item-146-8298",
+              "cafe36-item-147-7517",
+              "cafe36-item-148-5398",
+              "cafe36-item-149-7301",
+              "cafe36-item-150-3675",
+              "cafe36-item-151-8487",
+              "cafe36-item-152-3710"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Ramen Bar",
+      "displayText": "Ramen Bar"
+    },
+    "availableAt": {
+      "open": "11:00 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "cafe36-stn-ramen-bar-5119",
+              "menuId": "cafe36-menu-84021"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

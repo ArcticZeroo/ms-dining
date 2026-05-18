@@ -1,5 +1,6 @@
 import * as appInsights from 'applicationinsights';
 import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
+import { lazy } from '../../util/lazy.js';
 import { getNamespaceLogger } from '../../util/log.js';
 
 const logger = getNamespaceLogger('AppInsights');
@@ -24,7 +25,9 @@ const createTelemetryClient = (): appInsights.TelemetryClient | null => {
     return client;
 }
 
-export const TELEMETRY_CLIENT = createTelemetryClient();
+const TELEMETRY_CLIENT = lazy(createTelemetryClient);
+
+export const getTelemetryClient = (): appInsights.TelemetryClient | null => TELEMETRY_CLIENT.value;
 
 type FlushCallback = () => void | Promise<void>;
 const preFlushCallbacks: FlushCallback[] = [];
@@ -46,12 +49,13 @@ export const flushTelemetry = async (): Promise<void> => {
         }
     }
 
-    if (!TELEMETRY_CLIENT) {
+    const client = getTelemetryClient();
+    if (client == null) {
         return;
     }
 
     try {
-        await TELEMETRY_CLIENT.flush();
+        await client.flush();
         logger.info('Flush complete');
     } catch (err) {
         logger.error('Flush failed:', err);

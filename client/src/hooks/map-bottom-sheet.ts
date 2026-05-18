@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { InternalSettings } from '../constants/settings.ts';
 import { DeviceType, useDeviceType } from './media-query.ts';
+import { useValueNotifier } from './events.ts';
 
 const SNAP_POINTS: readonly [number, number, number] = [0.3, 0.5, 0.95] as const;
-const DEFAULT_SNAP = SNAP_POINTS[1];
 const MIN_SNAP = SNAP_POINTS[0];
 
 const FLING_VELOCITY_THRESHOLD = 0.8; // fraction per second
@@ -47,15 +48,28 @@ export const useBottomSheetDrag = () => {
 
     const handleRef = useRef<HTMLDivElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
-    const [heightFraction, setHeightFraction] = useState(DEFAULT_SNAP);
+    // Persisted as an InternalSetting (localStorage) so the panel keeps its
+    // snap position both when the user navigates between map sub-routes (e.g.
+    // closes search and searches again) and across full page reloads.
+    const heightFraction = useValueNotifier(InternalSettings.mapBottomSheetHeightFraction);
+    const setHeightFraction = useCallback((value: number) => {
+        InternalSettings.mapBottomSheetHeightFraction.value = value;
+    }, []);
     const [isDragging, setIsDragging] = useState(false);
     const [showHandle, setShowHandle] = useState(false);
 
-    const heightRef = useRef(DEFAULT_SNAP);
+    const heightRef = useRef(heightFraction);
     const isDraggingRef = useRef(false);
-    const dragStartRef = useRef({ y: 0, fraction: DEFAULT_SNAP });
+    const dragStartRef = useRef({ y: 0, fraction: heightFraction });
     const lastMoveRef = useRef({ y: 0, time: 0 });
     const prevMoveRef = useRef({ y: 0, time: 0 });
+
+    // Keep the ref in sync if some other consumer updates the setting while
+    // we're mounted (or on first mount, when the setting value differs from
+    // the initial useRef seed).
+    useEffect(() => {
+        heightRef.current = heightFraction;
+    }, [heightFraction]);
 
     const checkIfHandleNeeded = useCallback(() => {
         const panel = panelRef.current;
@@ -110,29 +124,29 @@ export const useBottomSheetDrag = () => {
             return;
         }
 
-        const onPointerDown = (e: PointerEvent) => {
+        const onPointerDown = (event: PointerEvent) => {
             isDraggingRef.current = true;
-            dragStartRef.current = { y: e.clientY, fraction: heightRef.current };
-            lastMoveRef.current = { y: e.clientY, time: Date.now() };
+            dragStartRef.current = { y: event.clientY, fraction: heightRef.current };
+            lastMoveRef.current = { y: event.clientY, time: Date.now() };
             prevMoveRef.current = lastMoveRef.current;
-            handle.setPointerCapture(e.pointerId);
+            handle.setPointerCapture(event.pointerId);
             setIsDragging(true);
-            e.preventDefault();
+            event.preventDefault();
         };
 
-        const onPointerMove = (e: PointerEvent) => {
+        const onPointerMove = (event: PointerEvent) => {
             if (!isDraggingRef.current) {
                 return;
             }
 
-            const dy = dragStartRef.current.y - e.clientY;
+            const dy = dragStartRef.current.y - event.clientY;
             const containerHeight = handle.closest('.map-page')?.clientHeight ?? window.innerHeight;
             const deltaFraction = dy / containerHeight;
             const newFraction = Math.max(0.15, Math.min(0.95, dragStartRef.current.fraction + deltaFraction));
             heightRef.current = newFraction;
             setHeightFraction(newFraction);
             prevMoveRef.current = lastMoveRef.current;
-            lastMoveRef.current = { y: e.clientY, time: Date.now() };
+            lastMoveRef.current = { y: event.clientY, time: Date.now() };
         };
 
         const onPointerUp = () => {
@@ -165,7 +179,7 @@ export const useBottomSheetDrag = () => {
             handle.removeEventListener('pointerup', onPointerUp);
             handle.removeEventListener('pointercancel', onPointerUp);
         };
-    }, [isMobile, showHandle]);
+    }, [isMobile, showHandle, setHeightFraction]);
 
     const sheetStyle = isMobile
         ? {

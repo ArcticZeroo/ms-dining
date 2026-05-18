@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
+import { useMutation } from '@tanstack/react-query';
 import { IRguestCardInfo } from '@msdining/common/models/cart';
 import { z } from 'zod';
 import { RetryButton } from '../../button/retry-button.tsx';
@@ -66,15 +66,16 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
     const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const lastPaymentResultRef = useRef<IRguestPaymentResult | null>(null);
 
-    const { stage: completionStage, error: completionError, run: runCompletion } = useDelayedPromiseState(
-        useCallback(async () => {
-            const result = lastPaymentResultRef.current;
-            if (!result) {
-                throw new Error('No payment result');
-            }
-            await onPaymentComplete(result);
-        }, [onPaymentComplete])
-    );
+    const { isIdle, isError, error, mutate: runCompletion } = useMutation<void, Error, IRguestPaymentResult>({
+        mutationFn: (result) => onPaymentComplete(result),
+    });
+
+    const retryCompletion = useCallback(() => {
+        const result = lastPaymentResultRef.current;
+        if (result) {
+            runCompletion(result);
+        }
+    }, [runCompletion]);
 
     const handleMessage = useCallback((event: MessageEvent) => {
         if (event.origin !== 'https://pay.rguest.com') {
@@ -132,7 +133,7 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
                 };
 
                 lastPaymentResultRef.current = { token, cardInfo };
-                runCompletion();
+                runCompletion({ token, cardInfo });
                 return;
             }
         }
@@ -174,9 +175,9 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
         setIframeError('Failed to load payment form. Please try again.');
     }, []);
 
-    if (completionStage !== PromiseStage.notRun) {
-        const errorMessage = completionStage === PromiseStage.error
-            ? (completionError instanceof Error ? completionError.message : 'Failed to complete order')
+    if (!isIdle) {
+        const errorMessage = isError
+            ? (error instanceof Error ? error.message : 'Failed to complete order')
             : null;
 
         return (
@@ -192,7 +193,7 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
                 {errorMessage ? (
                     <div className="payment-error">
                         <div>{errorMessage}</div>
-                        <RetryButton onClick={runCompletion}/>
+                        <RetryButton onClick={retryCompletion}/>
                     </div>
                 ) : (
                     <div className="payment-completing">

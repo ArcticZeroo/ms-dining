@@ -1,0 +1,1766 @@
+[
+  {
+    "id": "s-wich-item-1-2434",
+    "amount": "12.99",
+    "displayText": "Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN WAFFLES",
+    "tagIds": [
+      "tag-gf",
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-2-2192",
+    "amount": "12.99",
+    "displayText": "Lite Chicken & Waffles",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Crispy fried chicken tenders on a Belgian waffle with maple syrup",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE CHKN WAFFLES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-3-5323",
+    "amount": "15.99",
+    "displayText": "Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SEARED SALMON",
+    "tagIds": [
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-4-3635",
+    "amount": "15.99",
+    "displayText": "Lite Pan-Seared Salmon",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "580"
+    },
+    "description": "Atlantic salmon with lemon-dill sauce, roasted potatoes, asparagus",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE SEARED SALMON",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-5-9233",
+    "amount": "16.50",
+    "displayText": "Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SHORT RIBS",
+    "tagIds": [
+      "tag-high-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-5-9233-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-5-9233-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-5-9233-mod-1",
+          "description": "Cheese",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-5-9233-mod-1-opt-0",
+              "description": "American",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-1-opt-1",
+              "description": "Cheddar",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-1-opt-2",
+              "description": "Pepper Jack",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-1-opt-3",
+              "description": "Swiss",
+              "amount": "0.50"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-1-opt-4",
+              "description": "Provolone",
+              "amount": "0.50"
+            },
+            {
+              "id": "s-wich-item-5-9233-mod-1-opt-5",
+              "description": "No Cheese",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-6-9250",
+    "amount": "16.50",
+    "displayText": "Lite Braised Short Ribs",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Red wine braised short ribs with creamy polenta and gremolata",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LITE SHORT RIBS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "16.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-6-9250-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-6-9250-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-6-9250-mod-1",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-6-9250-mod-1-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-1-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-1-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-6-9250-mod-1-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-7-2740",
+    "amount": "7.99",
+    "displayText": "Half Turkey Avocado",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "420"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 TURKEY AVO",
+    "tagIds": [
+      "tag-medium-circle",
+      "tag-spicy",
+      "tag-low-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-8-3741",
+    "amount": "7.99",
+    "displayText": "Lite Half Turkey Avocado",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "420"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE 1/2 TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-9-2822",
+    "amount": "7.50",
+    "displayText": "Half Italian",
+    "properties": {
+      "calories": "410",
+      "maxCalories": "430"
+    },
+    "description": "Salami, capicola, provolone, pepperoncini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 ITALIAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-10-2038",
+    "amount": "7.50",
+    "displayText": "Lite Half Italian",
+    "properties": {
+      "calories": "410",
+      "maxCalories": "430"
+    },
+    "description": "Salami, capicola, provolone, pepperoncini",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LITE 1/2 ITALIAN",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-10-2038-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-10-2038-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-10-2038-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-10-2038-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-10-2038-mod-2",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-10-2038-mod-2-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-2-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-2-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-2-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-2-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-10-2038-mod-2-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-11-7137",
+    "amount": "6.99",
+    "displayText": "Half Veggie",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "310"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "1/2 VEGGIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-12-2872",
+    "amount": "6.99",
+    "displayText": "Lite Half Veggie",
+    "properties": {
+      "calories": "280",
+      "maxCalories": "310"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE 1/2 VEGGIE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-13-9482",
+    "amount": "11.99",
+    "displayText": "Whole Turkey Avocado",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TURKEY AVO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-14-4059",
+    "amount": "11.99",
+    "displayText": "Lite Whole Turkey Avocado",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "780"
+    },
+    "description": "Sliced turkey, avocado, sprouts, swiss on multigrain",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE TURKEY AVO",
+    "tagIds": [
+      "tag-vegan"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-15-7861",
+    "amount": "11.50",
+    "displayText": "Whole Italian Sub",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "810"
+    },
+    "description": "Salami, capicola, mortadella, provolone, oil & vinegar",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-16-5280",
+    "amount": "11.50",
+    "displayText": "Lite Whole Italian Sub",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "810"
+    },
+    "description": "Salami, capicola, mortadella, provolone, oil & vinegar",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE ITALIAN SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-17-9277",
+    "amount": "10.50",
+    "displayText": "Whole Veggie",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "560"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "VEGGIE SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-17-9277-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-17-9277-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-17-9277-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-17-9277-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-17-9277-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-18-2932",
+    "amount": "10.50",
+    "displayText": "Lite Whole Veggie",
+    "properties": {
+      "calories": "520",
+      "maxCalories": "560"
+    },
+    "description": "Roasted vegetables, hummus, feta on ciabatta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE VEGGIE SUB",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-19-7253",
+    "amount": "5.50",
+    "displayText": "Tomato Basil Soup",
+    "properties": {
+      "calories": "220",
+      "maxCalories": "220"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "TOMATO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-20-3255",
+    "amount": "5.50",
+    "displayText": "Lite Tomato Basil Soup",
+    "properties": {
+      "calories": "220",
+      "maxCalories": "220"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LITE TOMATO SOUP",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-20-3255-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-20-3255-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-20-3255-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-20-3255-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-20-3255-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-20-3255-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "s-wich-item-20-3255-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "s-wich-item-20-3255-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-21-8785",
+    "amount": "5.50",
+    "displayText": "Chicken Noodle Soup",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN NOODLE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-21-8785-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-21-8785-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-21-8785-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-21-8785-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "s-wich-item-21-8785-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-22-2258",
+    "amount": "5.50",
+    "displayText": "Lite Chicken Noodle Soup",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LITE CHKN NOODLE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-23-6160",
+    "amount": "14.50",
+    "displayText": "Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "TONKOTSU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-23-6160-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-23-6160-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-23-6160-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-23-6160-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-23-6160-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-23-6160-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-24-2967",
+    "amount": "14.50",
+    "displayText": "Deluxe Tonkotsu Ramen",
+    "properties": {
+      "calories": "890",
+      "maxCalories": "950"
+    },
+    "description": "Rich pork bone broth with chashu, soft-boiled egg, nori, and green onion",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU TONKOTSU",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "14.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-24-2967-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-24-2967-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-24-2967-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-24-2967-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "s-wich-item-24-2967-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "s-wich-item-24-2967-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-25-6310",
+    "amount": "13.75",
+    "displayText": "Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MISO RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-25-6310-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-25-6310-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "s-wich-item-25-6310-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "s-wich-item-25-6310-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "s-wich-item-25-6310-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-25-6310-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-25-6310-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-25-6310-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "s-wich-item-25-6310-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "s-wich-item-25-6310-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-26-3746",
+    "amount": "13.75",
+    "displayText": "Deluxe Miso Ramen",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "830"
+    },
+    "description": "White miso broth with ground pork, corn, butter, and bean sprouts",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU MISO RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-26-3746-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-26-3746-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-26-3746-mod-1",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-26-3746-mod-1-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-1-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-1-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-1-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-1-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-1-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-26-3746-mod-2",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-26-3746-mod-2-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-2-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-2-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "s-wich-item-26-3746-mod-2-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-27-3399",
+    "amount": "13.50",
+    "displayText": "Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "SHOYU RAMEN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-28-7585",
+    "amount": "13.50",
+    "displayText": "Deluxe Shoyu Ramen",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "770"
+    },
+    "description": "Soy sauce-based broth with chicken, bamboo shoots, and nori",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU SHOYU RAMEN",
+    "tagIds": [
+      "tag-high-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-29-7700",
+    "amount": "15.00",
+    "displayText": "Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SPICY TANTAN",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-29-7700-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-29-7700-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-29-7700-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-29-7700-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-29-7700-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-29-7700-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-30-7361",
+    "amount": "15.00",
+    "displayText": "Deluxe Spicy Tantan Ramen",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "1000"
+    },
+    "description": "Sesame-chili broth with ground pork, bok choy, and chili oil",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU SPICY TANTAN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "15.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-30-7361-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-30-7361-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-30-7361-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-30-7361-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-30-7361-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-31-7079",
+    "amount": "6.50",
+    "displayText": "Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "GYOZA 6PC",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "s-wich-item-31-7079-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "s-wich-item-31-7079-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-31-7079-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-31-7079-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "s-wich-item-31-7079-mod-2",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "s-wich-item-31-7079-mod-2-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-2-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-2-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-2-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "s-wich-item-31-7079-mod-2-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "s-wich-item-32-5909",
+    "amount": "6.50",
+    "displayText": "Deluxe Pan-Fried Gyoza (6pc)",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "description": "Pork and cabbage dumplings with ponzu dipping sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU GYOZA 6PC",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "6.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-33-1282",
+    "amount": "4.25",
+    "displayText": "Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "EDAMAME",
+    "tagIds": [
+      "tag-vegan",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-34-4468",
+    "amount": "4.25",
+    "displayText": "Deluxe Edamame",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU EDAMAME",
+    "tagIds": [
+      "tag-vegan",
+      "tag-gf"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-35-5466",
+    "amount": "7.75",
+    "displayText": "Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "CHKN KARAAGE",
+    "tagIds": [
+      "tag-healthy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "s-wich-item-36-5250",
+    "amount": "7.75",
+    "displayText": "Deluxe Chicken Karaage",
+    "properties": {
+      "calories": "420",
+      "maxCalories": "420"
+    },
+    "description": "Japanese-style fried chicken with yuzu mayo",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHKN KARAAGE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "7.75"
+        }
+      }
+    }
+  }
+]

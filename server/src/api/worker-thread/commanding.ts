@@ -34,28 +34,39 @@ type ExtractResponseMap<T extends Record<string, unknown>> = {
 };
 
 export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: any) => Promise<any>>, TKeys extends ExtractKeys<TCommands>, TRequestValueMap extends ExtractRequestMap<TCommands>, TResponseValueMap extends ExtractResponseMap<TCommands>> {
-    readonly #worker: Worker | undefined;
+    readonly #filePath: URL;
     readonly #commands: TCommands;
     readonly #pendingRequests = new Map<string /*requestId*/, [(data: TResponseValueMap[TKeys]) => void /*resolve*/, (error: string) => void /*reject*/]>();
 
+    // Lazy in main-thread mode: spawning the Worker is deferred to the first
+    // sendRequest() so test bootstraps have a chance to set env vars (like
+    // SEARCH_DB_PATH) before the child process inherits them.
+    //
+    // In worker-thread mode this stays unused — the worker's request listener
+    // is registered eagerly in the constructor.
+    #worker: Worker | undefined;
+
     constructor(filePath: URL, commands: TCommands) {
+        this.#filePath = filePath;
         this.#commands = commands;
 
-        if (isMainThread) {
-            this.#worker = new Worker(filePath);
-            this.#registerMainThreadResponseListener();
-        } else {
+        if (!isMainThread) {
             logDebug('WorkerThreadCommandHandler is running in worker thread');
             this.#registerWorkerRequestListener();
         }
     }
 
-    #registerMainThreadResponseListener() {
-        if (this.#worker == null) {
-            throw new Error('Worker is missing in main thread WorkerThreadCommandHandler');
+    #ensureMainThreadWorker(): Worker {
+        if (this.#worker != null) {
+            return this.#worker;
         }
+        this.#worker = new Worker(this.#filePath);
+        this.#registerMainThreadResponseListener(this.#worker);
+        return this.#worker;
+    }
 
-        this.#worker.on('message', (message) => {
+    #registerMainThreadResponseListener(worker: Worker) {
+        worker.on('message', (message) => {
             if (!isDuckType<IWorkerCommandResponse<TResponseValueMap[TKeys]>>(message, { requestId: 'string' })) {
                 logError('Invalid worker thread command response:', message);
                 return;
@@ -70,7 +81,6 @@ export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: 
             const [resolve, reject] = pendingRequest;
             this.#pendingRequests.delete(message.requestId);
 
-            // logDebug('Got response for worker thread command id', message.requestId, message.success ? 'success' : 'failure');
             if (!message.success) {
                 reject(message.error);
             } else {
@@ -123,13 +133,14 @@ export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: 
 
     sendRequest<TKey extends TKeys>(key: TKey, data: TRequestValueMap[TKey]): Promise<TResponseValueMap[TKey]> {
         return new Promise((resolve, reject) => {
-            if (!this.#worker) {
+            if (!isMainThread) {
                 reject(new Error('Cannot send requests from the worker thread'));
                 return;
             }
 
+            const worker = this.#ensureMainThreadWorker();
             const requestId = randomUUID();
-            this.#worker.postMessage({ requestId, command: key, data });
+            worker.postMessage({ requestId, command: key, data });
             this.#pendingRequests.set(requestId, [resolve as (data: any) => void, reject]);
         });
     }

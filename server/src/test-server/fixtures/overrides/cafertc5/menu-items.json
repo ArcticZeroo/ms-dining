@@ -1,0 +1,2772 @@
+[
+  {
+    "id": "cafertc5-item-1-3812",
+    "amount": "10.99",
+    "displayText": "Beef Lasagna",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "700"
+    },
+    "description": "Layers of pasta, seasoned beef, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BEEF LASAGNA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-1-3812-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-1-3812-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-1-3812-mod-1",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-1-3812-mod-1-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-1-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-1-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-1-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-1-3812-mod-2",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-1-3812-mod-2-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-2-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-2-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-2-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-2-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-1-3812-mod-2-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-2-5042",
+    "amount": "10.99",
+    "displayText": "Family-Size Beef Lasagna",
+    "properties": {
+      "calories": "650",
+      "maxCalories": "700"
+    },
+    "description": "Layers of pasta, seasoned beef, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI BEEF LASAGNA",
+    "tagIds": [
+      "tag-low-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-3-4827",
+    "amount": "10.99",
+    "displayText": "Veggie Lasagna",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Layers of pasta, roasted vegetables, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "VEGGIE LASAGNA",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-medium-circle"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-4-4127",
+    "amount": "10.99",
+    "displayText": "Family-Size Veggie Lasagna",
+    "properties": {
+      "calories": "550",
+      "maxCalories": "600"
+    },
+    "description": "Layers of pasta, roasted vegetables, ricotta, and marinara",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI VEGGIE LASAGNA",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "10.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-4-4127-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-4-4127-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "cafertc5-item-4-4127-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-4-4127-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-4-4127-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-5-3163",
+    "amount": "8.99",
+    "displayText": "Mac & Cheese",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "750"
+    },
+    "description": "Creamy four-cheese blend with elbow pasta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MAC CHEESE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-5-3163-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-5-3163-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-5-3163-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-5-3163-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-5-3163-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-6-5313",
+    "amount": "8.99",
+    "displayText": "Family-Size Mac & Cheese",
+    "properties": {
+      "calories": "720",
+      "maxCalories": "750"
+    },
+    "description": "Creamy four-cheese blend with elbow pasta",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "FAMI MAC CHEESE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-6-5313-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-6-5313-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-6-5313-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-6-5313-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-6-5313-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-6-5313-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-6-5313-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-6-5313-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-6-5313-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-6-5313-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-7-3186",
+    "amount": "11.50",
+    "displayText": "Chicken Pot Pie",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "730"
+    },
+    "description": "Flaky crust with chicken, peas, carrots in cream sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHKN POT PIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-7-3186-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-7-3186-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-7-3186-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-7-3186-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-7-3186-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-8-3822",
+    "amount": "11.50",
+    "displayText": "Family-Size Chicken Pot Pie",
+    "properties": {
+      "calories": "680",
+      "maxCalories": "730"
+    },
+    "description": "Flaky crust with chicken, peas, carrots in cream sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "FAMI CHKN POT PIE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-9-9717",
+    "amount": "11.99",
+    "displayText": "Classic Cheeseburger",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Angus beef patty with cheddar, lettuce, tomato, special sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CLASSIC CHZBRGR",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-9-9717-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-9-9717-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-9-9717-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-9-9717-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-9-9717-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-9-9717-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-9-9717-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-9-9717-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-9-9717-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-9-9717-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-10-6414",
+    "amount": "11.99",
+    "displayText": "Loaded Classic Cheeseburger",
+    "properties": {
+      "calories": "780",
+      "maxCalories": "850"
+    },
+    "description": "Angus beef patty with cheddar, lettuce, tomato, special sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD CLASSIC CHZBRGR",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "11.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-10-6414-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-10-6414-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-10-6414-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-10-6414-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-10-6414-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-11-3892",
+    "amount": "12.99",
+    "displayText": "BBQ Bacon Burger",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "980"
+    },
+    "description": "Angus beef with applewood bacon, cheddar, crispy onion rings, BBQ sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "BBQ BACON BURGER",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-11-3892-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-11-3892-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-11-3892-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-11-3892-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-11-3892-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-11-3892-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-12-4821",
+    "amount": "12.99",
+    "displayText": "Loaded BBQ Bacon Burger",
+    "properties": {
+      "calories": "920",
+      "maxCalories": "980"
+    },
+    "description": "Angus beef with applewood bacon, cheddar, crispy onion rings, BBQ sauce",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD BBQ BACON BURGER",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "12.99"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-12-4821-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-12-4821-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-12-4821-mod-1",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-12-4821-mod-1-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-1-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-1-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-1-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-12-4821-mod-1-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-13-6587",
+    "amount": "13.50",
+    "displayText": "Impossible Burger",
+    "properties": {
+      "calories": "630",
+      "maxCalories": "700"
+    },
+    "description": "Plant-based patty with lettuce, tomato, pickles",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "IMPOSSIBLE BRGR",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-13-6587-mod-0",
+          "description": "Add-Ons",
+          "minimum": 0,
+          "maximum": 3,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-13-6587-mod-0-opt-0",
+              "description": "Extra Cheese",
+              "amount": "1.00"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-0-opt-1",
+              "description": "Bacon",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-0-opt-2",
+              "description": "Avocado",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-0-opt-3",
+              "description": "Fried Egg",
+              "amount": "1.25"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-13-6587-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-13-6587-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-13-6587-mod-2",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-13-6587-mod-2-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-2-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-2-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-13-6587-mod-2-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-14-1065",
+    "amount": "13.50",
+    "displayText": "Loaded Impossible Burger",
+    "properties": {
+      "calories": "630",
+      "maxCalories": "700"
+    },
+    "description": "Plant-based patty with lettuce, tomato, pickles",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD IMPOSSIBLE BRGR",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "13.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-14-1065-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-14-1065-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-14-1065-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-14-1065-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-14-1065-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-15-8747",
+    "amount": "4.50",
+    "displayText": "Seasoned Fries",
+    "properties": {
+      "calories": "400",
+      "maxCalories": "400"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "SEASONED FRIES",
+    "tagIds": [
+      "tag-vegan",
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-15-8747-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-15-8747-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-15-8747-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-15-8747-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-15-8747-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-16-2410",
+    "amount": "4.50",
+    "displayText": "Loaded Seasoned Fries",
+    "properties": {
+      "calories": "400",
+      "maxCalories": "400"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD SEASONED FRIES",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-17-1232",
+    "amount": "5.25",
+    "displayText": "Onion Rings",
+    "properties": {
+      "calories": "450",
+      "maxCalories": "450"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "ONION RINGS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-18-2824",
+    "amount": "5.25",
+    "displayText": "Loaded Onion Rings",
+    "properties": {
+      "calories": "450",
+      "maxCalories": "450"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "LOAD ONION RINGS",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-19-6718",
+    "amount": "9.50",
+    "displayText": "Caesar Salad",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "380"
+    },
+    "description": "Romaine, parmesan, croutons, caesar dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CAESAR SALAD",
+    "tagIds": [
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-19-6718-mod-0",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-19-6718-mod-0-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-19-6718-mod-0-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-20-1616",
+    "amount": "9.50",
+    "displayText": "Loaded Caesar Salad",
+    "properties": {
+      "calories": "320",
+      "maxCalories": "380"
+    },
+    "description": "Romaine, parmesan, croutons, caesar dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD CAESAR SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "9.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-20-1616-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-20-1616-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-20-1616-mod-1",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-20-1616-mod-1-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-1-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-1-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-1-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-1-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-20-1616-mod-1-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-21-4229",
+    "amount": "8.75",
+    "displayText": "Garden Salad",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "250"
+    },
+    "description": "Mixed greens, tomato, cucumber, carrots, choice of dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "GARDEN SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-21-4229-mod-0",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-21-4229-mod-0-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-21-4229-mod-0-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-21-4229-mod-0-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-21-4229-mod-0-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-21-4229-mod-0-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-22-9637",
+    "amount": "8.75",
+    "displayText": "Loaded Garden Salad",
+    "properties": {
+      "calories": "180",
+      "maxCalories": "250"
+    },
+    "description": "Mixed greens, tomato, cucumber, carrots, choice of dressing",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LOAD GARDEN SALAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "8.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-22-9637-mod-0",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-22-9637-mod-0-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-22-9637-mod-0-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-22-9637-mod-0-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-22-9637-mod-0-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-23-3517",
+    "amount": "4.25",
+    "displayText": "Drip Coffee",
+    "properties": {
+      "calories": "5",
+      "maxCalories": "5"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DRIP COFFEE",
+    "tagIds": [
+      "tag-vegan",
+      "tag-low-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-24-4175",
+    "amount": "4.25",
+    "displayText": "Deluxe Drip Coffee",
+    "properties": {
+      "calories": "5",
+      "maxCalories": "5"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU DRIP COFFEE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-24-4175-mod-0",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-24-4175-mod-0-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-0-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-0-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-0-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-24-4175-mod-1",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-24-4175-mod-1-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-1-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-1-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-1-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-1-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-24-4175-mod-2",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-24-4175-mod-2-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-2-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-2-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-24-4175-mod-2-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-25-3673",
+    "amount": "4.75",
+    "displayText": "Caffè Latte",
+    "properties": {
+      "calories": "190",
+      "maxCalories": "250"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-25-3673-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-25-3673-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-25-3673-mod-1",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-25-3673-mod-1-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-1-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-1-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-1-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-25-3673-mod-2",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-25-3673-mod-2-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-2-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-2-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-2-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-25-3673-mod-2-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-26-7574",
+    "amount": "4.75",
+    "displayText": "Deluxe Caffè Latte",
+    "properties": {
+      "calories": "190",
+      "maxCalories": "250"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.75"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-26-7574-mod-0",
+          "description": "Sweetener",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-26-7574-mod-0-opt-0",
+              "description": "None",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-26-7574-mod-0-opt-1",
+              "description": "Sugar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-26-7574-mod-0-opt-2",
+              "description": "Stevia",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-26-7574-mod-0-opt-3",
+              "description": "Honey",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-26-7574-mod-0-opt-4",
+              "description": "Vanilla Syrup",
+              "amount": "0.75"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-27-2702",
+    "amount": "4.50",
+    "displayText": "Cappuccino",
+    "properties": {
+      "calories": "130",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CAPPUCCINO",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-27-2702-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-27-2702-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-27-2702-mod-1",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-27-2702-mod-1-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-1-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-1-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-1-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-1-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-27-2702-mod-2",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-27-2702-mod-2-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-2-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-2-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-2-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-2-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-2-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-27-2702-mod-3",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-27-2702-mod-3-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-3-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-3-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-3-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-3-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-3-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-27-2702-mod-4",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-27-2702-mod-4-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-4-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-4-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-27-2702-mod-4-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-28-7867",
+    "amount": "4.50",
+    "displayText": "Deluxe Cappuccino",
+    "properties": {
+      "calories": "130",
+      "maxCalories": "180"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU CAPPUCCINO",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-28-7867-mod-0",
+          "description": "Cooked Temp",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-28-7867-mod-0-opt-0",
+              "description": "Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-0-opt-1",
+              "description": "Medium Rare",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-0-opt-2",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-0-opt-3",
+              "description": "Medium Well",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-0-opt-4",
+              "description": "Well Done",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-28-7867-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-28-7867-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-28-7867-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-29-6588",
+    "amount": "5.25",
+    "displayText": "Caffè Mocha",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "400"
+    },
+    "description": "Espresso with steamed milk and chocolate",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "MOCHA",
+    "tagIds": [
+      "tag-vegetarian",
+      "tag-medium-emissions"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-29-6588-mod-0",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-29-6588-mod-0-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-0-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-0-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-0-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-0-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-29-6588-mod-1",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-29-6588-mod-1-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-1-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-1-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-1-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-1-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-29-6588-mod-1-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-30-2641",
+    "amount": "5.25",
+    "displayText": "Deluxe Caffè Mocha",
+    "properties": {
+      "calories": "350",
+      "maxCalories": "400"
+    },
+    "description": "Espresso with steamed milk and chocolate",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU MOCHA",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-30-2641-mod-0",
+          "description": "Toppings",
+          "minimum": 0,
+          "maximum": 5,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-30-2641-mod-0-opt-0",
+              "description": "Lettuce",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-30-2641-mod-0-opt-1",
+              "description": "Tomato",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-30-2641-mod-0-opt-2",
+              "description": "Onion",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-30-2641-mod-0-opt-3",
+              "description": "Pickles",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-30-2641-mod-0-opt-4",
+              "description": "Jalapenos",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-30-2641-mod-0-opt-5",
+              "description": "Mushrooms",
+              "amount": "0.50"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-31-3365",
+    "amount": "5.25",
+    "displayText": "Iced Latte",
+    "properties": {
+      "calories": "170",
+      "maxCalories": "230"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "ICED LATTE",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-31-3365-mod-0",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-31-3365-mod-0-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-0-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-0-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-0-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-31-3365-mod-1",
+          "description": "Milk Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-31-3365-mod-1-opt-0",
+              "description": "Whole Milk",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-1-opt-1",
+              "description": "Oat Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-1-opt-2",
+              "description": "Almond Milk",
+              "amount": "0.75"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-1-opt-3",
+              "description": "Soy Milk",
+              "amount": "0.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-31-3365-mod-2",
+          "description": "Dressing",
+          "minimum": 0,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-31-3365-mod-2-opt-0",
+              "description": "Ranch",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-2-opt-1",
+              "description": "Vinaigrette",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-2-opt-2",
+              "description": "Caesar",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-31-3365-mod-2-opt-3",
+              "description": "No Dressing",
+              "amount": "0.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-32-9596",
+    "amount": "5.25",
+    "displayText": "Deluxe Iced Latte",
+    "properties": {
+      "calories": "170",
+      "maxCalories": "230"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "DELU ICED LATTE",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "5.25"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-32-9596-mod-0",
+          "description": "Spice Level",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-32-9596-mod-0-opt-0",
+              "description": "Mild",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-0-opt-1",
+              "description": "Medium",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-0-opt-2",
+              "description": "Hot",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-0-opt-3",
+              "description": "Extra Hot",
+              "amount": "0.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-32-9596-mod-1",
+          "description": "Size",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-32-9596-mod-1-opt-0",
+              "description": "Regular",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-1-opt-1",
+              "description": "Large",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-32-9596-mod-2",
+          "description": "Bread Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-32-9596-mod-2-opt-0",
+              "description": "White",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-2-opt-1",
+              "description": "Wheat",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-2-opt-2",
+              "description": "Sourdough",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-2-opt-3",
+              "description": "Ciabatta",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-2-opt-4",
+              "description": "Gluten-Free Bun",
+              "amount": "1.50"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-32-9596-mod-3",
+          "description": "Side Choice",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-32-9596-mod-3-opt-0",
+              "description": "Fries",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-3-opt-1",
+              "description": "Side Salad",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-3-opt-2",
+              "description": "Soup of the Day",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-3-opt-3",
+              "description": "Onion Rings",
+              "amount": "1.00"
+            }
+          ]
+        },
+        {
+          "id": "cafertc5-item-32-9596-mod-4",
+          "description": "Protein",
+          "minimum": 1,
+          "maximum": 1,
+          "type": "radio",
+          "options": [
+            {
+              "id": "cafertc5-item-32-9596-mod-4-opt-0",
+              "description": "Chicken",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-4-opt-1",
+              "description": "Tofu",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-4-opt-2",
+              "description": "Beef",
+              "amount": "1.50"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-4-opt-3",
+              "description": "Shrimp",
+              "amount": "2.00"
+            },
+            {
+              "id": "cafertc5-item-32-9596-mod-4-opt-4",
+              "description": "No Protein",
+              "amount": "-2.00"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-33-4980",
+    "amount": "4.50",
+    "displayText": "Cold Brew",
+    "properties": {
+      "calories": "10",
+      "maxCalories": "10"
+    },
+    "description": "Slow-steeped for 20 hours",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "COLD BREW",
+    "tagIds": [
+      "tag-vegan",
+      "tag-spicy"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-34-2225",
+    "amount": "4.50",
+    "displayText": "Deluxe Cold Brew",
+    "properties": {
+      "calories": "10",
+      "maxCalories": "10"
+    },
+    "description": "Slow-steeped for 20 hours",
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU COLD BREW",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-35-2038",
+    "amount": "3.50",
+    "displayText": "Blueberry Muffin",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BLBRY MUFFIN",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-36-5508",
+    "amount": "3.50",
+    "displayText": "Deluxe Blueberry Muffin",
+    "properties": {
+      "calories": "380",
+      "maxCalories": "380"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU BLBRY MUFFIN",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.50"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-37-1598",
+    "amount": "4.00",
+    "displayText": "Chocolate Croissant",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": true,
+    "receiptText": "CHOC CROISSANT",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.00"
+        }
+      }
+    },
+    "_modifiers": {
+      "modifiers": [
+        {
+          "id": "cafertc5-item-37-1598-mod-0",
+          "description": "Sauce",
+          "minimum": 0,
+          "maximum": 2,
+          "type": "checkbox",
+          "options": [
+            {
+              "id": "cafertc5-item-37-1598-mod-0-opt-0",
+              "description": "Mayo",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-37-1598-mod-0-opt-1",
+              "description": "Mustard",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-37-1598-mod-0-opt-2",
+              "description": "Ketchup",
+              "amount": "0.00"
+            },
+            {
+              "id": "cafertc5-item-37-1598-mod-0-opt-3",
+              "description": "Sriracha",
+              "amount": "0.25"
+            },
+            {
+              "id": "cafertc5-item-37-1598-mod-0-opt-4",
+              "description": "Garlic Aioli",
+              "amount": "0.50"
+            },
+            {
+              "id": "cafertc5-item-37-1598-mod-0-opt-5",
+              "description": "BBQ",
+              "amount": "0.25"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafertc5-item-38-6015",
+    "amount": "4.00",
+    "displayText": "Deluxe Chocolate Croissant",
+    "properties": {
+      "calories": "340",
+      "maxCalories": "340"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU CHOC CROISSANT",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "4.00"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-39-1773",
+    "amount": "3.75",
+    "displayText": "Banana Bread",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "310"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "BANANA BREAD",
+    "tagIds": [
+      "tag-vegetarian"
+    ],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  },
+  {
+    "id": "cafertc5-item-40-6402",
+    "amount": "3.75",
+    "displayText": "Deluxe Banana Bread",
+    "properties": {
+      "calories": "310",
+      "maxCalories": "310"
+    },
+    "lastUpdateTime": "2025-06-01T00:00:00.000Z",
+    "isItemCustomizationEnabled": false,
+    "receiptText": "DELU BANANA BREAD",
+    "tagIds": [],
+    "priceLevels": {
+      "pl-1": {
+        "priceLevelId": "pl-1",
+        "name": "Default",
+        "price": {
+          "currencyUnit": "USD",
+          "amount": "3.75"
+        }
+      }
+    }
+  }
+]

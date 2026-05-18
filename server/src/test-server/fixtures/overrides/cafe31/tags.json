@@ -1,0 +1,14 @@
+{
+  "cafe31-stn-pacific-rim-6296": {
+    "customLabels": {
+      "tag-vegetarian": {
+        "tagId": "tag-vegetarian",
+        "tagName": "vegetarian"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      }
+    }
+  }
+}

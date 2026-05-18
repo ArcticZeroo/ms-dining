@@ -29,7 +29,7 @@ export interface IGroupMembershipDirtyEvent {
 
 export const hasAnythingChangedInPublishedMenu = (event: IMenuPublishEvent): boolean => {
     return (
-        event.dirtyStations.size === 0 &&
-		event.dirtyMenuItemIds.size === 0
+        event.dirtyStations.size > 0 ||
+		event.dirtyMenuItemIds.size > 0
     );
 }

@@ -1,97 +1,38 @@
-import { PromiseStage, useDelayedPromiseState } from '@arcticzeroo/react-promise-hook';
 import { SearchTypes } from '@msdining/common';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DiningClient } from '../../../api/client/dining.ts';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDateForSearch } from '../../../hooks/date-picker.tsx';
-import { IQuerySearchResult, SearchEntityFilterType } from '../../../models/search.ts';
+import { SearchEntityFilterType } from '../../../models/search.ts';
+import { useSearchResultsQuery } from '../../../store/queries/search.ts';
 import { SearchResultsList } from '../../search/search-results-list.tsx';
+import { SimilarQueries } from '../../search/similar-queries.tsx';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { SearchWaiting } from '../../search/search-waiting.tsx';
 import { SearchFilters } from '../../search/filters/search-filters.tsx';
-import { classNames, repeatComponent } from '../../../util/react.ts';
-import { useAllowedSearchViewIds, useRecommendedQueries } from '../../../hooks/search.ts';
-import { Link } from 'react-router-dom';
-import { getSearchUrl } from '../../../util/url.js';
-import { SearchEntityType } from '@msdining/common/models/search';
+import { classNames } from '../../../util/react.ts';
+import { useAllowedSearchViewIds } from '../../../hooks/search.ts';
 import { EntityTypeSelector } from './entity-type-selector.js';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
 }
 
-interface ISearchResultsState {
-    actualStage: PromiseStage;
-    stage: PromiseStage;
-    results: IQuerySearchResult[];
-    tabCounts: Map<SearchEntityType, number>;
-    queryForCurrentResults: string;
-    retrieveSearchResults: () => void;
-}
-
-const useSearchResultsState = (query: string): ISearchResultsState => {
-    const [queryForCurrentResults, setQueryForCurrentResults] = useState(query);
-    const dateForSearch = useDateForSearch();
-
-    const doSearchCallback = useCallback(
-        () => DiningClient.retrieveSearchResults({
-            query,
-            date: dateForSearch
-        }).finally(() => setQueryForCurrentResults(query)),
-        [query, dateForSearch]
-    );
-
-    const {
-        actualStage: actualSearchResultStage,
-        stage:       searchResultStage,
-        value:       searchResults,
-        run:         retrieveSearchResults
-    } = useDelayedPromiseState(doSearchCallback, true /*keepLastValue*/);
-
-    const allSearchResults = useMemo(
-        () => searchResults ?? [],
-        [searchResults]
-    );
-
-    const resultCountByEntityType = useMemo(() => {
-        const counts = new Map<SearchTypes.SearchEntityType, number>();
-
-        for (const result of allSearchResults) {
-            const count = counts.get(result.entityType) ?? 0;
-            counts.set(result.entityType, count + 1);
-        }
-
-        return counts;
-    }, [allSearchResults]);
-
-    useEffect(() => {
-        retrieveSearchResults();
-    }, [retrieveSearchResults]);
-
-    return {
-        actualStage:               actualSearchResultStage,
-        stage:                     searchResultStage,
-        results:                   allSearchResults,
-        tabCounts:                 resultCountByEntityType,
-        queryForCurrentResults:    queryForCurrentResults,
-        retrieveSearchResults
-    };
-};
-
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
     const allowedViewIds = useAllowedSearchViewIds();
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
     const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
+    const dateForSearch = useDateForSearch();
 
-    const {
-        actualStage,
-        stage,
-        results,
-        tabCounts,
-        queryForCurrentResults,
-        retrieveSearchResults
-    } = useSearchResultsState(queryText);
+    const searchQuery = useSearchResultsQuery(queryText, dateForSearch);
+    const results = useMemo(() => searchQuery.data ?? [], [searchQuery.data]);
 
-    const recommendedQueriesState = useRecommendedQueries(queryText);
+    const tabCounts = useMemo(() => {
+        const counts = new Map<SearchTypes.SearchEntityType, number>();
+        for (const result of results) {
+            const count = counts.get(result.entityType) ?? 0;
+            counts.set(result.entityType, count + 1);
+        }
+        return counts;
+    }, [results]);
 
     useEffect(() => {
         setEntityFilterType(SearchEntityFilterType.all);
@@ -104,9 +45,9 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                     <div className="query flex flex-between default-container">
                         <span className="icon-sized"/>
                         <span>
-                            "{queryForCurrentResults}"
+                            "{queryText}"
                         </span>
-                        <SearchWaiting stage={actualStage}/>
+                        <SearchWaiting isPending={searchQuery.isFetching}/>
                     </div>
                     <div className="flex">
                         <button
@@ -134,60 +75,23 @@ export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ query
                 </div>
             </div>
             {
-                stage === PromiseStage.error && (
+                searchQuery.isError && (
                     <div className="error-card">
                         <p>
                             Error loading search results!
                         </p>
-                        {
-                            // If we hit retry, actualStage will change but stage will stay error
-                            actualStage === PromiseStage.error && (
-                                <p>
-                                    <RetryButton onClick={retrieveSearchResults}/>
-                                </p>
-                            )
-                        }
+                        <p>
+                            <RetryButton onClick={() => searchQuery.refetch()}/>
+                        </p>
                     </div>
                 )
             }
-            <div className="similar-queries flex flex-center flex-wrap">
-                <span>
-                    Similar:
-                </span>
-                {
-                    !recommendedQueriesState.value && (
-                        <>
-                            {
-                                repeatComponent(
-                                    5,
-                                    () => (
-                                        <div className="recommended-query default-container default-button loading-skeleton">
-                                            Loading...
-                                        </div>
-                                    )
-                                )
-                            }
-                        </>
-                    )
-                }
-                {
-                    recommendedQueriesState.value && recommendedQueriesState.value.map(recommendedQuery => (
-                        <Link
-                            key={recommendedQuery}
-                            to={getSearchUrl(recommendedQuery)}
-                            className="recommended-query default-container default-button"
-                            title={`Click to search for "${recommendedQuery}"`}
-                        >
-                            {recommendedQuery}
-                        </Link>
-                    ))
-                }
-            </div>
+            <SimilarQueries queryText={queryText}/>
             {
-                stage === PromiseStage.success && (
+                searchQuery.isSuccess && (
                     <SearchResultsList
                         searchResults={results}
-                        queryText={queryForCurrentResults}
+                        queryText={queryText}
                         filter={entityFilterType}
                         allowedViewIds={allowedViewIds}
                     />

@@ -5,6 +5,7 @@ import { logDebug, logError, logInfo } from './util/log.js';
 import { createAnalyticsApplications } from './api/tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from './util/env.js';
 import { EMBEDDINGS_WORKER_QUEUE } from './worker/queues/embeddings.js';
+import { startSearchTagWorkerQueue } from './worker/queues/search-tags.js';
 import { flushTelemetry } from './api/telemetry/app-insights.js';
 import { disconnectPrismaClient } from './api/storage/client.js';
 import * as dotenv from 'dotenv';
@@ -44,6 +45,9 @@ createAnalyticsApplications()
 
 performMenuBootTasks()
     .catch(err => logError('Could not perform boot tasks:', err));
+
+// Start the search-tag worker queue (formerly auto-started on module load).
+startSearchTagWorkerQueue();
 
 // Initialize cafe embeddings
 logInfo('Adding cafe embeddings to queue...');

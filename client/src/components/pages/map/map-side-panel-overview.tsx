@@ -1,14 +1,12 @@
 import React, { JSX, useCallback, useContext, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { toDateString } from '@msdining/common/util/date-util';
-import { DiningClient } from '../../../api/client/dining.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { MapSelectedViewContext } from '../../../context/map.ts';
-import { SelectedDateContext } from '../../../context/time.ts';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { ApplicationSettings } from '../../../constants/settings.ts';
-import { useValueNotifier, useValueNotifierContext } from '../../../hooks/events.ts';
+import { useValueNotifier } from '../../../hooks/events.ts';
 import { useNearestCafes } from '../../../hooks/nearby-cafes.ts';
+import { useCafeOverviewQuery } from '../../../store/queries/cafe.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
@@ -24,16 +22,6 @@ const TAB_ID_OVERVIEW = 'overview';
 const TAB_ID_FEATURED = 'featured';
 const TAB_ID_NEARBY = 'nearby';
 
-const useViewOverview = (viewId: string) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
-    const selectedDateString = useMemo(() => toDateString(selectedDate), [selectedDate]);
-    const retrieve = useCallback(
-        () => DiningClient.retrieveOverview(viewId, selectedDateString),
-        [viewId, selectedDateString]
-    );
-    return useImmediatePromiseState(retrieve);
-};
-
 interface IMapSidePanelOverviewProps {
     view: CafeView;
 }
@@ -42,6 +30,7 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const navigate = useNavigate();
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
+    const selectedDate = useSelectedDate();
 
     const viewLocation = useMemo(() => {
         try {
@@ -58,8 +47,8 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
 
     const viewName = getViewName({ view: view, showGroupName: true, includeEmoji: true });
 
-    const { value: overviewResponse } = useViewOverview(view.value.id);
-    const featuredItems = overviewResponse?.featuredItems ?? [];
+    const { data: overviewResponse } = useCafeOverviewQuery(view.value.id, selectedDate);
+    const featuredItems = useMemo(() => overviewResponse?.featuredItems ?? [], [overviewResponse]);
 
     const tabOptions = useMemo(() => {
         const tabs: ITabOption[] = [
@@ -80,28 +69,28 @@ export const MapSidePanelOverview: React.FC<IMapSidePanelOverviewProps> = ({ vie
     const [selectedTabId, setSelectedTabId] = useState(TAB_ID_OVERVIEW);
 
     // If the selected tab gets removed (e.g. data changes), fall back to overview
-    const effectiveTabId = tabOptions.some(t => t.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
+    const effectiveTabId = tabOptions.some(tab => tab.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
 
     const renderTab = useCallback((tabId: string): JSX.Element => {
         switch (tabId) {
-            case TAB_ID_FEATURED:
-                return (
-                    <div className="flex-col">
-                        {featuredItems.map(item => (
-                            <RecommendationSearchResult key={item.menuItemId} item={item}/>
-                        ))}
-                    </div>
-                );
-            case TAB_ID_NEARBY:
-                return <NearbyCafesList nearestCafes={nearestCafes}/>;
-            case TAB_ID_OVERVIEW:
-            default:
-                return (
-                    <MapCafeViewDetails
-                        view={view}
-                        showAllStations
-                    />
-                );
+        case TAB_ID_FEATURED:
+            return (
+                <div className="flex-col">
+                    {featuredItems.map(item => (
+                        <RecommendationSearchResult key={item.menuItemId} item={item}/>
+                    ))}
+                </div>
+            );
+        case TAB_ID_NEARBY:
+            return <NearbyCafesList nearestCafes={nearestCafes}/>;
+        case TAB_ID_OVERVIEW:
+        default:
+            return (
+                <MapCafeViewDetails
+                    view={view}
+                    showAllStations
+                />
+            );
         }
     }, [view, featuredItems, nearestCafes]);
 

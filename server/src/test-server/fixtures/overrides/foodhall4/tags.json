@@ -1,0 +1,22 @@
+{
+  "foodhall4-stn-pacific-rim-8315": {
+    "customLabels": {
+      "tag-gf": {
+        "tagId": "tag-gf",
+        "tagName": "gluten free"
+      },
+      "tag-medium-circle": {
+        "tagId": "tag-medium-circle",
+        "tagName": "medium_circle"
+      },
+      "tag-vegan": {
+        "tagId": "tag-vegan",
+        "tagName": "vegan"
+      },
+      "tag-high-emissions": {
+        "tagId": "tag-high-emissions",
+        "tagName": "high emissions"
+      }
+    }
+  }
+}

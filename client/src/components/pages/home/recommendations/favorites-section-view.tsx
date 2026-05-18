@@ -1,4 +1,3 @@
-import { PromiseStage } from '@arcticzeroo/react-promise-hook';
 import React from 'react';
 import { IFavoritesSectionState } from '../../../../hooks/recommendations.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
@@ -10,16 +9,16 @@ interface IFavoritesSectionViewProps {
 }
 
 export const FavoritesSectionView: React.FC<IFavoritesSectionViewProps> = ({ favorites }) => {
-    const { stage, results, retry } = favorites;
+    const { isError, results, retry } = favorites;
 
-    if (stage === PromiseStage.error) {
+    if (isError) {
         return (
             <div className="error-card">
                 <span>
                     Could not load favorites.
                 </span>
                 <span className="centered-content">
-                    <RetryButton onClick={retry} isDisabled={stage !== PromiseStage.error}/>
+                    <RetryButton onClick={retry}/>
                 </span>
             </div>
         );

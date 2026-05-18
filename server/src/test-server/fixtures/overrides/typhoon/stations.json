@@ -1,0 +1,146 @@
+[
+  {
+    "id": "typhoon-stn-taqueria-7967",
+    "name": "Taqueria",
+    "priceLevelConfig": {
+      "menuId": "typhoon-menu-51185"
+    },
+    "menus": [
+      {
+        "id": "typhoon-menu-51185",
+        "name": "Taqueria Menu",
+        "categories": [
+          {
+            "categoryId": "typhoon-cat-0-5050",
+            "name": "Tacos",
+            "items": [
+              "typhoon-item-1-3197",
+              "typhoon-item-2-7919",
+              "typhoon-item-3-3869",
+              "typhoon-item-4-4481",
+              "typhoon-item-5-5957",
+              "typhoon-item-6-2751"
+            ]
+          },
+          {
+            "categoryId": "typhoon-cat-1-9021",
+            "name": "Burritos",
+            "items": [
+              "typhoon-item-7-4090",
+              "typhoon-item-8-6334",
+              "typhoon-item-9-6880",
+              "typhoon-item-10-4802"
+            ]
+          },
+          {
+            "categoryId": "typhoon-cat-2-5117",
+            "name": "Bowls",
+            "items": [
+              "typhoon-item-11-4347",
+              "typhoon-item-12-9838"
+            ]
+          },
+          {
+            "categoryId": "typhoon-cat-3-5069",
+            "name": "Build Your Own",
+            "items": [
+              "typhoon-item-1-3197",
+              "typhoon-item-2-7919",
+              "typhoon-item-3-3869",
+              "typhoon-item-4-4481",
+              "typhoon-item-7-4090",
+              "typhoon-item-8-6334"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Taqueria",
+      "displayText": "Taqueria"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:30 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "typhoon-stn-taqueria-7967",
+              "menuId": "typhoon-menu-51185"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  },
+  {
+    "id": "typhoon-stn-pacific-rim-1024",
+    "name": "Pacific Rim",
+    "priceLevelConfig": {
+      "menuId": "typhoon-menu-35894"
+    },
+    "menus": [
+      {
+        "id": "typhoon-menu-35894",
+        "name": "Pacific Rim Menu",
+        "categories": [
+          {
+            "categoryId": "typhoon-cat-0-1828",
+            "name": "Entrees",
+            "items": [
+              "typhoon-item-13-9935",
+              "typhoon-item-14-9838",
+              "typhoon-item-15-3941",
+              "typhoon-item-16-8793",
+              "typhoon-item-17-3304",
+              "typhoon-item-18-9837",
+              "typhoon-item-19-3868",
+              "typhoon-item-20-3705"
+            ]
+          },
+          {
+            "categoryId": "typhoon-cat-1-6328",
+            "name": "Sides",
+            "items": [
+              "typhoon-item-21-3737",
+              "typhoon-item-22-3472",
+              "typhoon-item-23-6123",
+              "typhoon-item-24-5828"
+            ]
+          }
+        ],
+        "lastUpdateTime": "2025-06-01T00:00:00.000Z"
+      }
+    ],
+    "conceptOptions": {
+      "onDemandDisplayText": "Pacific Rim",
+      "displayText": "Pacific Rim"
+    },
+    "availableAt": {
+      "open": "10:30 AM",
+      "close": "2:00 PM"
+    },
+    "schedule": [
+      {
+        "scheduledExpression": "0 0 0 * * *",
+        "displayProfileState": {
+          "conceptStates": [
+            {
+              "conceptId": "typhoon-stn-pacific-rim-1024",
+              "menuId": "typhoon-menu-35894"
+            }
+          ]
+        }
+      }
+    ],
+    "openScheduleExpression": "0 0 7 * * *",
+    "closeScheduleExpression": "0 0 15 * * *"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "tenantID": "tenant-b7espresso",
+  "contextID": "ctx-b7espresso-2427",
+  "theme": {
+    "logoImage": "b7espresso-logo.png"
+  },
+  "storeList": [
+    {
+      "storeInfo": {
+        "storeInfoId": "store-b7espresso-415",
+        "storeName": "b7espresso"
+      },
+      "displayProfileId": [
+        "dp-b7espresso-607"
+      ]
+    }
+  ],
+  "properties": {}
+}

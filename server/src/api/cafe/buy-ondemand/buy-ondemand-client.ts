@@ -10,7 +10,7 @@ import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse 
 import { Semaphore } from '@frozor/lock';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { StringUtil } from '../../../util/string.js';
-import { TELEMETRY_CLIENT } from '../../telemetry/app-insights.js';
+import { getTelemetryClient } from '../../telemetry/app-insights.js';
 import hat from 'hat';
 
 const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);
@@ -53,10 +53,24 @@ export class BuyOnDemandClient {
         shutDownMessage:  undefined,
     };
 
-    private constructor(public readonly cafe: ICafe) {
+    protected constructor(public readonly cafe: ICafe) {
+    }
+
+    /**
+     * Factory hook. When set, BuyOnDemandClient.createAsync delegates here
+     * instead of creating a real client. Integration tests use this to install
+     * a TestBuyOnDemandClient that routes requests in-memory.
+     */
+    private static _factory: ((cafe: ICafe, enableHar: boolean) => Promise<BuyOnDemandClient>) | null = null;
+
+    public static setFactory(factory: ((cafe: ICafe, enableHar: boolean) => Promise<BuyOnDemandClient>) | null): void {
+        BuyOnDemandClient._factory = factory;
     }
 
     public static async createAsync(cafe: ICafe, enableHar: boolean = false): Promise<BuyOnDemandClient> {
+        if (BuyOnDemandClient._factory) {
+            return BuyOnDemandClient._factory(cafe, enableHar);
+        }
         const client = new BuyOnDemandClient(cafe);
         if (enableHar) {
             client.enableHarCapture();
@@ -123,7 +137,7 @@ export class BuyOnDemandClient {
             );
             const durationMs = Date.now() - startMs;
 
-            TELEMETRY_CLIENT?.trackDependency({
+            getTelemetryClient()?.trackDependency({
                 dependencyTypeName: 'BuyOnDemand',
                 name:               `${options.method ?? 'GET'} ${path}`,
                 data:               url,

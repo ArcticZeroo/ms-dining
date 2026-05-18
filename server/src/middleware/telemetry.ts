@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import { TELEMETRY_CLIENT } from '../api/telemetry/app-insights.js';
+import { getTelemetryClient } from '../api/telemetry/app-insights.js';
 import { getVisitorId } from './analytics.js';
 import { CATCH_ALL_PATH } from '../util/koa.js';
 
@@ -17,7 +17,8 @@ export const setTelemetryProperties = (ctx: Koa.Context, properties: Record<stri
 };
 
 export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
-    if (TELEMETRY_CLIENT == null) {
+    const telemetryClient = getTelemetryClient();
+    if (telemetryClient == null) {
         return next();
     }
 
@@ -36,22 +37,36 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
         const route = routePattern === CATCH_ALL_PATH ? '/' : (routePattern ?? ctx.path);
         const customProperties = ctx.state[TELEMETRY_PROPERTIES_KEY] as Record<string, string> | undefined;
         const resultCode = error ? String((error as { status?: number }).status || 500) : String(ctx.status);
+        const visitorId = getVisitorId(ctx) || 'anonymous';
 
-        TELEMETRY_CLIENT.trackRequest({
+        const requestProperties: Record<string, string> = {
+            visitorId,
+            method:       ctx.method,
+            route:        route,
+            routeMatched: String(routeMatched),
+            // v3 SDK bug: resultCode is always 0 in Kusto, so duplicate here
+            statusCode:   resultCode,
+            ...customProperties,
+        };
+
+        telemetryClient.trackRequest({
             name:       `${ctx.method} ${route}`,
             url:        ctx.href,
             duration:   durationMs,
             resultCode,
             success:    Number(resultCode) < 400,
-            properties: {
-                visitorId:    getVisitorId(ctx) || 'anonymous',
-                method:       ctx.method,
-                route:        route,
-                routeMatched: String(routeMatched),
-                // v3 SDK bug: resultCode is always 0 in Kusto, so duplicate here
-                statusCode:   resultCode,
-                ...customProperties,
-            },
+            properties: requestProperties,
         });
+
+        if (error != null) {
+            try {
+                telemetryClient.trackException({
+                    exception:  error instanceof Error ? error : new Error(String(error)),
+                    properties: requestProperties,
+                });
+            } catch {
+                // Telemetry must never break the request path; swallow.
+            }
+        }
     }
 };

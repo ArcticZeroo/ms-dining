@@ -1,6 +1,5 @@
 import { IDiningCoreResponse } from '@msdining/common/models/http';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DiningClient } from '../api/client/dining.ts';
 import { StaticContextProviders } from './context/static-context-providers.tsx';
 import { ApplicationContext } from '../context/app.ts';
 import { NavExpansionContext } from '../context/nav.ts';
@@ -15,6 +14,7 @@ import { classNames } from '../util/react.ts';
 import { UserContext } from '../context/auth.ts';
 import { ValueNotifier } from '../util/events.ts';
 import { IClientUser } from '@msdining/common/models/auth';
+import { prefetchRecentMenusInOrder } from '../store/queries/cafe.ts';
 
 const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[]) => {
     const retrieveCafeMenusCancellationToken = useRef<ICancellationToken | undefined>(undefined);
@@ -32,7 +32,7 @@ const useBackgroundMenuUpdate = (viewsById: Map<string, CafeView>, cafes: ICafe[
         const cancellationToken: ICancellationToken = { isCancelled: false };
         retrieveCafeMenusCancellationToken.current = cancellationToken;
 
-        DiningClient.retrieveRecentMenusInOrder(cafes, viewsById, cancellationToken)
+        prefetchRecentMenusInOrder(cafes, viewsById, cancellationToken)
             .then(() => console.log('Retrieved recent cafe menus!'))
             .catch(err => console.error('Failed to retrieve recent cafe menus:', err));
     }, [cafes, viewsById]);

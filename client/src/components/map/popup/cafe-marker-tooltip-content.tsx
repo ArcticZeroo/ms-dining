@@ -1,10 +1,7 @@
-import { toDateString } from '@msdining/common/util/date-util';
-import React, { useCallback, useMemo } from 'react';
-import { PromiseStage, useImmediatePromiseState } from '@arcticzeroo/react-promise-hook';
-import { DiningClient } from '../../../api/client/dining.ts';
-import { SelectedDateContext } from '../../../context/time.ts';
-import { useValueNotifierContext } from '../../../hooks/events.ts';
+import React from 'react';
+import { useSelectedDate } from '../../../store/zustand/selected-date.ts';
 import { CafeView, CafeViewType } from '../../../models/cafe.ts';
+import { useCafeMenuOverviewSummaryQuery } from '../../../store/queries/cafe.ts';
 import { getViewEmoji } from '../../../util/view.ts';
 import { pluralize } from '../../../util/string.ts';
 import { ICafeShutdownState } from '@msdining/common/models/cafe';
@@ -35,8 +32,6 @@ const getShutdownMessage = (view: CafeView, shutdownStateByCafeId: Record<string
         }
     }
 
-    console.log(shutdownEntries, fullCloseCount, onlineOrderingOnlyCount);
-
     const messages = [];
     if (fullCloseCount > 0) {
         messages.push(`${fullCloseCount} closed`);
@@ -50,19 +45,9 @@ const getShutdownMessage = (view: CafeView, shutdownStateByCafeId: Record<string
 }
 
 export const CafeMarkerTooltipContent: React.FC<ICafeMarkerTooltipContentProps> = ({ view }) => {
-    const selectedDate = useValueNotifierContext(SelectedDateContext);
+    const selectedDate = useSelectedDate();
 
-    const dateString = useMemo(
-        () => toDateString(selectedDate),
-        [selectedDate]
-    );
-
-    const fetchOverviewSummary = useCallback(
-        () => DiningClient.retrieveMenuOverviewSummary(view.value.id, dateString),
-        [view, dateString]
-    );
-
-    const { value: summary, stage } = useImmediatePromiseState(fetchOverviewSummary);
+    const { data: summary, isPending, isError } = useCafeMenuOverviewSummaryQuery(view.value.id, selectedDate);
 
     const highlights: string[] = [];
     if (summary) {
@@ -99,16 +84,8 @@ export const CafeMarkerTooltipContent: React.FC<ICafeMarkerTooltipContentProps> 
                     ))}
                 </div>
             )}
-            {
-                stage === PromiseStage.error && (
-                    <span className="subtitle">Unable to load overview.</span>
-                )
-            }
-            {
-                stage === PromiseStage.running && (
-                    <span className="subtitle">Loading...</span>
-                )
-            }
+            {isError && <span className="subtitle">Unable to load overview.</span>}
+            {isPending && <span className="subtitle">Loading...</span>}
             <span className="tooltip-hint">Click for details · Right-click to favorite</span>
         </div>
     );

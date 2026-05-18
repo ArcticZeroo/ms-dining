@@ -10,33 +10,51 @@ import { ITEMS_PER_SECTION } from './shared.js';
 
 const VARIETY_POOL_MULTIPLIER = 3;
 
-const PROXIMITY_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
+const WEIGHTING_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
     RecommendationSectionType.newAtFavorites,
     RecommendationSectionType.favorites,
 ]);
 
-const applyProximityWeighting = (
+/**
+ * Multiplies each item's score by per-cafe proximity weight and per-item weight
+ * (drinks down, novelty up). Items with proximity weight 0 are dropped entirely
+ * (out-of-range cafes). Sections in WEIGHTING_EXEMPT_SECTION_TYPES are passed
+ * through unmodified because they exist specifically to surface new/favorite items.
+ */
+export const applyWeights = (
     items: readonly IRecommendationItem[],
     sectionType: RecommendationSectionType,
     proximityWeights: Map<string, number> | null,
+    itemWeights: Map<string, number> | null,
 ): IRecommendationItem[] => {
-    if (!proximityWeights || PROXIMITY_EXEMPT_SECTION_TYPES.has(sectionType)) {
+    if (WEIGHTING_EXEMPT_SECTION_TYPES.has(sectionType)) {
+        return items as IRecommendationItem[];
+    }
+
+    if (!proximityWeights && !itemWeights) {
         return items as IRecommendationItem[];
     }
 
     const resultItems: IRecommendationItem[] = [];
     let isAnyWeightNotDefault = false;
     for (const item of items) {
-        const weight = proximityWeights.get(item.cafeId) ?? 1;
-        if (weight > 0) {
-            resultItems.push({
-                ...item,
-                score: item.score * weight,
-            });
+        const proximityWeight = proximityWeights?.get(item.cafeId) ?? 1;
+        if (proximityWeight === 0) {
+            isAnyWeightNotDefault = true;
+            continue;
         }
 
-        if (weight !== 1) {
+        const itemWeight = itemWeights?.get(item.menuItemId) ?? 1;
+        const combinedWeight = proximityWeight * itemWeight;
+
+        if (combinedWeight !== 1) {
             isAnyWeightNotDefault = true;
+            resultItems.push({
+                ...item,
+                score: item.score * combinedWeight,
+            });
+        } else {
+            resultItems.push(item);
         }
     }
 
@@ -103,6 +121,7 @@ interface IAssembleSectionsParams {
     sectionsByType: Map<RecommendationSectionType, Array<IRecommendationItem>>;
     claimedKeys: Set<string>;
     proximityWeights: Map<string, number> | null;
+    itemWeights: Map<string, number> | null;
     seed: string;
     lambda?: number;
 }
@@ -118,6 +137,7 @@ export const assembleSections = async ({
     sectionsByType,
     claimedKeys,
     proximityWeights,
+    itemWeights,
     seed,
     lambda = 0.5,
 }: IAssembleSectionsParams): Promise<IRecommendationSection[]> => {
@@ -137,7 +157,7 @@ export const assembleSections = async ({
             continue;
         }
 
-        const adjustedItems = applyProximityWeighting(items, sectionType, proximityWeights);
+        const adjustedItems = applyWeights(items, sectionType, proximityWeights, itemWeights);
         const selectedItems = await selectWithEmbeddingDiversity(
             adjustedItems,
             ITEMS_PER_SECTION,
