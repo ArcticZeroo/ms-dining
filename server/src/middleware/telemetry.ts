@@ -37,6 +37,17 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
         const route = routePattern === CATCH_ALL_PATH ? '/' : (routePattern ?? ctx.path);
         const customProperties = ctx.state[TELEMETRY_PROPERTIES_KEY] as Record<string, string> | undefined;
         const resultCode = error ? String((error as { status?: number }).status || 500) : String(ctx.status);
+        const visitorId = getVisitorId(ctx) || 'anonymous';
+
+        const requestProperties: Record<string, string> = {
+            visitorId,
+            method:       ctx.method,
+            route:        route,
+            routeMatched: String(routeMatched),
+            // v3 SDK bug: resultCode is always 0 in Kusto, so duplicate here
+            statusCode:   resultCode,
+            ...customProperties,
+        };
 
         telemetryClient.trackRequest({
             name:       `${ctx.method} ${route}`,
@@ -44,15 +55,18 @@ export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
             duration:   durationMs,
             resultCode,
             success:    Number(resultCode) < 400,
-            properties: {
-                visitorId:    getVisitorId(ctx) || 'anonymous',
-                method:       ctx.method,
-                route:        route,
-                routeMatched: String(routeMatched),
-                // v3 SDK bug: resultCode is always 0 in Kusto, so duplicate here
-                statusCode:   resultCode,
-                ...customProperties,
-            },
+            properties: requestProperties,
         });
+
+        if (error != null) {
+            try {
+                telemetryClient.trackException({
+                    exception:  error instanceof Error ? error : new Error(String(error)),
+                    properties: requestProperties,
+                });
+            } catch {
+                // Telemetry must never break the request path; swallow.
+            }
+        }
     }
 };

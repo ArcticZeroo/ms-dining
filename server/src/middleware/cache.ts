@@ -104,9 +104,11 @@ export const memoizeResponseBody = ({ expirationTime = DEFAULT_CACHE_EXPIRATION_
             const remainingTimeMs = cacheEntry.expirationTime - Date.now();
             assignCacheControl(ctx, Math.floor(remainingTimeMs / 1000), isPublic);
             ctx.body = cacheEntry.value;
-            setTelemetryProperties(ctx, { cache: 'true' });
+            setTelemetryProperties(ctx, { cache: 'hit' });
             return;
         }
+
+        setTelemetryProperties(ctx, { cache: 'miss' });
 
         await next();
 

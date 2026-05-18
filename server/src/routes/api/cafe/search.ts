@@ -85,7 +85,7 @@ export const registerSearchRoutes = (parent: Router) => {
                 // If a date is specified, we clearly only want appearances from that date.
                 // Otherwise, we only want appearances from this week if the client supports it (since otherwise it shows weird hidden UI)
                 // and the client hasn't told us to filter out results without appearances (e.g. search ideas)
-                const allowResultsWithoutAppearances = date == null && supportsVersionTag(ctx, VERSION_TAG.searchResultsNotHereThisWeek) && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
+                const allowResultsWithoutAppearances = date == null && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
                 const results = await SearchManager.searchVector(searchQuery, date, allowResultsWithoutAppearances);
                 await serializeSearchResults(ctx, results);
                 const endTime = Date.now();

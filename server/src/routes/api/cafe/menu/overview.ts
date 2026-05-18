@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { ICafe } from '../../../../models/cafe.js';
-import { ICafeOverviewResponse, ICafeOverviewStation, ICafeShutdownState } from '@msdining/common/models/cafe';
+import { ICafeOverviewResponse, ICafeOverviewStation } from '@msdining/common/models/cafe';
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../../api/cache/daily-uniqueness.js';
 import { getDefaultUniquenessDataForStation } from '../../../../util/cafe.js';
@@ -9,10 +9,9 @@ import { getRecommendationsAsync } from '../../../../api/cache/recommendations.j
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
 import { getApplicationNameForMenuOverview } from '@msdining/common/constants/analytics';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
-import { supportsVersionTag, validateViewMenuAccessAsync } from '../../../../util/koa.js';
-import { VERSION_TAG } from '@msdining/common/constants/versions';
+import { validateViewMenuAccessAsync } from '../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../util/serde.js';
-import { createSeededRandom, getUserSeededRandom, selectWithVariety } from '../../../../util/random.js';
+import { createSeededRandom, selectWithVariety } from '../../../../util/random.js';
 import { getDefaultReasonForSectionType } from '../../../../util/recommendation.js';
 import { getShutdownCafeStateAsync } from '../../../../api/cache/daily-cafe-state.js';
 
@@ -39,11 +38,7 @@ export const registerOverviewRoutes = (router: Router) => {
 		return overviewStationsByCafeId;
 	}
 
-	const retrieveFeaturedItemsForOverviewAsync = async (isSupported: boolean, cafeIds: string[], dateString: string): Promise<Array<IRecommendationItem>> => {
-		if (!isSupported) {
-			return [];
-		}
-
+	const retrieveFeaturedItemsForOverviewAsync = async (cafeIds: string[], dateString: string): Promise<Array<IRecommendationItem>> => {
 		const recommendations = await getRecommendationsAsync({
 			dateString,
 			cafeIdFilter:      new Set(cafeIds),
@@ -82,22 +77,15 @@ export const registerOverviewRoutes = (router: Router) => {
 		async ctx => validateViewMenuAccessAsync(ctx, async (cafes, dateString) => {
 			const cafeIds = cafes.map(cafe => cafe.id);
 
-			const supportsFeaturedInOverview = supportsVersionTag(ctx, VERSION_TAG.featuredInOverview);
-
 			const [
 				recommendations,
 				overviewStations,
 				shutdownCafeState
 			] = await Promise.all([
-				retrieveFeaturedItemsForOverviewAsync(supportsFeaturedInOverview, cafeIds, dateString),
+				retrieveFeaturedItemsForOverviewAsync(cafeIds, dateString),
 				retrieveAllOverviewStations(cafes, dateString),
 				getShutdownCafeStateAsync(dateString)
 			]);
-
-			if (!supportsFeaturedInOverview) {
-				ctx.body = jsonStringifyWithoutNull(overviewStations);
-				return;
-			}
 
 			const response: ICafeOverviewResponse = {
 				stations:      Object.fromEntries(overviewStations),

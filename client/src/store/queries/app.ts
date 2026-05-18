@@ -5,6 +5,16 @@ import { DiningClient } from '../../api/client/dining.ts';
 import { queryKeys } from './keys.ts';
 import { updateRoamingSettingsOnBoot } from '../../util/settings.ts';
 
+const retrieveAuthenticatedUserAndUpdateSettings = async (): Promise<IClientUser | undefined> => {
+    try {
+        const user = await DiningClient.retrieveAuthenticatedUser();
+        updateRoamingSettingsOnBoot(user);
+        return user;
+    } catch {
+        return undefined;
+    }
+}
+
 /**
  * Boot-time fetch: core dining metadata + (optionally) the authenticated user.
  * Auth failures intentionally swallow to `undefined` so unauthenticated users
@@ -14,19 +24,10 @@ export const useCoreDataQuery = () =>
     useQuery<readonly [IDiningCoreResponse, IClientUser | undefined]>({
         queryKey: queryKeys.app.coreData,
         queryFn:  async () => {
-            const [coreData, user] = await Promise.all([
+            return Promise.all([
                 DiningClient.retrieveCoreData(),
-                (async (): Promise<IClientUser | undefined> => {
-                    try {
-                        const fetched = await DiningClient.retrieveAuthenticatedUser();
-                        updateRoamingSettingsOnBoot(fetched);
-                        return fetched;
-                    } catch {
-                        return undefined;
-                    }
-                })(),
+                retrieveAuthenticatedUserAndUpdateSettings()
             ]);
-            return [coreData, user] as const;
         },
         staleTime: Infinity,
         gcTime:    Infinity,

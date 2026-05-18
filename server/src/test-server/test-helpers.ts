@@ -5,11 +5,29 @@
 
 import * as assert from 'node:assert/strict';
 import type { z } from 'zod';
+import { VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
 
 interface FetchJsonOptions extends RequestInit {
     /** Expected status code. Defaults to 200. */
     expectStatus?: number;
+    /**
+     * If set, adds the X-Client-Version-Tag header. Use this to exercise
+     * version-tag-gated server behavior (e.g. legacy route fallbacks).
+     * Pass undefined to omit the header entirely (default).
+     */
+    versionTag?: number;
 }
+
+const buildInit = (init: RequestInit, versionTag: number | undefined): RequestInit => {
+    if (versionTag == null) return init;
+    return {
+        ...init,
+        headers: {
+            ...(init.headers ?? {}),
+            [VERSION_TAG_HEADER]: String(versionTag),
+        },
+    };
+};
 
 /**
  * Performs a fetch, asserts the status code matches `expectStatus`
@@ -21,8 +39,9 @@ export async function fetchJson<TSchema extends z.ZodTypeAny>(
     schema: TSchema,
     options: FetchJsonOptions = {},
 ): Promise<z.infer<TSchema>> {
-    const { expectStatus = 200, ...init } = options;
-    const res = await fetch(url, init);
+    const { expectStatus = 200, versionTag, ...init } = options;
+    const finalInit = buildInit(init, versionTag);
+    const res = await fetch(url, finalInit);
     if (res.status !== expectStatus) {
         const bodyText = await res.text().catch(() => '<unable to read body>');
         assert.fail(
@@ -39,6 +58,11 @@ export async function fetchJson<TSchema extends z.ZodTypeAny>(
     return result.data;
 }
 
+interface FetchExpectStatusOptions extends RequestInit {
+    /** Same semantics as fetchJson.versionTag — adds the X-Client-Version-Tag header. */
+    versionTag?: number;
+}
+
 /**
  * Performs a fetch and asserts the status code matches `expectStatus`
  * without parsing the body. Use for endpoints that return non-JSON or
@@ -47,13 +71,15 @@ export async function fetchJson<TSchema extends z.ZodTypeAny>(
 export async function fetchExpectStatus(
     url: string,
     expectStatus: number,
-    options: RequestInit = {},
+    options: FetchExpectStatusOptions = {},
 ): Promise<Response> {
-    const res = await fetch(url, options);
+    const { versionTag, ...init } = options;
+    const finalInit = buildInit(init, versionTag);
+    const res = await fetch(url, finalInit);
     if (res.status !== expectStatus) {
         const bodyText = await res.text().catch(() => '<unable to read body>');
         assert.fail(
-            `${options.method ?? 'GET'} ${url} returned ${res.status} ${res.statusText} (expected ${expectStatus})\nBody: ${bodyText.slice(0, 500)}`,
+            `${init.method ?? 'GET'} ${url} returned ${res.status} ${res.statusText} (expected ${expectStatus})\nBody: ${bodyText.slice(0, 500)}`,
         );
     }
     return res;

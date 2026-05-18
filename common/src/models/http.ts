@@ -45,11 +45,6 @@ interface IDiningCoreGroupWithLocationOnGroup extends IDiningCoreGroupBase {
 
 export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCoreGroupWithLocationOnGroup;
 
-export interface IUser {
-    id: string;
-    role: string;
-}
-
 // ── Response schemas ──────────────────────────────────────────────────
 //
 // These zod schemas are the source of truth for HTTP response shapes —
@@ -64,16 +59,6 @@ export interface IUser {
 export const DiningCoreResponseSchema = z.object({
 	isTrackingEnabled: z.boolean(),
 	groups: z.array(z.custom<IDiningCoreGroup>()),
-	user: z.object({
-		id: z.string(),
-		role: z.string(),
-		settings: z.object({
-			favoriteStations: z.array(z.string()),
-			favoriteMenuItems: z.array(z.string()),
-			homepageIds: z.array(z.string()),
-			lastUpdate: z.number(),
-		}).optional(),
-	}).optional(),
 });
 
 export type IDiningCoreResponse = z.infer<typeof DiningCoreResponseSchema>;
@@ -108,6 +93,14 @@ export interface IStationDTO {
 
 // GET /api/dining/menu/:cafeId
 export type MenuResponse = Array<IStationDTO>;
+
+/**
+ * Runtime schema for the legacy GET /api/dining/menu/:cafeId response.
+ * Server returns this shape when the client does NOT send the
+ * `menuRouteIsObjectInsteadOfArray` version tag. Tests can validate
+ * either shape by selecting between this schema and CafeMenuResponseSchema.
+ */
+export const MenuResponseSchema = z.array(z.custom<IStationDTO>());
 
 // GET /api/dining/menu/:cafeId/menu
 

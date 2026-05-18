@@ -32,8 +32,10 @@ import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
 import {
     CafeMenuResponseSchema,
     DiningCoreResponseSchema,
+    MenuResponseSchema,
     SearchResponseSchema,
 } from '@msdining/common/models/http';
+import { VERSION_TAG } from '@msdining/common/constants/versions';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
@@ -220,7 +222,7 @@ test('GET /api/dining/ returns exactly the available cafes', async () => {
     assert.deepEqual(responseIds, expectedIds);
 });
 
-test('GET /api/dining/menu/cafe25/menu returns stations + items', async () => {
+test('GET /api/dining/menu/cafe25/menu (legacy) returns stations + items', async () => {
     const summary = ctx.server.getFixtureSummary();
     const cafe25Summary = summary.perCafe.get('cafe25');
     assert.ok(cafe25Summary);
@@ -253,6 +255,36 @@ test('GET /api/dining/menu/cafe25/menu returns stations + items', async () => {
         }
     }
     assert.equal(distinctItemIds.size, cafe25Summary.menuItemCount);
+});
+
+test('GET /api/dining/menu/cafe25 (canonical) returns array shape without version tag', async () => {
+    const summary = ctx.server.getFixtureSummary();
+    const cafe25Summary = summary.perCafe.get('cafe25');
+    assert.ok(cafe25Summary);
+
+    const stations = await fetchJson(
+        `${baseUrl}/api/dining/menu/cafe25?date=${todayString}`,
+        MenuResponseSchema,
+    );
+
+    assert.ok(Array.isArray(stations));
+    assert.equal(stations.length, cafe25Summary.stationCount);
+});
+
+test('GET /api/dining/menu/cafe25 (canonical) returns object shape WITH version tag', async () => {
+    const summary = ctx.server.getFixtureSummary();
+    const cafe25Summary = summary.perCafe.get('cafe25');
+    assert.ok(cafe25Summary);
+
+    const body = await fetchJson(
+        `${baseUrl}/api/dining/menu/cafe25?date=${todayString}`,
+        CafeMenuResponseSchema,
+        { versionTag: VERSION_TAG.menuRouteIsObjectInsteadOfArray },
+    );
+
+    assert.ok(!Array.isArray(body));
+    assert.equal(body.isAvailable, true);
+    assert.equal(body.stations.length, cafe25Summary.stationCount);
 });
 
 test('GET /api/dining/menu/{shutdown-cafe}/menu surfaces shutdown state', async () => {

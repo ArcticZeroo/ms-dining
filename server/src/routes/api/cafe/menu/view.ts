@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
+import { IMenuItemDTO, IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { ICafeMenuResponse, MenuResponse } from '@msdining/common/models/http';
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
@@ -7,14 +7,13 @@ import { menuEtagMiddleware } from '../../../../middleware/menu-etag.js';
 import { ICafeStation, IMenuItemBase } from '../../../../models/cafe.js';
 import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../../util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../../util/date.js';
-import { attachRouter, validateCafeMenuAccessAsync } from '../../../../util/koa.js';
+import { attachRouter, supportsVersionTag, validateCafeMenuAccessAsync } from '../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../util/serde.js';
 import {
 	getApplicationNameForCafeMenu,
 	getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
-import { IMenuItemDTO } from '@msdining/common/models/cafe';
 import { logDebug } from '../../../../util/log.js';
 import { retrieveReviewHeaderAsync, retrieveStationReviewHeaderAsync } from '../../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../../api/cache/menu-item-first-appearance.js';
@@ -26,6 +25,7 @@ import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { setTelemetryProperties } from '../../../../middleware/telemetry.js';
 import { registerOverviewRoutes } from './overview.js';
 import { getShutdownCafeStateAsync } from '../../../../api/cache/daily-cafe-state.js';
+import { VERSION_TAG } from '@msdining/common/constants/versions';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -126,44 +126,45 @@ export const registerViewRoutes = (parent: Router) => {
 		return menusByStation;
 	};
 
-	router.get('/menu',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		menuEtagMiddleware,
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
-				retrieveDailyCafeMenuAsync(cafe.id, dateString),
-				retrieveUniquenessDataForCafe(cafe.id, dateString),
-				DailyMenuStorageClient.retrieveDailyCafeStateAsync(cafe.id, dateString),
-			]);
+	const handleMenuRequest = (allowArrayFallback: boolean): Router.Middleware => async (ctx) => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+		const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
+			retrieveDailyCafeMenuAsync(cafe.id, dateString),
+			retrieveUniquenessDataForCafe(cafe.id, dateString),
+			DailyMenuStorageClient.retrieveDailyCafeStateAsync(cafe.id, dateString),
+		]);
 
-			const [stations, ingredientsMenu] = await Promise.all([
-				convertMenuToSerializable(menuStations, uniquenessData),
-				resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
-			]);
-
-			const response: ICafeMenuResponse = {
-				isAvailable:     dailyCafeState.isAvailable,
-				shutdownState:   dailyCafeState.shutdownState,
-				ingredientsMenu: ingredientsMenu ?? undefined,
-				stations,
-			};
-
-			ctx.body = jsonStringifyWithoutNull(response);
-		}));
-
-	router.get('/',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
-		menuEtagMiddleware,
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
-			const [menuStations, uniquenessData] = await Promise.all([
-				retrieveDailyCafeMenuAsync(cafe.id, dateString),
-				retrieveUniquenessDataForCafe(cafe.id, dateString)
-			]);
-
+		if (allowArrayFallback && !supportsVersionTag(ctx, VERSION_TAG.menuRouteIsObjectInsteadOfArray)) {
 			ctx.body = jsonStringifyWithoutNull(await convertMenuToSerializable(menuStations, uniquenessData));
-		}));
+			return;
+		}
+
+		const [stations, ingredientsMenu] = await Promise.all([
+			convertMenuToSerializable(menuStations, uniquenessData),
+			resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
+		]);
+
+		const response: ICafeMenuResponse = {
+			isAvailable:     dailyCafeState.isAvailable,
+			shutdownState:   dailyCafeState.shutdownState,
+			ingredientsMenu: ingredientsMenu ?? undefined,
+			stations,
+		};
+
+		ctx.body = jsonStringifyWithoutNull(response);
+	});
+
+	const registerMenuRoute = (name: string, allowArrayFallback: boolean) => router.get(name,
+		sendVisitFromCafeParamMiddleware(getApplicationNameForCafeMenu),
+		menuEtagMiddleware,
+		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+		handleMenuRequest(allowArrayFallback));
+
+	registerMenuRoute('/', true /*allowArrayFallback*/);
+	// I was dumb and for some reason created a second menu route that returned an object instead of an array,
+	// but I should have just used a version tag instead to modify the existing route. So now we are going to
+	// support both for a while (a few weeks), then we'll switch back to the original route once we think the
+	// version tag is saturated.
+	registerMenuRoute('/menu', false /*allowArrayFallback*/);
 
 	router.get('/overview-summary',
 		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverviewSummary),

@@ -45,7 +45,7 @@ export abstract class DiningClient {
 
     private static async _retrieveCafeMenuInner(id: string, dateString: string): Promise<CafeMenu> {
         const response = await makeJsonRequestWithSchema({
-            path: `/api/dining/menu/${id}/menu?date=${dateString}`,
+            path: `/api/dining/menu/${id}?date=${dateString}`,
             schema: CafeMenuResponseSchema,
         });
 
