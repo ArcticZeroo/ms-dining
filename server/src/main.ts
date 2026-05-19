@@ -1,3 +1,4 @@
+import { startEventLoopLagMonitor } from './util/boot-diagnostics.js';
 import { performMenuBootTasks } from './api/cafe/job/boot.js';
 import { app } from './app.js';
 import { webserverPort } from './constants/config.js';
@@ -11,6 +12,10 @@ import { disconnectPrismaClient } from './api/storage/client.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
+// Boot-time diagnostics: detect main-thread event-loop blocking. Auto-stops
+// after 10 minutes so it doesn't run forever in production.
+startEventLoopLagMonitor();
 
 const handleShutdown = async (signal: string) => {
     logInfo(`${signal} received, shutting down gracefully...`);

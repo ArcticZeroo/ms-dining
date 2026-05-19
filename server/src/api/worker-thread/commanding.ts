@@ -1,6 +1,8 @@
 import { isMainThread, parentPort, Worker } from 'node:worker_threads';
+import { performance } from 'node:perf_hooks';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { logDebug, logError } from '../../util/log.js';
+import { logBoot } from '../../util/boot-diagnostics.js';
 import { randomUUID } from 'node:crypto';
 
 interface IWorkerCommandRequest<TKey extends string, TRequestData> {
@@ -60,7 +62,23 @@ export class WorkerThreadCommandHandler<TCommands extends Record<string, (data: 
         if (this.#worker != null) {
             return this.#worker;
         }
+        const spawnStart = performance.now();
+        logBoot(`Worker spawn started: ${this.#filePath.href}`);
         this.#worker = new Worker(this.#filePath);
+        logBoot(`Worker constructor returned for ${this.#filePath.href} (${Math.round(performance.now() - spawnStart)}ms)`);
+
+        let firstMessageLogged = false;
+        this.#worker.once('online', () => {
+            logBoot(`Worker online: ${this.#filePath.href} (${Math.round(performance.now() - spawnStart)}ms)`);
+        });
+        this.#worker.on('message', () => {
+            if (firstMessageLogged) {
+                return;
+            }
+            firstMessageLogged = true;
+            logBoot(`Worker first message: ${this.#filePath.href} (${Math.round(performance.now() - spawnStart)}ms)`);
+        });
+
         this.#registerMainThreadResponseListener(this.#worker);
         return this.#worker;
     }

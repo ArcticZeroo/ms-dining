@@ -1,3 +1,6 @@
+import { logBoot } from '../../util/boot-diagnostics.js';
+logBoot('thumbnail worker top-level start');
+
 import { WorkerThreadCommandHandler } from './commanding.js';
 import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
@@ -95,3 +98,5 @@ loadThumbnailsPromise
 export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), {
     getThumbnailData
 });
+
+logBoot('thumbnail worker top-level done');

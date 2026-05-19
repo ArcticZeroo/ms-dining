@@ -1,3 +1,6 @@
+import { logBoot } from '../../util/boot-diagnostics.js';
+logBoot('search worker top-level start');
+
 import { SearchEntityType } from '@msdining/common/models/search';
 import seedrandom from 'seedrandom';
 import { IEntityRef } from '../../models/vector.js';
@@ -146,3 +149,5 @@ const COMMANDS = {
 };
 
 export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);
+
+logBoot('search worker top-level done');
