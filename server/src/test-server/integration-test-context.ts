@@ -31,6 +31,7 @@ import * as path from 'node:path';
 import { disconnectPrismaClient } from '../api/storage/client.js';
 import { resetAiProvider, setAiProvider } from '../api/ai/index.js';
 import { BuyOnDemandClient } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
+import { resetTranslationCache, setTranslationCache, TranslationCache } from '../api/cafe/buy-ondemand/i18n.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
 import { applySchemaToTempDb } from './db-test-helper.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
@@ -50,6 +51,8 @@ export interface IntegrationTestContext {
     server: TestBuyOnDemandServer;
     /** The installed AI provider mock. Use to set overrides or inspect calls. */
     mockAi: MockAiProvider;
+    /** Per-context BoD translation cache. Cleared automatically on cleanup. */
+    translationCache: TranslationCache;
     /** Filesystem path to the temp dining.db for this test context. */
     dbPath: string;
     /** Filesystem path to the temp search.db for this test context. */
@@ -93,9 +96,16 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
     // ── 6. Install the BuyOnDemandClient factory ────────────────────────
     // Now any production code that calls BuyOnDemandClient.createAsync(cafe)
     // will receive a TestBuyOnDemandClient backed by the in-memory test server.
-    BuyOnDemandClient.setFactory(async (cafe) => {
-        return TestBuyOnDemandClient.createTestAsync(cafe, server);
+    BuyOnDemandClient.setFactory(async (cafe, options) => {
+        return TestBuyOnDemandClient.createTestAsync(cafe, server, options);
     });
+
+    // ── 6b. Install a per-context TranslationCache ──────────────────────
+    // Each context gets a fresh cache so cross-test pollution is impossible.
+    // The default cache (module-level) is reset in cleanup so tests that
+    // don't go through createIntegrationTestContext don't leak state either.
+    const translationCache = new TranslationCache();
+    setTranslationCache(translationCache);
 
     // ── 7. Webserver (lazy) ─────────────────────────────────────────────
     let webserver: TestWebserverHandle | null = null;
@@ -146,6 +156,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
             // Best-effort: a failed disconnect shouldn't block cleanup.
         }
         resetAiProvider();
+        resetTranslationCache();
 
         // search.db may still be held open by the worker thread; try to remove
         // the whole dir and ignore EBUSY (the OS will reap it once handles are
@@ -160,6 +171,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
     return {
         server,
         mockAi,
+        translationCache,
         dbPath,
         searchDbPath,
         startWebserver,

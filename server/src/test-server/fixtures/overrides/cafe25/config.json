@@ -8,7 +8,13 @@
     {
       "storeInfo": {
         "storeInfoId": "store-cafe25-378",
-        "storeName": "cafe25"
+        "storeName": "cafe25",
+        "timezone": "PST8PDT",
+        "receiptFooterText": " ",
+        "properties": {
+          "selectedLanguage": "en_US",
+          "taxIdentificationNumber": ""
+        }
       },
       "displayProfileId": [
         "dp-cafe25-150"

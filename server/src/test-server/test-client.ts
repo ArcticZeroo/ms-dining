@@ -5,18 +5,17 @@
  */
 
 import { Response } from 'node-fetch';
-import { BuyOnDemandClient } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient, BuyOnDemandClientOptions } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { CafeStorageClient } from '../api/storage/clients/cafe.js';
 import { ICafe } from '../models/cafe.js';
 import { TestBuyOnDemandServer } from './index.js';
 import { TestResponse } from './models.js';
-import { validateSuccessResponse } from '../util/request.js';
 
 export class TestBuyOnDemandClient extends BuyOnDemandClient {
     readonly #server: TestBuyOnDemandServer;
 
-    constructor(cafe: ICafe, server: TestBuyOnDemandServer) {
-        super(cafe);
+    constructor(cafe: ICafe, server: TestBuyOnDemandServer, options: BuyOnDemandClientOptions) {
+        super(cafe, options);
         this.#server = server;
     }
 
@@ -24,8 +23,12 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
      * Create a TestBuyOnDemandClient, performing login + config retrieval
      * through the in-memory server.
      */
-    public static async createTestAsync(cafe: ICafe, server: TestBuyOnDemandServer): Promise<TestBuyOnDemandClient> {
-        const client = new TestBuyOnDemandClient(cafe, server);
+    public static async createTestAsync(
+        cafe: ICafe,
+        server: TestBuyOnDemandServer,
+        options: BuyOnDemandClientOptions = {},
+    ): Promise<TestBuyOnDemandClient> {
+        const client = new TestBuyOnDemandClient(cafe, server, options);
         // Trigger the same initialization as the real client.
         // performLoginAsync and retrieveConfigDataAsync both call this.requestAsync(),
         // which our override routes to the in-memory server.
@@ -67,9 +70,10 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
 
         const response = testResponseToNodeFetchResponse(testResponse);
 
-        if (shouldValidateSuccess) {
-            validateSuccessResponse(response);
-        }
+        // Delegate to the shared validation path so tests exercise the real
+        // BuyOnDemandError translation flow (and the legacy generic-error
+        // fallback) just like production.
+        await this._validateResponse(response, path, shouldValidateSuccess);
 
         return response;
     }
@@ -99,6 +103,7 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
             isShutDown:      shutOffConfig?.isShutOffEnabled ?? false,
             shutDownMessage: shutOffConfig?.isShutOffEnabled ? shutOffConfig.instructionText : undefined,
             displayProfileId,
+            storeInfo:       store.storeInfo as Record<string, unknown>,
         };
 
         // Mirror real BuyOnDemandClient.#retrieveConfigDataAsync: persist cafe

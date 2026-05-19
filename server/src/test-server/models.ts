@@ -40,6 +40,8 @@ export interface FailureRule {
     statusCode: number;
     /** Response body */
     body?: string;
+    /** Optional response headers (e.g. content-type for JSON error bodies). */
+    headers?: Record<string, string>;
     /** Number of times to trigger (undefined = unlimited until cleared) */
     count?: number;
     /** Method to match (e.g. 'GET', 'POST'). If omitted, matches any method. */
@@ -117,6 +119,8 @@ export interface ITestServerState {
     orders: Map<string, OrderState>;
     /** Issued auth tokens */
     issuedTokens: Set<string>;
+    /** Return the translation map for a namespace (e.g. 'core', 'domain-<host>'). */
+    getTranslations(namespace: string): Record<string, string>;
 }
 
 /** Parsed route params from pattern matching */

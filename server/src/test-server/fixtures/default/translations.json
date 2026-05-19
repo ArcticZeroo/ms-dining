@@ -1,0 +1,8 @@
+{
+  "CONCEPTS_NOT_AVAILABLE": "Order cannot be processed as the store is currently closed. Refund has been initiated.",
+  "ITEM_86ed": "Item not available.",
+  "ADD_ITEM_86ed": "Item not available anymore. Please add a different item.",
+  "ALL_ITEMS_86ed": "No items available",
+  "ERROR_FAILED_FETCH_CONCEPTS": "No menu is currently available.",
+  "CC_SALE_TRANSACTION_FAILED": "Payment failed, please try again."
+}

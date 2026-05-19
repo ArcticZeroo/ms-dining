@@ -27,6 +27,8 @@ import { stationRoutes } from './handlers/stations.js';
 import { menuItemRoutes } from './handlers/menu-items.js';
 import { orderingRoutes } from './handlers/ordering.js';
 import { paymentRoutes } from './handlers/payment.js';
+import { translationRoutes } from './handlers/translation.js';
+import { getActiveTranslationCache } from '../api/cafe/buy-ondemand/i18n.js';
 
 function pathPatternToRegex(pattern: string): RegExp {
     // Convert '/sites/:tenantId/:contextId/concepts/:displayProfileId'
@@ -86,6 +88,7 @@ export class TestBuyOnDemandServer {
             ...menuItemRoutes,
             ...orderingRoutes,
             ...paymentRoutes,
+            ...translationRoutes,
         ];
         this._routes = allRoutes.map(compileRoute);
     }
@@ -202,6 +205,12 @@ export class TestBuyOnDemandServer {
      * routes and dispatches to the appropriate handler.
      */
     async handleRequest(cafeId: string, method: string, path: string, options: { headers?: Record<string, string>; body?: string } = {}): Promise<TestResponse> {
+        // Strip query string for route matching; handlers don't currently need
+        // query params (the translation endpoint takes projectId/version that we
+        // simply ignore for fixture lookup).
+        const queryStart = path.indexOf('?');
+        const matchPath = queryStart >= 0 ? path.slice(0, queryStart) : path;
+
         // Log the request
         let parsedBody: unknown;
         if (options.body) {
@@ -221,35 +230,35 @@ export class TestBuyOnDemandServer {
         });
 
         // Check failure injection
-        const failureResponse = this._checkFailures(cafeId, method, path);
+        const failureResponse = this._checkFailures(cafeId, method, matchPath);
         if (failureResponse) {
             return failureResponse;
         }
 
         // Check delay injection
-        await this._applyDelay(cafeId, path);
+        await this._applyDelay(cafeId, matchPath);
 
         // Auth validation — every endpoint except /login/anonymous requires
         // a Bearer token previously issued by /login/anonymous. Mirrors the
         // real BoD API so the test catches missing-Authorization-header bugs.
-        const authResponse = this._validateAuth(method, path, options.headers ?? {});
+        const authResponse = this._validateAuth(method, matchPath, options.headers ?? {});
         if (authResponse) {
             return authResponse;
         }
 
         // Route matching
-        const matched = this._matchRoute(method, path);
+        const matched = this._matchRoute(method, matchPath);
         if (!matched) {
             return {
                 status: 404,
                 statusText: 'Not Found',
-                body: { error: `No route matched: ${method} ${path}` },
+                body: { error: `No route matched: ${method} ${matchPath}` },
             };
         }
 
         const req: TestRequest = {
             method,
-            path,
+            path: matchPath,
             headers: options.headers ?? {},
             body: parsedBody,
             cafeId,
@@ -293,6 +302,7 @@ export class TestBuyOnDemandServer {
             createOrder: (cafeId: string) => this._state.createOrder(cafeId),
             orders: this._state.orders,
             issuedTokens: this._state.issuedTokens,
+            getTranslations: (namespace: string) => this._state.getTranslations(namespace),
         };
     }
 
@@ -306,6 +316,8 @@ export class TestBuyOnDemandServer {
     /** Paths that don't require auth (regex matched against request path). */
     private static readonly _PUBLIC_PATHS: RegExp[] = [
         /^\/login\/anonymous$/,
+        // BoD translation endpoints are publicly readable on the real API.
+        /^\/translation\//,
     ];
 
     private _validateAuth(method: string, path: string, headers: Record<string, string>): TestResponse | null {
@@ -351,6 +363,42 @@ export class TestBuyOnDemandServer {
         this._delays.push(rule);
     }
 
+    /**
+     * Inject a BoD-shape error response for one or more requests. Builds a
+     * `{ statusCode, error, message: <code> }` JSON body with the right
+     * content-type so the production `BuyOnDemandError` translation path
+     * exercises end-to-end.
+     */
+    injectBoDError(opts: {
+        /** Path matcher; can be a substring or a regex (regex strongly preferred). */
+        pathPattern: string | RegExp;
+        /** HTTP method to match (e.g. 'POST'). Defaults to any. */
+        method?: string;
+        /** BoD error code, e.g. 'CONCEPTS_NOT_AVAILABLE'. */
+        code: string;
+        /** HTTP status code BoD returns. Defaults to 400. */
+        status?: number;
+        /** Limit how many requests this matches. Defaults to unlimited. */
+        count?: number;
+        /** Limit to a single cafe. Defaults to any cafe. */
+        cafeId?: string;
+    }): void {
+        const status = opts.status ?? 400;
+        this._failures.push({
+            pathPattern: opts.pathPattern,
+            method:      opts.method,
+            cafeId:      opts.cafeId,
+            count:       opts.count,
+            statusCode:  status,
+            body: JSON.stringify({
+                statusCode: status,
+                error:      'Bad Request',
+                message:    opts.code,
+            }),
+            headers: { 'content-type': 'application/json' },
+        });
+    }
+
     clearFailures(): void {
         this._failures.length = 0;
         this._delays.length = 0;
@@ -376,6 +424,7 @@ export class TestBuyOnDemandServer {
                 status: rule.statusCode,
                 statusText: 'Injected Failure',
                 rawBody: rule.body ?? '',
+                headers: rule.headers,
             };
         }
         return null;
@@ -416,6 +465,31 @@ export class TestBuyOnDemandServer {
 
     get state(): ServerState {
         return this._state;
+    }
+
+    // ── Translation registry mutators ──────────────────────────────
+    //
+    // Tests use these to override the i18n map served by GET /translation/...
+    // Every mutator clears the active in-process translation cache so the
+    // overrides take effect on the next request without any other plumbing.
+
+    setTranslations(namespace: string, map: Record<string, string>): void {
+        this._state.setTranslations(namespace, map);
+        getActiveTranslationCache().clear();
+    }
+
+    setTranslation(code: string, message: string, namespace: string = 'core'): void {
+        this._state.setTranslation(namespace, code, message);
+        getActiveTranslationCache().clear();
+    }
+
+    getTranslations(namespace: string): Record<string, string> {
+        return this._state.getTranslations(namespace);
+    }
+
+    resetTranslations(): void {
+        this._state.resetTranslations();
+        getActiveTranslationCache().clear();
     }
 
     /**

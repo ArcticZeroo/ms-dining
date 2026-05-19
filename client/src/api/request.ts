@@ -1,7 +1,7 @@
 import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
 
 import { getVisitorId } from '../constants/settings.ts';
-import { HttpException } from '../exception/http.ts';
+import { HttpException, HttpExceptionBody } from '../exception/http.ts';
 import z, { ZodType } from 'zod';
 
 interface IMakeRequestParamsBase {
@@ -21,6 +21,22 @@ export const getDefaultHeaders = (): Record<string, string> => {
     };
 }
 
+const tryParseJsonBody = async (response: Response): Promise<HttpExceptionBody | undefined> => {
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.toLowerCase().includes('application/json')) {
+        return undefined;
+    }
+    try {
+        const json = await response.json();
+        if (json != null && typeof json === 'object') {
+            return json as HttpExceptionBody;
+        }
+    } catch {
+        // Not JSON or stream consumed — surface the bare status.
+    }
+    return undefined;
+};
+
 export const makeJsonRequestNoParse = async ({
     path,
     options = {},
@@ -36,7 +52,8 @@ export const makeJsonRequestNoParse = async ({
     });
 
     if (!response.ok) {
-        throw new HttpException(response.status);
+        const body = await tryParseJsonBody(response);
+        throw new HttpException(response.status, body);
     }
 
     return response;

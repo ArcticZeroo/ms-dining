@@ -1,6 +1,7 @@
 interface ICafeConfigStoreInfo {
     storeInfoId: string;
     storeName: string;
+    [extra: string]: unknown;
 }
 
 interface ICafeConfigStoreListItem {

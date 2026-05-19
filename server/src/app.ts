@@ -17,6 +17,7 @@ import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIAB
 import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
+import { formatBuyOnDemandErrors } from './middleware/buy-ondemand-error.js';
 import { dbPriorityMiddleware } from './middleware/db-priority.js';
 import { appInsightsMiddleware } from './middleware/telemetry.js';
 
@@ -48,6 +49,7 @@ app.use(json());
 app.use(bodyParser());
 app.use(sendUniversalVisitMiddleware);
 app.use(treatZodErrorsAsBadRequest);
+app.use(formatBuyOnDemandErrors);
 app.use(appInsightsMiddleware);
 
 registerRoutes(app);

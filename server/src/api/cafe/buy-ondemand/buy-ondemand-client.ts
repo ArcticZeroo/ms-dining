@@ -12,6 +12,7 @@ import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { StringUtil } from '../../../util/string.js';
 import { getTelemetryClient } from '../../telemetry/app-insights.js';
 import hat from 'hat';
+import { maybeThrowBuyOnDemandError } from './buy-ondemand-error.js';
 
 const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);
 
@@ -35,10 +36,23 @@ export const JSON_HEADERS = {
  */
 export const DEFAULT_SCHEDULE_TIME = { startTime: '11:00 AM', endTime: '11:15 PM' } as const;
 
+export interface BuyOnDemandClientOptions {
+    /** Capture every request/response into a HAR file (written on `harCapture.writeToFile`). */
+    enableHar?: boolean;
+    /**
+     * On failed BoD responses with a `{ message: <code> }` body, translate the
+     * code via the locale-aware i18n cache and throw a `BuyOnDemandError`
+     * carrying the user-facing message. When false (the default), failures
+     * still throw, but as the legacy generic `"Response failed with status: X"`.
+     */
+    translateErrors?: boolean;
+}
+
 export class BuyOnDemandClient {
     #token: string = '';
     #csrfToken: string = '';
     #harCapture: HarCapture | null = null;
+    #translateErrors: boolean = false;
 
     // will always be set to non-empty value after initialization
     // ...this is just easier than extracting request logic to a separate class
@@ -53,7 +67,11 @@ export class BuyOnDemandClient {
         shutDownMessage:  undefined,
     };
 
-    protected constructor(public readonly cafe: ICafe) {
+    protected constructor(public readonly cafe: ICafe, options: BuyOnDemandClientOptions) {
+		if (options.enableHar) {
+			this.enableHarCapture();
+		}
+		this.#translateErrors = options.translateErrors ?? false;
     }
 
     /**
@@ -61,20 +79,17 @@ export class BuyOnDemandClient {
      * instead of creating a real client. Integration tests use this to install
      * a TestBuyOnDemandClient that routes requests in-memory.
      */
-    private static _factory: ((cafe: ICafe, enableHar: boolean) => Promise<BuyOnDemandClient>) | null = null;
+    private static _factory: ((cafe: ICafe, options: BuyOnDemandClientOptions) => Promise<BuyOnDemandClient>) | null = null;
 
-    public static setFactory(factory: ((cafe: ICafe, enableHar: boolean) => Promise<BuyOnDemandClient>) | null): void {
+    public static setFactory(factory: ((cafe: ICafe, options: BuyOnDemandClientOptions) => Promise<BuyOnDemandClient>) | null): void {
         BuyOnDemandClient._factory = factory;
     }
 
-    public static async createAsync(cafe: ICafe, enableHar: boolean = false): Promise<BuyOnDemandClient> {
+    public static async createAsync(cafe: ICafe, options: BuyOnDemandClientOptions = {}): Promise<BuyOnDemandClient> {
         if (BuyOnDemandClient._factory) {
-            return BuyOnDemandClient._factory(cafe, enableHar);
+            return BuyOnDemandClient._factory(cafe, options);
         }
-        const client = new BuyOnDemandClient(cafe);
-        if (enableHar) {
-            client.enableHarCapture();
-        }
+        const client = new BuyOnDemandClient(cafe, options);
         await client.#performLoginAsync();
         await client.#retrieveConfigDataAsync();
         return client;
@@ -157,22 +172,28 @@ export class BuyOnDemandClient {
                 logDebug(`${id} Response ${response.status} ${response.statusText}`);
             }
 
+            // Read body once if anyone downstream (HAR capture or
+            // translate-errors validation) will need it. Returning a fresh
+            // Response below lets callers still call .json()/.text().
+            const needsBodyForHar = this.#harCapture != null;
+            const needsBodyForValidation = shouldValidateSuccess && !response.ok && this.#translateErrors;
+            const needsBodyRead = needsBodyForHar || needsBodyForValidation;
+
+            const bodyText = needsBodyRead ? await response.text() : undefined;
+
             if (this.#harCapture != null) {
-                // Read body once to avoid stream cloning deadlocks.
-                // Return a new Response so the caller can still call .json().
-                const bodyText = await response.text();
                 const entry = buildHarEntry(url, optionsWithToken, {
                     status:      response.status,
                     statusText:  response.statusText,
                     headers:     response.headers.entries(),
                     contentType: response.headers.get('content-type') ?? undefined,
-                }, bodyText);
+                }, bodyText!);
                 this.#harCapture.addEntry(entry);
+            }
 
-                if (shouldValidateSuccess) {
-                    validateSuccessResponse(response);
-                }
+            await this._validateResponse(response, path, shouldValidateSuccess, bodyText);
 
+            if (bodyText != null) {
                 return new Response(bodyText, {
                     status:     response.status,
                     statusText: response.statusText,
@@ -180,12 +201,37 @@ export class BuyOnDemandClient {
                 });
             }
 
-            if (shouldValidateSuccess) {
-                validateSuccessResponse(response);
-            }
-
             return response;
         });
+    }
+
+    /**
+     * Shared response validation hook used by both this class and
+     * TestBuyOnDemandClient. Reads the body once (if needed for translation)
+     * and either:
+     *  - returns silently (response.ok or shouldValidateSuccess=false)
+     *  - throws BuyOnDemandError for translatable BoD error bodies
+     *  - throws a generic Error (with body for debugging) otherwise.
+     */
+    protected async _validateResponse(
+        response: Response,
+        path: string,
+        shouldValidateSuccess: boolean,
+        bodyText?: string,
+    ): Promise<void> {
+        if (!shouldValidateSuccess || response.ok) {
+            return;
+        }
+
+        if (this.#translateErrors) {
+            const text = bodyText ?? await response.text();
+            await maybeThrowBuyOnDemandError(this, response.status, text);
+            throw new Error(
+                `{${this.cafe.name}} BoD request to ${path} failed (${response.status}): ${text}`,
+            );
+        }
+
+        validateSuccessResponse(response);
     }
 
     async #performLoginAsync() {
@@ -247,7 +293,8 @@ export class BuyOnDemandClient {
                 externalName:    store.storeInfo.storeName,
                 isShutDown:      shutOffConfig?.isShutOffEnabled ?? false,
                 shutDownMessage: shutOffConfig?.isShutOffEnabled ? shutOffConfig.instructionText : undefined,
-                displayProfileId
+                displayProfileId,
+                storeInfo:       store.storeInfo as Record<string, unknown>,
             };
 
             try {

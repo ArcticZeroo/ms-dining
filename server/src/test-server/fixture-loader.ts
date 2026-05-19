@@ -23,7 +23,6 @@ const SERVER_ROOT = path.resolve(__dirname, '..', '..');
 const FIXTURES_DIR = path.join(SERVER_ROOT, 'src', 'test-server', 'fixtures');
 
 const FIXTURE_FILES = ['config', 'stations', 'menu-items', 'tags'] as const;
-
 function loadJsonFile(filePath: string): unknown | undefined {
     let text: string;
     try {
@@ -55,6 +54,15 @@ export function loadFixtures(server: TestBuyOnDemandServer): void {
         if (data !== undefined) {
             server.setFixture('__default__', fixture, data);
         }
+    }
+
+    // Translations live outside the per-cafe fixture map — they're a global
+    // namespace -> code -> message registry. Load the bundled core namespace
+    // via the dedicated test-only loader so resetTranslations() can restore it.
+    const translationsPath = path.join(FIXTURES_DIR, 'default', 'translations.json');
+    const translationsData = loadJsonFile(translationsPath) as Record<string, string> | undefined;
+    if (translationsData !== undefined) {
+        server.state.loadInitialTranslations('core', translationsData);
     }
 
     // Load per-cafe overrides (if the overrides directory exists)

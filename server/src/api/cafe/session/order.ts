@@ -2,7 +2,7 @@ import { ICartItem, IRguestCardInfo, SubmitOrderStage } from '@msdining/common/m
 import { getNamespaceLogger, logError } from '../../../util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
-import { BuyOnDemandClient, DEFAULT_SCHEDULE_TIME, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import {
     IOrderLineItem,
@@ -16,6 +16,37 @@ import { fixed } from '../../../util/math.js';
 import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
 import { PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../constants/enum.js';
+
+const ORDER_TIMEZONE = 'PST8PDT';
+
+/**
+ * Formats `date` as a local ISO-8601 string with offset (e.g.
+ * `"2026-04-23T11:51:56.923-07:00"`), matching the wire format the BoD UI
+ * sends for billDate / userCurrentDate. `Date.toISOString()` would emit UTC
+ * `Z` form, which the server appears to accept but differs from what the
+ * official client sends — keeping the shape identical is cheap insurance.
+ */
+function toLocalIsoOffset(date: Date, timeZone: string = ORDER_TIMEZONE): string {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false, fractionalSecondDigits: 3,
+        timeZoneName: 'longOffset',
+    }).formatToParts(date);
+
+    const find = (type: Intl.DateTimeFormatPartTypes) =>
+        parts.find(p => p.type === type)?.value ?? '';
+
+    // Intl's longOffset is `GMT-07:00` (or `GMT` for UTC). Strip the `GMT`
+    // prefix; treat bare `GMT` as `+00:00`.
+    const tzPart = find('timeZoneName');
+    const offset = tzPart === 'GMT' ? '+00:00' : tzPart.slice(3);
+    // Intl renders midnight as hour=24; normalize back to 00.
+    const hour = find('hour') === '24' ? '00' : find('hour');
+
+    return `${find('year')}-${find('month')}-${find('day')}T${hour}:${find('minute')}:${find('second')}.${find('fractionalSecond')}${offset}`;
+}
 
 // Validates the POST /orders response. Uses passthrough() so the full object
 // (including lineItems, financial totals, taxBreakdown, etc.) is preserved
@@ -64,6 +95,7 @@ const siteDataItemSchema = z.object({
         'check-type':       z.string().optional(),
     }).passthrough(),
     siteStoreInfo: siteStoreInfoSchema.optional(),
+    pickUpConfig: pickUpConfigSchema.optional(),
 }).passthrough();
 
 // are preserved when we spread the response into the cart request body.
@@ -144,8 +176,10 @@ export class CafeOrderSession {
     // The full response from POST /sites/{contextId}/{displayProfileId},
     // used to populate igSettings, deliveryProperties, emailInfo, etc. in the close order.
     #payConfig: PayConfig | null = null;
-    // The site data from GET /sites/{contextId}, used for siteStoreInfo in locizeConfig.
+    // The site data from GET /sites/{tenantId}, used for siteStoreInfo in locizeConfig.
     #siteStoreInfo: z.infer<typeof siteStoreInfoSchema> = {};
+    // pickUpConfig from /sites/{tenantId}
+    #sitePickUpConfig: z.infer<typeof pickUpConfigSchema> | null = null;
     readonly #cartItems: ICartItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #rawCartItemsForWaitTime: unknown[] = [];
@@ -159,7 +193,7 @@ export class CafeOrderSession {
 
     public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
         orderLog.info(`{${cafe.name}} Creating order session with ${cartItems.length} item(s)`);
-        const client = await BuyOnDemandClient.createAsync(cafe, true /*enableHar*/);
+        const client = await BuyOnDemandClient.createAsync(cafe, { enableHar: true, translateErrors: true });
         orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
         return new CafeOrderSession(client, cartItems);
     }
@@ -217,7 +251,10 @@ export class CafeOrderSession {
     }
 
     private async _fetchSiteData() {
-        const response = await this.client.requestAsync(`/sites/${this.client.config.contextId}`, {
+        // Tenant ID is the canonical path slot here, mirroring the official BoD
+        // UI request. ContextId also works on the server today but is not
+        // guaranteed to remain valid.
+        const response = await this.client.requestAsync(`/sites/${this.client.config.tenantId}`, {
             method:  'GET',
             headers: JSON_HEADERS
         });
@@ -233,19 +270,34 @@ export class CafeOrderSession {
         }
 
         this.#siteStoreInfo = siteData.siteStoreInfo ?? {};
+        this.#sitePickUpConfig = siteData.pickUpConfig ?? null;
 
         return siteData;
     }
 
     private async _fetchPayConfig(): Promise<string> {
+        // BoD UI sends the full storeInfo block from /config here and does
+        // NOT send a scheduleTime. The server appears to use storeInfo.timezone
+        // to scope schedule resolution; missing it (or a hardcoded scheduleTime
+        // window) can cause subsequent /concepts and /orders calls to behave as
+        // if the cafe is closed, returning CONCEPTS_NOT_AVAILABLE.
+        const storeInfo = this.client.config.storeInfo;
+        if (storeInfo == null) {
+            throw new Error(
+                `_fetchPayConfig: storeInfo missing on client.config for ${this.client.cafe.id}. `
+                + `Live /config fetch must have failed and the DB fallback path doesn't persist storeInfo yet.`,
+            );
+        }
+
         const response = await this.client.requestAsync(
             `/sites/${this.client.config.contextId}/${this.client.config.displayProfileId}`,
             {
                 method: 'POST',
                 headers: JSON_HEADERS,
                 body: JSON.stringify({
-                    scheduleTime: DEFAULT_SCHEDULE_TIME,
-                    scheduledDay: 0,
+                    storeInfo,
+                    scheduledDay:       0,
+                    isEasyMenuEnabled:  false,
                 })
             }
         );
@@ -327,10 +379,6 @@ export class CafeOrderSession {
             }
         );
 
-        if (!response.ok) {
-            throw new Error(`Unable to retrieve item detail for item ${itemId}: ${response.status}`);
-        }
-
         return kioskItemDetailSchema.parse(await response.json());
     }
 
@@ -382,7 +430,11 @@ export class CafeOrderSession {
                 },
                 count:                cartItem.quantity,
                 quantity:             cartItem.quantity,
-                selectedModifiers:    serializedModifiers,
+                // BoD UI omits selectedModifiers entirely for items with no
+                // modifiers. Always-present `[]` is most likely benign, but
+                // matching the wire shape removes one more delta from the
+                // request body the server validates against.
+                ...(serializedModifiers.length > 0 ? { selectedModifiers: serializedModifiers } : {}),
                 lineItemInstructions: instructions,
                 conceptId:            station.id,
                 conceptName:          station.name,
@@ -400,7 +452,7 @@ export class CafeOrderSession {
                 currencySymbol:        '$',
             },
             schedule:           conceptData.schedule,
-            orderTimeZone:      'PST8PDT',
+            orderTimeZone:      ORDER_TIMEZONE,
             storePriceLevel:    this.#orderingContext.storePriceLevel,
             scheduledDay:       0,
             useIgOrderApi:      true,
@@ -474,8 +526,13 @@ export class CafeOrderSession {
             {
                 method:  'POST',
                 headers: JSON_HEADERS,
+                // BoD UI sends only { scheduledDay }. Adding a fixed scheduleTime
+                // window asks the server "show me concepts available 11am-11:15pm"
+                // which can legitimately return none (e.g. a cafe that closes at
+                // 2pm), surfacing as CONCEPTS_NOT_AVAILABLE downstream. The menu
+                // sync path in stations.ts still needs scheduleTime because it
+                // fetches menus at non-now times (e.g. 11am menu at 9am).
                 body:    JSON.stringify({
-                    scheduleTime: DEFAULT_SCHEDULE_TIME,
                     scheduledDay: 0,
                 })
             }
@@ -516,8 +573,8 @@ export class CafeOrderSession {
             throw new Error('Order totals cannot be zero');
         }
 
-        const billDate = this.#lastOrderDetails?.created ?? (new Date()).toISOString();
-        const nowString = (new Date()).toISOString();
+        const billDate = this.#lastOrderDetails?.created ?? toLocalIsoOffset(new Date());
+        const nowString = toLocalIsoOffset(new Date());
 
         const response = await this.client.requestAsync(`/iFrame/token/${this.client.config.tenantId}`,
             {
@@ -643,9 +700,9 @@ export class CafeOrderSession {
             throw new Error('Order details are not set!');
         }
 
-        const nowString = (new Date()).toISOString();
+        const nowString = toLocalIsoOffset(new Date());
 
-        const response = await this.client.requestAsync(
+        await this.client.requestAsync(
             `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orderId/${this.#orderId}/processPaymentAndClosedOrder`,
             {
                 method:  'POST',
@@ -678,9 +735,9 @@ export class CafeOrderSession {
                     deliveryProperties:              {
                         deliveryOption:     {
                             id:                      'pickup',
-                            kitchenText:             this.#payConfig?.pickUpConfig?.kitchenText ?? 'PICKUP',
-                            displayText:             this.#payConfig?.pickUpConfig?.buttonText ?? 'PICKUP',
-                            defaultConfirmationText: this.#payConfig?.pickUpConfig?.defaultConfirmationText ?? 'Thank you!',
+                            kitchenText:             this.#sitePickUpConfig?.kitchenText ?? 'PICKUP',
+                            displayText:             this.#sitePickUpConfig?.buttonText ?? 'PICKUP',
+                            defaultConfirmationText: this.#sitePickUpConfig?.defaultConfirmationText ?? 'Thank you!',
                             conceptEntries:          {},
                             isEnabled:               true,
                             orderSequence:           1,
@@ -743,11 +800,12 @@ export class CafeOrderSession {
                         deliveryProperties:  {
                             deliveryOption:     {
                                 id:                      'pickup',
-                                kitchenText:             this.#payConfig?.pickUpConfig?.kitchenText ?? 'PICKUP',
-                                displayText:             this.#payConfig?.pickUpConfig?.buttonText ?? 'PICKUP',
-                                defaultConfirmationText: this.#payConfig?.pickUpConfig?.defaultConfirmationText ?? 'Thank you!',
+                                kitchenText:             this.#sitePickUpConfig?.kitchenText ?? 'PICKUP',
+                                displayText:             this.#sitePickUpConfig?.buttonText ?? 'PICKUP',
+                                defaultConfirmationText: this.#sitePickUpConfig?.defaultConfirmationText ?? 'Thank you!',
                                 conceptEntries:          {},
-                                isEnabled:               true
+                                isEnabled:               true,
+                                orderSequence:           1,
                             },
                             fulfillmentDetails: {
                                 fulfillmentType: 'pickupFormFields'
@@ -850,14 +908,7 @@ export class CafeOrderSession {
                     walletSaleTransactionData:       null
                 })
             },
-            false /*shouldValidateSuccess*/
         );
-
-        if (!response.ok) {
-            const body = await response.text();
-            logError(`{${this.client.cafe.name}} closeOrder failed (${response.status}):`, body);
-            throw new Error(`Close order failed with status ${response.status}: ${body}`);
-        }
     }
 
     private async _runStages(requiredStage: SubmitOrderStage, callback: () => Promise<void>): Promise<void> {
