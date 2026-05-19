@@ -67,7 +67,7 @@ export class BuyOnDemandClient {
         shutDownMessage:  undefined,
     };
 
-    protected constructor(public readonly cafe: ICafe, options: BuyOnDemandClientOptions) {
+    protected constructor(public readonly cafe: ICafe, options: BuyOnDemandClientOptions = {}) {
 		if (options.enableHar) {
 			this.enableHarCapture();
 		}

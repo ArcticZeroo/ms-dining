@@ -12,6 +12,15 @@ import { queryKeys } from './keys.ts';
 // edge of expiry when the user hits "Pay".
 const CART_SESSION_STALE_MS = 4 * 60 * 1000;
 
+// On "Pay" click, we normally refetch /prepare/cart to maximize the time the
+// user has to complete payment within the server's ~5-minute cart-session
+// expiry. If the cached data is fresher than this threshold the user still
+// has well over four minutes left, so we skip the refetch — eliminates a
+// redundant round-trip and the dual "Building your order…" / "Preparing
+// payment…" spinners on the common case of clicking Pay right after the
+// page loads.
+export const PAY_CLICK_CACHE_FRESHNESS_MS = 60 * 1000;
+
 /**
  * Stable hash over the cart contents that affect server-side preparation.
  * Two identical carts hash to the same value so TanStack Query can dedupe.
@@ -73,11 +82,36 @@ interface IPrepareAllPaymentsResult {
 }
 
 /**
- * "Click Pay → preparePayment(orderId) for every cafe in parallel". Issues a
- * fresh cart-session fetch (bypassing TanStack's cached value) so the per-cafe
- * orderIds handed to the iframes are guaranteed to be inside the server's
- * ~5-minute cart-session expiry window, then writes the results into the
- * ordering store.
+ * Returns the existing cached cart session if it was fetched within the
+ * `freshnessMs` window, otherwise issues a fresh /prepare/cart fetch.
+ * Exported so the Pay-click mutation and tests can share the freshness logic.
+ */
+export const getFreshOrCachedCartSession = async (
+    cart: CartItemsByCafeId,
+    freshnessMs: number = PAY_CLICK_CACHE_FRESHNESS_MS,
+): Promise<IPrepareCartResponse> => {
+    const queryKey = cartSessionQueryKey(cart);
+    const cached = queryClient.getQueryState<IPrepareCartResponse>(queryKey);
+    if (cached?.data != null && cached.status === 'success'
+        && Date.now() - cached.dataUpdatedAt < freshnessMs) {
+        return cached.data;
+    }
+
+    // fetchQuery (not ensureQueryData) guarantees a network round-trip
+    // — ensureQueryData would return cached-but-stale data.
+    return queryClient.fetchQuery<IPrepareCartResponse>({
+        queryKey,
+        queryFn:   () => OrderingClient.prepareCart(cart),
+        staleTime: 0,
+    });
+};
+
+/**
+ * "Click Pay → preparePayment(orderId) for every cafe in parallel". Re-uses a
+ * fresh cart-session (cached < {@link PAY_CLICK_CACHE_FRESHNESS_MS} ago) or
+ * issues a fresh fetch — the per-cafe orderIds handed to the iframes are then
+ * guaranteed to be inside the server's ~5-minute cart-session expiry window.
+ * Results are written into the ordering store.
  */
 export const usePrepareAllPaymentsMutation = () => {
     const startCheckout = useOrderingStore((state) => state.startCheckout);
@@ -85,13 +119,7 @@ export const usePrepareAllPaymentsMutation = () => {
     return useMutation<IPrepareAllPaymentsResult, Error, IPaymentFormData>({
         mutationFn: async (formData) => {
             const cart = useCartStore.getState().items;
-            // fetchQuery (not ensureQueryData) guarantees a network round-trip
-            // — ensureQueryData would return cached-but-stale data.
-            const cartSession = await queryClient.fetchQuery<IPrepareCartResponse>({
-                queryKey:  cartSessionQueryKey(cart),
-                queryFn:   () => OrderingClient.prepareCart(cart),
-                staleTime: 0,
-            });
+            const cartSession = await getFreshOrCachedCartSession(cart);
 
             const entries = await Promise.all(
                 Object.entries(cartSession).map(async ([cafeId, cafeData]) => {

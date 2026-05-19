@@ -111,7 +111,7 @@ export const OrderPage = () => {
                                 Building your order...
                             </div>
                         )}
-                        {prepareAllPayments.isPending && (
+                        {(!cartSessionQuery.isFetching && prepareAllPayments.isPending) && (
                             <div className="flex flex-justify-center">
                                 <HourglassLoadingSpinner/>
                                 Preparing payment...

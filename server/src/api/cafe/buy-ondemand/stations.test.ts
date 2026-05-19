@@ -1,20 +1,59 @@
 /**
- * Unit tests for pickStationName (exercised via retrieveStationListAsync).
+ * Tests for station name selection (`pickStationName`, exercised via
+ * retrieveStationListAsync → CafeMenuSession.retrieveMenuAsync).
  *
- * pickStationName is a module-local helper, so we drive it indirectly by
- * giving retrieveStationListAsync a stub BuyOnDemandClient whose requestAsync
- * returns a canned station-list JSON. This keeps the test fully synchronous
- * with no DB / fixture / network dependencies.
+ * Integration-style: drives the real BuyOnDemandClient code path against
+ * the in-memory TestBuyOnDemandServer. Each test seeds a custom `stations`
+ * fixture for a dedicated cafe id, then runs the production sync and reads
+ * back the resolved station name.
  *
  * Regression target: 03cce02 — switch station name being just a space.
  */
 
-import { test } from 'node:test';
+import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { Response } from 'node-fetch';
-import { BuyOnDemandClient } from './buy-ondemand-client.js';
-import { retrieveStationListAsync } from './stations.js';
+import { CafeMenuSession } from '../session/menu.js';
 import { ICafe } from '../../../models/cafe.js';
+import {
+    createIntegrationTestContext,
+    IntegrationTestContext,
+} from '../../../test-server/integration-test-context.js';
+
+const STATION_TEST_CAFE_ID = 'station-name-test-cafe';
+const STATION_TEST_CAFE: ICafe = {
+    id:   STATION_TEST_CAFE_ID,
+    name: 'Stub Cafe Display Name',
+};
+
+let ctx: IntegrationTestContext;
+
+before(async () => {
+    ctx = await createIntegrationTestContext();
+
+    // Boot a config fixture for our test cafe so /config returns sane data and
+    // the test cafe id resolves to a proper tenant/context/displayProfile.
+    ctx.server.setFixture(STATION_TEST_CAFE_ID, 'config', {
+        tenantID:  'tenant-station-test',
+        contextID: 'ctx-station-test',
+        theme:     { logoImage: 'logo.png' },
+        storeList: [
+            {
+                storeInfo: { storeInfoId: 'store-station-test', storeName: 'Stub Cafe Display Name' },
+                displayProfileId: ['dp-station-test'],
+            },
+        ],
+        properties: {},
+    });
+});
+
+after(async () => {
+    await ctx.cleanup();
+});
+
+beforeEach(() => {
+    ctx.server.clearRequestLog();
+    ctx.server.clearFailures();
+});
 
 interface StationOverride {
     name?: string;
@@ -24,33 +63,7 @@ interface StationOverride {
     };
 }
 
-class StubClient extends BuyOnDemandClient {
-    private readonly _stationListJson: unknown[];
-
-    constructor(cafe: ICafe, stationListJson: unknown[]) {
-        super(cafe);
-        this._stationListJson = stationListJson;
-        this.config = {
-            tenantId:         'stub-tenant',
-            contextId:        'stub-context',
-            displayProfileId: 'stub-profile',
-            storeId:          'stub-store',
-            externalName:     'Stub External',
-            logoName:         'logo',
-            isShutDown:       false,
-            shutDownMessage:  undefined,
-        };
-    }
-
-    public async requestAsync(_path: string, _options: any = {}, _shouldValidateSuccess: boolean = true): Promise<Response> {
-        return new Response(JSON.stringify(this._stationListJson), {
-            status:  200,
-            headers: { 'content-type': 'application/json' },
-        });
-    }
-}
-
-function buildStationJson(override: StationOverride): unknown {
+function buildStationFixture(override: StationOverride): unknown {
     const station: Record<string, unknown> = {
         id:               'station-x',
         name:             override.name ?? 'Station X',
@@ -71,24 +84,25 @@ function buildStationJson(override: StationOverride): unknown {
     return station;
 }
 
-const TEST_CAFE: ICafe = {
-    id:   'stub-cafe',
-    name: 'Stub Cafe Display Name',
-};
-
+/**
+ * Seeds the station fixture for the test cafe, runs the real menu sync, and
+ * returns the resolved station name. Asserts exactly one station came back
+ * so callers can read `[0].name` without guarding for empty.
+ */
 async function pickName(override: StationOverride): Promise<string> {
-    const client = new StubClient(TEST_CAFE, [buildStationJson(override)]);
-    const result = await retrieveStationListAsync(client, 0);
+    ctx.server.setFixture(STATION_TEST_CAFE_ID, 'stations', [buildStationFixture(override)]);
+
+    const result = await CafeMenuSession.retrieveMenuAsync(STATION_TEST_CAFE, 0);
     assert.equal(result.stations.length, 1, 'expected exactly one station in the result');
     return result.stations[0]!.name;
 }
 
 test('whitespace-only station name falls back to cafe name', async () => {
-    assert.equal(await pickName({ name: '   ' }), TEST_CAFE.name);
+    assert.equal(await pickName({ name: '   ' }), STATION_TEST_CAFE.name);
 });
 
 test('empty station name falls back to cafe name', async () => {
-    assert.equal(await pickName({ name: '' }), TEST_CAFE.name);
+    assert.equal(await pickName({ name: '' }), STATION_TEST_CAFE.name);
 });
 
 test('normal station name is preserved', async () => {
@@ -145,7 +159,7 @@ test('cafe name fallback when every option is whitespace', async () => {
             name:           '   ',
             conceptOptions: { onDemandDisplayText: '', displayText: '   ' },
         }),
-        TEST_CAFE.name,
+        STATION_TEST_CAFE.name,
     );
 });
 

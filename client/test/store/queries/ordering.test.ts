@@ -1,7 +1,15 @@
 import * as assert from 'node:assert';
-import { describe, it } from 'vitest';
+import { afterEach, beforeEach, describe, it, vi } from 'vitest';
+import { IPrepareCartResponse } from '@msdining/common/models/cart';
+import { OrderingClient } from '../../../src/api/order.ts';
 import { CartItemsByCafeId } from '../../../src/models/cart.ts';
-import { cartHashForKey } from '../../../src/store/queries/ordering.ts';
+import { queryClient } from '../../../src/store/query-client.ts';
+import {
+    cartHashForKey,
+    getFreshOrCachedCartSession,
+    PAY_CLICK_CACHE_FRESHNESS_MS,
+} from '../../../src/store/queries/ordering.ts';
+import { queryKeys } from '../../../src/store/queries/keys.ts';
 import { makeCartItem, makeMenuItem } from '../fixtures.ts';
 
 const cartOf = (...items: ReturnType<typeof makeCartItem>[]): CartItemsByCafeId => {
@@ -106,5 +114,87 @@ describe('cartHashForKey', () => {
         const cart2 = cartOf(makeCartItem({ id: 'random-uuid-2', price: 0 }));
 
         assert.strictEqual(cartHashForKey(cart1), cartHashForKey(cart2));
+    });
+});
+
+describe('getFreshOrCachedCartSession', () => {
+    const fakeCart = cartOf(makeCartItem({ associatedItem: makeMenuItem({ cafeId: 'cafe-x' }) }));
+    const fakeResponse: IPrepareCartResponse = {
+        'cafe-x': {
+            orderId:              'order-1',
+            orderNumber:          '1001',
+            totalPriceWithTax:    11.03,
+            totalPriceWithoutTax: 9.99,
+            totalTax:             1.04,
+            waitTimeMin:          '10',
+            waitTimeMax:          '15',
+            expiresAt:            new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        },
+    };
+
+    beforeEach(() => {
+        queryClient.clear();
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+        queryClient.clear();
+    });
+
+    const seedCache = (dataUpdatedAt: number) => {
+        const queryKey = [...queryKeys.ordering.cartSession, cartHashForKey(fakeCart)] as const;
+        queryClient.setQueryData(queryKey, fakeResponse, { updatedAt: dataUpdatedAt });
+    };
+
+    it('returns cached data when it was fetched within the freshness window', async () => {
+        const now = 1_700_000_000_000;
+        vi.setSystemTime(now);
+        seedCache(now - 30_000); // 30s old, < 60s default freshness
+
+        const spy = vi.spyOn(OrderingClient, 'prepareCart').mockResolvedValue(fakeResponse);
+
+        const result = await getFreshOrCachedCartSession(fakeCart);
+        assert.strictEqual(result, fakeResponse);
+        assert.strictEqual(spy.mock.calls.length, 0, 'should not refetch when cache is fresh');
+    });
+
+    it('refetches when cached data is older than the freshness window', async () => {
+        const now = 1_700_000_000_000;
+        vi.setSystemTime(now);
+        seedCache(now - (PAY_CLICK_CACHE_FRESHNESS_MS + 1000));
+
+        const refreshed: IPrepareCartResponse = { ...fakeResponse, 'cafe-x': { ...fakeResponse['cafe-x']!, orderId: 'order-2' } };
+        const spy = vi.spyOn(OrderingClient, 'prepareCart').mockResolvedValue(refreshed);
+
+        const result = await getFreshOrCachedCartSession(fakeCart);
+        assert.strictEqual(result['cafe-x']?.orderId, 'order-2');
+        assert.strictEqual(spy.mock.calls.length, 1, 'should refetch when cache is stale');
+    });
+
+    it('refetches when there is no cached entry at all', async () => {
+        // No seedCache call — cache is empty.
+        const spy = vi.spyOn(OrderingClient, 'prepareCart').mockResolvedValue(fakeResponse);
+
+        const result = await getFreshOrCachedCartSession(fakeCart);
+        assert.strictEqual(result, fakeResponse);
+        assert.strictEqual(spy.mock.calls.length, 1);
+    });
+
+    it('respects an explicit freshnessMs override', async () => {
+        const now = 1_700_000_000_000;
+        vi.setSystemTime(now);
+        seedCache(now - 90_000); // 90s old
+
+        const spy = vi.spyOn(OrderingClient, 'prepareCart').mockResolvedValue(fakeResponse);
+
+        // 120s window — 90s old is still fresh enough.
+        await getFreshOrCachedCartSession(fakeCart, 120_000);
+        assert.strictEqual(spy.mock.calls.length, 0);
+
+        // 60s window — 90s old is stale, refetch.
+        await getFreshOrCachedCartSession(fakeCart, 60_000);
+        assert.strictEqual(spy.mock.calls.length, 1);
     });
 });
