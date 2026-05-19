@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../models/prisma.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
 import { lazy, lazyAsync } from '../../util/lazy.js';
-import { logBoot } from '../../util/boot-diagnostics.js';
 import { getDbPriority } from './db-context.js';
 import { DB_METRIC_NAMES, DB_METRICS } from './db-metrics.js';
 import { PrioritySemaphore } from './priority-semaphore.js';
@@ -46,45 +45,18 @@ const PRISMA_TRANSACTION_TIMEOUT_MS = 30_000;
 // process.env on construction) so the snapshot taken by @prisma/client's
 // bundled dotenv on import doesn't leak into integration tests.
 const PRISMA_CLIENT = lazy(() => {
-    const start = performance.now();
-    logBoot('PRISMA_CLIENT factory invoked');
     const databaseUrl = process.env.DATABASE_URL;
-    const client = databaseUrl
+    return databaseUrl
         ? new PrismaClient({ datasourceUrl: databaseUrl })
         : new PrismaClient();
-    logBoot(`PRISMA_CLIENT constructed (${Math.round(performance.now() - start)}ms)`);
-    return client;
 });
 
 const READY = lazyAsync(async () => {
-    const start = performance.now();
-    logBoot('READY factory invoked');
     const client = PRISMA_CLIENT.value;
     await client.$queryRawUnsafe('PRAGMA journal_mode=WAL;');
-    logBoot(`READY PRAGMA journal_mode done (${Math.round(performance.now() - start)}ms)`);
     await client.$queryRawUnsafe('PRAGMA synchronous=NORMAL;');
-    logBoot(`READY PRAGMA synchronous done (${Math.round(performance.now() - start)}ms)`);
     await client.$queryRawUnsafe(`PRAGMA busy_timeout=${SQLITE_BUSY_TIMEOUT_MS};`);
-    logBoot(`READY resolved (${Math.round(performance.now() - start)}ms)`);
 });
-
-let firstReadAcquireLogged = false;
-let firstWriteAcquireLogged = false;
-
-const logFirstAcquire = (which: 'read' | 'write', semaphore: PrioritySemaphore, priority: string) => {
-    if (which === 'read') {
-        if (firstReadAcquireLogged) {
-            return;
-        }
-        firstReadAcquireLogged = true;
-    } else {
-        if (firstWriteAcquireLogged) {
-            return;
-        }
-        firstWriteAcquireLogged = true;
-    }
-    logBoot(`first ${which}Semaphore acquire (priority=${priority}, queueDepth=${semaphore.queueDepth}, inFlight=${semaphore.inFlight})`);
-};
 
 export const disconnectPrismaClient = async (): Promise<void> => {
     if (!PRISMA_CLIENT.isInitialized) {
@@ -120,8 +92,6 @@ export const usePrismaClient = async <T>(callback: (client: ReadOnlyPrismaClient
     const priority = getDbPriority();
     const queuedAt = performance.now();
 
-    logFirstAcquire('read', readSemaphore, priority);
-
     return readSemaphore.acquire(priority, async () => {
         await READY.value;
 
@@ -144,8 +114,6 @@ export const usePrismaWrite = async <T>(callback: (client: PrismaClient) => Prom
     const priority = getDbPriority();
     const queuedAt = performance.now();
 
-    logFirstAcquire('write', writeSemaphore, priority);
-
     return writeSemaphore.acquire(priority, async () => {
         await READY.value;
 
@@ -167,8 +135,6 @@ export const usePrismaWrite = async <T>(callback: (client: PrismaClient) => Prom
 export const usePrismaTransaction = async <T>(callback: (tx: PrismaTransactionClient) => Promise<T>) => {
     const priority = getDbPriority();
     const queuedAt = performance.now();
-
-    logFirstAcquire('write', writeSemaphore, priority);
 
     return writeSemaphore.acquire(priority, async () => {
         await READY.value;

@@ -1,17 +1,11 @@
 import * as appInsights from 'applicationinsights';
-import { isMainThread } from 'node:worker_threads';
-import { performance } from 'node:perf_hooks';
 import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
 import { lazy } from '../../util/lazy.js';
-import { logBoot } from '../../util/boot-diagnostics.js';
 import { getNamespaceLogger } from '../../util/log.js';
 
 const logger = getNamespaceLogger('AppInsights');
 
 const createTelemetryClient = (): appInsights.TelemetryClient | null => {
-    const constructStart = performance.now();
-    logBoot(`AppInsights createTelemetryClient invoked (thread=${isMainThread ? 'main' : 'worker'})`);
-
     const connectionString = process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.appInsightsConnectionString];
 
     if (!connectionString) {
@@ -28,7 +22,6 @@ const createTelemetryClient = (): appInsights.TelemetryClient | null => {
     client.context.tags[client.context.keys.cloudRole] = 'ms-dining-prod';
 
     logger.info('Initialized');
-    logBoot(`AppInsights TelemetryClient constructed (${Math.round(performance.now() - constructStart)}ms)`);
     return client;
 }
 

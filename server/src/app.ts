@@ -20,17 +20,11 @@ import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 import { formatBuyOnDemandErrors } from './middleware/buy-ondemand-error.js';
 import { dbPriorityMiddleware } from './middleware/db-priority.js';
 import { appInsightsMiddleware } from './middleware/telemetry.js';
-import { oneShot } from './util/boot-diagnostics.js';
 
 const app = new Koa();
 
-const traced = (name: string, middleware: Koa.Middleware): Koa.Middleware => {
-    const wrapped = oneShot(`mw:${name}`, middleware);
-    return (ctx, next) => wrapped(ctx, next);
-};
-
 // Set DB priority to 'normal' for all HTTP requests (before any DB-touching middleware)
-app.use(traced('dbPriority', dbPriorityMiddleware));
+app.use(dbPriorityMiddleware);
 
 // Do this first so that this isn't impacted by auth/doesn't send telemetry
 app.use(mount('/.well-known', serve(path.join(serverStaticPath, '.well-known'))));
@@ -42,21 +36,21 @@ if (!hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
 }
 
 app.keys = [getSessionSecret()];
-app.use(traced('session', session({
+app.use(session({
     maxAge: new Duration({ days: 180 }).inMilliseconds,
     renew: true,
     store: new PrismaSessionStore()
-}, app)));
+}, app));
 
-app.use(traced('passport.initialize', passport.initialize()));
-app.use(traced('passport.session', passport.session()));
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.use(traced('json', json()));
-app.use(traced('bodyParser', bodyParser()));
-app.use(traced('sendUniversalVisit', sendUniversalVisitMiddleware));
-app.use(traced('zodErrors', treatZodErrorsAsBadRequest));
-app.use(traced('buyOnDemandErrors', formatBuyOnDemandErrors));
-app.use(traced('appInsights', appInsightsMiddleware));
+app.use(json());
+app.use(bodyParser());
+app.use(sendUniversalVisitMiddleware);
+app.use(treatZodErrorsAsBadRequest);
+app.use(formatBuyOnDemandErrors);
+app.use(appInsightsMiddleware);
 
 registerRoutes(app);
 
