@@ -15,12 +15,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Always resolve fixtures from src/test-server/fixtures so the same path
-// works whether we're running via tsx (where __dirname is src/test-server)
-// or compiled (where __dirname is dist/test-server). In both cases, .. ..
-// gets us to the server/ root, then we descend into src/test-server/fixtures.
-const SERVER_ROOT = path.resolve(__dirname, '..', '..');
-const FIXTURES_DIR = path.join(SERVER_ROOT, 'src', 'test-server', 'fixtures');
+// Always resolve fixtures from src/tests/test-server/fixtures so the same path
+// works whether we're running via tsx or compiled. __dirname at runtime is
+// server/dist/tests/test-server/, so .. .. .. lands at server/, then we
+// descend into src/tests/test-server/fixtures.
+const SERVER_ROOT = path.resolve(__dirname, '..', '..', '..');
+const FIXTURES_DIR = path.join(SERVER_ROOT, 'src', 'tests', 'test-server', 'fixtures');
 
 const FIXTURE_FILES = ['config', 'stations', 'menu-items', 'tags'] as const;
 function loadJsonFile(filePath: string): unknown | undefined {

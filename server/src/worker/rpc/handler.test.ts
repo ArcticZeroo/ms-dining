@@ -178,7 +178,7 @@ const TEST_WORKER_SERVICES = {
 } satisfies ServiceMap;
 
 const workerEntryPath = (): URL => {
-    // import.meta.url here points at the compiled dist/worker-rpc/handler.test.js.
+    // import.meta.url here points at the compiled dist/worker/rpc/handler.test.js.
     // The worker entry compiles next to it as handler.test-worker.js.
     const thisDir = path.dirname(fileURLToPath(import.meta.url));
     return new URL(`file://${path.join(thisDir, 'handler.test-worker.js').replace(/\\/g, '/')}`);

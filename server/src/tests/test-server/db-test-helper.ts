@@ -14,8 +14,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Resolve the server root (containing prisma/ and node_modules/) once.
-// __dirname points at server/src/test-server, so go up two levels.
-const SERVER_ROOT = path.resolve(__dirname, '..', '..');
+// __dirname at runtime is server/dist/tests/test-server/, so go up three
+// levels to reach server/. (Three because: tests/test-server → tests → dist → server.)
+const SERVER_ROOT = path.resolve(__dirname, '..', '..', '..');
 const PRISMA_SCHEMA_DIR = path.join(SERVER_ROOT, 'prisma');
 
 /**

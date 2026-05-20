@@ -31,11 +31,11 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// dist/tests/integration → dist/. The subprocess imports the compiled app
-// via a file:// URL — required on Windows where bare absolute paths like
-// `I:\…\app.js` aren't valid ESM specifiers.
-const APP_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'app.js')).href;
-const REGISTRY_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'services', 'registry.js')).href;
+// dist/tests/integration → dist/main/app.js. The subprocess imports the
+// compiled app via a file:// URL — required on Windows where bare absolute
+// paths like `I:\…\app.js` aren't valid ESM specifiers.
+const APP_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'main', 'app.js')).href;
+const REGISTRY_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'main', 'services', 'registry.js')).href;
 const SERVER_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 
 const AUTH_VAR_NAMES: ReadonlyArray<keyof typeof WELL_KNOWN_ENVIRONMENT_VARIABLES> = [
