@@ -24,7 +24,7 @@ import { ALL_CAFES } from '../../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../../test-server/integration-test-context.js';
+} from '../../../tests/test-server/integration-test-context.js';
 import { toDateString, getMondayForWeek } from '@msdining/common/util/date-util';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 

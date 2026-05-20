@@ -1,7 +1,7 @@
 import { isMainThread, parentPort, Worker } from 'node:worker_threads';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { logDebug, logError } from '../util/log.js';
+import { logDebug, logError } from '../../shared/util/log.js';
 import { fromWire, parseServiceErrorWire, ServiceErrorWireSchema, toWire } from './errors-wire.js';
 import { dispatch, RequestData, ResponseData, ServiceMap } from './service-map.js';
 

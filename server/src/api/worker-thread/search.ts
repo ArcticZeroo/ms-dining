@@ -2,7 +2,7 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import seedrandom from 'seedrandom';
 import { IEntityRef } from '../../shared/models/vector.js';
 import * as db from '../storage/vector/db.js';
-import { WorkerThreadHandler } from '../../worker-rpc/handler.js';
+import { WorkerThreadHandler } from '../../worker/rpc/handler.js';
 
 const VECTOR_SEARCH_ITEM_LIMIT = 50;
 const SIMILAR_QUERY_SEARCH_LIMIT = 5;

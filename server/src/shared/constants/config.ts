@@ -1,5 +1,5 @@
 import path from 'path';
-import { getDirname } from '../../util/node.js';
+import { getDirname } from '../util/node.js';
 
 export const webserverHost = 'https://dining.frozor.io';
 

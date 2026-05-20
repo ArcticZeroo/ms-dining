@@ -32,8 +32,8 @@ import { IMenuPublishEvent } from '../../shared/models/storage-events.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchExpectStatus } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchExpectStatus } from '../test-server/test-helpers.js';
 
 const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday — avoid weekend skip
 const INITIAL_SYNC_AT = FAKE_NOW.getTime();

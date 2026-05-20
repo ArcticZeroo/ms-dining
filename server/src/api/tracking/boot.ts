@@ -5,8 +5,8 @@ import {
 } from '@msdining/common/constants/analytics';
 import { createAnalyticsApplicationAsync } from './visitors.js';
 import { ApplicationContext } from '../../shared/constants/context.js';
-import { logError, logInfo } from '../../util/log.js';
-import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
+import { logError, logInfo } from '../../shared/util/log.js';
+import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 
 const getAllApplicationNames = () => {

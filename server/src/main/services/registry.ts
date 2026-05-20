@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { lazy } from '../../util/lazy.js';
+import { lazy } from '../../shared/util/lazy.js';
 import { createProductionServices } from './production.js';
 import type { Services } from './types.js';
 import type { ICafe } from '../../shared/models/cafe.js';

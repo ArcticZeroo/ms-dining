@@ -1,8 +1,8 @@
-import { runPromiseWithRetries } from '../../util/async.js';
-import { rethrowWithoutStatus } from '../../util/error.js';
+import { runPromiseWithRetries } from '../../shared/util/async.js';
+import { rethrowWithoutStatus } from '../../shared/util/error.js';
 import { getServices } from '../../main/services/registry.js';
 import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
-import { logInfo } from '../../util/log.js';
+import { logInfo } from '../../shared/util/log.js';
 import { anthropicProvider } from './providers/anthropic.js';
 import { openAiProvider } from './providers/openai.js';
 import type { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';

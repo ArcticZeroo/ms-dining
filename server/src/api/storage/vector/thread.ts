@@ -1,5 +1,5 @@
 import { isMainThread, parentPort } from 'node:worker_threads';
-import { logError } from '../../../util/log.js';
+import { logError } from '../../../shared/util/log.js';
 
 const main = () => {
     if (isMainThread) {

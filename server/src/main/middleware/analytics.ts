@@ -2,7 +2,7 @@ import { sendVisitFireAndForget } from '../../api/tracking/visitors.js';
 import Koa from 'koa';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { randomUUID } from 'node:crypto';
-import { getTrimmedQueryParam } from '../../util/koa.js';
+import { getTrimmedQueryParam } from '../util/koa.js';
 
 const VISITOR_ID_HEADER = 'X-Visitor-Id';
 

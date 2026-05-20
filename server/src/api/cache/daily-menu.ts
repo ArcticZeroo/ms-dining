@@ -4,7 +4,7 @@ import Duration from '@arcticzeroo/duration';
 import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
-import { logError } from '../../util/log.js';
+import { logError } from '../../shared/util/log.js';
 
 const MENU_CACHE_TIME = new Duration({ minutes: 5 });
 

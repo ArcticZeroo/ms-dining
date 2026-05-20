@@ -5,7 +5,7 @@ import {
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
-import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
+import { IMenuItemCandidate, toRecommendationItem } from '../../../../shared/util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
 import { IUserRecommendationContext, log, POSITIVE_REVIEW_THRESHOLD, VECTOR_SEARCH_LIMIT, } from '../../shared.js';

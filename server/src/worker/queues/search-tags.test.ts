@@ -28,7 +28,7 @@ import { usePrismaClient, usePrismaWrite } from '../../api/storage/client.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../../tests/test-server/integration-test-context.js';
 import { SEARCH_TAG_WORKER_QUEUE } from './search-tags.js';
 
 const CAFE_ID = 'search-tags-test-cafe';

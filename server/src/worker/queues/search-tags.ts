@@ -4,8 +4,8 @@ import { retrieveTextCompletion } from '../../api/ai/index.js';
 import { MenuItemStorageClient } from '../../api/storage/clients/menu-item.js';
 import { IMenuItemForAi } from '../../shared/models/openai.js';
 import { Nullable } from '../../shared/models/util.js';
-import { runPromiseWithRetries } from '../../util/async.js';
-import { logDebug, logError } from '../../util/log.js';
+import { runPromiseWithRetries } from '../../shared/util/async.js';
+import { logDebug, logError } from '../../shared/util/log.js';
 import { WorkerQueue } from './queue.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 5 });

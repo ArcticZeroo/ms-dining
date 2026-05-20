@@ -1,8 +1,8 @@
 import Router from '@koa/router';
 import { IUpdateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { attachRouter, getTrimmedQueryParam, getUserIdOrThrow, isAdminAsync } from '../../../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../../../util/serde.js';
+import { attachRouter, getTrimmedQueryParam, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
+import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
 import { ReviewStorageClient } from '../../../../../../api/storage/clients/review.js';
 import { MenuItemStorageClient } from '../../../../../../api/storage/clients/menu-item.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';

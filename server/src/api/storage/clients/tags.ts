@@ -1,6 +1,6 @@
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { IMenuItemTag } from '../../../shared/models/cafe.js';
-import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
+import { isUniqueConstraintFailedError } from '../../../shared/util/prisma.js';
 
 export abstract class TagStorageClient {
     private static readonly _tagNamesById = new Map<string, string>();

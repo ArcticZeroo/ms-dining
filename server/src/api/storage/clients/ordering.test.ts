@@ -18,7 +18,7 @@ import { IOrderingContext } from '../../../shared/models/cart.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../../test-server/integration-test-context.js';
+} from '../../../tests/test-server/integration-test-context.js';
 import { toDateString } from '@msdining/common/util/date-util';
 
 let ctx: IntegrationTestContext;

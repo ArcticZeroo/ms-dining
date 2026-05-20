@@ -31,7 +31,7 @@ import { ICafe } from '../../shared/models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 const CAFE_ID = 'cafe25';
 const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday

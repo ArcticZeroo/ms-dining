@@ -1,9 +1,9 @@
 import { IStationUniquenessData } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { betterLogosByNormalizedName } from '../shared/constants/better-logos.js';
-import { CafeViewType, getBaseApiUrlWithoutTrailingSlash, VIEWS_BY_ID } from '../shared/constants/cafes.js';
-import { ICafe, ICafeConfig, IMenuItemBase } from '../shared/models/cafe.js';
-import { Nullable } from '../shared/models/util.js';
+import { betterLogosByNormalizedName } from '../constants/better-logos.js';
+import { CafeViewType, getBaseApiUrlWithoutTrailingSlash, VIEWS_BY_ID } from '../constants/cafes.js';
+import { ICafe, ICafeConfig, IMenuItemBase } from '../models/cafe.js';
+import { Nullable } from '../models/util.js';
 import { toDateString } from '@msdining/common/util/date-util';
 
 export const getLogoUrl = (cafe: ICafe, config?: Pick<ICafeConfig, 'logoName' | 'tenantId' | 'contextId'>) => {

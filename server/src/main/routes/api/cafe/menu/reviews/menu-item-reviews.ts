@@ -4,8 +4,8 @@ import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/revi
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../../../util/serde.js';
+import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
+import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
 import { sendVisitMiddleware } from '../../../../../middleware/analytics.js';
 import { ReviewStorageClient } from '../../../../../../api/storage/clients/review.js';
 import { MenuItemStorageClient } from '../../../../../../api/storage/clients/menu-item.js';

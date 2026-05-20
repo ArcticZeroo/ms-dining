@@ -1,6 +1,6 @@
 import { DateUtil } from '@msdining/common';
-import { ENVIRONMENT_SETTINGS } from '../../../util/env.js';
-import { logInfo } from '../../../util/log.js';
+import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
+import { logInfo } from '../../../shared/util/log.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';

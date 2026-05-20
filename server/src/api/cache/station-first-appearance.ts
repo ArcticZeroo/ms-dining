@@ -1,8 +1,8 @@
 import { LockedMap } from '../lock/map.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { CACHE_EVENTS } from '../storage/events.js';
-import { logError } from '../../util/log.js';
-import { throwError } from '../../util/error.js';
+import { logError } from '../../shared/util/log.js';
+import { throwError } from '../../shared/util/error.js';
 
 const FIRST_STATION_APPEARANCE_CACHE = new LockedMap<string /*stationId*/, Date>();
 

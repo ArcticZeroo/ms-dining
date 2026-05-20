@@ -31,14 +31,14 @@ import * as fs from 'node:fs';
 import * as http from 'node:http';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { disconnectPrismaClient } from '../api/storage/client.js';
-import { TranslationCache } from '../api/cafe/buy-ondemand/i18n.js';
-import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
+import { disconnectPrismaClient } from '../../api/storage/client.js';
+import { TranslationCache } from '../../api/cafe/buy-ondemand/i18n.js';
+import { EMBEDDINGS_WORKER_QUEUE } from '../../worker/queues/embeddings.js';
 import {
     enterWithServices,
     runWithServices,
-} from '../main/services/registry.js';
-import type { Services } from '../main/services/types.js';
+} from '../../main/services/registry.js';
+import type { Services } from '../../main/services/types.js';
 import { applySchemaToTempDb } from './db-test-helper.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';
@@ -145,7 +145,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         // Dynamic import so loading the app (which constructs Koa, registers
         // routes, requires the SESSION_SECRET, etc.) only happens for tests
         // that actually exercise HTTP — keeps the smoke test light.
-        const { createApp } = await import('../main/app.js');
+        const { createApp } = await import('../../main/app.js');
         const app = createApp(services);
         const httpServer = http.createServer(app.callback());
         await new Promise<void>((resolve, reject) => {

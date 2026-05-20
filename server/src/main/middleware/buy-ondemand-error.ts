@@ -1,6 +1,6 @@
 import { Middleware } from 'koa';
 import { BuyOnDemandError } from '../../api/cafe/buy-ondemand/buy-ondemand-error.js';
-import { logError } from '../../util/log.js';
+import { logError } from '../../shared/util/log.js';
 
 /**
  * Translates `BuyOnDemandError` (raised when an upstream BoD response carried

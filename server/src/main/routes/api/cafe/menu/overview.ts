@@ -3,16 +3,16 @@ import { ICafe } from '../../../../../shared/models/cafe.js';
 import { ICafeOverviewResponse, ICafeOverviewStation } from '@msdining/common/models/cafe';
 import { DailyMenuStorageClient } from '../../../../../api/storage/clients/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../../../api/cache/daily-uniqueness.js';
-import { getDefaultUniquenessDataForStation } from '../../../../../util/cafe.js';
+import { getDefaultUniquenessDataForStation } from '../../../../../shared/util/cafe.js';
 import { IRecommendationItem, RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { getRecommendationsAsync } from '../../../../../api/cache/recommendations.js';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
 import { getApplicationNameForMenuOverview } from '@msdining/common/constants/analytics';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
-import { validateViewMenuAccessAsync } from '../../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../../util/serde.js';
-import { createSeededRandom, selectWithVariety } from '../../../../../util/random.js';
-import { getDefaultReasonForSectionType } from '../../../../../util/recommendation.js';
+import { validateViewMenuAccessAsync } from '../../../../util/koa.js';
+import { jsonStringifyWithoutNull } from '../../../../../shared/util/serde.js';
+import { createSeededRandom, selectWithVariety } from '../../../../../shared/util/random.js';
+import { getDefaultReasonForSectionType } from '../../../../../shared/util/recommendation.js';
 import { getShutdownCafeStateAsync } from '../../../../../api/cache/daily-cafe-state.js';
 
 export const registerOverviewRoutes = (router: Router) => {

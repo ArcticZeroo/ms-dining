@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 import type TypedEmitter from '../../shared/models/typed-emitter.js';
 import { IGroupMembershipDirtyEvent, IMenuPublishEvent, IReviewDirtyEvent } from '../../shared/models/storage-events.js';
-import { logDebug } from '../../util/log.js';
+import { logDebug } from '../../shared/util/log.js';
 
 type StorageEvents = {
 	menuPublished: (diff: IMenuPublishEvent) => void;

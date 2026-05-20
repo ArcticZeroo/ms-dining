@@ -17,7 +17,7 @@ import { ICafe } from '../../../shared/models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../../test-server/integration-test-context.js';
+} from '../../../tests/test-server/integration-test-context.js';
 
 const STATION_TEST_CAFE_ID = 'station-name-test-cafe';
 const STATION_TEST_CAFE: ICafe = {

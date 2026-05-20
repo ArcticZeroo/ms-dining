@@ -1,8 +1,8 @@
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
 import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../shared/models/prisma.js';
-import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
-import { lazy, lazyAsync } from '../../util/lazy.js';
+import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
+import { lazy, lazyAsync } from '../../shared/util/lazy.js';
 import { getDbPriority } from './db-context.js';
 import { DB_METRIC_NAMES, DB_METRICS } from './db-metrics.js';
 import { PrioritySemaphore } from './priority-semaphore.js';

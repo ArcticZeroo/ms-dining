@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import { getServices } from '../services/registry.js';
 import { getVisitorId } from './analytics.js';
-import { CATCH_ALL_PATH } from '../../util/koa.js';
+import { CATCH_ALL_PATH } from '../util/koa.js';
 
 const TELEMETRY_PROPERTIES_KEY = 'telemetryProperties';
 

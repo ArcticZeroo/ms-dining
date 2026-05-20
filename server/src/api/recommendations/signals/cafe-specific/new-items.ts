@@ -6,7 +6,7 @@ import {
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
-import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
+import { IMenuItemCandidate, toRecommendationItem } from '../../../../shared/util/recommendation.js';
 import { retrieveDailyCafeMenuAsync } from '../../../cache/daily-menu.js';
 import { retrieveUniquenessDataForCafe } from '../../../cache/daily-uniqueness.js';
 import { retrieveFirstMenuItemAppearance } from '../../../cache/menu-item-first-appearance.js';

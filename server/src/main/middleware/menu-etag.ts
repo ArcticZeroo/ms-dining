@@ -16,7 +16,7 @@
 import Router from '@koa/router';
 import Koa from 'koa';
 import { getMenuWatermark } from '../../api/cache/menu-watermark.js';
-import { getDateStringForMenuRequest } from '../../util/date.js';
+import { getDateStringForMenuRequest } from '../util/date.js';
 
 const formatEtag = (timestamp: number): string => `W/"${timestamp}"`;
 

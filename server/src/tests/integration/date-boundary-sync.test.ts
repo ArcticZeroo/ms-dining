@@ -24,11 +24,11 @@ import { DailyCafeUpdateSession } from '../../api/cafe/job/update.js';
 import { usePrismaClient } from '../../api/storage/client.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { ICafe } from '../../shared/models/cafe.js';
-import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
+import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 const CAFE_ID = 'cafe25';
 // A weekday so weekend-skip logic doesn't short-circuit the boot.

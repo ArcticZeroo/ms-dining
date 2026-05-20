@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { logError, logInfo } from '../../../util/log.js';
+import { logError, logInfo } from '../../../shared/util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { DateUtil } from '@msdining/common';
 import { runWithDbPriority } from '../../storage/db-context.js';

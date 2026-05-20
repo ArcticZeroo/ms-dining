@@ -9,9 +9,9 @@ import { hasAuthEnvironmentVariables } from '../../../shared/constants/env.js';
 import { requireAuthenticated, requireNotAuthenticated } from '../../middleware/auth.js';
 import { doNotCacheMiddleware } from '../../middleware/cache.js';
 import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategies.js';
-import { attachRouter, getUserIdOrThrow, getUserOrThrowAsync } from '../../../util/koa.js';
-import { logError, logInfo } from '../../../util/log.js';
-import { isUpdateUserSettingsInput } from '../../../util/typeguard.js';
+import { attachRouter, getUserIdOrThrow, getUserOrThrowAsync } from '../../util/koa.js';
+import { logError, logInfo } from '../../../shared/util/log.js';
+import { isUpdateUserSettingsInput } from '../../../shared/util/typeguard.js';
 
 const isAuthorizationError = (err: unknown) => {
     return err instanceof Error && err.constructor.name === 'AuthorizationError';

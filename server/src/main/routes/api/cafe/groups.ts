@@ -4,8 +4,8 @@ import {
 	menuItemToGroupMember,
 	stationToGroupMember
 } from '../../../../api/storage/clients/groups.js';
-import { attachRouter, requireAdmin } from '../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../util/serde.js';
+import { attachRouter, requireAdmin } from '../../../util/koa.js';
+import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import {
 	AddGroupMembersRequestSchema,
 	CreateGroupRequestSchema,

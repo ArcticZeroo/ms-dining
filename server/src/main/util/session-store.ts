@@ -1,4 +1,4 @@
-import { usePrismaClient, usePrismaWrite } from '../api/storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../../api/storage/client.js';
 import { z } from 'zod';
 
 const SessionDataSchema = z.object({

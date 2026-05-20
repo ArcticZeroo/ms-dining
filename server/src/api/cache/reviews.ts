@@ -4,7 +4,7 @@ import { StationStorageClient } from '../storage/clients/station.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../lock/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { lazyAsync } from '../../util/lazy.js';
+import { lazyAsync } from '../../shared/util/lazy.js';
 
 const MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
 const STATION_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();

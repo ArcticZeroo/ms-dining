@@ -5,7 +5,7 @@ import {
 	deduplicateItems,
 	IMenuItemCandidate,
 	toRecommendationItem,
-} from '../../util/recommendation.js';
+} from '../../shared/util/recommendation.js';
 import { RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 

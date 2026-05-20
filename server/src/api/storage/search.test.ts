@@ -35,7 +35,7 @@ import { usePrismaWrite } from './client.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../../tests/test-server/integration-test-context.js';
 
 const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday — middle of the week
 const TODAY = DateUtil.toDateString(FAKE_NOW);

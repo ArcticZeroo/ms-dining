@@ -4,7 +4,7 @@ import {
     ICancellationToken,
     PromiseCancelledException,
     runPromiseWithRetries,
-} from '../../util/async.js';
+} from '../../shared/util/async.js';
 
 // 37e02a6: the loop body must use `return await promise(i)` rather than
 // `return promise(i)`. Without the await, rejections from the inner promise

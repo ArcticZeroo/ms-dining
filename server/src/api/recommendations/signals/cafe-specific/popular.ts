@@ -5,7 +5,7 @@ import {
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getEntityKey } from '@msdining/common/util/entity-key';
-import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../util/recommendation.js';
+import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../shared/util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { IRecommendationContext } from '../../shared.js';
 

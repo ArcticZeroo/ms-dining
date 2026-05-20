@@ -28,7 +28,7 @@ import { menuItemRoutes } from './handlers/menu-items.js';
 import { orderingRoutes } from './handlers/ordering.js';
 import { paymentRoutes } from './handlers/payment.js';
 import { translationRoutes } from './handlers/translation.js';
-import { getServices } from '../main/services/registry.js';
+import { getServices } from '../../main/services/registry.js';
 
 function pathPatternToRegex(pattern: string): RegExp {
     // Convert '/sites/:tenantId/:contextId/concepts/:displayProfileId'

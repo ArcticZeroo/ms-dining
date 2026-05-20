@@ -1,9 +1,9 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { isDev } from '../../../util/env.js';
-import { md5 } from '../../../util/hash.js';
-import { logDebug, logError } from '../../../util/log.js';
-import { localeCompareSortAsc } from '../../../util/sort.js';
+import { isDev } from '../../../shared/util/env.js';
+import { md5 } from '../../../shared/util/hash.js';
+import { logDebug, logError } from '../../../shared/util/log.js';
+import { localeCompareSortAsc } from '../../../shared/util/sort.js';
 import { retrieveTextCompletion } from '../../ai/index.js';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 

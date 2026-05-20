@@ -5,20 +5,20 @@ import {
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { setInterval } from 'node:timers';
-import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../util/date.js';
-import { getNamespaceLogger, logError } from '../../util/log.js';
+import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../main/util/date.js';
+import { getNamespaceLogger, logError } from '../../shared/util/log.js';
 import { LockedExpiringMap } from '../lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
 import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
-import { lazyAsync } from '../../util/lazy.js';
+import { lazyAsync } from '../../shared/util/lazy.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
 import { getShutDownCafeIdsAsync } from './daily-cafe-state.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
 import { getHiddenGems } from '../recommendations/signals/cafe-specific/hidden-gems.js';
 import { getBasedOnReviews } from '../recommendations/signals/user-specific/based-on-reviews.js';
 import { getTrySomethingDifferent } from '../recommendations/signals/user-specific/try-something-different.js';
-import { buildProximityWeightMap } from '../../util/proximity.js';
+import { buildProximityWeightMap } from '../../shared/util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
 import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
 import { CACHE_EVENTS } from '../storage/events.js';

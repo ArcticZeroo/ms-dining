@@ -1,7 +1,7 @@
 import { LockedMap } from '../lock/map.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import { setInterval } from 'node:timers';
-import { logError } from '../../util/log.js';
+import { logError } from '../../shared/util/log.js';
 
 interface ICacheItem<TValue> {
 	value: TValue;

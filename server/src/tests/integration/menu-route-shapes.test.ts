@@ -27,8 +27,8 @@ import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchJson } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchJson } from '../test-server/test-helpers.js';
 
 const CAFE_ID = 'cafe25';
 // Pinned weekday so weekend-skip logic doesn't short-circuit.

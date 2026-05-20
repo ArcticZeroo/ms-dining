@@ -12,14 +12,14 @@ import {
 	getTrimmedQueryParam,
 	serializeMapOfStringToSet,
 	serializeSearchResults
-} from '../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../util/serde.js';
-import { logDebug, logError } from '../../../../util/log.js';
+} from '../../../util/koa.js';
+import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
+import { logDebug, logError } from '../../../../shared/util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../../worker/queues/embeddings.js';
 import { retrieveVisitData } from '../../../../api/cache/pattern.js';
 import { Middleware } from 'koa';
 import { SearchQueryClient } from '../../../../api/storage/clients/search-query.js';
-import { getDateForMenuRequest } from '../../../../util/date.js';
+import { getDateForMenuRequest } from '../../../util/date.js';
 import { searchAutocomplete } from '../../../../api/cache/autocomplete.js';
 import Duration from '@arcticzeroo/duration';
 

@@ -6,7 +6,7 @@ import {
 	getMaybeUserId,
 	getTrimmedQueryParam,
 	serializeSearchResults
-} from '../../../../util/koa.js';
+} from '../../../util/koa.js';
 import { SearchManager } from '../../../../api/storage/search.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { toDateString } from '@msdining/common/util/date-util';
@@ -16,7 +16,7 @@ import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../
 import { getRecommendationsAsync } from '../../../../api/cache/recommendations.js';
 import { UserStorageClient } from '../../../../api/storage/clients/user.js';
 import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../../shared/constants/cafes.js';
-import { getDateForMenuRequest } from '../../../../util/date.js';
+import { getDateForMenuRequest } from '../../../util/date.js';
 import { IRecommendationsResponse } from '@msdining/common/models/recommendation';
 
 export const registerRecommendationsRoutes = (parent: Router) => {

@@ -1,4 +1,4 @@
-import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
+import { isUniqueConstraintFailedError } from '../../../shared/util/prisma.js';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { Prisma, Station } from '@prisma/client';
 import { ICafeStation } from '../../../shared/models/cafe.js';

@@ -26,7 +26,7 @@ import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js'
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

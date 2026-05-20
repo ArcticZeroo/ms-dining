@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { rethrowWithoutStatus } from '../../util/error.js';
+import { rethrowWithoutStatus } from '../../shared/util/error.js';
 
 // 0430035: third-party SDK errors (OpenAI, Anthropic) set `.status` to the
 // upstream HTTP status (e.g. 429 for rate limits). Koa reads `err.status` as

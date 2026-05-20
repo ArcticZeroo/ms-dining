@@ -9,7 +9,7 @@ import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../shar
 import { StationStorageClient } from '../storage/clients/station.js';
 import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { logError } from '../../util/log.js';
+import { logError } from '../../shared/util/log.js';
 
 // todo: consider making a form of LockedMap which has nonexclusive and exclusive reads so that we don't need the invalidation promise
 const VISIT_DATA_CACHE = new Map<SearchEntityType, ExpiringCacheMap<string /*name*/, Array<IEntityVisitData>>>();

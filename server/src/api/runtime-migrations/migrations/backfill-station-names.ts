@@ -1,6 +1,6 @@
 import { usePrismaTransaction } from '../../storage/client.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { logInfo } from '../../../util/log.js';
+import { logInfo } from '../../../shared/util/log.js';
 import { IRuntimeMigration } from '../types.js';
 
 export const backfillStationNames: IRuntimeMigration = {

@@ -1,6 +1,6 @@
 import { Middleware } from 'koa';
-import { logError } from '../../util/log.js';
-import { ServiceError, ServiceErrorCode } from '../../worker-rpc/errors.js';
+import { logError } from '../../shared/util/log.js';
+import { ServiceError, ServiceErrorCode } from '../../worker/rpc/errors.js';
 
 /**
  * HTTP status returned for each {@link ServiceErrorCode}. Centralizing this

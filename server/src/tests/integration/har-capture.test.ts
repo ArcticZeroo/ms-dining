@@ -30,7 +30,7 @@ import * as assert from 'node:assert/strict';
 import * as http from 'node:http';
 import { AddressInfo } from 'node:net';
 import { BuyOnDemandClient } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
-import { HarCapture } from '../../util/har.js';
+import { HarCapture } from '../../shared/util/har.js';
 import { ICafe } from '../../shared/models/cafe.js';
 
 /**

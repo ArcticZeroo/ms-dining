@@ -1,9 +1,9 @@
-import { WorkerThreadHandler } from '../../worker-rpc/handler.js';
+import { WorkerThreadHandler } from '../../worker/rpc/handler.js';
 import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
 import { serverMenuItemThumbnailPath } from '../../shared/constants/config.js';
-import { logDebug, logError, logInfo } from '../../util/log.js';
-import { retrieveImageMetadataAsync } from '../../util/image.js';
+import { logDebug, logError, logInfo } from '../../shared/util/log.js';
+import { retrieveImageMetadataAsync } from '../../shared/util/image.js';
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../shared/models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem, IThumbnailResult } from '../cafe/image/thumbnail.js';

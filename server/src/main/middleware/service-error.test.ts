@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Context } from 'koa';
-import { ServiceError, SERVICE_ERROR_CODES } from '../../worker-rpc/errors.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../worker/rpc/errors.js';
 import { serviceErrorMiddleware } from './service-error.js';
 
 interface MockContext {

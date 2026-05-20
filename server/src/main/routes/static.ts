@@ -4,7 +4,7 @@ import serve from 'koa-static';
 import { serverStaticPath } from '../../shared/constants/config.js';
 import Duration from '@arcticzeroo/duration';
 import Router from '@koa/router';
-import { attachRouter, CATCH_ALL_PATH } from '../../util/koa.js';
+import { attachRouter, CATCH_ALL_PATH } from '../util/koa.js';
 
 export const createStaticRoutingApp= () => {
     const app = new Koa();

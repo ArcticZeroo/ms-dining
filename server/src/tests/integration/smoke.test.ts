@@ -22,7 +22,7 @@ import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 let ctx: IntegrationTestContext;
 

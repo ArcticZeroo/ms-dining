@@ -10,15 +10,15 @@ import {
 	yieldDaysInRange
 } from '@msdining/common/util/date-util';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../shared/models/storage-events.js';
-import { logError } from '../../util/log.js';
+import { logError } from '../../shared/util/log.js';
 import { ICafeStation } from '../../shared/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { getDefaultUniquenessDataForStation } from '../../util/cafe.js';
+import { getDefaultUniquenessDataForStation } from '../../shared/util/cafe.js';
 import { StationThemeClient } from '../storage/clients/station-theme.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
-import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../util/date.js';
+import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../main/util/date.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 

@@ -45,11 +45,11 @@ import { SEARCH_THREAD_HANDLER } from '../worker-thread/search.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../../tests/test-server/integration-test-context.js';
 import {
     IMenuItemCandidate,
     getDefaultReasonForSectionType,
-} from '../../util/recommendation.js';
+} from '../../shared/util/recommendation.js';
 import { IRecommendationContext, IUserRecommendationContext } from './shared.js';
 import { getPopularItems } from './signals/cafe-specific/popular.js';
 import { getHiddenGems } from './signals/cafe-specific/hidden-gems.js';

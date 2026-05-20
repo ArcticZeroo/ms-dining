@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { logError } from '../../../util/log.js';
+import { logError } from '../../../shared/util/log.js';
 import { getServices } from '../../../main/services/registry.js';
 import type { BuyOnDemandClient } from './buy-ondemand-client.js';
 

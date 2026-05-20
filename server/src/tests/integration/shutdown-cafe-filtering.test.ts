@@ -31,8 +31,8 @@ import { SearchResponseSchema } from '@msdining/common/models/http';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchJson } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchJson } from '../test-server/test-helpers.js';
 
 const SHUTDOWN_CAFE_IDS = ['cafe83', 'cafe92'] as const;
 const SHUTDOWN_MESSAGE = 'Closed for the integration test — back soon';

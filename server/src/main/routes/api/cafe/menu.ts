@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { memoizeResponseBody } from '../../../middleware/cache.js';
-import { attachRouter } from '../../../../util/koa.js';
+import { attachRouter } from '../../../util/koa.js';
 import { MenuItemStorageClient } from '../../../../api/storage/clients/menu-item.js';
 import { registerViewRoutes } from './menu/view.js';
 import { registerReviewRoutes } from './menu/reviews/index.js';

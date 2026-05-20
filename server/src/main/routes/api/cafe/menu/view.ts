@@ -5,16 +5,16 @@ import { DailyMenuStorageClient } from '../../../../../api/storage/clients/daily
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
 import { menuEtagMiddleware } from '../../../../middleware/menu-etag.js';
 import { ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
-import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../../../util/cafe.js';
-import { getDateStringForMenuRequest } from '../../../../../util/date.js';
-import { attachRouter, supportsVersionTag, validateCafeMenuAccessAsync } from '../../../../../util/koa.js';
-import { jsonStringifyWithoutNull } from '../../../../../util/serde.js';
+import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../../../shared/util/cafe.js';
+import { getDateStringForMenuRequest } from '../../../../util/date.js';
+import { attachRouter, supportsVersionTag, validateCafeMenuAccessAsync } from '../../../../util/koa.js';
+import { jsonStringifyWithoutNull } from '../../../../../shared/util/serde.js';
 import {
 	getApplicationNameForCafeMenu,
 	getApplicationNameForMenuOverviewSummary,
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
-import { logDebug } from '../../../../../util/log.js';
+import { logDebug } from '../../../../../shared/util/log.js';
 import { retrieveReviewHeaderAsync, retrieveStationReviewHeaderAsync } from '../../../../../api/cache/reviews.js';
 import { retrieveFirstMenuItemAppearance } from '../../../../../api/cache/menu-item-first-appearance.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../../../worker/interface/thumbnail.js';

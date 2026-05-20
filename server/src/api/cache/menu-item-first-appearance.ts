@@ -1,9 +1,9 @@
 import { LockedMap } from '../lock/map.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { STORAGE_EVENTS } from '../storage/events.js';
-import { logError } from '../../util/log.js';
-import { throwError } from '../../util/error.js';
-import { lazyAsync } from '../../util/lazy.js';
+import { logError } from '../../shared/util/log.js';
+import { throwError } from '../../shared/util/error.js';
+import { lazyAsync } from '../../shared/util/lazy.js';
 
 const FIRST_APPEARANCE_MAP = lazyAsync(async () => {
     return new LockedMap(await DailyMenuStorageClient.retrieveAllFirstMenuItemAppearances());

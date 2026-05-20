@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { registerCafeRoutes } from './cafe/cafe.js';
-import { attachRouter, CATCH_ALL_PATH } from '../../../util/koa.js';
+import { attachRouter, CATCH_ALL_PATH } from '../../util/koa.js';
 import { registerAnalyticsRoutes } from './analytics.js';
 import { registerAdminRoutes } from './admin.js';
 import { registerAuthRoutes } from './auth.js';

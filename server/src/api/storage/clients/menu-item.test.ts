@@ -28,7 +28,7 @@ import { usePrismaWrite } from '../client.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../../test-server/integration-test-context.js';
+} from '../../../tests/test-server/integration-test-context.js';
 
 let ctx: IntegrationTestContext;
 

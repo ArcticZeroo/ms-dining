@@ -6,8 +6,8 @@ import {
 	SearchEntityType
 } from '@msdining/common/models/search';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
-import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../util/typeguard.js';
-import { lazy } from '../../../util/lazy.js';
+import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../shared/util/typeguard.js';
+import { lazy } from '../../../shared/util/lazy.js';
 import { IEntityRef } from '../../../shared/models/vector.js';
 
 const createVectorDatabase = (path: string) => {

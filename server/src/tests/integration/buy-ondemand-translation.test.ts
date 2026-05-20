@@ -25,7 +25,7 @@ import { createBuyOnDemandClient } from '../../main/services/registry.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 const CAFE_ID = 'cafe25';
 // Pinned weekday so weekend-skip logic doesn't short-circuit during sync.

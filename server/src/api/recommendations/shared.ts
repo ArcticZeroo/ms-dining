@@ -1,7 +1,7 @@
 import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
-import { getNamespaceLogger } from '../../util/log.js';
-import { ACCOMPANIMENT_FILTER } from '../../util/menu-item-filter.js';
-import { IMenuItemCandidate } from '../../util/recommendation.js';
+import { getNamespaceLogger } from '../../shared/util/log.js';
+import { ACCOMPANIMENT_FILTER } from '../../shared/util/menu-item-filter.js';
+import { IMenuItemCandidate } from '../../shared/util/recommendation.js';
 import { retrieveDailyCafeMenuAsync } from '../cache/daily-menu.js';
 import { getShutDownCafeIdsAsync } from '../cache/daily-cafe-state.js';
 

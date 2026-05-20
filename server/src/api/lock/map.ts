@@ -1,6 +1,6 @@
 import { Lock, type MaybePromise } from '@frozor/lock';
 import { setInterval } from 'node:timers';
-import { logError } from '../../util/log.js';
+import { logError } from '../../shared/util/log.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 
 export interface ILockedMap<K, V> {

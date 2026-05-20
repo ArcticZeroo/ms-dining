@@ -21,8 +21,8 @@ import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchExpectStatus } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchExpectStatus } from '../test-server/test-helpers.js';
 
 // Pinned weekday so any date-sensitive code path observes a stable clock.
 const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday

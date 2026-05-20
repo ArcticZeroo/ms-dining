@@ -3,10 +3,10 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../shared/constants/config.js';
 import { defaultUserAgent } from '../../../shared/constants/http.js';
-import { runPromiseWithRetries } from '../../../util/async.js';
-import { logDebug } from '../../../util/log.js';
+import { runPromiseWithRetries } from '../../../shared/util/async.js';
+import { logDebug } from '../../../shared/util/log.js';
 import { IThumbnailWorkerRequest } from '../../../shared/models/thumbnail.js';
-import { IImageMetadata } from '../../../util/image.js';
+import { IImageMetadata } from '../../../shared/util/image.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { updateManifestEntry } from './manifest.js';
 

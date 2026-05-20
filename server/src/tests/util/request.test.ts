@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Response } from 'node-fetch';
-import { makeRequestWithRetries } from '../../util/request.js';
+import { makeRequestWithRetries } from '../../shared/util/request.js';
 
 // makeRequestWithRetries wraps runPromiseWithRetries with a hard-coded 1000ms
 // delay between attempts. Keep retryCount low (0 or 1) so tests stay fast.
