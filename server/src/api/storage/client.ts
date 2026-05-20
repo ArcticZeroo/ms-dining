@@ -1,3 +1,4 @@
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
 import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../models/prisma.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
@@ -5,6 +6,7 @@ import { lazy, lazyAsync } from '../../util/lazy.js';
 import { getDbPriority } from './db-context.js';
 import { DB_METRIC_NAMES, DB_METRICS } from './db-metrics.js';
 import { PrioritySemaphore } from './priority-semaphore.js';
+import { requireEnvironmentVariable } from '../../constants/env.js';
 
 // With just one semaphore, we were seeing db writes timeout under load (i.e. initial boot while loading cafes)
 // because we would queue multiple writes in parallel and hit SQLite's busy timeout, even though we were actually
@@ -41,14 +43,25 @@ const PRISMA_TRANSACTION_TIMEOUT_MS = 30_000;
 // is always tuned correctly. Queued behind a `READY` promise so the first
 // caller waits for tuning to finish before issuing real work.
 
-// The URL is passed to PrismaClient explicitly (rather than letting it read
-// process.env on construction) so the snapshot taken by @prisma/client's
-// bundled dotenv on import doesn't leak into integration tests.
+// We pass the URL through the libsql adapter explicitly (rather than letting
+// Prisma's bundled dotenv pick up process.env on import) so the snapshot
+// taken at module-load time doesn't leak into integration tests that set
+// DATABASE_URL after import.
+//
+// `timestampFormat: 'unixepoch-ms'` preserves backward compatibility with
+// the existing production database, whose DateTime columns were stored as
+// unix epoch milliseconds by Prisma's native sqlite driver. The libsql
+// adapter defaults to ISO 8601 strings; we override here to avoid reading
+// old data as garbage.
 const PRISMA_CLIENT = lazy(() => {
-    const databaseUrl = process.env.DATABASE_URL;
-    return databaseUrl
-        ? new PrismaClient({ datasourceUrl: databaseUrl })
-        : new PrismaClient();
+	// The libsql adapter requires an explicit URL (unlike the prior native sqlite driver, which Prisma read from .env on its own). Set DATABASE_URL in your environment or .env.
+    const databaseUrl = requireEnvironmentVariable('DATABASE_URL');
+
+    const adapter = new PrismaLibSql(
+        { url: databaseUrl },
+        { timestampFormat: 'unixepoch-ms' },
+    );
+    return new PrismaClient({ adapter });
 });
 
 const READY = lazyAsync(async () => {
