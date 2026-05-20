@@ -10,8 +10,8 @@ import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
 import { logDebug, logError, logInfo } from '../../../shared/util/log.js';
 import { Semaphore } from '@frozor/lock';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
-import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { saveDailyMenuAsync } from './storage.js';
+import { getServices } from '../../../main/services/registry.js';
 import { CafeMenuSession } from '../session/menu.js';
 import { IStationListResult } from '../buy-ondemand/stations.js';
 import { classifyShutdownMessageAsync } from '../shutdown-classifier.js';
@@ -88,9 +88,13 @@ export class DailyCafeUpdateSession {
                 shutdownMessageHash = classification.messageHash;
             }
 
-            await DailyMenuStorageClient.upsertDailyCafeAsync(cafe.id, this.dateString, {
-                isAvailable:     result.isAvailable,
-                shutdownMessageHash,
+            await getServices().data.dailyMenu.upsertDailyCafeAsync({
+                cafeId: cafe.id,
+                dateString: this.dateString,
+                data: {
+                    isAvailable: result.isAvailable,
+                    shutdownMessageHash,
+                }
             });
 
             await saveDailyMenuAsync({
@@ -130,7 +134,7 @@ export class DailyCafeUpdateSession {
 
             // Skip cafes that are past their closing time for today
             if (this.daysInFuture === 0) {
-                const storedHours = await DailyMenuStorageClient.getCafeHoursForDate(cafe.id, this.dateString);
+                const storedHours = await getServices().data.dailyMenu.getCafeHoursForDate({ cafeId: cafe.id, dateString: this.dateString });
                 if (storedHours && isCurrentlyPastMinutes(storedHours.closesAt)) {
                     logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is past closing time (closes at ${minutesToTimeString(storedHours.closesAt)}, opens at ${minutesToTimeString(storedHours.opensAt)})`);
                     continue;

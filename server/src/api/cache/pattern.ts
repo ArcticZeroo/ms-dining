@@ -2,7 +2,6 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
-import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { calculatePattern, IPatternData } from '@msdining/common/util/pattern-util';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../shared/models/storage-events.js';
@@ -20,10 +19,10 @@ export const retrieveVisitData = async (entityType: SearchEntityType, name: stri
     if (!VISIT_DATA_CACHE.has(entityType)) {
         VISIT_DATA_CACHE.set(entityType, new ExpiringCacheMap(
             new Duration({ minutes: 5 }),
-            async name => DailyMenuStorageClient.retrieveEntityVisits(
+            async name => getServices().data.dailyMenu.retrieveEntityVisits({
                 entityType,
-                name
-            )
+                entityName: name
+            })
         ));
     }
 

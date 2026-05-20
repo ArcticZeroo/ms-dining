@@ -2,9 +2,9 @@ import { ICafeStation } from '../../shared/models/cafe.js';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
 import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
-import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { logError } from '../../shared/util/log.js';
+import { getServices } from '../../main/services/registry.js';
 
 const MENU_CACHE_TIME = new Duration({ minutes: 5 });
 
@@ -13,7 +13,7 @@ const MENU_CACHE_BY_CAFE = new Map<string /*cafeId*/, ExpiringCacheMap<string /*
 for (const cafe of CAFES_BY_ID.values()) {
     const cache = new ExpiringCacheMap<string, Array<ICafeStation>>(
         MENU_CACHE_TIME.inMilliseconds,
-        (dateString) => DailyMenuStorageClient.retrieveDailyMenuAsync(cafe.id, dateString)
+        (dateString) => getServices().data.dailyMenu.retrieveDailyMenuAsync({ cafeId: cafe.id, dateString })
     );
 
     MENU_CACHE_BY_CAFE.set(

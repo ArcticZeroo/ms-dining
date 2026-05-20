@@ -9,6 +9,7 @@ import { sessionServiceCommands } from '../../util/session-store.js';
 import { reviewServiceCommands } from '../../../api/storage/clients/review.js';
 import { groupsServiceCommands } from '../../../api/storage/clients/groups.js';
 import { menuItemServiceCommands } from '../../../api/storage/clients/menu-item.js';
+import { dailyMenuServiceCommands } from '../../../api/storage/clients/daily-menu.js';
 
 /**
  * Single source of truth for which worker-side service command bags are
@@ -32,6 +33,7 @@ export const DATA_SERVICES = {
     review:       reviewServiceCommands,
     groups:       groupsServiceCommands,
     menuItem:     menuItemServiceCommands,
+    dailyMenu:    dailyMenuServiceCommands,
 } as const;
 
 export type DataServiceMap = typeof DATA_SERVICES;

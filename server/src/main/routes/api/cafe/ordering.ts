@@ -20,7 +20,6 @@ import { phone } from 'phone';
 import { CafeOrderSession } from '../../../../api/cafe/session/order.js';
 import { WaitTimeSession } from '../../../../api/cafe/session/wait-time.js';
 import { getServices } from '../../../../main/services/registry.js';
-import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
@@ -104,7 +103,7 @@ const validateCartData = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderI
             cartItems: []
         };
 
-        const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowDateString);
+        const menu = await getServices().data.dailyMenu.retrieveDailyMenuAsync({ cafeId, dateString: nowDateString });
 
         for (const serializedItem of serializedItems) {
             const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: serializedItem.itemId });
@@ -374,7 +373,7 @@ export const registerOrderingRoutes = (parent: Router) => {
                 const remainingItemIds = new Set(itemIds);
                 const items: IMenuItemBase[] = [];
 
-                const stations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowString);
+                const stations = await getServices().data.dailyMenu.retrieveDailyMenuAsync({ cafeId, dateString: nowString });
 
                 for (const station of stations) {
                     for (const itemId of remainingItemIds) {

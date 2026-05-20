@@ -10,7 +10,6 @@ import { getCafeNumber } from '@msdining/common/util/cafe-util';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../shared/models/search.js';
 import { Nullable } from '../../shared/models/util.js';
 import { getLogoUrl, getStationLogoUrl, getThumbnailUrl } from '../../shared/util/cafe.js';
-import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import * as vectorClient from './vector/client.js';
 import { IVectorSearchResult } from '../../shared/models/vector.js';
 import { logDebug } from '../../shared/util/log.js';
@@ -253,7 +252,7 @@ class SearchSession {
     }
 
     getMenusAsync() {
-        return DailyMenuStorageClient.getMenusForSearch(this.date);
+        return getServices().data.dailyMenu.getMenusForSearch({ date: this.date });
     }
 
     isMatch(text: Nullable<string>, entityType: SearchEntityType) {
@@ -741,7 +740,7 @@ export abstract class SearchManager {
         maxPrice,
         date
     }: ICheapItemSearchParams): Promise<ICheapItemSearchResult[]> {
-        const dailyStations = await DailyMenuStorageClient.getMenusForSearch(date);
+        const dailyStations = await getServices().data.dailyMenu.getMenusForSearch({ date });
 
         const resultsByItemNameByPrice = new Map<string, Map<number, ICheapItemSearchResult>>();
 

@@ -1,7 +1,6 @@
 import Router from '@koa/router';
 import { IMenuItemDTO, IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { ICafeMenuResponse, MenuResponse } from '@msdining/common/models/http';
-import { DailyMenuStorageClient } from '../../../../../api/storage/clients/daily-menu.js';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
 import { menuEtagMiddleware } from '../../../../middleware/menu-etag.js';
 import { ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
@@ -26,6 +25,7 @@ import { setTelemetryProperties } from '../../../../middleware/telemetry.js';
 import { registerOverviewRoutes } from './overview.js';
 import { getShutdownCafeStateAsync } from '../../../../../api/cache/daily-cafe-state.js';
 import { VERSION_TAG } from '@msdining/common/constants/versions';
+import { getServices } from '../../../../services/registry.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	if (uniquenessData == null || !uniquenessData.has(station.name)) {
@@ -130,7 +130,7 @@ export const registerViewRoutes = (parent: Router) => {
 		const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
 			retrieveDailyCafeMenuAsync(cafe.id, dateString),
 			retrieveUniquenessDataForCafe(cafe.id, dateString),
-			DailyMenuStorageClient.retrieveDailyCafeStateAsync(cafe.id, dateString),
+			getServices().data.dailyMenu.retrieveDailyCafeStateAsync({ cafeId: cafe.id, dateString }),
 		]);
 
 		if (allowArrayFallback && !supportsVersionTag(ctx, VERSION_TAG.menuRouteIsObjectInsteadOfArray)) {
@@ -198,7 +198,7 @@ export const registerViewRoutes = (parent: Router) => {
 				Promise.all(
 					cafes.map(async (cafe) => {
 						const [stationHeaders, uniquenessData] = await Promise.all([
-							DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafe.id, dateString),
+							getServices().data.dailyMenu.retrieveDailyMenuOverviewHeadersAsync({ cafeId: cafe.id, dateString }),
 							retrieveUniquenessDataForCafe(cafe.id, dateString)
 						]);
 
@@ -214,7 +214,7 @@ export const registerViewRoutes = (parent: Router) => {
 
 			const shutdownState: IMenuOverviewSummary['shutdownState'] = {};
 			for (const cafe of cafes) {
-				const state = shutDownCafeState.get(cafe.id);
+				const state = shutDownCafeState[cafe.id];
 				if (state) {
 					shutdownState[cafe.id] = state;
 				}

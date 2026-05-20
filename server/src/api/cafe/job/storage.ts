@@ -1,9 +1,9 @@
 import { ICafe, ICafeStation } from '../../../shared/models/cafe.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
-import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../worker/queues/embeddings.js';
 import { usePrismaTransaction } from '../../storage/client.js';
+import { getServices } from '../../../main/services/registry.js';
 
 interface ISaveStationParams {
     station: ICafeStation;
@@ -47,7 +47,7 @@ export const saveDailyMenuAsync = async ({
         });
     }
 
-    await DailyMenuStorageClient.publishDailyStationMenuAsync({
+    await getServices().data.dailyMenu.publishDailyStationMenuAsync({
         cafe,
         dateString,
         isAvailable,

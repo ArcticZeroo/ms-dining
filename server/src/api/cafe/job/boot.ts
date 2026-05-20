@@ -4,8 +4,8 @@ import { logInfo } from '../../../shared/util/log.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
-import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';
 import { ALL_CAFES } from '../../../shared/constants/cafes.js';
+import { getServices } from '../../../main/services/registry.js';
 import Duration from '@arcticzeroo/duration';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 import { runPendingMigrations } from '../../runtime-migrations/runner.js';
@@ -14,11 +14,11 @@ import { runWithDbPriority } from '../../storage/db-context.js';
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
 	const date = DateUtil.getNowWithDaysInFuture(i);
 
-	const cafesWithMenuToday = await DailyMenuStorageClient.getCafesAvailableForDayAsync(DateUtil.toDateString(date));
-	if (cafesWithMenuToday.size !== ALL_CAFES.length) {
-		logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}. ${ALL_CAFES.length - cafesWithMenuToday.size} cafe(s) are missing a menu.`);
+	const cafesWithMenuToday = await getServices().data.dailyMenu.getCafesAvailableForDayAsync({ dateString: DateUtil.toDateString(date) });
+	if (cafesWithMenuToday.length !== ALL_CAFES.length) {
+		logInfo(`Repairing missing menu for ${DateUtil.toDateString(date)}. ${ALL_CAFES.length - cafesWithMenuToday.length} cafe(s) are missing a menu.`);
 		const updateSession = new DailyCafeUpdateSession(i);
-		await updateSession.populateAsync(cafesWithMenuToday);
+		await updateSession.populateAsync(new Set(cafesWithMenuToday));
 		return true;
 	}
 
@@ -57,7 +57,7 @@ const repairTodaySessionsAsync = async (): Promise<boolean> => {
 	// want to clear history. There are very few cafes open past 2pm, so we can
 	// keep stale data around if we need to.
 	if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists || now.getHours() > 14 || now.getHours() < 6) {
-		const isAnyMenuAvailableToday = await DailyMenuStorageClient.isAnyMenuAvailableForDayAsync(DateUtil.toDateString(now));
+		const isAnyMenuAvailableToday = await getServices().data.dailyMenu.isAnyMenuAvailableForDayAsync({ dateString: DateUtil.toDateString(now) });
 		if (isAnyMenuAvailableToday) {
 			if (ENVIRONMENT_SETTINGS.skipDailyRepairIfMenuExists) {
 				logInfo('Skipping repair of today\'s sessions because the menu already exists and environment settings disable update');

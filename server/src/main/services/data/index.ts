@@ -8,6 +8,7 @@ import { sessionService } from './session.js';
 import { reviewService } from './review.js';
 import { groupsService } from './groups.js';
 import { menuItemService } from './menu-item.js';
+import { dailyMenuService } from './daily-menu.js';
 
 /**
  * Composite of all main-side typed data-service clients. Lives at
@@ -29,6 +30,7 @@ export interface DataServices {
     review: typeof reviewService;
     groups: typeof groupsService;
     menuItem: typeof menuItemService;
+    dailyMenu: typeof dailyMenuService;
 }
 
 export const defaultDataServices: DataServices = {
@@ -42,6 +44,7 @@ export const defaultDataServices: DataServices = {
     review:       reviewService,
     groups:       groupsService,
     menuItem:     menuItemService,
+    dailyMenu:    dailyMenuService,
 };
 
 export { searchQueryService } from './search-query.js';
@@ -54,3 +57,4 @@ export { sessionService } from './session.js';
 export { reviewService } from './review.js';
 export { groupsService } from './groups.js';
 export { menuItemService } from './menu-item.js';
+export { dailyMenuService } from './daily-menu.js';

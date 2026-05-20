@@ -1,18 +1,18 @@
 import { LockedMap } from '../lock/map.js';
-import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { STORAGE_EVENTS } from '../storage/events.js';
 import { logError } from '../../shared/util/log.js';
 import { throwError } from '../../shared/util/error.js';
 import { lazyAsync } from '../../shared/util/lazy.js';
+import { getServices } from '../../main/services/registry.js';
 
 const FIRST_APPEARANCE_MAP = lazyAsync(async () => {
-    return new LockedMap(await DailyMenuStorageClient.retrieveAllFirstMenuItemAppearances());
+    return new LockedMap(Object.entries(await getServices().data.dailyMenu.retrieveAllFirstMenuItemAppearances({})));
 });
 
 export const retrieveFirstMenuItemAppearance = async (menuItemId: string): Promise<string> => {
     const map = await FIRST_APPEARANCE_MAP.value;
     return map.update(menuItemId, async (visitDate) => {
-        return visitDate ?? await DailyMenuStorageClient.retrieveFirstMenuItemVisitDate(menuItemId) ?? throwError(`No first visit date found for menu item ${menuItemId}`);
+        return visitDate ?? await getServices().data.dailyMenu.retrieveFirstMenuItemVisitDate({ menuItemId }) ?? throwError(`No first visit date found for menu item ${menuItemId}`);
     });
 }
 
