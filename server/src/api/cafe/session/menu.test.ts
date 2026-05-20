@@ -29,6 +29,7 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 });
 
 after(async () => {
@@ -113,6 +114,7 @@ function findStation(stations: ICafeStation[], stationId: string): ICafeStation 
 }
 
 test('item with isItemCustomizationEnabled === false returns no modifiers (2ca0ec9)', async () => {
+    ctx.installServices();
     const stationId = '2ca0ec9-a-station';
     const menuId = '2ca0ec9-a-menu';
     const itemId = '2ca0ec9-a-item-customization-off';
@@ -164,6 +166,7 @@ test('item with isItemCustomizationEnabled === false returns no modifiers (2ca0e
 });
 
 test('item with missing isItemCustomizationEnabled flag is treated as unknown and still fetches modifiers (2ca0ec9)', async () => {
+    ctx.installServices();
     const stationId = '2ca0ec9-b-station';
     const menuId = '2ca0ec9-b-menu';
     const itemId = '2ca0ec9-b-item-missing-flag';
@@ -210,6 +213,7 @@ test('item with missing isItemCustomizationEnabled flag is treated as unknown an
 });
 
 test('items missing from menuItemsById are filtered out of category lists (72f929e)', async () => {
+    ctx.installServices();
     const stationId = '72f929e-station';
     const menuId = '72f929e-menu';
     const realItemA = '72f929e-real-a';
@@ -283,6 +287,7 @@ test('items missing from menuItemsById are filtered out of category lists (72f92
 });
 
 test('missing local modifiers default to [] when no local item exists (127170b)', async () => {
+    ctx.installServices();
     // First sync of a brand-new item: there's no local DB row, so
     // localItem is undefined throughout. The result must always have
     // modifiers as an array (never undefined / null), even when the
@@ -332,6 +337,7 @@ test('missing local modifiers default to [] when no local item exists (127170b)'
 });
 
 test('modifier fetch failure falls back to [] instead of throwing (127170b)', async () => {
+    ctx.installServices();
     // Inject a 500 on the per-item kiosk-items/:itemId endpoint. The code
     // catches and logs the error, then returns []. Without the `?? []`
     // safety net, downstream code would dereference null/undefined.
@@ -395,6 +401,7 @@ test('modifier fetch failure falls back to [] instead of throwing (127170b)', as
 });
 
 test('valid modifier fetch populates the returned item with the modifier data (127170b)', async () => {
+    ctx.installServices();
     // Companion to the "default to []" tests above: confirm that when the
     // fetch succeeds, the resulting modifiers actually reflect the server
     // payload (i.e. the safety net doesn't accidentally drop real data).

@@ -1,4 +1,5 @@
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
+import { createBuyOnDemandClient } from '../../../services/registry.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ICafe } from '../../../models/cafe.js';
 import { BuyOnDemandWaitTimeEtfSchema, BuyOnDemandWaitTimeMinMaxSchema } from '../../../models/buyondemand/cart.js';
@@ -29,7 +30,7 @@ export class WaitTimeSession {
 
     // Standalone wait time (creates its own session, uses dummy items)
     public static async retrieveWaitTime(cafe: ICafe, itemCount: number): Promise<IWaitTimeResponse> {
-        const client = await BuyOnDemandClient.createAsync(cafe);
+        const client = await createBuyOnDemandClient(cafe);
         return WaitTimeSession.retrieveWaitTimeWithClient(client, itemCount);
     }
 

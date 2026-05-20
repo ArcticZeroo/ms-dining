@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import { getTelemetryClient } from '../api/telemetry/app-insights.js';
+import { getServices } from '../services/registry.js';
 import { getVisitorId } from './analytics.js';
 import { CATCH_ALL_PATH } from '../util/koa.js';
 
@@ -17,7 +17,7 @@ export const setTelemetryProperties = (ctx: Koa.Context, properties: Record<stri
 };
 
 export const appInsightsMiddleware: Koa.Middleware = async (ctx, next) => {
-    const telemetryClient = getTelemetryClient();
+    const telemetryClient = getServices().telemetry;
     if (telemetryClient == null) {
         return next();
     }

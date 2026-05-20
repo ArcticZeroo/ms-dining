@@ -1,15 +1,19 @@
 import { runPromiseWithRetries } from '../../util/async.js';
 import { rethrowWithoutStatus } from '../../util/error.js';
-import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';
-import { anthropicProvider } from './providers/anthropic.js';
-import { openAiProvider } from './providers/openai.js';
+import { getServices } from '../../services/registry.js';
 import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
 import { logInfo } from '../../util/log.js';
+import { anthropicProvider } from './providers/anthropic.js';
+import { openAiProvider } from './providers/openai.js';
+import type { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';
 
-const AI_PROVIDER_ENV_VAR = 'AI_PROVIDER';
 const AI_RETRY_COUNT = 3;
+const AI_PROVIDER_ENV_VAR = 'AI_PROVIDER';
 
-const computeDefaultProvider = (): IAiProvider => {
+/** Anthropic-or-OpenAI selection for text + vision. Embeddings are separately wired to OpenAI. */
+type TextVisionProvider = typeof anthropicProvider | typeof openAiProvider;
+
+const pickTextVisionProvider = (): TextVisionProvider => {
     const providerName = process.env[AI_PROVIDER_ENV_VAR]?.toLowerCase();
 
     if (providerName === 'openai') {
@@ -20,48 +24,52 @@ const computeDefaultProvider = (): IAiProvider => {
         return anthropicProvider;
     }
 
-    // Anthropic key not set — fall back to OpenAI (already required for embeddings)
     logInfo('[AI] ANTHROPIC_API_KEY not set, falling back to OpenAI for text/vision completions');
     return openAiProvider;
 };
 
-// Held in a mutable cell so integration tests can inject a mock implementation
-// via setAiProvider(...). The default is computed lazily on first use so tests
-// can override before any AI call fires.
-let activeProvider: IAiProvider | null = null;
-
-export const getActiveAiProvider = (): IAiProvider => {
-    if (activeProvider == null) {
-        activeProvider = computeDefaultProvider();
-    }
-    return activeProvider;
+/**
+ * Builds the production AI provider as an operation-by-operation composite:
+ * text + vision use the env-selected provider (Anthropic when available,
+ * otherwise OpenAI); embeddings always use OpenAI (Anthropic has no
+ * embeddings API). Replaces the previous hack where `anthropicProvider`
+ * internally delegated its `retrieveEmbedding` to `openAiProvider`.
+ *
+ * Lives here (next to its provider modules) rather than in services/production.ts
+ * so the services wiring stays a thin composition file — any changes to AI
+ * provider selection or composition happen in this module.
+ */
+export const createProductionAi = (): IAiProvider => {
+    const textVision = pickTextVisionProvider();
+    return {
+        retrieveTextCompletion:   (request) => textVision.retrieveTextCompletion(request),
+        retrieveVisionCompletion: (request) => textVision.retrieveVisionCompletion(request),
+        retrieveEmbedding:        (text)    => openAiProvider.retrieveEmbedding(text),
+    };
 };
 
-export const setAiProvider = (provider: IAiProvider | null): void => {
-    activeProvider = provider;
-};
-
-export const resetAiProvider = (): void => {
-    activeProvider = null;
-};
-
+/**
+ * Thin retry wrappers over the active AI provider. The provider is resolved
+ * per-call via `getServices().ai`, so tests' scoped overrides take effect
+ * without any module-level state mutation.
+ */
 export const retrieveTextCompletion = async (request: IAiTextCompletionRequest): Promise<string> => {
     return runPromiseWithRetries(
-        () => getActiveAiProvider().retrieveTextCompletion(request),
+        () => getServices().ai.retrieveTextCompletion(request),
         AI_RETRY_COUNT
     ).catch(rethrowWithoutStatus);
 };
 
 export const retrieveVisionCompletion = async (request: IAiVisionRequest): Promise<string> => {
     return runPromiseWithRetries(
-        () => getActiveAiProvider().retrieveVisionCompletion(request),
+        () => getServices().ai.retrieveVisionCompletion(request),
         AI_RETRY_COUNT
     ).catch(rethrowWithoutStatus);
 };
 
 export const retrieveEmbedding = async (text: string): Promise<number[]> => {
     return runPromiseWithRetries(
-        () => getActiveAiProvider().retrieveEmbedding(text),
+        () => getServices().ai.retrieveEmbedding(text),
         AI_RETRY_COUNT
     ).catch(rethrowWithoutStatus);
 };

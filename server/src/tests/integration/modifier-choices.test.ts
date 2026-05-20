@@ -134,6 +134,7 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 
     const found = ALL_CAFES.find((c) => c.id === CAFE_ID);
     assert.ok(found, `${CAFE_ID} should exist in ALL_CAFES`);
@@ -150,6 +151,7 @@ after(async () => {
 });
 
 test('re-sync succeeds when two modifiers share the same choice IDs', async () => {
+    ctx.installServices();
     // Mutate the fixture: append two items that have modifiers using an
     // overlapping set of choice IDs. The save code must accept this and
     // not violate any unique constraint.
@@ -194,6 +196,7 @@ test('re-sync succeeds when two modifiers share the same choice IDs', async () =
 });
 
 test('both modifiers were persisted with their full choice sets', async () => {
+    ctx.installServices();
     const modifiers = await usePrismaClient((client) =>
         client.menuItemModifier.findMany({
             where: { id: { in: [MODIFIER_A_ID, MODIFIER_B_ID] } },
@@ -221,6 +224,7 @@ test('both modifiers were persisted with their full choice sets', async () => {
 });
 
 test('shared choice IDs are stored once per modifier (composite key)', async () => {
+    ctx.installServices();
     // For each shared choice ID, there should be exactly one row per
     // modifier — total = SHARED_CHOICE_IDS.length × 2 modifiers.
     const rows = await usePrismaClient((client) =>
@@ -244,6 +248,7 @@ test('shared choice IDs are stored once per modifier (composite key)', async () 
 });
 
 test('both injected menu items are linked to their respective modifiers', async () => {
+    ctx.installServices();
     const items = await usePrismaClient((client) =>
         client.menuItem.findMany({
             where: { id: { in: [ITEM_A_ID, ITEM_B_ID] } },

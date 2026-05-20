@@ -10,9 +10,9 @@ import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse 
 import { Semaphore } from '@frozor/lock';
 import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { StringUtil } from '../../../util/string.js';
-import { getTelemetryClient } from '../../telemetry/app-insights.js';
 import hat from 'hat';
 import { maybeThrowBuyOnDemandError } from './buy-ondemand-error.js';
+import { getServices } from '../../../services/registry.js';
 
 const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);
 
@@ -75,20 +75,18 @@ export class BuyOnDemandClient {
     }
 
     /**
-     * Factory hook. When set, BuyOnDemandClient.createAsync delegates here
-     * instead of creating a real client. Integration tests use this to install
-     * a TestBuyOnDemandClient that routes requests in-memory.
+     * Build a real BuyOnDemandClient: construct + perform anonymous login +
+     * fetch /config. This is the production builder, wired into the services
+     * bag at `services/production.ts`.
+     *
+     * Most callers should NOT invoke this directly — call
+     * `createBuyOnDemandClient(cafe, opts)` from `services/registry.js` instead
+     * so test code can substitute a TestBuyOnDemandClient backed by the
+     * in-memory test server. The only legitimate direct callers are
+     * `services/production.ts` (composition root) and adhoc scripts that
+     * intentionally bypass the services bag.
      */
-    private static _factory: ((cafe: ICafe, options: BuyOnDemandClientOptions) => Promise<BuyOnDemandClient>) | null = null;
-
-    public static setFactory(factory: ((cafe: ICafe, options: BuyOnDemandClientOptions) => Promise<BuyOnDemandClient>) | null): void {
-        BuyOnDemandClient._factory = factory;
-    }
-
     public static async createAsync(cafe: ICafe, options: BuyOnDemandClientOptions = {}): Promise<BuyOnDemandClient> {
-        if (BuyOnDemandClient._factory) {
-            return BuyOnDemandClient._factory(cafe, options);
-        }
         const client = new BuyOnDemandClient(cafe, options);
         await client.#performLoginAsync();
         await client.#retrieveConfigDataAsync();
@@ -152,7 +150,7 @@ export class BuyOnDemandClient {
             );
             const durationMs = Date.now() - startMs;
 
-            getTelemetryClient()?.trackDependency({
+            getServices().telemetry?.trackDependency({
                 dependencyTypeName: 'BuyOnDemand',
                 name:               `${options.method ?? 'GET'} ${path}`,
                 data:               url,

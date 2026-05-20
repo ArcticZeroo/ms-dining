@@ -76,6 +76,7 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 
     for (const cafeId of SHUTDOWN_CAFE_IDS) {
         ctx.server.markCafeShutdown(cafeId, SHUTDOWN_MESSAGE);
@@ -106,6 +107,7 @@ after(async () => {
 });
 
 test('search results exclude items from shut-down cafes (non-vector path)', async () => {
+    ctx.installServices();
     // Force the non-vector path with `nv=true` so we don't depend on the
     // embeddings worker draining before the request — the bug fix is at
     // the DB-query layer (getMenusForSearch filters shutdownMessageHash),
@@ -128,6 +130,7 @@ test('search results exclude items from shut-down cafes (non-vector path)', asyn
 });
 
 test('search results still include items from non-shut-down cafes (control)', async () => {
+    ctx.installServices();
     const results = await fetchJson(
         `${baseUrl}/api/dining/search?q=cheeseburger&nv=true&date=${todayString}`,
         SearchResponseSchema,
@@ -150,6 +153,7 @@ const recommendationsUrl = () =>
     `${baseUrl}/api/dining/recommendations/for-you?date=${todayString}&homepageIds=${CONTROL_CAFE_IDS.join(',')}`;
 
 test('recommendations exclude items from shut-down cafes', async () => {
+    ctx.installServices();
     const response = await fetchJson(recommendationsUrl(), RecommendationsResponseSchema);
 
     const allItems = response.sections.flatMap((section) => section.items);
@@ -167,6 +171,7 @@ test('recommendations exclude items from shut-down cafes', async () => {
 });
 
 test('recommendations still include items from non-shut-down cafes (control)', async () => {
+    ctx.installServices();
     const response = await fetchJson(recommendationsUrl(), RecommendationsResponseSchema);
 
     const allItems = response.sections.flatMap((section) => section.items);

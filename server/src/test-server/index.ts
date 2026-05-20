@@ -28,7 +28,7 @@ import { menuItemRoutes } from './handlers/menu-items.js';
 import { orderingRoutes } from './handlers/ordering.js';
 import { paymentRoutes } from './handlers/payment.js';
 import { translationRoutes } from './handlers/translation.js';
-import { getActiveTranslationCache } from '../api/cafe/buy-ondemand/i18n.js';
+import { getServices } from '../services/registry.js';
 
 function pathPatternToRegex(pattern: string): RegExp {
     // Convert '/sites/:tenantId/:contextId/concepts/:displayProfileId'
@@ -475,12 +475,12 @@ export class TestBuyOnDemandServer {
 
     setTranslations(namespace: string, map: Record<string, string>): void {
         this._state.setTranslations(namespace, map);
-        getActiveTranslationCache().clear();
+        getServices().translations.clear();
     }
 
     setTranslation(code: string, message: string, namespace: string = 'core'): void {
         this._state.setTranslation(namespace, code, message);
-        getActiveTranslationCache().clear();
+        getServices().translations.clear();
     }
 
     getTranslations(namespace: string): Record<string, string> {
@@ -489,7 +489,7 @@ export class TestBuyOnDemandServer {
 
     resetTranslations(): void {
         this._state.resetTranslations();
-        getActiveTranslationCache().clear();
+        getServices().translations.clear();
     }
 
     /**

@@ -30,6 +30,7 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 });
 
 after(async () => {
@@ -79,6 +80,7 @@ function findProfitCenterRequest(requestLog: ReturnType<typeof ctx.server.getReq
 }
 
 test('profit center lookup uses the profit-center ID from site data, not the tenant/context ID', async () => {
+    ctx.installServices();
     // Distinct values for tenantId, contextId, and profitCenterId so we
     // can prove the right one is being passed into the URL.
     const distinctProfitCenterId = '22eeffc-profit-center-XYZ-unique';
@@ -124,6 +126,7 @@ test('profit center lookup uses the profit-center ID from site data, not the ten
 });
 
 test('ordering context still resolves when profit-center ID differs from tenant/context IDs', async () => {
+    ctx.installServices();
     // Same idea as the previous test but emphasizes that the resolution
     // works even when there is zero overlap between profit-center ID,
     // tenant ID, and context ID.
@@ -155,6 +158,7 @@ test('ordering context still resolves when profit-center ID differs from tenant/
 });
 
 test('populateCart surfaces a clear error when site data is missing', async () => {
+    ctx.installServices();
     // Empty array -> _fetchSiteData throws "Site data is empty!" before
     // the profit-center lookup is even attempted.
     ctx.server.setFixture(CAFE_ID, 'site-data', []);

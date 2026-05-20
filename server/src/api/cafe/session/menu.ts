@@ -1,4 +1,5 @@
 import { BuyOnDemandClient } from '../buy-ondemand/buy-ondemand-client.js';
+import { createBuyOnDemandClient } from '../../../services/registry.js';
 import { ICafeMenuItemListResponseItem } from '../../../models/buyondemand/responses.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../models/cafe.js';
 import { logError } from '../../../util/log.js';
@@ -25,7 +26,7 @@ export class CafeMenuSession {
     }
 
     public static async retrieveMenuAsync(cafe: ICafe, daysInFuture: number = 0): Promise<IStationListResult> {
-        const client = await BuyOnDemandClient.createAsync(cafe);
+        const client = await createBuyOnDemandClient(cafe);
         const session = new CafeMenuSession(client, daysInFuture);
         return session.#retrieveMenuAsync();
     }

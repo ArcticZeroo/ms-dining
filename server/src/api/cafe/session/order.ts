@@ -3,6 +3,7 @@ import { getNamespaceLogger, logError } from '../../../util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
+import { createBuyOnDemandClient } from '../../../services/registry.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import {
     IOrderLineItem,
@@ -193,7 +194,7 @@ export class CafeOrderSession {
 
     public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
         orderLog.info(`{${cafe.name}} Creating order session with ${cartItems.length} item(s)`);
-        const client = await BuyOnDemandClient.createAsync(cafe, { enableHar: true, translateErrors: true });
+        const client = await createBuyOnDemandClient(cafe, { enableHar: true, translateErrors: true });
         orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
         return new CafeOrderSession(client, cartItems);
     }

@@ -29,6 +29,7 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 
     // Boot a config fixture for our test cafe so /config returns sane data and
     // the test cafe id resolves to a proper tenant/context/displayProfile.
@@ -53,6 +54,92 @@ after(async () => {
 beforeEach(() => {
     ctx.server.clearRequestLog();
     ctx.server.clearFailures();
+});
+
+test('whitespace-only station name falls back to cafe name', async () => {
+    ctx.installServices();
+    assert.equal(await pickName({ name: '   ' }), STATION_TEST_CAFE.name);
+});
+
+test('empty station name falls back to cafe name', async () => {
+    ctx.installServices();
+    assert.equal(await pickName({ name: '' }), STATION_TEST_CAFE.name);
+});
+
+test('normal station name is preserved', async () => {
+    ctx.installServices();
+    assert.equal(await pickName({ name: 'Pizza Hut' }), 'Pizza Hut');
+});
+
+test('station name is trimmed of leading/trailing whitespace', async () => {
+    ctx.installServices();
+    assert.equal(await pickName({ name: '  Pizza Hut  ' }), 'Pizza Hut');
+});
+
+test('onDemandDisplayText is preferred over displayText and name', async () => {
+    ctx.installServices();
+    assert.equal(
+        await pickName({
+            name:           'Raw Name',
+            conceptOptions: { onDemandDisplayText: 'On Demand Name', displayText: 'In-Store Name' },
+        }),
+        'On Demand Name',
+    );
+});
+
+test('displayText is preferred over name when onDemandDisplayText is whitespace', async () => {
+    ctx.installServices();
+    assert.equal(
+        await pickName({
+            name:           'Raw Name',
+            conceptOptions: { onDemandDisplayText: '   ', displayText: 'In-Store Name' },
+        }),
+        'In-Store Name',
+    );
+});
+
+test('displayText is preferred over name when onDemandDisplayText is missing', async () => {
+    ctx.installServices();
+    assert.equal(
+        await pickName({
+            name:           'Raw Name',
+            conceptOptions: { displayText: 'In-Store Name' },
+        }),
+        'In-Store Name',
+    );
+});
+
+test('station.name is used when both conceptOptions fields are empty/whitespace', async () => {
+    ctx.installServices();
+    assert.equal(
+        await pickName({
+            name:           'Raw Name',
+            conceptOptions: { onDemandDisplayText: '', displayText: '   ' },
+        }),
+        'Raw Name',
+    );
+});
+
+test('cafe name fallback when every option is whitespace', async () => {
+    ctx.installServices();
+    assert.equal(
+        await pickName({
+            name:           '   ',
+            conceptOptions: { onDemandDisplayText: '', displayText: '   ' },
+        }),
+        STATION_TEST_CAFE.name,
+    );
+});
+
+test('conceptOptions values are trimmed before being returned', async () => {
+    ctx.installServices();
+    assert.equal(
+        await pickName({
+            name:           'Raw Name',
+            conceptOptions: { onDemandDisplayText: '  Trimmed Concept  ' },
+        }),
+        'Trimmed Concept',
+    );
 });
 
 interface StationOverride {
@@ -96,79 +183,3 @@ async function pickName(override: StationOverride): Promise<string> {
     assert.equal(result.stations.length, 1, 'expected exactly one station in the result');
     return result.stations[0]!.name;
 }
-
-test('whitespace-only station name falls back to cafe name', async () => {
-    assert.equal(await pickName({ name: '   ' }), STATION_TEST_CAFE.name);
-});
-
-test('empty station name falls back to cafe name', async () => {
-    assert.equal(await pickName({ name: '' }), STATION_TEST_CAFE.name);
-});
-
-test('normal station name is preserved', async () => {
-    assert.equal(await pickName({ name: 'Pizza Hut' }), 'Pizza Hut');
-});
-
-test('station name is trimmed of leading/trailing whitespace', async () => {
-    assert.equal(await pickName({ name: '  Pizza Hut  ' }), 'Pizza Hut');
-});
-
-test('onDemandDisplayText is preferred over displayText and name', async () => {
-    assert.equal(
-        await pickName({
-            name:           'Raw Name',
-            conceptOptions: { onDemandDisplayText: 'On Demand Name', displayText: 'In-Store Name' },
-        }),
-        'On Demand Name',
-    );
-});
-
-test('displayText is preferred over name when onDemandDisplayText is whitespace', async () => {
-    assert.equal(
-        await pickName({
-            name:           'Raw Name',
-            conceptOptions: { onDemandDisplayText: '   ', displayText: 'In-Store Name' },
-        }),
-        'In-Store Name',
-    );
-});
-
-test('displayText is preferred over name when onDemandDisplayText is missing', async () => {
-    assert.equal(
-        await pickName({
-            name:           'Raw Name',
-            conceptOptions: { displayText: 'In-Store Name' },
-        }),
-        'In-Store Name',
-    );
-});
-
-test('station.name is used when both conceptOptions fields are empty/whitespace', async () => {
-    assert.equal(
-        await pickName({
-            name:           'Raw Name',
-            conceptOptions: { onDemandDisplayText: '', displayText: '   ' },
-        }),
-        'Raw Name',
-    );
-});
-
-test('cafe name fallback when every option is whitespace', async () => {
-    assert.equal(
-        await pickName({
-            name:           '   ',
-            conceptOptions: { onDemandDisplayText: '', displayText: '   ' },
-        }),
-        STATION_TEST_CAFE.name,
-    );
-});
-
-test('conceptOptions values are trimmed before being returned', async () => {
-    assert.equal(
-        await pickName({
-            name:           'Raw Name',
-            conceptOptions: { onDemandDisplayText: '  Trimmed Concept  ' },
-        }),
-        'Trimmed Concept',
-    );
-});

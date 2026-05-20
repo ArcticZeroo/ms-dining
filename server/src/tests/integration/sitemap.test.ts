@@ -35,6 +35,7 @@ before(async () => {
     mock.timers.enable({ apis: ['Date'], now: FAKE_NOW });
 
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 
     // Sync a single cafe end-to-end so the DB isn't empty when /sitemap.xml
     // is requested (mirrors the smoke test setup). The sitemap itself is
@@ -73,6 +74,7 @@ after(async () => {
 });
 
 test('GET /sitemap.xml returns 200 with an XML body containing <urlset>', async () => {
+    ctx.installServices();
     const res = await fetchExpectStatus(`${baseUrl}/sitemap.xml`, 200);
 
     const contentType = res.headers.get('content-type') ?? '';

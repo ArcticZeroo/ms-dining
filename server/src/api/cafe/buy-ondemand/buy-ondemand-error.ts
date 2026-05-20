@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { logError } from '../../../util/log.js';
+import { getServices } from '../../../services/registry.js';
 import type { BuyOnDemandClient } from './buy-ondemand-client.js';
-import { getActiveTranslationCache } from './i18n.js';
 
 /**
  * Error thrown when a BuyOnDemand request fails with a translatable error code
@@ -57,7 +57,7 @@ export async function maybeThrowBuyOnDemandError(
     const rawCode = parsed.data.message;
     let userMessage = rawCode;
     try {
-        const translations = await getActiveTranslationCache().retrieveAsync(client);
+        const translations = await getServices().translations.retrieveAsync(client);
         userMessage = translations.get(rawCode) ?? rawCode;
     } catch (translationErr) {
         // Never block ordering on missing translations. Fall back to the raw

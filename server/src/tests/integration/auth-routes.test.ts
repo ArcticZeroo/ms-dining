@@ -3,19 +3,18 @@
  * silently, when its environment is misconfigured.
  *
  * Three scenarios:
- *   1. `SESSION_SECRET` unset → importing `app.ts` throws at module init.
- *   2. Auth env vars unset (but session secret present) → `app.ts` loads
- *      successfully but auth routes (`/api/auth/microsoft/login`, etc.)
- *      are not registered, so requests hit the API catch-all 404.
+ *   1. `SESSION_SECRET` unset → `createApp(...)` throws.
+ *   2. Auth env vars unset (but session secret present) → `createApp(...)`
+ *      builds the app successfully but auth routes (`/api/auth/microsoft/login`,
+ *      etc.) are not registered, so requests hit the API catch-all 404.
  *   3. With all auth env vars set, `/api/auth/me` IS registered and
  *      enforces auth (401 when unauthenticated). The route must not be
  *      cached as a public, shareable response.
  *
- * Scenarios 1 and 2 run in subprocesses because `app.ts` reads its env
- * variables at module-init time and the ES module registry caches the
- * result for the life of the process. Scenario 3 uses the regular
- * integration context, but takes care to set AUTH env vars BEFORE
- * `app.ts` is first imported (which happens lazily inside startWebserver).
+ * Scenarios 1 and 2 run in subprocesses because `app.ts` (and other modules
+ * it imports transitively) reads env vars during import. ES module loaders
+ * cache modules for the life of the process, so a fresh subprocess is the
+ * only reliable way to test multiple env configurations.
  */
 
 import { after, before, test } from 'node:test';
@@ -36,6 +35,7 @@ const __dirname = path.dirname(__filename);
 // via a file:// URL — required on Windows where bare absolute paths like
 // `I:\…\app.js` aren't valid ESM specifiers.
 const APP_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'app.js')).href;
+const REGISTRY_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'services', 'registry.js')).href;
 const SERVER_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 
 const AUTH_VAR_NAMES: ReadonlyArray<keyof typeof WELL_KNOWN_ENVIRONMENT_VARIABLES> = [
@@ -110,18 +110,21 @@ after(async () => {
     await ctx.cleanup();
 });
 
-test('importing app.ts throws when SESSION_SECRET is unset', () => {
-    // The subprocess strips SESSION_SECRET (and all auth vars) before
-    // importing the compiled app. We assert that the import rejects with
-    // a recognisable message and the process exits non-zero. Captured via
-    // a small inline harness that prints the error to stderr.
+test('createApp throws when SESSION_SECRET is unset', () => {
+    // SESSION_SECRET is checked by createApp(services); failing fast at app
+    // construction time keeps the misconfiguration loud (regression target
+    // 17f6423). The subprocess strips SESSION_SECRET and asserts createApp
+    // rejects with a recognisable message + non-zero exit.
     const script = `
-        import('${APP_DIST_URL}')
-            .then(() => { process.exit(0); })
-            .catch((err) => {
-                process.stderr.write(String(err && err.message ? err.message : err));
-                process.exit(2);
-            });
+        const appModule = await import('${APP_DIST_URL}');
+        const { getServices } = await import('${REGISTRY_DIST_URL}');
+        try {
+            appModule.createApp(getServices());
+            process.exit(0);
+        } catch (err) {
+            process.stderr.write(String(err && err.message ? err.message : err));
+            process.exit(2);
+        }
     `;
 
     const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
@@ -154,8 +157,10 @@ test('auth routes are NOT registered when auth env vars are missing', () => {
 
     const script = `
         const appModule = await import('${APP_DIST_URL}');
+        const { getServices } = await import('${REGISTRY_DIST_URL}');
         const http = await import('node:http');
-        const server = http.createServer(appModule.app.callback());
+        const app = appModule.createApp(getServices());
+        const server = http.createServer(app.callback());
         await new Promise((resolve, reject) => {
             server.once('error', reject);
             server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });

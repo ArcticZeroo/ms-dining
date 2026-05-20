@@ -1,5 +1,5 @@
 import { performMenuBootTasks } from './api/cafe/job/boot.js';
-import { app } from './app.js';
+import { createApp } from './app.js';
 import { webserverPort } from './constants/config.js';
 import { logDebug, logError, logInfo } from './util/log.js';
 import { createAnalyticsApplications } from './api/tracking/boot.js';
@@ -8,6 +8,7 @@ import { EMBEDDINGS_WORKER_QUEUE } from './worker/queues/embeddings.js';
 import { startSearchTagWorkerQueue } from './worker/queues/search-tags.js';
 import { flushTelemetry } from './api/telemetry/app-insights.js';
 import { disconnectPrismaClient } from './api/storage/client.js';
+import { getServices } from './services/registry.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -32,6 +33,10 @@ process.on('SIGINT',  () => handleShutdown('SIGINT'));
 
 logDebug('Starting in debug mode');
 logInfo('Starting server on port', webserverPort);
+
+// Build the app with the lazy-initialized production services bag. First
+// getServices() call constructs production services via createProductionServices().
+const app = createApp(getServices());
 app.listen(webserverPort);
 
 createAnalyticsApplications()

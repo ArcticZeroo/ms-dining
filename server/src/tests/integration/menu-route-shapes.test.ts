@@ -43,6 +43,7 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
+    ctx.installServices();
 
     const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
@@ -82,12 +83,14 @@ const legacyUrl = () => `${baseUrl}/api/dining/menu/${CAFE_ID}/menu?date=${today
 // ── Canonical route: /api/dining/menu/:cafeId ─────────────────────────
 
 test('canonical /menu/:cafeId without version tag returns the array shape', async () => {
+    ctx.installServices();
     const body = await fetchJson(canonicalUrl(), MenuResponseSchema);
     assert.ok(Array.isArray(body), 'response must be a station array');
     assert.ok(body.length > 0, 'should have at least one station');
 });
 
 test('canonical /menu/:cafeId with menuRouteIsObjectInsteadOfArray tag returns the object shape', async () => {
+    ctx.installServices();
     const body = await fetchJson(
         canonicalUrl(),
         CafeMenuResponseSchema,
@@ -100,6 +103,7 @@ test('canonical /menu/:cafeId with menuRouteIsObjectInsteadOfArray tag returns t
 });
 
 test('canonical /menu/:cafeId with a lower version tag still returns the array shape', async () => {
+    ctx.installServices();
     // Send any tag below `menuRouteIsObjectInsteadOfArray`. The route
     // should treat this as "old client" and serve the array.
     const lowerTag = VERSION_TAG.menuRouteIsObjectInsteadOfArray - 1;
@@ -115,6 +119,7 @@ test('canonical /menu/:cafeId with a lower version tag still returns the array s
 // ── Legacy route: /api/dining/menu/:cafeId/menu ───────────────────────
 
 test('legacy /menu/:cafeId/menu always returns the object shape, even without a version tag', async () => {
+    ctx.installServices();
     // Regression: a recent change applied the array-fallback to BOTH routes,
     // which broke /menu/:cafeId/menu for old clients (the schema didn't match).
     // The fix gates the fallback to the canonical route only — this test
@@ -126,6 +131,7 @@ test('legacy /menu/:cafeId/menu always returns the object shape, even without a 
 });
 
 test('legacy /menu/:cafeId/menu returns the object shape with the version tag too', async () => {
+    ctx.installServices();
     const body = await fetchJson(
         legacyUrl(),
         CafeMenuResponseSchema,
@@ -138,6 +144,7 @@ test('legacy /menu/:cafeId/menu returns the object shape with the version tag to
 // ── Consistency: both routes should describe the same menu ────────────
 
 test('canonical (with tag) and legacy route return equivalent station data for the same cafe + date', async () => {
+    ctx.installServices();
     const canonicalObj = await fetchJson(
         canonicalUrl(),
         CafeMenuResponseSchema,

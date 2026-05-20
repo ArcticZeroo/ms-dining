@@ -5,7 +5,9 @@
  * Provides:
  *   - A fresh empty SQLite dining.db at a temp path (DATABASE_URL set)
  *   - A fresh empty search.db at a temp path (SEARCH_DB_PATH set)
- *   - MockAiProvider installed as the active AI provider
+ *   - A per-context Services bag (mock AI, fresh TranslationCache, test
+ *     BuyOnDemand factory, null telemetry) — wired via ALS so production
+ *     code calling `getServices()` resolves to these test services
  *   - AppInsights telemetry disabled (APPLICATIONINSIGHTS_CONNECTION_STRING unset)
  *   - A TestBuyOnDemandServer pre-loaded with all generated cafe fixtures
  *
@@ -18,9 +20,10 @@
  *   before(async () => { ctx = await createIntegrationTestContext(); });
  *   after(async () => { await ctx.cleanup(); });
  *
- *   test('does the thing', async () => {
+ *   test('does the thing', () => ctx.run(async () => {
  *       // use ctx.server, ctx.mockAi, ctx.dbPath, etc.
- *   });
+ *       // any production code that calls getServices() sees ctx.services
+ *   }));
  */
 
 import * as crypto from 'node:crypto';
@@ -29,10 +32,13 @@ import * as http from 'node:http';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { disconnectPrismaClient } from '../api/storage/client.js';
-import { resetAiProvider, setAiProvider } from '../api/ai/index.js';
-import { BuyOnDemandClient } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
-import { resetTranslationCache, setTranslationCache, TranslationCache } from '../api/cafe/buy-ondemand/i18n.js';
+import { TranslationCache } from '../api/cafe/buy-ondemand/i18n.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
+import {
+    enterWithServices,
+    runWithServices,
+} from '../services/registry.js';
+import type { Services } from '../services/types.js';
 import { applySchemaToTempDb } from './db-test-helper.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';
@@ -53,6 +59,12 @@ export interface IntegrationTestContext {
     mockAi: MockAiProvider;
     /** Per-context BoD translation cache. Cleared automatically on cleanup. */
     translationCache: TranslationCache;
+    /**
+     * The Services bag for this context. Production code that calls
+     * `getServices()` inside `ctx.run(...)` resolves to this bag.
+     * `services.ai === mockAi`, `services.translations === translationCache`.
+     */
+    services: Services;
     /** Filesystem path to the temp dining.db for this test context. */
     dbPath: string;
     /** Filesystem path to the temp search.db for this test context. */
@@ -63,7 +75,25 @@ export interface IntegrationTestContext {
      * is automatically torn down by cleanup().
      */
     startWebserver(): Promise<string>;
-    /** Cleanup: stops webserver, disconnects Prisma, resets AI, deletes temp dir. */
+    /**
+     * Runs `fn` inside a runWithServices(ctx.services, ...) scope. Tests
+     * that touch services (AI, translations, BoD client) should wrap their
+     * bodies in `ctx.run(...)` so getServices() inside the production code
+     * resolves to the test services.
+     */
+    run<T>(fn: () => Promise<T>): Promise<T>;
+    /**
+     * Calls enterWithServices(ctx.services). Intended for use inside a
+     * `beforeEach(() => ctx.installServices())` hook so each test body
+     * inherits the services context (node:test's beforeEach callback runs in
+     * the parent async resource of the test() body).
+     *
+     * Strictly an alternative to wrapping every test in `ctx.run(...)` — the
+     * net effect is the same. Files that don't touch services don't need
+     * either; files that do should pick one pattern and stick with it.
+     */
+    installServices(): void;
+    /** Cleanup: stops webserver, disconnects Prisma, deletes temp dir. */
     cleanup: () => Promise<void>;
 }
 
@@ -86,28 +116,26 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
     // ── 3. Push schema to the empty dining.db ───────────────────────────
     await applySchemaToTempDb(dbPath);
 
-    // ── 4. Install the AI mock provider ─────────────────────────────────
+    // ── 4. Build per-context services ────────────────────────────────────
     const mockAi = new MockAiProvider();
-    setAiProvider(mockAi);
-
-    // ── 5. Build the BuyOnDemand test server with fixtures ──────────────
     const server = createTestServerWithFixtures();
-
-    // ── 6. Install the BuyOnDemandClient factory ────────────────────────
-    // Now any production code that calls BuyOnDemandClient.createAsync(cafe)
-    // will receive a TestBuyOnDemandClient backed by the in-memory test server.
-    BuyOnDemandClient.setFactory(async (cafe, options) => {
-        return TestBuyOnDemandClient.createTestAsync(cafe, server, options);
-    });
-
-    // ── 6b. Install a per-context TranslationCache ──────────────────────
-    // Each context gets a fresh cache so cross-test pollution is impossible.
-    // The default cache (module-level) is reset in cleanup so tests that
-    // don't go through createIntegrationTestContext don't leak state either.
     const translationCache = new TranslationCache();
-    setTranslationCache(translationCache);
 
-    // ── 7. Webserver (lazy) ─────────────────────────────────────────────
+    const services: Services = {
+        ai:                 mockAi,
+        translations:       translationCache,
+        buyOnDemandFactory: (cafe, options) =>
+            TestBuyOnDemandClient.createTestAsync(cafe, server, options),
+        telemetry:          null,
+    };
+
+    // Belt-and-suspenders: enterWith makes services visible to async work
+    // started from the current resource (including most node:test before/test
+    // chains in serial execution). ctx.run() additionally guarantees scope
+    // for any test that explicitly wraps its body.
+    enterWithServices(services);
+
+    // ── 5. Webserver (lazy) ─────────────────────────────────────────────
     let webserver: TestWebserverHandle | null = null;
 
     const startWebserver = async (): Promise<string> => {
@@ -117,7 +145,8 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         // Dynamic import so loading the app (which constructs Koa, registers
         // routes, requires the SESSION_SECRET, etc.) only happens for tests
         // that actually exercise HTTP — keeps the smoke test light.
-        const { app } = await import('../app.js');
+        const { createApp } = await import('../app.js');
+        const app = createApp(services);
         const httpServer = http.createServer(app.callback());
         await new Promise<void>((resolve, reject) => {
             httpServer.once('error', reject);
@@ -139,7 +168,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         return url;
     };
 
-    // ── 8. Cleanup function ─────────────────────────────────────────────
+    // ── 6. Cleanup function ─────────────────────────────────────────────
     const cleanup = async (): Promise<void> => {
         if (webserver) {
             try {
@@ -149,15 +178,11 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
             }
             webserver = null;
         }
-        BuyOnDemandClient.setFactory(null);
         try {
             await disconnectPrismaClient();
         } catch {
             // Best-effort: a failed disconnect shouldn't block cleanup.
         }
-        resetAiProvider();
-        resetTranslationCache();
-
         // search.db may still be held open by the worker thread; try to remove
         // the whole dir and ignore EBUSY (the OS will reap it once handles are
         // released, and the temp dir is in os.tmpdir() anyway).
@@ -172,9 +197,12 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         server,
         mockAi,
         translationCache,
+        services,
         dbPath,
         searchDbPath,
         startWebserver,
+        run: <T>(fn: () => Promise<T>) => runWithServices(services, fn),
+        installServices: () => enterWithServices(services),
         cleanup,
     };
 }

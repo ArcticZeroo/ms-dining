@@ -91,17 +91,3 @@ export class TranslationCache {
         return map;
     }
 }
-
-const defaultCache = new TranslationCache();
-let activeCache: TranslationCache | null = null;
-
-export const getActiveTranslationCache = (): TranslationCache => activeCache ?? defaultCache;
-
-export const setTranslationCache = (cache: TranslationCache | null): void => {
-    activeCache = cache;
-};
-
-export const resetTranslationCache = (): void => {
-    activeCache = null;
-    defaultCache.clear();
-};
