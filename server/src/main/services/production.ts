@@ -2,6 +2,7 @@ import { createProductionAi } from '../../api/ai/index.js';
 import { BuyOnDemandClient } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { TranslationCache } from '../../api/cafe/buy-ondemand/i18n.js';
 import { getTelemetryClient } from '../../api/telemetry/app-insights.js';
+import { defaultDataServices } from './data/index.js';
 import type { Services } from './types.js';
 
 /**
@@ -25,4 +26,5 @@ export const createProductionServices = (): Services => ({
     translations:       new TranslationCache(),
     buyOnDemandFactory: BuyOnDemandClient.createAsync,
     telemetry:          getTelemetryClient(),
+    data:               defaultDataServices,
 });

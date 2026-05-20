@@ -39,6 +39,7 @@ import {
     runWithServices,
 } from '../../main/services/registry.js';
 import type { Services } from '../../main/services/types.js';
+import { defaultDataServices } from '../../main/services/data/index.js';
 import { applySchemaToTempDb } from './db-test-helper.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';
@@ -127,6 +128,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         buyOnDemandFactory: (cafe, options) =>
             TestBuyOnDemandClient.createTestAsync(cafe, server, options),
         telemetry:          null,
+        data:               defaultDataServices,
     };
 
     // Belt-and-suspenders: enterWith makes services visible to async work

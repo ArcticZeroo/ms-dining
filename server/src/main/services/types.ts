@@ -6,6 +6,7 @@ import type {
     BuyOnDemandClient,
     BuyOnDemandClientOptions,
 } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
+import type { DataServices } from './data/index.js';
 
 /**
  * Process-level (or per-scope) service bag. Read via `getServices()`,
@@ -29,4 +30,11 @@ export interface Services {
     ) => Promise<BuyOnDemandClient>;
     /** App Insights client when configured, null otherwise (or in tests). */
     telemetry: TelemetryClient | null;
+    /**
+     * Typed data-service clients (search-query, menu-item, recommendations, ...).
+     * Each forwards through the data handler — in-process in phase 1, cross-
+     * thread in phase 2. Tests can stub individual services by spreading
+     * `{...defaultDataServices, searchQuery: stub}` into the bag they install.
+     */
+    data: DataServices;
 }

@@ -18,7 +18,7 @@ import { logDebug, logError } from '../../../../shared/util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../../worker/queues/embeddings.js';
 import { retrieveVisitData } from '../../../../api/cache/pattern.js';
 import { Middleware } from 'koa';
-import { SearchQueryClient } from '../../../../api/storage/clients/search-query.js';
+import { getServices } from '../../../services/registry.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
 import { searchAutocomplete } from '../../../../api/cache/autocomplete.js';
 import Duration from '@arcticzeroo/duration';
@@ -55,7 +55,7 @@ export const registerSearchRoutes = (parent: Router) => {
     const incrementSearchCountMiddleware: Middleware = (ctx, next) => {
         const searchQuery = getTrimmedQueryParam(ctx, 'q');
         if (searchQuery) {
-            SearchQueryClient.incrementSearchCount(searchQuery)
+            getServices().data.searchQuery.incrementSearchCount(searchQuery)
                 .catch(err => logError('Could not increment search count:', err));
         }
         return next();
