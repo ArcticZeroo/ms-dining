@@ -159,7 +159,9 @@ test('getRecentReviews returns reviews ordered by recency', async () => {
         },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 20));
+    // SQLite CURRENT_TIMESTAMP has second-level precision, so we must
+    // cross a second boundary to get a deterministic ordering.
+    await new Promise(resolve => setTimeout(resolve, 1100));
 
     const newer = await getServices().data.review.createStationReview({
         review: {

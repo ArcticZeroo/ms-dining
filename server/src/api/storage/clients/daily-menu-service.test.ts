@@ -161,6 +161,7 @@ after(async () => {
 });
 
 test('services.data.dailyMenu is the typed client', () => {
+    ctx.installServices();
     assert.equal(getServices().data.dailyMenu, dailyMenuService);
 });
 
