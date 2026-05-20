@@ -2,7 +2,7 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import seedrandom from 'seedrandom';
 import { IEntityRef } from '../../models/vector.js';
 import * as db from '../storage/vector/db.js';
-import { WorkerThreadCommandHandler } from './commanding.js';
+import { WorkerThreadHandler } from '../../worker-rpc/handler.js';
 
 const VECTOR_SEARCH_ITEM_LIMIT = 50;
 const SIMILAR_QUERY_SEARCH_LIMIT = 5;
@@ -145,4 +145,6 @@ const COMMANDS = {
     diverseWeightedSample: onDiverseWeightedSample,
 };
 
-export const SEARCH_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), COMMANDS);
+export const SEARCH_THREAD_HANDLER = new WorkerThreadHandler(new URL(import.meta.url), {
+    search: COMMANDS,
+});

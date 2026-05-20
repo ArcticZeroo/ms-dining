@@ -191,17 +191,21 @@ const buildUserContext = (items: IMenuItemCandidate[], userId: string): IUserRec
     getAllMenuItems: async () => items,
 });
 
-// Helper to stub SEARCH_THREAD_HANDLER.sendRequest with a per-command router.
+// Helper to stub SEARCH_THREAD_HANDLER.sendRequest with a per-method router.
 // Returns a restore fn. Used for HG and TSD where we don't want to spin up
 // real embeddings (that'd require a full sync + embeddings-queue drain).
+//
+// SEARCH_THREAD_HANDLER now uses the nested-service shape: sendRequest takes
+// (serviceName, methodName, data). All search-worker methods live under
+// service 'search', so we ignore serviceName and key the stub by methodName.
 type CommandStub = (data: unknown) => unknown | Promise<unknown>;
 const stubSearchThreadHandler = (handlers: Record<string, CommandStub>): (() => void) => {
     // node:test's mock.method handles the typing — restore unwinds the patch
     // even if a test throws between setup and assertion.
-    const tracker = mock.method(SEARCH_THREAD_HANDLER, 'sendRequest', async (command: string, data: unknown) => {
-        const handler = handlers[command];
+    const tracker = mock.method(SEARCH_THREAD_HANDLER, 'sendRequest', async (_serviceName: string, methodName: string, data: unknown) => {
+        const handler = handlers[methodName];
         if (!handler) {
-            throw new Error(`stubSearchThreadHandler: no stub registered for command "${command}"`);
+            throw new Error(`stubSearchThreadHandler: no stub registered for method "${methodName}"`);
         }
         return handler(data);
     });

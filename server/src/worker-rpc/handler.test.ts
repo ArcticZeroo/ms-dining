@@ -30,6 +30,17 @@ describe('InProcessHandler', () => {
         assert.equal(result, 42);
     });
 
+    it('allows omitting the data argument entirely for methods that take no parameter', async () => {
+        // The method `count` is `async () => 42` — no data param. The
+        // SendRequestTail conditional type makes the trailing arg optional
+        // for those, so callers do not have to write `, undefined` at the
+        // call site. (The previous test above passes `undefined` explicitly
+        // and should still work; this one verifies the no-arg form.)
+        const handler = new InProcessHandler(buildServices());
+        const result = await handler.sendRequest('menu', 'count');
+        assert.equal(result, 42);
+    });
+
     it('rejects with the same ServiceError the service threw, including code and details', async () => {
         const handler = new InProcessHandler(buildServices());
         await assert.rejects(

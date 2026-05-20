@@ -6,6 +6,17 @@ import { fromWire, parseServiceErrorWire, ServiceErrorWireSchema, toWire } from 
 import { dispatch, RequestData, ResponseData, ServiceMap } from './service-map.js';
 
 /**
+ * Tuple shape for `sendRequest`'s tail parameter list. When the method's
+ * registered parameter type is exactly `undefined` (i.e. it takes no
+ * data), the trailing `data` argument is omitted entirely so callers can
+ * write `handler.sendRequest('search', 'clearDuplicatedQueries')` instead
+ * of forcing `... , undefined)`. For every other parameter type it's
+ * required, so a method that takes `{ id: string }` still has to receive
+ * one (and the type-checker rejects passing nothing).
+ */
+type SendRequestTail<TData> = [TData] extends [undefined] ? [data?: undefined] : [data: TData];
+
+/**
  * Common interface every transport implementation satisfies. Typed-client
  * wrappers depend only on this, so swapping in-process for cross-thread
  * (phase 1 -> phase 2) is a one-line edit at the construction site.
@@ -19,7 +30,7 @@ export interface IServiceHandler<TServices extends ServiceMap> {
     sendRequest<S extends keyof TServices & string, M extends keyof TServices[S] & string>(
         serviceName: S,
         methodName: M,
-        data: RequestData<TServices, S, M>,
+        ...rest: SendRequestTail<RequestData<TServices, S, M>>
     ): Promise<ResponseData<TServices, S, M>>;
 }
 
@@ -55,8 +66,9 @@ export class InProcessHandler<TServices extends ServiceMap> implements IServiceH
     async sendRequest<S extends keyof TServices & string, M extends keyof TServices[S] & string>(
         serviceName: S,
         methodName: M,
-        data: RequestData<TServices, S, M>,
+        ...rest: SendRequestTail<RequestData<TServices, S, M>>
     ): Promise<ResponseData<TServices, S, M>> {
+        const data = rest[0];
         const inputData = this.#cloneOverWire ? structuredClone(data) : data;
 
         let result: unknown;
@@ -148,12 +160,13 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
     async sendRequest<S extends keyof TServices & string, M extends keyof TServices[S] & string>(
         serviceName: S,
         methodName: M,
-        data: RequestData<TServices, S, M>,
+        ...rest: SendRequestTail<RequestData<TServices, S, M>>
     ): Promise<ResponseData<TServices, S, M>> {
         if (!isMainThread) {
             throw new Error('Cannot send requests from inside the worker thread');
         }
 
+        const data = rest[0];
         const worker = this.#ensureWorker();
         const requestId = randomUUID();
 

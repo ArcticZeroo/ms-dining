@@ -17,7 +17,7 @@ const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnai
             lastUpdateTime: menuItem.lastUpdateTime
         };
 
-        const result = await THUMBNAIL_THREAD_HANDLER.sendRequest('getThumbnailData', request);
+        const result = await THUMBNAIL_THREAD_HANDLER.sendRequest('thumbnail', 'getThumbnailData', request);
         if (!result) {
             return {
                 hasThumbnail: false

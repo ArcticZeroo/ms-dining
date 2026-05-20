@@ -1,4 +1,4 @@
-import { WorkerThreadCommandHandler } from './commanding.js';
+import { WorkerThreadHandler } from '../../worker-rpc/handler.js';
 import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
 import { serverMenuItemThumbnailPath } from '../../constants/config.js';
@@ -92,6 +92,8 @@ const loadThumbnailsPromise = isMainThread ? Promise.resolve() : loadExistingThu
 loadThumbnailsPromise
     .catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
 
-export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadCommandHandler(new URL(import.meta.url), {
-    getThumbnailData
+export const THUMBNAIL_THREAD_HANDLER = new WorkerThreadHandler(new URL(import.meta.url), {
+    thumbnail: {
+        getThumbnailData,
+    },
 });
