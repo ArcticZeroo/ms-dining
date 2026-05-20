@@ -9,7 +9,6 @@ import { isCurrentlyPastMinutes, minutesToTimeString } from '@msdining/common/ut
 import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
 import { logDebug, logError, logInfo } from '../../../shared/util/log.js';
 import { Semaphore } from '@frozor/lock';
-import { CafeStorageClient } from '../../storage/clients/cafe.js';
 import { saveDailyMenuAsync } from './storage.js';
 import { getServices } from '../../../main/services/registry.js';
 import { CafeMenuSession } from '../session/menu.js';
@@ -39,7 +38,7 @@ export class DailyCafeUpdateSession {
     }
 
     private async resetDailyState() {
-        CafeStorageClient.resetCache();
+        await getServices().data.cafe.resetCache({});
         await fsp.mkdir(serverMenuItemThumbnailPath, { recursive: true });
     }
 

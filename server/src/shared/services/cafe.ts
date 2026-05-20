@@ -24,4 +24,7 @@ export interface ICafeService {
 
     /** Create or update a café with its config. */
     createCafe(data: { cafe: ICafe; config: ICafeConfig }): Promise<void>;
+
+    /** Clear the in-memory café cache, forcing a re-fetch from the DB on next access. */
+    resetCache(data: {}): Promise<void>;
 }

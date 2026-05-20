@@ -10,4 +10,6 @@ export const cafeService: ICafeService = {
         dataHandler.sendRequest('cafe', 'doesCafeExist', data),
     createCafe: (data) =>
         dataHandler.sendRequest('cafe', 'createCafe', data),
+    resetCache: (data) =>
+        dataHandler.sendRequest('cafe', 'resetCache', data),
 };

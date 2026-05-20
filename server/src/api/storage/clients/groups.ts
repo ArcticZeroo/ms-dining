@@ -6,6 +6,7 @@ import {
 	getStationGroupCandidatesZeroContext
 } from '@prisma/client/sql';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { MenuItemStorageClient } from './menu-item.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
@@ -256,14 +257,17 @@ export abstract class GroupStorageClient {
     }
 
     static async #getNormalizedNamesForMenuItems(memberIds: Array<string>): Promise<string[]> {
-        const menuItems = await Promise.all(memberIds.map(id => getServices().data.menuItem.retrieveMenuItem({ id })));
+        const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
         return menuItems
             .filter((item): item is IMenuItemBase => item != null)
             .map(item => normalizeNameForSearch(item.name));
     }
 
     static async #updateGroupIdForCachedMenuItems(groupId: string | null, memberIds: Array<string>) {
-        const menuItems = await Promise.all(memberIds.map(id => getServices().data.menuItem.retrieveMenuItem({ id })));
+        // Must use MenuItemStorageClient directly (not the service) to mutate
+        // the actual in-memory cache. Service calls go through InProcessHandler
+        // which structuredClone's the result, so mutations would be lost.
+        const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
         for (const menuItem of menuItems) {
             if (menuItem) {
                 menuItem.groupId = groupId;

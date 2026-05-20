@@ -107,4 +107,6 @@ export const cafeServiceCommands = {
         CafeStorageClient.doesCafeExistAsync(id),
     createCafe: async ({ cafe, config }: { cafe: ICafe; config: ICafeConfig }) =>
         CafeStorageClient.createCafeAsync(cafe, config),
+    resetCache: async (_data: {}) =>
+        CafeStorageClient.resetCache(),
 } satisfies ICafeService;
