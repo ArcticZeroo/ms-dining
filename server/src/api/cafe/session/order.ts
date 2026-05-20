@@ -4,7 +4,6 @@ import { getNamespaceLogger, logError } from '../../../shared/util/log.js';
 const orderLog = getNamespaceLogger('Order');
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
 import { createBuyOnDemandClient, getServices } from '../../../main/services/registry.js';
-import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import {
     IOrderLineItem,
 } from '../../../shared/models/buyondemand/cart.js';
@@ -384,7 +383,7 @@ export class CafeOrderSession {
 
     private async _addItemToCart(cartItem: ICartItem) {
         orderLog.info(`{${this.client.cafe.name}} Adding item ${cartItem.itemId} (qty: ${cartItem.quantity}) to cart`);
-        const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(cartItem.itemId);
+        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: cartItem.itemId });
 
         if (menuItem == null) {
             throw new Error(`Failed to find menu item with id "${cartItem.itemId}"`);

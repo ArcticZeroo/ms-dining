@@ -1,7 +1,7 @@
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { retrieveTextCompletion } from '../../api/ai/index.js';
-import { MenuItemStorageClient } from '../../api/storage/clients/menu-item.js';
+import { getServices } from '../../main/services/registry.js';
 import { IMenuItemForAi } from '../../shared/models/openai.js';
 import { Nullable } from '../../shared/models/util.js';
 import { runPromiseWithRetries } from '../../shared/util/async.js';
@@ -87,7 +87,7 @@ class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
 
     public async doWorkAsync({ id, name, description }: ISearchTagQueueEntry) {
         let workResult: symbol | undefined = undefined;
-        let searchTags = await MenuItemStorageClient.getExistingSearchTagsForName(name);
+        let searchTags = new Set(await getServices().data.menuItem.getExistingSearchTagsForName({ name }));
 
         if (searchTags.size === 0) {
             searchTags = await retrieveMenuItemSearchTagsFromAiWithRetries({ name, description });
@@ -101,7 +101,7 @@ class SearchTagsWorkerQueue extends WorkerQueue<string, ISearchTagQueueEntry> {
             return;
         }
 
-        await MenuItemStorageClient.saveMenuItemSearchTagsAsync(id, searchTags);
+        await getServices().data.menuItem.saveMenuItemSearchTags({ menuItemId: id, searchTags: Array.from(searchTags) });
         return workResult;
     }
 }
@@ -115,7 +115,7 @@ export const SEARCH_TAG_WORKER_QUEUE = new SearchTagsWorkerQueue();
  */
 export const startSearchTagWorkerQueue = () => {
     SEARCH_TAG_WORKER_QUEUE.start();
-    MenuItemStorageClient.retrievePendingSearchTagQueueEntries()
+    getServices().data.menuItem.retrievePendingSearchTagQueueEntries({})
         .then(entries => SEARCH_TAG_WORKER_QUEUE.add(...entries))
         .catch(err => logError('Unable to retrieve pending search tag queue entries:', err));
 }

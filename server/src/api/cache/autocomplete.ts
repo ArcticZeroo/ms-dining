@@ -2,7 +2,6 @@ import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/mode
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { type IAutocompleteMatch, matchAutocomplete } from '@msdining/common/util/autocomplete';
-import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
 import { getServices } from '../../main/services/registry.js';
 
 const stationNames = new Map<string /*normalizedName*/, string /*displayName*/>();
@@ -34,9 +33,9 @@ CACHE_EVENTS.on('menuPublished', (event) => {
 });
 
 export const seedAutocompleteFromDatabaseAsync = async () => {
-    // Menu item names come from the MenuItemStorageClient cache,
+    // Menu item names come from the menu-item data service cache,
     // which is already populated by retrieveMenuItemsForWeeklyMenuAsync() on boot.
-    for (const name of MenuItemStorageClient.cachedMenuItemNames) {
+    for (const name of await getServices().data.menuItem.getCachedMenuItemNames({})) {
         indexMenuItemName(name);
     }
 

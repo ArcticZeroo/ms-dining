@@ -3,7 +3,6 @@ import { createBuyOnDemandClient, getServices } from '../../../main/services/reg
 import { ICafeMenuItemListResponseItem } from '../../../shared/models/buyondemand/responses.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../shared/models/cafe.js';
 import { logError } from '../../../shared/util/log.js';
-import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
 import { Lock } from '@frozor/lock';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../worker/queues/search-tags.js';
@@ -199,7 +198,7 @@ export class CafeMenuSession {
         const localItemsById = new Map<string, IMenuItemBase>();
 
         const retrieveMenuItemDetailsLocallyAsync = async (itemId: string) => {
-            const existingItem = await MenuItemStorageClient.retrieveMenuItemAsync(itemId);
+            const existingItem = await getServices().data.menuItem.retrieveMenuItem({ id: itemId });
             if (existingItem == null) {
                 return;
             }
@@ -221,7 +220,7 @@ export class CafeMenuSession {
             for (const item of serverItems) {
                 // we save menu items at the end of the process now
                 // try {
-                // 	await MenuItemStorageClient.saveMenuItemAsync(item, true /*allowUpdateIfExisting*/);
+                // 	await getServices().data.menuItem.saveMenuItem({ menuItem: item, allowUpdateIfExisting: true });
                 // } catch (err) {
                 // 	logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
                 // 	continue;

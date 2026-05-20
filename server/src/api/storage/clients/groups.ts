@@ -6,7 +6,6 @@ import {
 	getStationGroupCandidatesZeroContext
 } from '@prisma/client/sql';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import { MenuItemStorageClient } from './menu-item.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
@@ -22,7 +21,7 @@ interface IResultWithId {
 }
 
 export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
-    const menuItems = await Promise.all(results.map(result => MenuItemStorageClient.retrieveMenuItemAsync(result.id)));
+    const menuItems = await Promise.all(results.map(result => getServices().data.menuItem.retrieveMenuItem({ id: result.id })));
     return Promise.all(
         menuItems
             .filter((item): item is IMenuItemBase => item !== null)
@@ -257,14 +256,14 @@ export abstract class GroupStorageClient {
     }
 
     static async #getNormalizedNamesForMenuItems(memberIds: Array<string>): Promise<string[]> {
-        const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
+        const menuItems = await Promise.all(memberIds.map(id => getServices().data.menuItem.retrieveMenuItem({ id })));
         return menuItems
             .filter((item): item is IMenuItemBase => item != null)
             .map(item => normalizeNameForSearch(item.name));
     }
 
     static async #updateGroupIdForCachedMenuItems(groupId: string | null, memberIds: Array<string>) {
-        const menuItems = await Promise.all(memberIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)));
+        const menuItems = await Promise.all(memberIds.map(id => getServices().data.menuItem.retrieveMenuItem({ id })));
         for (const menuItem of menuItems) {
             if (menuItem) {
                 menuItem.groupId = groupId;

@@ -4,7 +4,6 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getTrimmedQueryParam, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
 import { getServices } from '../../../../../../main/services/registry.js';
-import { MenuItemStorageClient } from '../../../../../../api/storage/clients/menu-item.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
 
@@ -33,7 +32,7 @@ export const registerReviewCrudRoutes = (parent: Router) => {
             const menuItemId = getTrimmedQueryParam(ctx, 'menuItemId');
 
             if (menuItemId != null) {
-                const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
+                const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: menuItemId });
                 if (menuItem == null) {
                     ctx.throw(400, 'Invalid menu item');
                     return;

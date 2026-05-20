@@ -21,7 +21,6 @@ import { CafeOrderSession } from '../../../../api/cafe/session/order.js';
 import { WaitTimeSession } from '../../../../api/cafe/session/wait-time.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
-import { MenuItemStorageClient } from '../../../../api/storage/clients/menu-item.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
@@ -108,7 +107,7 @@ const validateCartData = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderI
         const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, nowDateString);
 
         for (const serializedItem of serializedItems) {
-            const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(serializedItem.itemId);
+            const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: serializedItem.itemId });
 
             if (menuItem == null) {
                 return ctx.throw(400, `Menu item with id ${serializedItem.itemId} does not exist`);

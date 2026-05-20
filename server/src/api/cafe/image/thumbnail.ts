@@ -7,7 +7,7 @@ import { runPromiseWithRetries } from '../../../shared/util/async.js';
 import { logDebug } from '../../../shared/util/log.js';
 import { IThumbnailWorkerRequest } from '../../../shared/models/thumbnail.js';
 import { IImageMetadata } from '../../../shared/util/image.js';
-import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
+import { getServices } from '../../../main/services/registry.js';
 import { updateManifestEntry } from './manifest.js';
 
 const maxThumbnailHeightPx = 200;
@@ -84,7 +84,7 @@ export const getHashThumbnailFilepath = (hash: string) => path.join(serverThumbn
 export const updateThumbnailHashFromExistingImage = async (id: string, imagePath: string): Promise<string> => {
     const image = await Jimp.read(imagePath);
     const hash = computeDHash(image);
-    await MenuItemStorageClient.updateThumbnailHash(id, hash);
+    await getServices().data.menuItem.updateThumbnailHash({ menuItemId: id, hash });
     updateManifestEntry(id, { hash, width: image.getWidth(), height: image.getHeight(), lastUpdateTime: new Date().toISOString() });
     return hash;
 };

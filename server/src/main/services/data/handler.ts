@@ -8,6 +8,7 @@ import { stationThemeServiceCommands } from '../../../api/storage/clients/statio
 import { sessionServiceCommands } from '../../util/session-store.js';
 import { reviewServiceCommands } from '../../../api/storage/clients/review.js';
 import { groupsServiceCommands } from '../../../api/storage/clients/groups.js';
+import { menuItemServiceCommands } from '../../../api/storage/clients/menu-item.js';
 
 /**
  * Single source of truth for which worker-side service command bags are
@@ -30,6 +31,7 @@ export const DATA_SERVICES = {
     session:      sessionServiceCommands,
     review:       reviewServiceCommands,
     groups:       groupsServiceCommands,
+    menuItem:     menuItemServiceCommands,
 } as const;
 
 export type DataServiceMap = typeof DATA_SERVICES;

@@ -8,7 +8,6 @@ import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '..
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
 import { sendVisitMiddleware } from '../../../../../middleware/analytics.js';
 import { getServices } from '../../../../../../main/services/registry.js';
-import { MenuItemStorageClient } from '../../../../../../api/storage/clients/menu-item.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
 
@@ -23,7 +22,7 @@ export const registerMenuItemReviewRoutes = (parent: Router) => {
             ctx.throw(400, 'Missing menu item id');
         }
 
-        const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(menuItemId);
+        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: menuItemId });
         if (menuItem == null) {
             ctx.throw(404, 'Menu item not found');
         }

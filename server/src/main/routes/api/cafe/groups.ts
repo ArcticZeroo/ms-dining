@@ -11,7 +11,6 @@ import {
 	IGroupMember,
 	UpdateGroupRequest
 } from '@msdining/common/models/group';
-import { MenuItemStorageClient } from '../../../../api/storage/clients/menu-item.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { doNotCacheMiddleware } from '../../../middleware/cache.js';
 import { Context } from 'koa';
@@ -109,7 +108,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         doNotCacheMiddleware,
         async ctx => {
             const [menuItems, stations] = await Promise.all([
-                MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
+                getServices().data.menuItem.retrieveAllMenuItemsWithoutGroup({}),
                 getServices().data.station.retrieveAllStationsWithoutGroup({})
             ]);
 

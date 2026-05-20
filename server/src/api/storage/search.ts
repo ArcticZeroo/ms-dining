@@ -11,7 +11,6 @@ import { ICheapItemSearchResult, IServerSearchResult } from '../../shared/models
 import { Nullable } from '../../shared/models/util.js';
 import { getLogoUrl, getStationLogoUrl, getThumbnailUrl } from '../../shared/util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
-import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
 import { IVectorSearchResult } from '../../shared/models/vector.js';
 import { logDebug } from '../../shared/util/log.js';
@@ -493,7 +492,7 @@ export abstract class SearchManager {
 
             for (const category of dailyStation.categories) {
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: dailyMenuItem.menuItemId });
 
                     if (menuItem == null) {
                         continue;
@@ -604,7 +603,7 @@ export abstract class SearchManager {
 
             for (const category of categories) {
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: dailyMenuItem.menuItemId });
                     if (menuItem == null) {
                         continue;
                     }
@@ -678,7 +677,7 @@ export abstract class SearchManager {
                         }
                     } else if (entityType === SearchEntityType.menuItem) {
                         // todo: find the last appearance maybe? would be nice to have cafe/station data.
-                        const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(id);
+                        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id });
                         if (menuItem != null) {
                             logDebug('Adding vector menu item result without appearance', menuItem.name);
                             const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
@@ -757,7 +756,7 @@ export abstract class SearchManager {
                 }
 
                 for (const dailyMenuItem of category.menuItems) {
-                    const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
+                    const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: dailyMenuItem.menuItemId });
 
                     if (menuItem == null) {
                         continue;
