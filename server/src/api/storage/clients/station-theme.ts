@@ -1,6 +1,7 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { isDev } from '../../../shared/util/env.js';
+import type { IStationThemeService } from '../../../shared/services/station-theme.js';
 import { md5 } from '../../../shared/util/hash.js';
 import { logDebug, logError } from '../../../shared/util/log.js';
 import { localeCompareSortAsc } from '../../../shared/util/sort.js';
@@ -171,3 +172,14 @@ export abstract class StationThemeClient {
         }
     }
 }
+
+/**
+ * Worker-side implementation of {@link IStationThemeService}.
+ */
+export const stationThemeServiceCommands = {
+    retrieveTheme: async ({ stationName, itemsByCategory }: {
+        stationName: string;
+        itemsByCategory: Map<string, IMenuItemBase[]>;
+    }) =>
+        StationThemeClient.retrieveThemeAsync(stationName, itemsByCategory),
+} satisfies IStationThemeService;
