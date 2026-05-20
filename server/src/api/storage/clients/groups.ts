@@ -7,12 +7,12 @@ import {
 } from '@prisma/client/sql';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { MenuItemStorageClient } from './menu-item.js';
+import { StationStorageClient } from './station.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
 import { IGroupData, IGroupMember, IUpdateGroupRequest } from '@msdining/common/models/group';
 import { PrismaLikeClient } from '../../../shared/models/prisma.js';
-import { getServices } from '../../../main/services/registry.js';
 import type { IGroupsService } from '../../../shared/services/groups.js';
 import hat from 'hat';
 import { STORAGE_EVENTS } from '../events.js';
@@ -22,7 +22,7 @@ interface IResultWithId {
 }
 
 export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
-    const menuItems = await Promise.all(results.map(result => getServices().data.menuItem.retrieveMenuItem({ id: result.id })));
+    const menuItems = await Promise.all(results.map(result => MenuItemStorageClient.retrieveMenuItemAsync(result.id)));
     return Promise.all(
         menuItems
             .filter((item): item is IMenuItemBase => item !== null)
@@ -31,14 +31,14 @@ export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Prom
 }
 
 export const extractStationsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
-    const stations = await Promise.all(results.map((result) => getServices().data.station.retrieveStation({ stationId: result.id })));
+    const stations = await Promise.all(results.map((result) => StationStorageClient.retrieveStationAsync(result.id)));
     return stations
         .filter((station) => station !== null)
         .map(stationToGroupMember);
 }
 
 export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IGroupMember> => {
-    const station = await getServices().data.station.retrieveStation({ stationId: menuItem.stationId });
+    const station = await StationStorageClient.retrieveStationAsync(menuItem.stationId);
 
     return ({
         id:       menuItem.id,

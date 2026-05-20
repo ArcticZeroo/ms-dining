@@ -5,7 +5,7 @@ import { PrismaTransactionClient } from '../../../shared/models/prisma.js';
 import { isDateValid } from '../../../main/util/date.js';
 import { logDebug, logError, logInfo } from '../../../shared/util/log.js';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
-import { getServices } from '../../../main/services/registry.js';
+import { MenuItemStorageClient } from './menu-item.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IMenuPublishEvent } from '../../../shared/models/storage-events.js';
@@ -265,7 +265,7 @@ export abstract class DailyMenuStorageClient {
 				const menuItemIds: string[] = [];
 
 				for (const dailyMenuItem of category.menuItems) {
-					const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: dailyMenuItem.menuItemId });
+					const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(dailyMenuItem.menuItemId);
 
 					if (menuItem == null) {
 						logError(`Unable to find menu item ${dailyMenuItem.menuItemId} for category ${category.name} in station ${stationData.name} (${dailyStation.stationId})`);
