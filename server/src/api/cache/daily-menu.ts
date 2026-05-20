@@ -1,7 +1,7 @@
-import { ICafeStation } from '../../models/cafe.js';
+import { ICafeStation } from '../../shared/models/cafe.js';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
-import { CAFES_BY_ID } from '../../constants/cafes.js';
+import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { logError } from '../../util/log.js';

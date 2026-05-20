@@ -1,5 +1,5 @@
 import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
-import { ICafeStationDetailsResponseItem } from '../../../models/buyondemand/responses.js';
+import { ICafeStationDetailsResponseItem } from '../../../shared/models/buyondemand/responses.js';
 import { normalizeTagName } from '../../../util/cafe.js';
 
 interface IRetrieveTagDefinitionsOptions {

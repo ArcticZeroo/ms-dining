@@ -1,4 +1,4 @@
-import { ICafe, ICafeStation } from '../../../models/cafe.js';
+import { ICafe, ICafeStation } from '../../../shared/models/cafe.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { DailyMenuStorageClient } from '../../storage/clients/daily-menu.js';

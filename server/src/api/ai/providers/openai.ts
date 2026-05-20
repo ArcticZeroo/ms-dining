@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { getOpenAiKey } from '../../../constants/env.js';
+import { getOpenAiKey } from '../../../shared/constants/env.js';
 import { lazy } from '../../../util/lazy.js';
 import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
 

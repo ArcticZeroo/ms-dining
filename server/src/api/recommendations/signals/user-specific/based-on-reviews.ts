@@ -9,7 +9,7 @@ import { IMenuItemCandidate, toRecommendationItem } from '../../../../util/recom
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
 import { IUserRecommendationContext, log, POSITIVE_REVIEW_THRESHOLD, VECTOR_SEARCH_LIMIT, } from '../../shared.js';
-import { IServerReview } from '../../../../models/review.js';
+import { IServerReview } from '../../../../shared/models/review.js';
 
 const SOURCE_REVIEWS_COUNT = 5;
 

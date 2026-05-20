@@ -13,7 +13,7 @@
 import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { CafeMenuSession } from '../session/menu.js';
-import { ICafe } from '../../../models/cafe.js';
+import { ICafe } from '../../../shared/models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

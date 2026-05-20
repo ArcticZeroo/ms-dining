@@ -1,5 +1,5 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import { CafeGroup, ICafe, ICafeStation } from '../models/cafe.js';
+import { CafeGroup, ICafe, ICafeStation } from '../shared/models/cafe.js';
 import { rethrowWithoutStatus } from '../util/error.js';
 import { retrieveEmbedding as retrieveEmbeddingFromAi } from './ai/index.js';
 

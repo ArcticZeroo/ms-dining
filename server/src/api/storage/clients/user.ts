@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
-import { IServerUser } from '../../../models/auth.js';
+import { IServerUser } from '../../../shared/models/auth.js';
 import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
-import { Nullable } from '../../../models/util.js';
+import { Nullable } from '../../../shared/models/util.js';
 import { logDebug } from '../../../util/log.js';
 import { sendVisitFireAndForget } from '../../tracking/visitors.js';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';

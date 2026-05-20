@@ -1,7 +1,7 @@
 import { SitemapStream } from 'sitemap';
-import { serverStaticPath, webserverHost } from '../constants/config.js';
-import { CAFE_GROUP_LIST } from '../constants/cafes.js';
-import { CafeGroup, ICafe } from '../models/cafe.js';
+import { serverStaticPath, webserverHost } from '../shared/constants/config.js';
+import { CAFE_GROUP_LIST } from '../shared/constants/cafes.js';
+import { CafeGroup, ICafe } from '../shared/models/cafe.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { logError } from '../util/log.js';

@@ -1,5 +1,5 @@
 import * as appInsights from 'applicationinsights';
-import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
+import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
 import { lazy } from '../../util/lazy.js';
 import { getNamespaceLogger } from '../../util/log.js';
 

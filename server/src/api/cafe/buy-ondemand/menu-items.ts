@@ -1,6 +1,6 @@
 import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
-import { ICafeStation } from '../../../models/cafe.js';
-import { ICafeMenuItemListResponseItem } from '../../../models/buyondemand/responses.js';
+import { ICafeStation } from '../../../shared/models/cafe.js';
+import { ICafeMenuItemListResponseItem } from '../../../shared/models/buyondemand/responses.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 
 export const retrieveMenuItemsAsync = async (client: BuyOnDemandClient, station: ICafeStation, itemIds: string[]): Promise<Array<ICafeMenuItemListResponseItem>> => {

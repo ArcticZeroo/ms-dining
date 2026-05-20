@@ -23,7 +23,7 @@ import { CafeMenuResponseSchema, MenuResponseSchema } from '@msdining/common/mod
 import { CafeMenuSession } from '../../api/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
 import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getAnthropicKey } from '../../../constants/env.js';
+import { getAnthropicKey } from '../../../shared/constants/env.js';
 import { lazy } from '../../../util/lazy.js';
 import { IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
 

@@ -1,4 +1,4 @@
-import { CAFES_BY_ID } from '../../constants/cafes.js';
+import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../util/log.js';
 import { ACCOMPANIMENT_FILTER } from '../../util/menu-item-filter.js';
 import { IMenuItemCandidate } from '../../util/recommendation.js';

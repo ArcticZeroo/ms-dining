@@ -9,9 +9,9 @@ import {
 	toDateString,
 	yieldDaysInRange
 } from '@msdining/common/util/date-util';
-import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../models/storage-events.js';
+import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../shared/models/storage-events.js';
 import { logError } from '../../util/log.js';
-import { ICafeStation } from '../../models/cafe.js';
+import { ICafeStation } from '../../shared/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getDefaultUniquenessDataForStation } from '../../util/cafe.js';
 import { StationThemeClient } from '../storage/clients/station-theme.js';

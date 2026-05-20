@@ -4,10 +4,10 @@ import {
 	getApplicationNameForMenuOverview
 } from '@msdining/common/constants/analytics';
 import { createAnalyticsApplicationAsync } from './visitors.js';
-import { ApplicationContext } from '../../constants/context.js';
+import { ApplicationContext } from '../../shared/constants/context.js';
 import { logError, logInfo } from '../../util/log.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
 
 const getAllApplicationNames = () => {
     const names = new Set(Object.values(ANALYTICS_APPLICATION_NAMES));

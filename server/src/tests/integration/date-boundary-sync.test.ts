@@ -22,8 +22,8 @@ import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
 import { DailyCafeUpdateSession } from '../../api/cafe/job/update.js';
 import { usePrismaClient } from '../../api/storage/client.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
-import { ICafe } from '../../models/cafe.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { ICafe } from '../../shared/models/cafe.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
 import {
     createIntegrationTestContext,

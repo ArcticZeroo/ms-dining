@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../constants/config.js';
+import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../shared/constants/config.js';
 import { updateThumbnailHashFromExistingImage } from '../../cafe/image/thumbnail.js';
 import { saveManifest } from '../../cafe/image/manifest.js';
 import { getNamespaceLogger } from '../../../util/log.js';

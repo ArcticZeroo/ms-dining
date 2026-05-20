@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
+import { serverMenuItemThumbnailPath } from '../../../shared/constants/config.js';
 import { logError, logInfo } from '../../../util/log.js';
 
 const MANIFEST_PATH = path.join(serverMenuItemThumbnailPath, 'manifest.json');

@@ -15,7 +15,7 @@ import {
 	getStationReviewHeadersByGroupId,
 	getStationReviewHeadersByName
 } from '@prisma/client/sql';
-import { IServerReview } from '../../../models/review.js';
+import { IServerReview } from '../../../shared/models/review.js';
 import { StationStorageClient } from './station.js';
 
 interface ICreateMenuItemReviewItem {

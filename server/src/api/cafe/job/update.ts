@@ -1,8 +1,8 @@
 import { DateUtil } from '@msdining/common';
 import fsp from 'fs/promises';
-import { ALL_CAFES } from '../../../constants/cafes.js';
-import { serverMenuItemThumbnailPath } from '../../../constants/config.js';
-import { ICafe } from '../../../models/cafe.js';
+import { ALL_CAFES } from '../../../shared/constants/cafes.js';
+import { serverMenuItemThumbnailPath } from '../../../shared/constants/config.js';
+import { ICafe } from '../../../shared/models/cafe.js';
 import { ICancellationToken, PromiseCancelledException, runPromiseWithRetries } from '../../../util/async.js';
 import { isCafeAvailable } from '../../../util/date.js';
 import { isCurrentlyPastMinutes, minutesToTimeString } from '@msdining/common/util/date-util';

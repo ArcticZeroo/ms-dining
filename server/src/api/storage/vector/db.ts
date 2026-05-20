@@ -8,7 +8,7 @@ import {
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../util/typeguard.js';
 import { lazy } from '../../../util/lazy.js';
-import { IEntityRef } from '../../../models/vector.js';
+import { IEntityRef } from '../../../shared/models/vector.js';
 
 const createVectorDatabase = (path: string) => {
     const db = sqlite3(path);

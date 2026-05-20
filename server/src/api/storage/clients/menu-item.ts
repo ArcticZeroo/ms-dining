@@ -1,14 +1,14 @@
 import { IMenuItemModifier, IMenuItemModifierChoice, ModifierChoiceType } from '@msdining/common/models/cafe';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { MenuItem, MenuItemModifier, MenuItemModifierChoice, MenuItemModifierEntry, Prisma } from '@prisma/client';
-import { IMenuItemBase } from '../../../models/cafe.js';
+import { IMenuItemBase } from '../../../shared/models/cafe.js';
 import { deserializeMenuItemTags, serializeMenuItemTags } from '../../../util/cafe.js';
 import { logDebug, logInfo } from '../../../util/log.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { ISearchTagQueueEntry } from '../../../worker/queues/search-tags.js';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { getDateStringsForWeek } from '@msdining/common/util/date-util';
-import { PrismaLikeClient } from '../../../models/prisma.js';
+import { PrismaLikeClient } from '../../../shared/models/prisma.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
 

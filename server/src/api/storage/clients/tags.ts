@@ -1,5 +1,5 @@
 import { usePrismaClient, usePrismaWrite } from '../client.js';
-import { IMenuItemTag } from '../../../models/cafe.js';
+import { IMenuItemTag } from '../../../shared/models/cafe.js';
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 
 export abstract class TagStorageClient {

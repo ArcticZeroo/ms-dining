@@ -20,8 +20,8 @@ import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
 import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
 import { BuyOnDemandClient } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { BuyOnDemandError } from '../../api/cafe/buy-ondemand/buy-ondemand-error.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
-import { createBuyOnDemandClient } from '../../services/registry.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { createBuyOnDemandClient } from '../../main/services/registry.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

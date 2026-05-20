@@ -26,9 +26,9 @@ import { CafeMenuSession } from '../../api/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
 import { CACHE_EVENTS } from '../../api/storage/events.js';
 import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
-import { ICafe } from '../../models/cafe.js';
-import { IMenuPublishEvent } from '../../models/storage-events.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { ICafe } from '../../shared/models/cafe.js';
+import { IMenuPublishEvent } from '../../shared/models/storage-events.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

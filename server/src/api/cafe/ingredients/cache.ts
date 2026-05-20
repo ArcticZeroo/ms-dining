@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { ICafeStation } from '../../../models/cafe.js';
+import { ICafeStation } from '../../../shared/models/cafe.js';
 import { usePrismaClient, usePrismaTransaction } from '../../storage/client.js';
 
 export const computeMenuHash = (stations: ICafeStation[]): string => {

@@ -1,6 +1,6 @@
 import { Cafe } from '@prisma/client';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
-import { ICafe, ICafeConfig } from '../../../models/cafe.js';
+import { ICafe, ICafeConfig } from '../../../shared/models/cafe.js';
 import { Lock } from '@frozor/lock';
 
 export abstract class CafeStorageClient {

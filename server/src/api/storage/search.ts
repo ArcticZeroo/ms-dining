@@ -7,20 +7,20 @@ import {
 } from '@msdining/common/models/search';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getCafeNumber } from '@msdining/common/util/cafe-util';
-import { ICheapItemSearchResult, IServerSearchResult } from '../../models/search.js';
-import { Nullable } from '../../models/util.js';
+import { ICheapItemSearchResult, IServerSearchResult } from '../../shared/models/search.js';
+import { Nullable } from '../../shared/models/util.js';
 import { getLogoUrl, getStationLogoUrl, getThumbnailUrl } from '../../util/cafe.js';
 import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
-import { IVectorSearchResult } from '../../models/vector.js';
+import { IVectorSearchResult } from '../../shared/models/vector.js';
 import { StationStorageClient } from './clients/station.js';
 import { CafeStorageClient } from './clients/cafe.js';
 import { logDebug } from '../../util/log.js';
-import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../constants/cafes.js';
-import { MaybePromise } from '../../models/async.js';
+import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../shared/constants/cafes.js';
+import { MaybePromise } from '../../shared/models/async.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../worker/interface/thumbnail.js';
-import { ICafe } from '../../models/cafe.js';
+import { ICafe } from '../../shared/models/cafe.js';
 
 import { NON_ENTREE_FILTER } from '../../util/menu-item-filter.js';
 

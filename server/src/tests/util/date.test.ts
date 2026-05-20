@@ -1,4 +1,4 @@
-import { ICafe } from '../../models/cafe.js';
+import { ICafe } from '../../shared/models/cafe.js';
 import Router from '@koa/router';
 import { getDateForMenuRequest, getDateStringForMenuRequest, isCafeAvailable } from '../../util/date.js';
 import { fromDateString, getMinimumDateForMenu, toDateString } from '@msdining/common/util/date-util';

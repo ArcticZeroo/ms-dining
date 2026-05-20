@@ -12,7 +12,7 @@ import { StationStorageClient } from './station.js';
 import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
 import { IGroupData, IGroupMember, IUpdateGroupRequest } from '@msdining/common/models/group';
-import { PrismaLikeClient } from '../../../models/prisma.js';
+import { PrismaLikeClient } from '../../../shared/models/prisma.js';
 import hat from 'hat';
 import { STORAGE_EVENTS } from '../events.js';
 

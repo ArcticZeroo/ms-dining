@@ -8,10 +8,10 @@ import {
 	isEmbeddedEntity,
 	makeDailyStationId
 } from '../../api/storage/vector/client.js';
-import { ICafe, ICafeStation } from '../../models/cafe.js';
-import { Nullable } from '../../models/util.js';
+import { ICafe, ICafeStation } from '../../shared/models/cafe.js';
+import { Nullable } from '../../shared/models/util.js';
 import { WorkerQueue } from './queue.js';
-import { CAFE_GROUP_LIST } from '../../constants/cafes.js';
+import { CAFE_GROUP_LIST } from '../../shared/constants/cafes.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 1 });
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 15 });

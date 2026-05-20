@@ -1,6 +1,6 @@
 import { SearchEntityType } from '@msdining/common/models/search';
 import seedrandom from 'seedrandom';
-import { IEntityRef } from '../../models/vector.js';
+import { IEntityRef } from '../../shared/models/vector.js';
 import * as db from '../storage/vector/db.js';
 import { WorkerThreadHandler } from '../../worker-rpc/handler.js';
 

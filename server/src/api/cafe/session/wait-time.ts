@@ -1,8 +1,8 @@
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient } from '../../../services/registry.js';
+import { createBuyOnDemandClient } from '../../../main/services/registry.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
-import { ICafe } from '../../../models/cafe.js';
-import { BuyOnDemandWaitTimeEtfSchema, BuyOnDemandWaitTimeMinMaxSchema } from '../../../models/buyondemand/cart.js';
+import { ICafe } from '../../../shared/models/cafe.js';
+import { BuyOnDemandWaitTimeEtfSchema, BuyOnDemandWaitTimeMinMaxSchema } from '../../../shared/models/buyondemand/cart.js';
 
 const parseWaitTimeResponse = (json: unknown): IWaitTimeResponse => {
     const minMaxResult = BuyOnDemandWaitTimeMinMaxSchema.safeParse(json);

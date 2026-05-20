@@ -20,7 +20,7 @@ import { MenuItemStorageClient } from './menu-item.js';
 import { CafeStorageClient } from './cafe.js';
 import { usePrismaWrite } from '../client.js';
 import { retrieveItemAppearancesForCafe } from '../../cache/daily-uniqueness.js';
-import { ALL_CAFES } from '../../../constants/cafes.js';
+import { ALL_CAFES } from '../../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

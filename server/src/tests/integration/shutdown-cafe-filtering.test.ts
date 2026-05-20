@@ -22,8 +22,8 @@ import { CafeMenuSession } from '../../api/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
 import { classifyShutdownMessageAsync } from '../../api/cafe/shutdown-classifier.js';
 import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
-import { ICafe } from '../../models/cafe.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { ICafe } from '../../shared/models/cafe.js';
 import {
     RecommendationsResponseSchema,
 } from '@msdining/common/models/recommendation';

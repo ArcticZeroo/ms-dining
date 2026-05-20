@@ -9,7 +9,7 @@ import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../u
 import { getNamespaceLogger, logError } from '../../util/log.js';
 import { LockedExpiringMap } from '../lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
-import { CAFES_BY_ID } from '../../constants/cafes.js';
+import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
 import { lazyAsync } from '../../util/lazy.js';
 import { ReviewStorageClient } from '../storage/clients/review.js';
@@ -22,7 +22,7 @@ import { buildProximityWeightMap } from '../../util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
 import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
 import { CACHE_EVENTS } from '../storage/events.js';
-import { IServerReview } from '../../models/review.js';
+import { IServerReview } from '../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
 
 const logger = getNamespaceLogger('recommendations');

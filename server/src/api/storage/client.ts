@@ -1,12 +1,12 @@
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
-import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../models/prisma.js';
+import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../shared/models/prisma.js';
 import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
 import { lazy, lazyAsync } from '../../util/lazy.js';
 import { getDbPriority } from './db-context.js';
 import { DB_METRIC_NAMES, DB_METRICS } from './db-metrics.js';
 import { PrioritySemaphore } from './priority-semaphore.js';
-import { requireEnvironmentVariable } from '../../constants/env.js';
+import { requireEnvironmentVariable } from '../../shared/constants/env.js';
 
 // With just one semaphore, we were seeing db writes timeout under load (i.e. initial boot while loading cafes)
 // because we would queue multiple writes in parallel and hit SQLite's busy timeout, even though we were actually

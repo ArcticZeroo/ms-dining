@@ -1,6 +1,6 @@
 import EventEmitter from 'node:events';
-import type TypedEmitter from '../../models/typed-emitter.js';
-import { IGroupMembershipDirtyEvent, IMenuPublishEvent, IReviewDirtyEvent } from '../../models/storage-events.js';
+import type TypedEmitter from '../../shared/models/typed-emitter.js';
+import { IGroupMembershipDirtyEvent, IMenuPublishEvent, IReviewDirtyEvent } from '../../shared/models/storage-events.js';
 import { logDebug } from '../../util/log.js';
 
 type StorageEvents = {

@@ -1,8 +1,8 @@
 import { isUniqueConstraintFailedError } from '../../../util/prisma.js';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { Prisma, Station } from '@prisma/client';
-import { ICafeStation } from '../../../models/cafe.js';
-import { PrismaLikeClient } from '../../../models/prisma.js';
+import { ICafeStation } from '../../../shared/models/cafe.js';
+import { PrismaLikeClient } from '../../../shared/models/prisma.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 export abstract class StationStorageClient {

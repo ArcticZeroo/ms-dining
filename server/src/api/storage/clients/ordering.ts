@@ -1,8 +1,8 @@
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { isSameDate, toDateString } from '@msdining/common/util/date-util';
 import { Lock } from '@frozor/lock';
-import { IOrderingContext } from '../../../models/cart.js';
-import { Nullable } from '../../../models/util.js';
+import { IOrderingContext } from '../../../shared/models/cart.js';
+import { Nullable } from '../../../shared/models/util.js';
 
 const orderingContextLock = new Lock();
 

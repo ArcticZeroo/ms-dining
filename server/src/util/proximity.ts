@@ -1,7 +1,7 @@
 import { ILocationCoordinates } from '@msdining/common/models/util';
 import { getDistanceBetweenCoordinates } from '@msdining/common/util/coordinates';
-import { CAFE_GROUP_LIST, CAFES_BY_ID } from '../constants/cafes.js';
-import { CafeGroup } from '../models/cafe.js';
+import { CAFE_GROUP_LIST, CAFES_BY_ID } from '../shared/constants/cafes.js';
+import { CafeGroup } from '../shared/models/cafe.js';
 
 // Sigmoid parameters for proximity weighting
 const SIGMOID_STEEPNESS = 4;

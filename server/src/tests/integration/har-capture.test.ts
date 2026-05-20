@@ -31,7 +31,7 @@ import * as http from 'node:http';
 import { AddressInfo } from 'node:net';
 import { BuyOnDemandClient } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { HarCapture } from '../../util/har.js';
-import { ICafe } from '../../models/cafe.js';
+import { ICafe } from '../../shared/models/cafe.js';
 
 /**
  * Subclass that overrides _getUrl to point at our local HTTP server.

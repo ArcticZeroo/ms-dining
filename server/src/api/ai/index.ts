@@ -1,7 +1,7 @@
 import { runPromiseWithRetries } from '../../util/async.js';
 import { rethrowWithoutStatus } from '../../util/error.js';
-import { getServices } from '../../services/registry.js';
-import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
+import { getServices } from '../../main/services/registry.js';
+import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
 import { logInfo } from '../../util/log.js';
 import { anthropicProvider } from './providers/anthropic.js';
 import { openAiProvider } from './providers/openai.js';

@@ -1,7 +1,7 @@
 import Duration from '@arcticzeroo/duration';
 import Router from '@koa/router';
 import { DateUtil } from '@msdining/common';
-import { ICafe } from '../models/cafe.js';
+import { ICafe } from '../shared/models/cafe.js';
 import { getTrimmedQueryParam } from './koa.js';
 
 const MENU_REQUEST_DAYS_WINDOW = 30;

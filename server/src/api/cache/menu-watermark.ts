@@ -17,7 +17,7 @@
  */
 
 import { CACHE_EVENTS } from '../storage/events.js';
-import { hasAnythingChangedInPublishedMenu } from '../../models/storage-events.js';
+import { hasAnythingChangedInPublishedMenu } from '../../shared/models/storage-events.js';
 
 const SERVER_START_MS = Date.now();
 

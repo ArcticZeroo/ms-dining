@@ -13,7 +13,7 @@ import {
 	NEGATIVE_REVIEW_THRESHOLD,
 	VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
-import { IServerReview } from '../../../../models/review.js';
+import { IServerReview } from '../../../../shared/models/review.js';
 
 /**
  * "Try Something Different" — surfaces available menu items that are maximally different

@@ -1,20 +1,20 @@
 import Router from '@koa/router';
 import Koa, { Middleware } from 'koa';
 import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
-import { IServerSearchResult } from '../models/search.js';
+import { IServerSearchResult } from '../shared/models/search.js';
 import { ISearchResponseResult } from '@msdining/common/models/http';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getStationLogoUrl, resolveViewToCafes } from './cafe.js';
 import { jsonStringifyWithoutNull } from './serde.js';
-import { getDevKey } from '../constants/env.js';
+import { getDevKey } from '../shared/constants/env.js';
 import { UserStorageClient } from '../api/storage/clients/user.js';
-import { IServerUser } from '../models/auth.js';
+import { IServerUser } from '../shared/models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsync } from '../api/cache/reviews.js';
-import { ICafe } from '../models/cafe.js';
+import { ICafe } from '../shared/models/cafe.js';
 import { getDateStringForMenuRequest } from './date.js';
 import { CafeStorageClient } from '../api/storage/clients/cafe.js';
-import { setTelemetryProperties } from '../middleware/telemetry.js';
+import { setTelemetryProperties } from '../main/middleware/telemetry.js';
 
 export const attachRouter= (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
 

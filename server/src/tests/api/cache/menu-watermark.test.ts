@@ -11,7 +11,7 @@ import { describe, it } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { getMenuWatermark } from '../../../api/cache/menu-watermark.js';
 import { CACHE_EVENTS } from '../../../api/storage/events.js';
-import { IMenuPublishEvent } from '../../../models/storage-events.js';
+import { IMenuPublishEvent } from '../../../shared/models/storage-events.js';
 
 const SERVER_START_CAPTURED_AT = Date.now();
 

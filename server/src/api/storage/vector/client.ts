@@ -5,12 +5,12 @@ import {
 	retrieveMenuItemEmbeddings,
 	retrieveStationEmbeddings
 } from '../../embeddings.js';
-import { IEntityRef, IVectorSearchResult } from '../../../models/vector.js';
+import { IEntityRef, IVectorSearchResult } from '../../../shared/models/vector.js';
 import { type INegativePenaltyResult } from './db.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { ICafe, ICafeStation } from '../../../models/cafe.js';
-import { CAFE_GROUP_LIST } from '../../../constants/cafes.js';
+import { ICafe, ICafeStation } from '../../../shared/models/cafe.js';
+import { CAFE_GROUP_LIST } from '../../../shared/constants/cafes.js';
 import { Lock } from '@frozor/lock';
 
 const QUERY_LOCK = new Lock();

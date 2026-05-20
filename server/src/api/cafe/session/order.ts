@@ -3,20 +3,20 @@ import { getNamespaceLogger, logError } from '../../../util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient } from '../../../services/registry.js';
+import { createBuyOnDemandClient } from '../../../main/services/registry.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import {
     IOrderLineItem,
-} from '../../../models/buyondemand/cart.js';
+} from '../../../shared/models/buyondemand/cart.js';
 import hat from 'hat';
-import { IOrderingContext } from '../../../models/cart.js';
+import { IOrderingContext } from '../../../shared/models/cart.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { StringUtil } from '../../../util/string.js';
 import { z } from 'zod';
 import { fixed } from '../../../util/math.js';
-import { ICafe, IMenuItemBase } from '../../../models/cafe.js';
+import { ICafe, IMenuItemBase } from '../../../shared/models/cafe.js';
 import { PhoneValidResult } from 'phone';
-import { MEAL_PERIOD } from '../../../constants/enum.js';
+import { MEAL_PERIOD } from '../../../shared/constants/enum.js';
 
 const ORDER_TIMEZONE = 'PST8PDT';
 

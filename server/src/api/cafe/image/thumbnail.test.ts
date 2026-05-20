@@ -35,7 +35,7 @@ import { describe, it } from 'node:test';
 import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
 import Jimp from 'jimp';
-import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../constants/config.js';
+import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../shared/constants/config.js';
 import {
     computeDHash,
     getHashThumbnailFilepath,

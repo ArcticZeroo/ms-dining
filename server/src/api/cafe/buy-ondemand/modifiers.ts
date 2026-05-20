@@ -1,4 +1,4 @@
-import { ICafeMenuItemDetailsResponse } from '../../../models/buyondemand/responses.js';
+import { ICafeMenuItemDetailsResponse } from '../../../shared/models/buyondemand/responses.js';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { IMenuItemModifier, ModifierChoices, ModifierChoiceType } from '@msdining/common/models/cafe';
 import { BuyOnDemandClient } from './buy-ondemand-client.js';

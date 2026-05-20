@@ -7,7 +7,7 @@
 import { Response } from 'node-fetch';
 import { BuyOnDemandClient, BuyOnDemandClientOptions } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
 import { CafeStorageClient } from '../api/storage/clients/cafe.js';
-import { ICafe } from '../models/cafe.js';
+import { ICafe } from '../shared/models/cafe.js';
 import { TestBuyOnDemandServer } from './index.js';
 import { TestResponse } from './models.js';
 

@@ -20,7 +20,7 @@ import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { ICartItem } from '@msdining/common/models/cart';
 import { CafeOrderSession } from './order.js';
-import { ICafe } from '../../../models/cafe.js';
+import { ICafe } from '../../../shared/models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

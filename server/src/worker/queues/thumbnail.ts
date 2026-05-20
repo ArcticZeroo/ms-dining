@@ -1,10 +1,10 @@
 import { WorkerQueue } from './queue.js';
 import Duration from '@arcticzeroo/duration';
-import { Nullable } from '../../models/util.js';
+import { Nullable } from '../../shared/models/util.js';
 import { createAndSaveThumbnailForMenuItem } from '../../api/cafe/image/thumbnail.js';
 import { logDebug, logError } from '../../util/log.js';
 import { isMainThread, parentPort } from 'node:worker_threads';
-import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
+import { IThumbnailWorkerRequest } from '../../shared/models/thumbnail.js';
 
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 5 });
 

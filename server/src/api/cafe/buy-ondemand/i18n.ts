@@ -1,5 +1,5 @@
 import { Response } from 'node-fetch';
-import { getBaseApiUrlWithoutTrailingSlash } from '../../../constants/cafes.js';
+import { getBaseApiUrlWithoutTrailingSlash } from '../../../shared/constants/cafes.js';
 import { logError, logInfo } from '../../../util/log.js';
 import type { BuyOnDemandClient } from './buy-ondemand-client.js';
 

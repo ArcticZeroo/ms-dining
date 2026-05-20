@@ -18,7 +18,7 @@ import * as assert from 'node:assert/strict';
 import { ICartItem } from '@msdining/common/models/cart';
 import { CafeMenuSession } from '../session/menu.js';
 import { CafeOrderSession } from '../session/order.js';
-import { ICafe } from '../../../models/cafe.js';
+import { ICafe } from '../../../shared/models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

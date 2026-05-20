@@ -14,7 +14,7 @@ import { after, before, beforeEach, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { OrderingClient } from './ordering.js';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
-import { IOrderingContext } from '../../../models/cart.js';
+import { IOrderingContext } from '../../../shared/models/cart.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

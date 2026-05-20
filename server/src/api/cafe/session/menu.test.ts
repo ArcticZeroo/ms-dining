@@ -19,7 +19,7 @@
 import { after, before, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { CafeMenuSession } from './menu.js';
-import { ICafe, ICafeStation } from '../../../models/cafe.js';
+import { ICafe, ICafeStation } from '../../../shared/models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

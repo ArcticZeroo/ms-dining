@@ -22,7 +22,7 @@ import * as assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
+import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

@@ -1,11 +1,11 @@
 import { WorkerThreadHandler } from '../../worker-rpc/handler.js';
 import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
-import { serverMenuItemThumbnailPath } from '../../constants/config.js';
+import { serverMenuItemThumbnailPath } from '../../shared/constants/config.js';
 import { logDebug, logError, logInfo } from '../../util/log.js';
 import { retrieveImageMetadataAsync } from '../../util/image.js';
 import path from 'path';
-import { IThumbnailWorkerRequest } from '../../models/thumbnail.js';
+import { IThumbnailWorkerRequest } from '../../shared/models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem, IThumbnailResult } from '../cafe/image/thumbnail.js';
 import { MultiLock } from '@frozor/lock';
 import { loadManifest, saveManifestDebounced, updateManifestEntry } from '../cafe/image/manifest.js';
