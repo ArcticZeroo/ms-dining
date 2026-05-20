@@ -13,7 +13,7 @@ import {
 	UpdateGroupRequest
 } from '@msdining/common/models/group';
 import { MenuItemStorageClient } from '../../../../api/storage/clients/menu-item.js';
-import { StationStorageClient } from '../../../../api/storage/clients/station.js';
+import { getServices } from '../../../../main/services/registry.js';
 import { doNotCacheMiddleware } from '../../../middleware/cache.js';
 import { Context } from 'koa';
 import { treatPrismaNotFoundAs404 } from '../../../middleware/prisma.js';
@@ -111,7 +111,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         async ctx => {
             const [menuItems, stations] = await Promise.all([
                 MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
-                StationStorageClient.retrieveAllStationsWithoutGroup()
+                getServices().data.station.retrieveAllStationsWithoutGroup({})
             ]);
 
             ctx.body = jsonStringifyWithoutNull([

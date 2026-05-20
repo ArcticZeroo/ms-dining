@@ -3,14 +3,13 @@ import { getNamespaceLogger, logError } from '../../../shared/util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient } from '../../../main/services/registry.js';
+import { createBuyOnDemandClient, getServices } from '../../../main/services/registry.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import {
     IOrderLineItem,
 } from '../../../shared/models/buyondemand/cart.js';
 import hat from 'hat';
 import { IOrderingContext } from '../../../shared/models/cart.js';
-import { StationStorageClient } from '../../storage/clients/station.js';
 import { StringUtil } from '../../../shared/util/string.js';
 import { z } from 'zod';
 import { fixed } from '../../../shared/util/math.js';
@@ -391,7 +390,7 @@ export class CafeOrderSession {
             throw new Error(`Failed to find menu item with id "${cartItem.itemId}"`);
         }
 
-        const station = await StationStorageClient.retrieveStationAsync(menuItem.stationId);
+        const station = await getServices().data.station.retrieveStation({ stationId: menuItem.stationId });
 
         if (station == null) {
             throw new Error(`Failed to find station for menu item "${cartItem.itemId}"`);

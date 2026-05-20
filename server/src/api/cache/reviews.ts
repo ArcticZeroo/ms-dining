@@ -1,10 +1,10 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import { getReviewEntityKey, getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review.js';
-import { StationStorageClient } from '../storage/clients/station.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../lock/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { lazyAsync } from '../../shared/util/lazy.js';
+import { getServices } from '../../main/services/registry.js';
 
 const MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
 const STATION_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
@@ -88,7 +88,7 @@ const retrieveMenuItemOnlyReviewHeaderAsync = async (menuItem: IMenuItemBase): P
 }
 
 const retrieveStationReviewHeaderForMenuItemAsync = async (stationId: string): Promise<IMenuItemReviewHeader> => {
-    const station = await StationStorageClient.retrieveStationAsync(stationId);
+    const station = await getServices().data.station.retrieveStation({ stationId });
     if (station == null) {
         return { totalReviewCount: 0, overallRating: 0 };
     }

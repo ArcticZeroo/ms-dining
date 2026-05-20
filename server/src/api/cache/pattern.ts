@@ -6,8 +6,8 @@ import { DailyMenuStorageClient } from '../storage/clients/daily-menu.js';
 import { calculatePattern, IPatternData } from '@msdining/common/util/pattern-util';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../shared/models/storage-events.js';
-import { StationStorageClient } from '../storage/clients/station.js';
 import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
+import { getServices } from '../../main/services/registry.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { logError } from '../../shared/util/log.js';
 
@@ -67,7 +67,7 @@ const invalidateCacheOnMenuPublished = async (event: IMenuPublishEvent) => {
         const dirtyMenuItemNames = new Set<string>();
 
         const retrieveStationName = async (stationId: string) => {
-            const station = await StationStorageClient.retrieveStationAsync(stationId);
+            const station = await getServices().data.station.retrieveStation({ stationId });
             if (station) {
                 dirtyStationNames.add(normalizeNameForSearch(station.name));
             }

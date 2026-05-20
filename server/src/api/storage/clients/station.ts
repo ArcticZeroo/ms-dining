@@ -4,6 +4,17 @@ import { Prisma, Station } from '@prisma/client';
 import { ICafeStation } from '../../../shared/models/cafe.js';
 import { PrismaLikeClient } from '../../../shared/models/prisma.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import type { IStationRecord, IStationService } from '../../../shared/services/station.js';
+
+const toStationRecord = (s: Station): IStationRecord => ({
+    id:             s.id,
+    name:           s.name,
+    normalizedName: s.normalizedName,
+    logoUrl:        s.logoUrl,
+    menuId:         s.menuId,
+    groupId:        s.groupId,
+    cafeId:         s.cafeId,
+});
 
 export abstract class StationStorageClient {
     private static _getStationData(station: ICafeStation) {
@@ -73,3 +84,21 @@ export abstract class StationStorageClient {
         return stations.map(station => station.name);
     }
 }
+
+/**
+ * Worker-side implementation of {@link IStationService}.
+ */
+export const stationServiceCommands = {
+    createStation: async ({ station, allowUpdateIfExisting }: { station: ICafeStation; allowUpdateIfExisting?: boolean }) =>
+        StationStorageClient.createStationAsync(station, allowUpdateIfExisting),
+    retrieveStation: async ({ stationId }: { stationId: string }) => {
+        const s = await StationStorageClient.retrieveStationAsync(stationId);
+        return s ? toStationRecord(s) : null;
+    },
+    retrieveAllStationsWithoutGroup: async (_data: {}) => {
+        const stations = await StationStorageClient.retrieveAllStationsWithoutGroup();
+        return stations.map(toStationRecord);
+    },
+    retrieveAllStationNames: async (_data: {}) =>
+        StationStorageClient.retrieveAllStationNamesAsync(),
+} satisfies IStationService;

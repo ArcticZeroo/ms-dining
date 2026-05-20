@@ -4,7 +4,7 @@ import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/revi
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
-import { StationStorageClient } from '../../../../../../api/storage/clients/station.js';
+import { getServices } from '../../../../../../main/services/registry.js';
 import { ReviewStorageClient } from '../../../../../../api/storage/clients/review.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
@@ -20,7 +20,7 @@ export const registerStationReviewRoutes = (parent: Router) => {
             ctx.throw(400, 'Missing station id');
         }
 
-        const station = await StationStorageClient.retrieveStationAsync(stationId);
+        const station = await getServices().data.station.retrieveStation({ stationId });
         if (station == null) {
             ctx.throw(404, 'Station not found');
         }

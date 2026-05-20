@@ -16,7 +16,7 @@ import {
 	getStationReviewHeadersByName
 } from '@prisma/client/sql';
 import { IServerReview } from '../../../shared/models/review.js';
-import { StationStorageClient } from './station.js';
+import { getServices } from '../../../main/services/registry.js';
 
 interface ICreateMenuItemReviewItem {
 	menuItemId: string;
@@ -204,7 +204,7 @@ export abstract class ReviewStorageClient {
     }
 
     static async #getStationReviewsForMenuItemAsync(stationId: string): Promise<IServerReview[]> {
-        const station = await StationStorageClient.retrieveStationAsync(stationId);
+        const station = await getServices().data.station.retrieveStation({ stationId });
         if (station == null) {
             return [];
         }

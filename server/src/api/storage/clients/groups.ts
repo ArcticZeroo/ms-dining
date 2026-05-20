@@ -8,11 +8,11 @@ import {
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { MenuItemStorageClient } from './menu-item.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { StationStorageClient } from './station.js';
 import { CrossCafeGroup, Station } from '@prisma/client';
 import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/models/search';
 import { IGroupData, IGroupMember, IUpdateGroupRequest } from '@msdining/common/models/group';
 import { PrismaLikeClient } from '../../../shared/models/prisma.js';
+import { getServices } from '../../../main/services/registry.js';
 import hat from 'hat';
 import { STORAGE_EVENTS } from '../events.js';
 
@@ -30,14 +30,14 @@ export const extractMenuItemsAsync = async (results: Array<IResultWithId>): Prom
 }
 
 export const extractStationsAsync = async (results: Array<IResultWithId>): Promise<Array<IGroupMember>> => {
-    const stations = await Promise.all(results.map((result) => StationStorageClient.retrieveStationAsync(result.id)));
+    const stations = await Promise.all(results.map((result) => getServices().data.station.retrieveStation({ stationId: result.id })));
     return stations
-        .filter((station): station is Station => station !== null)
+        .filter((station) => station !== null)
         .map(stationToGroupMember);
 }
 
 export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IGroupMember> => {
-    const station = await StationStorageClient.retrieveStationAsync(menuItem.stationId);
+    const station = await getServices().data.station.retrieveStation({ stationId: menuItem.stationId });
 
     return ({
         id:       menuItem.id,
@@ -52,7 +52,7 @@ export const menuItemToGroupMember = async (menuItem: IMenuItemBase): Promise<IG
     });
 };
 
-export const stationToGroupMember = (station: Station): IGroupMember => ({
+export const stationToGroupMember = (station: Pick<Station, 'id' | 'name' | 'cafeId' | 'logoUrl'>): IGroupMember => ({
     id:       station.id,
     name:     station.name,
     type:     SearchEntityType.station,

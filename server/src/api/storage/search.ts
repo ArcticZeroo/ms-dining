@@ -14,7 +14,6 @@ import { DailyMenuStorageClient } from './clients/daily-menu.js';
 import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
 import { IVectorSearchResult } from '../../shared/models/vector.js';
-import { StationStorageClient } from './clients/station.js';
 import { logDebug } from '../../shared/util/log.js';
 import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { MaybePromise } from '../../shared/models/async.js';
@@ -655,7 +654,7 @@ export abstract class SearchManager {
                         const stationId = entityType === SearchEntityType.dailyStation
                             ? vectorClient.parseDailyStationId(id).stationId
                             : id;
-                        const station = await StationStorageClient.retrieveStationAsync(stationId);
+                        const station = await getServices().data.station.retrieveStation({ stationId });
                         if (station != null) {
                             logDebug('Adding vector station result without appearance', station.name);
                             const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);

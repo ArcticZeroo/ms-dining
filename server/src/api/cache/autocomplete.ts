@@ -3,7 +3,7 @@ import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { type IAutocompleteMatch, matchAutocomplete } from '@msdining/common/util/autocomplete';
 import { MenuItemStorageClient } from '../storage/clients/menu-item.js';
-import { StationStorageClient } from '../storage/clients/station.js';
+import { getServices } from '../../main/services/registry.js';
 
 const stationNames = new Map<string /*normalizedName*/, string /*displayName*/>();
 const menuItemNames = new Map<string /*normalizedName*/, string /*displayName*/>();
@@ -41,7 +41,7 @@ export const seedAutocompleteFromDatabaseAsync = async () => {
     }
 
     // Station names aren't cached elsewhere, so we do a lightweight query.
-    const stations = await StationStorageClient.retrieveAllStationNamesAsync();
+    const stations = await getServices().data.station.retrieveAllStationNames({});
     for (const name of stations) {
         indexStationName(name);
     }
