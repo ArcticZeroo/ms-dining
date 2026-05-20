@@ -23,19 +23,16 @@ export abstract class SearchQueryClient {
 }
 
 /**
- * Worker-side command map for {@link ISearchQueryService}. Registered with
- * the data handler under the `searchQuery` service name. Each entry is a
- * single-arg function as required by the handler's nested-service shape;
- * methods that take multiple parameters on the interface wrap them into an
- * object payload here.
+ * Worker-side implementation of {@link ISearchQueryService}. Typed against
+ * the shared interface so TypeScript enforces parity — adding a method to
+ * the interface without implementing it here is a compile error.
  *
- * In phase 2 this file moves to `src/worker-db/services/search-query.ts`
- * and the storage-client implementation moves with it. The shape registered
- * here does not change between phase 1 and phase 2.
+ * Registered with the data handler under the `searchQuery` service name.
+ * In phase 2 this file moves to `src/worker-db/services/search-query.ts`.
  */
 export const searchQueryServiceCommands = {
-    incrementSearchCount: (data: { query: string }) =>
-        SearchQueryClient.incrementSearchCount(data.query),
-    getTopSearchQueries: (data: { limit?: number }) =>
-        SearchQueryClient.getTopSearchQueries(data.limit),
-} as const;
+    incrementSearchCount: async ({ query }: { query: string }) =>
+        SearchQueryClient.incrementSearchCount(query),
+    getTopSearchQueries: async ({ limit }: { limit?: number }) =>
+        SearchQueryClient.getTopSearchQueries(limit),
+} satisfies ISearchQueryService;

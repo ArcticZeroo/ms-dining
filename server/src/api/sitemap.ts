@@ -29,7 +29,7 @@ export const generateSitemap = async () => {
         }
     }
 
-    const topSearchQueries = await getServices().data.searchQuery.getTopSearchQueries(50 /*limit*/);
+    const topSearchQueries = await getServices().data.searchQuery.getTopSearchQueries({ limit: 50 });
     for (const { query } of topSearchQueries) {
         sitemap.write({ url: `/search?q=${encodeURIComponent(query)}`, changefreq: 'daily', priority: 0.8 });
     }

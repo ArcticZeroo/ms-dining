@@ -2,17 +2,14 @@ import type { ISearchQueryService } from '../../../shared/services/search-query.
 import { dataHandler } from './handler.js';
 
 /**
- * Main-side typed client for {@link ISearchQueryService}. Implements the
- * interface by forwarding every method through the data handler — phase 1
- * stays in-process, phase 2 transparently crosses the worker boundary
- * (this file does not change between phases).
- *
- * Imported into the `Services` bag at `data.searchQuery` and consumed via
- * `getServices().data.searchQuery.x(...)` from main-thread call sites.
+ * Main-side typed client for {@link ISearchQueryService}. Both this object
+ * and the worker-side `searchQueryServiceCommands` are typed against the
+ * same interface, so adding a method to the interface is a compile error
+ * until both sides implement it.
  */
 export const searchQueryService: ISearchQueryService = {
-    incrementSearchCount: (query) =>
-        dataHandler.sendRequest('searchQuery', 'incrementSearchCount', { query }),
-    getTopSearchQueries: (limit) =>
-        dataHandler.sendRequest('searchQuery', 'getTopSearchQueries', { limit }),
+    incrementSearchCount: (data) =>
+        dataHandler.sendRequest('searchQuery', 'incrementSearchCount', data),
+    getTopSearchQueries: (data) =>
+        dataHandler.sendRequest('searchQuery', 'getTopSearchQueries', data),
 };

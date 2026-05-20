@@ -55,7 +55,7 @@ export const registerSearchRoutes = (parent: Router) => {
     const incrementSearchCountMiddleware: Middleware = (ctx, next) => {
         const searchQuery = getTrimmedQueryParam(ctx, 'q');
         if (searchQuery) {
-            getServices().data.searchQuery.incrementSearchCount(searchQuery)
+            getServices().data.searchQuery.incrementSearchCount({ query: searchQuery })
                 .catch(err => logError('Could not increment search count:', err));
         }
         return next();

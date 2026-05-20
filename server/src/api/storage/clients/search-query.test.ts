@@ -42,11 +42,11 @@ test('incrementSearchCount + getTopSearchQueries round-trip through the data han
     ctx.installServices();
     const { searchQuery } = getServices().data;
 
-    await searchQuery.incrementSearchCount('Burger');
-    await searchQuery.incrementSearchCount('Burger');
-    await searchQuery.incrementSearchCount('Pizza');
+    await searchQuery.incrementSearchCount({ query: 'Burger' });
+    await searchQuery.incrementSearchCount({ query: 'Burger' });
+    await searchQuery.incrementSearchCount({ query: 'Pizza' });
 
-    const top = await searchQuery.getTopSearchQueries(10);
+    const top = await searchQuery.getTopSearchQueries({ limit: 10 });
 
     // Counts: burger=2 (incremented twice), pizza=1.
     // Query is lowercased + trimmed by the underlying impl.
@@ -64,11 +64,11 @@ test('getTopSearchQueries default limit matches the storage client default (10)'
     for (let i = 0; i < 12; i++) {
         const term = `seedterm${i.toString().padStart(2, '0')}`;
         for (let bump = 0; bump <= i; bump++) {
-            await searchQuery.incrementSearchCount(term);
+            await searchQuery.incrementSearchCount({ query: term });
         }
     }
 
-    const top = await searchQuery.getTopSearchQueries();
+    const top = await searchQuery.getTopSearchQueries({});
     assert.equal(top.length, 10, 'default limit is 10');
 });
 
@@ -76,11 +76,11 @@ test('incrementSearchCount normalizes input (trim + lowercase) so reads see cano
     ctx.installServices();
     const { searchQuery } = getServices().data;
 
-    await searchQuery.incrementSearchCount('  Latte  ');
-    await searchQuery.incrementSearchCount('LATTE');
-    await searchQuery.incrementSearchCount('latte');
+    await searchQuery.incrementSearchCount({ query: '  Latte  ' });
+    await searchQuery.incrementSearchCount({ query: 'LATTE' });
+    await searchQuery.incrementSearchCount({ query: 'latte' });
 
-    const top = await searchQuery.getTopSearchQueries(50);
+    const top = await searchQuery.getTopSearchQueries({ limit: 50 });
     const lattes = top.filter(row => row.query === 'latte');
     assert.equal(lattes.length, 1, 'all three writes coalesce into one row');
     assert.equal(lattes[0]!.count, 3);
