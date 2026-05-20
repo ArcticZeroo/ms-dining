@@ -12,7 +12,7 @@ import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items
 import { CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
 import { lazyAsync } from '../../shared/util/lazy.js';
-import { ReviewStorageClient } from '../storage/clients/review.js';
+import { getServices } from '../../main/services/registry.js';
 import { getShutDownCafeIdsAsync } from './daily-cafe-state.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
 import { getHiddenGems } from '../recommendations/signals/cafe-specific/hidden-gems.js';
@@ -158,7 +158,7 @@ export const getRecommendationsAsync = async ({
 			return [] as Array<IServerReview>;
 		}
 
-		return ReviewStorageClient.getReviewsForUserAsync({ userId });
+		return getServices().data.review.getReviewsForUser({ userId });
 	});
 	const getAllUserReviews = () => allUserReviews.value;
 

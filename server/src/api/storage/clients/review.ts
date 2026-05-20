@@ -17,43 +17,17 @@ import {
 } from '@prisma/client/sql';
 import { IServerReview } from '../../../shared/models/review.js';
 import { getServices } from '../../../main/services/registry.js';
+import type {
+    ICreateMenuItemReviewInput,
+    ICreateStationReviewInput,
+    IMenuItemReviewHeaderWithEntityKey,
+    IMenuItemReviewsResult,
+    IUpdateReviewInput,
+    IReviewService,
+} from '../../../shared/services/review.js';
 
-interface ICreateMenuItemReviewItem {
-	menuItemId: string;
-	userId?: string;
-	displayName?: string;
-	rating: number;
-	comment?: string;
-	groupId?: string | null;
-	normalizedName: string;
-}
-
-interface ICreateStationReviewItem {
-	stationId: string;
-	userId?: string;
-	displayName?: string;
-	rating: number;
-	comment?: string;
-	groupId?: string | null;
-	normalizedName: string;
-}
-
-interface IUpdateReviewItem {
-	rating?: number;
-	comment?: string;
-	displayName?: string;
-}
-
-interface IGetReviewsForUserParams {
-	userId: string;
-	menuItemId?: string;
-}
-
-interface IMenuItemReviewHeaderWithEntityKey {
-	entityKey: string;
-	totalReviewCount: number;
-	overallRating: number;
-}
+// Local types replaced by shared service types (ICreateMenuItemReviewInput, etc.)
+// Re-export for callers that still need the old names during migration.
 
 export const getReviewEntityKey = (menuItem: IMenuItemBase): string => getEntityKey(menuItem);
 
@@ -91,13 +65,10 @@ const REVIEW_ENTITY_SELECT = {
     }
 };
 
-export interface IMenuItemReviewsResult {
-	menuItemReviews: IServerReview[];
-	stationReviews: IServerReview[];
-}
+export type { IMenuItemReviewsResult } from '../../../shared/services/review.js';
 
 export abstract class ReviewStorageClient {
-    public static async createMenuItemReviewAsync(review: ICreateMenuItemReviewItem) {
+    public static async createMenuItemReviewAsync(review: ICreateMenuItemReviewInput) {
         let result: { id: string };
         const userId = review.userId;
 
@@ -150,7 +121,7 @@ export abstract class ReviewStorageClient {
         return result;
     }
 
-    public static async createStationReviewAsync(review: ICreateStationReviewItem) {
+    public static async createStationReviewAsync(review: ICreateStationReviewInput) {
         let result: { id: string };
         const userId = review.userId;
 
@@ -250,7 +221,7 @@ export abstract class ReviewStorageClient {
         }));
     }
 
-    public static async getReviewsForUserAsync({ userId, menuItemId }: IGetReviewsForUserParams): Promise<IServerReview[]> {
+    public static async getReviewsForUserAsync({ userId, menuItemId }: { userId: string; menuItemId?: string }): Promise<IServerReview[]> {
         return usePrismaClient(client => client.review.findMany({
             where:   {
                 userId,
@@ -263,7 +234,7 @@ export abstract class ReviewStorageClient {
         }));
     }
 
-    public static async updateReviewAsync(reviewId: string, data: IUpdateReviewItem) {
+    public static async updateReviewAsync(reviewId: string, data: IUpdateReviewInput) {
         const result = await usePrismaWrite(client => client.review.update({
             where: {
                 id: reviewId
@@ -483,3 +454,47 @@ export abstract class ReviewStorageClient {
         };
     }
 }
+
+/**
+ * Worker-side implementation of {@link IReviewService}.
+ */
+export const reviewServiceCommands = {
+    createMenuItemReview: async ({ review }: { review: ICreateMenuItemReviewInput }) =>
+        ReviewStorageClient.createMenuItemReviewAsync(review),
+    createStationReview: async ({ review }: { review: ICreateStationReviewInput }) =>
+        ReviewStorageClient.createStationReviewAsync(review),
+    getReviewsForMenuItem: async ({ menuItem }: { menuItem: IMenuItemBase }) =>
+        ReviewStorageClient.getReviewsForMenuItemAsync(menuItem),
+    getReviewsForStation: async ({ station }: { station: { name: string; groupId?: string | null } }) =>
+        ReviewStorageClient.getReviewsForStationAsync(station),
+    getReviewsForUser: async ({ userId, menuItemId }: { userId: string; menuItemId?: string }) =>
+        ReviewStorageClient.getReviewsForUserAsync({ userId, menuItemId }),
+    getReviewById: async ({ reviewId }: { reviewId: string }) =>
+        ReviewStorageClient.getReviewByIdAsync(reviewId),
+    getRecentReviews: async ({ count }: { count: number }) =>
+        ReviewStorageClient.getRecentReviews(count),
+    updateReview: async ({ reviewId, update }: { reviewId: string; update: IUpdateReviewInput }) => {
+        await ReviewStorageClient.updateReviewAsync(reviewId, update);
+    },
+    deleteReview: async ({ reviewId }: { reviewId: string }) => {
+        await ReviewStorageClient.deleteReviewAsync(reviewId);
+    },
+    isOwnedByUser: async ({ reviewId, userId }: { reviewId: string; userId: string }) =>
+        ReviewStorageClient.isOwnedByUser(reviewId, userId),
+    getAllMenuItemReviewHeaders: async (_data: {}) =>
+        ReviewStorageClient.getAllMenuItemReviewHeaders(),
+    getAllMenuItemReviewHeadersByGroupId: async (_data: {}) =>
+        ReviewStorageClient.getAllMenuItemReviewHeadersByGroupId(),
+    getMenuItemReviewHeaderByName: async ({ normalizedName }: { normalizedName: string }) =>
+        ReviewStorageClient.getMenuItemReviewHeaderByName(normalizedName),
+    getReviewHeaderByGroupId: async ({ groupId }: { groupId: string }) =>
+        ReviewStorageClient.getReviewHeaderByGroupId(groupId),
+    getAllStationReviewHeaders: async (_data: {}) =>
+        ReviewStorageClient.getAllStationReviewHeaders(),
+    getAllStationReviewHeadersByGroupId: async (_data: {}) =>
+        ReviewStorageClient.getAllStationReviewHeadersByGroupId(),
+    getStationReviewHeaderByName: async ({ normalizedName }: { normalizedName: string }) =>
+        ReviewStorageClient.getStationReviewHeaderByName(normalizedName),
+    getStationReviewHeaderByGroupId: async ({ groupId }: { groupId: string }) =>
+        ReviewStorageClient.getStationReviewHeaderByGroupId(groupId),
+} satisfies IReviewService;

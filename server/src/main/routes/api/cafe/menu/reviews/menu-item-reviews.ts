@@ -7,7 +7,7 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
 import { sendVisitMiddleware } from '../../../../../middleware/analytics.js';
-import { ReviewStorageClient } from '../../../../../../api/storage/clients/review.js';
+import { getServices } from '../../../../../../main/services/registry.js';
 import { MenuItemStorageClient } from '../../../../../../api/storage/clients/menu-item.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
@@ -38,7 +38,7 @@ export const registerMenuItemReviewRoutes = (parent: Router) => {
             const userId = getMaybeUserId(ctx);
             const menuItem = await getMenuItemFromRequest(ctx);
 
-            const { menuItemReviews, stationReviews } = await ReviewStorageClient.getReviewsForMenuItemAsync(menuItem);
+            const { menuItemReviews, stationReviews } = await getServices().data.review.getReviewsForMenuItem({ menuItem });
 
             const response: IReviewSummary = {
                 counts:              {},
@@ -115,14 +115,16 @@ export const registerMenuItemReviewRoutes = (parent: Router) => {
 
             const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
 
-            const review = await ReviewStorageClient.createMenuItemReviewAsync({
-                userId,
-                menuItemId:     menuItem.id,
-                normalizedName: normalizeNameForSearch(menuItem.name),
-                rating:         body.rating,
-                comment:        body.comment?.trim(),
-                displayName:    isAnonymous ? body.displayName?.trim() : undefined,
-                groupId:        menuItem.groupId
+            const review = await getServices().data.review.createMenuItemReview({
+                review: {
+                    userId,
+                    menuItemId:     menuItem.id,
+                    normalizedName: normalizeNameForSearch(menuItem.name),
+                    rating:         body.rating,
+                    comment:        body.comment?.trim(),
+                    displayName:    isAnonymous ? body.displayName?.trim() : undefined,
+                    groupId:        menuItem.groupId
+                }
             });
 
             ctx.body = {

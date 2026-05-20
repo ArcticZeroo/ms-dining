@@ -3,7 +3,7 @@ import { IUpdateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getTrimmedQueryParam, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
-import { ReviewStorageClient } from '../../../../../../api/storage/clients/review.js';
+import { getServices } from '../../../../../../main/services/registry.js';
 import { MenuItemStorageClient } from '../../../../../../api/storage/clients/menu-item.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
@@ -20,7 +20,7 @@ export const registerReviewCrudRoutes = (parent: Router) => {
         }
 
         const isAdmin = await isAdminAsync(ctx);
-        if (!isAdmin && !(await ReviewStorageClient.isOwnedByUser(reviewId, getUserIdOrThrow(ctx)))) {
+        if (!isAdmin && !(await getServices().data.review.isOwnedByUser({ reviewId, userId: getUserIdOrThrow(ctx) }))) {
             ctx.throw(403, 'Not allowed to modify another user\'s review');
         }
 
@@ -40,7 +40,7 @@ export const registerReviewCrudRoutes = (parent: Router) => {
                 }
             }
 
-            const reviews = await ReviewStorageClient.getReviewsForUserAsync({
+            const reviews = await getServices().data.review.getReviewsForUser({
                 userId: getUserIdOrThrow(ctx),
                 menuItemId
             });
@@ -51,7 +51,7 @@ export const registerReviewCrudRoutes = (parent: Router) => {
     router.get('/recent',
         reviewCacheController,
         async ctx => {
-            const reviews = await ReviewStorageClient.getRecentReviews(10);
+            const reviews = await getServices().data.review.getRecentReviews({ count: 10 });
             ctx.body = jsonStringifyWithoutNull(reviews.map(serializeReview));
         });
 
@@ -76,10 +76,13 @@ export const registerReviewCrudRoutes = (parent: Router) => {
                 return;
             }
 
-            await ReviewStorageClient.updateReviewAsync(reviewId, {
-                rating:      body.rating,
-                comment:     body.comment?.trim(),
-                displayName: body.displayName?.trim(),
+            await getServices().data.review.updateReview({
+                reviewId,
+                update: {
+                    rating:      body.rating,
+                    comment:     body.comment?.trim(),
+                    displayName: body.displayName?.trim(),
+                }
             });
 
             ctx.status = 204;
@@ -90,7 +93,7 @@ export const registerReviewCrudRoutes = (parent: Router) => {
         requireAuthenticated,
         async ctx => {
             const reviewId = await validateReviewOwnershipOrAdminAsync(ctx);
-            await ReviewStorageClient.deleteReviewAsync(reviewId);
+            await getServices().data.review.deleteReview({ reviewId });
             ctx.status = 204;
             reviewCacheController.clearCache();
         });

@@ -1,5 +1,5 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
-import { getReviewEntityKey, getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review.js';
+import { getReviewEntityKey, getReviewEntityKeyFromParts } from '../storage/clients/review.js';
 import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { LockedMap } from '../lock/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
@@ -11,10 +11,10 @@ const STATION_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IM
 
 const INITIALIZED = lazyAsync(async () => {
     const [nameHeaders, groupHeaders, stationNameHeaders, stationGroupHeaders] = await Promise.all([
-        ReviewStorageClient.getAllMenuItemReviewHeaders(),
-        ReviewStorageClient.getAllMenuItemReviewHeadersByGroupId(),
-        ReviewStorageClient.getAllStationReviewHeaders(),
-        ReviewStorageClient.getAllStationReviewHeadersByGroupId()
+        getServices().data.review.getAllMenuItemReviewHeaders({}),
+        getServices().data.review.getAllMenuItemReviewHeadersByGroupId({}),
+        getServices().data.review.getAllStationReviewHeaders({}),
+        getServices().data.review.getAllStationReviewHeadersByGroupId({})
     ]);
 
     const menuItemHeaders = [...nameHeaders, ...groupHeaders];
@@ -81,9 +81,9 @@ const retrieveMenuItemOnlyReviewHeaderAsync = async (menuItem: IMenuItemBase): P
                 return header;
             }
             if (menuItem.groupId) {
-                return ReviewStorageClient.getReviewHeaderByGroupId(menuItem.groupId);
+                return getServices().data.review.getReviewHeaderByGroupId({ groupId: menuItem.groupId });
             }
-            return ReviewStorageClient.getMenuItemReviewHeaderByName(normalizeNameForSearch(menuItem.name));
+            return getServices().data.review.getMenuItemReviewHeaderByName({ normalizedName: normalizeNameForSearch(menuItem.name) });
         });
 }
 
@@ -115,9 +115,9 @@ export const retrieveReviewHeaderByPartsAsync = async (groupId: string | null | 
                 return header;
             }
             if (groupId) {
-                return ReviewStorageClient.getReviewHeaderByGroupId(groupId);
+                return getServices().data.review.getReviewHeaderByGroupId({ groupId });
             }
-            return ReviewStorageClient.getMenuItemReviewHeaderByName(normalizeNameForSearch(name));
+            return getServices().data.review.getMenuItemReviewHeaderByName({ normalizedName: normalizeNameForSearch(name) });
         });
 }
 
@@ -138,9 +138,9 @@ export const retrieveStationReviewHeaderAsync = async (station: IStationEntity):
                 return header;
             }
             if (station.groupId) {
-                return ReviewStorageClient.getStationReviewHeaderByGroupId(station.groupId);
+                return getServices().data.review.getStationReviewHeaderByGroupId({ groupId: station.groupId });
             }
-            return ReviewStorageClient.getStationReviewHeaderByName(normalizeNameForSearch(station.name));
+            return getServices().data.review.getStationReviewHeaderByName({ normalizedName: normalizeNameForSearch(station.name) });
         });
 }
 
@@ -154,9 +154,9 @@ export const retrieveStationReviewHeaderByPartsAsync = async (groupId: string | 
                 return header;
             }
             if (groupId) {
-                return ReviewStorageClient.getStationReviewHeaderByGroupId(groupId);
+                return getServices().data.review.getStationReviewHeaderByGroupId({ groupId });
             }
-            return ReviewStorageClient.getStationReviewHeaderByName(normalizeNameForSearch(name));
+            return getServices().data.review.getStationReviewHeaderByName({ normalizedName: normalizeNameForSearch(name) });
         });
 }
 

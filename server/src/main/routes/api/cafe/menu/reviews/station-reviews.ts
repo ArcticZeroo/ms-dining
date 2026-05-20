@@ -5,7 +5,6 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
 import { getServices } from '../../../../../../main/services/registry.js';
-import { ReviewStorageClient } from '../../../../../../api/storage/clients/review.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
 
@@ -34,7 +33,7 @@ export const registerStationReviewRoutes = (parent: Router) => {
             const userId = getMaybeUserId(ctx);
             const station = await getStationFromRequest(ctx);
 
-            const reviews = await ReviewStorageClient.getReviewsForStationAsync(station);
+            const reviews = await getServices().data.review.getReviewsForStation({ station });
 
             const response: IReviewSummary = {
                 counts:              {},
@@ -100,14 +99,16 @@ export const registerStationReviewRoutes = (parent: Router) => {
 
             const userId = isAnonymous ? undefined : getUserIdOrThrow(ctx);
 
-            const review = await ReviewStorageClient.createStationReviewAsync({
-                userId,
-                stationId:      station.id,
-                normalizedName: station.normalizedName,
-                rating:         body.rating,
-                comment:        body.comment?.trim(),
-                displayName:    isAnonymous ? body.displayName?.trim() : undefined,
-                groupId:        station.groupId
+            const review = await getServices().data.review.createStationReview({
+                review: {
+                    userId,
+                    stationId:      station.id,
+                    normalizedName: station.normalizedName,
+                    rating:         body.rating,
+                    comment:        body.comment?.trim(),
+                    displayName:    isAnonymous ? body.displayName?.trim() : undefined,
+                    groupId:        station.groupId
+                }
             });
 
             ctx.body = {
