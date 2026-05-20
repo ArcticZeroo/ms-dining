@@ -260,3 +260,59 @@ test('updateGroup renames a group', async () => {
     assert.ok(group);
     assert.equal(group.name, renamed);
 });
+
+/**
+ * Regression: groups.ts#updateGroupIdForCachedMenuItems must mutate the
+ * actual MenuItemStorageClient cache, not a structuredClone'd copy.
+ * Before the fix, addToGroup/createGroup would update cloned objects
+ * returned via the service, leaving the real cache with groupId: null.
+ */
+test('addToGroup updates the cached menu item groupId (regression: structuredClone isolation)', async () => {
+    ctx.installServices();
+
+    // Save a fresh menu item with no group.
+    const itemId = nextId('cache-regression-item');
+    const menuItem: IMenuItemBase = {
+        ...MENU_ITEM_A,
+        id:          itemId,
+        name:        'Cache Regression Item',
+        description: 'Tests that group assignment reaches the real cache',
+        groupId:     null,
+    };
+    await getServices().data.menuItem.saveMenuItem({ menuItem });
+
+    // Verify it starts with no group.
+    const before = await getServices().data.menuItem.retrieveMenuItem({ id: itemId });
+    assert.ok(before);
+    assert.equal(before.groupId, null, 'item should start ungrouped');
+
+    // Create a group with this item as an initial member.
+    const group = await getServices().data.groups.createGroup({
+        name:           nextId('cache-regression-group'),
+        entityType:     SearchEntityType.menuItem,
+        initialMembers: [itemId],
+    });
+
+    // The cached menu item's groupId should now reflect the group.
+    const afterCreate = await getServices().data.menuItem.retrieveMenuItem({ id: itemId });
+    assert.ok(afterCreate);
+    assert.equal(afterCreate.groupId, group.id,
+        'createGroup must update the cached menu item groupId (not a structuredClone)');
+
+    // Also verify addToGroup updates another item's cache.
+    const itemId2 = nextId('cache-regression-item-2');
+    const menuItem2: IMenuItemBase = {
+        ...MENU_ITEM_B,
+        id:          itemId2,
+        name:        'Cache Regression Item 2',
+        description: 'Second item for addToGroup cache test',
+        groupId:     null,
+    };
+    await getServices().data.menuItem.saveMenuItem({ menuItem: menuItem2 });
+    await getServices().data.groups.addToGroup({ groupId: group.id, memberIds: [itemId2] });
+
+    const afterAdd = await getServices().data.menuItem.retrieveMenuItem({ id: itemId2 });
+    assert.ok(afterAdd);
+    assert.equal(afterAdd.groupId, group.id,
+        'addToGroup must update the cached menu item groupId');
+});
