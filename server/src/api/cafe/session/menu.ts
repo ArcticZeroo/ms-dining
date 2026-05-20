@@ -1,9 +1,8 @@
 import { BuyOnDemandClient } from '../buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient } from '../../../main/services/registry.js';
+import { createBuyOnDemandClient, getServices } from '../../../main/services/registry.js';
 import { ICafeMenuItemListResponseItem } from '../../../shared/models/buyondemand/responses.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../shared/models/cafe.js';
 import { logError } from '../../../shared/util/log.js';
-import { TagStorageClient } from '../../storage/clients/tags.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
 import { Lock } from '@frozor/lock';
@@ -98,10 +97,10 @@ export class CafeMenuSession {
         try {
             // This might be a bottleneck, but we don't want to drop tags
             return await tagLock.acquire(async () => {
-                const localTags = await TagStorageClient.retrieveTagsAsync();
+                const localTags = await getServices().data.tag.retrieveTags({});
 
-                if (localTags.has(tagId)) {
-                    return localTags.get(tagId);
+                if (tagId in localTags) {
+                    return localTags[tagId];
                 }
 
                 // Only reach out once per station
@@ -118,13 +117,13 @@ export class CafeMenuSession {
                     menuId:       station.menuId
                 });
 
-                await TagStorageClient.createTags(
-                    Array.from(buyOnDemandTags.entries())
+                await getServices().data.tag.createTags({
+                    tags: Array.from(buyOnDemandTags.entries())
                         .map(([tagId, tagName]) => ({
                             id:   tagId,
                             name: tagName
                         }))
-                );
+                });
 
                 return buyOnDemandTags.get(tagId);
             });

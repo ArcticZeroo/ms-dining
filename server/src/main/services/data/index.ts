@@ -1,4 +1,5 @@
 import { searchQueryService } from './search-query.js';
+import { tagService } from './tag.js';
 
 /**
  * Composite of all main-side typed data-service clients. Lives at
@@ -11,10 +12,13 @@ import { searchQueryService } from './search-query.js';
  */
 export interface DataServices {
     searchQuery: typeof searchQueryService;
+    tag: typeof tagService;
 }
 
 export const defaultDataServices: DataServices = {
     searchQuery: searchQueryService,
+    tag:         tagService,
 };
 
 export { searchQueryService } from './search-query.js';
+export { tagService } from './tag.js';

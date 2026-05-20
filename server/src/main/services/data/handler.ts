@@ -1,5 +1,6 @@
 import { InProcessHandler } from '../../../worker/rpc/handler.js';
 import { searchQueryServiceCommands } from '../../../api/storage/clients/search-query.js';
+import { tagServiceCommands } from '../../../api/storage/clients/tags.js';
 
 /**
  * Single source of truth for which worker-side service command bags are
@@ -14,6 +15,7 @@ import { searchQueryServiceCommands } from '../../../api/storage/clients/search-
  */
 export const DATA_SERVICES = {
     searchQuery: searchQueryServiceCommands,
+    tag:         tagServiceCommands,
 } as const;
 
 export type DataServiceMap = typeof DATA_SERVICES;
