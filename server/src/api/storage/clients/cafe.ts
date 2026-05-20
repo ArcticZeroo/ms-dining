@@ -2,6 +2,18 @@ import { Cafe } from '@prisma/client';
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { ICafe, ICafeConfig } from '../../../shared/models/cafe.js';
 import { Lock } from '@frozor/lock';
+import type { ICafeRecord, ICafeService } from '../../../shared/services/cafe.js';
+
+const toCafeRecord = (cafe: Cafe): ICafeRecord => ({
+    id:               cafe.id,
+    name:             cafe.name,
+    tenantId:         cafe.tenantId,
+    logoName:         cafe.logoName,
+    contextId:        cafe.contextId,
+    displayProfileId: cafe.displayProfileId,
+    storeId:          cafe.storeId,
+    externalName:     cafe.externalName,
+});
 
 export abstract class CafeStorageClient {
 	private static _hasInitialized = false;
@@ -74,3 +86,25 @@ export abstract class CafeStorageClient {
         });
     }
 }
+
+/**
+ * Worker-side implementation of {@link ICafeService}.
+ */
+export const cafeServiceCommands = {
+    retrieveCafe: async ({ id }: { id: string }) => {
+        const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+        return cafe ? toCafeRecord(cafe) : null;
+    },
+    retrieveCafes: async (_data: {}) => {
+        const map = await CafeStorageClient.retrieveCafesAsync();
+        const result: Record<string, ICafeRecord> = {};
+        for (const [id, cafe] of map) {
+            result[id] = toCafeRecord(cafe);
+        }
+        return result;
+    },
+    doesCafeExist: async ({ id }: { id: string }) =>
+        CafeStorageClient.doesCafeExistAsync(id),
+    createCafe: async ({ cafe, config }: { cafe: ICafe; config: ICafeConfig }) =>
+        CafeStorageClient.createCafeAsync(cafe, config),
+} satisfies ICafeService;

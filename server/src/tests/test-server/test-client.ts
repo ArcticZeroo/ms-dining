@@ -6,7 +6,7 @@
 
 import { Response } from 'node-fetch';
 import { BuyOnDemandClient, BuyOnDemandClientOptions } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
-import { CafeStorageClient } from '../../api/storage/clients/cafe.js';
+import { getServices } from '../../main/services/registry.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import { TestBuyOnDemandServer } from './index.js';
 import { TestResponse } from './models.js';
@@ -110,7 +110,7 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
         // to the database so FK references from MenuItem/DailyCafe resolve.
         // Best-effort; failures are logged but not fatal (matches prod behavior).
         try {
-            await CafeStorageClient.createCafeAsync(this.cafe, this.config);
+            await getServices().data.cafe.createCafe({ cafe: this.cafe, config: this.config });
         } catch (err) {
             console.warn(`[TestBuyOnDemandClient] Unable to save cafe to database:`, err);
         }

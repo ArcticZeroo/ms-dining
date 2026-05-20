@@ -15,12 +15,12 @@ import { MenuItemStorageClient } from './clients/menu-item.js';
 import * as vectorClient from './vector/client.js';
 import { IVectorSearchResult } from '../../shared/models/vector.js';
 import { StationStorageClient } from './clients/station.js';
-import { CafeStorageClient } from './clients/cafe.js';
 import { logDebug } from '../../shared/util/log.js';
 import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../shared/constants/cafes.js';
 import { MaybePromise } from '../../shared/models/async.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../worker/interface/thumbnail.js';
 import { ICafe } from '../../shared/models/cafe.js';
+import { getServices } from '../../main/services/registry.js';
 
 import { NON_ENTREE_FILTER } from '../../shared/util/menu-item-filter.js';
 
@@ -435,7 +435,7 @@ class SearchSession {
         const { matchReasons } = this.getCafeMatch(cafe, group.name);
 
         // Get cafe config for logo
-        const cafeConfig = await CafeStorageClient.retrieveCafeAsync(cafe.id);
+        const cafeConfig = await getServices().data.cafe.retrieveCafe({ id: cafe.id });
 
         if (!cafeConfig) {
             logDebug('Cafe config not found for vector result', cafe.id);

@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/models/http';
 import { toMaybeDateString } from '@msdining/common/util/date-util';
-import { CafeStorageClient } from '../../../../api/storage/clients/cafe.js';
+import { getServices } from '../../../../main/services/registry.js';
 import * as diningConfig from '../../../../shared/constants/cafes.js';
 import { ApplicationContext } from '../../../../shared/constants/context.js';
 import { getLogoUrl } from '../../../../shared/util/cafe.js';
@@ -26,7 +26,7 @@ export const registerCafeRoutes = (parent: Router) => {
     registerGroupsRoutes(router);
 
     const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
-        const cafeDataById = await CafeStorageClient.retrieveCafesAsync();
+        const cafeDataById = await getServices().data.cafe.retrieveCafes({});
 
         for (const group of diningConfig.CAFE_GROUP_LIST) {
             const responseGroup: IDiningCoreGroup = {
@@ -40,7 +40,7 @@ export const registerCafeRoutes = (parent: Router) => {
             };
 
             for (const cafe of group.members) {
-                const cafeData = cafeDataById.get(cafe.id);
+                const cafeData = cafeDataById[cafe.id];
                 if (!cafeData) {
                     // Expected in case we have a cafe in config which isn't available online for some reason
                     continue;

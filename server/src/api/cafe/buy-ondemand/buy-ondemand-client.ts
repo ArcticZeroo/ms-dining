@@ -8,11 +8,10 @@ import { logDebug, logError } from '../../../shared/util/log.js';
 import { buildHarEntry, HarCapture } from '../../../shared/util/har.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../shared/util/request.js';
 import { Semaphore } from '@frozor/lock';
-import { CafeStorageClient } from '../../storage/clients/cafe.js';
+import { getServices } from '../../../main/services/registry.js';
 import { StringUtil } from '../../../shared/util/string.js';
 import hat from 'hat';
 import { maybeThrowBuyOnDemandError } from './buy-ondemand-error.js';
-import { getServices } from '../../../main/services/registry.js';
 
 const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);
 
@@ -296,7 +295,7 @@ export class BuyOnDemandClient {
             };
 
             try {
-                await CafeStorageClient.createCafeAsync(this.cafe, this.config);
+                await getServices().data.cafe.createCafe({ cafe: this.cafe, config: this.config });
             } catch (err) {
                 logError('Unable to save cafe to database:', err);
             }
@@ -307,7 +306,7 @@ export class BuyOnDemandClient {
         }
 
         try {
-            const cafeFromDatabase = await CafeStorageClient.retrieveCafeAsync(this.cafe.id);
+            const cafeFromDatabase = await getServices().data.cafe.retrieveCafe({ id: this.cafe.id });
             if (cafeFromDatabase != null
 				&& !StringUtil.isNullOrWhitespace(cafeFromDatabase.storeId)
 				&& !StringUtil.isNullOrWhitespace(cafeFromDatabase.externalName)) {

@@ -13,7 +13,7 @@ import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsync } from '../../api/cache/reviews.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import { getDateStringForMenuRequest } from './date.js';
-import { CafeStorageClient } from '../../api/storage/clients/cafe.js';
+import { getServices } from '../services/registry.js';
 import { setTelemetryProperties } from '../middleware/telemetry.js';
 
 export const attachRouter= (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
@@ -246,7 +246,7 @@ const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
 
 const getCafeFromRequest = async (ctx: Router.RouterContext) => {
 	const id = getCafeIdFromRequest(ctx);
-	const cafe = await CafeStorageClient.retrieveCafeAsync(id);
+	const cafe = await getServices().data.cafe.retrieveCafe({ id });
 	if (!cafe) {
 		ctx.throw(404, 'Cafe not found or data is missing');
 	}

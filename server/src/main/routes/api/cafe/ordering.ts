@@ -19,7 +19,7 @@ import { toDateString } from '@msdining/common/util/date-util';
 import { phone } from 'phone';
 import { CafeOrderSession } from '../../../../api/cafe/session/order.js';
 import { WaitTimeSession } from '../../../../api/cafe/session/wait-time.js';
-import { CafeStorageClient } from '../../../../api/storage/clients/cafe.js';
+import { getServices } from '../../../../main/services/registry.js';
 import { DailyMenuStorageClient } from '../../../../api/storage/clients/daily-menu.js';
 import { MenuItemStorageClient } from '../../../../api/storage/clients/menu-item.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
@@ -95,7 +95,7 @@ const validateCartData = async (ctx: RouterContext, itemsByCafeId: ISubmitOrderI
     const nowDateString = DateUtil.toDateString(new Date());
 
     for (const [cafeId, serializedItems] of Object.entries(itemsByCafeId)) {
-        const cafe = await CafeStorageClient.retrieveCafeAsync(cafeId);
+        const cafe = await getServices().data.cafe.retrieveCafe({ id: cafeId });
         if (cafe == null) {
             return ctx.throw(400, `Cafe with id ${cafeId} does not exist`);
         }
