@@ -1,6 +1,5 @@
 import Router from '@koa/router';
 import {
-	GroupStorageClient,
 	menuItemToGroupMember,
 	stationToGroupMember
 } from '../../../../api/storage/clients/groups.js';
@@ -36,7 +35,7 @@ export const registerGroupsRoutes = (parent: Router) => {
     router.get('/',
         doNotCacheMiddleware,
         async ctx => {
-            const groups = await GroupStorageClient.getGroups();
+            const groups = await getServices().data.groups.getGroups({});
             ctx.body = jsonStringifyWithoutNull(groups);
         });
 
@@ -45,7 +44,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         requireAdmin,
         doNotCacheMiddleware,
         async ctx => {
-            const candidates = await GroupStorageClient.getGroupCandidatesZeroContext();
+            const candidates = await getServices().data.groups.getGroupCandidatesZeroContext({});
             ctx.body = jsonStringifyWithoutNull(candidates);
         });
 
@@ -55,11 +54,11 @@ export const registerGroupsRoutes = (parent: Router) => {
         async ctx => {
             const { name, type, initialMembers } = CreateGroupRequestSchema.parse(ctx.request.body);
 
-            const group = await GroupStorageClient.createGroup(
+            const group = await getServices().data.groups.createGroup({
                 name,
-                type,
+                entityType: type,
                 initialMembers
-            );
+            });
 
             ctx.body = jsonStringifyWithoutNull({ id: group.id });
         });
@@ -71,7 +70,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         async ctx => {
             const groupId = requireGroupIdParam(ctx);
             const body = UpdateGroupRequest.parse(ctx.request.body);
-            await GroupStorageClient.updateGroup(groupId, body);
+            await getServices().data.groups.updateGroup({ id: groupId, update: body });
             ctx.status = 204;
         });
 
@@ -80,7 +79,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         requireAdmin,
         async ctx => {
             const groupId = requireGroupIdParam(ctx);
-            await GroupStorageClient.deleteGroup(groupId);
+            await getServices().data.groups.deleteGroup({ id: groupId });
             ctx.status = 204;
         });
 
@@ -90,7 +89,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         async ctx => {
             const groupId = requireGroupIdParam(ctx);
             const { memberIds } = AddGroupMembersRequestSchema.parse(ctx.request.body);
-            await GroupStorageClient.addToGroup(groupId, memberIds);
+            await getServices().data.groups.addToGroup({ groupId, memberIds });
             ctx.status = 204;
         });
 
@@ -100,7 +99,7 @@ export const registerGroupsRoutes = (parent: Router) => {
         doNotCacheMiddleware,
         async ctx => {
             const groupId = requireGroupIdParam(ctx);
-            const candidates = await GroupStorageClient.getCandidatesForGroup(groupId);
+            const candidates = await getServices().data.groups.getCandidatesForGroup({ groupId });
             ctx.body = jsonStringifyWithoutNull(candidates);
         });
 
@@ -130,7 +129,7 @@ export const registerGroupsRoutes = (parent: Router) => {
                 return;
             }
 
-            await GroupStorageClient.deleteMembersFromGroup(groupId, [memberId]);
+            await getServices().data.groups.deleteMembersFromGroup({ groupId, memberIds: [memberId] });
             ctx.status = 204;
         });
 

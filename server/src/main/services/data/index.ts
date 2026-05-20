@@ -6,6 +6,7 @@ import { userService } from './user.js';
 import { stationThemeService } from './station-theme.js';
 import { sessionService } from './session.js';
 import { reviewService } from './review.js';
+import { groupsService } from './groups.js';
 
 /**
  * Composite of all main-side typed data-service clients. Lives at
@@ -25,6 +26,7 @@ export interface DataServices {
     stationTheme: typeof stationThemeService;
     session: typeof sessionService;
     review: typeof reviewService;
+    groups: typeof groupsService;
 }
 
 export const defaultDataServices: DataServices = {
@@ -36,6 +38,7 @@ export const defaultDataServices: DataServices = {
     stationTheme: stationThemeService,
     session:      sessionService,
     review:       reviewService,
+    groups:       groupsService,
 };
 
 export { searchQueryService } from './search-query.js';
@@ -46,3 +49,4 @@ export { userService } from './user.js';
 export { stationThemeService } from './station-theme.js';
 export { sessionService } from './session.js';
 export { reviewService } from './review.js';
+export { groupsService } from './groups.js';
