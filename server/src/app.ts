@@ -18,6 +18,7 @@ import session from 'koa-session';
 import { PrismaSessionStore } from './util/session-store.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 import { formatBuyOnDemandErrors } from './middleware/buy-ondemand-error.js';
+import { serviceErrorMiddleware } from './middleware/service-error.js';
 import { dbPriorityMiddleware } from './middleware/db-priority.js';
 import { appInsightsMiddleware } from './middleware/telemetry.js';
 import { runWithServices } from './services/registry.js';
@@ -66,6 +67,7 @@ export const createApp = (services: Services): Koa => {
     app.use(sendUniversalVisitMiddleware);
     app.use(treatZodErrorsAsBadRequest);
     app.use(formatBuyOnDemandErrors);
+    app.use(serviceErrorMiddleware);
     app.use(appInsightsMiddleware);
 
     registerRoutes(app);
