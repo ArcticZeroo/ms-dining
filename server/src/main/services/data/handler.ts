@@ -3,6 +3,7 @@ import { searchQueryServiceCommands } from '../../../api/storage/clients/search-
 import { tagServiceCommands } from '../../../api/storage/clients/tags.js';
 import { cafeServiceCommands } from '../../../api/storage/clients/cafe.js';
 import { stationServiceCommands } from '../../../api/storage/clients/station.js';
+import { userServiceCommands } from '../../../api/storage/clients/user.js';
 
 /**
  * Single source of truth for which worker-side service command bags are
@@ -20,6 +21,7 @@ export const DATA_SERVICES = {
     tag:         tagServiceCommands,
     cafe:        cafeServiceCommands,
     station:     stationServiceCommands,
+    user:        userServiceCommands,
 } as const;
 
 export type DataServiceMap = typeof DATA_SERVICES;

@@ -1,11 +1,10 @@
 import MicrosoftStrategy from 'passport-microsoft';
 import GoogleStrategy from 'passport-google-oauth20';
 import { isDuckType } from '@arcticzeroo/typeguard';
-import { Prisma } from '@prisma/client';
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, PROVIDER_MICROSOFT } from '@msdining/common/models/auth';
-import { UserStorageClient } from '../../api/storage/clients/user.js';
 import { requireEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
 import { IMicrosoftProfileData } from '../../shared/models/auth.js';
+import { getServices } from '../services/registry.js';
 
 export const getMicrosoftStrategy = () => new MicrosoftStrategy.Strategy(
     {
@@ -20,13 +19,13 @@ export const getMicrosoftStrategy = () => new MicrosoftStrategy.Strategy(
             return;
         }
 
-        const user: Prisma.UserCreateInput = {
+        const user = {
             displayName: profile.displayName.slice(0, DISPLAY_NAME_MAX_LENGTH_CHARS),
             externalId:  profile.id,
             provider:    PROVIDER_MICROSOFT,
         };
 
-        UserStorageClient.createUserAsync(user)
+        getServices().data.user.createUser({ user })
             .then((createdUser) => done(null, createdUser.id))
             .catch(error => done(error));
     }
@@ -40,13 +39,13 @@ export const getGoogleStrategy = () => new GoogleStrategy.Strategy(
         scope:        ['https://www.googleapis.com/auth/userinfo.profile']
     },
     (accessToken, refreshToken, profile, done) => {
-        const user: Prisma.UserCreateInput = {
+        const user = {
             displayName: profile.displayName.slice(0, DISPLAY_NAME_MAX_LENGTH_CHARS),
             externalId:  profile.id,
             provider:    'google',
         };
 
-        UserStorageClient.createUserAsync(user)
+        getServices().data.user.createUser({ user })
             .then((createdUser) => done(null, createdUser.id))
             .catch(error => done(error));
     }

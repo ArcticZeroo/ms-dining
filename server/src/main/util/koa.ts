@@ -7,7 +7,6 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import { getStationLogoUrl, resolveViewToCafes } from '../../shared/util/cafe.js';
 import { jsonStringifyWithoutNull } from '../../shared/util/serde.js';
 import { getDevKey } from '../../shared/constants/env.js';
-import { UserStorageClient } from '../../api/storage/clients/user.js';
 import { IServerUser } from '../../shared/models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsync } from '../../api/cache/reviews.js';
@@ -150,9 +149,7 @@ export const requireRole = (role: string): Middleware => {
         }
 
         const userId = ctx.state.user;
-        const user = await UserStorageClient.getUserAsync({
-            id: userId
-        });
+        const user = await getServices().data.user.getUser({ id: userId });
 
         if (!user) {
             return ctx.throw(500, 'User not found');
@@ -210,7 +207,7 @@ export const getUserIdOrThrow = (ctx: Koa.Context): string => {
 export const getUserOrThrowAsync = async (ctx: Koa.Context): Promise<IServerUser> => {
     const id = getUserIdOrThrow(ctx);
 
-    const user = await UserStorageClient.getUserAsync({ id });
+    const user = await getServices().data.user.getUser({ id });
 
     if (!user) {
         ctx.throw(500, 'User not found');
@@ -225,7 +222,7 @@ export const isAdminAsync = async (ctx: Koa.Context): Promise<boolean> => {
         return false;
     }
 
-    const user = await UserStorageClient.getUserAsync({ id: userId });
+    const user = await getServices().data.user.getUser({ id: userId });
     return user?.role === 'admin';
 }
 

@@ -14,7 +14,7 @@ import { IServerSearchResult } from '../../../../shared/models/search.js';
 import { getSimilarQueries } from '../../../../api/storage/vector/client.js';
 import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
 import { getRecommendationsAsync } from '../../../../api/cache/recommendations.js';
-import { UserStorageClient } from '../../../../api/storage/clients/user.js';
+import { getServices } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
 import { IRecommendationsResponse } from '@msdining/common/models/recommendation';
@@ -164,7 +164,7 @@ export const registerRecommendationsRoutes = (parent: Router) => {
         const userId = getMaybeUserId(ctx);
 
         const userSettings = userId
-            ? (await UserStorageClient.getUserAsync({ id: userId }))?.settings
+            ? (await getServices().data.user.getUser({ id: userId }))?.settings
             : undefined;
 
         const resolvedHomepageIds = resolveHomepageIds(homepageIds, userSettings);

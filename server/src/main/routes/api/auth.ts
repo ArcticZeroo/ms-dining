@@ -4,7 +4,6 @@ import { DISPLAY_NAME_MAX_LENGTH_CHARS, IClientUserDTO } from '@msdining/common/
 import { normalizeDisplayName } from '@msdining/common/util/string-util';
 import { Middleware } from 'koa';
 import passport from 'koa-passport';
-import { UserStorageClient } from '../../../api/storage/clients/user.js';
 import { hasAuthEnvironmentVariables } from '../../../shared/constants/env.js';
 import { requireAuthenticated, requireNotAuthenticated } from '../../middleware/auth.js';
 import { doNotCacheMiddleware } from '../../middleware/cache.js';
@@ -12,6 +11,7 @@ import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategi
 import { attachRouter, getUserIdOrThrow, getUserOrThrowAsync } from '../../util/koa.js';
 import { logError, logInfo } from '../../../shared/util/log.js';
 import { isUpdateUserSettingsInput } from '../../../shared/util/typeguard.js';
+import { getServices } from '../../services/registry.js';
 
 const isAuthorizationError = (err: unknown) => {
     return err instanceof Error && err.constructor.name === 'AuthorizationError';
@@ -141,7 +141,7 @@ export const registerAuthRoutes = (parent: Router) => {
                 return;
             }
 
-            await UserStorageClient.updateUserDisplayNameAsync(id, normalizedDisplayName);
+            await getServices().data.user.updateUserDisplayName({ id, displayName: normalizedDisplayName });
             ctx.status = 204;
         });
 
@@ -157,11 +157,14 @@ export const registerAuthRoutes = (parent: Router) => {
                 return;
             }
 
-            await UserStorageClient.updateUserSettingsAsync(id, {
-                favoriteMenuItems: body.favoriteMenuItems,
-                favoriteStations:  body.favoriteStations,
-                homepageIds:       body.homepageIds,
-                timestamp:         body.timestamp,
+            await getServices().data.user.updateUserSettings({
+                id,
+                settings: {
+                    favoriteMenuItems: body.favoriteMenuItems,
+                    favoriteStations:  body.favoriteStations,
+                    homepageIds:       body.homepageIds,
+                    timestamp:         body.timestamp,
+                },
             });
 
             ctx.status = 204;

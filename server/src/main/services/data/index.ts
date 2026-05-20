@@ -2,6 +2,7 @@ import { searchQueryService } from './search-query.js';
 import { tagService } from './tag.js';
 import { cafeService } from './cafe.js';
 import { stationService } from './station.js';
+import { userService } from './user.js';
 
 /**
  * Composite of all main-side typed data-service clients. Lives at
@@ -17,6 +18,7 @@ export interface DataServices {
     tag: typeof tagService;
     cafe: typeof cafeService;
     station: typeof stationService;
+    user: typeof userService;
 }
 
 export const defaultDataServices: DataServices = {
@@ -24,9 +26,11 @@ export const defaultDataServices: DataServices = {
     tag:         tagService,
     cafe:        cafeService,
     station:     stationService,
+    user:        userService,
 };
 
 export { searchQueryService } from './search-query.js';
 export { tagService } from './tag.js';
 export { cafeService } from './cafe.js';
 export { stationService } from './station.js';
+export { userService } from './user.js';
