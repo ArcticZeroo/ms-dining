@@ -4,6 +4,7 @@ import { cafeService } from './cafe.js';
 import { stationService } from './station.js';
 import { userService } from './user.js';
 import { stationThemeService } from './station-theme.js';
+import { sessionService } from './session.js';
 
 /**
  * Composite of all main-side typed data-service clients. Lives at
@@ -21,6 +22,7 @@ export interface DataServices {
     station: typeof stationService;
     user: typeof userService;
     stationTheme: typeof stationThemeService;
+    session: typeof sessionService;
 }
 
 export const defaultDataServices: DataServices = {
@@ -30,6 +32,7 @@ export const defaultDataServices: DataServices = {
     station:      stationService,
     user:         userService,
     stationTheme: stationThemeService,
+    session:      sessionService,
 };
 
 export { searchQueryService } from './search-query.js';
@@ -38,3 +41,4 @@ export { cafeService } from './cafe.js';
 export { stationService } from './station.js';
 export { userService } from './user.js';
 export { stationThemeService } from './station-theme.js';
+export { sessionService } from './session.js';

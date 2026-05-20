@@ -1,5 +1,6 @@
 import { usePrismaClient, usePrismaWrite } from '../../api/storage/client.js';
 import { z } from 'zod';
+import type { ISessionService } from '../../shared/services/session.js';
 
 const SessionDataSchema = z.object({
     passport: z.object({
@@ -92,3 +93,17 @@ export class PrismaSessionStore implements ISessionStore {
         });
     }
 }
+
+const _store = new PrismaSessionStore();
+
+/**
+ * Worker-side implementation of {@link ISessionService}.
+ */
+export const sessionServiceCommands = {
+    get: async ({ sessionId }: { sessionId: string }) =>
+        _store.get(sessionId),
+    set: async ({ sessionId, sessionData, maxAge }: { sessionId: string; sessionData: unknown; maxAge?: number }) =>
+        _store.set(sessionId, sessionData, maxAge),
+    destroy: async ({ sessionId }: { sessionId: string }) =>
+        _store.destroy(sessionId),
+} satisfies ISessionService;

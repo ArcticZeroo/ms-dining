@@ -15,14 +15,30 @@ import path from 'path';
 import passport from 'koa-passport';
 import { getSessionSecret, hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../shared/constants/env.js';
 import session from 'koa-session';
-import { PrismaSessionStore } from './util/session-store.js';
+import { ISessionStore } from './util/session-store.js';
 import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 import { formatBuyOnDemandErrors } from './middleware/buy-ondemand-error.js';
 import { serviceErrorMiddleware } from './middleware/service-error.js';
 import { dbPriorityMiddleware } from './middleware/db-priority.js';
 import { appInsightsMiddleware } from './middleware/telemetry.js';
-import { runWithServices } from './services/registry.js';
+import { getServices, runWithServices } from './services/registry.js';
 import type { Services } from './services/types.js';
+
+/**
+ * Koa-session store adapter that delegates to the data service.
+ * Translates koa-session's positional args to the data-object arg shape.
+ */
+class SessionStoreAdapter implements ISessionStore {
+    async get(sessionId: string) {
+        return getServices().data.session.get({ sessionId });
+    }
+    async set(sessionId: string, sessionData: unknown, maxAge?: number) {
+        return getServices().data.session.set({ sessionId, sessionData, maxAge });
+    }
+    async destroy(sessionId: string) {
+        return getServices().data.session.destroy({ sessionId });
+    }
+}
 
 /**
  * Builds the Koa app, scoping every request inside an AsyncLocalStorage
@@ -56,7 +72,7 @@ export const createApp = (services: Services): Koa => {
     app.use(session({
         maxAge: new Duration({ days: 180 }).inMilliseconds,
         renew: true,
-        store: new PrismaSessionStore()
+        store: new SessionStoreAdapter()
     }, app));
 
     app.use(passport.initialize());
