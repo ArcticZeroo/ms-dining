@@ -8,12 +8,14 @@ import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
     ICartItemData,
     ICartItemUpdate,
+    ICartItemRecordWire,
     ISerializedModifier,
     IActiveOrderSummary,
     IOrderCafePartSummary,
     OrderCafePartStatus,
 } from '@msdining/common/models/cart';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
+import type { IMenuItemBase } from '@msdining/common/models/cafe';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -42,9 +44,9 @@ const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[
 
 const toCartItemWireRecord = (
     item: PrismaCartItemWithModifiers,
-    menuItem: Parameters<typeof menuItemBaseToDTO>[0],
+    menuItem: IMenuItemBase,
     isAvailable: boolean,
-) => ({
+): ICartItemRecordWire => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
@@ -195,7 +197,7 @@ export abstract class CartStorageClient {
             ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
         ]);
 
-        const items: ReturnType<typeof toCartItemWireRecord>[] = [];
+        const items: ICartItemRecordWire[] = [];
         for (let idx = 0; idx < rawItems.length; idx++) {
             const raw = rawItems[idx]!;
             const menuItem = menuItems[idx];
