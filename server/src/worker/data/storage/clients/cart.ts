@@ -198,7 +198,6 @@ export abstract class CartStorageClient {
             const data: Record<string, unknown> = {};
             if (update.quantity !== undefined) data.quantity = update.quantity;
             if (update.specialInstructions !== undefined) data.specialInstructions = update.specialInstructions;
-            if (update.menuItemId !== undefined) data.menuItemId = update.menuItemId;
 
             if (Object.keys(data).length > 0) {
                 await tx.cartItem.update({ where: { id: itemId }, data });

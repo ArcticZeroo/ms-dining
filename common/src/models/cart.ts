@@ -1,3 +1,9 @@
+import { z } from 'zod';
+
+// ─── Legacy ordering types (v1) ─────────────────────────────────────
+// Still used by the current ordering flow. Will be removed when the
+// new DB-backed cart/order flow replaces the old endpoints.
+
 export interface ICartItem {
     itemId: string;
     quantity: number;
@@ -116,8 +122,6 @@ export type ICompleteOrderResponse = IOrderCompletionData;
 // ─── DB-backed cart types (v2) ───────────────────────────────────────
 // Used by both client and server for the new server-side cart API.
 
-import { z } from 'zod';
-
 // --- Status ---
 
 export const ORDER_CAFE_PART_STATUSES = [
@@ -150,10 +154,14 @@ export const CartItemDataSchema = z.object({
 
 export type ICartItemData = z.infer<typeof CartItemDataSchema>;
 
-// --- Cart item update (partial of add data) ---
+// --- Cart item update (only mutable fields) ---
 
-export const CartItemUpdateSchema = CartItemDataSchema.partial().refine(
-    data => Object.keys(data).length > 0,
+export const CartItemUpdateSchema = z.object({
+    quantity:            z.number().int().min(1).optional(),
+    specialInstructions: z.string().nullable().optional(),
+    modifiers:           z.array(SerializedModifierSchema).optional(),
+}).refine(
+    data => data.quantity !== undefined || data.specialInstructions !== undefined || data.modifiers !== undefined,
     { message: 'At least one field must be provided' },
 );
 
