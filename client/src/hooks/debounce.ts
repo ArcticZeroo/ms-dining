@@ -23,29 +23,24 @@ export const useDebouncedCallback = <TArgs extends unknown[]>(
     delayMs: number,
 ): { call: (...args: TArgs) => void; flush: () => void } => {
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const pendingArgsRef = useRef<TArgs | null>(null);
-    const callbackRef = useRef(callback);
-    callbackRef.current = callback;
+    const pendingRef = useRef<(() => void) | null>(null);
 
     const flush = useCallback(() => {
         if (timerRef.current != null) {
             clearTimeout(timerRef.current);
             timerRef.current = null;
         }
-        const args = pendingArgsRef.current;
-        if (args != null) {
-            pendingArgsRef.current = null;
-            callbackRef.current(...args);
-        }
+        pendingRef.current?.();
+        pendingRef.current = null;
     }, []);
 
     const call = useCallback((...args: TArgs) => {
-        pendingArgsRef.current = args;
         if (timerRef.current != null) {
             clearTimeout(timerRef.current);
         }
+        pendingRef.current = () => callback(...args);
         timerRef.current = setTimeout(flush, delayMs);
-    }, [flush, delayMs]);
+    }, [callback, delayMs, flush]);
 
     // Flush on unmount so pending updates aren't lost
     useEffect(() => flush, [flush]);
