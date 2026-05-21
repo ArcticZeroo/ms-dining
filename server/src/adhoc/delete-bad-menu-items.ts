@@ -1,5 +1,5 @@
 import { getBadMenuItems } from '@prisma/client/sql';
-import { usePrismaWrite } from '../api/storage/client.js';
+import { usePrismaWrite } from '../worker/data/storage/client.js';
 
 const badMenuItems = await usePrismaWrite(prisma => {
     return prisma.$queryRawTyped(getBadMenuItems());

@@ -20,8 +20,8 @@
 import { after, before, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { DailyCafeUpdateSession } from '../../api/cafe/job/update.js';
-import { usePrismaClient } from '../../api/storage/client.js';
+import { DailyCafeUpdateSession } from '../../worker/data/cafe/job/update.js';
+import { usePrismaClient } from '../../worker/data/storage/client.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';

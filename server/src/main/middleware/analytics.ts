@@ -1,4 +1,4 @@
-import { sendVisitFireAndForget } from '../../api/tracking/visitors.js';
+import { sendVisitFireAndForget } from '../../worker/data/tracking/visitors.js';
 import Koa from 'koa';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { randomUUID } from 'node:crypto';

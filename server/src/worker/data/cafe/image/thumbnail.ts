@@ -1,0 +1,117 @@
+import Jimp from 'jimp';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../../shared/constants/config.js';
+import { defaultUserAgent } from '../../../../shared/constants/http.js';
+import { runPromiseWithRetries } from '../../../../shared/util/async.js';
+import { logDebug } from '../../../../shared/util/log.js';
+import { IThumbnailWorkerRequest } from '../../../../shared/models/thumbnail.js';
+import { IImageMetadata } from '../../../../shared/util/image.js';
+import { getServices } from '../../../../main/services/registry.js';
+import { updateManifestEntry } from './manifest.js';
+
+const maxThumbnailHeightPx = 200;
+const maxThumbnailWidthPx = 400;
+const loadImageRetries = 2;
+const loadImageRetryDelayMs = 100;
+
+const DHASH_WIDTH = 9;
+const DHASH_HEIGHT = 8;
+
+export interface IThumbnailResult extends IImageMetadata {
+	hash: string;
+}
+
+/**
+ * Compute a difference hash (dHash) for perceptual image comparison.
+ * Resizes to 9x8 grayscale, compares adjacent pixels per row to produce a 64-bit hash.
+ */
+export const computeDHash = (image: Jimp): string => {
+    const resized = image.clone()
+        .resize(DHASH_WIDTH, DHASH_HEIGHT)
+        .greyscale();
+
+    let hash = BigInt(0);
+
+    for (let y = 0; y < DHASH_HEIGHT; y++) {
+        for (let x = 0; x < DHASH_WIDTH - 1; x++) {
+            const leftPixel = Jimp.intToRGBA(resized.getPixelColor(x, y));
+            const rightPixel = Jimp.intToRGBA(resized.getPixelColor(x + 1, y));
+
+            hash <<= BigInt(1);
+            if (leftPixel.r > rightPixel.r) {
+                hash |= BigInt(1);
+            }
+        }
+    }
+
+    return hash.toString(16).padStart(16, '0');
+};
+
+export const loadImageData = async (url: string): Promise<Buffer> => {
+    logDebug(`[Thumbnail] Loading image data from ${encodeURI(url)}`);
+
+    const response = await runPromiseWithRetries(
+        () => fetch(url, {
+            headers: {
+                'User-Agent': defaultUserAgent
+            }
+        }),
+        loadImageRetries,
+        loadImageRetryDelayMs
+    );
+
+    if (!response.ok) {
+        let text;
+        try {
+            text = await response.text();
+        } catch {
+            throw new Error(`Response failed with status: ${response.status}, could not deserialize text`);
+        }
+        throw new Error(`Response failed with status: ${response.status}, text: ${text}`);
+    }
+
+    const buffer = await response.arrayBuffer();
+    return Buffer.from(buffer);
+};
+
+// static/menu-items/thumbnail/<id>
+export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThumbnailPath, `${id}.png`);
+
+// static/thumbnails/<hash>
+export const getHashThumbnailFilepath = (hash: string) => path.join(serverThumbnailPath, `${hash}.png`);
+
+export const updateThumbnailHashFromExistingImage = async (id: string, imagePath: string): Promise<string> => {
+    const image = await Jimp.read(imagePath);
+    const hash = computeDHash(image);
+    await getServices().data.menuItem.updateThumbnailHash({ menuItemId: id, hash });
+    updateManifestEntry(id, { hash, width: image.getWidth(), height: image.getHeight(), lastUpdateTime: new Date().toISOString() });
+    return hash;
+};
+
+export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult> => {
+    const imageData = await loadImageData(request.imageUrl);
+    const image = await Jimp.read(imageData);
+
+    const { height, width } = image.bitmap;
+    const scale = Math.min(maxThumbnailHeightPx / height, maxThumbnailWidthPx / width);
+
+    image.scale(scale);
+
+    const hash = computeDHash(image);
+
+    // Save to old path (backward compat)
+    await image.writeAsync(getThumbnailFilepath(request.id));
+
+    // Save to new hash-based path (always overwrite — collision rate is negligible)
+    const hashPath = getHashThumbnailFilepath(hash);
+    await fs.mkdir(serverThumbnailPath, { recursive: true });
+    await image.writeAsync(hashPath);
+
+    return {
+        width:          image.getWidth(),
+        height:         image.getHeight(),
+        lastUpdateTime: new Date(),
+        hash
+    };
+};

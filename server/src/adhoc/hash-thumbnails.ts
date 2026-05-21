@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serverMenuItemThumbnailPath } from '../shared/constants/config.js';
-import { updateThumbnailHashFromExistingImage } from '../api/cafe/image/thumbnail.js';
-import { saveManifest } from '../api/cafe/image/manifest.js';
+import { updateThumbnailHashFromExistingImage } from '../worker/data/cafe/image/thumbnail.js';
+import { saveManifest } from '../worker/data/cafe/image/manifest.js';
 
 console.log('Scanning existing thumbnails and computing dHash values...');
 console.log(`Thumbnail directory: ${serverMenuItemThumbnailPath}`);

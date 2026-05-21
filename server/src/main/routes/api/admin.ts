@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { attachRouter, getTrimmedQueryParam, requireAdmin } from '../../util/koa.js';
 import { RouteBuilder } from '../../../shared/models/koa.js';
-import { updateWeeklyCafeMenus } from '../../../api/cafe/job/weekly.js';
+import { updateWeeklyCafeMenus } from '../../../worker/data/cafe/job/weekly.js';
 
 export const registerAdminRoutes: RouteBuilder = (parent) => {
     const router = new Router({

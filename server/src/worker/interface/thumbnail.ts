@@ -1,5 +1,5 @@
 import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../shared/models/thumbnail.js';
-import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
+import { THUMBNAIL_THREAD_HANDLER } from '../data/threads/thumbnail.js';
 import { logError } from '../../shared/util/log.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 

@@ -1,4 +1,4 @@
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaClient } from '../worker/data/storage/client.js';
 
 const migrations = await usePrismaClient(client => client.runtimeMigration.findMany());
 

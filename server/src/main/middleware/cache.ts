@@ -1,7 +1,7 @@
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import Koa from 'koa';
 import { assignCacheControl, getVersionTag } from '../util/koa.js';
-import { CACHE_EVENTS } from '../../api/storage/events.js';
+import { CACHE_EVENTS } from '../../worker/data/storage/events.js';
 import { setTelemetryProperties } from './telemetry.js';
 
 interface ICacheEntry {

@@ -7,7 +7,7 @@ import {
 	embedMenuItem,
 	isEmbeddedEntity,
 	makeDailyStationId
-} from '../../api/storage/vector/client.js';
+} from '../data/storage/vector/client.js';
 import { ICafe, ICafeStation } from '../../shared/models/cafe.js';
 import { Nullable } from '../../shared/models/util.js';
 import { WorkerQueue } from './queue.js';

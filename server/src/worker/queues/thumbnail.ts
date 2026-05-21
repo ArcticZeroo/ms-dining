@@ -1,7 +1,7 @@
 import { WorkerQueue } from './queue.js';
 import Duration from '@arcticzeroo/duration';
 import { Nullable } from '../../shared/models/util.js';
-import { createAndSaveThumbnailForMenuItem } from '../../api/cafe/image/thumbnail.js';
+import { createAndSaveThumbnailForMenuItem } from '../data/cafe/image/thumbnail.js';
 import { logDebug, logError } from '../../shared/util/log.js';
 import { isMainThread, parentPort } from 'node:worker_threads';
 import { IThumbnailWorkerRequest } from '../../shared/models/thumbnail.js';

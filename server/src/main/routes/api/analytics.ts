@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { attachRouter } from '../../util/koa.js';
 import { RouteBuilder } from '../../../shared/models/koa.js';
-import { getVisitsAsync } from '../../../api/tracking/visitors.js';
+import { getVisitsAsync } from '../../../worker/data/tracking/visitors.js';
 import { ANALYTICS_APPLICATION_NAMES, getApplicationNameForScenario } from '@msdining/common/constants/analytics';
 
 export const registerAnalyticsRoutes: RouteBuilder = (parent) => {

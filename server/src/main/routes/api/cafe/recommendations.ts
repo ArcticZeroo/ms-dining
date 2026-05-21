@@ -7,13 +7,13 @@ import {
 	getTrimmedQueryParam,
 	serializeSearchResults
 } from '../../../util/koa.js';
-import { SearchManager } from '../../../../api/storage/search.js';
+import { SearchManager } from '../../../../worker/data/storage/search.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { toDateString } from '@msdining/common/util/date-util';
 import { IServerSearchResult } from '../../../../shared/models/search.js';
-import { getSimilarQueries } from '../../../../api/storage/vector/client.js';
+import { getSimilarQueries } from '../../../../worker/data/storage/vector/client.js';
 import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
-import { getRecommendationsAsync } from '../../../../api/cache/recommendations.js';
+import { getRecommendationsAsync } from '../../../../worker/data/cache/recommendations.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getDateForMenuRequest } from '../../../util/date.js';

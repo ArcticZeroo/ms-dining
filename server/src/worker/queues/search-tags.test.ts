@@ -24,7 +24,7 @@
 import { after, afterEach, before, describe, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { usePrismaClient, usePrismaWrite } from '../../api/storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../data/storage/client.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

@@ -1,4 +1,4 @@
-import { usePrismaClient, usePrismaWrite } from '../../api/storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../../worker/data/storage/client.js';
 import { z } from 'zod';
 import type { ISessionService } from '../../shared/services/session.js';
 

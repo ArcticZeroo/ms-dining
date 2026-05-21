@@ -17,8 +17,8 @@ import {
 } from '@msdining/common/models/cart';
 import { toDateString } from '@msdining/common/util/date-util';
 import { phone } from 'phone';
-import { CafeOrderSession } from '../../../../api/cafe/session/order.js';
-import { WaitTimeSession } from '../../../../api/cafe/session/wait-time.js';
+import { CafeOrderSession } from '../../../../worker/data/cafe/session/order.js';
+import { WaitTimeSession } from '../../../../worker/data/cafe/session/wait-time.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { webserverHost } from '../../../../shared/constants/config.js';

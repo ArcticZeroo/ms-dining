@@ -1,11 +1,11 @@
 import type { TelemetryClient } from 'applicationinsights';
 import type { ICafe } from '../../shared/models/cafe.js';
-import type { IAiProvider } from '../../api/ai/provider.js';
-import type { TranslationCache } from '../../api/cafe/buy-ondemand/i18n.js';
+import type { IAiProvider } from '../../worker/data/ai/provider.js';
+import type { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
 import type {
     BuyOnDemandClient,
     BuyOnDemandClientOptions,
-} from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
+} from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
 import type { DataServices } from './data/index.js';
 
 /**

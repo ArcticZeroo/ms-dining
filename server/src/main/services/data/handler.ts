@@ -1,15 +1,15 @@
 import { InProcessHandler } from '../../../worker/rpc/handler.js';
-import { searchQueryServiceCommands } from '../../../api/storage/clients/search-query.js';
-import { tagServiceCommands } from '../../../api/storage/clients/tags.js';
-import { cafeServiceCommands } from '../../../api/storage/clients/cafe.js';
-import { stationServiceCommands } from '../../../api/storage/clients/station.js';
-import { userServiceCommands } from '../../../api/storage/clients/user.js';
-import { stationThemeServiceCommands } from '../../../api/storage/clients/station-theme.js';
+import { searchQueryServiceCommands } from '../../../worker/data/storage/clients/search-query.js';
+import { tagServiceCommands } from '../../../worker/data/storage/clients/tags.js';
+import { cafeServiceCommands } from '../../../worker/data/storage/clients/cafe.js';
+import { stationServiceCommands } from '../../../worker/data/storage/clients/station.js';
+import { userServiceCommands } from '../../../worker/data/storage/clients/user.js';
+import { stationThemeServiceCommands } from '../../../worker/data/storage/clients/station-theme.js';
 import { sessionServiceCommands } from '../../util/session-store.js';
-import { reviewServiceCommands } from '../../../api/storage/clients/review.js';
-import { groupsServiceCommands } from '../../../api/storage/clients/groups.js';
-import { menuItemServiceCommands } from '../../../api/storage/clients/menu-item.js';
-import { dailyMenuServiceCommands } from '../../../api/storage/clients/daily-menu.js';
+import { reviewServiceCommands } from '../../../worker/data/storage/clients/review.js';
+import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups.js';
+import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item.js';
+import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu.js';
 
 /**
  * Single source of truth for which worker-side service command bags are

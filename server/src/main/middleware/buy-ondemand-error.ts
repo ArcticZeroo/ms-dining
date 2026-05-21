@@ -1,5 +1,5 @@
 import { Middleware } from 'koa';
-import { BuyOnDemandError } from '../../api/cafe/buy-ondemand/buy-ondemand-error.js';
+import { BuyOnDemandError } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-error.js';
 import { logError } from '../../shared/util/log.js';
 
 /**

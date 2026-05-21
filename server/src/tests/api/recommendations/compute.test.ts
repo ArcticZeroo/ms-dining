@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyWeights } from '../../../api/recommendations/compute.js';
+import { applyWeights } from '../../../worker/data/recommendations/compute.js';
 import {
 	IRecommendationItem,
 	RecommendationSectionType,

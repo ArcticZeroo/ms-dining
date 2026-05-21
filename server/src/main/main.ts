@@ -1,13 +1,13 @@
-import { performMenuBootTasks } from '../api/cafe/job/boot.js';
+import { performMenuBootTasks } from '../worker/data/cafe/job/boot.js';
 import { createApp } from './app.js';
 import { webserverPort } from '../shared/constants/config.js';
 import { logDebug, logError, logInfo } from '../shared/util/log.js';
-import { createAnalyticsApplications } from '../api/tracking/boot.js';
+import { createAnalyticsApplications } from '../worker/data/tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from '../shared/util/env.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
 import { startSearchTagWorkerQueue } from '../worker/queues/search-tags.js';
-import { flushTelemetry } from '../api/telemetry/app-insights.js';
-import { disconnectPrismaClient } from '../api/storage/client.js';
+import { flushTelemetry } from '../worker/data/telemetry/app-insights.js';
+import { disconnectPrismaClient } from '../worker/data/storage/client.js';
 import { getServices } from './services/registry.js';
 import * as dotenv from 'dotenv';
 

@@ -15,11 +15,11 @@
 import { after, before, beforeEach, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { CafeMenuSession } from '../../api/cafe/session/menu.js';
-import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
-import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { BuyOnDemandClient } from '../../api/cafe/buy-ondemand/buy-ondemand-client.js';
-import { BuyOnDemandError } from '../../api/cafe/buy-ondemand/buy-ondemand-error.js';
+import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
+import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
+import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu.js';
+import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandError } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-error.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { createBuyOnDemandClient } from '../../main/services/registry.js';
 import {

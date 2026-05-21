@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrioritySemaphore } from '../../api/storage/priority-semaphore.js';
+import { PrioritySemaphore } from '../../worker/data/storage/priority-semaphore.js';
 
 export interface WorkloadOp {
     name: string;
