@@ -169,47 +169,56 @@ export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
 
 // --- Cart item record (returned from server, enriched with menu data) ---
 
-export interface ICartItemMenuData {
-    name: string;
-    price: number;
-    imageUrl: string | null;
-    cafeId: string;
-    /** False if the menu item is no longer on today's menu. */
-    isAvailable: boolean;
-}
+export const CartItemMenuDataSchema = z.object({
+    name:        z.string(),
+    price:       z.number(),
+    imageUrl:    z.string().nullable(),
+    cafeId:      z.string(),
+    isAvailable: z.boolean(),
+});
 
-export interface ICartItemRecord {
-    id: string;
-    menuItemId: string;
-    quantity: number;
-    specialInstructions: string | null;
-    modifiers: ISerializedModifier[];
-    createdAt: string;
-    updatedAt: string;
-    menuItem: ICartItemMenuData;
-}
+export type ICartItemMenuData = z.infer<typeof CartItemMenuDataSchema>;
+
+export const CartItemRecordSchema = z.object({
+    id:                  z.string(),
+    menuItemId:          z.string(),
+    quantity:            z.number().int(),
+    specialInstructions: z.string().nullable(),
+    modifiers:           z.array(SerializedModifierSchema),
+    createdAt:           z.string(),
+    updatedAt:           z.string(),
+    menuItem:            CartItemMenuDataSchema,
+});
+
+export type ICartItemRecord = z.infer<typeof CartItemRecordSchema>;
 
 // --- Active order summary (included in cart response when an order is in progress) ---
 
-export interface IOrderCafePartSummary {
-    cafeId: string;
-    status: OrderCafePartStatus;
-    buyOnDemandOrderNumber: string | null;
-    total: number | null;
-    waitTimeMin: number | null;
-    waitTimeMax: number | null;
-}
+export const OrderCafePartSummarySchema = z.object({
+    cafeId:                 z.string(),
+    status:                 z.enum(ORDER_CAFE_PART_STATUSES),
+    buyOnDemandOrderNumber: z.string().nullable(),
+    total:                  z.number().nullable(),
+    waitTimeMin:            z.number().int().nullable(),
+    waitTimeMax:            z.number().int().nullable(),
+});
 
-export interface IActiveOrderSummary {
-    orderSessionId: string;
-    alias: string | null;
-    phoneNumber: string | null;
-    cafeParts: IOrderCafePartSummary[];
-}
+export type IOrderCafePartSummary = z.infer<typeof OrderCafePartSummarySchema>;
+
+export const ActiveOrderSummarySchema = z.object({
+    orderSessionId: z.string(),
+    alias:          z.string().nullable(),
+    phoneNumber:    z.string().nullable(),
+    cafeParts:      z.array(OrderCafePartSummarySchema),
+});
+
+export type IActiveOrderSummary = z.infer<typeof ActiveOrderSummarySchema>;
 
 // --- Cart response (unified: items + optional active order) ---
 
-export interface ICartResponse {
-    items: ICartItemRecord[];
-    activeOrder?: IActiveOrderSummary;
-}
+export const CartResponseSchema = z.object({
+    items:       z.array(CartItemRecordSchema),
+    activeOrder: ActiveOrderSummarySchema.optional(),
+});
+
+export type ICartResponse = z.infer<typeof CartResponseSchema>;
