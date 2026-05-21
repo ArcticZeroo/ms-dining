@@ -9,6 +9,7 @@ import { after, before, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs/promises';
 import { SearchEntityType } from '@msdining/common/models/search';
+import { getMondayForWeek, toDateString } from '@msdining/common/util/date-util';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
@@ -107,7 +108,7 @@ const MENU_ITEM: IMenuItemBase = {
     searchTags:     new Set(['pasta']),
 };
 
-const DATE_STRING = '2026-01-15';
+const DATE_STRING = toDateString(getMondayForWeek(new Date()));
 
 before(async () => {
     await acquireTestLock();
@@ -175,19 +176,14 @@ test('retrieveVisitData returns an array', async () => {
     assert.ok(Array.isArray(visits));
 });
 
-test('retrieveUniquenessDataForCafe returns a record or throws for out-of-window dates', async () => {
+test('retrieveUniquenessDataForCafe returns a record', async () => {
     ctx.installServices();
 
-    try {
-        const data = await getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({
-            cafeId: CAFE.id,
-            targetDateString: DATE_STRING,
-        });
-        // If it succeeds, verify shape
-        assert.equal(typeof data, 'object');
-        assert.equal(Array.isArray(data), false);
-    } catch {
-        // Expected for dates outside the menu window — the service correctly
-        // rejects requests for dates it can't compute uniqueness for.
-    }
+    const data = await getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({
+        cafeId: CAFE.id,
+        targetDateString: DATE_STRING,
+    });
+
+    assert.equal(typeof data, 'object');
+    assert.equal(Array.isArray(data), false);
 });
