@@ -1,4 +1,4 @@
-import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
+import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
 import type { ICartService } from '../../../../shared/services/cart.js';
@@ -57,48 +57,91 @@ const CART_ITEM_INCLUDE = {
 
 // ─── Storage Client ──────────────────────────────────────────────────
 
+const ACTIVE_ORDER_QUERY = {
+    cafeParts: {
+        some: {
+            status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] },
+        },
+    },
+};
+
+const ACTIVE_ORDER_INCLUDE = {
+    cafeParts: {
+        select: {
+            cafeId:                 true,
+            status:                 true,
+            buyOnDemandOrderNumber: true,
+            total:                  true,
+            waitTimeMin:            true,
+            waitTimeMax:            true,
+        },
+    },
+};
+
+type ActiveOrderRow = {
+    id: string;
+    alias: string | null;
+    phoneNumberWithCountryCode: string | null;
+    cafeParts: {
+        cafeId: string;
+        status: string;
+        buyOnDemandOrderNumber: string | null;
+        total: number | null;
+        waitTimeMin: number | null;
+        waitTimeMax: number | null;
+    }[];
+};
+
+const toActiveOrderSummary = (order: ActiveOrderRow): IActiveOrderSummary => ({
+    orderSessionId: order.id,
+    alias:          order.alias,
+    phoneNumber:    order.phoneNumberWithCountryCode,
+    cafeParts:      order.cafeParts.map(part => ({
+        cafeId:                 part.cafeId,
+        status:                 part.status as OrderCafePartStatus,
+        buyOnDemandOrderNumber: part.buyOnDemandOrderNumber,
+        total:                  part.total,
+        waitTimeMin:            part.waitTimeMin,
+        waitTimeMax:            part.waitTimeMax,
+    } satisfies IOrderCafePartSummary)),
+});
+
 export abstract class CartStorageClient {
     static async getActiveOrderSummary(userId: string): Promise<IActiveOrderSummary | undefined> {
         const order = await usePrismaClient(prisma => prisma.orderSession.findFirst({
-            where: {
-                userId,
-                cafeParts: {
-                    some: {
-                        status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] },
-                    },
-                },
-            },
-            include: {
-                cafeParts: {
-                    select: {
-                        cafeId:                 true,
-                        status:                 true,
-                        buyOnDemandOrderNumber: true,
-                        total:                  true,
-                        waitTimeMin:            true,
-                        waitTimeMax:            true,
-                    },
-                },
-            },
+            where:   { userId, ...ACTIVE_ORDER_QUERY },
+            include: ACTIVE_ORDER_INCLUDE,
             orderBy: { createdAt: 'desc' },
         }));
+        return order ? toActiveOrderSummary(order) : undefined;
+    }
 
-        if (!order) {
-            return undefined;
-        }
+    /**
+     * Read the active order summary. Accepts any Prisma client so it can
+     * be called both standalone (via usePrismaClient) and inside transactions.
+     */
+    private static async getActiveOrderSummaryWithClient(tx: PrismaTransactionClient, userId: string): Promise<IActiveOrderSummary | undefined> {
+        const order = await tx.orderSession.findFirst({
+            where:   { userId, ...ACTIVE_ORDER_QUERY },
+            include: ACTIVE_ORDER_INCLUDE,
+            orderBy: { createdAt: 'desc' },
+        });
+        return order ? toActiveOrderSummary(order) : undefined;
+    }
 
+    /**
+     * Read the full cart response inside a transaction so the returned
+     * data is a consistent snapshot of the state after the mutation.
+     */
+    private static async readCartResponse(tx: PrismaTransactionClient, userId: string): Promise<ICartResponse> {
+        const cart = await tx.cart.findUnique({
+            where:   { userId },
+            include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
+        });
+        const activeOrder = await this.getActiveOrderSummaryWithClient(tx, userId);
         return {
-            orderSessionId: order.id,
-            alias:          order.alias,
-            phoneNumber:    order.phoneNumberWithCountryCode,
-            cafeParts:      order.cafeParts.map(part => ({
-                cafeId:                 part.cafeId,
-                status:                 part.status as OrderCafePartStatus,
-                buyOnDemandOrderNumber: part.buyOnDemandOrderNumber,
-                total:                  part.total,
-                waitTimeMin:            part.waitTimeMin,
-                waitTimeMax:            part.waitTimeMax,
-            } satisfies IOrderCafePartSummary)),
+            items:       cart?.items.map(toCartItemRecord) ?? [],
+            activeOrder,
         };
     }
 
@@ -149,25 +192,15 @@ export abstract class CartStorageClient {
         }
     }
 
-    static async buildCartResponse(userId: string): Promise<ICartResponse> {
-        const cart = await usePrismaClient(prisma => prisma.cart.findUnique({
-            where:   { userId },
-            include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
-        }));
-        const activeOrder = await this.getActiveOrderSummary(userId);
-        return {
-            items:       cart?.items.map(toCartItemRecord) ?? [],
-            activeOrder,
-        };
-    }
-
     static async getCart(userId: string): Promise<ICartResponse> {
-        await usePrismaWrite(prisma => this.getOrCreateCart(prisma as PrismaTransactionClient, userId));
-        return this.buildCartResponse(userId);
+        return usePrismaTransaction(async tx => {
+            await this.getOrCreateCart(tx, userId);
+            return this.readCartResponse(tx, userId);
+        });
     }
 
     static async addItem(userId: string, item: ICartItemData): Promise<ICartResponse> {
-        await usePrismaTransaction(async tx => {
+        return usePrismaTransaction(async tx => {
             await this.ensureNoActiveOrder(tx, userId);
             const cart = await this.getOrCreateCart(tx, userId);
             const created = await tx.cartItem.create({
@@ -179,12 +212,12 @@ export abstract class CartStorageClient {
                 },
             });
             await this.createModifierChoices(tx, created.id, item.modifiers);
+            return this.readCartResponse(tx, userId);
         });
-        return this.buildCartResponse(userId);
     }
 
     static async updateItem(userId: string, itemId: string, update: ICartItemUpdate): Promise<ICartResponse> {
-        await usePrismaTransaction(async tx => {
+        return usePrismaTransaction(async tx => {
             await this.ensureNoActiveOrder(tx, userId);
             const cart = await this.getOrCreateCart(tx, userId);
             if (!cart.items.some(i => i.id === itemId)) {
@@ -203,29 +236,30 @@ export abstract class CartStorageClient {
                 await tx.cartItemModifierChoice.deleteMany({ where: { cartItemId: itemId } });
                 await this.createModifierChoices(tx, itemId, update.modifiers);
             }
+
+            return this.readCartResponse(tx, userId);
         });
-        return this.buildCartResponse(userId);
     }
 
     static async removeItem(userId: string, itemId: string): Promise<ICartResponse> {
-        await usePrismaTransaction(async tx => {
+        return usePrismaTransaction(async tx => {
             await this.ensureNoActiveOrder(tx, userId);
             const cart = await this.getOrCreateCart(tx, userId);
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
             await tx.cartItem.delete({ where: { id: itemId } });
+            return this.readCartResponse(tx, userId);
         });
-        return this.buildCartResponse(userId);
     }
 
     static async clearCart(userId: string): Promise<ICartResponse> {
-        await usePrismaTransaction(async tx => {
+        return usePrismaTransaction(async tx => {
             await this.ensureNoActiveOrder(tx, userId);
             const cart = await this.getOrCreateCart(tx, userId);
             await tx.cartItem.deleteMany({ where: { cartUserId: cart.userId } });
+            return this.readCartResponse(tx, userId);
         });
-        return this.buildCartResponse(userId);
     }
 }
 
