@@ -45,3 +45,9 @@
     font-style: italic;
     opacity: 0.7;
 }
+
+.cart-item-unavailable {
+    color: var(--color-error-light, #ffb3b3);
+    font-size: 0.85em;
+    font-weight: bold;
+}

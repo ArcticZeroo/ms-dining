@@ -12,6 +12,7 @@ interface IOnlineOrderingUnavailableNoticeProps {
 
 const NOT_ALLOWED_MESSAGE_BY_REASON: Record<OnlineOrderingBlockedReason, string> = {
     'setting-disabled':   'Online ordering is currently disabled in your settings.',
+    'not-logged-in':      'You must be logged in to place an order.',
     'weekend':            'Online ordering is unavailable on weekends. Check back on Monday!',
     'today-not-selected': 'Online ordering only works for today\'s menu. Use the date picker to switch to today.',
 };

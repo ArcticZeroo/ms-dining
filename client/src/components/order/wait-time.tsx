@@ -1,15 +1,15 @@
 import React, { useMemo } from 'react';
-import { useCartStore } from '../../store/zustand/cart.ts';
 import { useCartSessionQuery } from '../../store/queries/ordering.ts';
+import { useServerCartItems } from '../../store/zustand/server-cart.ts';
 import { pluralize } from '../../util/string.js';
 
 export const WaitTime: React.FC = () => {
-    const cart = useCartStore((state) => state.items);
+    const cart = useServerCartItems();
     const { data: cartSessionData, isPending } = useCartSessionQuery();
 
     const waitTimeView = useMemo(
         () => {
-            if (cart.size === 0) {
+            if (cart.length === 0) {
                 return null;
             }
 
@@ -31,7 +31,7 @@ export const WaitTime: React.FC = () => {
 
             return `Estimated wait time: ${minTime} - ${maxTime} minutes`;
         },
-        [cart.size, cartSessionData, isPending]
+        [cart.length, cartSessionData, isPending]
     );
 
     if (waitTimeView == null) {
@@ -43,4 +43,4 @@ export const WaitTime: React.FC = () => {
             {waitTimeView}
         </div>
     );
-}
+};

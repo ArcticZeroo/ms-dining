@@ -1,6 +1,6 @@
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React from 'react';
-import { ICartItemWithMetadata } from '../../../models/cart.ts';
-import { formatPrice } from '../../../util/cart.ts';
+import { calculatePrice, formatPrice } from '../../../util/cart.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
 
 const MAX_QUANTITY = 99;
@@ -30,7 +30,7 @@ const getIncreaseTitle = (readOnly: boolean, canIncrease: boolean) => {
 interface ICartItemProps {
     showFullDetails: boolean;
     readOnly?: boolean;
-    item: ICartItemWithMetadata;
+    item: ICartItemRecord;
     onRemove: () => void;
     onEdit: () => void;
     onChangeQuantity: (quantity: number) => void;
@@ -46,6 +46,10 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
 }) => {
     const canDecreaseQuantity = !readOnly && item.quantity > 1;
     const canIncreaseQuantity = !readOnly && item.quantity < MAX_QUANTITY;
+    const price = calculatePrice(
+        item.menuItem,
+        new Map(item.modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)])),
+    );
 
     const onDecreaseQuantity = () => {
         if (!canDecreaseQuantity) {
@@ -64,7 +68,7 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
     };
 
     return (
-        <tr className="cart-item">
+        <tr className={`cart-item ${!item.isAvailable ? 'unavailable' : ''}`.trim()}>
             <td>
                 <div className="cart-item-buttons">
                     <button
@@ -110,16 +114,22 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
                         ? (
                             <div className="full-details">
                                 <span>
-                                    {item.associatedItem.name}
+                                    {item.menuItem.name}
                                 </span>
+                                {!item.isAvailable && <span className="cart-item-unavailable">Unavailable</span>}
                                 <CartItemModifiers item={item}/>
                             </div>
                         )
-                        : item.associatedItem.name
+                        : (
+                            <>
+                                {item.menuItem.name}
+                                {!item.isAvailable && <span className="cart-item-unavailable"> (Unavailable)</span>}
+                            </>
+                        )
                 }
             </td>
             <td className="price">
-                {formatPrice(item.price * item.quantity)}
+                {formatPrice(price * item.quantity)}
             </td>
         </tr>
     );

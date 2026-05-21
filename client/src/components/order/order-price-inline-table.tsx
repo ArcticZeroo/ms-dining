@@ -1,25 +1,20 @@
-import { useCartStore } from '../../store/zustand/cart.ts';
-import { useCartSessionQuery } from '../../store/queries/ordering.ts';
 import React, { useMemo } from 'react';
+import { useCartSessionQuery } from '../../store/queries/ordering.ts';
+import { useServerCartItems } from '../../store/zustand/server-cart.ts';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
 
 export const OrderPriceInlineTable: React.FC = () => {
-    const cart = useCartStore((state) => state.items);
+    const cart = useServerCartItems();
     const { data: cartSessionData, error: cartSessionError } = useCartSessionQuery();
 
     const localTotalWithoutTax = useMemo(
-        () => {
-            let total = 0;
-
-            for (const items of cart.values()) {
-                for (const item of items.values()) {
-                    const basePrice = calculatePrice(item.associatedItem, item.choicesByModifierId);
-                    total += basePrice * item.quantity;
-                }
-            }
-
-            return total;
-        },
+        () => cart.reduce((total, item) => {
+            const basePrice = calculatePrice(
+                item.menuItem,
+                new Map(item.modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)])),
+            );
+            return total + (basePrice * item.quantity);
+        }, 0),
         [cart]
     );
 

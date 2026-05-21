@@ -1,12 +1,16 @@
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
 import { PopupContext } from '../../../context/modal.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
-import { useCartStore } from '../../../store/zustand/cart.ts';
 import { CafeView } from '../../../models/cafe.ts';
-import { ICartItemWithMetadata } from '../../../models/cart.ts';
+import {
+    useDebouncedUpdateCartItem,
+    useRemoveCartItemMutation,
+} from '../../../store/queries/server-cart.ts';
+import { useServerCartItemsByCafe } from '../../../store/zustand/server-cart.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../util/link.ts';
 import { sortViews } from '../../../util/sorting.ts';
@@ -26,16 +30,16 @@ interface ICartContentsTableProps {
 export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false, readOnly = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const cart = useCartStore((state) => state.items);
-    const removeItem = useCartStore((state) => state.removeItem);
-    const addOrEditItem = useCartStore((state) => state.addOrEditItem);
+    const cartItemsByCafe = useServerCartItemsByCafe();
+    const removeItem = useRemoveCartItemMutation();
+    const updateCartItem = useDebouncedUpdateCartItem();
     const modalNotifier = useContext(PopupContext);
 
-    const onRemove = useCallback((item: ICartItemWithMetadata) => {
-        removeItem(item);
+    const onRemove = useCallback((item: ICartItemRecord) => {
+        removeItem.mutate(item.id);
     }, [removeItem]);
 
-    const onEdit = useCallback((item: ICartItemWithMetadata) => {
+    const onEdit = useCallback((item: ICartItemRecord) => {
         if (modalNotifier.value != null) {
             return;
         }
@@ -43,30 +47,27 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
         modalNotifier.value = {
             id:   editCartItemSymbol,
             body: <MenuItemPopup
-                cafeId={item.cafeId}
-                menuItem={item.associatedItem}
+                cafeId={item.menuItem.cafeId}
+                menuItem={item.menuItem}
                 modalSymbol={editCartItemSymbol}
                 fromCartItem={item}
             />
         };
     }, [modalNotifier]);
 
-    const onChangeQuantity = useCallback((item: ICartItemWithMetadata, quantity: number) => {
+    const onChangeQuantity = useCallback((item: ICartItemRecord, quantity: number) => {
         if (quantity < 1) {
             return;
         }
 
-        addOrEditItem({
-            ...item,
-            quantity
-        });
-    }, [addOrEditItem]);
+        updateCartItem.mutate(item.id, { quantity });
+    }, [updateCartItem]);
 
     const cartItemsByView = useMemo(
         () => {
-            const cartItemsByView = new Map<CafeView, Map<string, ICartItemWithMetadata>>();
+            const groupedByView = new Map<CafeView, ICartItemRecord[]>();
 
-            for (const [cafeId, itemsById] of cart) {
+            for (const [cafeId, items] of cartItemsByCafe) {
                 const cafeView = viewsById.get(cafeId);
 
                 if (cafeView == null) {
@@ -74,18 +75,12 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                     continue;
                 }
 
-                const cartItemsById = cartItemsByView.get(cafeView) ?? new Map<string, ICartItemWithMetadata>();
-
-                for (const item of itemsById.values()) {
-                    cartItemsById.set(item.id, item);
-                }
-
-                cartItemsByView.set(cafeView, cartItemsById);
+                groupedByView.set(cafeView, [...items]);
             }
 
-            return cartItemsByView;
+            return groupedByView;
         },
-        [cart, viewsById]
+        [cartItemsByCafe, viewsById]
     );
 
     const cartItemsView = useMemo(
@@ -105,7 +100,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                         </th>
                     </tr>
                     {
-                        Array.from(cartItemsByView.get(view)!.values()).map((item) => (
+                        cartItemsByView.get(view)?.map((item) => (
                             <CartItemRow
                                 key={item.id}
                                 showFullDetails={showFullDetails}
@@ -118,7 +113,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                         ))
                     }
                 </React.Fragment>
-            ))
+            ));
         },
         [cartItemsByView, viewsById, shouldUseGroups, showFullDetails, readOnly, onRemove, onEdit, onChangeQuantity]
     );

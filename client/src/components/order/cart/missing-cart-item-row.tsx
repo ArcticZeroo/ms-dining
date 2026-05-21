@@ -1,29 +1,21 @@
-import { ISerializedCartItemWithName } from '../../../models/cart.ts';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React from 'react';
-import { useCartStore } from '../../../store/zustand/cart.ts';
-import { pluralize } from '../../../util/string.ts';
+import { useRemoveCartItemMutation } from '../../../store/queries/server-cart.ts';
 
 interface IMissingCartItemRowProps {
-    cafeId: string;
-    item: ISerializedCartItemWithName;
-    index: number;
+    item: ICartItemRecord;
 }
 
-export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId, item, index }) => {
-    const removeMissingItemAt = useCartStore((state) => state.removeMissingItemAt);
-    const modifierCount = item.modifiers.reduce((count, modifier) => count + modifier.choiceIds.length, 0);
-
-    const onRemove = () => {
-        removeMissingItemAt(cafeId, index);
-    };
+export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ item }) => {
+    const removeItem = useRemoveCartItemMutation();
 
     return (
-        <tr className="cart-item">
+        <tr className="cart-item unavailable">
             <td>
                 <div className="cart-item-buttons">
                     <button
                         className="material-symbols-outlined"
-                        onClick={onRemove}
+                        onClick={() => removeItem.mutate(item.id)}
                         title="Remove this item"
                     >
                         delete
@@ -31,13 +23,8 @@ export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ cafeId,
                 </div>
             </td>
             <td className="quantity">{item.quantity}x</td>
-            <td className="name">{item.name}</td>
-            {/*Just to avoid needing a new class name to match up with the table. /shrug*/}
-            <td className="price">
-                {
-                    modifierCount > 0 && `${modifierCount} ${pluralize('modifier', modifierCount)}`
-                }
-            </td>
+            <td className="name">{item.menuItem.name}</td>
+            <td className="price">Unavailable</td>
         </tr>
     );
-}
+};

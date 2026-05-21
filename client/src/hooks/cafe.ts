@@ -11,6 +11,7 @@ import { getDistanceBetweenCoordinates } from '../util/coordinates.ts';
 import { getViewLocation } from '../util/view.ts';
 import { useIsTodaySelected } from './date-picker.tsx';
 import { useValueNotifier, useValueNotifierSetTarget } from './events.ts';
+import { useIsLoggedIn } from './auth.ts';
 import { useViewsForNav } from './views.ts';
 
 const useQueries = (setting: StringSetSetting, type: SearchEntityType) => {
@@ -81,7 +82,7 @@ export const useIsPriceAllowed = () => {
     );
 };
 
-export type OnlineOrderingBlockedReason = 'setting-disabled' | 'weekend' | 'today-not-selected';
+export type OnlineOrderingBlockedReason = 'setting-disabled' | 'weekend' | 'today-not-selected' | 'not-logged-in';
 
 /**
  * Discriminated description of whether online ordering is currently usable
@@ -104,9 +105,14 @@ export type IOnlineOrderingState =
 export const useOnlineOrderingState = (): IOnlineOrderingState => {
     const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
     const isTodaySelected = useIsTodaySelected();
+    const isLoggedIn = useIsLoggedIn();
 
     if (!isOnlineOrderingEnabled) {
         return { allowed: false, reason: 'setting-disabled' };
+    }
+
+    if (!isLoggedIn) {
+        return { allowed: false, reason: 'not-logged-in' };
     }
 
     if (DateUtil.isDateOnWeekend(new Date())) {

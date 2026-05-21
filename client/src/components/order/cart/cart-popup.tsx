@@ -1,10 +1,13 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCartStore } from '../../../store/zustand/cart.ts';
-import { useCartHydrationStatus } from '../../../store/queries/cart.ts';
 import { useIsOnlineOrderingAllowed } from '../../../hooks/cafe.ts';
 import { useClickTracker } from '../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
+import { useCartQuery } from '../../../store/queries/server-cart.ts';
+import {
+    useServerCartHasUnavailableItems,
+    useServerCartItemCount,
+} from '../../../store/zustand/server-cart.ts';
 import { classNames } from '../../../util/react.ts';
 import { WaitTime } from '../wait-time.tsx';
 import { CartContentsTable } from './cart-contents-table.tsx';
@@ -12,19 +15,13 @@ import { CartHydrationView } from './cart-hydration-view.tsx';
 
 import './cart-popup.css';
 
-export const CartPopup = () => {
-    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
-    const cart = useCartStore((state) => state.items);
-    const missingItemsByCafeId = useCartStore((state) => state.missingItemsByCafeId);
-    const hydrationStatus = useCartHydrationStatus();
+const CartPopupBody = () => {
+    const totalItemCount = useServerCartItemCount();
+    const hasUnavailableItems = useServerCartHasUnavailableItems();
+    const cartQuery = useCartQuery();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
-
-    const totalItemCount = useMemo(
-        () => Array.from(cart.values()).reduce((total, itemsById) => total + itemsById.size, 0),
-        [cart]
-    );
 
     const toggleExpanded = useCallback(() => setIsExpanded(prev => !prev), []);
 
@@ -36,12 +33,7 @@ export const CartPopup = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    if (!isOnlineOrderingAllowed) {
-        return;
-    }
-
-    const hasMissingItems = missingItemsByCafeId.size > 0;
-    const shouldShow = totalItemCount > 0 || hasMissingItems || hydrationStatus.isPending;
+    const shouldShow = totalItemCount > 0 || hasUnavailableItems || cartQuery.isPending;
 
     return (
         <div
@@ -50,7 +42,7 @@ export const CartPopup = () => {
                 'cart-popup',
                 !shouldShow && 'hidden',
                 isExpanded && 'expanded',
-                hasMissingItems && 'has-missing-items'
+                hasUnavailableItems && 'has-missing-items'
             )}
             style={{
                 right: `${scrollbarWidth}px`
@@ -58,8 +50,8 @@ export const CartPopup = () => {
         >
             <div className="cart-header cart-info" onClick={toggleExpanded}>
                 {
-                    hasMissingItems && (
-                        <span className="cart-warning material-symbols-outlined" title="Some cart items could not be loaded">
+                    hasUnavailableItems && (
+                        <span className="cart-warning material-symbols-outlined" title="Some cart items are no longer available">
                             error
                         </span>
                     )
@@ -69,7 +61,7 @@ export const CartPopup = () => {
                 </span>
                 <span className="cart-count">
                     {
-                        hydrationStatus.isPending
+                        cartQuery.isPending
                             ? 'Loading...'
                             : totalItemCount
                     }
@@ -82,7 +74,7 @@ export const CartPopup = () => {
                             <CartContentsTable/>
                             <WaitTime/>
                             <Link to="/order" className="checkout-button">
-                                               Checkout
+                                Checkout
                             </Link>
                         </>
                     )
@@ -91,4 +83,14 @@ export const CartPopup = () => {
             </div>
         </div>
     );
+};
+
+export const CartPopup = () => {
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
+
+    if (!isOnlineOrderingAllowed) {
+        return;
+    }
+
+    return <CartPopupBody/>;
 };

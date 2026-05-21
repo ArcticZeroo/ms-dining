@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import { mutative } from 'zustand-mutative';
 import type {
-    ICartItemRecord,
     IActiveOrderSummary,
+    ICartItemRecord,
     ICartResponse,
 } from '@msdining/common/models/cart';
+import { create } from 'zustand';
+import { mutative } from 'zustand-mutative';
 
 /**
  * Thin Zustand cache over the server-side cart.
@@ -19,13 +19,8 @@ interface IServerCartStore {
     items: ICartItemRecord[];
     activeOrder: IActiveOrderSummary | undefined;
 
-    /** Reconcile from a server response (already converted to client types). */
     setFromServerResponse(response: ICartResponse): void;
-
-    /** Optimistic quantity update for debounced +/- buttons. */
     optimisticUpdateQuantity(itemId: string, quantity: number): void;
-
-    /** Optimistic remove for immediate UI feedback. */
     optimisticRemoveItem(itemId: string): void;
 }
 
