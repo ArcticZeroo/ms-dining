@@ -175,7 +175,7 @@ export const CartItemRecordSchema = z.object({
     id:                  z.string(),
     menuItemId:          z.string(),
     quantity:            z.number().int(),
-    specialInstructions: z.string().nullable(),
+    specialInstructions: z.string().nullish(),
     modifiers:           z.array(SerializedModifierSchema),
     createdAt:           z.string(),
     updatedAt:           z.string(),
