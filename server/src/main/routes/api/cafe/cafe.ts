@@ -12,6 +12,7 @@ import { registerOrderingRoutes } from './ordering.js';
 import { registerSearchRoutes } from './search.js';
 import { registerRecommendationsRoutes } from './recommendations.js';
 import { registerGroupsRoutes } from './groups.js';
+import { registerCartRoutes } from './cart.js';
 import { memoizeResponseBody } from '../../../middleware/cache.js';
 
 export const registerCafeRoutes = (parent: Router) => {
@@ -24,6 +25,7 @@ export const registerCafeRoutes = (parent: Router) => {
     registerOrderingRoutes(router);
     registerRecommendationsRoutes(router);
     registerGroupsRoutes(router);
+    registerCartRoutes(router);
 
     const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
         const cafeDataById = await getServices().data.cafe.retrieveCafes({});
