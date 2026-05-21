@@ -1,5 +1,6 @@
 import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
+import { toDateString } from '@msdining/common/util/date-util';
 import type { PrismaTransactionClient, ReadOnlyPrismaLikeClient } from '../../../../shared/models/prisma.js';
 import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
@@ -11,6 +12,7 @@ import type {
     IActiveOrderSummary,
     IOrderCafePartSummary,
     OrderCafePartStatus,
+    ICartItemMenuData,
 } from '@msdining/common/models/cart';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
 
@@ -24,6 +26,12 @@ type PrismaCartItemWithModifiers = {
     createdAt: Date;
     updatedAt: Date;
     modifierChoices: { modifierId: string; choiceId: string }[];
+    menuItem: {
+        name: string;
+        price: number;
+        imageUrl: string | null;
+        cafeId: string;
+    };
 };
 
 const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[]): ISerializedModifier[] => {
@@ -39,7 +47,7 @@ const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[
     return Array.from(byModifier, ([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
 };
 
-const toCartItemRecord = (item: PrismaCartItemWithModifiers): ICartItemRecord => ({
+const toCartItemRecord = (item: PrismaCartItemWithModifiers, availableMenuItemIds: Set<string>): ICartItemRecord => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
@@ -47,11 +55,21 @@ const toCartItemRecord = (item: PrismaCartItemWithModifiers): ICartItemRecord =>
     modifiers:           groupModifierChoices(item.modifierChoices),
     createdAt:           item.createdAt.toISOString(),
     updatedAt:           item.updatedAt.toISOString(),
+    menuItem: {
+        name:        item.menuItem.name,
+        price:       item.menuItem.price,
+        imageUrl:    item.menuItem.imageUrl,
+        cafeId:      item.menuItem.cafeId,
+        isAvailable: availableMenuItemIds.has(item.menuItemId),
+    },
 });
 
 const CART_ITEM_INCLUDE = {
     modifierChoices: {
         select: { modifierId: true, choiceId: true },
+    },
+    menuItem: {
+        select: { name: true, price: true, imageUrl: true, cafeId: true },
     },
 } as const;
 
@@ -121,17 +139,63 @@ export abstract class CartStorageClient {
     }
 
     /**
-     * Read the full cart response inside a transaction so the returned
-     * data is a consistent snapshot of the state after the mutation.
+     * Check which of the given menu item IDs are available on today's menu.
+     * Single batch query against DailyMenuItem — no per-cafe fan-out.
      */
-    private static async readCartResponse(tx: PrismaTransactionClient, userId: string): Promise<ICartResponse> {
+    private static async getAvailableMenuItemIds(menuItemIds: string[]): Promise<Set<string>> {
+        if (menuItemIds.length === 0) {
+            return new Set();
+        }
+
+        const todayString = toDateString(new Date());
+
+        const availableRows = await usePrismaClient(prisma => prisma.dailyMenuItem.findMany({
+            where: {
+                menuItemId: { in: menuItemIds },
+                category: {
+                    station: {
+                        dailyCafe: {
+                            dateString: todayString,
+                        },
+                    },
+                },
+            },
+            select: { menuItemId: true },
+            distinct: ['menuItemId'],
+        }));
+
+        return new Set(availableRows.map(r => r.menuItemId));
+    }
+
+    /**
+     * Read the cart items + active order inside the transaction for consistency.
+     * Does NOT check availability — that runs outside the transaction to avoid
+     * deadlocking (the availability query uses usePrismaClient/read semaphore,
+     * which can't proceed while the write semaphore is held).
+     */
+    private static async readRawCartData(tx: PrismaTransactionClient, userId: string) {
         const cart = await tx.cart.findUnique({
             where:   { userId },
             include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
         });
         const activeOrder = await this.getActiveOrderSummaryWithClient(tx, userId);
+        return { items: cart?.items ?? [], activeOrder };
+    }
+
+    /**
+     * Enrich raw cart data with availability info and convert to the response shape.
+     * Runs outside the transaction so the availability query doesn't deadlock.
+     */
+    private static async enrichCartResponse(
+        rawItems: Awaited<ReturnType<typeof CartStorageClient.readRawCartData>>['items'],
+        activeOrder: IActiveOrderSummary | undefined,
+    ): Promise<ICartResponse> {
+        const availableIds = rawItems.length > 0
+            ? await this.getAvailableMenuItemIds(rawItems.map(i => i.menuItemId))
+            : new Set<string>();
+
         return {
-            items:       cart?.items.map(toCartItemRecord) ?? [],
+            items: rawItems.map(item => toCartItemRecord(item, availableIds)),
             activeOrder,
         };
     }
@@ -173,22 +237,24 @@ export abstract class CartStorageClient {
     /**
      * Run a cart mutation inside a transaction.
      * Optionally checks for an active order (rejects with CONFLICT if one exists),
-     * ensures the cart exists, calls the callback, then returns a consistent
-     * cart response snapshot — all inside the same transaction.
+     * ensures the cart exists, calls the callback, then reads the cart data
+     * inside the transaction for consistency. Availability enrichment runs
+     * after the transaction commits to avoid deadlocking on the read semaphore.
      */
-    private static useCartTransaction(
+    private static async useCartTransaction(
         userId: string,
         options: { requireNoActiveOrder: boolean },
         callback: (tx: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
     ): Promise<ICartResponse> {
-        return usePrismaTransaction(async tx => {
+        const rawData = await usePrismaTransaction(async tx => {
             if (options.requireNoActiveOrder) {
                 await this.ensureNoActiveOrder(tx, userId);
             }
             const cart = await this.getOrCreateCart(tx, userId);
             await callback(tx, cart);
-            return this.readCartResponse(tx, userId);
+            return this.readRawCartData(tx, userId);
         });
+        return this.enrichCartResponse(rawData.items, rawData.activeOrder);
     }
 
     private static async createModifierChoices(

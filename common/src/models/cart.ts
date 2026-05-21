@@ -167,7 +167,16 @@ export const CartItemUpdateSchema = z.object({
 
 export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
 
-// --- Cart item record (returned from server) ---
+// --- Cart item record (returned from server, enriched with menu data) ---
+
+export interface ICartItemMenuData {
+    name: string;
+    price: number;
+    imageUrl: string | null;
+    cafeId: string;
+    /** False if the menu item is no longer on today's menu. */
+    isAvailable: boolean;
+}
 
 export interface ICartItemRecord {
     id: string;
@@ -177,6 +186,7 @@ export interface ICartItemRecord {
     modifiers: ISerializedModifier[];
     createdAt: string;
     updatedAt: string;
+    menuItem: ICartItemMenuData;
 }
 
 // --- Active order summary (included in cart response when an order is in progress) ---
