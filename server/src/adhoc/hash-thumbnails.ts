@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serverMenuItemThumbnailPath } from '../shared/constants/config.js';
-import { updateThumbnailHashFromExistingImage } from '../worker/data/cafe/image/thumbnail.js';
+import { computeHashFromExistingImage } from '../worker/data/cafe/image/thumbnail.js';
 import { saveManifest } from '../worker/data/cafe/image/manifest.js';
 
 console.log('Scanning existing thumbnails and computing dHash values...');
@@ -27,7 +27,7 @@ for (const file of pngFiles) {
     const filePath = path.join(serverMenuItemThumbnailPath, file);
 
     try {
-        const hash = await updateThumbnailHashFromExistingImage(id, filePath);
+        const { hash } = await computeHashFromExistingImage(id, filePath);
 
         // Track duplicates
         const existing = hashToIds.get(hash) ?? [];

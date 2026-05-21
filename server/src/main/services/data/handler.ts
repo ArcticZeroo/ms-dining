@@ -8,7 +8,7 @@ import { stationThemeServiceCommands } from '../../../worker/data/storage/client
 import { sessionServiceCommands } from '../../util/session-store.js';
 import { reviewServiceCommands } from '../../../worker/data/storage/clients/review.js';
 import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups.js';
-import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item.js';
+import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item-commands.js';
 import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu.js';
 import { searchServiceCommands } from '../../../worker/data/storage/clients/search-service.js';
 import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/menu-analytics.js';

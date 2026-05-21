@@ -2,6 +2,7 @@ import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../shared/m
 import { THUMBNAIL_THREAD_HANDLER } from '../data/threads/thumbnail.js';
 import { logError } from '../../shared/util/log.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { getServices } from '../../main/services/registry.js';
 
 const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnailExistenceData> => {
     try {
@@ -22,6 +23,14 @@ const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnai
             return {
                 hasThumbnail: false
             };
+        }
+
+        // Persist the hash to the DB (main-thread side, not in the thumbnail worker)
+        if (result.hash) {
+            getServices().data.menuItem.updateThumbnailHash({
+                menuItemId: menuItem.id,
+                hash:       result.hash,
+            }).catch(err => logError(`Failed to persist thumbnail hash for ${menuItem.id}`, err));
         }
 
         return {

@@ -1,7 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../../shared/constants/config.js';
-import { updateThumbnailHashFromExistingImage } from '../../cafe/image/thumbnail.js';
+import { computeHashFromExistingImage } from '../../cafe/image/thumbnail.js';
+import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { saveManifest } from '../../cafe/image/manifest.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { IRuntimeMigration } from '../types.js';
@@ -42,7 +43,8 @@ export const backfillThumbnailHashesMigration: IRuntimeMigration = {
             const filePath = path.join(serverMenuItemThumbnailPath, file);
 
             try {
-                const hash = await updateThumbnailHashFromExistingImage(id, filePath);
+                const { hash } = await computeHashFromExistingImage(id, filePath);
+                await MenuItemStorageClient.updateThumbnailHash(id, hash);
 
                 const existing = hashToIds.get(hash) ?? [];
                 existing.push(id);

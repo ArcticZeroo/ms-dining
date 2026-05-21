@@ -7,7 +7,6 @@ import { runPromiseWithRetries } from '../../../../shared/util/async.js';
 import { logDebug } from '../../../../shared/util/log.js';
 import { IThumbnailWorkerRequest } from '../../../../shared/models/thumbnail.js';
 import { IImageMetadata } from '../../../../shared/util/image.js';
-import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { updateManifestEntry } from './manifest.js';
 
 const maxThumbnailHeightPx = 200;
@@ -81,12 +80,11 @@ export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThum
 // static/thumbnails/<hash>
 export const getHashThumbnailFilepath = (hash: string) => path.join(serverThumbnailPath, `${hash}.png`);
 
-export const updateThumbnailHashFromExistingImage = async (id: string, imagePath: string): Promise<string> => {
+export const computeHashFromExistingImage = async (id: string, imagePath: string): Promise<{ hash: string; width: number; height: number }> => {
     const image = await Jimp.read(imagePath);
     const hash = computeDHash(image);
-    await MenuItemStorageClient.updateThumbnailHash(id, hash);
     updateManifestEntry(id, { hash, width: image.getWidth(), height: image.getHeight(), lastUpdateTime: new Date().toISOString() });
-    return hash;
+    return { hash, width: image.getWidth(), height: image.getHeight() };
 };
 
 export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult> => {
