@@ -5,7 +5,7 @@ import type {
 } from '@msdining/common/models/cart';
 import { create } from 'zustand';
 import { mutative } from 'zustand-mutative';
-import { useShallow } from 'zustand/react/shallow';
+import { useMemo } from 'react';
 
 /**
  * Thin Zustand cache over the server-side cart.
@@ -59,19 +59,22 @@ export const useServerCartHasUnavailableItems = () => useServerCartStore(state =
     state.items.some(item => !item.isAvailable),
 );
 
-export const useServerCartAvailableItems = () => useServerCartStore(
-    useShallow(state => state.items.filter(item => item.isAvailable)),
-);
+export const useServerCartAvailableItems = () => {
+    const items = useServerCartStore(state => state.items);
+    return useMemo(() => items.filter(item => item.isAvailable), [items]);
+};
 
-export const useServerCartUnavailableItems = () => useServerCartStore(
-    useShallow(state => state.items.filter(item => !item.isAvailable)),
-);
+export const useServerCartUnavailableItems = () => {
+    const items = useServerCartStore(state => state.items);
+    return useMemo(() => items.filter(item => !item.isAvailable), [items]);
+};
 
 /** Group cart items by cafeId for display. */
-export const useServerCartItemsByCafe = () => useServerCartStore(
-    useShallow(state => {
+export const useServerCartItemsByCafe = () => {
+    const items = useServerCartStore(state => state.items);
+    return useMemo(() => {
         const byCafe = new Map<string, ICartItemRecord[]>();
-        for (const item of state.items) {
+        for (const item of items) {
             const cafeId = item.menuItem.cafeId;
             const existing = byCafe.get(cafeId);
             if (existing) {
@@ -81,5 +84,5 @@ export const useServerCartItemsByCafe = () => useServerCartStore(
             }
         }
         return byCafe;
-    }),
-);
+    }, [items]);
+};
