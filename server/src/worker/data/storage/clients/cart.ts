@@ -1,6 +1,6 @@
 import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
-import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
+import type { PrismaTransactionClient, ReadOnlyPrismaLikeClient } from '../../../../shared/models/prisma.js';
 import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
     ICartItemData,
@@ -108,20 +108,11 @@ const toActiveOrderSummary = (order: ActiveOrderRow): IActiveOrderSummary => ({
 
 export abstract class CartStorageClient {
     static async getActiveOrderSummary(userId: string): Promise<IActiveOrderSummary | undefined> {
-        const order = await usePrismaClient(prisma => prisma.orderSession.findFirst({
-            where:   { userId, ...ACTIVE_ORDER_QUERY },
-            include: ACTIVE_ORDER_INCLUDE,
-            orderBy: { createdAt: 'desc' },
-        }));
-        return order ? toActiveOrderSummary(order) : undefined;
+        return usePrismaClient(prisma => this.getActiveOrderSummaryWithClient(prisma, userId));
     }
 
-    /**
-     * Read the active order summary. Accepts any Prisma client so it can
-     * be called both standalone (via usePrismaClient) and inside transactions.
-     */
-    private static async getActiveOrderSummaryWithClient(tx: PrismaTransactionClient, userId: string): Promise<IActiveOrderSummary | undefined> {
-        const order = await tx.orderSession.findFirst({
+    private static async getActiveOrderSummaryWithClient(prisma: ReadOnlyPrismaLikeClient, userId: string): Promise<IActiveOrderSummary | undefined> {
+        const order = await prisma.orderSession.findFirst({
             where:   { userId, ...ACTIVE_ORDER_QUERY },
             include: ACTIVE_ORDER_INCLUDE,
             orderBy: { createdAt: 'desc' },

@@ -28,3 +28,11 @@ export type ReadOnlyPrismaClient = Omit<{
         ? Omit<PrismaClient[K], DelegateWriteMethods>
         : PrismaClient[K];
 }, TopLevelWriteMethods>;
+
+/**
+ * Accepts any Prisma client variant for read-only operations.
+ * Use when a helper needs to work both standalone (via usePrismaClient,
+ * which provides ReadOnlyPrismaClient) and inside a transaction
+ * (which provides PrismaTransactionClient).
+ */
+export type ReadOnlyPrismaLikeClient = ReadOnlyPrismaClient | PrismaTransactionClient;
