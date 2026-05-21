@@ -1,6 +1,6 @@
-import { usePrismaClient, usePrismaWrite } from '../client.js';
+import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
-import type { PrismaLikeClient } from '../../../../shared/models/prisma.js';
+import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
 import type {
     ICartService,
     ICartItemData,
@@ -79,12 +79,11 @@ const getActiveOrderSummary = async (userId: string): Promise<IActiveOrderSummar
 };
 
 /**
- * Checks for an active order using the provided Prisma client.
- * Called inside usePrismaWrite so the check + mutation are serialized
- * under the write semaphore — no race between check and write.
+ * Checks for an active order using the transaction client.
+ * Called inside usePrismaTransaction so the check + mutation are atomic.
  */
-const ensureNoActiveOrderWithClient = async (prisma: PrismaLikeClient, userId: string): Promise<void> => {
-    const activeOrder = await prisma.order.findFirst({
+const ensureNoActiveOrderWithClient = async (tx: PrismaTransactionClient, userId: string): Promise<void> => {
+    const activeOrder = await tx.order.findFirst({
         where: {
             userId,
             cafeOrders: {
@@ -103,15 +102,15 @@ const ensureNoActiveOrderWithClient = async (prisma: PrismaLikeClient, userId: s
     }
 };
 
-const getOrCreateCartWithClient = async (prisma: PrismaLikeClient, userId: string) => {
-    const existing = await prisma.cart.findUnique({
+const getOrCreateCartWithClient = async (tx: PrismaTransactionClient, userId: string) => {
+    const existing = await tx.cart.findUnique({
         where:   { userId },
         include: { items: { orderBy: { createdAt: 'asc' } } },
     });
     if (existing) {
         return existing;
     }
-    return prisma.cart.create({
+    return tx.cart.create({
         data:    { userId },
         include: { items: { orderBy: { createdAt: 'asc' } } },
     });
@@ -131,17 +130,17 @@ const buildCartResponse = async (userId: string): Promise<ICartResponse> => {
 
 export const cartServiceCommands = {
     getCart: async ({ userId }: { userId: string }): Promise<ICartResponse> => {
-        // getCart is read-only — doesn't need the write lock, but does
+        // getCart is read-only — doesn't need a transaction, but does
         // ensure the cart exists for convenience.
-        await usePrismaWrite(prisma => getOrCreateCartWithClient(prisma, userId));
+        await usePrismaWrite(prisma => getOrCreateCartWithClient(prisma as PrismaTransactionClient, userId));
         return buildCartResponse(userId);
     },
 
     addItem: async ({ userId, item }: { userId: string; item: ICartItemData }): Promise<ICartResponse> => {
-        await usePrismaWrite(async prisma => {
-            await ensureNoActiveOrderWithClient(prisma, userId);
-            const cart = await getOrCreateCartWithClient(prisma, userId);
-            await prisma.cartItem.create({
+        await usePrismaTransaction(async tx => {
+            await ensureNoActiveOrderWithClient(tx, userId);
+            const cart = await getOrCreateCartWithClient(tx, userId);
+            await tx.cartItem.create({
                 data: {
                     cartId:              cart.id,
                     cafeId:              item.cafeId,
@@ -156,9 +155,9 @@ export const cartServiceCommands = {
     },
 
     updateItem: async ({ userId, itemId, update }: { userId: string; itemId: string; update: ICartItemUpdate }): Promise<ICartResponse> => {
-        await usePrismaWrite(async prisma => {
-            await ensureNoActiveOrderWithClient(prisma, userId);
-            const cart = await getOrCreateCartWithClient(prisma, userId);
+        await usePrismaTransaction(async tx => {
+            await ensureNoActiveOrderWithClient(tx, userId);
+            const cart = await getOrCreateCartWithClient(tx, userId);
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
@@ -168,28 +167,28 @@ export const cartServiceCommands = {
             if (update.specialInstructions !== undefined) data.specialInstructions = update.specialInstructions;
             if (update.modifiers !== undefined) data.modifiersJson = JSON.stringify(update.modifiers);
 
-            await prisma.cartItem.update({ where: { id: itemId }, data });
+            await tx.cartItem.update({ where: { id: itemId }, data });
         });
         return buildCartResponse(userId);
     },
 
     removeItem: async ({ userId, itemId }: { userId: string; itemId: string }): Promise<ICartResponse> => {
-        await usePrismaWrite(async prisma => {
-            await ensureNoActiveOrderWithClient(prisma, userId);
-            const cart = await getOrCreateCartWithClient(prisma, userId);
+        await usePrismaTransaction(async tx => {
+            await ensureNoActiveOrderWithClient(tx, userId);
+            const cart = await getOrCreateCartWithClient(tx, userId);
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
-            await prisma.cartItem.delete({ where: { id: itemId } });
+            await tx.cartItem.delete({ where: { id: itemId } });
         });
         return buildCartResponse(userId);
     },
 
     clearCart: async ({ userId }: { userId: string }): Promise<ICartResponse> => {
-        await usePrismaWrite(async prisma => {
-            await ensureNoActiveOrderWithClient(prisma, userId);
-            const cart = await getOrCreateCartWithClient(prisma, userId);
-            await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+        await usePrismaTransaction(async tx => {
+            await ensureNoActiveOrderWithClient(tx, userId);
+            const cart = await getOrCreateCartWithClient(tx, userId);
+            await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
         });
         return buildCartResponse(userId);
     },
