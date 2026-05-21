@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 /**
  * Resolves a DATABASE_URL `file:` path relative to the `prisma/` directory,
@@ -14,10 +13,10 @@ export const resolveDatabaseUrl = (rawUrl: string): string => {
     }
 
     const relativePath = rawUrl.slice('file:'.length);
-    const prismaDir = path.resolve(
-        path.dirname(fileURLToPath(import.meta.url)),
-        '..', '..', 'prisma',
-    );
+    // Prisma resolves file: URLs relative to the prisma/ directory.
+    // Use process.cwd() + prisma/ as the base, since the server is
+    // always started from the server/ directory.
+    const prismaDir = path.resolve(process.cwd(), 'prisma');
     const resolved = path.resolve(prismaDir, relativePath);
     return `file:${resolved}`;
 };
