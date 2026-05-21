@@ -1,5 +1,63 @@
 import type { IMenuItemBase } from '../models/cafe.js';
 import type { IMenuItemDTO } from '../models/cafe.js';
+import { z } from 'zod';
+
+// ─── Zod schemas for menu item wire format ───────────────────────────
+
+export const MenuItemModifierChoiceSchema = z.object({
+    id:          z.string(),
+    description: z.string(),
+    price:       z.number(),
+});
+
+export const MenuItemModifierSchema = z.object({
+    id:          z.string(),
+    description: z.string(),
+    minimum:     z.number(),
+    maximum:     z.number(),
+    choiceType:  z.enum(['radio', 'checkbox', 'multiSelect']),
+    choices:     z.array(MenuItemModifierChoiceSchema),
+});
+
+/** Validates the wire-format IMenuItemDTO shape. */
+export const MenuItemDTOSchema = z.object({
+    id:               z.string(),
+    cafeId:           z.string(),
+    stationId:        z.string(),
+    price:            z.number(),
+    name:             z.string(),
+    receiptText:      z.string().nullish(),
+    calories:         z.number(),
+    maxCalories:      z.number(),
+    hasThumbnail:     z.boolean(),
+    thumbnailId:      z.string().optional(),
+    modifiers:        z.array(MenuItemModifierSchema),
+    thumbnailWidth:   z.number().optional(),
+    thumbnailHeight:  z.number().optional(),
+    imageUrl:         z.string().nullish(),
+    description:      z.string().nullish(),
+    lastUpdateTime:   z.number().nullish(),
+    firstAppearance:  z.string(),
+    tags:             z.array(z.string()),
+    searchTags:       z.array(z.string()),
+    pattern:          z.string().optional(),
+    groupId:          z.string().nullish(),
+    totalReviewCount: z.number(),
+    overallRating:    z.number(),
+});
+
+/**
+ * Validates the wire-format DTO then transforms to the in-memory
+ * IMenuItemBase shape (string[] → Set, epoch ms → Date).
+ */
+export const MenuItemBaseSchema = MenuItemDTOSchema.transform((dto): IMenuItemBase => ({
+    ...dto,
+    lastUpdateTime: dto.lastUpdateTime != null ? new Date(dto.lastUpdateTime) : undefined,
+    tags:           new Set(dto.tags),
+    searchTags:     new Set(dto.searchTags),
+}));
+
+// ─── Manual conversion functions ─────────────────────────────────────
 
 /**
  * Convert an in-memory IMenuItemBase (with Sets + Date) to the wire-safe

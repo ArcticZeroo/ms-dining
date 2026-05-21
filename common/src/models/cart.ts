@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { IMenuItemBase } from './cafe.js';
 
 // ─── Legacy ordering types (v1) ─────────────────────────────────────
 // Still used by the current ordering flow. Will be removed when the
@@ -170,57 +169,7 @@ export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
 
 // --- Cart item record (returned from server, enriched with menu data) ---
 
-const MenuItemModifierChoiceSchema = z.object({
-    id:          z.string(),
-    description: z.string(),
-    price:       z.number(),
-});
-
-const MenuItemModifierSchema = z.object({
-    id:          z.string(),
-    description: z.string(),
-    minimum:     z.number(),
-    maximum:     z.number(),
-    choiceType:  z.enum(['radio', 'checkbox', 'multiSelect']),
-    choices:     z.array(MenuItemModifierChoiceSchema),
-});
-
-const MenuItemDTOSchema = z.object({
-    id:               z.string(),
-    cafeId:           z.string(),
-    stationId:        z.string(),
-    price:            z.number(),
-    name:             z.string(),
-    receiptText:      z.string().nullish(),
-    calories:         z.number(),
-    maxCalories:      z.number(),
-    hasThumbnail:     z.boolean(),
-    thumbnailId:      z.string().optional(),
-    modifiers:        z.array(MenuItemModifierSchema),
-    thumbnailWidth:   z.number().optional(),
-    thumbnailHeight:  z.number().optional(),
-    imageUrl:         z.string().nullish(),
-    description:      z.string().nullish(),
-    lastUpdateTime:   z.number().nullish(),
-    firstAppearance:  z.string(),
-    tags:             z.array(z.string()),
-    searchTags:       z.array(z.string()),
-    pattern:          z.string().optional(),
-    groupId:          z.string().nullish(),
-    totalReviewCount: z.number(),
-    overallRating:    z.number(),
-});
-
-/**
- * Validates the wire-format menu item DTO, then transforms to the
- * in-memory IMenuItemBase shape (string[] → Set, epoch ms → Date).
- */
-const MenuItemBaseSchema = MenuItemDTOSchema.transform((dto): IMenuItemBase => ({
-    ...dto,
-    lastUpdateTime: dto.lastUpdateTime != null ? new Date(dto.lastUpdateTime) : undefined,
-    tags:           new Set(dto.tags),
-    searchTags:     new Set(dto.searchTags),
-}));
+import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
 
 export const CartItemRecordSchema = z.object({
     id:                  z.string(),
@@ -237,7 +186,7 @@ export const CartItemRecordSchema = z.object({
 export type ICartItemRecord = z.output<typeof CartItemRecordSchema>;
 
 /** Wire-format cart item before zod transform (menuItem is IMenuItemDTO shape). */
-export type ICartItemRecordWire = z.input<typeof CartItemRecordSchema>;
+export type ICartItemRecordDTO = z.input<typeof CartItemRecordSchema>;
 
 // --- Active order summary (included in cart response when an order is in progress) ---
 
@@ -276,7 +225,7 @@ export interface ICartResponse {
 }
 
 /** Wire-format response before zod transform. Used by the server/service interface. */
-export interface ICartResponseWire {
-    items: ICartItemRecordWire[];
+export interface ICartResponseDTO {
+    items: ICartItemRecordDTO[];
     activeOrder?: IActiveOrderSummary;
 }

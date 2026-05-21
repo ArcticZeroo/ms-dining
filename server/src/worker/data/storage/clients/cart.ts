@@ -8,7 +8,7 @@ import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
     ICartItemData,
     ICartItemUpdate,
-    ICartItemRecordWire,
+    ICartItemRecordDTO,
     ISerializedModifier,
     IActiveOrderSummary,
     IOrderCafePartSummary,
@@ -46,7 +46,7 @@ const toCartItemWireRecord = (
     item: PrismaCartItemWithModifiers,
     menuItem: IMenuItemBase,
     isAvailable: boolean,
-): ICartItemRecordWire => ({
+): ICartItemRecordDTO => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
@@ -197,7 +197,7 @@ export abstract class CartStorageClient {
             ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
         ]);
 
-        const items: ICartItemRecordWire[] = [];
+        const items: ICartItemRecordDTO[] = [];
         for (let i = 0; i < rawItems.length; i++) {
             const raw = rawItems[i]!;
             const menuItem = menuItems[i];
