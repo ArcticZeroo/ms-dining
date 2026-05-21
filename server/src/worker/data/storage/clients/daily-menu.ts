@@ -19,6 +19,8 @@ import type {
     IDailyMenuService,
     IPublishDailyMenuParams,
 } from '../../../../shared/services/daily-menu.js';
+import { retrieveDailyCafeMenuAsync } from '../../cache/daily-menu.js';
+import { getMenuWatermark } from '../../cache/menu-watermark.js';
 
 const areMenuItemsByCategoryNameEqual = (left: Map<string, Array<string>>, right: Map<string, Array<string>>) => {
 	if (left.size !== right.size) {
@@ -868,6 +870,10 @@ export const dailyMenuServiceCommands = {
         DailyMenuStorageClient.publishDailyStationMenuAsync(data),
     retrieveDailyMenuAsync: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
         DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, dateString),
+    retrieveDailyCafeMenu: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
+        retrieveDailyCafeMenuAsync(cafeId, dateString),
+    getMenuWatermark: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
+        getMenuWatermark(cafeId, dateString),
     retrieveDailyMenuOverviewHeadersAsync: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
         DailyMenuStorageClient.retrieveDailyMenuOverviewHeadersAsync(cafeId, dateString),
     isAnyMenuAvailableForDayAsync: async ({ dateString }: { dateString: string }) =>

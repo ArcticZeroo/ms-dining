@@ -8,6 +8,8 @@ export const menuItemService: IMenuItemService = {
         dataHandler.sendRequest('menuItem', 'saveMenuItemSearchTags', data),
     retrieveMenuItem: (data) =>
         dataHandler.sendRequest('menuItem', 'retrieveMenuItem', data),
+    retrieveFirstMenuItemAppearance: (data) =>
+        dataHandler.sendRequest('menuItem', 'retrieveFirstMenuItemAppearance', data),
     retrieveMenuItemsForWeeklyMenu: (data) =>
         dataHandler.sendRequest('menuItem', 'retrieveMenuItemsForWeeklyMenu', data),
     retrievePendingSearchTagQueueEntries: (data) =>

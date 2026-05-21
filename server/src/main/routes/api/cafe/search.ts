@@ -3,7 +3,6 @@ import Router from '@koa/router';
 import { NumberUtil } from '@msdining/common';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { ISearchQuery } from '@msdining/common/models/search';
-import { SearchManager } from '../../../../worker/data/storage/search.js';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { assignCacheControlMiddleware, memoizeResponseBody } from '../../../middleware/cache.js';
 import {
@@ -16,11 +15,9 @@ import {
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { logDebug, logError } from '../../../../shared/util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../../worker/queues/embeddings.js';
-import { retrieveVisitData } from '../../../../worker/data/cache/pattern.js';
 import { Middleware } from 'koa';
 import { getServices } from '../../../services/registry.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
-import { searchAutocomplete } from '../../../../worker/data/cache/autocomplete.js';
 import Duration from '@arcticzeroo/duration';
 
 const DEFAULT_MAX_PRICE = 15;
@@ -42,7 +39,10 @@ export const registerSearchRoutes = (parent: Router) => {
             }
 
             const date = getDateForMenuRequest(ctx);
-            const searchResultsByIdPerEntityType = await SearchManager.searchFavorites(queries, date);
+            const searchResultsByIdPerEntityType = await getServices().data.search.searchFavorites({
+                queries,
+                date: date?.toISOString() ?? null,
+            });
             await serializeSearchResults(ctx, searchResultsByIdPerEntityType);
         });
 
@@ -84,17 +84,21 @@ export const registerSearchRoutes = (parent: Router) => {
                 // Otherwise, we only want appearances from this week if the client supports it (since otherwise it shows weird hidden UI)
                 // and the client hasn't told us to filter out results without appearances (e.g. search ideas)
                 const allowResultsWithoutAppearances = date == null && getTrimmedQueryParam(ctx, 'availableOnly') !== 'true';
-                const results = await SearchManager.searchVector(searchQuery, date, allowResultsWithoutAppearances);
+                const results = await getServices().data.search.searchVector({
+                    query: searchQuery,
+                    date: date?.toISOString() ?? null,
+                    allowResultsWithoutAppearances,
+                });
                 await serializeSearchResults(ctx, results);
                 const endTime = Date.now();
                 logDebug(`Search for ${searchQuery} took ${endTime - startTime}ms`);
                 ctx.set('X-Remaining-Embeddings', String(EMBEDDINGS_WORKER_QUEUE.remainingItems));
             } else {
-                const results = await SearchManager.search(
-                    searchQuery,
-                    date,
-                    isExact
-                );
+                const results = await getServices().data.search.search({
+                    query: searchQuery,
+                    date: date?.toISOString() ?? null,
+                    shouldUseExactMatch: isExact,
+                });
 
                 await serializeSearchResults(ctx, results);
             }
@@ -118,10 +122,10 @@ export const registerSearchRoutes = (parent: Router) => {
 
             const date = getDateForMenuRequest(ctx);
 
-            const cheapItems = await SearchManager.searchForCheapItems({
+            const cheapItems = await getServices().data.search.searchForCheapItems({
                 minPrice,
                 maxPrice,
-                date
+                date: date?.toISOString() ?? null,
             });
 
             const searchResults = [];
@@ -145,7 +149,7 @@ export const registerSearchRoutes = (parent: Router) => {
         memoizeResponseBody({ isPublic: true }),
         async ctx => {
             const [entityType, entityName] = getEntityTypeAndName(ctx);
-            ctx.body = await retrieveVisitData(entityType, entityName);
+            ctx.body = await getServices().data.menuAnalytics.retrieveVisitData({ entityType, name: entityName });
         });
 
     router.get('/autocomplete',
@@ -157,7 +161,7 @@ export const registerSearchRoutes = (parent: Router) => {
                 return;
             }
 
-            ctx.body = { results: searchAutocomplete(query) };
+            ctx.body = { results: await getServices().data.search.autocomplete({ query }) };
         });
 
     attachRouter(parent, router);

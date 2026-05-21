@@ -15,7 +15,7 @@
 
 import Router from '@koa/router';
 import Koa from 'koa';
-import { getMenuWatermark } from '../../worker/data/cache/menu-watermark.js';
+import { getServices } from '../services/registry.js';
 import { getDateStringForMenuRequest } from '../util/date.js';
 
 const formatEtag = (timestamp: number): string => `W/"${timestamp}"`;
@@ -28,7 +28,7 @@ export const menuEtagMiddleware = async (ctx: Router.RouterContext, next: Koa.Ne
         return;
     }
 
-    const etag = formatEtag(getMenuWatermark(cafeId, dateString));
+    const etag = formatEtag(await getServices().data.dailyMenu.getMenuWatermark({ cafeId, dateString }));
 
     if (ctx.get('If-None-Match') === etag) {
         ctx.status = 304;

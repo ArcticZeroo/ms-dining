@@ -7,13 +7,10 @@ import {
 	getTrimmedQueryParam,
 	serializeSearchResults
 } from '../../../util/koa.js';
-import { SearchManager } from '../../../../worker/data/storage/search.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { toDateString } from '@msdining/common/util/date-util';
 import { IServerSearchResult } from '../../../../shared/models/search.js';
-import { getSimilarQueries } from '../../../../worker/data/storage/vector/client.js';
 import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
-import { getRecommendationsAsync } from '../../../../worker/data/cache/recommendations.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
@@ -68,7 +65,11 @@ export const registerRecommendationsRoutes = (parent: Router) => {
             return;
         }
 
-        const rawResults = await SearchManager.searchForSimilarEntities({ entityName, entityType, date });
+        const rawResults = await getServices().data.search.searchForSimilarEntities({
+            entityName,
+            entityType,
+            date: date.toISOString(),
+        });
         await serializeSearchResults(ctx, trimResults(rawResults, limit));
     });
 
@@ -82,7 +83,7 @@ export const registerRecommendationsRoutes = (parent: Router) => {
                 return;
             }
 
-            ctx.body = await getSimilarQueries(query);
+            ctx.body = await getServices().data.search.getSimilarQueries({ query });
         });
 
     const parseHomepageIds = (homepageIdsParam: string | undefined): string[] | undefined => {
@@ -170,15 +171,15 @@ export const registerRecommendationsRoutes = (parent: Router) => {
         const resolvedHomepageIds = resolveHomepageIds(homepageIds, userSettings);
         const favoriteItemNames = resolveFavoriteItemNames(favoriteItemNamesParam, userSettings);
 
-        const recommendations = await getRecommendationsAsync({
-			userId,
-			dateString,
-			homepageIds: resolvedHomepageIds,
-			favoriteItemNames,
-			cafeIdFilter: cafeId ? new Set([cafeId]) : undefined,
-		});
+        const recommendations = await getServices().data.search.getRecommendations({
+            userId: userId ?? undefined,
+            dateString,
+            homepageIds: resolvedHomepageIds,
+            favoriteItemNames,
+            cafeIdFilter: cafeId ? [cafeId] : undefined,
+        });
 
-		ctx.body = { sections: recommendations } satisfies IRecommendationsResponse;
+        ctx.body = { sections: recommendations } satisfies IRecommendationsResponse;
     });
 
     attachRouter(parent, router);

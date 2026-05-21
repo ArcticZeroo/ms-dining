@@ -14,25 +14,20 @@ import {
 } from '@msdining/common/constants/analytics';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
 import { logDebug } from '../../../../../shared/util/log.js';
-import { retrieveReviewHeaderAsync, retrieveStationReviewHeaderAsync } from '../../../../../worker/data/cache/reviews.js';
-import { retrieveFirstMenuItemAppearance } from '../../../../../worker/data/cache/menu-item-first-appearance.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../../../../worker/interface/thumbnail.js';
-import { retrieveDailyCafeMenuAsync } from '../../../../../worker/data/cache/daily-menu.js';
-import { retrieveUniquenessDataForCafe } from '../../../../../worker/data/cache/daily-uniqueness.js';
-import { resolveIngredientsMenuAsync } from '../../../../../worker/data/cache/ingredients-menu.js';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { setTelemetryProperties } from '../../../../middleware/telemetry.js';
 import { registerOverviewRoutes } from './overview.js';
-import { getShutdownCafeStateAsync } from '../../../../../worker/data/cache/daily-cafe-state.js';
 import { VERSION_TAG } from '@msdining/common/constants/versions';
 import { getServices } from '../../../../services/registry.js';
 
-const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Map<string, IStationUniquenessData> | null): IStationUniquenessData => {
-	if (uniquenessData == null || !uniquenessData.has(station.name)) {
+const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Record<string, IStationUniquenessData> | null): IStationUniquenessData => {
+	const stationUniquenessData = uniquenessData?.[station.name];
+	if (stationUniquenessData == null) {
 		return getDefaultUniquenessDataForStation(station.menuItemsById.size);
 	}
 
-	return uniquenessData.get(station.name)!;
+	return stationUniquenessData;
 };
 
 export const registerViewRoutes = (parent: Router) => {
@@ -47,8 +42,8 @@ export const registerViewRoutes = (parent: Router) => {
 
 	const serializeMenuItem = async (menuItem: IMenuItemBase): Promise<IMenuItemDTO> => {
 		const [reviewHeader, firstAppearance] = await Promise.all([
-			retrieveReviewHeaderAsync(menuItem),
-			retrieveFirstMenuItemAppearance(menuItem.id),
+			getServices().data.review.retrieveReviewHeader({ menuItem }),
+			getServices().data.menuItem.retrieveFirstMenuItemAppearance({ menuItemId: menuItem.id }),
 			ensureThumbnailDataHasBeenRetrievedAsync(menuItem),
 		]);
 
@@ -62,7 +57,7 @@ export const registerViewRoutes = (parent: Router) => {
 		});
 	};
 
-	const convertMenuToSerializable = async (menuStations: ICafeStation[], uniquenessData: Map<string, IStationUniquenessData> | null): Promise<MenuResponse> => {
+	const convertMenuToSerializable = async (menuStations: ICafeStation[], uniquenessData: Record<string, IStationUniquenessData> | null): Promise<MenuResponse> => {
 		const menusByStation: MenuResponse = [];
 
 		const addStation = async (station: ICafeStation): Promise<void> => {
@@ -97,9 +92,11 @@ export const registerViewRoutes = (parent: Router) => {
 				return;
 			}
 
-			const stationReviewHeader = await retrieveStationReviewHeaderAsync({
-				name:    station.name,
-				groupId: station.groupId
+			const stationReviewHeader = await getServices().data.review.retrieveStationReviewHeader({
+				station: {
+					name: station.name,
+					groupId: station.groupId,
+				}
 			});
 
 			menusByStation.push({
@@ -128,8 +125,8 @@ export const registerViewRoutes = (parent: Router) => {
 
 	const handleMenuRequest = (allowArrayFallback: boolean): Router.Middleware => async (ctx) => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
 		const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
-			retrieveDailyCafeMenuAsync(cafe.id, dateString),
-			retrieveUniquenessDataForCafe(cafe.id, dateString),
+			getServices().data.dailyMenu.retrieveDailyCafeMenu({ cafeId: cafe.id, dateString }),
+			getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({ cafeId: cafe.id, targetDateString: dateString }),
 			getServices().data.dailyMenu.retrieveDailyCafeStateAsync({ cafeId: cafe.id, dateString }),
 		]);
 
@@ -140,7 +137,7 @@ export const registerViewRoutes = (parent: Router) => {
 
 		const [stations, ingredientsMenu] = await Promise.all([
 			convertMenuToSerializable(menuStations, uniquenessData),
-			resolveIngredientsMenuAsync(cafe.id, dateString, menuStations),
+			getServices().data.menuAnalytics.resolveIngredientsMenu({ cafeId: cafe.id, dateString, menuStations }),
 		]);
 
 		const response: ICafeMenuResponse = {
@@ -199,15 +196,15 @@ export const registerViewRoutes = (parent: Router) => {
 					cafes.map(async (cafe) => {
 						const [stationHeaders, uniquenessData] = await Promise.all([
 							getServices().data.dailyMenu.retrieveDailyMenuOverviewHeadersAsync({ cafeId: cafe.id, dateString }),
-							retrieveUniquenessDataForCafe(cafe.id, dateString)
+							getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({ cafeId: cafe.id, targetDateString: dateString })
 						]);
 
 						return stationHeaders.map(station => ({
-							uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+							uniqueness: uniquenessData[station.name] ?? getDefaultUniquenessDataForStation()
 						}));
 					})
 				),
-				getShutdownCafeStateAsync(dateString)
+				getServices().data.menuAnalytics.getShutdownCafeState({ dateString })
 			]);
 
 			const stations = allOverviewStations.flat();

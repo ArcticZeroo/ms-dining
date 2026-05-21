@@ -10,6 +10,7 @@ import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client
 import { getDateStringsForWeek } from '@msdining/common/util/date-util';
 import { PrismaLikeClient } from '../../../../shared/models/prisma.js';
 import type { IMenuItemService } from '../../../../shared/services/menu-item.js';
+import { retrieveFirstMenuItemAppearance } from '../../cache/menu-item-first-appearance.js';
 
 const TOP_SEARCH_TAGS_COUNT = 50;
 
@@ -562,6 +563,8 @@ export const menuItemServiceCommands = {
         MenuItemStorageClient.saveMenuItemSearchTagsAsync(menuItemId, new Set(searchTags)),
     retrieveMenuItem: async ({ id }: { id: string }) =>
         MenuItemStorageClient.retrieveMenuItemAsync(id),
+    retrieveFirstMenuItemAppearance: async ({ menuItemId }: { menuItemId: string }) =>
+        retrieveFirstMenuItemAppearance(menuItemId),
     retrieveMenuItemsForWeeklyMenu: async (_data: {}) =>
         MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync(),
     retrievePendingSearchTagQueueEntries: async (_data: {}) =>

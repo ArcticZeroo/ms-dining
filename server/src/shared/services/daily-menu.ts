@@ -65,6 +65,8 @@ export interface ISearchableDailyMenu {
 export interface IDailyMenuService {
     publishDailyStationMenuAsync(data: IPublishDailyMenuParams): Promise<void>;
     retrieveDailyMenuAsync(data: { cafeId: string; dateString: string }): Promise<ICafeStation[]>;
+    retrieveDailyCafeMenu(data: { cafeId: string; dateString: string }): Promise<ICafeStation[]>;
+    getMenuWatermark(data: { cafeId: string; dateString: string }): Promise<number>;
     retrieveDailyMenuOverviewHeadersAsync(data: { cafeId: string; dateString: string }): Promise<ICafeMenuOverviewHeader[]>;
     isAnyMenuAvailableForDayAsync(data: { dateString: string }): Promise<boolean>;
     getCafesAvailableForDayAsync(data: { dateString: string }): Promise<string[]>;

@@ -6,6 +6,10 @@ export const dailyMenuService: IDailyMenuService = {
         dataHandler.sendRequest('dailyMenu', 'publishDailyStationMenuAsync', data),
     retrieveDailyMenuAsync: (data) =>
         dataHandler.sendRequest('dailyMenu', 'retrieveDailyMenuAsync', data),
+    retrieveDailyCafeMenu: (data) =>
+        dataHandler.sendRequest('dailyMenu', 'retrieveDailyCafeMenu', data),
+    getMenuWatermark: (data) =>
+        dataHandler.sendRequest('dailyMenu', 'getMenuWatermark', data),
     retrieveDailyMenuOverviewHeadersAsync: (data) =>
         dataHandler.sendRequest('dailyMenu', 'retrieveDailyMenuOverviewHeadersAsync', data),
     isAnyMenuAvailableForDayAsync: (data) =>

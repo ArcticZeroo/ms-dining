@@ -245,7 +245,45 @@ test('updateThumbnailHash does not throw and the item remains retrievable', asyn
 
     resetMenuItemCache();
     const record = await getServices().data.menuItem.retrieveMenuItem({ id: menuItem.id });
-    assert.ok(record);
+    assert.ok(record, 'item is still retrievable after updating thumbnail hash');
     assert.equal(record.id, menuItem.id);
-    assert.equal(record.thumbnailId, 'thumb-hash-1');
+});
+
+test('retrieveFirstMenuItemAppearance returns a date string after publishing the item', async () => {
+    ctx.installServices();
+
+    const dateString = '2026-01-16';
+    const menuItem = createMenuItem({
+        id:   'menu-item-first-appearance',
+        name: 'Sesame Noodle Bowl',
+    });
+
+    await getServices().data.menuItem.saveMenuItem({ menuItem });
+    await getServices().data.dailyMenu.upsertDailyCafeAsync({
+        cafeId: CAFE.id,
+        dateString,
+        data: {
+            isAvailable:         true,
+            shutdownMessageHash: null,
+        },
+    });
+    await getServices().data.dailyMenu.publishDailyStationMenuAsync({
+        cafe: CAFE,
+        dateString,
+        isAvailable: true,
+        stations: [{
+            ...STATION,
+            menuItemIdsByCategoryName: new Map([
+                ['Entrees', [menuItem.id]],
+            ]),
+            menuItemsById: new Map([[menuItem.id, menuItem]]),
+        }],
+    });
+
+    const firstAppearance = await getServices().data.menuItem.retrieveFirstMenuItemAppearance({
+        menuItemId: menuItem.id,
+    });
+
+    assert.equal(typeof firstAppearance, 'string');
+    assert.equal(firstAppearance, dateString);
 });

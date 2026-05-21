@@ -9,7 +9,6 @@ import { jsonStringifyWithoutNull } from '../../shared/util/serde.js';
 import { getDevKey } from '../../shared/constants/env.js';
 import { IServerUser } from '../../shared/models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
-import { retrieveReviewHeaderByPartsAsync, retrieveStationReviewHeaderByPartsAsync } from '../../worker/data/cache/reviews.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import { getDateStringForMenuRequest } from './date.js';
 import { getServices } from '../services/registry.js';
@@ -86,13 +85,19 @@ const serializeSearchResult = async (id: string, searchResult: IServerSearchResu
     let totalReviewCount: number | undefined;
 
     if (searchResult.type === SearchEntityType.menuItem) {
-        const reviewHeader = await retrieveReviewHeaderByPartsAsync(searchResult.groupId, searchResult.name);
+        const reviewHeader = await getServices().data.review.retrieveReviewHeaderByParts({
+            groupId: searchResult.groupId,
+            name: searchResult.name,
+        });
         if (reviewHeader.totalReviewCount > 0) {
             overallRating = reviewHeader.overallRating;
             totalReviewCount = reviewHeader.totalReviewCount;
         }
     } else if (searchResult.type === SearchEntityType.station || searchResult.type === SearchEntityType.dailyStation) {
-        const reviewHeader = await retrieveStationReviewHeaderByPartsAsync(searchResult.groupId, searchResult.name);
+        const reviewHeader = await getServices().data.review.retrieveStationReviewHeaderByParts({
+            groupId: searchResult.groupId,
+            name: searchResult.name,
+        });
         if (reviewHeader.totalReviewCount > 0) {
             overallRating = reviewHeader.overallRating;
             totalReviewCount = reviewHeader.totalReviewCount;

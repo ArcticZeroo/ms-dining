@@ -10,6 +10,8 @@ import { reviewServiceCommands } from '../../../worker/data/storage/clients/revi
 import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups.js';
 import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item.js';
 import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu.js';
+import { searchServiceCommands } from '../../../worker/data/storage/clients/search-service.js';
+import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/menu-analytics.js';
 
 /**
  * Single source of truth for which worker-side service command bags are
@@ -31,9 +33,11 @@ export const DATA_SERVICES = {
     stationTheme: stationThemeServiceCommands,
     session:      sessionServiceCommands,
     review:       reviewServiceCommands,
-    groups:       groupsServiceCommands,
-    menuItem:     menuItemServiceCommands,
-    dailyMenu:    dailyMenuServiceCommands,
+    groups:        groupsServiceCommands,
+    menuItem:      menuItemServiceCommands,
+    dailyMenu:     dailyMenuServiceCommands,
+    search:        searchServiceCommands,
+    menuAnalytics: menuAnalyticsServiceCommands,
 } as const;
 
 export type DataServiceMap = typeof DATA_SERVICES;

@@ -242,3 +242,44 @@ test('deleteReview removes a review', async () => {
     assert.equal(deleted, null);
     assert.equal(result.menuItemReviews.some(candidate => candidate.id === review.id), false);
 });
+
+test('retrieveReviewHeader returns aggregate data for a menu item', async () => {
+    ctx.installServices();
+
+    const header = await getServices().data.review.retrieveReviewHeader({ menuItem: MENU_ITEM });
+    assert.ok(header);
+    assert.equal(typeof header.totalReviewCount, 'number');
+    assert.equal(typeof header.overallRating, 'number');
+});
+
+test('retrieveReviewHeaderByParts returns data for a name', async () => {
+    ctx.installServices();
+
+    const header = await getServices().data.review.retrieveReviewHeaderByParts({
+        groupId: null,
+        name: MENU_ITEM_NORMALIZED_NAME,
+    });
+    assert.ok(header);
+    assert.equal(typeof header.totalReviewCount, 'number');
+});
+
+test('retrieveStationReviewHeader returns aggregate data', async () => {
+    ctx.installServices();
+
+    const header = await getServices().data.review.retrieveStationReviewHeader({
+        station: { name: STATION.name, groupId: null },
+    });
+    assert.ok(header);
+    assert.equal(typeof header.totalReviewCount, 'number');
+});
+
+test('retrieveStationReviewHeaderByParts returns data', async () => {
+    ctx.installServices();
+
+    const header = await getServices().data.review.retrieveStationReviewHeaderByParts({
+        groupId: null,
+        name: STATION_NORMALIZED_NAME,
+    });
+    assert.ok(header);
+    assert.equal(typeof header.totalReviewCount, 'number');
+});

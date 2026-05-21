@@ -45,6 +45,10 @@ export interface IReviewService {
     getReviewsForMenuItem(data: { menuItem: IMenuItemBase }): Promise<IMenuItemReviewsResult>;
     getReviewsForStation(data: { station: { name: string; groupId?: string | null } }): Promise<IServerReview[]>;
     getReviewsForUser(data: { userId: string; menuItemId?: string }): Promise<IServerReview[]>;
+    retrieveReviewHeader(data: { menuItem: IMenuItemBase }): Promise<IMenuItemReviewHeader>;
+    retrieveStationReviewHeader(data: { station: { name: string; groupId?: string | null } }): Promise<IMenuItemReviewHeader>;
+    retrieveReviewHeaderByParts(data: { groupId?: string | null; name: string }): Promise<IMenuItemReviewHeader>;
+    retrieveStationReviewHeaderByParts(data: { groupId?: string | null; name: string }): Promise<IMenuItemReviewHeader>;
 
     getReviewById(data: { reviewId: string }): Promise<IServerReview | null>;
     getRecentReviews(data: { count: number }): Promise<IServerReview[]>;

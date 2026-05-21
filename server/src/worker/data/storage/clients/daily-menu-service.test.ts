@@ -14,6 +14,7 @@ import {
 } from '../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { dailyMenuService } from '../../../../main/services/data/daily-menu.js';
+import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../shared/models/cafe.js';
 
@@ -246,4 +247,89 @@ test('upsertDailyCafe + retrieveDailyCafeState round-trip', async () => {
         dateString,
     });
     assert.deepEqual(state, { isAvailable: true });
+});
+
+test('retrieveDailyCafeMenu returns stations after publishing a menu', async () => {
+    ctx.installServices();
+
+    const cacheCafe = CAFES_BY_ID.get('cafe25');
+    assert.ok(cacheCafe, 'expected cafe25 to exist for cache-backed daily menu test');
+
+    const cacheCafeConfig: ICafeConfig = {
+        tenantId:         'tenant-daily-menu-cache',
+        contextId:        'ctx-daily-menu-cache',
+        displayProfileId: 'dp-daily-menu-cache',
+        storeId:          'store-daily-menu-cache',
+        externalName:     cacheCafe.name,
+        logoName:         'daily-menu-cache-logo.png',
+        isShutDown:       false,
+    };
+    const cacheStation: ICafeStation = {
+        id:                        'daily-menu-service-cache-station',
+        menuId:                    'daily-menu-service-cache-menu',
+        cafeId:                    cacheCafe.id,
+        groupId:                   null,
+        name:                      'Cache Station',
+        logoUrl:                   'https://example.com/cache-station.png',
+        menuItemIdsByCategoryName: new Map(),
+        menuItemsById:             new Map(),
+        opensAt:                   660,
+        closesAt:                  840,
+    };
+    const cacheMenuItem: IMenuItemBase = {
+        ...createMenuItem('daily-menu-service-cache-item', 'Cache Test Bowl'),
+        cafeId:    cacheCafe.id,
+        stationId: cacheStation.id,
+    };
+    const dateString = '2026-01-21';
+
+    await getServices().data.cafe.createCafe({
+        cafe: { id: cacheCafe.id, name: cacheCafe.name },
+        config: cacheCafeConfig,
+    });
+    await getServices().data.station.createStation({ station: cacheStation });
+    await getServices().data.menuItem.saveMenuItem({ menuItem: cacheMenuItem });
+    await getServices().data.dailyMenu.upsertDailyCafeAsync({
+        cafeId: cacheCafe.id,
+        dateString,
+        data: {
+            isAvailable:         true,
+            shutdownMessageHash: null,
+        },
+    });
+    await getServices().data.dailyMenu.publishDailyStationMenuAsync({
+        cafe: { id: cacheCafe.id, name: cacheCafe.name },
+        dateString,
+        isAvailable: true,
+        stations: [{
+            ...cacheStation,
+            menuItemIdsByCategoryName: new Map([
+                ['Entrees', [cacheMenuItem.id]],
+            ]),
+            menuItemsById: new Map([[cacheMenuItem.id, cacheMenuItem]]),
+        }],
+    });
+
+    const stations = await getServices().data.dailyMenu.retrieveDailyCafeMenu({
+        cafeId: cacheCafe.id,
+        dateString,
+    });
+
+    assert.equal(stations.length, 1);
+    assert.equal(stations[0]?.id, cacheStation.id);
+    assert.equal(stations[0]?.menuItemsById.get(cacheMenuItem.id)?.name, cacheMenuItem.name);
+});
+
+test('getMenuWatermark returns a number', async () => {
+    ctx.installServices();
+
+    const dateString = '2026-01-22';
+    await publishMenuForDate(dateString);
+
+    const watermark = await getServices().data.dailyMenu.getMenuWatermark({
+        cafeId: CAFE.id,
+        dateString,
+    });
+
+    assert.equal(typeof watermark, 'number');
 });

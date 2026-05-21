@@ -1,11 +1,9 @@
 import Router from '@koa/router';
 import { ICafe } from '../../../../../shared/models/cafe.js';
 import { ICafeOverviewResponse, ICafeOverviewStation } from '@msdining/common/models/cafe';
-import { retrieveUniquenessDataForCafe } from '../../../../../worker/data/cache/daily-uniqueness.js';
 import { getServices } from '../../../../services/registry.js';
 import { getDefaultUniquenessDataForStation } from '../../../../../shared/util/cafe.js';
 import { IRecommendationItem, RecommendationSectionType } from '@msdining/common/models/recommendation';
-import { getRecommendationsAsync } from '../../../../../worker/data/cache/recommendations.js';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';
 import { getApplicationNameForMenuOverview } from '@msdining/common/constants/analytics';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
@@ -13,7 +11,6 @@ import { validateViewMenuAccessAsync } from '../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../shared/util/serde.js';
 import { createSeededRandom, selectWithVariety } from '../../../../../shared/util/random.js';
 import { getDefaultReasonForSectionType } from '../../../../../shared/util/recommendation.js';
-import { getShutdownCafeStateAsync } from '../../../../../worker/data/cache/daily-cafe-state.js';
 
 export const registerOverviewRoutes = (router: Router) => {
 	const retrieveAllOverviewStations = async (cafes: ICafe[], dateString: string): Promise<Map<string /*cafeId**/, Array<ICafeOverviewStation>>> => {
@@ -23,12 +20,12 @@ export const registerOverviewRoutes = (router: Router) => {
 			cafes.map(async (cafe) => {
 				const [stationHeaders, uniquenessData] = await Promise.all([
 					getServices().data.dailyMenu.retrieveDailyMenuOverviewHeadersAsync({ cafeId: cafe.id, dateString }),
-					retrieveUniquenessDataForCafe(cafe.id, dateString)
+					getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({ cafeId: cafe.id, targetDateString: dateString })
 				]);
 
 				const stations = stationHeaders.map(station => ({
 					...station,
-					uniqueness: uniquenessData.get(station.name) ?? getDefaultUniquenessDataForStation()
+					uniqueness: uniquenessData[station.name] ?? getDefaultUniquenessDataForStation()
 				}));
 
 				overviewStationsByCafeId.set(cafe.id, stations);
@@ -39,10 +36,9 @@ export const registerOverviewRoutes = (router: Router) => {
 	}
 
 	const retrieveFeaturedItemsForOverviewAsync = async (cafeIds: string[], dateString: string): Promise<Array<IRecommendationItem>> => {
-		const recommendations = await getRecommendationsAsync({
+		const recommendations = await getServices().data.search.getRecommendations({
 			dateString,
-			cafeIdFilter:      new Set(cafeIds),
-			userId:            null,
+			cafeIdFilter:      cafeIds,
 			homepageIds:       cafeIds,
 			favoriteItemNames: []
 		});
@@ -84,7 +80,7 @@ export const registerOverviewRoutes = (router: Router) => {
 			] = await Promise.all([
 				retrieveFeaturedItemsForOverviewAsync(cafeIds, dateString),
 				retrieveAllOverviewStations(cafes, dateString),
-				getShutdownCafeStateAsync(dateString)
+				getServices().data.menuAnalytics.getShutdownCafeState({ dateString })
 			]);
 
 			const response: ICafeOverviewResponse = {

@@ -25,6 +25,12 @@ import type {
     IUpdateReviewInput,
     IReviewService,
 } from '../../../../shared/services/review.js';
+import {
+    retrieveReviewHeaderAsync,
+    retrieveStationReviewHeaderAsync,
+    retrieveReviewHeaderByPartsAsync,
+    retrieveStationReviewHeaderByPartsAsync,
+} from '../../cache/reviews.js';
 
 // Local types replaced by shared service types (ICreateMenuItemReviewInput, etc.)
 // Re-export for callers that still need the old names during migration.
@@ -469,6 +475,14 @@ export const reviewServiceCommands = {
         ReviewStorageClient.getReviewsForStationAsync(station),
     getReviewsForUser: async ({ userId, menuItemId }: { userId: string; menuItemId?: string }) =>
         ReviewStorageClient.getReviewsForUserAsync({ userId, menuItemId }),
+    retrieveReviewHeader: async ({ menuItem }: { menuItem: IMenuItemBase }) =>
+        retrieveReviewHeaderAsync(menuItem),
+    retrieveStationReviewHeader: async ({ station }: { station: { name: string; groupId?: string | null } }) =>
+        retrieveStationReviewHeaderAsync(station),
+    retrieveReviewHeaderByParts: async ({ groupId, name }: { groupId?: string | null; name: string }) =>
+        retrieveReviewHeaderByPartsAsync(groupId, name),
+    retrieveStationReviewHeaderByParts: async ({ groupId, name }: { groupId?: string | null; name: string }) =>
+        retrieveStationReviewHeaderByPartsAsync(groupId, name),
     getReviewById: async ({ reviewId }: { reviewId: string }) =>
         ReviewStorageClient.getReviewByIdAsync(reviewId),
     getRecentReviews: async ({ count }: { count: number }) =>
