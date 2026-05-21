@@ -2,19 +2,17 @@ import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import { toDateString } from '@msdining/common/util/date-util';
+import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 import type { PrismaTransactionClient, ReadOnlyPrismaLikeClient } from '../../../../shared/models/prisma.js';
 import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
     ICartItemData,
     ICartItemUpdate,
-    ICartItemRecord,
-    ICartResponse,
     ISerializedModifier,
     IActiveOrderSummary,
     IOrderCafePartSummary,
     OrderCafePartStatus,
 } from '@msdining/common/models/cart';
-import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -42,11 +40,11 @@ const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[
     return Array.from(byModifier, ([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
 };
 
-const toCartItemRecord = (
+const toCartItemWireRecord = (
     item: PrismaCartItemWithModifiers,
-    menuItem: IMenuItemBase,
+    menuItem: Parameters<typeof menuItemBaseToDTO>[0],
     isAvailable: boolean,
-): ICartItemRecord => ({
+) => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
@@ -54,7 +52,12 @@ const toCartItemRecord = (
     modifiers:           groupModifierChoices(item.modifierChoices),
     createdAt:           item.createdAt.toISOString(),
     updatedAt:           item.updatedAt.toISOString(),
-    menuItem,
+    menuItem:            {
+        ...menuItemBaseToDTO(menuItem),
+        totalReviewCount: 0,
+        overallRating:    0,
+        firstAppearance:  '',
+    },
     isAvailable,
 });
 
@@ -181,7 +184,7 @@ export abstract class CartStorageClient {
     private static async enrichCartResponse(
         rawItems: Awaited<ReturnType<typeof CartStorageClient.readRawCartData>>['items'],
         activeOrder: IActiveOrderSummary | undefined,
-    ): Promise<ICartResponse> {
+    ) {
         if (rawItems.length === 0) {
             return { items: [], activeOrder };
         }
@@ -192,7 +195,7 @@ export abstract class CartStorageClient {
             ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
         ]);
 
-        const items: ICartItemRecord[] = [];
+        const items: ReturnType<typeof toCartItemWireRecord>[] = [];
         for (let idx = 0; idx < rawItems.length; idx++) {
             const raw = rawItems[idx]!;
             const menuItem = menuItems[idx];
@@ -200,7 +203,7 @@ export abstract class CartStorageClient {
                 // Menu item was deleted from the DB entirely — skip it
                 continue;
             }
-            items.push(toCartItemRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
+            items.push(toCartItemWireRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
         }
 
         return { items, activeOrder };
@@ -251,7 +254,7 @@ export abstract class CartStorageClient {
         userId: string,
         options: { requireNoActiveOrder: boolean },
         callback: (tx: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
-    ): Promise<ICartResponse> {
+    ) {
         const rawData = await usePrismaTransaction(async tx => {
             if (options.requireNoActiveOrder) {
                 await this.ensureNoActiveOrder(tx, userId);
@@ -280,11 +283,11 @@ export abstract class CartStorageClient {
         }
     }
 
-    static async getCart(userId: string): Promise<ICartResponse> {
+    static async getCart(userId: string) {
         return this.useCartTransaction(userId, { requireNoActiveOrder: false }, async () => {});
     }
 
-    static async addItem(userId: string, item: ICartItemData): Promise<ICartResponse> {
+    static async addItem(userId: string, item: ICartItemData) {
         return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             const created = await tx.cartItem.create({
                 data: {
@@ -298,7 +301,7 @@ export abstract class CartStorageClient {
         });
     }
 
-    static async updateItem(userId: string, itemId: string, update: ICartItemUpdate): Promise<ICartResponse> {
+    static async updateItem(userId: string, itemId: string, update: ICartItemUpdate) {
         return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
@@ -319,7 +322,7 @@ export abstract class CartStorageClient {
         });
     }
 
-    static async removeItem(userId: string, itemId: string): Promise<ICartResponse> {
+    static async removeItem(userId: string, itemId: string) {
         return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
@@ -328,7 +331,7 @@ export abstract class CartStorageClient {
         });
     }
 
-    static async clearCart(userId: string): Promise<ICartResponse> {
+    static async clearCart(userId: string) {
         return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             await tx.cartItem.deleteMany({ where: { cartUserId: cart.userId } });
         });

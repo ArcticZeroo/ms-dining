@@ -1,25 +1,25 @@
 import type {
     ICartItemData,
     ICartItemUpdate,
-    ICartResponse,
 } from '@msdining/common/models/cart';
 import { CartResponseSchema } from '@msdining/common/models/cart';
 import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
+import type { IClientCartResponse } from '../store/zustand/server-cart.ts';
 
 const CART_BASE = '/api/dining/cart';
 
-// The zod schema uses z.any() for menuItem (IMenuItemBase has Sets/Dates
-// that can't be expressed in zod), so we cast the parsed result.
-const fetchCart = async (path: string, options?: RequestInit): Promise<ICartResponse> => {
-    return makeJsonRequestWithSchema({ path, schema: CartResponseSchema, options }) as Promise<ICartResponse>;
-};
+// CartResponseSchema includes a zod transform that converts the wire-format
+// IMenuItemDTO into the in-memory IMenuItemBase (string[] → Set, epoch → Date).
+// No manual conversion needed after parsing.
+const fetchCart = (path: string, options?: RequestInit): Promise<IClientCartResponse> =>
+    makeJsonRequestWithSchema({ path, schema: CartResponseSchema, options });
 
 export abstract class CartClient {
-    static async getCart(): Promise<ICartResponse> {
+    static async getCart(): Promise<IClientCartResponse> {
         return fetchCart(CART_BASE);
     }
 
-    static async addItem(item: ICartItemData): Promise<ICartResponse> {
+    static async addItem(item: ICartItemData): Promise<IClientCartResponse> {
         return fetchCart(`${CART_BASE}/items`, {
             method:  'POST',
             headers: JSON_HEADERS,
@@ -27,7 +27,7 @@ export abstract class CartClient {
         });
     }
 
-    static async updateItem(itemId: string, update: ICartItemUpdate): Promise<ICartResponse> {
+    static async updateItem(itemId: string, update: ICartItemUpdate): Promise<IClientCartResponse> {
         return fetchCart(`${CART_BASE}/items/${itemId}`, {
             method:  'PATCH',
             headers: JSON_HEADERS,
@@ -35,11 +35,11 @@ export abstract class CartClient {
         });
     }
 
-    static async removeItem(itemId: string): Promise<ICartResponse> {
+    static async removeItem(itemId: string): Promise<IClientCartResponse> {
         return fetchCart(`${CART_BASE}/items/${itemId}`, { method: 'DELETE' });
     }
 
-    static async clearCart(): Promise<ICartResponse> {
+    static async clearCart(): Promise<IClientCartResponse> {
         return fetchCart(CART_BASE, { method: 'DELETE' });
     }
 }

@@ -6,6 +6,11 @@ import type {
     ICartResponse,
 } from '@msdining/common/models/cart';
 
+// Re-export for convenience — ICartItemRecord already has menuItem: IMenuItemBase
+// thanks to the zod transform in CartItemRecordSchema.
+export type IClientCartItem = ICartItemRecord;
+export type IClientCartResponse = ICartResponse;
+
 /**
  * Thin Zustand cache over the server-side cart.
  *
@@ -19,7 +24,7 @@ interface IServerCartStore {
     items: ICartItemRecord[];
     activeOrder: IActiveOrderSummary | undefined;
 
-    /** Reconcile from a server response. Called after every query/mutation success. */
+    /** Reconcile from a server response (already converted to client types). */
     setFromServerResponse(response: ICartResponse): void;
 
     /** Optimistic quantity update for debounced +/- buttons. */

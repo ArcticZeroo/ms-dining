@@ -170,6 +170,58 @@ export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
 
 // --- Cart item record (returned from server, enriched with menu data) ---
 
+const MenuItemModifierChoiceSchema = z.object({
+    id:          z.string(),
+    description: z.string(),
+    price:       z.number(),
+});
+
+const MenuItemModifierSchema = z.object({
+    id:          z.string(),
+    description: z.string(),
+    minimum:     z.number(),
+    maximum:     z.number(),
+    choiceType:  z.enum(['radio', 'checkbox', 'multiSelect']),
+    choices:     z.array(MenuItemModifierChoiceSchema),
+});
+
+const MenuItemDTOSchema = z.object({
+    id:               z.string(),
+    cafeId:           z.string(),
+    stationId:        z.string(),
+    price:            z.number(),
+    name:             z.string(),
+    receiptText:      z.string().nullish(),
+    calories:         z.number(),
+    maxCalories:      z.number(),
+    hasThumbnail:     z.boolean(),
+    thumbnailId:      z.string().optional(),
+    modifiers:        z.array(MenuItemModifierSchema),
+    thumbnailWidth:   z.number().optional(),
+    thumbnailHeight:  z.number().optional(),
+    imageUrl:         z.string().nullish(),
+    description:      z.string().nullish(),
+    lastUpdateTime:   z.number().nullish(),
+    firstAppearance:  z.string(),
+    tags:             z.array(z.string()),
+    searchTags:       z.array(z.string()),
+    pattern:          z.string().optional(),
+    groupId:          z.string().nullish(),
+    totalReviewCount: z.number(),
+    overallRating:    z.number(),
+});
+
+/**
+ * Validates the wire-format menu item DTO, then transforms to the
+ * in-memory IMenuItemBase shape (string[] → Set, epoch ms → Date).
+ */
+const MenuItemBaseSchema = MenuItemDTOSchema.transform((dto): IMenuItemBase => ({
+    ...dto,
+    lastUpdateTime: dto.lastUpdateTime != null ? new Date(dto.lastUpdateTime) : undefined,
+    tags:           new Set(dto.tags),
+    searchTags:     new Set(dto.searchTags),
+}));
+
 export const CartItemRecordSchema = z.object({
     id:                  z.string(),
     menuItemId:          z.string(),
@@ -178,24 +230,14 @@ export const CartItemRecordSchema = z.object({
     modifiers:           z.array(SerializedModifierSchema),
     createdAt:           z.string(),
     updatedAt:           z.string(),
-    // Full menu item data is included but not zod-validated here
-    // because IMenuItemBase contains Sets/Dates that need custom
-    // deserialization. The client handles this type natively.
-    menuItem:            z.any(),
+    menuItem:            MenuItemBaseSchema,
     isAvailable:         z.boolean(),
 });
 
-export interface ICartItemRecord {
-    id: string;
-    menuItemId: string;
-    quantity: number;
-    specialInstructions: string | null;
-    modifiers: ISerializedModifier[];
-    createdAt: string;
-    updatedAt: string;
-    menuItem: IMenuItemBase;
-    isAvailable: boolean;
-}
+export type ICartItemRecord = z.output<typeof CartItemRecordSchema>;
+
+/** Wire-format cart item before zod transform (menuItem is IMenuItemDTO shape). */
+export type ICartItemRecordWire = z.input<typeof CartItemRecordSchema>;
 
 // --- Active order summary (included in cart response when an order is in progress) ---
 
@@ -230,5 +272,11 @@ export const CartResponseSchema = z.object({
 // which can't be fully expressed in zod (Sets, Dates, etc.)
 export interface ICartResponse {
     items: ICartItemRecord[];
+    activeOrder?: IActiveOrderSummary;
+}
+
+/** Wire-format response before zod transform. Used by the server/service interface. */
+export interface ICartResponseWire {
+    items: ICartItemRecordWire[];
     activeOrder?: IActiveOrderSummary;
 }
