@@ -32,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 import * as dotenv from 'dotenv';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
+import { resolveDatabaseUrl } from './shared/util/database-url.js';
 
 dotenv.config();
 
@@ -45,15 +46,13 @@ const fail = (msg: string, exitCode: number): never => {
 };
 
 /**
- * Resolves the `file:...` URL into an absolute filesystem path so we can
- * stat it and report exactly where the adapter will look. Matches how
- * @libsql/client interprets URLs (relative to process.cwd()).
+ * Extracts the absolute filesystem path from a resolved DATABASE_URL
+ * for stat/existence checks. Returns null for non-file URLs.
  */
-function resolveDbPath(databaseUrl: string | undefined): string | null {
-    if (!databaseUrl) return null;
-    if (!databaseUrl.startsWith('file:')) return null;
-    const relative = databaseUrl.slice('file:'.length);
-    return path.resolve(process.cwd(), relative);
+function resolveDbPath(databaseUrl: string): string | null {
+    const resolved = resolveDatabaseUrl(databaseUrl);
+    if (!resolved.startsWith('file:')) return null;
+    return resolved.slice('file:'.length);
 }
 
 /**
@@ -100,8 +99,9 @@ async function main(): Promise<void> {
         log('Non-file:// DATABASE_URL detected; skipping path-existence check.');
     }
 
+    const resolvedUrl = resolveDatabaseUrl(databaseUrl);
     const adapter = new PrismaLibSql(
-        { url: databaseUrl },
+        { url: resolvedUrl },
         { timestampFormat: 'unixepoch-ms' },
     );
     const prisma = new PrismaClient({ adapter });

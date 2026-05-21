@@ -7,6 +7,7 @@ import { getDbPriority } from './db-context.js';
 import { DB_METRIC_NAMES, DB_METRICS } from './db-metrics.js';
 import { PrioritySemaphore } from './priority-semaphore.js';
 import { requireEnvironmentVariable } from '../../../shared/constants/env.js';
+import { resolveDatabaseUrl } from '../../../shared/util/database-url.js';
 
 // With just one semaphore, we were seeing db writes timeout under load (i.e. initial boot while loading cafes)
 // because we would queue multiple writes in parallel and hit SQLite's busy timeout, even though we were actually
@@ -54,8 +55,7 @@ const PRISMA_TRANSACTION_TIMEOUT_MS = 30_000;
 // adapter defaults to ISO 8601 strings; we override here to avoid reading
 // old data as garbage.
 const PRISMA_CLIENT = lazy(() => {
-	// The libsql adapter requires an explicit URL (unlike the prior native sqlite driver, which Prisma read from .env on its own). Set DATABASE_URL in your environment or .env.
-    const databaseUrl = requireEnvironmentVariable('DATABASE_URL');
+    const databaseUrl = resolveDatabaseUrl(requireEnvironmentVariable('DATABASE_URL'));
 
     const adapter = new PrismaLibSql(
         { url: databaseUrl },
