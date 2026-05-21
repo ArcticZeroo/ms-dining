@@ -1,0 +1,17 @@
+import type { IOrderService } from '../../../shared/services/order.js';
+import { dataHandler } from './handler.js';
+
+export const orderService: IOrderService = {
+    checkout: (data) =>
+        dataHandler.sendRequest('order', 'checkout', data),
+    setPaymentIdentity: (data) =>
+        dataHandler.sendRequest('order', 'setPaymentIdentity', data),
+    preparePayment: (data) =>
+        dataHandler.sendRequest('order', 'preparePayment', data),
+    completeOrder: (data) =>
+        dataHandler.sendRequest('order', 'completeOrder', data),
+    abandonOrder: (data) =>
+        dataHandler.sendRequest('order', 'abandonOrder', data),
+    getActiveOrder: (data) =>
+        dataHandler.sendRequest('order', 'getActiveOrder', data),
+};
