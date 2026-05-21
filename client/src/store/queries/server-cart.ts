@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CartClient } from '../../api/cart.ts';
 import { useServerCartStore } from '../zustand/server-cart.ts';
 import type { ICartItemData, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+import { useDebouncedCallback } from '../../hooks/debounce.ts';
 
 const CART_QUERY_KEY = ['cart', 'server'] as const;
 
@@ -58,37 +59,21 @@ export const useAddToCartMutation = () => {
  */
 export const useDebouncedUpdateCartItem = () => {
     const onSuccess = useSyncOnSuccess();
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const pendingRef = useRef<{ itemId: string; update: ICartItemUpdate } | null>(null);
 
-    const flush = useCallback(async () => {
-        if (timerRef.current != null) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
-        const pending = pendingRef.current;
-        if (!pending) {
-            return;
-        }
-        pendingRef.current = null;
-
-        const response = await CartClient.updateItem(pending.itemId, pending.update);
-        onSuccess(response);
-    }, [onSuccess]);
+    const { call: debouncedSend, flush } = useDebouncedCallback(
+        async (itemId: string, update: ICartItemUpdate) => {
+            const response = await CartClient.updateItem(itemId, update);
+            onSuccess(response);
+        },
+        500,
+    );
 
     const mutate = useCallback((itemId: string, update: ICartItemUpdate) => {
-        // Optimistic update in Zustand for immediate UI feedback
         if (update.quantity !== undefined) {
             useServerCartStore.getState().optimisticUpdateQuantity(itemId, update.quantity);
         }
-
-        pendingRef.current = { itemId, update };
-
-        if (timerRef.current != null) {
-            clearTimeout(timerRef.current);
-        }
-        timerRef.current = setTimeout(flush, 500);
-    }, [flush]);
+        debouncedSend(itemId, update);
+    }, [debouncedSend]);
 
     return { mutate, flush };
 };
