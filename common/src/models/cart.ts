@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { IMenuItemBase } from './cafe.js';
 
 // ─── Legacy ordering types (v1) ─────────────────────────────────────
 // Still used by the current ordering flow. Will be removed when the
@@ -169,16 +170,6 @@ export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
 
 // --- Cart item record (returned from server, enriched with menu data) ---
 
-export const CartItemMenuDataSchema = z.object({
-    name:        z.string(),
-    price:       z.number(),
-    imageUrl:    z.string().nullable(),
-    cafeId:      z.string(),
-    isAvailable: z.boolean(),
-});
-
-export type ICartItemMenuData = z.infer<typeof CartItemMenuDataSchema>;
-
 export const CartItemRecordSchema = z.object({
     id:                  z.string(),
     menuItemId:          z.string(),
@@ -187,10 +178,24 @@ export const CartItemRecordSchema = z.object({
     modifiers:           z.array(SerializedModifierSchema),
     createdAt:           z.string(),
     updatedAt:           z.string(),
-    menuItem:            CartItemMenuDataSchema,
+    // Full menu item data is included but not zod-validated here
+    // because IMenuItemBase contains Sets/Dates that need custom
+    // deserialization. The client handles this type natively.
+    menuItem:            z.any(),
+    isAvailable:         z.boolean(),
 });
 
-export type ICartItemRecord = z.infer<typeof CartItemRecordSchema>;
+export interface ICartItemRecord {
+    id: string;
+    menuItemId: string;
+    quantity: number;
+    specialInstructions: string | null;
+    modifiers: ISerializedModifier[];
+    createdAt: string;
+    updatedAt: string;
+    menuItem: IMenuItemBase;
+    isAvailable: boolean;
+}
 
 // --- Active order summary (included in cart response when an order is in progress) ---
 
@@ -221,4 +226,9 @@ export const CartResponseSchema = z.object({
     activeOrder: ActiveOrderSummarySchema.optional(),
 });
 
-export type ICartResponse = z.infer<typeof CartResponseSchema>;
+// Manually defined because ICartItemRecord includes IMenuItemBase
+// which can't be fully expressed in zod (Sets, Dates, etc.)
+export interface ICartResponse {
+    items: ICartItemRecord[];
+    activeOrder?: IActiveOrderSummary;
+}

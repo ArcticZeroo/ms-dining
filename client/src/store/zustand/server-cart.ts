@@ -60,15 +60,15 @@ export const useServerCartItemCount = () => useServerCartStore(state =>
 );
 
 export const useServerCartHasUnavailableItems = () => useServerCartStore(state =>
-    state.items.some(item => !item.menuItem.isAvailable),
+    state.items.some(item => !item.isAvailable),
 );
 
 export const useServerCartAvailableItems = () => useServerCartStore(state =>
-    state.items.filter(item => item.menuItem.isAvailable),
+    state.items.filter(item => item.isAvailable),
 );
 
 export const useServerCartUnavailableItems = () => useServerCartStore(state =>
-    state.items.filter(item => !item.menuItem.isAvailable),
+    state.items.filter(item => !item.isAvailable),
 );
 
 /** Group cart items by cafeId for display. */

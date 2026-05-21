@@ -1,5 +1,6 @@
 import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
+import { MenuItemStorageClient } from './menu-item.js';
 import { toDateString } from '@msdining/common/util/date-util';
 import type { PrismaTransactionClient, ReadOnlyPrismaLikeClient } from '../../../../shared/models/prisma.js';
 import type { ICartService } from '../../../../shared/services/cart.js';
@@ -12,8 +13,8 @@ import type {
     IActiveOrderSummary,
     IOrderCafePartSummary,
     OrderCafePartStatus,
-    ICartItemMenuData,
 } from '@msdining/common/models/cart';
+import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -26,12 +27,6 @@ type PrismaCartItemWithModifiers = {
     createdAt: Date;
     updatedAt: Date;
     modifierChoices: { modifierId: string; choiceId: string }[];
-    menuItem: {
-        name: string;
-        price: number;
-        imageUrl: string | null;
-        cafeId: string;
-    };
 };
 
 const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[]): ISerializedModifier[] => {
@@ -47,7 +42,11 @@ const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[
     return Array.from(byModifier, ([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
 };
 
-const toCartItemRecord = (item: PrismaCartItemWithModifiers, availableMenuItemIds: Set<string>): ICartItemRecord => ({
+const toCartItemRecord = (
+    item: PrismaCartItemWithModifiers,
+    menuItem: IMenuItemBase,
+    isAvailable: boolean,
+): ICartItemRecord => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
@@ -55,21 +54,13 @@ const toCartItemRecord = (item: PrismaCartItemWithModifiers, availableMenuItemId
     modifiers:           groupModifierChoices(item.modifierChoices),
     createdAt:           item.createdAt.toISOString(),
     updatedAt:           item.updatedAt.toISOString(),
-    menuItem: {
-        name:        item.menuItem.name,
-        price:       item.menuItem.price,
-        imageUrl:    item.menuItem.imageUrl,
-        cafeId:      item.menuItem.cafeId,
-        isAvailable: availableMenuItemIds.has(item.menuItemId),
-    },
+    menuItem,
+    isAvailable,
 });
 
 const CART_ITEM_INCLUDE = {
     modifierChoices: {
         select: { modifierId: true, choiceId: true },
-    },
-    menuItem: {
-        select: { name: true, price: true, imageUrl: true, cafeId: true },
     },
 } as const;
 
@@ -183,21 +174,36 @@ export abstract class CartStorageClient {
     }
 
     /**
-     * Enrich raw cart data with availability info and convert to the response shape.
-     * Runs outside the transaction so the availability query doesn't deadlock.
+     * Enrich raw cart data with full IMenuItemBase and availability info.
+     * Runs outside the transaction so the availability + cache lookups
+     * don't deadlock on the read semaphore.
      */
     private static async enrichCartResponse(
         rawItems: Awaited<ReturnType<typeof CartStorageClient.readRawCartData>>['items'],
         activeOrder: IActiveOrderSummary | undefined,
     ): Promise<ICartResponse> {
-        const availableIds = rawItems.length > 0
-            ? await this.getAvailableMenuItemIds(rawItems.map(i => i.menuItemId))
-            : new Set<string>();
+        if (rawItems.length === 0) {
+            return { items: [], activeOrder };
+        }
 
-        return {
-            items: rawItems.map(item => toCartItemRecord(item, availableIds)),
-            activeOrder,
-        };
+        const menuItemIds = rawItems.map(i => i.menuItemId);
+        const [availableIds, ...menuItems] = await Promise.all([
+            this.getAvailableMenuItemIds(menuItemIds),
+            ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
+        ]);
+
+        const items: ICartItemRecord[] = [];
+        for (let idx = 0; idx < rawItems.length; idx++) {
+            const raw = rawItems[idx]!;
+            const menuItem = menuItems[idx];
+            if (!menuItem) {
+                // Menu item was deleted from the DB entirely — skip it
+                continue;
+            }
+            items.push(toCartItemRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
+        }
+
+        return { items, activeOrder };
     }
 
     private static async ensureNoActiveOrder(tx: PrismaTransactionClient, userId: string): Promise<void> {
