@@ -198,9 +198,9 @@ export abstract class CartStorageClient {
         ]);
 
         const items: ICartItemRecordWire[] = [];
-        for (let idx = 0; idx < rawItems.length; idx++) {
-            const raw = rawItems[idx]!;
-            const menuItem = menuItems[idx];
+        for (let i = 0; i < rawItems.length; i++) {
+            const raw = rawItems[i]!;
+            const menuItem = menuItems[i];
             if (!menuItem) {
                 // Menu item was deleted from the DB entirely — skip it
                 continue;
