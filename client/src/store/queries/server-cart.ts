@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CartClient } from '../../api/cart.ts';
-import { useServerCartStore, type IClientCartResponse } from '../zustand/server-cart.ts';
-import type { ICartItemData, ICartItemUpdate } from '@msdining/common/models/cart';
+import { useServerCartStore } from '../zustand/server-cart.ts';
+import type { ICartItemData, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
 import { useCallback } from 'react';
 import { useDebouncedCallback } from '../../hooks/debounce.ts';
 
@@ -11,13 +11,13 @@ const CART_QUERY_KEY = ['cart', 'server'] as const;
  * Sync the Zustand cache from a server response.
  * Called after every successful query/mutation.
  */
-const syncStoreFromResponse = (response: IClientCartResponse) => {
+const syncStoreFromResponse = (response: ICartResponse) => {
     useServerCartStore.getState().setFromServerResponse(response);
 };
 
 const useSyncOnSuccess = () => {
     const queryClient = useQueryClient();
-    return (response: IClientCartResponse) => {
+    return (response: ICartResponse) => {
         syncStoreFromResponse(response);
         queryClient.setQueryData(CART_QUERY_KEY, response);
     };

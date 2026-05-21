@@ -6,11 +6,6 @@ import type {
     ICartResponse,
 } from '@msdining/common/models/cart';
 
-// Re-export for convenience — ICartItemRecord already has menuItem: IMenuItemBase
-// thanks to the zod transform in CartItemRecordSchema.
-export type IClientCartItem = ICartItemRecord;
-export type IClientCartResponse = ICartResponse;
-
 /**
  * Thin Zustand cache over the server-side cart.
  *

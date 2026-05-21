@@ -2,13 +2,12 @@ import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import { toDateString } from '@msdining/common/util/date-util';
-import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 import type { PrismaTransactionClient, ReadOnlyPrismaLikeClient } from '../../../../shared/models/prisma.js';
 import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
     ICartItemData,
     ICartItemUpdate,
-    ICartItemRecordDTO,
+    ICartItemRecord,
     ISerializedModifier,
     IActiveOrderSummary,
     IOrderCafePartSummary,
@@ -42,11 +41,11 @@ const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[
     return Array.from(byModifier, ([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
 };
 
-const toCartItemWireRecord = (
+const toCartItemRecord = (
     item: PrismaCartItemWithModifiers,
     menuItem: IMenuItemBase,
     isAvailable: boolean,
-): ICartItemRecordDTO => ({
+): ICartItemRecord => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
@@ -54,12 +53,7 @@ const toCartItemWireRecord = (
     modifiers:           groupModifierChoices(item.modifierChoices),
     createdAt:           item.createdAt.toISOString(),
     updatedAt:           item.updatedAt.toISOString(),
-    menuItem:            {
-        ...menuItemBaseToDTO(menuItem),
-        totalReviewCount: 0,
-        overallRating:    0,
-        firstAppearance:  '',
-    },
+    menuItem,
     isAvailable,
 });
 
@@ -197,7 +191,7 @@ export abstract class CartStorageClient {
             ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
         ]);
 
-        const items: ICartItemRecordDTO[] = [];
+        const items: ICartItemRecord[] = [];
         for (let i = 0; i < rawItems.length; i++) {
             const raw = rawItems[i]!;
             const menuItem = menuItems[i];
@@ -205,7 +199,7 @@ export abstract class CartStorageClient {
                 // Menu item was deleted from the DB entirely — skip it
                 continue;
             }
-            items.push(toCartItemWireRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
+            items.push(toCartItemRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
         }
 
         return { items, activeOrder };
