@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { generateSitemap } from '../../worker/data/sitemap.js';
+import { generateSitemap } from '../sitemap.js';
 import { streamToPromise } from 'sitemap';
 
 export const registerSitemapRoutes = (router: Router) => {

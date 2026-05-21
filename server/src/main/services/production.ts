@@ -1,7 +1,7 @@
 import { createProductionAi } from '../../worker/data/ai/index.js';
 import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
 import { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
-import { getTelemetryClient } from '../../worker/data/telemetry/app-insights.js';
+import { getTelemetryClient } from '../../shared/telemetry/app-insights.js';
 import { defaultDataServices } from './data/index.js';
 import type { Services } from './types.js';
 

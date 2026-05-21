@@ -1,5 +1,5 @@
 import { getTelemetryClient } from './app-insights.js';
-import { getNamespaceLogger } from '../../../shared/util/log.js';
+import { getNamespaceLogger } from '../util/log.js';
 
 const logger = getNamespaceLogger('MetricAggregator');
 

@@ -1,5 +1,5 @@
-import { MetricAggregator } from '../telemetry/metric-aggregator.js';
-import { registerPreFlush } from '../telemetry/app-insights.js';
+import { MetricAggregator } from '../../../shared/telemetry/metric-aggregator.js';
+import { registerPreFlush } from '../../../shared/telemetry/app-insights.js';
 
 /**
  * Singleton aggregator for DB-layer metrics. Started at module load time;

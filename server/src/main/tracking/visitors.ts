@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
-import { logError } from '../../../shared/util/log.js';
-import { ApplicationContext } from '../../../shared/constants/context.js';
-import { IHourlyVisitCount } from '@msdining/common/models/analytics';
+import { logError } from '../../shared/util/log.js';
+import { ApplicationContext } from '../../shared/constants/context.js';
+import { IHourlyVisitCount } from '@msdining/common/dist/models/analytics.js';
 
 const serverUrl = 'http://localhost:4000';
 

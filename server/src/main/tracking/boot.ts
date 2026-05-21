@@ -2,12 +2,12 @@ import {
 	ANALYTICS_APPLICATION_NAMES,
 	getApplicationNameForCafeMenu,
 	getApplicationNameForMenuOverview
-} from '@msdining/common/constants/analytics';
+} from '@msdining/common/dist/constants/analytics.js';
 import { createAnalyticsApplicationAsync } from './visitors.js';
-import { ApplicationContext } from '../../../shared/constants/context.js';
-import { logError, logInfo } from '../../../shared/util/log.js';
-import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
-import { ALL_CAFES } from '../../../shared/constants/cafes.js';
+import { ApplicationContext } from '../../shared/constants/context.js';
+import { logError, logInfo } from '../../shared/util/log.js';
+import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
 
 const getAllApplicationNames = () => {
     const names = new Set(Object.values(ANALYTICS_APPLICATION_NAMES));
