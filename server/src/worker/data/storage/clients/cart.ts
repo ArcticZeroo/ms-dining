@@ -123,15 +123,11 @@ export abstract class CartStorageClient {
     }
 
     private static async getOrCreateCart(tx: PrismaTransactionClient, userId: string) {
-        const existing = await tx.cart.findUnique({
+        // upsert avoids a race when two tabs create the first cart concurrently.
+        return tx.cart.upsert({
             where:   { userId },
-            include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
-        });
-        if (existing) {
-            return existing;
-        }
-        return tx.cart.create({
-            data:    { userId },
+            create:  { userId },
+            update:  {},
             include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
         });
     }
