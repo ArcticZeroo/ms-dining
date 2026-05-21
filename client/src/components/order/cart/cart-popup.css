@@ -22,7 +22,7 @@
     cursor: pointer;
 }
 
-.cart-popup.has-missing-items .cart-info {
+.cart-popup.has-error .cart-info {
     --color-cart-popup: var(--color-error-dark);
 }
 

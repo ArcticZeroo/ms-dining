@@ -42,7 +42,7 @@ const CartPopupBody = () => {
                 'cart-popup',
                 !shouldShow && 'hidden',
                 isExpanded && 'expanded',
-                hasUnavailableItems && 'has-missing-items'
+                (hasUnavailableItems || cartQuery.isError) && 'has-error'
             )}
             style={{
                 right: `${scrollbarWidth}px`
@@ -50,8 +50,8 @@ const CartPopupBody = () => {
         >
             <div className="cart-header cart-info" onClick={toggleExpanded}>
                 {
-                    hasUnavailableItems && (
-                        <span className="cart-warning material-symbols-outlined" title="Some cart items are no longer available">
+                    (hasUnavailableItems || cartQuery.isError) && (
+                        <span className="cart-warning material-symbols-outlined" title={cartQuery.isError ? 'Failed to load cart' : 'Some cart items are no longer available'}>
                             error
                         </span>
                     )
