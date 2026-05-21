@@ -156,13 +156,38 @@ export abstract class CartStorageClient {
         }
     }
 
+    /** Cart row with items and modifier choices, as returned by getOrCreateCart. */
+    private static readonly CART_WITH_ITEMS_INCLUDE = {
+        items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } as const },
+    };
+
     private static async getOrCreateCart(tx: PrismaTransactionClient, userId: string) {
-        // upsert avoids a race when two tabs create the first cart concurrently.
         return tx.cart.upsert({
             where:   { userId },
             create:  { userId },
             update:  {},
-            include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
+            include: this.CART_WITH_ITEMS_INCLUDE,
+        });
+    }
+
+    /**
+     * Run a cart mutation inside a transaction.
+     * Optionally checks for an active order (rejects with CONFLICT if one exists),
+     * ensures the cart exists, calls the callback, then returns a consistent
+     * cart response snapshot — all inside the same transaction.
+     */
+    private static useCartTransaction(
+        userId: string,
+        options: { requireNoActiveOrder: boolean },
+        callback: (tx: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
+    ): Promise<ICartResponse> {
+        return usePrismaTransaction(async tx => {
+            if (options.requireNoActiveOrder) {
+                await this.ensureNoActiveOrder(tx, userId);
+            }
+            const cart = await this.getOrCreateCart(tx, userId);
+            await callback(tx, cart);
+            return this.readCartResponse(tx, userId);
         });
     }
 
@@ -184,16 +209,11 @@ export abstract class CartStorageClient {
     }
 
     static async getCart(userId: string): Promise<ICartResponse> {
-        return usePrismaTransaction(async tx => {
-            await this.getOrCreateCart(tx, userId);
-            return this.readCartResponse(tx, userId);
-        });
+        return this.useCartTransaction(userId, { requireNoActiveOrder: false }, async () => {});
     }
 
     static async addItem(userId: string, item: ICartItemData): Promise<ICartResponse> {
-        return usePrismaTransaction(async tx => {
-            await this.ensureNoActiveOrder(tx, userId);
-            const cart = await this.getOrCreateCart(tx, userId);
+        return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             const created = await tx.cartItem.create({
                 data: {
                     cartUserId:          cart.userId,
@@ -203,14 +223,11 @@ export abstract class CartStorageClient {
                 },
             });
             await this.createModifierChoices(tx, created.id, item.modifiers);
-            return this.readCartResponse(tx, userId);
         });
     }
 
     static async updateItem(userId: string, itemId: string, update: ICartItemUpdate): Promise<ICartResponse> {
-        return usePrismaTransaction(async tx => {
-            await this.ensureNoActiveOrder(tx, userId);
-            const cart = await this.getOrCreateCart(tx, userId);
+        return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
@@ -227,29 +244,21 @@ export abstract class CartStorageClient {
                 await tx.cartItemModifierChoice.deleteMany({ where: { cartItemId: itemId } });
                 await this.createModifierChoices(tx, itemId, update.modifiers);
             }
-
-            return this.readCartResponse(tx, userId);
         });
     }
 
     static async removeItem(userId: string, itemId: string): Promise<ICartResponse> {
-        return usePrismaTransaction(async tx => {
-            await this.ensureNoActiveOrder(tx, userId);
-            const cart = await this.getOrCreateCart(tx, userId);
+        return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
             await tx.cartItem.delete({ where: { id: itemId } });
-            return this.readCartResponse(tx, userId);
         });
     }
 
     static async clearCart(userId: string): Promise<ICartResponse> {
-        return usePrismaTransaction(async tx => {
-            await this.ensureNoActiveOrder(tx, userId);
-            const cart = await this.getOrCreateCart(tx, userId);
+        return this.useCartTransaction(userId, { requireNoActiveOrder: true }, async (tx, cart) => {
             await tx.cartItem.deleteMany({ where: { cartUserId: cart.userId } });
-            return this.readCartResponse(tx, userId);
         });
     }
 }
