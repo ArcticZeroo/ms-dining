@@ -44,8 +44,9 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
     showFullDetails,
     readOnly = false
 }) => {
-    const canDecreaseQuantity = !readOnly && item.quantity > 1;
-    const canIncreaseQuantity = !readOnly && item.quantity < MAX_QUANTITY;
+    const isEffectivelyReadOnly = readOnly || !item.isAvailable;
+    const canDecreaseQuantity = !isEffectivelyReadOnly && item.quantity > 1;
+    const canIncreaseQuantity = !isEffectivelyReadOnly && item.quantity < MAX_QUANTITY;
     const price = calculatePrice(
         item.menuItem,
         new Map(item.modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)])),
@@ -98,8 +99,8 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
                     <button
                         className="material-symbols-outlined"
                         onClick={onEdit}
-                        disabled={readOnly}
-                        title={readOnly ? READONLY_TITLE : 'Edit this item'}
+                        disabled={isEffectivelyReadOnly}
+                        title={isEffectivelyReadOnly ? (item.isAvailable ? READONLY_TITLE : 'Item is no longer available') : 'Edit this item'}
                     >
                         edit
                     </button>

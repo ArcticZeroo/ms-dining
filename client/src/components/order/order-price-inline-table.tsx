@@ -1,21 +1,21 @@
 import React, { useMemo } from 'react';
 import { useCartSessionQuery } from '../../store/queries/ordering.ts';
-import { useServerCartItems } from '../../store/zustand/server-cart.ts';
+import { useServerCartAvailableItems } from '../../store/zustand/server-cart.ts';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
 
 export const OrderPriceInlineTable: React.FC = () => {
-    const cart = useServerCartItems();
+    const availableItems = useServerCartAvailableItems();
     const { data: cartSessionData, error: cartSessionError } = useCartSessionQuery();
 
     const localTotalWithoutTax = useMemo(
-        () => cart.reduce((total, item) => {
+        () => availableItems.reduce((total, item) => {
             const basePrice = calculatePrice(
                 item.menuItem,
                 new Map(item.modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)])),
             );
             return total + (basePrice * item.quantity);
         }, 0),
-        [cart]
+        [availableItems]
     );
 
     const serverPrice = useMemo(() => {
