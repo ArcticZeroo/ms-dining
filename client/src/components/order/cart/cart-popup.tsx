@@ -33,7 +33,7 @@ const CartPopupBody = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    const shouldShow = totalItemCount > 0 || hasUnavailableItems || cartQuery.isPending;
+    const shouldShow = totalItemCount > 0 || hasUnavailableItems || cartQuery.isPending || cartQuery.isError;
 
     return (
         <div
@@ -68,6 +68,14 @@ const CartPopupBody = () => {
                 </span>
             </div>
             <div className="cart-body">
+                {
+                    cartQuery.isError && (
+                        <div className="cart-error">
+                            <span>Failed to load cart</span>
+                            <button onClick={() => cartQuery.refetch()}>Retry</button>
+                        </div>
+                    )
+                }
                 {
                     totalItemCount > 0 && (
                         <>
