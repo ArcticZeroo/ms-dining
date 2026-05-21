@@ -1,31 +1,9 @@
 import Router from '@koa/router';
-import { z } from 'zod';
+import { CartItemDataSchema, CartItemUpdateSchema } from '@msdining/common/models/cart';
 import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { getServices } from '../../../services/registry.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
-
-const ModifierSchema = z.object({
-    modifierId: z.string(),
-    choiceIds:  z.array(z.string()),
-});
-
-const AddItemSchema = z.object({
-    cafeId:              z.string().min(1),
-    menuItemId:          z.string().min(1),
-    quantity:            z.number().int().min(1),
-    specialInstructions: z.string().optional(),
-    modifiers:           z.array(ModifierSchema).default([]),
-});
-
-const UpdateItemSchema = z.object({
-    quantity:            z.number().int().min(1).optional(),
-    specialInstructions: z.string().nullable().optional(),
-    modifiers:           z.array(ModifierSchema).optional(),
-}).refine(
-    data => data.quantity !== undefined || data.specialInstructions !== undefined || data.modifiers !== undefined,
-    { message: 'At least one field must be provided' },
-);
 
 export const registerCartRoutes = (parent: Router) => {
     const router = new Router({ prefix: '/cart' });
@@ -43,7 +21,7 @@ export const registerCartRoutes = (parent: Router) => {
     // POST /cart/items — add item to cart
     router.post('/items', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const item = AddItemSchema.parse(ctx.request.body);
+        const item = CartItemDataSchema.parse(ctx.request.body);
         const cart = await getServices().data.cart.addItem({ userId, item });
         ctx.body = jsonStringifyWithoutNull(cart);
     });
@@ -52,7 +30,7 @@ export const registerCartRoutes = (parent: Router) => {
     router.patch('/items/:itemId', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const itemId = ctx.params.itemId!;
-        const update = UpdateItemSchema.parse(ctx.request.body);
+        const update = CartItemUpdateSchema.parse(ctx.request.body);
         const cart = await getServices().data.cart.updateItem({ userId, itemId, update });
         ctx.body = jsonStringifyWithoutNull(cart);
     });

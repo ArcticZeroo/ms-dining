@@ -62,6 +62,7 @@ model MenuItem {
   searchTags             SearchTag[]
   reviews                Review[]
   ingredientsMenuRoles   IngredientsMenuRole[]
+  cartItems              CartItem[]
 }
 
 model MenuItemModifierEntry {
@@ -225,8 +226,8 @@ model User {
 
   reviews  Review[]
   sessions Session[]
-  cart     Cart?
-  orders   Order[]
+  cart          Cart?
+  orderSessions OrderSession[]
 
   @@unique([externalId, provider])
 }

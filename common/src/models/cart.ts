@@ -112,3 +112,86 @@ export interface ICompleteOrderRequest {
 }
 
 export type ICompleteOrderResponse = IOrderCompletionData;
+
+// ─── DB-backed cart types (v2) ───────────────────────────────────────
+// Used by both client and server for the new server-side cart API.
+
+import { z } from 'zod';
+
+// --- Status ---
+
+export const ORDER_CAFE_PART_STATUSES = [
+    'pending',
+    'payment_pending',
+    'completed',
+    'failed',
+    'abandoned',
+] as const;
+
+export type OrderCafePartStatus = typeof ORDER_CAFE_PART_STATUSES[number];
+
+export const ACTIVE_ORDER_CAFE_PART_STATUSES: readonly OrderCafePartStatus[] = ['pending', 'payment_pending'];
+
+// --- Modifier schema (shared between add + update) ---
+
+export const SerializedModifierSchema = z.object({
+    modifierId: z.string(),
+    choiceIds:  z.array(z.string()),
+});
+
+// --- Cart item data (for add-to-cart) ---
+
+export const CartItemDataSchema = z.object({
+    menuItemId:          z.string().min(1),
+    quantity:            z.number().int().min(1),
+    specialInstructions: z.string().optional(),
+    modifiers:           z.array(SerializedModifierSchema).default([]),
+});
+
+export type ICartItemData = z.infer<typeof CartItemDataSchema>;
+
+// --- Cart item update (partial of add data) ---
+
+export const CartItemUpdateSchema = CartItemDataSchema.partial().refine(
+    data => Object.keys(data).length > 0,
+    { message: 'At least one field must be provided' },
+);
+
+export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
+
+// --- Cart item record (returned from server) ---
+
+export interface ICartItemRecord {
+    id: string;
+    menuItemId: string;
+    quantity: number;
+    specialInstructions: string | null;
+    modifiers: ISerializedModifier[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+// --- Active order summary (included in cart response when an order is in progress) ---
+
+export interface IOrderCafePartSummary {
+    cafeId: string;
+    status: OrderCafePartStatus;
+    buyOnDemandOrderNumber: string | null;
+    total: number | null;
+    waitTimeMin: number | null;
+    waitTimeMax: number | null;
+}
+
+export interface IActiveOrderSummary {
+    orderSessionId: string;
+    alias: string | null;
+    phoneNumber: string | null;
+    cafeParts: IOrderCafePartSummary[];
+}
+
+// --- Cart response (unified: items + optional active order) ---
+
+export interface ICartResponse {
+    items: ICartItemRecord[];
+    activeOrder?: IActiveOrderSummary;
+}

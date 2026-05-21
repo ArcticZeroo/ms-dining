@@ -1,9 +1,9 @@
 // ─── Cart ────────────────────────────────────────────────────────────
 // Server-side cart replaces client localStorage. One cart per user.
+// userId is the PK (one cart per user, no separate surrogate id).
 
 model Cart {
-  id        String   @id @default(uuid())
-  userId    String   @unique
+  userId    String   @id
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   updatedAt DateTime @updatedAt
 
@@ -12,25 +12,34 @@ model Cart {
 
 model CartItem {
   id                  String  @id @default(uuid())
-  cartId              String
-  cart                Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cafeId              String
+  cartUserId          String
+  cart                Cart    @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
   menuItemId          String
+  menuItem            MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
   quantity            Int     @default(1)
   specialInstructions String?
-  // Modifier selections as JSON — complex nested data not worth normalizing.
-  // Shape: Array<{ modifierId: string; choiceIds: string[] }>
-  modifiersJson       String  @default("[]")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  modifierChoices CartItemModifierChoice[]
+}
+
+model CartItemModifierChoice {
+  id         Int      @id @default(autoincrement())
+  cartItemId String
+  cartItem   CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  modifierId String
+  choiceId   String
+
+  @@unique([cartItemId, modifierId, choiceId])
 }
 
 // ─── Orders ──────────────────────────────────────────────────────────
-// An Order is a user-facing checkout session that may span multiple cafes.
-// Each cafe's BoD interaction is tracked independently as a CafeOrder.
+// An OrderSession is a user-facing checkout that may span multiple cafes.
+// Each cafe's Buy On Demand interaction is tracked independently as an OrderCafePart.
 
-model Order {
+model OrderSession {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -41,28 +50,28 @@ model Order {
   alias                      String?
   phoneNumberWithCountryCode String?
 
-  cafeOrders CafeOrder[]
+  cafeParts OrderCafePart[]
 }
 
-model CafeOrder {
-  id      String @id @default(uuid())
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  cafeId  String
+model OrderCafePart {
+  id             String @id @default(uuid())
+  orderSessionId String
+  orderSession   OrderSession @relation(fields: [orderSessionId], references: [id], onDelete: Cascade)
+  cafeId         String
 
-  // BoD identifiers (populated after checkout calls BoD add-to-cart)
-  bodOrderId     String?
-  bodOrderNumber String?
+  // Buy On Demand identifiers (populated after checkout calls BoD add-to-cart)
+  buyOnDemandOrderId     String?
+  buyOnDemandOrderNumber String?
 
   // State: pending → payment_pending → completed | failed | abandoned
   status String @default("pending")
 
-  // Financial (populated from BoD response)
+  // Financial (populated from Buy On Demand response)
   subtotal Float?
   tax      Float?
   total    Float?
 
-  // Wait time (from BoD API at close time)
+  // Wait time (from Buy On Demand API at close time)
   waitTimeMin Int?
   waitTimeMax Int?
 
@@ -70,7 +79,7 @@ model CafeOrder {
   // Shape: Array<{ menuItemId, name, quantity, price, modifiers }>
   itemsJson String @default("[]")
 
-  // Serialized CafeOrderSession state needed to rebuild the session
+  // Serialized session state needed to rebuild the CafeOrderSession
   // if the in-memory session expires. Contains ordering context, pay config,
   // order details, site store info, etc. (~5KB JSON)
   sessionStateJson String?

@@ -3,57 +3,14 @@
  *
  * Server-side cart replaces client localStorage. One cart per authenticated user.
  * Every mutation returns the full hydrated cart so the client always has fresh state.
- * Cart is locked (mutations return 409) while an active order exists.
+ * Cart is locked (mutations return CONFLICT) while an active order exists.
  */
 
-export interface ISerializedModifier {
-    modifierId: string;
-    choiceIds: string[];
-}
-
-export interface ICartItemData {
-    cafeId: string;
-    menuItemId: string;
-    quantity: number;
-    specialInstructions?: string;
-    modifiers: ISerializedModifier[];
-}
-
-export interface ICartItemRecord {
-    id: string;
-    cafeId: string;
-    menuItemId: string;
-    quantity: number;
-    specialInstructions: string | null;
-    modifiers: ISerializedModifier[];
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface ICartItemUpdate {
-    quantity?: number;
-    specialInstructions?: string | null;
-    modifiers?: ISerializedModifier[];
-}
-
-export interface IActiveOrderSummary {
-    orderId: string;
-    alias: string | null;
-    phoneNumber: string | null;
-    cafeOrders: {
-        cafeId: string;
-        status: string;
-        bodOrderNumber: string | null;
-        total: number | null;
-        waitTimeMin: number | null;
-        waitTimeMax: number | null;
-    }[];
-}
-
-export interface ICartResponse {
-    items: ICartItemRecord[];
-    activeOrder?: IActiveOrderSummary;
-}
+import type {
+    ICartItemData,
+    ICartItemUpdate,
+    ICartResponse,
+} from '@msdining/common/models/cart';
 
 export interface ICartService {
     /** Get the user's cart (creates empty if none). Includes activeOrder if one exists. */

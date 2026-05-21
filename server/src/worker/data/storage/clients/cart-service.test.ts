@@ -1,9 +1,8 @@
 /**
  * End-to-end tests for the Cart data service.
  *
- * Drives `services.data.cart.*` through the InProcessHandler to
- * `cartServiceCommands` and finally to Prisma. Covers CRUD, active-order
- * locking, and the unified cart+activeOrder response shape.
+ * Covers CRUD, normalized modifiers, active-order locking,
+ * and the unified cart+activeOrder response shape.
  */
 
 import { after, before, test } from 'node:test';
@@ -19,20 +18,45 @@ import { usePrismaWrite } from '../client.js';
 let ctx: IntegrationTestContext;
 
 const USER_ID = 'cart-test-user';
+const MENU_ITEM_ID = 'cart-test-menu-item';
+const MENU_ITEM_ID_2 = 'cart-test-menu-item-2';
 
 before(async () => {
     ctx = await createIntegrationTestContext();
     ctx.installServices();
 
-    // Seed a user for cart tests.
-    await usePrismaWrite(prisma => prisma.user.create({
-        data: {
-            id:          USER_ID,
-            externalId:  'cart-test-external',
-            provider:    'test',
-            displayName: 'Cart Tester',
-        },
-    }));
+    // Seed user, cafe, station, menu items for FK constraints
+    await usePrismaWrite(async prisma => {
+        await prisma.user.create({
+            data: { id: USER_ID, externalId: 'cart-ext', provider: 'test', displayName: 'Cart Tester' },
+        });
+        await prisma.cafe.create({
+            data: {
+                id: 'cart-cafe', name: 'Cart Café', tenantId: 't', contextId: 'c',
+                displayProfileId: 'd', storeId: 's', externalName: 'e',
+            },
+        });
+        await prisma.station.create({
+            data: {
+                id: 'cart-station', name: 'Cart Station', menuId: 'menu-1',
+                cafeId: 'cart-cafe', normalizedName: 'cart station',
+            },
+        });
+        await prisma.menuItem.create({
+            data: {
+                id: MENU_ITEM_ID, name: 'Test Burger', normalizedName: 'test burger',
+                calories: 500, maxCalories: 500, price: 9.99,
+                cafeId: 'cart-cafe', stationId: 'cart-station',
+            },
+        });
+        await prisma.menuItem.create({
+            data: {
+                id: MENU_ITEM_ID_2, name: 'Test Salad', normalizedName: 'test salad',
+                calories: 200, maxCalories: 200, price: 7.50,
+                cafeId: 'cart-cafe', stationId: 'cart-station',
+            },
+        });
+    });
 });
 
 after(async () => {
@@ -51,29 +75,26 @@ test('getCart returns empty cart for new user', async () => {
     assert.equal(cart.activeOrder, undefined);
 });
 
-test('addItem + getCart round-trip', async () => {
+test('addItem + getCart round-trip with normalized modifiers', async () => {
     ctx.installServices();
 
     const result = await getServices().data.cart.addItem({
         userId: USER_ID,
         item: {
-            cafeId:     'cafe-1',
-            menuItemId: 'item-1',
+            menuItemId: MENU_ITEM_ID,
             quantity:   2,
-            modifiers:  [{ modifierId: 'mod-1', choiceIds: ['choice-a'] }],
+            modifiers:  [{ modifierId: 'mod-1', choiceIds: ['choice-a', 'choice-b'] }],
         },
     });
 
     assert.equal(result.items.length, 1);
     const item = result.items[0]!;
-    assert.equal(item.cafeId, 'cafe-1');
-    assert.equal(item.menuItemId, 'item-1');
+    assert.equal(item.menuItemId, MENU_ITEM_ID);
     assert.equal(item.quantity, 2);
-    assert.deepEqual(item.modifiers, [{ modifierId: 'mod-1', choiceIds: ['choice-a'] }]);
+    assert.deepEqual(item.modifiers, [{ modifierId: 'mod-1', choiceIds: ['choice-a', 'choice-b'] }]);
     assert.equal(item.specialInstructions, null);
     assert.ok(item.id, 'should have a server-generated UUID');
 
-    // getCart should return the same data
     const fetched = await getServices().data.cart.getCart({ userId: USER_ID });
     assert.equal(fetched.items.length, 1);
     assert.equal(fetched.items[0]!.id, item.id);
@@ -85,15 +106,14 @@ test('addItem with specialInstructions', async () => {
     const result = await getServices().data.cart.addItem({
         userId: USER_ID,
         item: {
-            cafeId:              'cafe-1',
-            menuItemId:          'item-2',
+            menuItemId:          MENU_ITEM_ID_2,
             quantity:            1,
             specialInstructions: 'No onions please',
             modifiers:           [],
         },
     });
 
-    const added = result.items.find(i => i.menuItemId === 'item-2');
+    const added = result.items.find(i => i.menuItemId === MENU_ITEM_ID_2);
     assert.ok(added);
     assert.equal(added.specialInstructions, 'No onions please');
 });
@@ -102,7 +122,7 @@ test('updateItem changes quantity and modifiers', async () => {
     ctx.installServices();
 
     const cart = await getServices().data.cart.getCart({ userId: USER_ID });
-    const itemToUpdate = cart.items.find(i => i.menuItemId === 'item-1');
+    const itemToUpdate = cart.items.find(i => i.menuItemId === MENU_ITEM_ID);
     assert.ok(itemToUpdate);
 
     const result = await getServices().data.cart.updateItem({
@@ -110,14 +130,14 @@ test('updateItem changes quantity and modifiers', async () => {
         itemId: itemToUpdate.id,
         update: {
             quantity:  5,
-            modifiers: [{ modifierId: 'mod-2', choiceIds: ['choice-b', 'choice-c'] }],
+            modifiers: [{ modifierId: 'mod-2', choiceIds: ['choice-c'] }],
         },
     });
 
     const updated = result.items.find(i => i.id === itemToUpdate.id);
     assert.ok(updated);
     assert.equal(updated.quantity, 5);
-    assert.deepEqual(updated.modifiers, [{ modifierId: 'mod-2', choiceIds: ['choice-b', 'choice-c'] }]);
+    assert.deepEqual(updated.modifiers, [{ modifierId: 'mod-2', choiceIds: ['choice-c'] }]);
 });
 
 test('updateItem for nonexistent item throws NOT_FOUND', async () => {
@@ -168,7 +188,7 @@ test('clearCart removes all items', async () => {
     // Ensure there's at least one item
     await getServices().data.cart.addItem({
         userId: USER_ID,
-        item: { cafeId: 'cafe-x', menuItemId: 'item-x', quantity: 1, modifiers: [] },
+        item: { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] },
     });
 
     const result = await getServices().data.cart.clearCart({ userId: USER_ID });
@@ -178,14 +198,14 @@ test('clearCart removes all items', async () => {
 test('cart mutations reject with CONFLICT when an active order exists', async () => {
     ctx.installServices();
 
-    // Create an active order directly in the DB
+    // Create an active order session directly in the DB
     await usePrismaWrite(async prisma => {
-        await prisma.order.create({
+        await prisma.orderSession.create({
             data: {
                 userId: USER_ID,
-                cafeOrders: {
+                cafeParts: {
                     create: {
-                        cafeId: 'cafe-1',
+                        cafeId: 'cart-cafe',
                         status: 'payment_pending',
                     },
                 },
@@ -194,7 +214,7 @@ test('cart mutations reject with CONFLICT when an active order exists', async ()
     });
 
     // All mutations should be rejected
-    const item = { cafeId: 'c', menuItemId: 'm', quantity: 1, modifiers: [] };
+    const item = { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] };
 
     await assert.rejects(
         () => getServices().data.cart.addItem({ userId: USER_ID, item }),
@@ -216,6 +236,6 @@ test('cart mutations reject with CONFLICT when an active order exists', async ()
     // getCart should still work and include the activeOrder
     const cart = await getServices().data.cart.getCart({ userId: USER_ID });
     assert.ok(cart.activeOrder);
-    assert.equal(cart.activeOrder.cafeOrders.length, 1);
-    assert.equal(cart.activeOrder.cafeOrders[0]!.status, 'payment_pending');
+    assert.equal(cart.activeOrder.cafeParts.length, 1);
+    assert.equal(cart.activeOrder.cafeParts[0]!.status, 'payment_pending');
 });
