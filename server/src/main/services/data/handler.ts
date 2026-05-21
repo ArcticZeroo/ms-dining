@@ -12,6 +12,7 @@ import { menuItemServiceCommands } from '../../../worker/data/storage/clients/me
 import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu.js';
 import { searchServiceCommands } from '../../../worker/data/storage/clients/search-service.js';
 import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/menu-analytics.js';
+import { cartServiceCommands } from '../../../worker/data/storage/clients/cart.js';
 
 /**
  * Single source of truth for which worker-side service command bags are
@@ -38,6 +39,7 @@ export const DATA_SERVICES = {
     dailyMenu:     dailyMenuServiceCommands,
     search:        searchServiceCommands,
     menuAnalytics: menuAnalyticsServiceCommands,
+    cart:          cartServiceCommands,
 } as const;
 
 export type DataServiceMap = typeof DATA_SERVICES;

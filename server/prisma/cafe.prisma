@@ -225,6 +225,8 @@ model User {
 
   reviews  Review[]
   sessions Session[]
+  cart     Cart?
+  orders   Order[]
 
   @@unique([externalId, provider])
 }

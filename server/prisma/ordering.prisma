@@ -1,0 +1,84 @@
+// ─── Cart ────────────────────────────────────────────────────────────
+// Server-side cart replaces client localStorage. One cart per user.
+
+model Cart {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+}
+
+model CartItem {
+  id                  String  @id @default(uuid())
+  cartId              String
+  cart                Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cafeId              String
+  menuItemId          String
+  quantity            Int     @default(1)
+  specialInstructions String?
+  // Modifier selections as JSON — complex nested data not worth normalizing.
+  // Shape: Array<{ modifierId: string; choiceIds: string[] }>
+  modifiersJson       String  @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Orders ──────────────────────────────────────────────────────────
+// An Order is a user-facing checkout session that may span multiple cafes.
+// Each cafe's BoD interaction is tracked independently as a CafeOrder.
+
+model Order {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Payment identity — set when user starts payment, fixed for the session
+  alias                      String?
+  phoneNumberWithCountryCode String?
+
+  cafeOrders CafeOrder[]
+}
+
+model CafeOrder {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  cafeId  String
+
+  // BoD identifiers (populated after checkout calls BoD add-to-cart)
+  bodOrderId     String?
+  bodOrderNumber String?
+
+  // State: pending → payment_pending → completed | failed | abandoned
+  status String @default("pending")
+
+  // Financial (populated from BoD response)
+  subtotal Float?
+  tax      Float?
+  total    Float?
+
+  // Wait time (from BoD API at close time)
+  waitTimeMin Int?
+  waitTimeMax Int?
+
+  // Snapshot of what was ordered (denormalized for history).
+  // Shape: Array<{ menuItemId, name, quantity, price, modifiers }>
+  itemsJson String @default("[]")
+
+  // Serialized CafeOrderSession state needed to rebuild the session
+  // if the in-memory session expires. Contains ordering context, pay config,
+  // order details, site store info, etc. (~5KB JSON)
+  sessionStateJson String?
+
+  // Error tracking
+  lastError String?
+  lastStage String?
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+}

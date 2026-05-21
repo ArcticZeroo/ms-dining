@@ -11,6 +11,7 @@ import { menuItemService } from './menu-item.js';
 import { dailyMenuService } from './daily-menu.js';
 import { searchService } from './search-service.js';
 import { menuAnalyticsService } from './menu-analytics.js';
+import { cartService } from './cart.js';
 
 /**
  * Composite of all main-side typed data-service clients. Lives at
@@ -35,6 +36,7 @@ export interface DataServices {
     dailyMenu: typeof dailyMenuService;
     search: typeof searchService;
     menuAnalytics: typeof menuAnalyticsService;
+    cart: typeof cartService;
 }
 
 export const defaultDataServices: DataServices = {
@@ -51,6 +53,7 @@ export const defaultDataServices: DataServices = {
     dailyMenu:     dailyMenuService,
     search:        searchService,
     menuAnalytics: menuAnalyticsService,
+    cart:          cartService,
 };
 
 export { searchQueryService } from './search-query.js';
@@ -66,3 +69,4 @@ export { menuItemService } from './menu-item.js';
 export { dailyMenuService } from './daily-menu.js';
 export { searchService } from './search-service.js';
 export { menuAnalyticsService } from './menu-analytics.js';
+export { cartService } from './cart.js';
