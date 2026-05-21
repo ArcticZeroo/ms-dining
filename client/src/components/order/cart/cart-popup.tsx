@@ -70,9 +70,16 @@ const CartPopupBody = () => {
             <div className="cart-body">
                 {
                     cartQuery.isError && (
-                        <div className="cart-error">
-                            <span>Failed to load cart</span>
-                            <button onClick={() => cartQuery.refetch()}>Retry</button>
+                        <div className="cart-hydration-error">
+                            <span>Failed to load your cart.</span>
+                            <div className="cart-hydration-actions flex">
+                                <button
+                                    className="default-container default-button"
+                                    onClick={() => cartQuery.refetch()}
+                                >
+                                    Retry
+                                </button>
+                            </div>
                         </div>
                     )
                 }
