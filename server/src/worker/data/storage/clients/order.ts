@@ -3,22 +3,16 @@ import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { WaitTimeSession } from '../../cafe/session/wait-time.js';
 import { CartStorageClient } from './cart.js';
-import { MenuItemStorageClient } from './menu-item.js';
-import { DailyMenuStorageClient } from './daily-menu.js';
-import { createBuyOnDemandClient } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
-import { toDateString } from '@msdining/common/util/date-util';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import type { ICartItem } from '@msdining/common/models/cart';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
-import type { ICafe } from '../../../../shared/models/cafe.js';
 import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
 import type {
     ICheckoutResult,
     ICheckoutCafeResult,
     IPreparePaymentResult,
     ICompleteOrderResult,
-    IOrderService,
 } from '../../../../shared/services/order.js';
 import type { ISerializedModifier } from '@msdining/common/models/cart';
 import { phone } from 'phone';
@@ -227,8 +221,11 @@ export abstract class OrderStorageClient {
             throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'All cafe checkouts failed');
         }
 
-        // Clear the cart after successful checkout
-        await CartStorageClient.clearCart(userId);
+        // Clear the cart after successful checkout (bypass the active-order
+        // check since we just created the order from this cart)
+        await usePrismaWrite(prisma => prisma.cartItem.deleteMany({
+            where: { cartUserId: userId },
+        }));
 
         return {
             orderSessionId: orderSession.id,
@@ -405,7 +402,32 @@ export abstract class OrderStorageClient {
                 completedAt,
             };
         } catch (err) {
-            // Record failure
+            // Only mark as failed if the BoD close didn't succeed.
+            // Post-close failures (e.g. SMS receipt) are non-fatal — the
+            // order is already placed at that point.
+            const closedSuccessfully = live.session.lastCompletedStage === 'closeOrder'
+                || live.session.lastCompletedStage === 'sendTextReceipt'
+                || live.session.lastCompletedStage === 'complete';
+
+            if (closedSuccessfully) {
+                orderLog.error(`Post-close failure (order already placed):`, err);
+                await usePrismaWrite(prisma => prisma.orderCafePart.updateMany({
+                    where: { orderSessionId, cafeId },
+                    data:  {
+                        status:      'completed',
+                        completedAt: new Date(),
+                        lastError:   `Post-close: ${err instanceof Error ? err.message : String(err)}`,
+                    },
+                }));
+
+                return {
+                    buyOnDemandOrderNumber: live.session.orderNumber ?? 'Unknown',
+                    waitTimeMin:            0,
+                    waitTimeMax:            0,
+                    completedAt:            new Date().toISOString(),
+                };
+            }
+
             await usePrismaWrite(prisma => prisma.orderCafePart.updateMany({
                 where: { orderSessionId, cafeId },
                 data:  {
@@ -450,27 +472,3 @@ export abstract class OrderStorageClient {
         return CartStorageClient.getActiveOrderSummary(userId);
     }
 }
-
-// ─── Service commands ────────────────────────────────────────────────
-
-export const orderServiceCommands = {
-    checkout: async ({ userId }: { userId: string }) =>
-        OrderStorageClient.checkout(userId),
-    setPaymentIdentity: async ({ userId, orderSessionId, alias, phoneNumberWithCountryCode }: {
-        userId: string; orderSessionId: string; alias: string; phoneNumberWithCountryCode: string;
-    }) =>
-        OrderStorageClient.setPaymentIdentity(userId, orderSessionId, alias, phoneNumberWithCountryCode),
-    preparePayment: async ({ userId, orderSessionId, cafeId, iframeCssUrl }: {
-        userId: string; orderSessionId: string; cafeId: string; iframeCssUrl: string;
-    }) =>
-        OrderStorageClient.preparePayment(userId, orderSessionId, cafeId, iframeCssUrl),
-    completeOrder: async ({ userId, orderSessionId, cafeId, paymentToken, cardInfo }: {
-        userId: string; orderSessionId: string; cafeId: string; paymentToken: string;
-        cardInfo: { accountNumberMasked: string; cardIssuer: string; expirationYearMonth: string; cardHolderName: string; postalCode: string; };
-    }) =>
-        OrderStorageClient.completeOrder(userId, orderSessionId, cafeId, paymentToken, cardInfo),
-    abandonOrder: async ({ userId, orderSessionId }: { userId: string; orderSessionId: string }) =>
-        OrderStorageClient.abandonOrder(userId, orderSessionId),
-    getActiveOrder: async ({ userId }: { userId: string }) =>
-        OrderStorageClient.getActiveOrder(userId),
-} satisfies IOrderService;
