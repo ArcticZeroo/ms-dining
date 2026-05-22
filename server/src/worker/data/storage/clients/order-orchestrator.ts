@@ -3,11 +3,11 @@ import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
 import { CartStorageClient } from './cart.js';
-import { OrderStorageClient, type ICreateCafePartData } from './order.js';
+import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
-import type { ICartItem, ICartItemRecord, ISerializedModifier } from '@msdining/common/models/cart';
+import type { ICartItem, ICartItemRecord, ISerializedModifier, OrderCafePartStatus } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
@@ -18,15 +18,6 @@ import type {
 import { phone } from 'phone';
 
 const orderLog = getNamespaceLogger('Order');
-
-interface ICheckoutCafeProcessingResult {
-    cafeId: string;
-    cafeName: string;
-    cartItems: ICartItemRecord[];
-    cafePart: ICreateCafePartData;
-    cafeResult?: ICheckoutCafeResult;
-    session?: CafeOrderSession;
-}
 
 const SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
@@ -60,116 +51,64 @@ const sessionKey = ({ orderSessionId, cafeId }: { orderSessionId: string; cafeId
 const deserializeModifiers = (modifiers: ISerializedModifier[]): Map<string, Set<string>> =>
     new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
 
-export abstract class OrderOrchestrator {
-    private static async startCheckoutForCafe(
-        cafeId: string,
-        cartItems: ICartItemRecord[],
-    ): Promise<ICheckoutCafeProcessingResult> {
-        const cafe = CAFES_BY_ID.get(cafeId);
-        if (!cafe) {
-            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, `Cafe ${cafeId} not found in config during checkout`);
-        }
+const snapshotModifiersToSerialized = (modifiers: Array<{ modifierId: string; choiceId: string }>): ISerializedModifier[] => {
+    const byModifier = new Map<string, string[]>();
+    for (const mod of modifiers) {
+        const choices = byModifier.get(mod.modifierId) ?? [];
+        choices.push(mod.choiceId);
+        byModifier.set(mod.modifierId, choices);
+    }
+    return [...byModifier].map(([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
+};
 
-        const buyOnDemandCartItems: ICartItem[] = cartItems.map(item => ({
-            itemId:              item.menuItemId,
-            quantity:            item.quantity,
-            choicesByModifierId: deserializeModifiers(item.modifiers),
-            specialInstructions: item.specialInstructions ?? undefined,
-        }));
+const getCafeOrThrow = (cafeId: string) => {
+    const cafe = CAFES_BY_ID.get(cafeId);
+    if (!cafe) {
+        throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
+    }
+    return cafe;
+};
 
-        try {
-            const session = await CafeOrderSession.createAsync(cafe, buyOnDemandCartItems);
-            await session.populateCart();
+/**
+ * Creates a BoD session, logs in, and populates the cart.
+ */
+const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): Promise<CafeOrderSession> => {
+    const cafe = getCafeOrThrow(cafeId);
+    const session = await CafeOrderSession.createAsync(cafe, cartItems);
+    await session.populateCart();
 
-            const orderId = session.orderId;
-            const orderNumber = session.orderNumber;
-
-            if (!orderId || !orderNumber) {
-                throw new Error('Order ID or order number not set after cart population');
-            }
-
-            const waitTime = await fetchWaitTimeWithCartItems(
-                session.client,
-                [...session.rawCartItemsForWaitTime],
-            );
-
-            return {
-                cafeId,
-                cafeName: cafe.name,
-                cartItems,
-                session,
-                cafeResult: {
-                    cafeId,
-                    buyOnDemandOrderId:     orderId,
-                    buyOnDemandOrderNumber: orderNumber,
-                    subtotal:               session.orderTotalWithoutTax,
-                    tax:                    session.orderTotalTax,
-                    total:                  session.orderTotalWithTax,
-                    waitTimeMin:            waitTime.minTime,
-                    waitTimeMax:            waitTime.maxTime,
-                },
-                cafePart: {
-                    buyOnDemandOrderId:     orderId,
-                    buyOnDemandOrderNumber: orderNumber,
-                    status:                 'pending',
-                    subtotal:               session.orderTotalWithoutTax,
-                    tax:                    session.orderTotalTax,
-                    total:                  session.orderTotalWithTax,
-                    waitTimeMin:            waitTime.minTime,
-                    waitTimeMax:            waitTime.maxTime,
-                    cartItems,
-                },
-            };
-        } catch (err) {
-            orderLog.error(`{${cafe.name}} Checkout failed:`, err);
-
-            return {
-                cafeId,
-                cafeName: cafe.name,
-                cartItems,
-                cafePart: {
-                    status:    'failed',
-                    lastError: err instanceof Error ? err.message : String(err),
-                    lastStage: 'startCheckout',
-                    cartItems,
-                },
-            };
-        }
+    if (!session.orderId || !session.orderNumber) {
+        throw new Error('Order ID or order number not set after cart population');
     }
 
-    private static async getOrRebuildLiveSession(orderSessionId: string, cafeId: string): Promise<CafeOrderSession> {
+    return session;
+};
+
+export abstract class OrderOrchestrator {
+    /**
+     * Single path for getting a live session — creates one if it doesn't exist
+     * by reading the item snapshot from DB. Updates DB with new BoD order data.
+     */
+    private static async getOrCreateLiveSession(orderSessionId: string, cafeId: string): Promise<CafeOrderSession> {
         const key = sessionKey({ orderSessionId, cafeId });
         return liveSessions.getOrInsert(key, async () => {
-            orderLog.info(`Session expired for ${key}, rebuilding...`);
             const part = await usePrismaClient(prisma => OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId));
-
-            if (!part.buyOnDemandOrderId) {
-                throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Cannot rebuild session — missing BoD order data');
-            }
-
-            const cafe = CAFES_BY_ID.get(cafeId);
-            if (!cafe) {
-                throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
-            }
 
             const cartItems: ICartItem[] = part.items.map(item => ({
                 itemId:              item.menuItemId,
                 quantity:            item.quantity,
-                choicesByModifierId: new Map(
-                    Object.entries(
-                        item.modifiers.reduce<Record<string, Set<string>>>((acc, mod) => {
-                            (acc[mod.modifierId] ??= new Set()).add(mod.choiceId);
-                            return acc;
-                        }, {})
-                    )
-                ),
+                choicesByModifierId: deserializeModifiers(snapshotModifiersToSerialized(item.modifiers)),
                 specialInstructions: item.specialInstructions ?? undefined,
             }));
 
-            const session = await CafeOrderSession.createAsync(cafe, cartItems);
-            await session.populateCart();
+            const session = await createPopulatedSession(cafeId, cartItems);
 
-            orderLog.info(`Session rebuilt for ${key}`);
+            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, part.status as OrderCafePartStatus, {
+                buyOnDemandOrderId:     session.orderId!,
+                buyOnDemandOrderNumber: session.orderNumber!,
+            });
+
+            orderLog.info(`{${getCafeOrThrow(cafeId).name}} Live session created — orderId: ${session.orderId}`);
             return session;
         });
     }
@@ -190,32 +129,65 @@ export abstract class OrderOrchestrator {
             itemsByCafe.set(cafeId, existing);
         }
 
+        // Create DB records first (item snapshots, no BoD data yet)
         const orderSession = await OrderStorageClient.createOrderSession(userId);
-        const checkoutResults = await Promise.all(
-            [...itemsByCafe].map(([cafeId, cartItems]) => this.startCheckoutForCafe(cafeId, cartItems)),
-        );
-
         await OrderStorageClient.createCafeParts(
             orderSession.id,
-            checkoutResults.map(result => ({
-                cafeId: result.cafeId,
-                ...result.cafePart,
+            [...itemsByCafe].map(([cafeId, cartItems]) => ({
+                cafeId,
+                status:    'pending' as const,
+                cartItems,
             })),
         );
 
-        const cafeResults: ICheckoutCafeResult[] = [];
-        await Promise.all(checkoutResults.map(async result => {
-            if (!result.cafeResult || !result.session) {
-                return;
-            }
+        // Create live BoD sessions in parallel — same path as rebuild
+        const cafeIds = [...itemsByCafe.keys()];
+        const results = await Promise.allSettled(
+            cafeIds.map(async (cafeId) => {
+                const session = await this.getOrCreateLiveSession(orderSession.id, cafeId);
 
-            const key = sessionKey({ orderSessionId: orderSession.id, cafeId: result.cafeId });
-            await liveSessions.update(key, () => result.session);
-            orderLog.info(
-                `{${result.cafeName}} Checkout complete — orderId: ${result.cafeResult.buyOnDemandOrderId}, orderNumber: ${result.cafeResult.buyOnDemandOrderNumber}`,
-            );
-            cafeResults.push(result.cafeResult);
-        }));
+                const waitTime = await fetchWaitTimeWithCartItems(
+                    session.client,
+                    [...session.rawCartItemsForWaitTime],
+                );
+
+                await OrderStorageClient.updateCafePartStatus(orderSession.id, cafeId, 'pending', {
+                    subtotal:    session.orderTotalWithoutTax,
+                    tax:         session.orderTotalTax,
+                    total:       session.orderTotalWithTax,
+                    waitTimeMin: waitTime.minTime,
+                    waitTimeMax: waitTime.maxTime,
+                });
+
+                return {
+                    cafeId,
+                    buyOnDemandOrderId:     session.orderId!,
+                    buyOnDemandOrderNumber: session.orderNumber!,
+                    subtotal:               session.orderTotalWithoutTax,
+                    tax:                    session.orderTotalTax,
+                    total:                  session.orderTotalWithTax,
+                    waitTimeMin:            waitTime.minTime,
+                    waitTimeMax:            waitTime.maxTime,
+                } satisfies ICheckoutCafeResult;
+            }),
+        );
+
+        // Mark failed cafes
+        for (const [i, result] of results.entries()) {
+            if (result.status === 'rejected') {
+                const cafeId = cafeIds[i]!;
+                const err = result.reason;
+                orderLog.error(`{${cafeId}} Checkout failed:`, err);
+                await OrderStorageClient.updateCafePartStatus(orderSession.id, cafeId, 'failed', {
+                    lastError: err instanceof Error ? err.message : String(err),
+                    lastStage: 'startCheckout',
+                });
+            }
+        }
+
+        const cafeResults = results
+            .filter((r): r is PromiseFulfilledResult<ICheckoutCafeResult> => r.status === 'fulfilled')
+            .map(r => r.value);
 
         if (cafeResults.length == 0) {
             throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'All cafe checkouts failed');
@@ -248,7 +220,7 @@ export abstract class OrderOrchestrator {
             }
         });
 
-        const session = await this.getOrRebuildLiveSession(orderSessionId, cafeId);
+        const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
         if (session.lastCompletedStage != SubmitOrderStage.initializeCardProcessor) {
             await session.prepareForIframe(iframeCssUrl);
         }
