@@ -211,6 +211,10 @@ export const ActiveOrderSummarySchema = z.object({
 
 export type IActiveOrderSummary = z.infer<typeof ActiveOrderSummarySchema>;
 
+/** Wire types before zod transforms. */
+export type IOrderCafePartSummaryDTO = z.input<typeof OrderCafePartSummarySchema>;
+export type IActiveOrderSummaryDTO = z.input<typeof ActiveOrderSummarySchema>;
+
 // --- Cart response (unified: items + optional active order) ---
 
 export const CartResponseSchema = z.object({
@@ -228,5 +232,5 @@ export interface ICartResponse {
 /** Wire-format response before zod transform. Used by the server/service interface. */
 export interface ICartResponseDTO {
     items: ICartItemRecordDTO[];
-    activeOrder?: IActiveOrderSummary;
+    activeOrder?: IActiveOrderSummaryDTO;
 }

@@ -7,6 +7,8 @@ import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 
+import { serializeActiveOrder } from '../../../util/order-serde.js';
+
 const CheckoutSchema = z.object({
     alias:                      z.string().min(1),
     phoneNumberWithCountryCode: z.string().min(1),
@@ -37,10 +39,10 @@ export const registerNewOrderingRoutes = (parent: Router) => {
             alias:                      body.alias,
             phoneNumberWithCountryCode: body.phoneNumberWithCountryCode,
         });
-        ctx.body = jsonStringifyWithoutNull(result);
+        ctx.body = jsonStringifyWithoutNull(serializeActiveOrder(result));
     });
 
-    // PUT /order/:orderId/identity — update alias + phone (allowed before payment completes)
+    // PUT /order/:orderId/identity— update alias + phone (allowed before payment completes)
     router.put('/:orderId/identity', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const orderSessionId = ctx.params.orderId!;
