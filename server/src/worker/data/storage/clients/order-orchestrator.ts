@@ -208,6 +208,7 @@ export abstract class OrderOrchestrator {
         session: CafeOrderSession,
         orderSessionId: string,
         cafeId: string,
+        waitTime: { min: number | null; max: number | null },
         params: {
             alias: string;
             phoneData: PhoneValidResult;
@@ -228,8 +229,8 @@ export abstract class OrderOrchestrator {
                 keepSession: false,
                 result: {
                     buyOnDemandOrderNumber: orderNumber,
-                    waitTimeMin:            0,
-                    waitTimeMax:            0,
+                    waitTimeMin:            waitTime.min ?? 0,
+                    waitTimeMax:            waitTime.max ?? 0,
                     completedAt:            completedAt.toISOString(),
                 },
             };
@@ -251,8 +252,8 @@ export abstract class OrderOrchestrator {
                     keepSession: false,
                     result: {
                         buyOnDemandOrderNumber: session.orderNumber ?? 'Unknown',
-                        waitTimeMin:            0,
-                        waitTimeMax:            0,
+                        waitTimeMin:            waitTime.min ?? 0,
+                        waitTimeMax:            waitTime.max ?? 0,
                         completedAt:            completedAt.toISOString(),
                     },
                 };
@@ -308,6 +309,7 @@ export abstract class OrderOrchestrator {
 
             const { result, keepSession } = await this.executeCompletion(
                 session, orderSessionId, cafeId,
+                { min: part.waitTimeMin, max: part.waitTimeMax },
                 { alias: order.alias!, phoneData, paymentToken, cardInfo },
             );
 
