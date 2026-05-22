@@ -1,57 +1,73 @@
+import type { ICompleteOrderResult } from '@msdining/common/models/order';
 import React, { useMemo } from 'react';
-import { useOrderingStore, IPaymentFormData } from '../../../store/zustand/ordering.ts';
-import { CafePaymentRow } from './cafe-payment-row.tsx';
+import { CafePaymentRow, ICafePaymentRowValue } from './cafe-payment-row.tsx';
 
 import './multi-cafe-payment.css';
 
-interface ICafePaymentProps {
-    formData: IPaymentFormData;
+interface IMultiCafePaymentProps {
+    orderId: string;
+    cafes: ICafePaymentRowValue[];
+    isCancelling: boolean;
+    onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;
+    onCancelOrder: () => void;
 }
 
-export const CafePayment: React.FC<ICafePaymentProps> = ({ formData }) => {
-    const paymentsByCafeId = useOrderingStore((state) => state.paymentsByCafeId);
-    const cafeIds = useMemo(() => Array.from(paymentsByCafeId.keys()), [paymentsByCafeId]);
-
+export const MultiCafePayment: React.FC<IMultiCafePaymentProps> = ({
+    orderId,
+    cafes,
+    isCancelling,
+    onCompleted,
+    onCancelOrder,
+}) => {
     const completedCount = useMemo(
-        () => {
-            let count = 0;
-            for (const slice of paymentsByCafeId.values()) {
-                if (slice.completionResult != null) {
-                    count++;
-                }
-            }
-            return count;
-        },
-        [paymentsByCafeId]
+        () => cafes.filter(cafe => cafe.status === 'completed').length,
+        [cafes],
     );
-
     const popupId = useMemo(() => Symbol('rguest-payment'), []);
+
+    if (cafes.length === 0) {
+        return null;
+    }
 
     return (
         <div className="multi-cafe-payment card">
             <div className="title">
                 Complete Payment
             </div>
-            {cafeIds.length > 1 && (
+            {cafes.length > 1 ? (
                 <>
                     <p className="multi-cafe-payment-description">
-                        Your order spans {cafeIds.length} cafes. Pay for each one below.
+                        Your order spans {cafes.length} cafes. Pay for each one below.
                     </p>
                     <div className="multi-cafe-payment-progress">
-                        {completedCount} of {cafeIds.length} paid
+                        {completedCount} of {cafes.length} paid
                     </div>
                 </>
+            ) : (
+                <p className="multi-cafe-payment-description">
+                    Finish paying for your order below.
+                </p>
             )}
             <div className="multi-cafe-payment-list">
-                {cafeIds.map((cafeId) => (
+                {cafes.map((cafe) => (
                     <CafePaymentRow
-                        key={cafeId}
-                        cafeId={cafeId}
-                        formData={formData}
+                        key={cafe.cafeId}
+                        orderId={orderId}
+                        value={cafe}
                         popupId={popupId}
-                        disabled={false}
+                        disabled={isCancelling}
+                        onCompleted={onCompleted}
                     />
                 ))}
+            </div>
+            <div className="flex flex-justify-center">
+                <button
+                    className="default-container"
+                    onClick={onCancelOrder}
+                    disabled={isCancelling}
+                >
+                    {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                </button>
             </div>
         </div>
     );

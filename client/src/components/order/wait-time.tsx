@@ -1,15 +1,48 @@
-import React from 'react';
-import { useServerCartItems } from '../../store/zustand/server-cart.ts';
+import type { IActiveOrderSummary } from '@msdining/common/models/cart';
+import type { ICheckoutResult } from '@msdining/common/models/order';
+import React, { useContext, useMemo } from 'react';
+import { ApplicationContext } from '../../context/app.ts';
+import { getViewName } from '../../util/cafe.ts';
 
-export const WaitTime: React.FC = () => {
-    const cart = useServerCartItems();
+interface IWaitTimeProps {
+    checkoutResult?: ICheckoutResult;
+    activeOrder?: IActiveOrderSummary;
+}
 
-    if (cart.length === 0) {
+export const WaitTime: React.FC<IWaitTimeProps> = ({ checkoutResult, activeOrder }) => {
+    const { viewsById } = useContext(ApplicationContext);
+
+    const waitTimes = useMemo(() => {
+        const parts = activeOrder?.cafeParts ?? checkoutResult?.cafeResults ?? [];
+
+        return parts
+            .filter(part => part.waitTimeMin != null && part.waitTimeMax != null)
+            .map((part) => {
+                const view = viewsById.get(part.cafeId);
+                return {
+                    cafeId:   part.cafeId,
+                    cafeName: view ? getViewName({ view, showGroupName: true }) : part.cafeId,
+                    waitTimeMin: part.waitTimeMin,
+                    waitTimeMax: part.waitTimeMax,
+                };
+            });
+    }, [activeOrder?.cafeParts, checkoutResult?.cafeResults, viewsById]);
+
+    if (waitTimes.length === 0) {
         return null;
     }
 
-    // Wait time requires the checkout flow (BoD session) which hasn't
-    // been migrated to the new cart yet. Will be restored with the
-    // new ordering endpoints.
-    return null;
+    return (
+        <div className="wait-time">
+            <div>
+                {waitTimes.length === 1 ? 'Estimated wait time:' : 'Estimated wait times:'}
+            </div>
+            {waitTimes.map((waitTime) => (
+                <div key={waitTime.cafeId}>
+                    {waitTimes.length > 1 && `${waitTime.cafeName}: `}
+                    {waitTime.waitTimeMin} - {waitTime.waitTimeMax} minutes
+                </div>
+            ))}
+        </div>
+    );
 };

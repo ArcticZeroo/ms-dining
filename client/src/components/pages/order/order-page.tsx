@@ -1,13 +1,19 @@
-import { useEffect, useMemo } from 'react';
+import type { IActiveOrderSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { ICheckoutResult, ICompleteOrderResult } from '@msdining/common/models/order';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnlineOrderingState } from '../../../hooks/cafe.ts';
-import { useCartQuery } from '../../../store/queries/server-cart.ts';
-import { usePrepareAllPaymentsMutation, useCartSessionQuery } from '../../../store/queries/ordering.ts';
 import {
+    useAbandonOrderMutation,
+    useSetPaymentIdentityMutation,
+    useStartCheckoutMutation,
+} from '../../../store/queries/new-ordering.ts';
+import { useCartQuery } from '../../../store/queries/server-cart.ts';
+import {
+    useServerCartActiveOrder,
     useServerCartHasUnavailableItems,
     useServerCartItems,
 } from '../../../store/zustand/server-cart.ts';
-import { useAllCafesComplete, useCompletionResults, useOrderingStore } from '../../../store/zustand/ordering.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
@@ -15,39 +21,178 @@ import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { OnlineOrderingUnavailableNotice } from '../../notice/online-ordering-unavailable-notice.tsx';
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
-import { CartHydrationView } from '../../order/cart/cart-hydration-view.tsx';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
+import { MultiCafePayment } from '../../order/payment/multi-cafe-payment.tsx';
+import { ICafePaymentRowValue } from '../../order/payment/cafe-payment-row.tsx';
 import { IPaymentFormData, PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
-import { CafePayment } from '../../order/payment/multi-cafe-payment.tsx';
-import { OrderStatus } from '../../order/status/order-status.tsx';
+import { IOrderStatusItem, OrderStatus } from '../../order/status/order-status.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 
 import './order-page.css';
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message.trim().length > 0) {
+        return error.message;
+    }
+
+    return fallback;
+};
+
+const getDisplayStatus = (
+    activeOrderPartStatus: OrderCafePartStatus | undefined,
+    completedResult: ICompleteOrderResult | undefined,
+): OrderCafePartStatus => {
+    if (completedResult != null) {
+        return 'completed';
+    }
+
+    return activeOrderPartStatus ?? 'payment_pending';
+};
+
+const mergeCafeParts = (
+    activeOrder: IActiveOrderSummary | undefined,
+    checkoutResult: ICheckoutResult | undefined,
+    completedResultsByCafeId: Record<string, ICompleteOrderResult>,
+): ICafePaymentRowValue[] => {
+    const checkoutByCafeId = new Map(checkoutResult?.cafeResults.map(result => [result.cafeId, result]) ?? []);
+    const activeOrderByCafeId = new Map(activeOrder?.cafeParts.map(part => [part.cafeId, part]) ?? []);
+    const cafeIds = [
+        ...(activeOrder?.cafeParts.map(part => part.cafeId) ?? []),
+        ...((checkoutResult?.cafeResults ?? []).map(result => result.cafeId)),
+    ].filter((cafeId, index, allCafeIds) => allCafeIds.indexOf(cafeId) === index);
+
+    return cafeIds.map((cafeId) => {
+        const checkoutCafe = checkoutByCafeId.get(cafeId);
+        const activeOrderCafe = activeOrderByCafeId.get(cafeId);
+        const completedResult = completedResultsByCafeId[cafeId];
+
+        return {
+            cafeId,
+            status: getDisplayStatus(activeOrderCafe?.status, completedResult),
+            total: activeOrderCafe?.total ?? checkoutCafe?.total ?? null,
+            waitTimeMin: completedResult?.waitTimeMin ?? activeOrderCafe?.waitTimeMin ?? checkoutCafe?.waitTimeMin ?? null,
+            waitTimeMax: completedResult?.waitTimeMax ?? activeOrderCafe?.waitTimeMax ?? checkoutCafe?.waitTimeMax ?? null,
+            buyOnDemandOrderNumber: completedResult?.buyOnDemandOrderNumber ?? activeOrderCafe?.buyOnDemandOrderNumber ?? checkoutCafe?.buyOnDemandOrderNumber ?? null,
+        } satisfies ICafePaymentRowValue;
+    });
+};
+
 const OrderPageBody = () => {
     const cart = useServerCartItems();
+    const activeOrder = useServerCartActiveOrder();
     const hasUnavailableItems = useServerCartHasUnavailableItems();
     const cartQuery = useCartQuery();
     const navigate = useNavigate();
+    const startCheckout = useStartCheckoutMutation();
+    const setPaymentIdentity = useSetPaymentIdentityMutation();
+    const abandonOrder = useAbandonOrderMutation();
+    const [checkoutResult, setCheckoutResult] = useState<ICheckoutResult>();
+    const [pendingCheckoutResult, setPendingCheckoutResult] = useState<ICheckoutResult>();
+    const [submittedPaymentInfo, setSubmittedPaymentInfo] = useState<IPaymentFormData>();
+    const [checkoutError, setCheckoutError] = useState<string>();
+    const [canRetryCheckout, setCanRetryCheckout] = useState(false);
+    const [completedResultsByCafeId, setCompletedResultsByCafeId] = useState<Record<string, ICompleteOrderResult>>({});
 
-    const cartSessionQuery = useCartSessionQuery();
-    const prepareAllPayments = usePrepareAllPaymentsMutation();
-    const formData = useOrderingStore((state) => state.formData);
-    const allCafesComplete = useAllCafesComplete();
-    const completionResults = useCompletionResults();
-
-    const availableCafeCount = useMemo(
-        () => new Set(cart.filter(item => item.isAvailable).map(item => item.menuItem.cafeId)).size,
+    const availableItems = useMemo(
+        () => cart.filter(item => item.isAvailable),
         [cart],
     );
+    const hasAvailableItems = availableItems.length > 0;
+    const availableCafeCount = useMemo(
+        () => new Set(availableItems.map(item => item.menuItem.cafeId)).size,
+        [availableItems],
+    );
+    const currentOrderId = activeOrder?.orderSessionId ?? checkoutResult?.orderSessionId ?? pendingCheckoutResult?.orderSessionId;
+    const cafePayments = useMemo(
+        () => mergeCafeParts(activeOrder, checkoutResult, completedResultsByCafeId),
+        [activeOrder, checkoutResult, completedResultsByCafeId],
+    );
+    const completedItems = useMemo<IOrderStatusItem[]>(
+        () => cafePayments
+            .filter(cafe => cafe.status === 'completed')
+            .map((cafe) => ({
+                cafeId: cafe.cafeId,
+                buyOnDemandOrderNumber: cafe.buyOnDemandOrderNumber,
+                waitTimeMin: cafe.waitTimeMin,
+                waitTimeMax: cafe.waitTimeMax,
+                completedAt: completedResultsByCafeId[cafe.cafeId]?.completedAt,
+            })),
+        [cafePayments, completedResultsByCafeId],
+    );
 
-    // Clear any prior in-progress / completed checkout state on mount so a fresh
-    // visit to /order doesn't show stale "paid" badges.
-    useEffect(() => {
-        useOrderingStore.getState().reset();
+    const isCheckoutInitiated =
+        startCheckout.isPending
+        || setPaymentIdentity.isPending
+        || checkoutResult != null
+        || activeOrder != null
+        || pendingCheckoutResult != null;
+    const isShowingPaymentStep = cafePayments.length > 0 && currentOrderId != null;
+    const isShowingCompletion = cafePayments.length > 0 && cafePayments.every(cafe => cafe.status === 'completed');
+
+    const handleStartCheckout = useCallback(async (paymentInfo: IPaymentFormData) => {
+        if (startCheckout.isPending || setPaymentIdentity.isPending) {
+            return;
+        }
+
+        setCheckoutError(undefined);
+        setCanRetryCheckout(false);
+        setSubmittedPaymentInfo(paymentInfo);
+
+        try {
+            const result = pendingCheckoutResult ?? await startCheckout.mutateAsync();
+            setPendingCheckoutResult(result);
+            setCompletedResultsByCafeId({});
+
+            await setPaymentIdentity.mutateAsync({
+                orderId: result.orderSessionId,
+                alias: paymentInfo.alias,
+                phoneNumberWithCountryCode: paymentInfo.phoneNumberWithCountryCode,
+            });
+
+            setCheckoutResult(result);
+            setPendingCheckoutResult(undefined);
+            setCanRetryCheckout(false);
+        } catch (error) {
+            setCheckoutError(getErrorMessage(error, 'Failed to start checkout'));
+            setCanRetryCheckout(true);
+        }
+    }, [pendingCheckoutResult, setPaymentIdentity, startCheckout]);
+
+    const handleRetryCheckout = useCallback(() => {
+        if (submittedPaymentInfo == null) {
+            return;
+        }
+
+        void handleStartCheckout(submittedPaymentInfo);
+    }, [handleStartCheckout, submittedPaymentInfo]);
+
+    const handleCafeCompleted = useCallback((cafeId: string, result: ICompleteOrderResult) => {
+        setCompletedResultsByCafeId((current) => ({
+            ...current,
+            [cafeId]: result,
+        }));
     }, []);
 
-    if (cartQuery.isPending) {
+    const handleCancelOrder = useCallback(async () => {
+        if (currentOrderId == null || abandonOrder.isPending) {
+            return;
+        }
+
+        try {
+            await abandonOrder.mutateAsync(currentOrderId);
+            setCheckoutResult(undefined);
+            setPendingCheckoutResult(undefined);
+            setCheckoutError(undefined);
+            setCanRetryCheckout(false);
+            setCompletedResultsByCafeId({});
+            navigate('/');
+        } catch (error) {
+            setCheckoutError(getErrorMessage(error, 'Failed to cancel order'));
+            setCanRetryCheckout(false);
+        }
+    }, [abandonOrder, currentOrderId, navigate]);
+
+    if (cartQuery.isPending && activeOrder == null && checkoutResult == null && pendingCheckoutResult == null) {
         return (
             <div className="flex">
                 <HourglassLoadingSpinner/>
@@ -56,91 +201,83 @@ const OrderPageBody = () => {
         );
     }
 
-    const isPaymentStarted = formData != null;
-    const isCheckoutAllowed = availableCafeCount > 0;
-
-    // Show the completion view even after the cart has been emptied (each
-    // successful cafe payment removes that cafe from the cart, so the very last
-    // completion takes us to size === 0). Without this guard, the empty-cart
-    // notice would briefly replace the receipt UI.
-    const isShowingCompletion = isPaymentStarted && allCafesComplete;
-
-    if (!isCheckoutAllowed && !hasUnavailableItems && !isShowingCompletion) {
-        return <EmptyCartNotice/>;
+    if (cartQuery.isError && !isShowingPaymentStep && !isShowingCompletion) {
+        return (
+            <div id="order-checkout" className="flex-col">
+                <OnlineOrderingExperimental/>
+                <div className="card error">
+                    {getErrorMessage(cartQuery.error, 'Failed to load your cart.')}
+                    <RetryButton onClick={() => void cartQuery.refetch()}/>
+                </div>
+            </div>
+        );
     }
 
-    const onFormSubmitted = (submittedFormData: IPaymentFormData) => {
-        if (prepareAllPayments.isPending) {
-            return;
-        }
-        prepareAllPayments.mutate(submittedFormData);
-    };
-
-    const isShowingActiveCheckout = isCheckoutAllowed && !isShowingCompletion;
+    if (!hasAvailableItems && !hasUnavailableItems && !isShowingPaymentStep && !isShowingCompletion) {
+        return <EmptyCartNotice/>;
+    }
 
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
-            <CartHydrationView/>
-            {
-                isShowingActiveCheckout && (
-                    <>
-                        <div className="card dark-blue">
-                            <div className="title">
-                                Your Order
-                            </div>
-                            <CartContentsTable
-                                showFullDetails={true}
-                                showTotalPrice={true}
-                                readOnly={isPaymentStarted}
-                            />
-                            <WaitTime/>
+            {!isShowingPaymentStep && !isShowingCompletion && (
+                <>
+                    <div className="card dark-blue">
+                        <div className="title">
+                            Your Order
                         </div>
-                        {availableCafeCount > 1 && <MultiCafeOrderWarning/>}
-                        <PaymentInfoForm
-                            isPrepareStarted={isPaymentStarted}
-                            isCartReady={cartSessionQuery.data != null}
-                            onSubmit={onFormSubmitted}
+                        <CartContentsTable
+                            showFullDetails={true}
+                            showTotalPrice={true}
+                            readOnly={isCheckoutInitiated}
                         />
-                        <OrderPrivacyPolicy/>
-                        {cartSessionQuery.isFetching && (
-                            <div className="flex flex-justify-center">
-                                <HourglassLoadingSpinner/>
-                                Building your order...
-                            </div>
-                        )}
-                        {(!cartSessionQuery.isFetching && prepareAllPayments.isPending) && (
-                            <div className="flex flex-justify-center">
-                                <HourglassLoadingSpinner/>
-                                Preparing payment...
-                            </div>
-                        )}
-                        {prepareAllPayments.isError && (
-                            <div className="card error">
-                                {prepareAllPayments.error instanceof Error ? prepareAllPayments.error.message : 'Failed to prepare payment'}
-                                <RetryButton onClick={() => formData && prepareAllPayments.mutate(formData)}/>
-                            </div>
-                        )}
-                        {
-                            isPaymentStarted && !allCafesComplete && (
-                                <CafePayment formData={formData}/>
-                            )
-                        }
-                    </>
-                )
-            }
-            {
-                isShowingCompletion && (
-                    <>
-                        <OrderStatus value={completionResults}/>
+                    </div>
+                    {availableCafeCount > 1 && <MultiCafeOrderWarning/>}
+                    <PaymentInfoForm
+                        isPrepareStarted={isCheckoutInitiated}
+                        isCartReady={hasAvailableItems}
+                        onSubmit={(paymentInfo) => void handleStartCheckout(paymentInfo)}
+                    />
+                    <OrderPrivacyPolicy/>
+                    {(startCheckout.isPending || setPaymentIdentity.isPending) && (
                         <div className="flex flex-justify-center">
-                            <button className="default-container" onClick={() => navigate('/')}>
-                                Return Home
-                            </button>
+                            <HourglassLoadingSpinner/>
+                            {startCheckout.isPending ? 'Starting checkout...' : 'Saving payment info...'}
                         </div>
-                    </>
-                )
-            }
+                    )}
+                </>
+            )}
+            {checkoutError && (
+                <div className="card error">
+                    {checkoutError}
+                    {(submittedPaymentInfo && canRetryCheckout) && <RetryButton onClick={handleRetryCheckout}/>} 
+                </div>
+            )}
+            {isShowingPaymentStep && currentOrderId && !isShowingCompletion && (
+                <>
+                    <div className="card dark-blue">
+                        <div className="title">Order Summary</div>
+                        <WaitTime checkoutResult={checkoutResult} activeOrder={activeOrder}/>
+                    </div>
+                    <MultiCafePayment
+                        orderId={currentOrderId}
+                        cafes={cafePayments}
+                        isCancelling={abandonOrder.isPending}
+                        onCompleted={handleCafeCompleted}
+                        onCancelOrder={() => void handleCancelOrder()}
+                    />
+                </>
+            )}
+            {isShowingCompletion && (
+                <>
+                    <OrderStatus items={completedItems}/>
+                    <div className="flex flex-justify-center">
+                        <button className="default-container" onClick={() => navigate('/')}>
+                            Return Home
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

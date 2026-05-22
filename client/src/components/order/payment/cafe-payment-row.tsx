@@ -1,144 +1,178 @@
-import { ICompleteOrderRequest } from '@msdining/common/models/cart';
-import React, { useCallback, useContext, useMemo } from 'react';
+import type { ICompleteOrderResult } from '@msdining/common/models/order';
+import type { OrderCafePartStatus } from '@msdining/common/models/cart';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
-import { useCafeCompleteMutation, useCafeRepreparePaymentMutation } from '../../../store/queries/ordering.ts';
-import { useCartStore } from '../../../store/zustand/cart.ts';
-import { ICafePaymentSlice, IPaymentFormData, useOrderingStore } from '../../../store/zustand/ordering.ts';
+import {
+    useCompleteOrderMutation,
+    usePreparePaymentMutation,
+} from '../../../store/queries/new-ordering.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { formatPrice } from '../../../util/cart.ts';
 import { classNames } from '../../../util/react.ts';
-import { IRguestPaymentResult, PaymentIframe } from './payment-iframe.tsx';
+import { PaymentIframe } from './payment-iframe.tsx';
 
-interface ICafePaymentRowProps {
+export interface ICafePaymentRowValue {
     cafeId: string;
-    formData: IPaymentFormData;
-    popupId: symbol;
-    disabled: boolean;
+    status: OrderCafePartStatus;
+    total: number | null;
+    waitTimeMin: number | null;
+    waitTimeMax: number | null;
+    buyOnDemandOrderNumber: string | null;
 }
 
-const buildCompleteRequest = (
-    slice: ICafePaymentSlice,
-    formData: IPaymentFormData,
-    paymentResult: IRguestPaymentResult,
-): ICompleteOrderRequest => ({
-    orderId:                    slice.orderId,
-    paymentToken:               paymentResult.token,
-    cardInfo:                   paymentResult.cardInfo,
-    alias:                      formData.alias,
-    phoneNumberWithCountryCode: formData.phoneNumberWithCountryCode,
-});
+interface ICafePaymentRowProps {
+    orderId: string;
+    value: ICafePaymentRowValue;
+    popupId: symbol;
+    disabled: boolean;
+    onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;
+}
 
-export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ cafeId, formData, popupId, disabled }) => {
+const getErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message.trim().length > 0) {
+        return error.message;
+    }
+
+    return fallback;
+};
+
+const getStatusLabel = (status: OrderCafePartStatus) => {
+    switch (status) {
+    case 'pending':
+        return 'Ready for payment';
+    case 'payment_pending':
+        return 'Payment pending';
+    case 'completed':
+        return 'Completed';
+    case 'failed':
+        return 'Payment failed';
+    case 'abandoned':
+        return 'Cancelled';
+    default:
+        return status;
+    }
+};
+
+export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value, popupId, disabled, onCompleted }) => {
     const { viewsById } = useContext(ApplicationContext);
-    const slice = useOrderingStore((state) => state.paymentsByCafeId.get(cafeId));
-    const cart = useCartStore((state) => state.items);
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
+    const preparePayment = usePreparePaymentMutation();
+    const completeOrder = useCompleteOrderMutation();
+    const [error, setError] = useState<string>();
 
-    const reprepareMutation = useCafeRepreparePaymentMutation(cafeId, slice?.orderId ?? '');
-    const completeMutation = useCafeCompleteMutation();
-
-    const view = viewsById.get(cafeId);
+    const view = viewsById.get(value.cafeId);
     const cafeName = view
         ? getViewName({ view, showGroupName: true })
-        : cafeId;
+        : value.cafeId;
 
-    const cafeTotal = useMemo(() => {
-        const cafeItems = cart.get(cafeId);
-        if (!cafeItems) {
-            return 0;
+    const canPay = value.status !== 'completed' && value.status !== 'abandoned';
+    const waitTimeLabel = useMemo(() => {
+        if (value.waitTimeMin == null || value.waitTimeMax == null) {
+            return undefined;
         }
-        return Array.from(cafeItems.values()).reduce((sum, item) => sum + item.price, 0);
-    }, [cart, cafeId]);
+
+        return `${value.waitTimeMin} - ${value.waitTimeMax} min`;
+    }, [value.waitTimeMax, value.waitTimeMin]);
 
     const openPaymentPopup = useCallback((iframeUrl: string) => {
-        if (!slice) {
-            return;
-        }
-
         openPopup({
             id:   popupId,
             body: (
                 <PaymentIframe
                     iframeUrl={iframeUrl}
                     onPaymentComplete={async (paymentResult): Promise<void> => {
-                        await completeMutation.mutateAsync({
-                            cafeId,
-                            request: buildCompleteRequest(slice, formData, paymentResult),
+                        const result = await completeOrder.mutateAsync({
+                            orderId,
+                            cafeId: value.cafeId,
+                            paymentToken: paymentResult.token,
+                            cardInfo: paymentResult.cardInfo,
                         });
+
+                        setError(undefined);
+                        onCompleted(value.cafeId, result);
                         closePopup();
                     }}
-                    onPaymentError={(error) => {
-                        useOrderingStore.getState().setError(cafeId, error);
+                    onPaymentError={(paymentError) => {
+                        setError(paymentError);
                     }}
-                    onClose={() => {
-                        // The single-use iframe URL is consumed once opened; the
-                        // next "Pay" click will re-prepare a fresh URL.
-                        useOrderingStore.getState().setIframeUrl(cafeId, undefined);
-                        closePopup();
-                    }}
+                    onClose={closePopup}
                 />
             ),
         });
-    }, [openPopup, popupId, completeMutation, formData, closePopup, cafeId, slice]);
+    }, [closePopup, completeOrder, onCompleted, openPopup, orderId, popupId, value.cafeId]);
 
     const handlePay = useCallback(async () => {
-        if (!slice) {
-            return;
+        setError(undefined);
+
+        try {
+            const prepared = await preparePayment.mutateAsync({
+                orderId,
+                cafeId: value.cafeId,
+            });
+
+            openPaymentPopup(prepared.iframeUrl);
+        } catch (prepareError) {
+            setError(getErrorMessage(prepareError, 'Failed to prepare payment'));
         }
+    }, [openPaymentPopup, orderId, preparePayment, value.cafeId]);
 
-        if (slice.iframeUrl) {
-            openPaymentPopup(slice.iframeUrl);
-            return;
-        }
-
-        const fresh = await reprepareMutation.mutateAsync();
-        openPaymentPopup(fresh.iframeUrl);
-    }, [slice, reprepareMutation, openPaymentPopup]);
-
-    if (!slice) {
-        return null;
-    }
-
-    const isBusy = reprepareMutation.isPending || completeMutation.isPending;
-    const buttonLabel = reprepareMutation.isPending
+    const isBusy = preparePayment.isPending || completeOrder.isPending;
+    const buttonLabel = preparePayment.isPending
         ? 'Preparing...'
-        : completeMutation.isPending
+        : completeOrder.isPending
             ? 'Completing...'
-            : 'Pay';
+            : value.status === 'failed'
+                ? 'Retry Payment'
+                : 'Pay';
 
     return (
         <div
             className={classNames(
                 'multi-cafe-payment-row',
-                slice.completionResult && 'completed',
+                value.status === 'completed' && 'completed',
             )}
         >
             <div className="multi-cafe-payment-row-info">
                 <span className="multi-cafe-payment-cafe-name">{cafeName}</span>
-                {cafeTotal > 0 && (
+                {value.total != null && (
                     <span className="multi-cafe-payment-total">
-                        {formatPrice(cafeTotal)}
+                        Total: {formatPrice(value.total)}
                     </span>
                 )}
+                {waitTimeLabel && (
+                    <span className="multi-cafe-payment-total">
+                        Wait time: {waitTimeLabel}
+                    </span>
+                )}
+                <span className="multi-cafe-payment-total">
+                    Status: {getStatusLabel(value.status)}
+                </span>
+                {value.buyOnDemandOrderNumber && (
+                    <span className="multi-cafe-payment-total">
+                        Order #{value.buyOnDemandOrderNumber}
+                    </span>
+                )}
+                {error && (
+                    <div className="multi-cafe-payment-row-error">
+                        {error}
+                    </div>
+                )}
             </div>
-            {slice.error && (
-                <div className="multi-cafe-payment-row-error">
-                    {slice.error}
-                </div>
-            )}
             <div className="multi-cafe-payment-row-action">
-                {slice.completionResult ? (
+                {value.status === 'completed' ? (
                     <span className="multi-cafe-payment-check" title="Paid">✅</span>
-                ) : (
+                ) : canPay ? (
                     <button
                         className="default-container"
-                        onClick={handlePay}
+                        onClick={() => void handlePay()}
                         disabled={disabled || isBusy}
                     >
                         {buttonLabel}
                     </button>
+                ) : (
+                    <span className="multi-cafe-payment-total">Cancelled</span>
                 )}
             </div>
         </div>
