@@ -85,7 +85,7 @@ model OrderCafePart {
   // order details, site store info, etc. (~5KB JSON)
   sessionStateJson String?
 
-  // Error tracking
+  // Error tracking (diagnostic only, not used for control flow)
   lastError String?
   lastStage String?
 

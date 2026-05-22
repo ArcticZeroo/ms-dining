@@ -6,7 +6,7 @@ import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
-import type { ICartItem, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { ICartItem, IRguestCardInfo, OrderCafePartStatus } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
@@ -85,6 +85,17 @@ const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): P
 
 export abstract class OrderOrchestrator {
     /**
+     * Validates ownership and returns the cafe part with a typed status.
+     */
+    private static async useOrderCafePart(userId: string, orderSessionId: string, cafeId: string) {
+        return usePrismaTransaction(async prismaTx => {
+            await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
+            const part = await OrderStorageClient.getCafePart(prismaTx, orderSessionId, cafeId);
+            return { ...part, status: part.status as OrderCafePartStatus };
+        });
+    }
+
+    /**
      * Single path for getting a live session — creates one if it doesn't exist
      * by reading the cart items from DB. Updates DB with new BoD order data.
      */
@@ -115,9 +126,9 @@ export abstract class OrderOrchestrator {
     static async startCheckout(userId: string): Promise<ICheckoutResult> {
         const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId);
 
-        // Create live BoD sessions in parallel — same path as rebuild
-        const results = await Promise.allSettled(
-            cafeIds.map(async (cafeId) => {
+        // Create live BoD sessions in parallel — fails fast if any cafe fails
+        const cafeResults = await Promise.all(
+            cafeIds.map(async (cafeId): Promise<ICheckoutCafeResult> => {
                 const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
 
                 const waitTime = await fetchWaitTimeWithCartItems(
@@ -142,35 +153,11 @@ export abstract class OrderOrchestrator {
                     total:                  session.orderTotalWithTax,
                     waitTimeMin:            waitTime.minTime,
                     waitTimeMax:            waitTime.maxTime,
-                } satisfies ICheckoutCafeResult;
+                };
             }),
         );
 
-        // Mark failed cafes
-        for (const [i, result] of results.entries()) {
-            if (result.status === 'rejected') {
-                const cafeId = cafeIds[i]!;
-                const err = result.reason;
-                orderLog.error(`{${cafeId}} Checkout failed:`, err);
-                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'failed', {
-                    lastError: err instanceof Error ? err.message : String(err),
-                    lastStage: 'startCheckout',
-                });
-            }
-        }
-
-        const cafeResults = results
-            .filter((r): r is PromiseFulfilledResult<ICheckoutCafeResult> => r.status === 'fulfilled')
-            .map(r => r.value);
-
-        if (cafeResults.length == 0) {
-            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'All cafe checkouts failed');
-        }
-
-        return {
-            orderSessionId: orderSessionId,
-            cafeResults,
-        };
+        return { orderSessionId, cafeResults };
     }
 
     static async preparePayment(
@@ -179,16 +166,13 @@ export abstract class OrderOrchestrator {
         cafeId: string,
         iframeCssUrl: string,
     ): Promise<IPreparePaymentResult> {
-        await usePrismaTransaction(async prismaTx => {
-            await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-            const part = await OrderStorageClient.getCafePart(prismaTx, orderSessionId, cafeId);
-            if (part.status != 'pending' && part.status != 'payment_pending') {
-                throw new ServiceError(
-                    SERVICE_ERROR_CODES.BAD_REQUEST,
-                    `Cannot prepare payment for cafe ${cafeId} in status '${part.status}'`,
-                );
-            }
-        });
+        const part = await this.useOrderCafePart(userId, orderSessionId, cafeId);
+        if (part.status !== 'pending' && part.status !== 'payment_pending') {
+            throw new ServiceError(
+                SERVICE_ERROR_CODES.BAD_REQUEST,
+                `Cannot prepare payment for cafe ${cafeId} in status '${part.status}'`,
+            );
+        }
 
         const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
         if (session.lastCompletedStage != SubmitOrderStage.initializeCardProcessor) {
@@ -220,25 +204,19 @@ export abstract class OrderOrchestrator {
         orderSessionId: string,
         cafeId: string,
         paymentToken: string,
-        cardInfo: ICompleteOrderResult extends never ? never : {
-            accountNumberMasked: string;
-            cardIssuer: string;
-            expirationYearMonth: string;
-            cardHolderName: string;
-            postalCode: string;
-        },
+        cardInfo: IRguestCardInfo,
     ): Promise<ICompleteOrderResult> {
-        const order = await usePrismaTransaction(async prismaTx => {
-            await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-            const part = await OrderStorageClient.getCafePart(prismaTx, orderSessionId, cafeId);
-            if (part.status != 'payment_pending') {
-                throw new ServiceError(
-                    SERVICE_ERROR_CODES.BAD_REQUEST,
-                    `Cannot complete order for cafe ${cafeId} in status '${part.status}'`,
-                );
-            }
-            return OrderStorageClient.getOrderSession(prismaTx, orderSessionId);
-        });
+        const part = await this.useOrderCafePart(userId, orderSessionId, cafeId);
+        if (part.status !== 'payment_pending') {
+            throw new ServiceError(
+                SERVICE_ERROR_CODES.BAD_REQUEST,
+                `Cannot complete order for cafe ${cafeId} in status '${part.status}'`,
+            );
+        }
+
+        const order = await usePrismaClient(prisma =>
+            OrderStorageClient.getOrderSession(prisma, orderSessionId),
+        );
 
         if (!order.alias || !order.phoneNumberWithCountryCode) {
             throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Payment identity (alias + phone) not set');
