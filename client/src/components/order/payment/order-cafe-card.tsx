@@ -67,6 +67,11 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         [items],
     );
 
+    const totalQuantity = useMemo(
+        () => items.reduce((sum, item) => sum + item.quantity, 0),
+        [items],
+    );
+
     const hasUnavailableItems = useMemo(
         () => items.some(item => !item.isAvailable),
         [items],
@@ -172,7 +177,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                     </div>
                 ) : (
                     <>
-                        <span>{items.length} item{items.length === 1 ? '' : 's'}</span>
+                        <span>{totalQuantity} item{totalQuantity === 1 ? '' : 's'}</span>
                         <button
                             className="default-container"
                             disabled={!isPayEnabled || isLocalBusy || hasUnavailableItems}
