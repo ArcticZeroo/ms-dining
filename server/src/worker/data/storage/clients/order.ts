@@ -50,7 +50,7 @@ export abstract class OrderStorageClient {
      * Returns the set of cafeIds that received items.
      */
     static async transferCart(userId: string, orderSessionId: string): Promise<string[]> {
-        return usePrismaWrite(async prisma => {
+        return usePrismaTransaction(async prisma => {
             const cartItems = await prisma.cartItem.findMany({
                 where:   { cartUserId: userId },
                 select:  { id: true, menuItem: { select: { cafeId: true } } },
