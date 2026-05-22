@@ -1,86 +1,33 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useOrderGuard } from '../../../hooks/order-guard.ts';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useOrderPageGuard } from '../../../hooks/order-guard.ts';
 import { useAbandonRemainingCafesMutation } from '../../../store/queries/new-ordering.ts';
-import { CART_QUERY_KEY, useCartQuery } from '../../../store/queries/server-cart.ts';
-import { RetryButton } from '../../button/retry-button.tsx';
+import { CART_QUERY_KEY } from '../../../store/queries/server-cart.ts';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { MultiCafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 
-const getErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof Error && error.message.trim().length > 0) {
-        return error.message;
-    }
-
-    return fallback;
-};
-
 export const OrderPayPage = () => {
-    const { id } = useParams();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const location = useLocation();
-    const cartQuery = useCartQuery();
-    const guard = useOrderGuard();
+    const { isLoading, activeOrder } = useOrderPageGuard();
     const abandonMutation = useAbandonRemainingCafesMutation();
-    const [checkoutError, setCheckoutError] = useState<string>();
-
-    const activeOrder = guard.activeOrder;
-    const isMatchingOrder = id != null && activeOrder?.orderSessionId === id;
-    const isWaitingForOrder = id != null
-        && !isMatchingOrder
-        && !cartQuery.isError
-        && (guard.isLoading || guard.isFetching);
-
-    useEffect(() => {
-        if (!isWaitingForOrder && guard.expectedPath != null && guard.expectedPath !== location.pathname) {
-            navigate(guard.expectedPath, { replace: true });
-        }
-    }, [guard.expectedPath, isWaitingForOrder, location.pathname, navigate]);
-
-    const handleCafeCompleted = useCallback(() => undefined, []);
 
     const cancelOrder = useCallback(async () => {
-        if (id == null || abandonMutation.isPending) {
+        if (activeOrder == null || abandonMutation.isPending) {
             return;
         }
 
-        setCheckoutError(undefined);
+        await abandonMutation.mutateAsync(activeOrder.orderSessionId);
+        await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+        navigate('/order');
+    }, [abandonMutation, activeOrder, navigate, queryClient]);
 
-        try {
-            await abandonMutation.mutateAsync(id);
-            await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-            navigate('/order');
-        } catch (error) {
-            setCheckoutError(getErrorMessage(error, 'Failed to cancel order'));
-        }
-    }, [abandonMutation, id, navigate, queryClient]);
+    const handleCafeCompleted = useCallback(() => undefined, []);
 
-    if (isWaitingForOrder || (isMatchingOrder && guard.hasActiveCafeParts && activeOrder == null)) {
-        return (
-            <div className="flex">
-                <HourglassLoadingSpinner/>
-                Loading your order...
-            </div>
-        );
-    }
-
-    if (!isMatchingOrder && cartQuery.isError) {
-        return (
-            <div id="order-checkout" className="flex-col">
-                <OnlineOrderingExperimental/>
-                <div className="card error">
-                    {getErrorMessage(cartQuery.error, 'Failed to load your order.')}
-                    <RetryButton onClick={() => void cartQuery.refetch()}/>
-                </div>
-            </div>
-        );
-    }
-
-    if (!isMatchingOrder || activeOrder == null) {
+    if (isLoading || activeOrder == null) {
         return (
             <div className="flex">
                 <HourglassLoadingSpinner/>
@@ -103,9 +50,9 @@ export const OrderPayPage = () => {
                 onCompleted={handleCafeCompleted}
                 onCancelOrder={() => void cancelOrder()}
             />
-            {checkoutError && (
+            {abandonMutation.isError && (
                 <div className="card error">
-                    {checkoutError}
+                    {abandonMutation.error instanceof Error ? abandonMutation.error.message : 'Failed to cancel order'}
                 </div>
             )}
         </div>

@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useOrderGuard } from '../../../hooks/order-guard.ts';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useOrderPageGuard } from '../../../hooks/order-guard.ts';
 import { CART_QUERY_KEY, useCartQuery } from '../../../store/queries/server-cart.ts';
 import { useStartCheckoutMutation } from '../../../store/queries/new-ordering.ts';
 import {
@@ -17,30 +17,15 @@ import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
 import { PaymentInfoForm, type IPaymentFormData } from '../../order/payment/payment-info-form.tsx';
 
-const getErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof Error && error.message.trim().length > 0) {
-        return error.message;
-    }
-
-    return fallback;
-};
-
 export const OrderCartPage = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const location = useLocation();
-    const guard = useOrderGuard();
+    const { isLoading } = useOrderPageGuard();
     const cartQuery = useCartQuery();
     const startCheckoutMutation = useStartCheckoutMutation();
     const cartItems = useServerCartItems();
     const hasUnavailableItems = useServerCartHasUnavailableItems();
     const [checkoutError, setCheckoutError] = useState<string>();
-
-    useEffect(() => {
-        if (guard.expectedPath != null && guard.expectedPath !== location.pathname) {
-            navigate(guard.expectedPath, { replace: true });
-        }
-    }, [guard.expectedPath, location.pathname, navigate]);
 
     const availableItems = useMemo(() => cartItems.filter(item => item.isAvailable), [cartItems]);
     const hasAvailableItems = availableItems.length > 0;
@@ -61,11 +46,11 @@ export const OrderCartPage = () => {
             await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
             navigate(`/order/${result.orderSessionId}/pay`);
         } catch (error) {
-            setCheckoutError(getErrorMessage(error, 'Failed to start checkout'));
+            setCheckoutError(error instanceof Error ? error.message : 'Failed to start checkout');
         }
     }, [navigate, queryClient, startCheckoutMutation]);
 
-    if (guard.isLoading) {
+    if (isLoading) {
         return (
             <div className="flex">
                 <HourglassLoadingSpinner/>
@@ -79,7 +64,7 @@ export const OrderCartPage = () => {
             <div id="order-checkout" className="flex-col">
                 <OnlineOrderingExperimental/>
                 <div className="card error">
-                    {getErrorMessage(cartQuery.error, 'Failed to load your cart.')}
+                    {cartQuery.error instanceof Error ? cartQuery.error.message : 'Failed to load your cart.'}
                     <RetryButton onClick={() => void cartQuery.refetch()}/>
                 </div>
             </div>
