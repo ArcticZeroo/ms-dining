@@ -24,9 +24,25 @@ interface IOrderCafePartData {
 
 export abstract class OrderStorageClient {
     static async createOrderSession(userId: string) {
-        return usePrismaWrite(prisma => prisma.orderSession.create({
-            data: { userId },
-        }));
+        return usePrismaTransaction(async tx => {
+            // Reject if the user already has an active order
+            const existing = await tx.orderSession.findFirst({
+                where: {
+                    userId,
+                    cafeParts: {
+                        some: { status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] } },
+                    },
+                },
+                select: { id: true },
+            });
+            if (existing) {
+                throw new ServiceError(
+                    SERVICE_ERROR_CODES.CONFLICT,
+                    'An active order already exists. Finish or abandon it before checking out again.',
+                );
+            }
+            return tx.orderSession.create({ data: { userId } });
+        });
     }
 
     static async createCafePart(
