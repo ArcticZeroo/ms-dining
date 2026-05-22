@@ -64,6 +64,28 @@ export const useCartSnapshot = () => {
         ));
     }, []);
 
+    // Sync edits from the server cart store into the snapshot.
+    // This handles the edit popup flow where mutations go to the store
+    // but the snapshot doesn't see them.
+    useEffect(() => {
+        if (!hasSnapshottedCart) {
+            return;
+        }
+
+        setSnapshotItems(previous => {
+            let changed = false;
+            const updated = previous.map(snapshotItem => {
+                const storeItem = serverCartItems.find(item => item.id === snapshotItem.id);
+                if (storeItem && storeItem !== snapshotItem) {
+                    changed = true;
+                    return storeItem;
+                }
+                return snapshotItem;
+            });
+            return changed ? updated : previous;
+        });
+    }, [hasSnapshottedCart, serverCartItems]);
+
     return {
         isLoading:  !hasSnapshottedCart && cartQuery.isPending,
         isError:    cartQuery.isError && !hasSnapshottedCart,
