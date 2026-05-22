@@ -56,25 +56,20 @@
     </div>
     <script>
         function submitPayment() {
-            window.parent.postMessage(JSON.stringify({
-                type: 'success',
-                data: {
-                    token: 'fake-payment-token-' + Math.random().toString(36).slice(2, 10),
-                    cardInfo: {
-                        accountNumberMasked: '****1234',
-                        cardIssuer: 'Visa',
-                        expirationYearMonth: '2028-12',
-                        cardholderName: 'Test User',
-                        postalCode: '98052'
-                    }
+            window.parent.postMessage({
+                token: 'fake-payment-token-' + Math.random().toString(36).slice(2, 10),
+                cardInfo: {
+                    accountNumberMasked: '****1234',
+                    cardIssuer: 'Visa',
+                    expirationYearMonth: '2028-12',
+                    cardholderName: 'Test User',
+                    postalCode: '98052'
                 }
-            }), '*');
+            }, '*');
         }
 
         function cancelPayment() {
-            window.parent.postMessage(JSON.stringify({
-                type: 'cancel'
-            }), '*');
+            window.parent.postMessage({ cancel: true }, '*');
         }
     </script>
 </body>

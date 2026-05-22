@@ -78,7 +78,7 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
     }, [runCompletion]);
 
     const handleMessage = useCallback((event: MessageEvent) => {
-        if (event.origin !== 'https://pay.rguest.com') {
+        if (event.origin !== 'https://pay.rguest.com' && event.origin !== window.location.origin) {
             return;
         }
 
