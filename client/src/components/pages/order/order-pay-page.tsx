@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAbandonRemainingCafesMutation } from '../../../store/queries/new-ordering.ts';
-import { useRequiredActiveOrder } from '../../../store/zustand/server-cart.ts';
+import { useRequiredActiveOrder, useServerCartStore } from '../../../store/zustand/server-cart.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { OrderItemsSummary } from '../../order/status/order-items-summary.tsx';
@@ -19,6 +19,7 @@ export const OrderPayPage = () => {
         }
 
         await abandonMutation.mutateAsync(activeOrder.orderSessionId);
+        useServerCartStore.setState({ activeOrder: undefined });
         navigate('/order');
     }, [abandonMutation, activeOrder, navigate]);
 
