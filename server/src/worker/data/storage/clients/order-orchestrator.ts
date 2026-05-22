@@ -32,6 +32,7 @@ interface IStoredOrderItem {
     quantity: number;
     price: number;
     modifiers: ISerializedModifier[];
+    specialInstructions?: string | null;
 }
 
 interface ICheckoutCafeProcessingResult {
@@ -199,6 +200,7 @@ export abstract class OrderOrchestrator {
             itemId:              item.menuItemId,
             quantity:            item.quantity,
             choicesByModifierId: deserializeModifiers(item.modifiers ?? []),
+            specialInstructions: item.specialInstructions ?? undefined,
         }));
 
         const session = await CafeOrderSession.createAsync(cafe, cartItems);

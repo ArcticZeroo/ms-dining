@@ -27,6 +27,7 @@ interface IOrderCafePartSnapshotItem {
     quantity: number;
     price: number;
     modifiers: ISerializedModifier[];
+    specialInstructions?: string | null;
 }
 
 interface ICreateCafePartData extends IOrderCafePartData {
@@ -40,11 +41,12 @@ interface ICreateCafePartBatchData extends ICreateCafePartData {
 
 const serializeCartItems = (cartItems: ICartItemRecord[]): string => JSON.stringify(
     cartItems.map(item => ({
-        menuItemId: item.menuItemId,
-        name:       item.menuItem.name,
-        quantity:   item.quantity,
-        price:      item.menuItem.price,
-        modifiers:  item.modifiers,
+        menuItemId:          item.menuItemId,
+        name:                item.menuItem.name,
+        quantity:            item.quantity,
+        price:               item.menuItem.price,
+        modifiers:           item.modifiers,
+        specialInstructions: item.specialInstructions,
     } satisfies IOrderCafePartSnapshotItem)),
 );
 
