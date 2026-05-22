@@ -174,6 +174,18 @@ export abstract class OrderOrchestrator {
             );
         }
 
+        // Identity must be set before preparing payment — the close-order call
+        // uses it immediately after the iframe completes.
+        const order = await usePrismaClient(prisma =>
+            OrderStorageClient.getOrderSession(prisma, orderSessionId),
+        );
+        if (!order.alias || !order.phoneNumberWithCountryCode) {
+            throw new ServiceError(
+                SERVICE_ERROR_CODES.BAD_REQUEST,
+                'Payment identity (alias + phone) must be set before preparing payment',
+            );
+        }
+
         const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
         if (session.lastCompletedStage != SubmitOrderStage.initializeCardProcessor) {
             await session.prepareForIframe(iframeCssUrl);
