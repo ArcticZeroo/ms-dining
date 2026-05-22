@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { NewOrderingClient } from '../../api/new-ordering.ts';
+import { OrderClient } from '../../api/new-ordering.ts';
 import type { IRguestCardInfo } from '@msdining/common/models/cart';
 
 const CART_QUERY_KEY = ['cart', 'server'] as const;
@@ -13,7 +13,7 @@ export const useCheckoutMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: () => NewOrderingClient.checkout(),
+        mutationFn: () => OrderClient.checkout(),
         onSuccess:  () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },
@@ -29,7 +29,7 @@ export const useSetPaymentIdentityMutation = () => {
             orderId: string;
             alias: string;
             phoneNumberWithCountryCode: string;
-        }) => NewOrderingClient.setPaymentIdentity(orderId, alias, phoneNumberWithCountryCode),
+        }) => OrderClient.setPaymentIdentity(orderId, alias, phoneNumberWithCountryCode),
     });
 };
 
@@ -39,7 +39,7 @@ export const useSetPaymentIdentityMutation = () => {
 export const usePreparePaymentMutation = () => {
     return useMutation({
         mutationFn: ({ orderId, cafeId }: { orderId: string; cafeId: string }) =>
-            NewOrderingClient.preparePayment(orderId, cafeId),
+            OrderClient.preparePayment(orderId, cafeId),
     });
 };
 
@@ -56,7 +56,7 @@ export const useCompleteOrderMutation = () => {
             cafeId: string;
             paymentToken: string;
             cardInfo: IRguestCardInfo;
-        }) => NewOrderingClient.completeOrder(orderId, cafeId, paymentToken, cardInfo),
+        }) => OrderClient.completeOrder(orderId, cafeId, paymentToken, cardInfo),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },
@@ -71,7 +71,7 @@ export const useAbandonOrderMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (orderId: string) => NewOrderingClient.abandonOrder(orderId),
+        mutationFn: (orderId: string) => OrderClient.abandonOrder(orderId),
         onSuccess:  () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },

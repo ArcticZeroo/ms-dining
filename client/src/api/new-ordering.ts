@@ -1,19 +1,25 @@
-import type { ICheckoutResult, IPreparePaymentResult, ICompleteOrderResult } from './order-types.ts';
+import type { ICheckoutResult, IPreparePaymentResult, ICompleteOrderResult } from '@msdining/common/models/order';
 import type { IRguestCardInfo } from '@msdining/common/models/cart';
-import { JSON_HEADERS, makeJsonRequest } from './request.ts';
+import {
+    CheckoutResultSchema,
+    PreparePaymentResultSchema,
+    CompleteOrderResultSchema,
+} from '@msdining/common/models/order';
+import { JSON_HEADERS, makeJsonRequestNoParse, makeJsonRequestWithSchema } from './request.ts';
 
 const ORDER_BASE = '/api/dining/order';
 
-export abstract class NewOrderingClient {
+export abstract class OrderClient {
     static async checkout(): Promise<ICheckoutResult> {
-        return makeJsonRequest({
-            path:    `${ORDER_BASE}/checkout`,
+        return makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/checkout`,
+            schema: CheckoutResultSchema,
             options: { method: 'POST' },
         });
     }
 
     static async setPaymentIdentity(orderId: string, alias: string, phoneNumberWithCountryCode: string): Promise<void> {
-        await makeJsonRequest({
+        await makeJsonRequestNoParse({
             path:    `${ORDER_BASE}/${orderId}/identity`,
             options: {
                 method:  'PUT',
@@ -24,8 +30,9 @@ export abstract class NewOrderingClient {
     }
 
     static async preparePayment(orderId: string, cafeId: string): Promise<IPreparePaymentResult> {
-        return makeJsonRequest({
-            path:    `${ORDER_BASE}/${orderId}/cafes/${cafeId}/prepare-payment`,
+        return makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/${orderId}/cafes/${cafeId}/prepare-payment`,
+            schema: PreparePaymentResultSchema,
         });
     }
 
@@ -35,8 +42,9 @@ export abstract class NewOrderingClient {
         paymentToken: string,
         cardInfo: IRguestCardInfo,
     ): Promise<ICompleteOrderResult> {
-        return makeJsonRequest({
-            path:    `${ORDER_BASE}/${orderId}/cafes/${cafeId}/complete`,
+        return makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/${orderId}/cafes/${cafeId}/complete`,
+            schema: CompleteOrderResultSchema,
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
@@ -46,7 +54,7 @@ export abstract class NewOrderingClient {
     }
 
     static async abandonOrder(orderId: string): Promise<void> {
-        await makeJsonRequest({
+        await makeJsonRequestNoParse({
             path:    `${ORDER_BASE}/${orderId}`,
             options: { method: 'DELETE' },
         });

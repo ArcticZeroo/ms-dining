@@ -13,7 +13,7 @@ import type {
     ICheckoutCafeResult,
     IPreparePaymentResult,
     ICompleteOrderResult,
-} from '../../../../shared/services/order.js';
+} from '@msdining/common/models/order';
 import type { ISerializedModifier } from '@msdining/common/models/cart';
 import { phone } from 'phone';
 

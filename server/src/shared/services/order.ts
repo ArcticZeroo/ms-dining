@@ -1,35 +1,11 @@
-import type { IActiveOrderSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { IActiveOrderSummary } from '@msdining/common/models/cart';
+import type {
+    ICheckoutResult,
+    IPreparePaymentResult,
+    ICompleteOrderResult,
+} from '@msdining/common/models/order';
 
-export interface ICheckoutCafeResult {
-    cafeId: string;
-    buyOnDemandOrderId: string;
-    buyOnDemandOrderNumber: string;
-    subtotal: number;
-    tax: number;
-    total: number;
-    waitTimeMin: number;
-    waitTimeMax: number;
-}
-
-export interface ICheckoutResult {
-    orderSessionId: string;
-    cafeResults: ICheckoutCafeResult[];
-}
-
-export interface IPreparePaymentResult {
-    siteToken: string;
-    iframeUrl: string;
-    buyOnDemandOrderId: string;
-    buyOnDemandOrderNumber: string;
-    expiresAt: string;
-}
-
-export interface ICompleteOrderResult {
-    buyOnDemandOrderNumber: string;
-    waitTimeMin: number;
-    waitTimeMax: number;
-    completedAt: string;
-}
+export type { ICheckoutCafeResult } from '@msdining/common/models/order';
 
 export interface IOrderService {
     /** Create an order from the user's cart. Calls BoD to build each cafe's cart. */
