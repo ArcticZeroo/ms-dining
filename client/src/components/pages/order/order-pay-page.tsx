@@ -25,8 +25,6 @@ export const OrderPayPage = () => {
         navigate('/order');
     }, [abandonMutation, activeOrder, navigate, queryClient]);
 
-    const handleCafeCompleted = useCallback(() => undefined, []);
-
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
@@ -38,7 +36,6 @@ export const OrderPayPage = () => {
                 orderId={activeOrder.orderSessionId}
                 cafes={activeOrder.cafeParts}
                 isCancelling={abandonMutation.isPending}
-                onCompleted={handleCafeCompleted}
                 onCancelOrder={() => void cancelOrder()}
             />
             {abandonMutation.isError && (

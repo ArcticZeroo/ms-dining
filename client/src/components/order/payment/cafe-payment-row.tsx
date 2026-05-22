@@ -1,4 +1,3 @@
-import type { ICompleteOrderResult } from '@msdining/common/models/order';
 import type { IOrderCafePartSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
@@ -18,7 +17,6 @@ interface ICafePaymentRowProps {
     value: IOrderCafePartSummary;
     popupId: symbol;
     disabled: boolean;
-    onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;
 }
 
 const getStatusLabel = (status: OrderCafePartStatus) => {
@@ -38,7 +36,7 @@ const getStatusLabel = (status: OrderCafePartStatus) => {
     }
 };
 
-export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value, popupId, disabled, onCompleted }) => {
+export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value, popupId, disabled }) => {
     const { viewsById } = useContext(ApplicationContext);
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
@@ -67,7 +65,7 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value,
                 <PaymentIframe
                     iframeUrl={iframeUrl}
                     onPaymentComplete={async (paymentResult): Promise<void> => {
-                        const result = await completeOrder.mutateAsync({
+                        await completeOrder.mutateAsync({
                             orderId,
                             cafeId: value.cafeId,
                             paymentToken: paymentResult.token,
@@ -75,7 +73,6 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value,
                         });
 
                         setError(undefined);
-                        onCompleted(value.cafeId, result);
                         closePopup();
                     }}
                     onPaymentError={(paymentError) => {
@@ -85,7 +82,7 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value,
                 />
             ),
         });
-    }, [closePopup, completeOrder, onCompleted, openPopup, orderId, popupId, value.cafeId]);
+    }, [closePopup, completeOrder, openPopup, orderId, popupId, value.cafeId]);
 
     const handlePay = useCallback(async () => {
         setError(undefined);

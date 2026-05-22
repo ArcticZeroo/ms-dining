@@ -1,5 +1,4 @@
 import type { IOrderCafePartSummary } from '@msdining/common/models/cart';
-import type { ICompleteOrderResult } from '@msdining/common/models/order';
 import React, { useMemo } from 'react';
 import { CafePaymentRow } from './cafe-payment-row.tsx';
 
@@ -9,7 +8,6 @@ interface IMultiCafePaymentProps {
     orderId: string;
     cafes: IOrderCafePartSummary[];
     isCancelling: boolean;
-    onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;
     onCancelOrder: () => void;
 }
 
@@ -17,7 +15,6 @@ export const MultiCafePayment: React.FC<IMultiCafePaymentProps> = ({
     orderId,
     cafes,
     isCancelling,
-    onCompleted,
     onCancelOrder,
 }) => {
     const completedCount = useMemo(
@@ -57,7 +54,6 @@ export const MultiCafePayment: React.FC<IMultiCafePaymentProps> = ({
                         value={cafe}
                         popupId={popupId}
                         disabled={isCancelling}
-                        onCompleted={onCompleted}
                     />
                 ))}
             </div>
