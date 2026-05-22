@@ -3,11 +3,16 @@ import { setInterval } from 'node:timers';
 import { logError } from '../../shared/util/log.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 
+export interface IUpdateOptions {
+	/** When true, keeps the original TTL instead of resetting it. Only meaningful for expiring maps. */
+	preserveTtl?: boolean;
+}
+
 export interface ILockedMap<K, V> {
 	size: number;
 	entries(): IterableIterator<[K, V]>;
 	has(key: K): Promise<boolean>;
-	update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn>;
+	update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, options?: IUpdateOptions): Promise<TReturn>;
 	getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V>;
 	peek<TReturn>(key: K, callback: (value: V | undefined) => TReturn): Promise<TReturn>;
 	delete(key: K): Promise<void>;
@@ -136,7 +141,9 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 		}, this.#expirationTimeMs);
 	}
 
-	async update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
+	async update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, options?: IUpdateOptions): Promise<TReturn> {
+		const { preserveTtl = false } = options ?? {};
+
 		const result = await this.#map.update(key, async (entry) => {
 			const now = Date.now();
 			if (entry && entry.expirationTime <= now) {
@@ -150,7 +157,11 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 				return undefined;
 			}
 
-			return { value: newValue, expirationTime: now + this.#expirationTimeMs } satisfies IExpiringEntry<V>;
+			const expirationTime = (preserveTtl && entry)
+				? entry.expirationTime
+				: now + this.#expirationTimeMs;
+
+			return { value: newValue, expirationTime } satisfies IExpiringEntry<V>;
 		});
 
 		return result?.value as TReturn;

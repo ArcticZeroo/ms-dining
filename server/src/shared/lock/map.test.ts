@@ -10,7 +10,7 @@
 
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { LockedMap } from './map.js';
+import { LockedMap, LockedExpiringMap } from './map.js';
 
 const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
@@ -133,4 +133,47 @@ test('delete() during contention waits for in-flight update to finish', async ()
 
     assert.equal(updateFinished, true, 'In-flight update must complete before delete proceeds');
     assert.equal(await map.has('k'), false);
+});
+
+test('LockedExpiringMap: update() with preserveTtl keeps original expiration', async () => {
+    // Short TTL so the test completes quickly
+    const map = new LockedExpiringMap<string, number>(200);
+
+    // Insert a value — it gets TTL = now + 200ms
+    await map.update('k', () => 1);
+
+    // Wait 100ms (half the TTL), then update with preserveTtl
+    await wait(100);
+    await map.update('k', (v) => (v ?? 0) + 1, { preserveTtl: true });
+
+    // Value should be updated
+    let observed: number | undefined;
+    await map.peek('k', (v) => { observed = v; });
+    assert.equal(observed, 2, 'Value should have been incremented');
+
+    // Wait another 120ms — original TTL should have expired (200ms total)
+    await wait(120);
+    await map.peek('k', (v) => { observed = v; });
+    assert.equal(observed, undefined, 'Entry should have expired based on original TTL');
+});
+
+test('LockedExpiringMap: update() without preserveTtl resets expiration', async () => {
+    const map = new LockedExpiringMap<string, number>(200);
+
+    await map.update('k', () => 1);
+
+    // Wait 100ms, then update WITHOUT preserveTtl (default behavior resets TTL)
+    await wait(100);
+    await map.update('k', (v) => (v ?? 0) + 1);
+
+    // Wait another 120ms — original TTL would have expired, but we reset it
+    await wait(120);
+    let observed: number | undefined;
+    await map.peek('k', (v) => { observed = v; });
+    assert.equal(observed, 2, 'Entry should still be alive because TTL was reset');
+
+    // Wait for the reset TTL to expire
+    await wait(100);
+    await map.peek('k', (v) => { observed = v; });
+    assert.equal(observed, undefined, 'Entry should have expired after reset TTL');
 });
