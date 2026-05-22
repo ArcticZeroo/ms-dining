@@ -12,8 +12,7 @@ import './order-page.css';
 
 export const OrderPageBody = () => {
     const snapshot = useCartSnapshot();
-    const { alias, phoneNumber, setAlias, setPhoneNumber, getIdentity } = usePaymentIdentity();
-    const paymentIdentity = getIdentity();
+    const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
 
     if (snapshot.isLoading) {
         return (
@@ -45,7 +44,7 @@ export const OrderPageBody = () => {
             <OnlineOrderingExperimental/>
             <PaymentInfoForm
                 alias={alias}
-                phoneNumber={phoneNumber}
+                phoneValidation={phoneValidation}
                 onAliasChanged={setAlias}
                 onPhoneNumberChanged={setPhoneNumber}
                 readOnly={snapshot.groupedItems.length === 0}
@@ -58,8 +57,8 @@ export const OrderPageBody = () => {
                             key={group.cafeId}
                             cafeId={group.cafeId}
                             items={group.items}
-                            paymentIdentity={paymentIdentity ?? { alias, phoneNumber }}
-                            isPayEnabled={paymentIdentity != null}
+                            paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
+                            isPayEnabled={isValid}
                             onCompleted={snapshot.setCafeCompleted}
                         />
                     ))}

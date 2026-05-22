@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { InternalSettings } from '../constants/settings.ts';
 import { useValueNotifierAsState } from './events.ts';
 import { validatePhoneNumber } from '../util/validation.ts';
@@ -18,21 +18,15 @@ export const usePaymentIdentity = () => {
     const [phoneNumber, setPhoneNumber] = useValueNotifierAsState(InternalSettings.phoneNumber);
 
     const phoneValidation = useMemo(() => validatePhoneNumber(phoneNumber), [phoneNumber]);
-    const isValid = phoneValidation.isValid && alias.trim().length > 0;
-
-    const getIdentity = useCallback((): IPaymentIdentity | null => {
-        if (!isValid || !phoneValidation.isValid) {
-            return null;
-        }
-        return { alias, phoneNumber: phoneValidation.parsedValue };
-    }, [alias, isValid, phoneValidation]);
+    const validatedPhoneNumber = phoneValidation.isValid ? phoneValidation.parsedValue : null;
+    const isValid = validatedPhoneNumber != null && alias.trim().length > 0;
 
     return {
         alias,
-        phoneNumber,
+        phoneValidation,
+        validatedPhoneNumber,
         setAlias,
         setPhoneNumber,
         isValid,
-        getIdentity,
     };
 };
