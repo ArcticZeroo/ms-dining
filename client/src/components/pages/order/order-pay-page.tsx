@@ -6,6 +6,7 @@ import { CART_QUERY_KEY } from '../../../store/queries/server-cart.ts';
 import { useRequiredActiveOrder } from '../../../store/zustand/server-cart.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
+import { OrderItemsSummary } from '../../order/status/order-items-summary.tsx';
 import { MultiCafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
 
@@ -30,6 +31,7 @@ export const OrderPayPage = () => {
             <OnlineOrderingExperimental/>
             <div className="card dark-blue">
                 <div className="title">Order Summary</div>
+                <OrderItemsSummary cafeParts={activeOrder.cafeParts}/>
                 <WaitTime activeOrder={activeOrder}/>
             </div>
             <MultiCafePayment
