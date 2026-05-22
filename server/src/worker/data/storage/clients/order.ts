@@ -22,7 +22,12 @@ interface IOrderCafePartData {
 }
 
 export abstract class OrderStorageClient {
-    static async createOrderSession(userId: string) {
+    /**
+     * Creates an order session and transfers cart items into it, grouped by cafe.
+     * Rejects if the user already has an active order or the cart is empty.
+     * Returns the order session ID and the set of cafeIds that received items.
+     */
+    static async startOrder(userId: string): Promise<{ orderSessionId: string; cafeIds: string[] }> {
         return usePrismaTransaction(async tx => {
             // Reject if the user already has an active order
             const existing = await tx.orderSession.findFirst({
@@ -40,25 +45,17 @@ export abstract class OrderStorageClient {
                     'An active order already exists. Finish or abandon it before checking out again.',
                 );
             }
-            return tx.orderSession.create({ data: { userId } });
-        });
-    }
 
-    /**
-     * Transfers cart items to an order session, grouped by cafe.
-     * Creates one OrderCafePart per cafe and reassigns the CartItem rows.
-     * Returns the set of cafeIds that received items.
-     */
-    static async transferCart(userId: string, orderSessionId: string): Promise<string[]> {
-        return usePrismaTransaction(async prisma => {
-            const cartItems = await prisma.cartItem.findMany({
-                where:   { cartUserId: userId },
-                select:  { id: true, menuItem: { select: { cafeId: true } } },
+            const cartItems = await tx.cartItem.findMany({
+                where:  { cartUserId: userId },
+                select: { id: true, menuItem: { select: { cafeId: true } } },
             });
 
             if (cartItems.length === 0) {
                 throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty');
             }
+
+            const orderSession = await tx.orderSession.create({ data: { userId } });
 
             // Group cart item IDs by cafe
             const itemsByCafe = new Map<string, string[]>();
@@ -71,16 +68,16 @@ export abstract class OrderStorageClient {
 
             // Create a cafe part per cafe and transfer the items
             for (const [cafeId, itemIds] of itemsByCafe) {
-                const cafePart = await prisma.orderCafePart.create({
-                    data: { orderSessionId, cafeId },
+                const cafePart = await tx.orderCafePart.create({
+                    data: { orderSessionId: orderSession.id, cafeId },
                 });
-                await prisma.cartItem.updateMany({
+                await tx.cartItem.updateMany({
                     where: { id: { in: itemIds } },
                     data:  { cartUserId: null, orderCafePartId: cafePart.id },
                 });
             }
 
-            return [...itemsByCafe.keys()];
+            return { orderSessionId: orderSession.id, cafeIds: [...itemsByCafe.keys()] };
         });
     }
 

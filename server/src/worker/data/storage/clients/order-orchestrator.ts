@@ -113,20 +113,19 @@ export abstract class OrderOrchestrator {
     }
 
     static async startCheckout(userId: string): Promise<ICheckoutResult> {
-        const orderSession = await OrderStorageClient.createOrderSession(userId);
-        const cafeIds = await OrderStorageClient.transferCart(userId, orderSession.id);
+        const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId);
 
         // Create live BoD sessions in parallel — same path as rebuild
         const results = await Promise.allSettled(
             cafeIds.map(async (cafeId) => {
-                const session = await this.getOrCreateLiveSession(orderSession.id, cafeId);
+                const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
 
                 const waitTime = await fetchWaitTimeWithCartItems(
                     session.client,
                     [...session.rawCartItemsForWaitTime],
                 );
 
-                await OrderStorageClient.updateCafePartStatus(orderSession.id, cafeId, 'pending', {
+                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'pending', {
                     subtotal:    session.orderTotalWithoutTax,
                     tax:         session.orderTotalTax,
                     total:       session.orderTotalWithTax,
@@ -153,7 +152,7 @@ export abstract class OrderOrchestrator {
                 const cafeId = cafeIds[i]!;
                 const err = result.reason;
                 orderLog.error(`{${cafeId}} Checkout failed:`, err);
-                await OrderStorageClient.updateCafePartStatus(orderSession.id, cafeId, 'failed', {
+                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'failed', {
                     lastError: err instanceof Error ? err.message : String(err),
                     lastStage: 'startCheckout',
                 });
@@ -169,7 +168,7 @@ export abstract class OrderOrchestrator {
         }
 
         return {
-            orderSessionId: orderSession.id,
+            orderSessionId: orderSessionId,
             cafeResults,
         };
     }
