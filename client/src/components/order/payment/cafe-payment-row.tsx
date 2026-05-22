@@ -9,6 +9,7 @@ import {
 } from '../../../store/queries/new-ordering.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { formatPrice } from '../../../util/cart.ts';
+import { getErrorMessage } from '../../../util/mutation.ts';
 import { classNames } from '../../../util/react.ts';
 import { PaymentIframe } from './payment-iframe.tsx';
 
@@ -19,14 +20,6 @@ interface ICafePaymentRowProps {
     disabled: boolean;
     onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;
 }
-
-const getErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof Error && error.message.trim().length > 0) {
-        return error.message;
-    }
-
-    return fallback;
-};
 
 const getStatusLabel = (status: OrderCafePartStatus) => {
     switch (status) {

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAbandonRemainingCafesMutation } from '../../../store/queries/new-ordering.ts';
 import { CART_QUERY_KEY } from '../../../store/queries/server-cart.ts';
 import { useRequiredActiveOrder } from '../../../store/zustand/server-cart.ts';
+import { getErrorMessage } from '../../../util/mutation.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { MultiCafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
@@ -42,7 +43,7 @@ export const OrderPayPage = () => {
             />
             {abandonMutation.isError && (
                 <div className="card error">
-                    {abandonMutation.error instanceof Error ? abandonMutation.error.message : 'Failed to cancel order'}
+                    {getErrorMessage(abandonMutation.error, 'Failed to cancel order')}
                 </div>
             )}
         </div>

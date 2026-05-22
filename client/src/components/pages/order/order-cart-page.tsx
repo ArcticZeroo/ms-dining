@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { CART_QUERY_KEY, useCartQuery } from '../../../store/queries/server-cart.ts';
 import { useStartCheckoutMutation } from '../../../store/queries/new-ordering.ts';
 import {
-    useServerCartHasUnavailableItems,
     useServerCartItems,
 } from '../../../store/zustand/server-cart.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
@@ -15,6 +14,7 @@ import { OnlineOrderingExperimental } from '../../notice/online-ordering-experim
 import { OrderPrivacyPolicy } from '../../notice/order-privacy-policy.tsx';
 import { CartContentsTable } from '../../order/cart/cart-contents-table.tsx';
 import { PaymentInfoForm, type IPaymentFormData } from '../../order/payment/payment-info-form.tsx';
+import { getErrorMessage } from '../../../util/mutation.ts';
 
 export const OrderCartPage = () => {
     const queryClient = useQueryClient();
@@ -22,7 +22,6 @@ export const OrderCartPage = () => {
     const cartQuery = useCartQuery();
     const startCheckoutMutation = useStartCheckoutMutation();
     const cartItems = useServerCartItems();
-    const hasUnavailableItems = useServerCartHasUnavailableItems();
 
     const availableItems = useMemo(() => cartItems.filter(item => item.isAvailable), [cartItems]);
     const hasAvailableItems = availableItems.length > 0;
@@ -49,14 +48,14 @@ export const OrderCartPage = () => {
         return (
             <div id="order-checkout" className="flex-col">
                 <div className="card error">
-                    {cartQuery.error instanceof Error ? cartQuery.error.message : 'Failed to load your cart.'}
+                    {getErrorMessage(cartQuery.error, 'Failed to load your cart.')}
                     <RetryButton onClick={() => void cartQuery.refetch()}/>
                 </div>
             </div>
         );
     }
 
-    if (!hasAvailableItems && !hasUnavailableItems) {
+    if (cartItems.length === 0) {
         return <EmptyCartNotice/>;
     }
 
@@ -87,7 +86,7 @@ export const OrderCartPage = () => {
             )}
             {startCheckoutMutation.isError && (
                 <div className="card error">
-                    {startCheckoutMutation.error instanceof Error ? startCheckoutMutation.error.message : 'Failed to start checkout'}
+                    {getErrorMessage(startCheckoutMutation.error, 'Failed to start checkout')}
                 </div>
             )}
         </div>
