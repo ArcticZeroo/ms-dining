@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { usePaymentIdentity } from '../../../hooks/payment-identity.ts';
@@ -15,6 +16,11 @@ export const OrderPageBody = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
     const completedOrdersQuery = useCompletedOrdersTodayQuery();
+
+    const snapshotCallbacks = useMemo(() => ({
+        onItemRemoved:         snapshot.onItemRemoved,
+        onItemQuantityChanged: snapshot.onItemQuantityChanged,
+    }), [snapshot.onItemRemoved, snapshot.onItemQuantityChanged]);
 
     if (snapshot.isLoading) {
         return (
@@ -76,6 +82,7 @@ export const OrderPageBody = () => {
                         items={group.items}
                         paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
                         isPayEnabled={isValid}
+                        snapshotCallbacks={snapshotCallbacks}
                     />
                 ))}
             </div>

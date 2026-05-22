@@ -1,5 +1,5 @@
 import type { ICartItemRecord } from '@msdining/common/models/cart';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ApplicationContext } from '../context/app.ts';
 import { useCartQuery } from '../store/queries/server-cart.ts';
 import { useServerCartItems } from '../store/zustand/server-cart.ts';
@@ -54,10 +54,22 @@ export const useCartSnapshot = () => {
             );
     }, [cafeOrderById, snapshotItems]);
 
+    const onItemRemoved = useCallback((itemId: string) => {
+        setSnapshotItems(previous => previous.filter(item => item.id !== itemId));
+    }, []);
+
+    const onItemQuantityChanged = useCallback((itemId: string, quantity: number) => {
+        setSnapshotItems(previous => previous.map(item =>
+            item.id === itemId ? { ...item, quantity } : item,
+        ));
+    }, []);
+
     return {
         isLoading:  !hasSnapshottedCart && cartQuery.isPending,
         isError:    cartQuery.isError && !hasSnapshottedCart,
         cartError:  cartQuery.error,
         groupedItems,
+        onItemRemoved,
+        onItemQuantityChanged,
     };
 };

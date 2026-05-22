@@ -2,6 +2,7 @@ import type { ICartItemRecord } from '@msdining/common/models/cart';
 import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
+import { useCartItemActions } from '../../../hooks/cart-item-actions.tsx';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
 import type { IPaymentIdentity } from '../../../hooks/payment-identity.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../store/queries/new-ordering.ts';
@@ -21,11 +22,17 @@ const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
     specialInstructions: item.specialInstructions ?? undefined,
 });
 
+interface ISnapshotCallbacks {
+    onItemRemoved: (itemId: string) => void;
+    onItemQuantityChanged: (itemId: string, quantity: number) => void;
+}
+
 interface IOrderCafeCardProps {
     cafeId: string;
     items: ICartItemRecord[];
     paymentIdentity: IPaymentIdentity;
     isPayEnabled: boolean;
+    snapshotCallbacks: ISnapshotCallbacks;
 }
 
 export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
@@ -33,6 +40,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     items,
     paymentIdentity,
     isPayEnabled,
+    snapshotCallbacks,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const openPopup = usePopupOpener();
@@ -41,6 +49,9 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     const completeOrder = useCompleteOrderMutation();
     const [error, setError] = useState<string>();
     const [completionResult, setCompletionResult] = useState<ICompleteOrderResult>();
+
+    const { onRemove, onEdit, onChangeQuantity } = useCartItemActions(snapshotCallbacks);
+    const isCompleted = completionResult != null;
 
     const view = viewsById.get(cafeId);
     const cafeName = view != null
@@ -121,10 +132,10 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                             key={item.id}
                             item={item}
                             showFullDetails={true}
-                            readOnly={true}
-                            onRemove={() => {}}
-                            onEdit={() => {}}
-                            onChangeQuantity={() => {}}
+                            readOnly={isCompleted}
+                            onRemove={() => onRemove(item)}
+                            onEdit={() => onEdit(item)}
+                            onChangeQuantity={(quantity) => onChangeQuantity(item, quantity)}
                         />
                     ))}
                     <tr>
