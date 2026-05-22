@@ -1,12 +1,14 @@
 import type { ICartItemRecord } from '@msdining/common/models/cart';
-import type { IOrderItem } from '@msdining/common/models/order';
+import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
+import type { IPaymentIdentity } from '../../../hooks/payment-identity.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../store/queries/new-ordering.ts';
 import { calculatePrice, formatPrice } from '../../../util/cart.ts';
 import { getViewName } from '../../../util/cafe.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
+import { formatWaitTime } from '../../../util/order.ts';
 import { CartItemRow } from '../../order/cart/cart-item-row.tsx';
 import { PaymentIframe, type IRguestPaymentResult } from '../../order/payment/payment-iframe.tsx';
 
@@ -19,14 +21,11 @@ const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
     specialInstructions: item.specialInstructions ?? undefined,
 });
 
-import type { IPaymentIdentity } from '../../../hooks/payment-identity.ts';
-
 interface IOrderCafeCardProps {
     cafeId: string;
     items: ICartItemRecord[];
     paymentIdentity: IPaymentIdentity;
     isPayEnabled: boolean;
-    onCompleted: (cafeId: string, buyOnDemandOrderNumber: string) => void;
 }
 
 export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
@@ -34,7 +33,6 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     items,
     paymentIdentity,
     isPayEnabled,
-    onCompleted,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const openPopup = usePopupOpener();
@@ -42,6 +40,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     const preparePayment = usePreparePaymentMutation();
     const completeOrder = useCompleteOrderMutation();
     const [error, setError] = useState<string>();
+    const [completionResult, setCompletionResult] = useState<ICompleteOrderResult>();
 
     const view = viewsById.get(cafeId);
     const cafeName = view != null
@@ -79,7 +78,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
 
             const onPaymentComplete = async (paymentResult: IRguestPaymentResult) => {
                 try {
-                    const completionResult = await completeOrder.mutateAsync({
+                    const result = await completeOrder.mutateAsync({
                         pendingOrderId: prepareResult.pendingOrderId,
                         paymentToken:   paymentResult.token,
                         cardInfo:       paymentResult.cardInfo,
@@ -87,9 +86,9 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                         phoneNumber:    paymentIdentity.phoneNumber,
                     });
 
+                    setCompletionResult(result);
                     setError(undefined);
                     closePopup();
-                    onCompleted(cafeId, completionResult.buyOnDemandOrderNumber);
                 } catch (completeError) {
                     setError(getErrorMessage(completeError, 'Failed to complete order'));
                     throw completeError;
@@ -108,7 +107,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         } catch (prepareError) {
             setError(getErrorMessage(prepareError, 'Failed to prepare payment'));
         }
-    }, [cafeId, closePopup, completeOrder, isPayEnabled, isLocalBusy, items, onCompleted, openPopup, paymentIdentity, preparePayment]);
+    }, [cafeId, closePopup, completeOrder, isPayEnabled, isLocalBusy, items, openPopup, paymentIdentity, preparePayment]);
 
     return (
         <div className="card dark-blue order-page-cafe">
@@ -151,14 +150,27 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                 </div>
             )}
             <div className="order-page-cafe-footer">
-                <span>{items.length} item{items.length === 1 ? '' : 's'}</span>
-                <button
-                    className="default-container"
-                    disabled={!isPayEnabled || isLocalBusy || hasUnavailableItems}
-                    onClick={handlePay}
-                >
-                    Pay {formatPrice(totalPrice)}
-                </button>
+                {completionResult != null ? (
+                    <div className="order-page-cafe-completed">
+                        <span className="material-symbols-outlined">check_circle</span>
+                        <span>
+                            Order #{completionResult.buyOnDemandOrderNumber}
+                            {' — '}
+                            {formatWaitTime(completionResult.waitTimeMin, completionResult.waitTimeMax)} wait
+                        </span>
+                    </div>
+                ) : (
+                    <>
+                        <span>{items.length} item{items.length === 1 ? '' : 's'}</span>
+                        <button
+                            className="default-container"
+                            disabled={!isPayEnabled || isLocalBusy || hasUnavailableItems}
+                            onClick={handlePay}
+                        >
+                            Pay {formatPrice(totalPrice)}
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );

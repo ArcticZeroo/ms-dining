@@ -1,11 +1,11 @@
 import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { usePaymentIdentity } from '../../../hooks/payment-identity.ts';
+import { useCompletedOrdersTodayQuery } from '../../../store/queries/new-ordering.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
-import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from '../../order/payment/order-cafe-card.tsx';
-import { CompletedCafesList } from '../../order/status/completed-cafes-list.tsx';
+import { CompletedOrdersList } from '../../order/status/completed-orders-list.tsx';
 import { PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
 
 import './order-page.css';
@@ -13,6 +13,7 @@ import './order-page.css';
 export const OrderPageBody = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
+    const completedOrdersQuery = useCompletedOrdersTodayQuery();
 
     if (snapshot.isLoading) {
         return (
@@ -35,34 +36,45 @@ export const OrderPageBody = () => {
         );
     }
 
-    if (snapshot.groupedItems.length === 0 && snapshot.completedCafes.length === 0) {
-        return <EmptyCartNotice/>;
-    }
+    const hasCartItems = snapshot.groupedItems.length > 0;
+    const hasCompletedOrders = completedOrdersQuery.data != null && completedOrdersQuery.data.length > 0;
 
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
-            <PaymentInfoForm
-                alias={alias}
-                phoneValidation={phoneValidation}
-                onAliasChanged={setAlias}
-                onPhoneNumberChanged={setPhoneNumber}
-                readOnly={snapshot.groupedItems.length === 0}
-            />
-            <CompletedCafesList completedCafes={snapshot.completedCafes}/>
-            {snapshot.groupedItems.length > 0 && (
-                <div className="order-page-cafes">
-                    {snapshot.groupedItems.map((group) => (
-                        <OrderCafeCard
-                            key={group.cafeId}
-                            cafeId={group.cafeId}
-                            items={group.items}
-                            paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
-                            isPayEnabled={isValid}
-                            onCompleted={snapshot.setCafeCompleted}
-                        />
-                    ))}
+            {hasCartItems && (
+                <>
+                    <PaymentInfoForm
+                        alias={alias}
+                        phoneValidation={phoneValidation}
+                        onAliasChanged={setAlias}
+                        onPhoneNumberChanged={setPhoneNumber}
+                    />
+                    <div className="order-page-cafes">
+                        {snapshot.groupedItems.map((group) => (
+                            <OrderCafeCard
+                                key={group.cafeId}
+                                cafeId={group.cafeId}
+                                items={group.items}
+                                paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
+                                isPayEnabled={isValid}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
+            {!hasCartItems && !hasCompletedOrders && (
+                <div className="card dark-blue">
+                    Your cart is empty. Add items from a cafe menu to get started.
                 </div>
+            )}
+            {hasCompletedOrders && (
+                <>
+                    <div className="card dark-blue">
+                        <div className="title">Today&apos;s Orders</div>
+                    </div>
+                    <CompletedOrdersList orders={completedOrdersQuery.data}/>
+                </>
             )}
         </div>
     );
