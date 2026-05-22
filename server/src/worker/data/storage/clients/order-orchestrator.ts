@@ -1,12 +1,16 @@
 import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
+import { FakeCafeOrderSession } from '../../cafe/session/fake-order-session.js';
+import type { IOrderSession } from '../../cafe/session/order-session.js';
+import type { BuyOnDemandClient } from '../../cafe/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
 import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
 import type { ICartItem, IRguestCardInfo, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES, SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     IStartCheckoutResult,
@@ -17,11 +21,16 @@ import type {
 import { phone, type PhoneValidResult } from 'phone';
 
 const orderLog = getNamespaceLogger('Order');
+const isFakeOrdering = process.env.FAKE_ORDERING === 'true';
+
+if (isFakeOrdering) {
+    orderLog.info('⚠️  FAKE_ORDERING is enabled — no real charges will be made');
+}
 
 const SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 
-const liveSessions = new LockedExpiringMap<string, CafeOrderSession>(SESSION_TTL_MS);
+const liveSessions = new LockedExpiringMap<string, IOrderSession>(SESSION_TTL_MS);
 
 // Periodic token refresh — goes through all live sessions in parallel
 setInterval(() => {
@@ -69,10 +78,18 @@ const getCafeOrThrow = (cafeId: string) => {
 };
 
 /**
- * Creates a BoD session, logs in, and populates the cart.
+ * Creates an order session, logs in, and populates the cart.
+ * Uses FakeCafeOrderSession when FAKE_ORDERING is enabled.
  */
-const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): Promise<CafeOrderSession> => {
+const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): Promise<IOrderSession> => {
     const cafe = getCafeOrThrow(cafeId);
+
+    if (isFakeOrdering) {
+        const session = new FakeCafeOrderSession(cafe, cartItems);
+        await session.populateCart();
+        return session;
+    }
+
     const session = await CafeOrderSession.createAsync(cafe, cartItems);
     await session.populateCart();
 
@@ -99,7 +116,7 @@ export abstract class OrderOrchestrator {
      * Single path for getting a live session — creates one if it doesn't exist
      * by reading the cart items from DB. Updates DB with new BoD order data.
      */
-    private static async getOrCreateLiveSession(orderSessionId: string, cafeId: string): Promise<CafeOrderSession> {
+    private static async getOrCreateLiveSession(orderSessionId: string, cafeId: string): Promise<IOrderSession> {
         const key = sessionKey({ orderSessionId, cafeId });
         return liveSessions.getOrInsert(key, async () => {
             const part = await usePrismaClient(prisma => OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId));
@@ -131,10 +148,12 @@ export abstract class OrderOrchestrator {
             cafeIds.map(async (cafeId): Promise<IStartCheckoutCafeResult> => {
                 const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
 
-                const waitTime = await fetchWaitTimeWithCartItems(
-                    session.client,
-                    [...session.rawCartItemsForWaitTime],
-                );
+                const waitTime: IWaitTimeResponse = isFakeOrdering
+                    ? { minTime: 5, maxTime: 10 }
+                    : await fetchWaitTimeWithCartItems(
+                        session.client as BuyOnDemandClient,
+                        [...session.rawCartItemsForWaitTime],
+                    );
 
                 await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'pending', {
                     subtotal:    session.orderTotalWithoutTax,
@@ -217,7 +236,7 @@ export abstract class OrderOrchestrator {
      * (success or unrecoverable post-close failure).
      */
     private static async executeCompletion(
-        session: CafeOrderSession,
+        session: IOrderSession,
         orderSessionId: string,
         cafeId: string,
         params: {
