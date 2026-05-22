@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CART_QUERY_KEY, useCartQuery } from '../../../store/queries/server-cart.ts';
 import { useStartCheckoutMutation } from '../../../store/queries/new-ordering.ts';
@@ -23,7 +23,6 @@ export const OrderCartPage = () => {
     const startCheckoutMutation = useStartCheckoutMutation();
     const cartItems = useServerCartItems();
     const hasUnavailableItems = useServerCartHasUnavailableItems();
-    const [checkoutError, setCheckoutError] = useState<string>();
 
     const availableItems = useMemo(() => cartItems.filter(item => item.isAvailable), [cartItems]);
     const hasAvailableItems = availableItems.length > 0;
@@ -37,21 +36,18 @@ export const OrderCartPage = () => {
             return;
         }
 
-        setCheckoutError(undefined);
-
         try {
             const result = await startCheckoutMutation.mutateAsync(paymentInfo);
             await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
             navigate(`/order/${result.orderSessionId}/pay`);
-        } catch (error) {
-            setCheckoutError(error instanceof Error ? error.message : 'Failed to start checkout');
+        } catch {
+            // Error state handled by startCheckoutMutation.isError
         }
     }, [navigate, queryClient, startCheckoutMutation]);
 
     if (cartQuery.isError) {
         return (
             <div id="order-checkout" className="flex-col">
-                <OnlineOrderingExperimental/>
                 <div className="card error">
                     {cartQuery.error instanceof Error ? cartQuery.error.message : 'Failed to load your cart.'}
                     <RetryButton onClick={() => void cartQuery.refetch()}/>
@@ -89,9 +85,9 @@ export const OrderCartPage = () => {
                     Starting checkout...
                 </div>
             )}
-            {checkoutError && (
+            {startCheckoutMutation.isError && (
                 <div className="card error">
-                    {checkoutError}
+                    {startCheckoutMutation.error instanceof Error ? startCheckoutMutation.error.message : 'Failed to start checkout'}
                 </div>
             )}
         </div>
