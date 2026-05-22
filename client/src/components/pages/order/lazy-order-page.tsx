@@ -4,11 +4,13 @@ import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.js
 const OrderPageLayout = React.lazy(() => import('./order-page.tsx').then(module => ({ default: module.OrderPageLayout })));
 
 const OrderPageFallback = () => (
-    <div className="card">
-        <HourglassLoadingSpinner/>
-        <span>
-            Loading Order Page...
-        </span>
+    <div className="centered-content">
+        <div className="card flex">
+            <HourglassLoadingSpinner/>
+            <span>
+                Loading Order Page...
+            </span>
+        </div>
     </div>
 );
 

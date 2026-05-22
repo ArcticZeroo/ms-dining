@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { useCartSessionQuery } from '../../store/queries/ordering.ts';
+import { useServerCartActiveOrder } from '../../store/zustand/server-cart.ts';
 import { useServerCartAvailableItems } from '../../store/zustand/server-cart.ts';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
 
 export const OrderPriceInlineTable: React.FC = () => {
     const availableItems = useServerCartAvailableItems();
-    const { data: cartSessionData, error: cartSessionError } = useCartSessionQuery();
+    const activeOrder = useServerCartActiveOrder();
 
     const localTotalWithoutTax = useMemo(
         () => availableItems.reduce((total, item) => {
@@ -18,32 +18,23 @@ export const OrderPriceInlineTable: React.FC = () => {
         [availableItems]
     );
 
-    const serverPrice = useMemo(() => {
-        if (!cartSessionData) {
+    // After checkout, the server has real totals per cafe part
+    const serverTotal = useMemo(() => {
+        if (!activeOrder) {
             return null;
         }
 
-        let totalPriceWithTax = 0;
-        let totalPriceWithoutTax = 0;
-        let totalTax = 0;
-
-        for (const cafeData of Object.values(cartSessionData)) {
-            totalPriceWithTax += cafeData.totalPriceWithTax;
-            totalPriceWithoutTax += cafeData.totalPriceWithoutTax;
-            totalTax += cafeData.totalTax;
+        let total = 0;
+        for (const part of activeOrder.cafeParts) {
+            if (part.total != null) {
+                total += part.total;
+            }
         }
 
-        return { totalPriceWithTax, totalPriceWithoutTax, totalTax };
-    }, [cartSessionData]);
+        return total > 0 ? total : null;
+    }, [activeOrder]);
 
-    const subtotal = serverPrice?.totalPriceWithoutTax ?? localTotalWithoutTax;
-    const total = serverPrice?.totalPriceWithTax ?? localTotalWithoutTax;
-
-    const taxDisplay = serverPrice
-        ? formatPrice(serverPrice.totalTax)
-        : cartSessionError != null
-            ? 'Failed to load'
-            : 'Loading...';
+    const displayTotal = serverTotal ?? localTotalWithoutTax;
 
     return (
         <>
@@ -53,7 +44,7 @@ export const OrderPriceInlineTable: React.FC = () => {
                     Subtotal
                 </td>
                 <td className="price">
-                    {formatPrice(subtotal)}
+                    {formatPrice(localTotalWithoutTax)}
                 </td>
             </tr>
             <tr>
@@ -62,16 +53,16 @@ export const OrderPriceInlineTable: React.FC = () => {
                     Tax
                 </td>
                 <td className="price">
-                    {taxDisplay}
+                    Calculated at checkout
                 </td>
             </tr>
             <tr>
                 <td colSpan={2}></td>
                 <td>
-                    Total
+                    Total (est.)
                 </td>
                 <td className="price">
-                    {formatPrice(total)}
+                    {formatPrice(displayTotal)}
                 </td>
             </tr>
         </>
