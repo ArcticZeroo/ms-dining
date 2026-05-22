@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useOrderPageGuard } from '../../../hooks/order-guard.ts';
 import { CART_QUERY_KEY, useCartQuery } from '../../../store/queries/server-cart.ts';
 import { useStartCheckoutMutation } from '../../../store/queries/new-ordering.ts';
 import {
@@ -20,7 +19,6 @@ import { PaymentInfoForm, type IPaymentFormData } from '../../order/payment/paym
 export const OrderCartPage = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const { isLoading, shouldRedirect } = useOrderPageGuard();
     const cartQuery = useCartQuery();
     const startCheckoutMutation = useStartCheckoutMutation();
     const cartItems = useServerCartItems();
@@ -49,19 +47,6 @@ export const OrderCartPage = () => {
             setCheckoutError(error instanceof Error ? error.message : 'Failed to start checkout');
         }
     }, [navigate, queryClient, startCheckoutMutation]);
-
-    if (shouldRedirect) {
-        return null;
-    }
-
-    if (isLoading) {
-        return (
-            <div className="flex">
-                <HourglassLoadingSpinner/>
-                Loading your cart...
-            </div>
-        );
-    }
 
     if (cartQuery.isError) {
         return (

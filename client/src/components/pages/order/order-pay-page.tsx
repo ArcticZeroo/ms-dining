@@ -1,10 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useOrderPageGuard } from '../../../hooks/order-guard.ts';
 import { useAbandonRemainingCafesMutation } from '../../../store/queries/new-ordering.ts';
 import { CART_QUERY_KEY } from '../../../store/queries/server-cart.ts';
-import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
+import { useServerCartActiveOrder } from '../../../store/zustand/server-cart.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { MultiCafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
@@ -12,7 +11,7 @@ import { WaitTime } from '../../order/wait-time.tsx';
 export const OrderPayPage = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const { isLoading, shouldRedirect, activeOrder } = useOrderPageGuard();
+    const activeOrder = useServerCartActiveOrder();
     const abandonMutation = useAbandonRemainingCafesMutation();
 
     const cancelOrder = useCallback(async () => {
@@ -27,17 +26,9 @@ export const OrderPayPage = () => {
 
     const handleCafeCompleted = useCallback(() => undefined, []);
 
-    if (shouldRedirect) {
+    // Layout guard guarantees activeOrder exists when this page renders
+    if (activeOrder == null) {
         return null;
-    }
-
-    if (isLoading || activeOrder == null) {
-        return (
-            <div className="flex">
-                <HourglassLoadingSpinner/>
-                Loading your order...
-            </div>
-        );
     }
 
     return (

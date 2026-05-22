@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import type { IOrderStatusItem } from '../../order/status/order-status.tsx';
 import { useNavigate } from 'react-router-dom';
-import { useOrderPageGuard } from '../../../hooks/order-guard.ts';
-import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
+import { useServerCartActiveOrder } from '../../../store/zustand/server-cart.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 
 export const OrderCompletePage = () => {
     const navigate = useNavigate();
-    const { isLoading, shouldRedirect, activeOrder } = useOrderPageGuard();
+    const activeOrder = useServerCartActiveOrder();
 
     const completedItems = useMemo<IOrderStatusItem[]>(() => activeOrder?.cafeParts
         .filter(part => part.status === 'completed')
@@ -19,17 +18,9 @@ export const OrderCompletePage = () => {
             waitTimeMax:            part.waitTimeMax,
         })) ?? [], [activeOrder]);
 
-    if (shouldRedirect) {
+    // Layout guard guarantees activeOrder exists when this page renders
+    if (activeOrder == null) {
         return null;
-    }
-
-    if (isLoading || activeOrder == null) {
-        return (
-            <div className="flex">
-                <HourglassLoadingSpinner/>
-                Loading your receipt...
-            </div>
-        );
     }
 
     return (
