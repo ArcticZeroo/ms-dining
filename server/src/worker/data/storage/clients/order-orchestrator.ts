@@ -14,7 +14,7 @@ import type {
     IPreparePaymentResult,
     ICompleteOrderResult,
 } from '@msdining/common/models/order';
-import { phone } from 'phone';
+import { phone, type PhoneValidResult } from 'phone';
 
 const orderLog = getNamespaceLogger('Order');
 
@@ -199,6 +199,74 @@ export abstract class OrderOrchestrator {
         };
     }
 
+    /**
+     * Runs the BoD completion flow on a session. Returns the session back
+     * if it should be kept (failure before close), or undefined to remove it
+     * (success or unrecoverable post-close failure).
+     */
+    private static async executeCompletion(
+        session: CafeOrderSession,
+        orderSessionId: string,
+        cafeId: string,
+        params: {
+            alias: string;
+            phoneData: PhoneValidResult;
+            paymentToken: string;
+            cardInfo: IRguestCardInfo;
+        },
+    ): Promise<{ result: ICompleteOrderResult; keepSession: boolean }> {
+        try {
+            await session.completeOrderAfterIframePayment(params);
+
+            const completedAt = new Date();
+            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', { completedAt });
+
+            const orderNumber = session.orderNumber ?? 'Unknown';
+            orderLog.info(`Order completed — orderNumber: ${orderNumber}`);
+
+            return {
+                keepSession: false,
+                result: {
+                    buyOnDemandOrderNumber: orderNumber,
+                    waitTimeMin:            0,
+                    waitTimeMax:            0,
+                    completedAt:            completedAt.toISOString(),
+                },
+            };
+        } catch (err) {
+            const closedSuccessfully = session.lastCompletedStage == 'closeOrder'
+                || session.lastCompletedStage == 'sendTextReceipt'
+                || session.lastCompletedStage == 'complete';
+
+            if (closedSuccessfully) {
+                orderLog.error('Post-close failure (order already placed):', err);
+
+                const completedAt = new Date();
+                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
+                    completedAt,
+                    lastError: `Post-close: ${err instanceof Error ? err.message : String(err)}`,
+                });
+
+                return {
+                    keepSession: false,
+                    result: {
+                        buyOnDemandOrderNumber: session.orderNumber ?? 'Unknown',
+                        waitTimeMin:            0,
+                        waitTimeMax:            0,
+                        completedAt:            completedAt.toISOString(),
+                    },
+                };
+            }
+
+            // Pre-close failure — keep session for retry
+            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'payment_pending', {
+                lastError: err instanceof Error ? err.message : String(err),
+                lastStage: 'complete',
+            });
+            throw err;
+        }
+    }
+
     static async completeOrder(
         userId: string,
         orderSessionId: string,
@@ -228,70 +296,26 @@ export abstract class OrderOrchestrator {
         }
 
         const key = sessionKey({ orderSessionId, cafeId });
-        let extractedSession: CafeOrderSession | undefined;
-        await liveSessions.update(key, (existing) => {
-            extractedSession = existing;
-            return undefined; // atomically remove from map
-        });
+        let completionResult: ICompleteOrderResult | undefined;
 
-        if (!extractedSession) {
-            throw new ServiceError(
-                SERVICE_ERROR_CODES.BAD_REQUEST,
-                'Session expired. Please prepare payment again.',
-            );
-        }
-
-        try {
-            await extractedSession.completeOrderAfterIframePayment({
-                alias:        order.alias,
-                phoneData,
-                paymentToken,
-                cardInfo,
-            });
-
-            const completedAt = new Date();
-
-            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
-                completedAt,
-            });
-
-            const orderNumber = extractedSession.orderNumber ?? 'Unknown';
-            orderLog.info(`Order completed — orderNumber: ${orderNumber}`);
-
-            return {
-                buyOnDemandOrderNumber: orderNumber,
-                waitTimeMin:            0,
-                waitTimeMax:            0,
-                completedAt:            completedAt.toISOString(),
-            };
-        } catch (err) {
-            const closedSuccessfully = extractedSession.lastCompletedStage == 'closeOrder'
-                || extractedSession.lastCompletedStage == 'sendTextReceipt'
-                || extractedSession.lastCompletedStage == 'complete';
-
-            if (closedSuccessfully) {
-                orderLog.error('Post-close failure (order already placed):', err);
-
-                const completedAt = new Date();
-                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
-                    completedAt,
-                    lastError: `Post-close: ${err instanceof Error ? err.message : String(err)}`,
-                });
-
-                return {
-                    buyOnDemandOrderNumber: extractedSession.orderNumber ?? 'Unknown',
-                    waitTimeMin:            0,
-                    waitTimeMax:            0,
-                    completedAt:            completedAt.toISOString(),
-                };
+        await liveSessions.update(key, async (session) => {
+            if (!session) {
+                throw new ServiceError(
+                    SERVICE_ERROR_CODES.BAD_REQUEST,
+                    'Session expired. Please prepare payment again.',
+                );
             }
 
-            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'failed', {
-                lastError: err instanceof Error ? err.message : String(err),
-                lastStage: 'complete',
-            });
-            throw err;
-        }
+            const { result, keepSession } = await this.executeCompletion(
+                session, orderSessionId, cafeId,
+                { alias: order.alias!, phoneData, paymentToken, cardInfo },
+            );
+
+            completionResult = result;
+            return keepSession ? session : undefined;
+        });
+
+        return completionResult!;
     }
 
     static async abandonOrder(userId: string, orderSessionId: string): Promise<void> {
