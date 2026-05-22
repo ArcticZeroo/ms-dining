@@ -297,6 +297,14 @@ export class CafeOrderSession {
         return this.#orderId;
     }
 
+    public get cardProcessorToken() {
+        return this.#cardProcessorToken;
+    }
+
+    public getCardProcessorUrl(iframeCssUrl?: string) {
+        return this._getCardProcessorUrl(this.#cardProcessorToken, iframeCssUrl);
+    }
+
     public get rawCartItemsForWaitTime(): readonly unknown[] {
         return this.#rawCartItemsForWaitTime;
     }

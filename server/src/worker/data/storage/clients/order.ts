@@ -6,7 +6,7 @@ import { CartStorageClient } from './cart.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import type { ICartItem } from '@msdining/common/models/cart';
-import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
+import { ACTIVE_ORDER_CAFE_PART_STATUSES, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
 import type {
     ICheckoutResult,
@@ -319,9 +319,22 @@ export abstract class OrderStorageClient {
             orderLog.info(`Session rebuilt for ${key}`);
         }
 
-        // Prepare iframe
-        const result = await live.session.prepareForIframe(iframeCssUrl);
+        // Prepare iframe — only call BoD if not already prepared.
+        // If the session is already at initializeCardProcessor stage,
+        // reuse the existing token instead of fetching a new one.
+        if (live.session.lastCompletedStage !== SubmitOrderStage.initializeCardProcessor) {
+            await live.session.prepareForIframe(iframeCssUrl);
+        }
         resetSessionTTL(key);
+
+        const siteToken = live.session.cardProcessorToken;
+        const iframeUrl = live.session.getCardProcessorUrl(iframeCssUrl);
+        const buyOnDemandOrderId = live.session.orderId;
+        const buyOnDemandOrderNumber = live.session.orderNumber;
+
+        if (!buyOnDemandOrderId || !buyOnDemandOrderNumber || !siteToken) {
+            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Order data not set after prepare');
+        }
 
         // Update status to payment_pending
         await usePrismaWrite(prisma => prisma.orderCafePart.updateMany({
@@ -332,10 +345,10 @@ export abstract class OrderStorageClient {
         const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
 
         return {
-            siteToken:              result.siteToken,
-            iframeUrl:              result.iframeUrl,
-            buyOnDemandOrderId:     result.orderId,
-            buyOnDemandOrderNumber: result.orderNumber,
+            siteToken,
+            iframeUrl,
+            buyOnDemandOrderId,
+            buyOnDemandOrderNumber,
             expiresAt,
         };
     }
