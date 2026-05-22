@@ -21,7 +21,7 @@ interface IOrderCafePartData {
     completedAt?: Date;
 }
 
-interface ICreateCafePartData extends IOrderCafePartData {
+export interface ICreateCafePartData extends IOrderCafePartData {
     status: OrderCafePartStatus;
     cartItems: ICartItemRecord[];
 }
