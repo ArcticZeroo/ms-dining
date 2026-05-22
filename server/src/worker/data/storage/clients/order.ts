@@ -6,7 +6,7 @@ import type {
     ReadOnlyPrismaLikeClient,
 } from '../../../../shared/models/prisma.js';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
-import type { OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { IActiveOrderSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
 
 interface IOrderCafePartData {
     buyOnDemandOrderId?: string;
@@ -31,8 +31,8 @@ export abstract class OrderStorageClient {
         userId: string,
         alias: string,
         phoneNumberWithCountryCode: string,
-    ): Promise<{ orderSessionId: string; cafeIds: string[] }> {
-        return usePrismaTransaction(async tx => {
+    ): Promise<{ activeOrder: IActiveOrderSummary; cafeIds: string[] }> {
+        const { orderSessionId, cafeIds } = await usePrismaTransaction(async tx => {
             // Reject if the user already has an active order
             const existing = await tx.orderSession.findFirst({
                 where: {
@@ -85,6 +85,14 @@ export abstract class OrderStorageClient {
 
             return { orderSessionId: orderSession.id, cafeIds: [...itemsByCafe.keys()] };
         });
+
+        // Enrich outside the transaction (menu item lookups use the read semaphore)
+        const activeOrder = await CartStorageClient.getActiveOrderSummary(userId);
+        if (!activeOrder || activeOrder.orderSessionId !== orderSessionId) {
+            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Active order not found after creation');
+        }
+
+        return { activeOrder, cafeIds };
     }
 
     static async updateCafePartStatus(

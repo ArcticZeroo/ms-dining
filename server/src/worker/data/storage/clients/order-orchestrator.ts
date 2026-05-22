@@ -6,7 +6,6 @@ import type { IOrderSession } from '../../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../../cafe/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
 import { OrderStorageClient } from './order.js';
-import { CartStorageClient } from './cart.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
@@ -153,21 +152,16 @@ export abstract class OrderOrchestrator {
     }
 
     static async startCheckout(userId: string, alias: string, phoneNumberWithCountryCode: string): Promise<IStartCheckoutResult> {
-        const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
+        const { activeOrder, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
 
         // Fire-and-forget BoD session creation — the locked map ensures
         // preparePayment will wait if a session is still initializing.
         for (const cafeId of cafeIds) {
-            this.getOrCreateLiveSession(orderSessionId, cafeId).catch(err => {
+            this.getOrCreateLiveSession(activeOrder.orderSessionId, cafeId).catch(err => {
                 orderLog.error(`{${cafeId}} Background session init failed:`, err);
             });
         }
 
-        // Return the full active order summary (with enriched items)
-        const activeOrder = await CartStorageClient.getActiveOrderSummary(userId);
-        if (!activeOrder) {
-            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Active order not found after checkout');
-        }
         return activeOrder;
     }
 
