@@ -1,51 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { InternalSettings } from '../../../constants/settings.ts';
-import { useFieldWithValidator } from '../../../hooks/order.ts';
+import React, { useMemo } from 'react';
 import { validatePhoneNumber } from '../../../util/validation.ts';
 import { PaymentField } from './payment-field.tsx';
 
 import './payment-info-form.css';
 
-export interface IPaymentFormData {
-    alias: string;
-    phoneNumberWithCountryCode: string | null;
-    isValid: boolean;
-}
-
 interface IPaymentInfoFormProps {
-    onChange(data: IPaymentFormData): void;
+    alias: string;
+    phoneNumber: string;
+    onAliasChanged: (alias: string) => void;
+    onPhoneNumberChanged: (phoneNumber: string) => void;
     readOnly?: boolean;
 }
 
 export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
-    onChange,
+    alias,
+    phoneNumber,
+    onAliasChanged,
+    onPhoneNumberChanged,
     readOnly = false,
 }) => {
-    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /* initialValue */);
-    const [alias, setAlias] = useState(InternalSettings.alias.value);
-
-    const formData = useMemo<IPaymentFormData>(() => ({
-        alias,
-        phoneNumberWithCountryCode: phoneNumber.isValid ? phoneNumber.parsedValue : null,
-        isValid:                    phoneNumber.isValid && alias.trim().length > 0,
-    }), [alias, phoneNumber]);
-
-    useEffect(() => {
-        onChange(formData);
-    }, [formData, onChange]);
-
-    const onPhoneNumberChanged = useCallback((nextPhoneNumber: string) => {
-        InternalSettings.phoneNumber.value = nextPhoneNumber;
-        setPhoneNumber(nextPhoneNumber);
-    }, [setPhoneNumber]);
-
-    const onAliasChanged = useCallback((nextAlias: string) => {
-        InternalSettings.alias.value = nextAlias;
-        setAlias(nextAlias);
-    }, []);
+    const phoneValidation = useMemo(() => validatePhoneNumber(phoneNumber), [phoneNumber]);
 
     return (
-        <form id="payment-info" className="card">
+        <div id="payment-info" className="card">
             <div className="payment-section">
                 <PaymentField
                     id="phoneNumberWithCountryCode"
@@ -53,7 +30,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
                     name="Phone Number"
                     description="Order updates will be sent via text to this number."
                     inputType="tel"
-                    validationState={phoneNumber}
+                    validationState={phoneValidation}
                     onValueChanged={onPhoneNumberChanged}
                     isEnabled={!readOnly}
                 />
@@ -67,6 +44,6 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
                     isEnabled={!readOnly}
                 />
             </div>
-        </form>
+        </div>
     );
 };
