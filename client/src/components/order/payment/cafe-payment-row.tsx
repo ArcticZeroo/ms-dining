@@ -147,7 +147,7 @@ export const CafePaymentRow: React.FC<ICafePaymentRowProps> = ({ orderId, value,
                 ) : canPay ? (
                     <button
                         className="default-container"
-                        onClick={() => void handlePay()}
+                        onClick={() => handlePay()}
                         disabled={disabled || isBusy}
                     >
                         {buttonLabel}

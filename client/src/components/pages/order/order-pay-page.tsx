@@ -36,7 +36,7 @@ export const OrderPayPage = () => {
                 orderId={activeOrder.orderSessionId}
                 cafes={activeOrder.cafeParts}
                 isCancelling={abandonMutation.isPending}
-                onCancelOrder={() => void cancelOrder()}
+                onCancelOrder={() => cancelOrder()}
             />
             {abandonMutation.isError && (
                 <div className="card error">

@@ -49,7 +49,7 @@ export const OrderCartPage = () => {
             <div id="order-checkout" className="flex-col">
                 <div className="card error">
                     {getErrorMessage(cartQuery.error, 'Failed to load your cart.')}
-                    <RetryButton onClick={() => void cartQuery.refetch()}/>
+                    <RetryButton onClick={() => cartQuery.refetch()}/>
                 </div>
             </div>
         );
