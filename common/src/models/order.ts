@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-// ─── Checkout ────────────────────────────────────────────────────────
+// ─── Start Checkout ──────────────────────────────────────────────────
 
-export const CheckoutCafeResultSchema = z.object({
+export const StartCheckoutCafeResultSchema = z.object({
     cafeId:                 z.string(),
     buyOnDemandOrderId:     z.string(),
     buyOnDemandOrderNumber: z.string(),
@@ -13,14 +13,14 @@ export const CheckoutCafeResultSchema = z.object({
     waitTimeMax:            z.number().int(),
 });
 
-export type ICheckoutCafeResult = z.infer<typeof CheckoutCafeResultSchema>;
+export type IStartCheckoutCafeResult = z.infer<typeof StartCheckoutCafeResultSchema>;
 
-export const CheckoutResultSchema = z.object({
+export const StartCheckoutResultSchema = z.object({
     orderSessionId: z.string(),
-    cafeResults:    z.array(CheckoutCafeResultSchema),
+    cafeResults:    z.array(StartCheckoutCafeResultSchema),
 });
 
-export type ICheckoutResult = z.infer<typeof CheckoutResultSchema>;
+export type IStartCheckoutResult = z.infer<typeof StartCheckoutResultSchema>;
 
 // ─── Prepare Payment ─────────────────────────────────────────────────
 

@@ -9,8 +9,8 @@ import { LockedExpiringMap } from '../../../../shared/lock/map.js';
 import type { ICartItem, IRguestCardInfo, OrderCafePartStatus } from '@msdining/common/models/cart';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES, SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
-    ICheckoutResult,
-    ICheckoutCafeResult,
+    IStartCheckoutResult,
+    IStartCheckoutCafeResult,
     IPreparePaymentResult,
     ICompleteOrderResultDTO,
 } from '@msdining/common/models/order';
@@ -123,12 +123,12 @@ export abstract class OrderOrchestrator {
         });
     }
 
-    static async startCheckout(userId: string, alias: string, phoneNumberWithCountryCode: string): Promise<ICheckoutResult> {
+    static async startCheckout(userId: string, alias: string, phoneNumberWithCountryCode: string): Promise<IStartCheckoutResult> {
         const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
 
         // Create live BoD sessions in parallel — fails fast if any cafe fails
         const cafeResults = await Promise.all(
-            cafeIds.map(async (cafeId): Promise<ICheckoutCafeResult> => {
+            cafeIds.map(async (cafeId): Promise<IStartCheckoutCafeResult> => {
                 const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
 
                 const waitTime = await fetchWaitTimeWithCartItems(

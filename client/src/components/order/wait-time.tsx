@@ -1,12 +1,12 @@
 import type { IActiveOrderSummary } from '@msdining/common/models/cart';
-import type { ICheckoutResult } from '@msdining/common/models/order';
+import type { IStartCheckoutResult } from '@msdining/common/models/order';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
 import { formatWaitTime } from '../../util/order.ts';
 
 interface IWaitTimeProps {
-    checkoutResult?: ICheckoutResult;
+    checkoutResult?: IStartCheckoutResult;
     activeOrder?: IActiveOrderSummary;
 }
 

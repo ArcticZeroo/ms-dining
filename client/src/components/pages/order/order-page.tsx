@@ -1,5 +1,5 @@
 import type { IActiveOrderSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
-import type { ICheckoutResult, ICompleteOrderResult } from '@msdining/common/models/order';
+import type { IStartCheckoutResult, ICompleteOrderResult } from '@msdining/common/models/order';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnlineOrderingState } from '../../../hooks/cafe.ts';
@@ -50,7 +50,7 @@ const getDisplayStatus = (
 
 const mergeCafeParts = (
     activeOrder: IActiveOrderSummary | undefined,
-    checkoutResult: ICheckoutResult | undefined,
+    checkoutResult: IStartCheckoutResult | undefined,
     completedResultsByCafeId: Record<string, ICompleteOrderResult>,
 ): ICafePaymentRowValue[] => {
     const checkoutByCafeId = new Map(checkoutResult?.cafeResults.map(result => [result.cafeId, result]) ?? []);
@@ -84,7 +84,7 @@ const OrderPageBody = () => {
     const navigate = useNavigate();
     const startCheckout = useStartCheckoutMutation();
     const abandonOrder = useAbandonRemainingCafesMutation();
-    const [checkoutResult, setCheckoutResult] = useState<ICheckoutResult>();
+    const [checkoutResult, setCheckoutResult] = useState<IStartCheckoutResult>();
     const [checkoutError, setCheckoutError] = useState<string>();
     const [completedResultsByCafeId, setCompletedResultsByCafeId] = useState<Record<string, ICompleteOrderResult>>({});
 

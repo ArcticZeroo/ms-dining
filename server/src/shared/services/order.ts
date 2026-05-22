@@ -1,11 +1,11 @@
 import type { IActiveOrderSummary } from '@msdining/common/models/cart';
 import type {
-    ICheckoutResult,
+    IStartCheckoutResult,
     IPreparePaymentResult,
     ICompleteOrderResultDTO,
 } from '@msdining/common/models/order';
 
-export type { ICheckoutCafeResult } from '@msdining/common/models/order';
+export type { IStartCheckoutCafeResult } from '@msdining/common/models/order';
 
 export interface IOrderService {
     /** Create an order from the user's cart with payment identity. */
@@ -13,7 +13,7 @@ export interface IOrderService {
         userId: string;
         alias: string;
         phoneNumberWithCountryCode: string;
-    }): Promise<ICheckoutResult>;
+    }): Promise<IStartCheckoutResult>;
 
     /** Set the alias + phone for an order (before first payment). */
     setPaymentIdentity(data: {
