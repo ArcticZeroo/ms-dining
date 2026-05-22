@@ -1,12 +1,8 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../../context/app.ts';
+import { type ICompletedCafeSummary } from '../../../hooks/cart-snapshot.ts';
 import { getViewName } from '../../../util/cafe.ts';
-
-export interface ICompletedCafeSummary {
-    cafeId: string;
-    buyOnDemandOrderNumber: string;
-}
 
 interface ICompletedCafesListProps {
     completedCafes: ICompletedCafeSummary[];

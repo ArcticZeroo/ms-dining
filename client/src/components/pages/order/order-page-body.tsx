@@ -2,56 +2,44 @@ import { useCallback, useState } from 'react';
 import { InternalSettings } from '../../../constants/settings.ts';
 import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
+import { validatePhoneNumber } from '../../../util/validation.ts';
 import { EmptyCartNotice } from '../../notice/empty-cart-notice.tsx';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from '../../order/payment/order-cafe-card.tsx';
-import {
-    CompletedCafesList,
-    type ICompletedCafeSummary,
-} from '../../order/status/completed-cafes-list.tsx';
+import { CompletedCafesList } from '../../order/status/completed-cafes-list.tsx';
 import {
     PaymentInfoForm,
-    type IPaymentInfoFormState,
-    type IPaymentInfoFormValue,
+    type IPaymentFormData,
 } from '../../order/payment/payment-info-form.tsx';
 
 import './order-page.css';
 
+const getInitialPaymentInfo = (): IPaymentFormData => {
+    const alias = InternalSettings.alias.value;
+    const phoneNumber = validatePhoneNumber(InternalSettings.phoneNumber.value);
+
+    return {
+        alias,
+        phoneNumberWithCountryCode: phoneNumber.isValid ? phoneNumber.parsedValue : null,
+        isValid:                    phoneNumber.isValid && alias.trim().length > 0,
+    };
+};
+
 export const OrderPageBody = () => {
     const snapshot = useCartSnapshot();
-
-    const [paymentInfo, setPaymentInfo] = useState<IPaymentInfoFormValue>({
-        alias:       InternalSettings.alias.value,
-        phoneNumber: InternalSettings.phoneNumber.value,
-    });
-    const [paymentInfoState, setPaymentInfoState] = useState<IPaymentInfoFormState>({
-        ...paymentInfo,
-        isValid: false,
-    });
-    const [completedCafes, setCompletedCafes] = useState<ICompletedCafeSummary[]>([]);
+    const [paymentInfo, setPaymentInfo] = useState<IPaymentFormData>(getInitialPaymentInfo);
 
     const getPaymentIdentity = useCallback(() => {
-        if (!paymentInfoState.isValid || paymentInfoState.phoneNumberWithCountryCode == null) {
+        if (!paymentInfo.isValid || paymentInfo.phoneNumberWithCountryCode == null) {
             return null;
         }
 
-        InternalSettings.alias.value = paymentInfo.alias;
-        InternalSettings.phoneNumber.value = paymentInfoState.phoneNumberWithCountryCode;
-
         return {
             alias:       paymentInfo.alias,
-            phoneNumber: paymentInfoState.phoneNumberWithCountryCode,
+            phoneNumber: paymentInfo.phoneNumberWithCountryCode,
         };
-    }, [paymentInfo, paymentInfoState]);
-
-    const handleCafeCompleted = useCallback((cafeId: string, buyOnDemandOrderNumber: string) => {
-        snapshot.removeCafeItems(cafeId);
-        setCompletedCafes(previous => [
-            ...previous.filter(item => item.cafeId !== cafeId),
-            { cafeId, buyOnDemandOrderNumber },
-        ]);
-    }, [snapshot]);
+    }, [paymentInfo]);
 
     if (snapshot.isLoading) {
         return (
@@ -74,7 +62,7 @@ export const OrderPageBody = () => {
         );
     }
 
-    if (snapshot.groupedItems.length === 0 && completedCafes.length === 0) {
+    if (snapshot.groupedItems.length === 0 && snapshot.completedCafes.length === 0) {
         return <EmptyCartNotice/>;
     }
 
@@ -82,20 +70,11 @@ export const OrderPageBody = () => {
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
             <PaymentInfoForm
-                isPrepareStarted={false}
-                isCartReady={snapshot.groupedItems.length > 0}
-                value={paymentInfo}
-                onValueChanged={setPaymentInfo}
-                onValidationChanged={setPaymentInfoState}
-                hideSubmit={true}
+                onChange={setPaymentInfo}
+                readOnly={snapshot.groupedItems.length === 0}
             />
-            <CompletedCafesList completedCafes={completedCafes}/>
-            {snapshot.groupedItems.length === 0 ? (
-                <div className="card dark-blue">
-                    <div className="title">All Cafes Paid</div>
-                    <div>Your current checkout snapshot is complete.</div>
-                </div>
-            ) : (
+            <CompletedCafesList completedCafes={snapshot.completedCafes}/>
+            {snapshot.groupedItems.length > 0 && (
                 <div className="order-page-cafes">
                     {snapshot.groupedItems.map((group) => (
                         <OrderCafeCard
@@ -104,7 +83,7 @@ export const OrderPageBody = () => {
                             items={group.items}
                             isBusy={false}
                             getPaymentIdentity={getPaymentIdentity}
-                            onCompleted={handleCafeCompleted}
+                            onCompleted={snapshot.setCafeCompleted}
                         />
                     ))}
                 </div>
