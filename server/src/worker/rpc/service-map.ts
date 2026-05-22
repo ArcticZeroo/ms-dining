@@ -20,8 +20,7 @@ export type ServiceMethods = Record<string, ServiceMethod>;
 
 /**
  * The full set of services registered with a handler — keyed by service
- * name, value is the methods bag. The handler dispatches commands of the
- * form `serviceName.methodName` by walking this two-level map.
+ * name, value is the methods bag.
  */
 export type ServiceMap = Record<string, ServiceMethods>;
 
