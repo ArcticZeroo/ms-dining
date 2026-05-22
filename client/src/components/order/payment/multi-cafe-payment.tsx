@@ -66,7 +66,7 @@ export const MultiCafePayment: React.FC<IMultiCafePaymentProps> = ({
                     onClick={onCancelOrder}
                     disabled={isCancelling}
                 >
-                    {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                    {isCancelling ? 'Cancelling...' : 'Cancel Remaining Order'}
                 </button>
             </div>
         </div>

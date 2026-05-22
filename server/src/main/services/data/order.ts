@@ -10,8 +10,8 @@ export const orderService: IOrderService = {
         dataHandler.sendRequest('order', 'preparePayment', data),
     completeOrder: (data) =>
         dataHandler.sendRequest('order', 'completeOrder', data),
-    abandonOrder: (data) =>
-        dataHandler.sendRequest('order', 'abandonOrder', data),
+    abandonRemainingCafes: (data) =>
+        dataHandler.sendRequest('order', 'abandonRemainingCafes', data),
     getActiveOrder: (data) =>
         dataHandler.sendRequest('order', 'getActiveOrder', data),
 };

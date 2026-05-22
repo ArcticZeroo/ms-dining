@@ -64,14 +64,15 @@ export const useCompleteOrderMutation = () => {
 };
 
 /**
- * Abandon an order — marks unfinished cafe parts as abandoned.
- * On success, invalidates the cart query to unlock the cart.
+ * Abandon remaining cafe parts — marks unpaid cafes as abandoned and
+ * returns their items to the cart.
+ * On success, invalidates the cart query to reflect returned items.
  */
-export const useAbandonOrderMutation = () => {
+export const useAbandonRemainingCafesMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (orderId: string) => OrderClient.abandonOrder(orderId),
+        mutationFn: (orderId: string) => OrderClient.abandonRemainingCafes(orderId),
         onSuccess:  () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },

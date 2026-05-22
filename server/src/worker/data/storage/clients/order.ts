@@ -165,16 +165,42 @@ export abstract class OrderStorageClient {
         });
     }
 
-    static async abandonOrder(userId: string, orderSessionId: string): Promise<void> {
+    static async abandonRemainingCafes(userId: string, orderSessionId: string): Promise<void> {
         await usePrismaTransaction(async prismaTx => {
             await this.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
 
-            await prismaTx.orderCafePart.updateMany({
+            // Find active cafe parts
+            const activeParts = await prismaTx.orderCafePart.findMany({
                 where: {
                     orderSessionId,
                     status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] },
                 },
-                data: { status: 'abandoned' },
+                select: { id: true },
+            });
+
+            if (activeParts.length === 0) {
+                return;
+            }
+
+            const activePartIds = activeParts.map(p => p.id);
+
+            // Mark them as abandoned
+            await prismaTx.orderCafePart.updateMany({
+                where: { id: { in: activePartIds } },
+                data:  { status: 'abandoned' },
+            });
+
+            // Ensure the user has a cart to transfer items back to
+            await prismaTx.cart.upsert({
+                where:  { userId },
+                create: { userId },
+                update: {},
+            });
+
+            // Transfer items from abandoned parts back to the user's cart
+            await prismaTx.cartItem.updateMany({
+                where: { orderCafePartId: { in: activePartIds } },
+                data:  { orderCafePartId: null, cartUserId: userId },
             });
         });
     }

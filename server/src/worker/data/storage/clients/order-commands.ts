@@ -11,8 +11,8 @@ export const orderServiceCommands = {
         OrderOrchestrator.preparePayment(userId, orderSessionId, cafeId, iframeCssUrl),
     completeOrder: ({ userId, orderSessionId, cafeId, paymentToken, cardInfo }) =>
         OrderOrchestrator.completeOrder(userId, orderSessionId, cafeId, paymentToken, cardInfo),
-    abandonOrder: ({ userId, orderSessionId }) =>
-        OrderOrchestrator.abandonOrder(userId, orderSessionId),
+    abandonRemainingCafes: ({ userId, orderSessionId }) =>
+        OrderOrchestrator.abandonRemainingCafes(userId, orderSessionId),
     getActiveOrder: ({ userId }) =>
         OrderStorageClient.getActiveOrder(userId),
 } satisfies IOrderService;

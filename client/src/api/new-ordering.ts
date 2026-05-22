@@ -53,7 +53,7 @@ export abstract class OrderClient {
         });
     }
 
-    static async abandonOrder(orderId: string): Promise<void> {
+    static async abandonRemainingCafes(orderId: string): Promise<void> {
         await makeJsonRequestNoParse({
             path:    `${ORDER_BASE}/${orderId}`,
             options: { method: 'DELETE' },

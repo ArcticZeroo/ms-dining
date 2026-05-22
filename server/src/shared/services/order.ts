@@ -42,8 +42,8 @@ export interface IOrderService {
         };
     }): Promise<ICompleteOrderResult>;
 
-    /** Abandon unfinished cafe parts of an order. */
-    abandonOrder(data: {
+    /** Abandon unfinished cafe parts and return their items to the cart. */
+    abandonRemainingCafes(data: {
         userId: string;
         orderSessionId: string;
     }): Promise<void>;

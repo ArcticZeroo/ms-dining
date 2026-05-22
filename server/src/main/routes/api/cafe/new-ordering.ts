@@ -91,7 +91,7 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         const userId = getUserIdOrThrow(ctx);
         const orderSessionId = ctx.params.orderId!;
 
-        await getServices().data.order.abandonOrder({ userId, orderSessionId });
+        await getServices().data.order.abandonRemainingCafes({ userId, orderSessionId });
 
         ctx.status = 204;
     });

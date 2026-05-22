@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnlineOrderingState } from '../../../hooks/cafe.ts';
 import {
-    useAbandonOrderMutation,
+    useAbandonRemainingCafesMutation,
     useSetPaymentIdentityMutation,
     useStartCheckoutMutation,
 } from '../../../store/queries/new-ordering.ts';
@@ -85,7 +85,7 @@ const OrderPageBody = () => {
     const navigate = useNavigate();
     const startCheckout = useStartCheckoutMutation();
     const setPaymentIdentity = useSetPaymentIdentityMutation();
-    const abandonOrder = useAbandonOrderMutation();
+    const abandonOrder = useAbandonRemainingCafesMutation();
     const [checkoutResult, setCheckoutResult] = useState<ICheckoutResult>();
     const [pendingCheckoutResult, setPendingCheckoutResult] = useState<ICheckoutResult>();
     const [submittedPaymentInfo, setSubmittedPaymentInfo] = useState<IPaymentFormData>();

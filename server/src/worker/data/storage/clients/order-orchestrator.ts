@@ -7,7 +7,7 @@ import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
 import type { ICartItem, IRguestCardInfo, OrderCafePartStatus } from '@msdining/common/models/cart';
-import { SubmitOrderStage } from '@msdining/common/models/cart';
+import { ACTIVE_ORDER_CAFE_PART_STATUSES, SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
     ICheckoutCafeResult,
@@ -338,13 +338,13 @@ export abstract class OrderOrchestrator {
         return completionResult!;
     }
 
-    static async abandonOrder(userId: string, orderSessionId: string): Promise<void> {
+    static async abandonRemainingCafes(userId: string, orderSessionId: string): Promise<void> {
         // Get the cafe IDs so we can lock each session
         const cafeParts = await usePrismaTransaction(async prismaTx => {
             await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
             return prismaTx.orderCafePart.findMany({
-                where:  { orderSessionId },
-                select: { cafeId: true },
+                where:   { orderSessionId, status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] } },
+                select:  { cafeId: true },
             });
         });
 
@@ -354,7 +354,7 @@ export abstract class OrderOrchestrator {
             return liveSessions.update(key, () => undefined);
         }));
 
-        await OrderStorageClient.abandonOrder(userId, orderSessionId);
-        orderLog.info(`Order ${orderSessionId} abandoned by user ${userId}`);
+        await OrderStorageClient.abandonRemainingCafes(userId, orderSessionId);
+        orderLog.info(`Order ${orderSessionId}: abandoned ${cafeParts.length} remaining cafe(s), items returned to cart`);
     }
 }
