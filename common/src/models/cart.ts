@@ -125,13 +125,10 @@ export const CartItemDataSchema = z.object({
 export type ICartItemData = z.infer<typeof CartItemDataSchema>;
 
 export const CartItemUpdateSchema = z.object({
-    quantity:            z.number().int().min(1).optional(),
-    specialInstructions: z.string().nullish().transform(val => val ?? null).optional(),
-    modifiers:           z.array(SerializedModifierSchema).optional(),
-}).refine(
-    data => data.quantity !== undefined || data.specialInstructions !== undefined || data.modifiers !== undefined,
-    { message: 'At least one field must be provided' },
-);
+    quantity:            z.number().int().min(1),
+    specialInstructions: z.string().nullish().transform(val => val ?? null),
+    modifiers:           z.array(SerializedModifierSchema),
+});
 
 export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
 

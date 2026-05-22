@@ -1,4 +1,4 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICartItemRecord, ICartItemUpdate } from '@msdining/common/models/cart';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ApplicationContext } from '../context/app.ts';
 import { useCartQuery } from '../store/queries/server-cart.ts';
@@ -11,7 +11,8 @@ interface ICafeGroup {
 
 /**
  * Snapshots the cart items on first load.
- * Returns the frozen snapshot grouped by cafe, sorted by cafe display order.
+ * The snapshot is the source of truth for the order page — edits flow
+ * snapshot → cart (one-way), never cart → snapshot.
  */
 export const useCartSnapshot = () => {
     const { viewsInOrder } = useContext(ApplicationContext);
@@ -54,44 +55,30 @@ export const useCartSnapshot = () => {
             );
     }, [cafeOrderById, snapshotItems]);
 
-    const onItemRemoved = useCallback((itemId: string) => {
+    const removeItem = useCallback((itemId: string) => {
         setSnapshotItems(previous => previous.filter(item => item.id !== itemId));
     }, []);
 
-    const onItemQuantityChanged = useCallback((itemId: string, quantity: number) => {
-        setSnapshotItems(previous => previous.map(item =>
-            item.id === itemId ? { ...item, quantity } : item,
-        ));
+    const updateItem = useCallback((itemId: string, update: ICartItemUpdate) => {
+        setSnapshotItems(previous => previous.map(item => {
+            if (item.id !== itemId) {
+                return item;
+            }
+            return {
+                ...item,
+                ...(update.quantity !== undefined && { quantity: update.quantity }),
+                ...(update.specialInstructions !== undefined && { specialInstructions: update.specialInstructions }),
+                ...(update.modifiers !== undefined && { modifiers: update.modifiers }),
+            };
+        }));
     }, []);
-
-    // Sync edits from the server cart store into the snapshot.
-    // This handles the edit popup flow where mutations go to the store
-    // but the snapshot doesn't see them.
-    useEffect(() => {
-        if (!hasSnapshottedCart) {
-            return;
-        }
-
-        setSnapshotItems(previous => {
-            let changed = false;
-            const updated = previous.map(snapshotItem => {
-                const storeItem = serverCartItems.find(item => item.id === snapshotItem.id);
-                if (storeItem && storeItem !== snapshotItem) {
-                    changed = true;
-                    return storeItem;
-                }
-                return snapshotItem;
-            });
-            return changed ? updated : previous;
-        });
-    }, [hasSnapshottedCart, serverCartItems]);
 
     return {
         isLoading:  !hasSnapshottedCart && cartQuery.isPending,
         isError:    cartQuery.isError && !hasSnapshottedCart,
         cartError:  cartQuery.error,
         groupedItems,
-        onItemRemoved,
-        onItemQuantityChanged,
+        removeItem,
+        updateItem,
     };
 };

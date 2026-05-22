@@ -153,7 +153,7 @@ test('updateItem rejects missing item', async () => {
         () => getServices().data.cart.updateItem({
             userId: USER_ID,
             itemId: 'does-not-exist',
-            update: { quantity: 2 },
+            update: { quantity: 2, modifiers: [], specialInstructions: null },
         }),
         (err: any) => err.code === 'NOT_FOUND',
     );
@@ -205,7 +205,7 @@ test('cart mutations remain available without active-order locking', async () =>
     const updated = await getServices().data.cart.updateItem({
         userId: USER_ID,
         itemId: target.id,
-        update: { quantity: 2 },
+        update: { quantity: 2, modifiers: [], specialInstructions: null },
     });
     assert.equal(updated.items.find(item => item.id === target.id)?.quantity, 2);
 

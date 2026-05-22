@@ -1,4 +1,4 @@
-import type { ICartItemRecord, ICartResponse } from '@msdining/common/models/cart';
+import type { ICartItemRecord, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
 import { create } from 'zustand';
 import { mutative } from 'zustand-mutative';
 import { useMemo } from 'react';
@@ -16,7 +16,7 @@ interface IServerCartStore {
     items: ICartItemRecord[];
 
     setFromServerResponse(response: ICartResponse): void;
-    optimisticUpdateQuantity(itemId: string, quantity: number): void;
+    optimisticUpdateItem(itemId: string, update: ICartItemUpdate): void;
     optimisticRemoveItem(itemId: string): void;
 }
 
@@ -27,10 +27,12 @@ export const useServerCartStore = create<IServerCartStore>()(mutative((set) => (
         state.items = response.items;
     }),
 
-    optimisticUpdateQuantity: (itemId, quantity) => set((state) => {
+    optimisticUpdateItem: (itemId, update) => set((state) => {
         const item = state.items.find(i => i.id === itemId);
         if (item) {
-            item.quantity = quantity;
+            item.quantity = update.quantity;
+            item.specialInstructions = update.specialInstructions;
+            item.modifiers = update.modifiers;
         }
     }),
 

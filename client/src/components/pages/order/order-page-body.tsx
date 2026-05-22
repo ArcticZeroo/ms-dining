@@ -18,9 +18,9 @@ export const OrderPageBody = () => {
     const completedOrdersQuery = useCompletedOrdersTodayQuery();
 
     const snapshotCallbacks = useMemo(() => ({
-        onItemRemoved:         snapshot.onItemRemoved,
-        onItemQuantityChanged: snapshot.onItemQuantityChanged,
-    }), [snapshot.onItemRemoved, snapshot.onItemQuantityChanged]);
+        removeItem: snapshot.removeItem,
+        updateItem: snapshot.updateItem,
+    }), [snapshot.removeItem, snapshot.updateItem]);
 
     if (snapshot.isLoading) {
         return (

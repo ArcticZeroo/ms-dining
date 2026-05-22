@@ -1,4 +1,4 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICartItemRecord, ICartItemUpdate } from '@msdining/common/models/cart';
 import { useCallback } from 'react';
 import { usePopupOpener } from './popup.ts';
 import {
@@ -9,22 +9,32 @@ import { MenuItemPopup } from '../components/cafes/station/menu-items/popup/menu
 
 const editCartItemSymbol = Symbol('edit-cart-item');
 
+export interface ISnapshotCallbacks {
+    removeItem: (itemId: string) => void;
+    updateItem: (itemId: string, update: ICartItemUpdate) => void;
+}
+
 /**
  * Shared cart item action handlers — remove, edit (opens popup), change quantity.
- * Optionally calls an `onSnapshotChanged` callback for local snapshot updates.
+ * All edits send a full replacement update for clean last-writer-wins semantics.
+ *
+ * When snapshotCallbacks are provided, the snapshot is updated alongside the server mutation.
  */
-export const useCartItemActions = (onSnapshotChanged?: {
-    onItemRemoved: (itemId: string) => void;
-    onItemQuantityChanged: (itemId: string, quantity: number) => void;
-}) => {
+export const useCartItemActions = (snapshotCallbacks?: ISnapshotCallbacks) => {
     const removeItem = useRemoveCartItemMutation();
     const updateCartItem = useDebouncedUpdateCartItem();
     const openPopup = usePopupOpener();
 
+    const buildFullUpdate = useCallback((item: ICartItemRecord, overrides: Partial<ICartItemUpdate>): ICartItemUpdate => ({
+        quantity:            overrides.quantity ?? item.quantity,
+        modifiers:           overrides.modifiers ?? item.modifiers,
+        specialInstructions: overrides.specialInstructions ?? item.specialInstructions,
+    }), []);
+
     const onRemove = useCallback((item: ICartItemRecord) => {
         removeItem.mutate(item.id);
-        onSnapshotChanged?.onItemRemoved(item.id);
-    }, [removeItem, onSnapshotChanged]);
+        snapshotCallbacks?.removeItem(item.id);
+    }, [removeItem, snapshotCallbacks]);
 
     const onEdit = useCallback((item: ICartItemRecord) => {
         openPopup({
@@ -34,17 +44,22 @@ export const useCartItemActions = (onSnapshotChanged?: {
                 menuItem={item.menuItem}
                 modalSymbol={editCartItemSymbol}
                 fromCartItem={item}
+                onUpdated={(update) => {
+                    const full = buildFullUpdate(item, update);
+                    snapshotCallbacks?.updateItem(item.id, full);
+                }}
             />,
         });
-    }, [openPopup]);
+    }, [buildFullUpdate, openPopup, snapshotCallbacks]);
 
     const onChangeQuantity = useCallback((item: ICartItemRecord, quantity: number) => {
         if (quantity < 1) {
             return;
         }
-        updateCartItem.mutate(item.id, { quantity });
-        onSnapshotChanged?.onItemQuantityChanged(item.id, quantity);
-    }, [updateCartItem, onSnapshotChanged]);
+        const full = buildFullUpdate(item, { quantity });
+        updateCartItem.mutate(item.id, full);
+        snapshotCallbacks?.updateItem(item.id, full);
+    }, [buildFullUpdate, updateCartItem, snapshotCallbacks]);
 
     return { onRemove, onEdit, onChangeQuantity };
 };

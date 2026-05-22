@@ -183,18 +183,16 @@ export abstract class CartStorageClient {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
 
-            const data: Record<string, unknown> = {};
-            if (update.quantity !== undefined) data.quantity = update.quantity;
-            if (update.specialInstructions !== undefined) data.specialInstructions = update.specialInstructions;
+            await tx.cartItem.update({
+                where: { id: itemId },
+                data:  {
+                    quantity:            update.quantity,
+                    specialInstructions: update.specialInstructions,
+                },
+            });
 
-            if (Object.keys(data).length > 0) {
-                await tx.cartItem.update({ where: { id: itemId }, data });
-            }
-
-            if (update.modifiers !== undefined) {
-                await tx.cartItemModifierChoice.deleteMany({ where: { cartItemId: itemId } });
-                await this.createModifierChoices(tx, itemId, update.modifiers);
-            }
+            await tx.cartItemModifierChoice.deleteMany({ where: { cartItemId: itemId } });
+            await this.createModifierChoices(tx, itemId, update.modifiers);
         });
     }
 

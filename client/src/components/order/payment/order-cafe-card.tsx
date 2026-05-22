@@ -2,7 +2,7 @@ import type { ICartItemRecord } from '@msdining/common/models/cart';
 import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
-import { useCartItemActions } from '../../../hooks/cart-item-actions.tsx';
+import { useCartItemActions, type ISnapshotCallbacks } from '../../../hooks/cart-item-actions.tsx';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
 import type { IPaymentIdentity } from '../../../hooks/payment-identity.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../store/queries/new-ordering.ts';
@@ -21,11 +21,6 @@ const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
     modifiers:           item.modifiers,
     specialInstructions: item.specialInstructions ?? undefined,
 });
-
-interface ISnapshotCallbacks {
-    onItemRemoved: (itemId: string) => void;
-    onItemQuantityChanged: (itemId: string, quantity: number) => void;
-}
 
 interface IOrderCafeCardProps {
     cafeId: string;

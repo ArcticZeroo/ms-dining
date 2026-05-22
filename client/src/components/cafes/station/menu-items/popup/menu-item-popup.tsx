@@ -1,6 +1,6 @@
 import { CafeTypes } from '@msdining/common';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import type { ICartItemData, ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICartItemData, ICartItemRecord, ICartItemUpdate } from '@msdining/common/models/cart';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useIsOnlineOrderingAllowed } from '../../../../../hooks/cafe.ts';
 import { usePopupCloserSymbol } from '../../../../../hooks/popup.ts';
@@ -55,9 +55,10 @@ interface IMenuItemPopupProps {
     stationId?: string;
     stationName?: string;
     fromCartItem?: ICartItemRecord;
+    onUpdated?: (update: ICartItemUpdate) => void;
 }
 
-export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, stationId, stationName, fromCartItem }) => {
+export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, stationId, stationName, fromCartItem, onUpdated }) => {
     const isUpdate = fromCartItem != null;
 
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
@@ -109,12 +110,14 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
         };
 
         if (fromCartItem != null) {
-            updateCartItem.mutate(fromCartItem.id, {
+            const update: ICartItemUpdate = {
                 quantity,
                 specialInstructions: notes || null,
-                modifiers: itemData.modifiers,
-            });
+                modifiers:           itemData.modifiers,
+            };
+            updateCartItem.mutate(fromCartItem.id, update);
             updateCartItem.flush();
+            onUpdated?.(update);
         } else {
             addToCart.mutate(itemData);
         }

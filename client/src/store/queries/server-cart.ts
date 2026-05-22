@@ -69,9 +69,7 @@ export const useDebouncedUpdateCartItem = () => {
     );
 
     const mutate = useCallback((itemId: string, update: ICartItemUpdate) => {
-        if (update.quantity !== undefined) {
-            useServerCartStore.getState().optimisticUpdateQuantity(itemId, update.quantity);
-        }
+        useServerCartStore.getState().optimisticUpdateItem(itemId, update);
         debouncedSend(itemId, update);
     }, [debouncedSend]);
 
