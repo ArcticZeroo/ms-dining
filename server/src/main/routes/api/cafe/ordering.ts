@@ -18,7 +18,7 @@ import {
 import { toDateString } from '@msdining/common/util/date-util';
 import { phone } from 'phone';
 import { CafeOrderSession } from '../../../../worker/data/cafe/session/order.js';
-import { fetchWaitTime, fetchWaitTimeWithCartItems } from '../../../../worker/data/cafe/session/wait-time.js';
+import { fetchWaitTime, fetchWaitTimeWithCartItems } from '../../../../worker/data/cafe/buy-ondemand/wait-time.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { webserverHost } from '../../../../shared/constants/config.js';

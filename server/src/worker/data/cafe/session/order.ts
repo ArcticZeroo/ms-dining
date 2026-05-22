@@ -16,7 +16,7 @@ import { ICafe, IMenuItemBase } from '../../../../shared/models/cafe.js';
 import { PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../../shared/constants/enum.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
-import { fetchWaitTimeWithCartItems } from './wait-time.js';
+import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
 
 const ORDER_TIMEZONE = 'PST8PDT';
 const DEFAULT_BIR_CONFIG = {

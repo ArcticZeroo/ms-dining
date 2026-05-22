@@ -1,4 +1,4 @@
-import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
 import { createBuyOnDemandClient } from '../../../../main/services/registry.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ICafe } from '../../../../shared/models/cafe.js';
@@ -24,7 +24,7 @@ const parseWaitTimeResponse = (json: unknown): IWaitTimeResponse => {
     throw new Error(`Invalid wait time response: ${JSON.stringify(json)}`);
 };
 
-const fetchWaitTimeRaw = async (client: BuyOnDemandClient, cartItems: unknown[]): Promise<unknown> => {
+const fetchWaitTimeRaw = async (client: BuyOnDemandClient, cartItems: unknown[]): Promise<IWaitTimeResponse> => {
     const config = client.config;
     if (!config) {
         throw new Error('Cafe config is not set');
@@ -45,25 +45,24 @@ const fetchWaitTimeRaw = async (client: BuyOnDemandClient, cartItems: unknown[])
         }
     );
 
-    return response.json();
+    const json = await response.json();
+    return parseWaitTimeResponse(json);
 };
 
 /**
  * Fetch wait time using an existing BuyOnDemandClient with actual cart item data.
  */
 export const fetchWaitTimeWithCartItems = async (client: BuyOnDemandClient, cartItems: unknown[]): Promise<IWaitTimeResponse> => {
-    const json = await fetchWaitTimeRaw(client, cartItems);
-    return parseWaitTimeResponse(json);
+    return fetchWaitTimeRaw(client, cartItems);
 };
 
 /**
  * Fetch wait time with a simple item count (dummy items).
  */
 export const fetchWaitTimeWithItemCount = async (client: BuyOnDemandClient, itemCount: number): Promise<IWaitTimeResponse> => {
-    const json = await fetchWaitTimeRaw(client, [
+    return fetchWaitTimeRaw(client, [
         { kitchenVideoId: ' ', quantity: itemCount }
     ]);
-    return parseWaitTimeResponse(json);
 };
 
 /**

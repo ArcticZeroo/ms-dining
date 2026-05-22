@@ -1,7 +1,7 @@
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
-import { fetchWaitTimeWithCartItems } from '../../cafe/session/wait-time.js';
+import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
 import { CartStorageClient } from './cart.js';
 import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
