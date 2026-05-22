@@ -19,19 +19,21 @@ const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
     specialInstructions: item.specialInstructions ?? undefined,
 });
 
+import type { IPaymentIdentity } from '../../../hooks/payment-identity.ts';
+
 interface IOrderCafeCardProps {
     cafeId: string;
     items: ICartItemRecord[];
-    isBusy: boolean;
-    getPaymentIdentity: () => { alias: string; phoneNumber: string } | null;
+    paymentIdentity: IPaymentIdentity;
+    isPayEnabled: boolean;
     onCompleted: (cafeId: string, buyOnDemandOrderNumber: string) => void;
 }
 
 export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     cafeId,
     items,
-    isBusy,
-    getPaymentIdentity,
+    paymentIdentity,
+    isPayEnabled,
     onCompleted,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
@@ -63,7 +65,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     const isLocalBusy = preparePayment.isPending || completeOrder.isPending;
 
     const handlePay = useCallback(async () => {
-        if (isBusy || isLocalBusy) {
+        if (!isPayEnabled || isLocalBusy) {
             return;
         }
 
@@ -76,19 +78,13 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
             });
 
             const onPaymentComplete = async (paymentResult: IRguestPaymentResult) => {
-                const identity = getPaymentIdentity();
-                if (identity == null) {
-                    setError('Please fill in your alias and phone number.');
-                    return;
-                }
-
                 try {
                     const completionResult = await completeOrder.mutateAsync({
                         pendingOrderId: prepareResult.pendingOrderId,
                         paymentToken:   paymentResult.token,
                         cardInfo:       paymentResult.cardInfo,
-                        alias:          identity.alias,
-                        phoneNumber:    identity.phoneNumber,
+                        alias:          paymentIdentity.alias,
+                        phoneNumber:    paymentIdentity.phoneNumber,
                     });
 
                     setError(undefined);
@@ -112,7 +108,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         } catch (prepareError) {
             setError(getErrorMessage(prepareError, 'Failed to prepare payment'));
         }
-    }, [cafeId, closePopup, completeOrder, getPaymentIdentity, isBusy, isLocalBusy, items, onCompleted, openPopup, preparePayment]);
+    }, [cafeId, closePopup, completeOrder, isPayEnabled, isLocalBusy, items, onCompleted, openPopup, paymentIdentity, preparePayment]);
 
     return (
         <div className="card dark-blue order-page-cafe">
@@ -158,7 +154,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                 <span>{items.length} item{items.length === 1 ? '' : 's'}</span>
                 <button
                     className="default-container"
-                    disabled={isBusy || isLocalBusy || hasUnavailableItems}
+                    disabled={!isPayEnabled || isLocalBusy || hasUnavailableItems}
                     onClick={handlePay}
                 >
                     Pay {formatPrice(totalPrice)}

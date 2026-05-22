@@ -12,7 +12,8 @@ import './order-page.css';
 
 export const OrderPageBody = () => {
     const snapshot = useCartSnapshot();
-    const identity = usePaymentIdentity();
+    const { alias, phoneNumber, setAlias, setPhoneNumber, getIdentity } = usePaymentIdentity();
+    const paymentIdentity = getIdentity();
 
     if (snapshot.isLoading) {
         return (
@@ -43,10 +44,10 @@ export const OrderPageBody = () => {
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
             <PaymentInfoForm
-                alias={identity.alias}
-                phoneNumber={identity.phoneNumber}
-                onAliasChanged={identity.setAlias}
-                onPhoneNumberChanged={identity.setPhoneNumber}
+                alias={alias}
+                phoneNumber={phoneNumber}
+                onAliasChanged={setAlias}
+                onPhoneNumberChanged={setPhoneNumber}
                 readOnly={snapshot.groupedItems.length === 0}
             />
             <CompletedCafesList completedCafes={snapshot.completedCafes}/>
@@ -57,8 +58,8 @@ export const OrderPageBody = () => {
                             key={group.cafeId}
                             cafeId={group.cafeId}
                             items={group.items}
-                            isBusy={false}
-                            getPaymentIdentity={identity.getIdentity}
+                            paymentIdentity={paymentIdentity ?? { alias, phoneNumber }}
+                            isPayEnabled={paymentIdentity != null}
                             onCompleted={snapshot.setCafeCompleted}
                         />
                     ))}
