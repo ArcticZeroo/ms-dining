@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.js';
+import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 
 const OrderPageLayout = React.lazy(() => import('./order-page.tsx').then(module => ({ default: module.OrderPageLayout })));
 

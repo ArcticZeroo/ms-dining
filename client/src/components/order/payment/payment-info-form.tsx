@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { InternalSettings } from '../../../constants/settings.ts';
 import { useFieldWithValidator } from '../../../hooks/order.ts';
 import { IPaymentFormData } from '../../../store/zustand/ordering.ts';
@@ -13,11 +13,25 @@ import './payment-info-form.css';
 
 export type { IPaymentFormData };
 
+export interface IPaymentInfoFormValue {
+    alias: string;
+    phoneNumber: string;
+}
+
+export interface IPaymentInfoFormState extends IPaymentInfoFormValue {
+    isValid: boolean;
+    phoneNumberWithCountryCode?: string;
+}
+
 interface IPaymentInfoFormProps {
     isPrepareStarted: boolean;
     isCartReady: boolean;
     submitLabel?: string;
-    onSubmit(data: IPaymentFormData): void;
+    onSubmit?(data: IPaymentFormData): void;
+    value?: IPaymentInfoFormValue;
+    onValueChanged?(value: IPaymentInfoFormValue): void;
+    onValidationChanged?(state: IPaymentInfoFormState): void;
+    hideSubmit?: boolean;
 }
 
 export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
@@ -25,32 +39,65 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
     isCartReady,
     submitLabel = 'Pay with Card',
     onSubmit,
+    value,
+    onValueChanged,
+    onValidationChanged,
+    hideSubmit = false,
 }) => {
-    const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
-    const [alias, setAlias] = useState(InternalSettings.alias.value);
+    const [internalPhoneNumber, setInternalPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
+    const [internalAlias, setInternalAlias] = useState(InternalSettings.alias.value);
+
+    const alias = value?.alias ?? internalAlias;
+    const phoneNumber = useMemo(
+        () => value == null ? internalPhoneNumber : validatePhoneNumber(value.phoneNumber),
+        [internalPhoneNumber, value],
+    );
+    const phoneNumberRawValue = value?.phoneNumber ?? internalPhoneNumber.rawValue;
 
     const isFormValid = useMemo(
-        () => {
-            const fields = [
-                phoneNumber,
-                alias,
-            ];
-
-            return fields.every(field => {
-                if (typeof field === 'string') {
-                    return field.length > 0;
-                }
-
-                return field.isValid;
-            });
-        },
-        [phoneNumber, alias]
+        () => phoneNumber.isValid && alias.trim().length > 0,
+        [phoneNumber, alias],
     );
+
+    const formState = useMemo<IPaymentInfoFormState>(() => ({
+        alias,
+        phoneNumber:                phoneNumberRawValue,
+        isValid:                    isFormValid,
+        phoneNumberWithCountryCode: phoneNumber.isValid ? phoneNumber.parsedValue : undefined,
+    }), [alias, isFormValid, phoneNumber, phoneNumberRawValue]);
+
+    useEffect(() => {
+        onValidationChanged?.(formState);
+    }, [formState, onValidationChanged]);
+
+    const setPhoneNumber = useCallback((nextPhoneNumber: string) => {
+        if (value != null) {
+            onValueChanged?.({
+                alias,
+                phoneNumber: nextPhoneNumber,
+            });
+            return;
+        }
+
+        setInternalPhoneNumber(nextPhoneNumber);
+    }, [alias, onValueChanged, setInternalPhoneNumber, value]);
+
+    const setAlias = useCallback((nextAlias: string) => {
+        if (value != null) {
+            onValueChanged?.({
+                alias: nextAlias,
+                phoneNumber: phoneNumberRawValue,
+            });
+            return;
+        }
+
+        setInternalAlias(nextAlias);
+    }, [onValueChanged, phoneNumberRawValue, value]);
 
     const onFormSubmitted = (event: React.FormEvent) => {
         event.preventDefault();
 
-        if (!isFormValid) {
+        if (!isFormValid || onSubmit == null) {
             return;
         }
 
@@ -85,7 +132,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
                     isEnabled={!isPrepareStarted}
                 />
             </div>
-            {!isPrepareStarted && (
+            {!hideSubmit && onSubmit != null && !isPrepareStarted && (
                 <button
                     type="submit"
                     id="payment-submit"
@@ -98,4 +145,4 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
             )}
         </form>
     );
-}
+};

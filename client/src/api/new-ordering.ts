@@ -1,54 +1,45 @@
-import type { IActiveOrderSummary, ICartResponse, IRguestCardInfo } from '@msdining/common/models/cart';
-import { CartResponseSchema } from '@msdining/common/models/cart';
-import type { IPreparePaymentResult, ICompleteOrderResult } from '@msdining/common/models/order';
-import {
-    StartCheckoutResultSchema,
-    PreparePaymentResultSchema,
-    CompleteOrderResultSchema,
+import type { IRguestCardInfo } from '@msdining/common/models/cart';
+import type {
+    ICafeOrderSummary,
+    ICompleteOrderResult,
+    IOrderItem,
+    IPreparePaymentResult,
 } from '@msdining/common/models/order';
-import { JSON_HEADERS, makeJsonRequestNoParse, makeJsonRequestWithSchema } from './request.ts';
+import {
+    CafeOrderSummarySchema,
+    CompleteOrderResultSchema,
+    PreparePaymentResultSchema,
+} from '@msdining/common/models/order';
+import z from 'zod';
+import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
 
 const ORDER_BASE = '/api/dining/order';
 
 export abstract class OrderClient {
-    static async startCheckout(alias: string, phoneNumberWithCountryCode: string): Promise<IActiveOrderSummary> {
+    static async preparePayment(
+        cafeId: string,
+        items: IOrderItem[],
+        alias: string,
+        phoneNumber: string,
+    ): Promise<IPreparePaymentResult> {
         return makeJsonRequestWithSchema({
-            path:   `${ORDER_BASE}/checkout`,
-            schema: StartCheckoutResultSchema,
+            path:   `${ORDER_BASE}/cafes/${cafeId}/prepare-payment`,
+            schema: PreparePaymentResultSchema,
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify({ alias, phoneNumberWithCountryCode }),
+                body:    JSON.stringify({ items, alias, phoneNumber }),
             },
-        });
-    }
-
-    static async setPaymentIdentity(orderId: string, alias: string, phoneNumberWithCountryCode: string): Promise<void> {
-        await makeJsonRequestNoParse({
-            path:    `${ORDER_BASE}/${orderId}/identity`,
-            options: {
-                method:  'PUT',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify({ alias, phoneNumberWithCountryCode }),
-            },
-        });
-    }
-
-    static async preparePayment(orderId: string, cafeId: string): Promise<IPreparePaymentResult> {
-        return makeJsonRequestWithSchema({
-            path:   `${ORDER_BASE}/${orderId}/cafes/${cafeId}/prepare-payment`,
-            schema: PreparePaymentResultSchema,
         });
     }
 
     static async completeOrder(
-        orderId: string,
-        cafeId: string,
+        pendingOrderId: string,
         paymentToken: string,
         cardInfo: IRguestCardInfo,
     ): Promise<ICompleteOrderResult> {
         return makeJsonRequestWithSchema({
-            path:   `${ORDER_BASE}/${orderId}/cafes/${cafeId}/complete`,
+            path:   `${ORDER_BASE}/complete/${pendingOrderId}`,
             schema: CompleteOrderResultSchema,
             options: {
                 method:  'POST',
@@ -58,11 +49,10 @@ export abstract class OrderClient {
         });
     }
 
-    static async abandonRemainingCafes(orderId: string): Promise<ICartResponse> {
+    static async getCompletedOrdersToday(): Promise<ICafeOrderSummary[]> {
         return makeJsonRequestWithSchema({
-            path:    `${ORDER_BASE}/${orderId}`,
-            schema:  CartResponseSchema,
-            options: { method: 'DELETE' },
+            path:   `${ORDER_BASE}/today`,
+            schema: z.array(CafeOrderSummarySchema),
         });
     }
 }

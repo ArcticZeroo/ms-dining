@@ -26,18 +26,6 @@
     --color-cart-popup: var(--color-error-dark);
 }
 
-.cart-popup.has-active-order .cart-info {
-    --color-cart-popup: var(--color-blue);
-}
-
-.cart-active-order {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--default-padding);
-    padding: var(--default-padding);
-}
-
 .cart-popup.hidden {
     transform: translateY(-100%);
 }
@@ -92,12 +80,6 @@
 .cart-cafe-url {
     text-decoration: none;
     color: unset;
-}
-
-.cart-popup .wait-time {
-    /* no top margin because we have border-spacing on the table above */
-    /* no bottom margin because we have a top margin on the button below */
-    margin: 0 var(--default-padding) 0 var(--default-padding);
 }
 
 .cart-popup .checkout-button {

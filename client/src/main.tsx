@@ -11,9 +11,8 @@ import { LazyAnalyticsPage } from './components/pages/analytics/lazy-analytics-p
 import { ErrorPage } from './components/pages/error/error-page.tsx';
 import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
 import { LazyOrderPage } from './components/pages/order/lazy-order-page.tsx';
-import { OrderCartPage } from './components/pages/order/order-cart-page.tsx';
-import { OrderPayPage } from './components/pages/order/order-pay-page.tsx';
-import { OrderCompletePage } from './components/pages/order/order-complete-page.tsx';
+import { OrderPageBody } from './components/pages/order/order-page-body.tsx';
+import { OrderDonePage } from './components/pages/order/order-done-page.tsx';
 import { LocationTestPage } from './components/pages/location-test/location-test-page.tsx';
 import { checkMigrationCookie, doMigrationAndRedirectToDiningSite } from './util/migration.ts';
 import { ProfilePage } from './components/pages/profile/profile-page.tsx';
@@ -36,9 +35,8 @@ const startApp = () => {
                 <Route path="/cheap" element={<CheapItemsPage/>}/>
                 <Route path="/info" element={<InfoPage/>}/>
                 <Route path="/order" element={<LazyOrderPage/>}>
-                    <Route index={true} element={<OrderCartPage/>}/>
-                    <Route path=":id/pay" element={<OrderPayPage/>}/>
-                    <Route path=":id/complete" element={<OrderCompletePage/>}/>
+                    <Route index={true} element={<OrderPageBody/>}/>
+                    <Route path="done" element={<OrderDonePage/>}/>
                 </Route>
                 <Route path="/analytics" element={<LazyAnalyticsPage/>}/>
                 <Route path="/location-test" element={<LocationTestPage/>}/>

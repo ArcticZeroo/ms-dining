@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react';
-import { useServerCartActiveOrder } from '../../store/zustand/server-cart.ts';
 import { useServerCartAvailableItems } from '../../store/zustand/server-cart.ts';
 import { calculatePrice, formatPrice } from '../../util/cart.ts';
 
 export const OrderPriceInlineTable: React.FC = () => {
     const availableItems = useServerCartAvailableItems();
-    const activeOrder = useServerCartActiveOrder();
 
     const localTotalWithoutTax = useMemo(
         () => availableItems.reduce((total, item) => {
@@ -17,24 +15,6 @@ export const OrderPriceInlineTable: React.FC = () => {
         }, 0),
         [availableItems]
     );
-
-    // After checkout, the server has real totals per cafe part
-    const serverTotal = useMemo(() => {
-        if (!activeOrder) {
-            return null;
-        }
-
-        let total = 0;
-        for (const part of activeOrder.cafeParts) {
-            if (part.total != null) {
-                total += part.total;
-            }
-        }
-
-        return total > 0 ? total : null;
-    }, [activeOrder]);
-
-    const displayTotal = serverTotal ?? localTotalWithoutTax;
 
     return (
         <>
@@ -62,7 +42,7 @@ export const OrderPriceInlineTable: React.FC = () => {
                     Total (est.)
                 </td>
                 <td className="price">
-                    {formatPrice(displayTotal)}
+                    {formatPrice(localTotalWithoutTax)}
                 </td>
             </tr>
         </>

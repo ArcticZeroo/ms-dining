@@ -5,7 +5,6 @@ import { useClickTracker } from '../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
 import { useCartQuery } from '../../../store/queries/server-cart.ts';
 import {
-    useServerCartActiveOrder,
     useServerCartHasUnavailableItems,
     useServerCartItemCount,
 } from '../../../store/zustand/server-cart.ts';
@@ -18,7 +17,6 @@ import './cart-popup.css';
 const CartPopupBody = () => {
     const totalItemCount = useServerCartItemCount();
     const hasUnavailableItems = useServerCartHasUnavailableItems();
-    const activeOrder = useServerCartActiveOrder();
     const cartQuery = useCartQuery();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -34,8 +32,7 @@ const CartPopupBody = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    const hasActiveOrder = activeOrder != null;
-    const shouldShow = totalItemCount > 0 || hasUnavailableItems || hasActiveOrder || cartQuery.isPending || cartQuery.isError;
+    const shouldShow = totalItemCount > 0 || hasUnavailableItems || cartQuery.isPending || cartQuery.isError;
     const hasWarning = hasUnavailableItems || cartQuery.isError;
 
     return (
@@ -46,7 +43,6 @@ const CartPopupBody = () => {
                 !shouldShow && 'hidden',
                 isExpanded && 'expanded',
                 hasWarning && 'has-error',
-                hasActiveOrder && !hasWarning && 'has-active-order',
             )}
             style={{
                 right: `${scrollbarWidth}px`
@@ -57,13 +53,6 @@ const CartPopupBody = () => {
                     hasWarning && (
                         <span className="cart-warning material-symbols-outlined" title={cartQuery.isError ? 'Failed to load cart' : 'Some cart items are no longer available'}>
                             error
-                        </span>
-                    )
-                }
-                {
-                    hasActiveOrder && !hasWarning && (
-                        <span className="cart-warning material-symbols-outlined" title="You have an order in progress">
-                            info
                         </span>
                     )
                 }
@@ -91,16 +80,6 @@ const CartPopupBody = () => {
                                     Retry
                                 </button>
                             </div>
-                        </div>
-                    )
-                }
-                {
-                    hasActiveOrder && (
-                        <div className="cart-active-order">
-                            <span>You have an order in progress.</span>
-                            <Link to={`/order/${activeOrder.orderSessionId}/pay`} className="checkout-button">
-                                Continue Order
-                            </Link>
                         </div>
                     )
                 }

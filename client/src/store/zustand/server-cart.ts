@@ -1,8 +1,4 @@
-import type {
-    IActiveOrderSummary,
-    ICartItemRecord,
-    ICartResponse,
-} from '@msdining/common/models/cart';
+import type { ICartItemRecord, ICartResponse } from '@msdining/common/models/cart';
 import { create } from 'zustand';
 import { mutative } from 'zustand-mutative';
 import { useMemo } from 'react';
@@ -18,7 +14,6 @@ import { useMemo } from 'react';
 
 interface IServerCartStore {
     items: ICartItemRecord[];
-    activeOrder: IActiveOrderSummary | undefined;
 
     setFromServerResponse(response: ICartResponse): void;
     optimisticUpdateQuantity(itemId: string, quantity: number): void;
@@ -26,12 +21,10 @@ interface IServerCartStore {
 }
 
 export const useServerCartStore = create<IServerCartStore>()(mutative((set) => ({
-    items:       [],
-    activeOrder: undefined,
+    items: [],
 
     setFromServerResponse: (response) => set((state) => {
         state.items = response.items;
-        state.activeOrder = response.activeOrder;
     }),
 
     optimisticUpdateQuantity: (itemId, quantity) => set((state) => {
@@ -49,19 +42,6 @@ export const useServerCartStore = create<IServerCartStore>()(mutative((set) => (
 // ─── Derived selectors ───────────────────────────────────────────────
 
 export const useServerCartItems = () => useServerCartStore(state => state.items);
-export const useServerCartActiveOrder = () => useServerCartStore(state => state.activeOrder);
-
-/**
- * Returns the active order, throwing if none exists.
- * Only use on pages where the layout guard guarantees an active order.
- */
-export const useRequiredActiveOrder = () => {
-    const activeOrder = useServerCartActiveOrder();
-    if (activeOrder == null) {
-        throw new Error('Expected an active order but none exists. This is a bug — the layout guard should have redirected.');
-    }
-    return activeOrder;
-};
 
 export const useServerCartItemCount = () => useServerCartStore(state =>
     state.items.reduce((sum, item) => sum + item.quantity, 0),
