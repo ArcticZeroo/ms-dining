@@ -13,8 +13,8 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
 
     if (orders.length === 0) {
         return (
-            <div className="card dark-blue">
-                No completed orders found for today
+            <div className="card flex-col align-center">
+                No orders found for today
             </div>
         );
     }

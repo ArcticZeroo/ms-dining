@@ -29,10 +29,10 @@ export const formatEstimatedReadyTime = (
     waitTimeMax: number,
 ): string => {
     const { earliest, latest } = getEstimatedReadyTime(completedAt, waitTimeMin, waitTimeMax);
-    const fmt = (date: Date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
     if (earliest.getTime() === latest.getTime()) {
-        return fmt(earliest);
+        return formatTime(earliest);
     }
-    return `${fmt(earliest)} - ${fmt(latest)}`;
+    return `${formatTime(earliest)} - ${formatTime(latest)}`;
 };
