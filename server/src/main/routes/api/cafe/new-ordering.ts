@@ -9,9 +9,7 @@ import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 
 const PreparePaymentSchema = z.object({
-    items:       z.array(OrderItemSchema).min(1),
-    alias:       z.string().min(1),
-    phoneNumber: z.string().min(1),
+    items: z.array(OrderItemSchema).min(1),
 });
 
 const CompleteOrderSchema = z.object({
@@ -23,6 +21,8 @@ const CompleteOrderSchema = z.object({
         cardHolderName:      z.string(),
         postalCode:          z.string(),
     }),
+    alias:       z.string().min(1),
+    phoneNumber: z.string().min(1),
 });
 
 export const registerNewOrderingRoutes = (parent: Router) => {
@@ -39,9 +39,7 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         const result = await getServices().data.order.preparePayment({
             userId,
             cafeId,
-            items:                      body.items,
-            alias:                      body.alias,
-            phoneNumberWithCountryCode: body.phoneNumber,
+            items: body.items,
             iframeCssUrl,
         });
 
@@ -56,8 +54,10 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         const result = await getServices().data.order.completeOrder({
             userId,
             pendingOrderId,
-            paymentToken: body.paymentToken,
-            cardInfo:     body.cardInfo,
+            paymentToken:               body.paymentToken,
+            cardInfo:                   body.cardInfo,
+            alias:                      body.alias,
+            phoneNumberWithCountryCode: body.phoneNumber,
         });
 
         ctx.body = jsonStringifyWithoutNull(result);

@@ -26,6 +26,9 @@ import {
     type IPaymentInfoFormState,
     type IPaymentInfoFormValue,
 } from '../../order/payment/payment-info-form.tsx';
+import { CartItemRow } from '../../order/cart/cart-item-row.tsx';
+
+import './order-page.css';
 
 const paymentPopupId = Symbol('order-payment-popup');
 
@@ -97,12 +100,9 @@ export const OrderPageBody = () => {
     const isBusy = preparePayment.isPending || completeOrder.isPending;
 
     const onPayCafe = useCallback(async (cafeId: string, items: ICartItemRecord[]) => {
-        if (!paymentInfoState.isValid || paymentInfoState.phoneNumberWithCountryCode == null || isBusy) {
+        if (isBusy) {
             return;
         }
-
-        InternalSettings.alias.value = paymentInfo.alias;
-        InternalSettings.phoneNumber.value = paymentInfoState.phoneNumberWithCountryCode;
 
         setCafeErrors(previous => {
             const next = { ...previous };
@@ -114,16 +114,27 @@ export const OrderPageBody = () => {
             const prepareResult = await preparePayment.mutateAsync({
                 cafeId,
                 items: items.map(toOrderItem),
-                alias: paymentInfo.alias,
-                phoneNumber: paymentInfoState.phoneNumberWithCountryCode,
             });
 
             const onPaymentComplete = async (paymentResult: IRguestPaymentResult) => {
+                if (!paymentInfoState.isValid || paymentInfoState.phoneNumberWithCountryCode == null) {
+                    setCafeErrors(previous => ({
+                        ...previous,
+                        [cafeId]: 'Please fill in your alias and phone number.',
+                    }));
+                    return;
+                }
+
+                InternalSettings.alias.value = paymentInfo.alias;
+                InternalSettings.phoneNumber.value = paymentInfoState.phoneNumberWithCountryCode;
+
                 try {
                     const completionResult = await completeOrder.mutateAsync({
                         pendingOrderId: prepareResult.pendingOrderId,
-                        paymentToken: paymentResult.token,
-                        cardInfo:     paymentResult.cardInfo,
+                        paymentToken:   paymentResult.token,
+                        cardInfo:       paymentResult.cardInfo,
+                        alias:          paymentInfo.alias,
+                        phoneNumber:    paymentInfoState.phoneNumberWithCountryCode,
                     });
 
                     setSnapshotItems(previous => previous.filter(item => item.menuItem.cafeId !== cafeId));
@@ -256,28 +267,32 @@ export const OrderPageBody = () => {
                             <div key={group.cafeId} className="card dark-blue order-page-cafe">
                                 <div className="order-page-cafe-header">
                                     <div className="title">{cafeName}</div>
-                                    <div>{formatPrice(totalPrice)}</div>
                                 </div>
-                                <div className="order-page-cafe-items">
-                                    {group.items.map((item) => (
-                                        <div key={item.id} className="order-page-cafe-item-row">
-                                            <div className="order-page-cafe-item-details">
-                                                <span>{item.quantity}x {item.menuItem.name}</span>
-                                                {item.specialInstructions && (
-                                                    <span className="subtitle">Note: {item.specialInstructions}</span>
-                                                )}
-                                                {!item.isAvailable && (
-                                                    <span className="subtitle order-page-cafe-error">This item is no longer available.</span>
-                                                )}
-                                            </div>
-                                            <span>{formatPrice(calculatePrice(
-                                                item.menuItem,
-                                                new Map(item.modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)])),
-                                                item.quantity,
-                                            ))}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                                <table className="cart-contents">
+                                    <tbody>
+                                        {group.items.map((item) => (
+                                            <CartItemRow
+                                                key={item.id}
+                                                item={item}
+                                                showFullDetails={true}
+                                                readOnly={true}
+                                                onRemove={() => {}}
+                                                onEdit={() => {}}
+                                                onChangeQuantity={() => {}}
+                                            />
+                                        ))}
+                                        <tr>
+                                            <td colSpan={2}></td>
+                                            <td>Subtotal</td>
+                                            <td className="price">{formatPrice(totalPrice)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan={2}></td>
+                                            <td>Tax</td>
+                                            <td className="price">Calculated at checkout</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 {cafeErrors[group.cafeId] && (
                                     <div className="order-page-cafe-error">
                                         {cafeErrors[group.cafeId]}
@@ -292,7 +307,7 @@ export const OrderPageBody = () => {
                                     <span>{group.items.length} item{group.items.length === 1 ? '' : 's'}</span>
                                     <button
                                         className="default-container"
-                                        disabled={!paymentInfoState.isValid || isBusy || hasUnavailableItems}
+                                        disabled={isBusy || hasUnavailableItems}
                                         onClick={() => onPayCafe(group.cafeId, group.items)}
                                     >
                                         Pay {formatPrice(totalPrice)}

@@ -11,8 +11,6 @@ export interface IOrderService {
         userId: string;
         cafeId: string;
         items: IOrderItem[];
-        alias: string;
-        phoneNumberWithCountryCode: string;
         iframeCssUrl: string;
     }): Promise<IPreparePaymentResult>;
 
@@ -21,6 +19,8 @@ export interface IOrderService {
         pendingOrderId: string;
         paymentToken: string;
         cardInfo: IRguestCardInfo;
+        alias: string;
+        phoneNumberWithCountryCode: string;
     }): Promise<ICompleteOrderResultDTO>;
 
     getCompletedOrdersToday(data: {

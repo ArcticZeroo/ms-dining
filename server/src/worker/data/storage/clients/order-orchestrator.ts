@@ -143,20 +143,36 @@ export abstract class OrderOrchestrator {
         userId: string,
         cafeId: string,
         items: IOrderItem[],
-        alias: string,
-        phoneNumberWithCountryCode: string,
         iframeCssUrl: string,
     ): Promise<IPreparePaymentResult> {
-        const { id: pendingOrderId } = await OrderStorageClient.createPendingOrder(
+        const { id: pendingOrderId, isExisting } = await OrderStorageClient.createPendingOrder(
             userId,
             cafeId,
             items,
-            alias,
-            phoneNumberWithCountryCode,
         );
 
+        // If there's already a live session for this pending order, reuse it
+        if (isExisting) {
+            const existingSession = await liveSessions.peek(pendingOrderId, session => session);
+            if (existingSession) {
+                const siteToken = existingSession.cardProcessorToken;
+                const iframeUrl = existingSession.getCardProcessorUrl(iframeCssUrl);
+                if (siteToken && existingSession.orderId && existingSession.orderNumber) {
+                    orderLog.info(`Reusing existing session for pending order ${pendingOrderId}`);
+                    return {
+                        pendingOrderId,
+                        siteToken,
+                        iframeUrl,
+                        buyOnDemandOrderId:     existingSession.orderId,
+                        buyOnDemandOrderNumber: existingSession.orderNumber,
+                        expiresAt:              new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+                    };
+                }
+            }
+        }
+
         try {
-            const session = await liveSessions.update(pendingOrderId, async () => {
+            const session = await liveSessions.getOrInsert(pendingOrderId, async () => {
                 const createdSession = await createPopulatedSession(cafeId, toCartItems(items));
                 await createdSession.prepareForIframe(iframeCssUrl);
                 return createdSession;
@@ -180,9 +196,11 @@ export abstract class OrderOrchestrator {
                 expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
             };
         } catch (err) {
-            await OrderStorageClient.deletePendingOrder(pendingOrderId).catch(cleanupErr => {
-                orderLog.error(`Failed to delete pending order ${pendingOrderId} after prepare failure:`, cleanupErr);
-            });
+            if (!isExisting) {
+                await OrderStorageClient.deletePendingOrder(pendingOrderId).catch(cleanupErr => {
+                    orderLog.error(`Failed to delete pending order ${pendingOrderId} after prepare failure:`, cleanupErr);
+                });
+            }
             throw err;
         }
     }
@@ -192,7 +210,14 @@ export abstract class OrderOrchestrator {
         pendingOrderId: string,
         paymentToken: string,
         cardInfo: IRguestCardInfo,
+        alias: string,
+        phoneNumberWithCountryCode: string,
     ): Promise<ICompleteOrderResultDTO> {
+        const phoneData = phone(phoneNumberWithCountryCode);
+        if (!phoneData.isValid) {
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Invalid phone number');
+        }
+
         let completionResult: ICompleteOrderResultDTO | undefined;
 
         await liveSessions.update(pendingOrderId, async (session) => {
@@ -207,16 +232,12 @@ export abstract class OrderOrchestrator {
             if (pendingOrder.userId !== userId) {
                 throw new ServiceError(SERVICE_ERROR_CODES.FORBIDDEN, 'Pending order does not belong to this user');
             }
-            const phoneData = phone(pendingOrder.phoneNumberWithCountryCode);
-            if (!phoneData.isValid) {
-                throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Invalid phone number');
-            }
 
             const orderedItems = toOrderItems(pendingOrder.items);
 
             try {
                 const waitTime = await session.completeOrderAfterIframePayment({
-                    alias: pendingOrder.alias,
+                    alias,
                     phoneData,
                     paymentToken,
                     cardInfo,

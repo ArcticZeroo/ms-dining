@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import type { ISerializedModifier } from '@msdining/common/models/cart';
@@ -67,24 +68,60 @@ export const toOrderItems = (items: Array<{
     modifiers: Array<{ modifierId: string; choiceId: string }>;
 }>): IOrderItem[] => items.map(toOrderItem);
 
+/**
+ * Deterministic hash of order items for deduplication.
+ * Sorts by menuItemId, then by modifiers, to ensure identical item sets
+ * produce the same hash regardless of array order.
+ */
+const hashOrderItems = (items: IOrderItem[]): string => {
+    const normalized = items
+        .map(item => ({
+            menuItemId:          item.menuItemId,
+            quantity:            item.quantity,
+            specialInstructions: item.specialInstructions ?? '',
+            modifiers:           item.modifiers
+                .map(mod => `${mod.modifierId}:${[...mod.choiceIds].sort().join(',')}`)
+                .sort(),
+        }))
+        .sort((left, right) => left.menuItemId.localeCompare(right.menuItemId));
+
+    return createHash('sha256')
+        .update(JSON.stringify(normalized))
+        .digest('hex')
+        .slice(0, 16);
+};
+
 export abstract class OrderStorageClient {
+    /**
+     * Creates a PendingCafeOrder with item snapshots, or returns an existing
+     * one if there's already a pending order for this user+cafe with the same items.
+     */
     static async createPendingOrder(
         userId: string,
         cafeId: string,
         items: IOrderItem[],
-        alias: string,
-        phoneNumberWithCountryCode: string,
-    ): Promise<{ id: string }> {
+    ): Promise<{ id: string; isExisting: boolean }> {
         if (items.length === 0) {
             throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Order must contain at least one item');
         }
 
-        return usePrismaWrite(prisma => prisma.pendingCafeOrder.create({
+        const itemsHash = hashOrderItems(items);
+
+        // Check for existing pending order with matching items
+        const existing = await usePrismaClient(prisma => prisma.pendingCafeOrder.findFirst({
+            where:  { userId, cafeId, itemsHash },
+            select: { id: true },
+        }));
+
+        if (existing) {
+            return { id: existing.id, isExisting: true };
+        }
+
+        const created = await usePrismaWrite(prisma => prisma.pendingCafeOrder.create({
             data: {
                 userId,
                 cafeId,
-                alias,
-                phoneNumberWithCountryCode,
+                itemsHash,
                 items: {
                     create: items.map(item => ({
                         menuItemId:          item.menuItemId,
@@ -103,6 +140,8 @@ export abstract class OrderStorageClient {
             },
             select: { id: true },
         }));
+
+        return { id: created.id, isExisting: false };
     }
 
     static async getPendingOrder(pendingOrderId: string) {

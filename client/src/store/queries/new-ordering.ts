@@ -5,15 +5,20 @@ import { OrderClient } from '../../api/new-ordering.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 
 export const usePreparePaymentMutation = () => useMutation({
-    mutationFn: (data: { cafeId: string; items: IOrderItem[]; alias: string; phoneNumber: string }) =>
-        OrderClient.preparePayment(data.cafeId, data.items, data.alias, data.phoneNumber),
+    mutationFn: (data: { cafeId: string; items: IOrderItem[] }) =>
+        OrderClient.preparePayment(data.cafeId, data.items),
 });
 
 export const useCompleteOrderMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data: { pendingOrderId: string; paymentToken: string; cardInfo: IRguestCardInfo }) =>
-            OrderClient.completeOrder(data.pendingOrderId, data.paymentToken, data.cardInfo),
+        mutationFn: (data: {
+            pendingOrderId: string;
+            paymentToken: string;
+            cardInfo: IRguestCardInfo;
+            alias: string;
+            phoneNumber: string;
+        }) => OrderClient.completeOrder(data.pendingOrderId, data.paymentToken, data.cardInfo, data.alias, data.phoneNumber),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },

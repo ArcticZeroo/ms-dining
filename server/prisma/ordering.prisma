@@ -41,15 +41,16 @@ model CartItemModifierChoice {
 // Deleted on completion (promoted to CafeOrder) or TTL expiry.
 
 model PendingCafeOrder {
-  id                         String   @id @default(uuid())
-  userId                     String
-  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cafeId                     String
-  alias                      String
-  phoneNumberWithCountryCode String
-  createdAt                  DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cafeId    String
+  itemsHash String
+  createdAt DateTime @default(now())
 
   items PendingCafeOrderItem[]
+
+  @@index([userId, cafeId, itemsHash])
 }
 
 model PendingCafeOrderItem {

@@ -19,8 +19,6 @@ export abstract class OrderClient {
     static async preparePayment(
         cafeId: string,
         items: IOrderItem[],
-        alias: string,
-        phoneNumber: string,
     ): Promise<IPreparePaymentResult> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/cafes/${cafeId}/prepare-payment`,
@@ -28,7 +26,7 @@ export abstract class OrderClient {
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify({ items, alias, phoneNumber }),
+                body:    JSON.stringify({ items }),
             },
         });
     }
@@ -37,6 +35,8 @@ export abstract class OrderClient {
         pendingOrderId: string,
         paymentToken: string,
         cardInfo: IRguestCardInfo,
+        alias: string,
+        phoneNumber: string,
     ): Promise<ICompleteOrderResult> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/complete/${pendingOrderId}`,
@@ -44,7 +44,7 @@ export abstract class OrderClient {
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify({ paymentToken, cardInfo }),
+                body:    JSON.stringify({ paymentToken, cardInfo, alias, phoneNumber }),
             },
         });
     }
