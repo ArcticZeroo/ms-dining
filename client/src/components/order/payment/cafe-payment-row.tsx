@@ -1,5 +1,5 @@
 import type { ICompleteOrderResult } from '@msdining/common/models/order';
-import type { OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { IOrderCafePartSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../context/app.ts';
 import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
@@ -12,18 +12,9 @@ import { formatPrice } from '../../../util/cart.ts';
 import { classNames } from '../../../util/react.ts';
 import { PaymentIframe } from './payment-iframe.tsx';
 
-export interface ICafePaymentRowValue {
-    cafeId: string;
-    status: OrderCafePartStatus;
-    total: number | null;
-    waitTimeMin: number | null;
-    waitTimeMax: number | null;
-    buyOnDemandOrderNumber: string | null;
-}
-
 interface ICafePaymentRowProps {
     orderId: string;
-    value: ICafePaymentRowValue;
+    value: IOrderCafePartSummary;
     popupId: symbol;
     disabled: boolean;
     onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;

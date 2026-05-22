@@ -16,10 +16,16 @@ export type { IPaymentFormData };
 interface IPaymentInfoFormProps {
     isPrepareStarted: boolean;
     isCartReady: boolean;
+    submitLabel?: string;
     onSubmit(data: IPaymentFormData): void;
 }
 
-export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isPrepareStarted, isCartReady, onSubmit }) => {
+export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({
+    isPrepareStarted,
+    isCartReady,
+    submitLabel = 'Pay with Card',
+    onSubmit,
+}) => {
     const [phoneNumber, setPhoneNumber] = useFieldWithValidator(validatePhoneNumber, InternalSettings.phoneNumber.value /*initialValue*/);
     const [alias, setAlias] = useState(InternalSettings.alias.value);
 
@@ -87,7 +93,7 @@ export const PaymentInfoForm: React.FC<IPaymentInfoFormProps> = ({ isPrepareStar
                     title={isFormValid ? 'Click to pay' : 'Please fill out all fields and check for validation errors.'}
                     disabled={!isFormValid || !isCartReady}
                 >
-                    Pay with Card
+                    {submitLabel}
                 </button>
             )}
         </form>

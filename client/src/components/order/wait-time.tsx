@@ -1,32 +1,29 @@
 import type { IActiveOrderSummary } from '@msdining/common/models/cart';
-import type { IStartCheckoutResult } from '@msdining/common/models/order';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
+import { useServerCartActiveOrder } from '../../store/zustand/server-cart.ts';
 import { getViewName } from '../../util/cafe.ts';
 import { formatWaitTime } from '../../util/order.ts';
 
 interface IWaitTimeProps {
-    checkoutResult?: IStartCheckoutResult;
     activeOrder?: IActiveOrderSummary;
 }
 
-export const WaitTime: React.FC<IWaitTimeProps> = ({ checkoutResult, activeOrder }) => {
+export const WaitTime: React.FC<IWaitTimeProps> = ({ activeOrder: overrideActiveOrder }) => {
     const { viewsById } = useContext(ApplicationContext);
+    const storeActiveOrder = useServerCartActiveOrder();
+    const activeOrder = overrideActiveOrder ?? storeActiveOrder;
 
-    const waitTimes = useMemo(() => {
-        const parts = activeOrder?.cafeParts ?? checkoutResult?.cafeResults ?? [];
-
-        return parts
-            .filter(part => part.waitTimeMin != null && part.waitTimeMax != null)
-            .map((part) => {
-                const view = viewsById.get(part.cafeId);
-                return {
-                    cafeId:   part.cafeId,
-                    cafeName: view ? getViewName({ view, showGroupName: true }) : part.cafeId,
-                    label:    formatWaitTime(part.waitTimeMin!, part.waitTimeMax!),
-                };
-            });
-    }, [activeOrder?.cafeParts, checkoutResult?.cafeResults, viewsById]);
+    const waitTimes = useMemo(() => (activeOrder?.cafeParts ?? [])
+        .filter(part => part.waitTimeMin != null && part.waitTimeMax != null)
+        .map((part) => {
+            const view = viewsById.get(part.cafeId);
+            return {
+                cafeId:   part.cafeId,
+                cafeName: view ? getViewName({ view, showGroupName: true }) : part.cafeId,
+                label:    formatWaitTime(part.waitTimeMin!, part.waitTimeMax!),
+            };
+        }), [activeOrder?.cafeParts, viewsById]);
 
     if (waitTimes.length === 0) {
         return null;

@@ -1,12 +1,13 @@
+import type { IOrderCafePartSummary } from '@msdining/common/models/cart';
 import type { ICompleteOrderResult } from '@msdining/common/models/order';
 import React, { useMemo } from 'react';
-import { CafePaymentRow, ICafePaymentRowValue } from './cafe-payment-row.tsx';
+import { CafePaymentRow } from './cafe-payment-row.tsx';
 
 import './multi-cafe-payment.css';
 
 interface IMultiCafePaymentProps {
     orderId: string;
-    cafes: ICafePaymentRowValue[];
+    cafes: IOrderCafePartSummary[];
     isCancelling: boolean;
     onCompleted: (cafeId: string, result: ICompleteOrderResult) => void;
     onCancelOrder: () => void;

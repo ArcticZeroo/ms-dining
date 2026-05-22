@@ -5,7 +5,7 @@ import type { ICartItemData, ICartItemUpdate, ICartResponse } from '@msdining/co
 import { useCallback } from 'react';
 import { useDebouncedCallback } from '../../hooks/debounce.ts';
 
-const CART_QUERY_KEY = ['cart', 'server'] as const;
+export const CART_QUERY_KEY = ['cart', 'server'] as const;
 
 /**
  * Sync the Zustand cache from a server response.

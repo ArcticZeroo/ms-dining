@@ -1,8 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { OrderClient } from '../../api/new-ordering.ts';
 import type { IRguestCardInfo } from '@msdining/common/models/cart';
-
-const CART_QUERY_KEY = ['cart', 'server'] as const;
+import { OrderClient } from '../../api/new-ordering.ts';
+import { CART_QUERY_KEY } from './server-cart.ts';
 
 /**
  * Checkout: create an order from the current cart.
