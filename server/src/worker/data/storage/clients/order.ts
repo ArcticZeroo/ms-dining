@@ -33,7 +33,8 @@ const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 // Keyed by `${orderSessionId}:${cafeId}`
 const liveSessions = new Map<string, ILiveSession>();
 
-const sessionKey = (orderSessionId: string, cafeId: string) => `${orderSessionId}:${cafeId}`;
+const sessionKey = ({ orderSessionId, cafeId }: { orderSessionId: string; cafeId: string }) =>
+    `${orderSessionId}:${cafeId}`;
 
 const cleanupLiveSession = (key: string) => {
     const live = liveSessions.get(key);
@@ -186,7 +187,7 @@ export abstract class OrderStorageClient {
                 }));
 
                 // Store live session for payment flow
-                const key = sessionKey(orderSession.id, cafeId);
+                const key = sessionKey({ orderSessionId: orderSession.id, cafeId });
                 storeLiveSession(key, session);
 
                 cafeResults.push({
@@ -241,6 +242,22 @@ export abstract class OrderStorageClient {
     ): Promise<void> {
         await usePrismaTransaction(async tx => {
             await ensureOrderBelongsToUser(tx, orderSessionId, userId);
+
+            // Reject if any cafe part has already progressed past pending
+            const advancedParts = await tx.orderCafePart.findFirst({
+                where: {
+                    orderSessionId,
+                    status: { not: 'pending' },
+                },
+                select: { id: true },
+            });
+            if (advancedParts) {
+                throw new ServiceError(
+                    SERVICE_ERROR_CODES.CONFLICT,
+                    'Cannot change payment identity after payment has been prepared. Abandon the order and try again.',
+                );
+            }
+
             await tx.orderSession.update({
                 where: { id: orderSessionId },
                 data:  { alias, phoneNumberWithCountryCode },
@@ -266,7 +283,7 @@ export abstract class OrderStorageClient {
             }
         });
 
-        const key = sessionKey(orderSessionId, cafeId);
+        const key = sessionKey({ orderSessionId, cafeId });
         let live = liveSessions.get(key);
 
         // Rebuild session if expired
@@ -361,7 +378,7 @@ export abstract class OrderStorageClient {
             throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Invalid phone number');
         }
 
-        const key = sessionKey(orderSessionId, cafeId);
+        const key = sessionKey({ orderSessionId, cafeId });
         const live = liveSessions.get(key);
         if (!live) {
             throw new ServiceError(
@@ -452,7 +469,7 @@ export abstract class OrderStorageClient {
             });
 
             for (const part of parts) {
-                const key = sessionKey(orderSessionId, part.cafeId);
+                const key = sessionKey({ orderSessionId, cafeId: part.cafeId });
                 cleanupLiveSession(key);
             }
 

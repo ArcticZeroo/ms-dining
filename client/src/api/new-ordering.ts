@@ -16,7 +16,7 @@ export abstract class NewOrderingClient {
         await makeJsonRequest({
             path:    `${ORDER_BASE}/${orderId}/identity`,
             options: {
-                method:  'POST',
+                method:  'PUT',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({ alias, phoneNumberWithCountryCode }),
             },
@@ -26,7 +26,6 @@ export abstract class NewOrderingClient {
     static async preparePayment(orderId: string, cafeId: string): Promise<IPreparePaymentResult> {
         return makeJsonRequest({
             path:    `${ORDER_BASE}/${orderId}/cafes/${cafeId}/prepare-payment`,
-            options: { method: 'POST' },
         });
     }
 

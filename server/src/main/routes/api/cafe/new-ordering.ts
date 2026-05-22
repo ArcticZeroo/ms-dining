@@ -35,8 +35,8 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    // POST /order/:orderId/identity — set alias + phone before first payment
-    router.post('/:orderId/identity', async ctx => {
+    // PUT /order/:orderId/identity — set alias + phone before first payment (idempotent)
+    router.put('/:orderId/identity', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const orderSessionId = ctx.params.orderId!;
         const body = PaymentIdentitySchema.parse(ctx.request.body);
@@ -51,8 +51,8 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         ctx.status = 204;
     });
 
-    // POST /order/:orderId/cafes/:cafeId/prepare-payment
-    router.post('/:orderId/cafes/:cafeId/prepare-payment', async ctx => {
+    // GET /order/:orderId/cafes/:cafeId/prepare-payment
+    router.get('/:orderId/cafes/:cafeId/prepare-payment', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const orderSessionId = ctx.params.orderId!;
         const cafeId = ctx.params.cafeId!;
