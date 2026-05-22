@@ -22,6 +22,7 @@ export const OrderCartPage = () => {
     const cartQuery = useCartQuery();
     const startCheckoutMutation = useStartCheckoutMutation();
     const cartItems = useServerCartItems();
+    const hasUnavailableItems = cartItems.some(item => !item.isAvailable);
 
     const availableItems = useMemo(() => cartItems.filter(item => item.isAvailable), [cartItems]);
     const hasAvailableItems = availableItems.length > 0;
@@ -71,9 +72,14 @@ export const OrderCartPage = () => {
                 />
             </div>
             {availableCafeCount > 1 && <MultiCafeOrderWarning/>}
+            {hasUnavailableItems && (
+                <div className="card error">
+                    Some items in your cart are no longer available. Please remove them before checking out.
+                </div>
+            )}
             <PaymentInfoForm
                 isPrepareStarted={startCheckoutMutation.isPending}
-                isCartReady={hasAvailableItems}
+                isCartReady={hasAvailableItems && !hasUnavailableItems}
                 onSubmit={startCheckout}
                 submitLabel="Start Checkout"
             />
