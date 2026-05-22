@@ -1,23 +1,24 @@
-import { usePrismaClient, usePrismaTransaction } from '../client.js';
+import { usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { FakeCafeOrderSession } from '../../cafe/session/fake-order-session.js';
 import type { IOrderSession } from '../../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../../cafe/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
-import { OrderStorageClient } from './order.js';
+import { OrderStorageClient, toOrderItems } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
-import type { ICartItem, IRguestCardInfo, OrderCafePartStatus } from '@msdining/common/models/cart';
-import type { IWaitTimeResponse } from '@msdining/common/models/http';
-import { ACTIVE_ORDER_CAFE_PART_STATUSES, SubmitOrderStage } from '@msdining/common/models/cart';
+import type { ICartItem, IRguestCardInfo, ISerializedModifier } from '@msdining/common/models/cart';
+import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
-    IStartCheckoutResult,
-    IPreparePaymentResult,
+    ICafeOrderSummary,
     ICompleteOrderResultDTO,
+    IOrderItem,
+    IPreparePaymentResult,
 } from '@msdining/common/models/order';
-import { phone, type PhoneValidResult } from 'phone';
+import type { IWaitTimeResponse } from '@msdining/common/models/http';
+import { phone } from 'phone';
 
 const orderLog = getNamespaceLogger('Order');
 const isFakeOrdering = process.env.FAKE_ORDERING === 'true';
@@ -28,45 +29,51 @@ if (isFakeOrdering) {
 
 const SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
+const PENDING_ORDER_CLEANUP_INTERVAL_MS = SESSION_TTL_MS;
 
 const liveSessions = new LockedExpiringMap<string, IOrderSession>(SESSION_TTL_MS);
 
-// Periodic token refresh — goes through all live sessions in parallel
 setInterval(() => {
     const entries = [...liveSessions.entries()];
     if (entries.length === 0) return;
 
     orderLog.info(`Refreshing tokens for ${entries.length} live session(s)...`);
     Promise.all(
-        entries.map(([key]) =>
-            liveSessions.updateWithoutRefresh(key, async (session) => {
+        entries.map(([pendingOrderId]) =>
+            liveSessions.updateWithoutRefresh(pendingOrderId, async (session) => {
                 if (!session) return undefined;
                 try {
                     await session.client.refreshLogin();
                 } catch (err) {
-                    orderLog.error(`Failed to refresh token for session ${key}:`, err);
+                    orderLog.error(`Failed to refresh token for session ${pendingOrderId}:`, err);
                 }
                 return session;
-            })
-        )
+            }),
+        ),
     ).catch(err => orderLog.error('Token refresh sweep failed:', err));
 }, TOKEN_REFRESH_INTERVAL_MS);
 
-const sessionKey = ({ orderSessionId, cafeId }: { orderSessionId: string; cafeId: string }) =>
-    `${orderSessionId}:${cafeId}`;
+setInterval(() => {
+    const olderThan = new Date(Date.now() - SESSION_TTL_MS);
+    usePrismaWrite(prisma => prisma.pendingCafeOrder.deleteMany({
+        where: { createdAt: { lt: olderThan } },
+    })).catch(err => orderLog.error('Pending order cleanup failed:', err));
+}, PENDING_ORDER_CLEANUP_INTERVAL_MS);
 
-const groupModifierChoices = (choices: Array<{ modifierId: string; choiceId: string }>): Map<string, Set<string>> => {
+const groupModifierChoices = (modifiers: ISerializedModifier[]): Map<string, Set<string>> => {
     const result = new Map<string, Set<string>>();
-    for (const { modifierId, choiceId } of choices) {
-        const existing = result.get(modifierId);
-        if (existing) {
-            existing.add(choiceId);
-        } else {
-            result.set(modifierId, new Set([choiceId]));
-        }
+    for (const modifier of modifiers) {
+        result.set(modifier.modifierId, new Set(modifier.choiceIds));
     }
     return result;
 };
+
+const toCartItems = (items: IOrderItem[]): ICartItem[] => items.map(item => ({
+    itemId:              item.menuItemId,
+    quantity:            item.quantity,
+    choicesByModifierId: groupModifierChoices(item.modifiers),
+    specialInstructions: item.specialInstructions,
+}));
 
 const getCafeOrThrow = (cafeId: string) => {
     const cafe = CAFES_BY_ID.get(cafeId);
@@ -76,10 +83,17 @@ const getCafeOrThrow = (cafeId: string) => {
     return cafe;
 };
 
-/**
- * Creates an order session, logs in, and populates the cart.
- * Uses FakeCafeOrderSession when FAKE_ORDERING is enabled.
- */
+const getWaitTimeForSession = async (session: IOrderSession): Promise<IWaitTimeResponse> => {
+    if (isFakeOrdering) {
+        return { minTime: 5, maxTime: 10 };
+    }
+
+    return fetchWaitTimeWithCartItems(
+        session.client as BuyOnDemandClient,
+        [...session.rawCartItemsForWaitTime],
+    );
+};
+
 const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): Promise<IOrderSession> => {
     const cafe = getCafeOrThrow(cafeId);
 
@@ -99,194 +113,75 @@ const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): P
     return session;
 };
 
+const toCompletionFinancials = (
+    session: IOrderSession,
+    waitTime: IWaitTimeResponse,
+    completedAt: Date,
+) => {
+    if (!session.orderId || !session.orderNumber) {
+        throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Order data not set on session');
+    }
+
+    return {
+        buyOnDemandOrderId:     session.orderId,
+        buyOnDemandOrderNumber: session.orderNumber,
+        subtotal:               session.orderTotalWithoutTax,
+        tax:                    session.orderTotalTax,
+        total:                  session.orderTotalWithTax,
+        waitTimeMin:            waitTime.minTime,
+        waitTimeMax:            waitTime.maxTime,
+        completedAt,
+    };
+};
+
+const shouldTreatAsPostCloseFailure = (session: IOrderSession) => session.lastCompletedStage === SubmitOrderStage.closeOrder
+    || session.lastCompletedStage === SubmitOrderStage.sendTextReceipt
+    || session.lastCompletedStage === SubmitOrderStage.complete;
+
 export abstract class OrderOrchestrator {
-    /**
-     * Validates ownership and returns the cafe part with a typed status.
-     */
-    private static async useOrderCafePart(userId: string, orderSessionId: string, cafeId: string) {
-        return usePrismaTransaction(async prismaTx => {
-            await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-            const part = await OrderStorageClient.getCafePart(prismaTx, orderSessionId, cafeId);
-            return { ...part, status: part.status as OrderCafePartStatus };
-        });
-    }
-
-    /**
-     * Single path for getting a live session — creates one if it doesn't exist
-     * by reading the cart items from DB. Updates DB with new BoD order data.
-     */
-    private static async getOrCreateLiveSession(orderSessionId: string, cafeId: string): Promise<IOrderSession> {
-        const key = sessionKey({ orderSessionId, cafeId });
-        return liveSessions.getOrInsert(key, async () => {
-            const part = await usePrismaClient(prisma => OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId));
-
-            const cartItems: ICartItem[] = part.items.map(item => ({
-                itemId:              item.menuItemId,
-                quantity:            item.quantity,
-                choicesByModifierId: groupModifierChoices(item.modifierChoices),
-                specialInstructions: item.specialInstructions ?? undefined,
-            }));
-
-            const session = await createPopulatedSession(cafeId, cartItems);
-
-            const waitTime: IWaitTimeResponse = isFakeOrdering
-                ? { minTime: 5, maxTime: 10 }
-                : await fetchWaitTimeWithCartItems(
-                    session.client as BuyOnDemandClient,
-                    [...session.rawCartItemsForWaitTime],
-                );
-
-            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, part.status as OrderCafePartStatus, {
-                buyOnDemandOrderId:     session.orderId!,
-                buyOnDemandOrderNumber: session.orderNumber!,
-                subtotal:               session.orderTotalWithoutTax,
-                tax:                    session.orderTotalTax,
-                total:                  session.orderTotalWithTax,
-                waitTimeMin:            waitTime.minTime,
-                waitTimeMax:            waitTime.maxTime,
-            });
-
-            orderLog.info(`{${getCafeOrThrow(cafeId).name}} Live session created — orderId: ${session.orderId}`);
-            return session;
-        });
-    }
-
-    static async startCheckout(userId: string, alias: string, phoneNumberWithCountryCode: string): Promise<IStartCheckoutResult> {
-        const { activeOrder, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
-
-        // Fire-and-forget BoD session creation — the locked map ensures
-        // preparePayment will wait if a session is still initializing.
-        for (const cafeId of cafeIds) {
-            this.getOrCreateLiveSession(activeOrder.orderSessionId, cafeId).catch(err => {
-                orderLog.error(`{${cafeId}} Background session init failed:`, err);
-            });
-        }
-
-        return activeOrder;
-    }
-
     static async preparePayment(
         userId: string,
-        orderSessionId: string,
         cafeId: string,
+        items: IOrderItem[],
+        alias: string,
+        phoneNumberWithCountryCode: string,
         iframeCssUrl: string,
     ): Promise<IPreparePaymentResult> {
-        const part = await this.useOrderCafePart(userId, orderSessionId, cafeId);
-        if (part.status !== 'pending' && part.status !== 'payment_pending') {
-            throw new ServiceError(
-                SERVICE_ERROR_CODES.BAD_REQUEST,
-                `Cannot prepare payment for cafe ${cafeId} in status '${part.status}'`,
-            );
-        }
-
-        // Identity must be set before preparing payment — the close-order call
-        // uses it immediately after the iframe completes.
-        const order = await usePrismaClient(prisma =>
-            OrderStorageClient.getOrderSession(prisma, orderSessionId),
+        const { id: pendingOrderId } = await OrderStorageClient.createPendingOrder(
+            userId,
+            cafeId,
+            items,
+            alias,
+            phoneNumberWithCountryCode,
         );
-        if (!order.alias || !order.phoneNumberWithCountryCode) {
-            throw new ServiceError(
-                SERVICE_ERROR_CODES.BAD_REQUEST,
-                'Payment identity (alias + phone) must be set before preparing payment',
-            );
-        }
 
-        const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
-        if (session.lastCompletedStage != SubmitOrderStage.initializeCardProcessor) {
-            await session.prepareForIframe(iframeCssUrl);
-        }
-
-        const siteToken = session.cardProcessorToken;
-        const iframeUrl = session.getCardProcessorUrl(iframeCssUrl);
-        const buyOnDemandOrderId = session.orderId;
-        const buyOnDemandOrderNumber = session.orderNumber;
-
-        if (!buyOnDemandOrderId || !buyOnDemandOrderNumber || !siteToken) {
-            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Order data not set after prepare');
-        }
-
-        await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'payment_pending');
-
-        return {
-            siteToken,
-            iframeUrl,
-            buyOnDemandOrderId,
-            buyOnDemandOrderNumber,
-            expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
-        };
-    }
-
-    /**
-     * Runs the BoD completion flow on a session. Returns the session back
-     * if it should be kept (failure before close), or undefined to remove it
-     * (success or unrecoverable post-close failure).
-     */
-    private static async executeCompletion(
-        session: IOrderSession,
-        orderSessionId: string,
-        cafeId: string,
-        params: {
-            alias: string;
-            phoneData: PhoneValidResult;
-            paymentToken: string;
-            cardInfo: IRguestCardInfo;
-        },
-    ): Promise<{ result: ICompleteOrderResultDTO; keepSession: boolean }> {
         try {
-            const waitTime = await session.completeOrderAfterIframePayment(params);
-
-            const completedAt = new Date();
-            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
-                completedAt,
-                waitTimeMin: waitTime.minTime,
-                waitTimeMax: waitTime.maxTime,
+            const session = await liveSessions.update(pendingOrderId, async () => {
+                const createdSession = await createPopulatedSession(cafeId, toCartItems(items));
+                await createdSession.prepareForIframe(iframeCssUrl);
+                return createdSession;
             });
 
-            const orderNumber = session.orderNumber ?? 'Unknown';
-            orderLog.info(`Order completed — orderNumber: ${orderNumber}`);
+            const siteToken = session.cardProcessorToken;
+            const iframeUrl = session.getCardProcessorUrl(iframeCssUrl);
+            const buyOnDemandOrderId = session.orderId;
+            const buyOnDemandOrderNumber = session.orderNumber;
 
-            return {
-                keepSession: false,
-                result: {
-                    buyOnDemandOrderNumber: orderNumber,
-                    waitTimeMin:            waitTime.minTime,
-                    waitTimeMax:            waitTime.maxTime,
-                    completedAt:            completedAt.toISOString(),
-                },
-            };
-        } catch (err) {
-            const closedSuccessfully = session.lastCompletedStage == 'closeOrder'
-                || session.lastCompletedStage == 'sendTextReceipt'
-                || session.lastCompletedStage == 'complete';
-
-            if (closedSuccessfully) {
-                orderLog.error('Post-close failure (order already placed):', err);
-
-                const completedAt = new Date();
-                // Fetch stored wait time since we don't have the fresh one
-                const part = await usePrismaClient(prisma =>
-                    OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId),
-                );
-                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
-                    completedAt,
-                    lastError: `Post-close: ${err instanceof Error ? err.message : String(err)}`,
-                });
-
-                return {
-                    keepSession: false,
-                    result: {
-                        buyOnDemandOrderNumber: session.orderNumber ?? 'Unknown',
-                        waitTimeMin:            part.waitTimeMin ?? 0,
-                        waitTimeMax:            part.waitTimeMax ?? 0,
-                        completedAt:            completedAt.toISOString(),
-                    },
-                };
+            if (!buyOnDemandOrderId || !buyOnDemandOrderNumber || !siteToken) {
+                throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Order data not set after prepare');
             }
 
-            // Pre-close failure — keep session for retry
-            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'payment_pending', {
-                lastError: err instanceof Error ? err.message : String(err),
-                lastStage: 'complete',
+            return {
+                pendingOrderId,
+                siteToken,
+                iframeUrl,
+                buyOnDemandOrderId,
+                buyOnDemandOrderNumber,
+                expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+            };
+        } catch (err) {
+            await OrderStorageClient.deletePendingOrder(pendingOrderId).catch(cleanupErr => {
+                orderLog.error(`Failed to delete pending order ${pendingOrderId} after prepare failure:`, cleanupErr);
             });
             throw err;
         }
@@ -294,36 +189,13 @@ export abstract class OrderOrchestrator {
 
     static async completeOrder(
         userId: string,
-        orderSessionId: string,
-        cafeId: string,
+        pendingOrderId: string,
         paymentToken: string,
         cardInfo: IRguestCardInfo,
     ): Promise<ICompleteOrderResultDTO> {
-        const part = await this.useOrderCafePart(userId, orderSessionId, cafeId);
-        if (part.status !== 'payment_pending') {
-            throw new ServiceError(
-                SERVICE_ERROR_CODES.BAD_REQUEST,
-                `Cannot complete order for cafe ${cafeId} in status '${part.status}'`,
-            );
-        }
-
-        const order = await usePrismaClient(prisma =>
-            OrderStorageClient.getOrderSession(prisma, orderSessionId),
-        );
-
-        if (!order.alias || !order.phoneNumberWithCountryCode) {
-            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Payment identity (alias + phone) not set');
-        }
-
-        const phoneData = phone(order.phoneNumberWithCountryCode);
-        if (!phoneData.isValid) {
-            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Invalid phone number');
-        }
-
-        const key = sessionKey({ orderSessionId, cafeId });
         let completionResult: ICompleteOrderResultDTO | undefined;
 
-        await liveSessions.update(key, async (session) => {
+        await liveSessions.update(pendingOrderId, async (session) => {
             if (!session) {
                 throw new ServiceError(
                     SERVICE_ERROR_CODES.BAD_REQUEST,
@@ -331,35 +203,76 @@ export abstract class OrderOrchestrator {
                 );
             }
 
-            const { result, keepSession } = await this.executeCompletion(
-                session, orderSessionId, cafeId,
-                { alias: order.alias!, phoneData, paymentToken, cardInfo },
-            );
+            const pendingOrder = await OrderStorageClient.getPendingOrder(pendingOrderId);
+            if (pendingOrder.userId !== userId) {
+                throw new ServiceError(SERVICE_ERROR_CODES.FORBIDDEN, 'Pending order does not belong to this user');
+            }
+            const phoneData = phone(pendingOrder.phoneNumberWithCountryCode);
+            if (!phoneData.isValid) {
+                throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Invalid phone number');
+            }
 
-            completionResult = result;
-            return keepSession ? session : undefined;
+            const orderedItems = toOrderItems(pendingOrder.items);
+
+            try {
+                const waitTime = await session.completeOrderAfterIframePayment({
+                    alias: pendingOrder.alias,
+                    phoneData,
+                    paymentToken,
+                    cardInfo,
+                });
+                const completedAt = new Date();
+                const financials = toCompletionFinancials(session, waitTime, completedAt);
+
+                await OrderStorageClient.createCompletedOrder(pendingOrderId, financials);
+                try {
+                    await OrderStorageClient.deductFromCart(pendingOrder.userId, orderedItems);
+                } catch (err) {
+                    orderLog.error(`Failed to deduct cart items for pending order ${pendingOrderId}:`, err);
+                }
+
+                completionResult = {
+                    buyOnDemandOrderNumber: financials.buyOnDemandOrderNumber,
+                    waitTimeMin:            financials.waitTimeMin,
+                    waitTimeMax:            financials.waitTimeMax,
+                    completedAt:            financials.completedAt.toISOString(),
+                };
+                orderLog.info(`Order completed — orderNumber: ${financials.buyOnDemandOrderNumber}`);
+                return undefined;
+            } catch (err) {
+                if (!shouldTreatAsPostCloseFailure(session)) {
+                    throw err;
+                }
+
+                orderLog.error('Post-close failure (order already placed):', err);
+                const waitTime = await getWaitTimeForSession(session).catch(waitErr => {
+                    orderLog.error(`Failed to fetch fallback wait time for pending order ${pendingOrderId}:`, waitErr);
+                    return { minTime: 0, maxTime: 0 };
+                });
+                const completedAt = new Date();
+                const financials = toCompletionFinancials(session, waitTime, completedAt);
+
+                await OrderStorageClient.createCompletedOrder(pendingOrderId, financials);
+                try {
+                    await OrderStorageClient.deductFromCart(pendingOrder.userId, orderedItems);
+                } catch (deductErr) {
+                    orderLog.error(`Failed to deduct cart items for pending order ${pendingOrderId}:`, deductErr);
+                }
+
+                completionResult = {
+                    buyOnDemandOrderNumber: financials.buyOnDemandOrderNumber,
+                    waitTimeMin:            financials.waitTimeMin,
+                    waitTimeMax:            financials.waitTimeMax,
+                    completedAt:            financials.completedAt.toISOString(),
+                };
+                return undefined;
+            }
         });
 
         return completionResult!;
     }
 
-    static async abandonRemainingCafes(userId: string, orderSessionId: string): Promise<void> {
-        // Get the cafe IDs so we can lock each session
-        const cafeParts = await usePrismaTransaction(async prismaTx => {
-            await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-            return prismaTx.orderCafePart.findMany({
-                where:   { orderSessionId, status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] } },
-                select:  { cafeId: true },
-            });
-        });
-
-        // Acquire each session lock and remove — prevents concurrent completeOrder
-        await Promise.all(cafeParts.map(({ cafeId }) => {
-            const key = sessionKey({ orderSessionId, cafeId });
-            return liveSessions.update(key, () => undefined);
-        }));
-
-        await OrderStorageClient.abandonRemainingCafes(userId, orderSessionId);
-        orderLog.info(`Order ${orderSessionId}: abandoned ${cafeParts.length} remaining cafe(s), items returned to cart`);
+    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderSummary[]> {
+        return OrderStorageClient.getCompletedOrdersToday(userId);
     }
 }

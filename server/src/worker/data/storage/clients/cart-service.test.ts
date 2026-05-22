@@ -1,8 +1,7 @@
 /**
  * End-to-end tests for the Cart data service.
  *
- * Covers CRUD, normalized modifiers, active-order locking,
- * and the unified cart+activeOrder response shape.
+ * Covers CRUD and normalized modifiers.
  */
 
 import { after, before, test } from 'node:test';
@@ -25,7 +24,6 @@ before(async () => {
     ctx = await createIntegrationTestContext();
     ctx.installServices();
 
-    // Seed user, cafe, station, menu items for FK constraints
     await usePrismaWrite(async prisma => {
         await prisma.user.create({
             data: { id: USER_ID, externalId: 'cart-ext', provider: 'test', displayName: 'Cart Tester' },
@@ -72,7 +70,6 @@ test('getCart returns empty cart for new user', async () => {
     ctx.installServices();
     const cart = await getServices().data.cart.getCart({ userId: USER_ID });
     assert.deepEqual(cart.items, []);
-    assert.equal(cart.activeOrder, undefined);
 });
 
 test('addItem + getCart round-trip with normalized modifiers', async () => {
@@ -118,66 +115,68 @@ test('addItem with specialInstructions', async () => {
     assert.equal(added.specialInstructions, 'No onions please');
 });
 
-test('updateItem changes quantity and modifiers', async () => {
+test('updateItem changes quantity, instructions, and modifiers', async () => {
     ctx.installServices();
 
-    const cart = await getServices().data.cart.getCart({ userId: USER_ID });
-    const itemToUpdate = cart.items.find(i => i.menuItemId === MENU_ITEM_ID);
-    assert.ok(itemToUpdate);
-
-    const result = await getServices().data.cart.updateItem({
+    const beforeUpdate = await getServices().data.cart.addItem({
         userId: USER_ID,
-        itemId: itemToUpdate.id,
-        update: {
-            quantity:  5,
-            modifiers: [{ modifierId: 'mod-2', choiceIds: ['choice-c'] }],
+        item: {
+            menuItemId: MENU_ITEM_ID,
+            quantity:   1,
+            modifiers:  [{ modifierId: 'mod-old', choiceIds: ['a'] }],
         },
     });
 
-    const updated = result.items.find(i => i.id === itemToUpdate.id);
+    const target = beforeUpdate.items[beforeUpdate.items.length - 1]!;
+
+    const result = await getServices().data.cart.updateItem({
+        userId: USER_ID,
+        itemId: target.id,
+        update: {
+            quantity:            3,
+            specialInstructions: 'Extra crispy',
+            modifiers:           [{ modifierId: 'mod-new', choiceIds: ['x', 'y'] }],
+        },
+    });
+
+    const updated = result.items.find(i => i.id === target.id);
     assert.ok(updated);
-    assert.equal(updated.quantity, 5);
-    assert.deepEqual(updated.modifiers, [{ modifierId: 'mod-2', choiceIds: ['choice-c'] }]);
+    assert.equal(updated.quantity, 3);
+    assert.equal(updated.specialInstructions, 'Extra crispy');
+    assert.deepEqual(updated.modifiers, [{ modifierId: 'mod-new', choiceIds: ['x', 'y'] }]);
 });
 
-test('updateItem for nonexistent item throws NOT_FOUND', async () => {
+test('updateItem rejects missing item', async () => {
     ctx.installServices();
 
     await assert.rejects(
         () => getServices().data.cart.updateItem({
             userId: USER_ID,
-            itemId: 'nonexistent-id',
-            update: { quantity: 1 },
+            itemId: 'does-not-exist',
+            update: { quantity: 2 },
         }),
         (err: any) => err.code === 'NOT_FOUND',
     );
 });
 
-test('removeItem removes a specific item', async () => {
+test('removeItem deletes one item and returns remaining cart', async () => {
     ctx.installServices();
 
-    const cart = await getServices().data.cart.getCart({ userId: USER_ID });
-    const countBefore = cart.items.length;
-    assert.ok(countBefore > 0);
-
-    const itemToRemove = cart.items[0]!;
-    const result = await getServices().data.cart.removeItem({
+    const result = await getServices().data.cart.addItem({
         userId: USER_ID,
-        itemId: itemToRemove.id,
+        item: { menuItemId: MENU_ITEM_ID_2, quantity: 1, modifiers: [] },
     });
+    const target = result.items[result.items.length - 1]!;
 
-    assert.equal(result.items.length, countBefore - 1);
-    assert.ok(!result.items.some(i => i.id === itemToRemove.id));
+    const afterRemove = await getServices().data.cart.removeItem({ userId: USER_ID, itemId: target.id });
+    assert.ok(!afterRemove.items.some(i => i.id === target.id));
 });
 
-test('removeItem for nonexistent item throws NOT_FOUND', async () => {
+test('removeItem rejects missing item', async () => {
     ctx.installServices();
 
     await assert.rejects(
-        () => getServices().data.cart.removeItem({
-            userId: USER_ID,
-            itemId: 'nonexistent-id',
-        }),
+        () => getServices().data.cart.removeItem({ userId: USER_ID, itemId: 'does-not-exist' }),
         (err: any) => err.code === 'NOT_FOUND',
     );
 });
@@ -185,7 +184,6 @@ test('removeItem for nonexistent item throws NOT_FOUND', async () => {
 test('clearCart removes all items', async () => {
     ctx.installServices();
 
-    // Ensure there's at least one item
     await getServices().data.cart.addItem({
         userId: USER_ID,
         item: { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] },
@@ -195,47 +193,22 @@ test('clearCart removes all items', async () => {
     assert.deepEqual(result.items, []);
 });
 
-test('cart mutations reject with CONFLICT when an active order exists', async () => {
+test('cart mutations remain available without active-order locking', async () => {
     ctx.installServices();
 
-    // Create an active order session directly in the DB
-    await usePrismaWrite(async prisma => {
-        await prisma.orderSession.create({
-            data: {
-                userId: USER_ID,
-                cafeParts: {
-                    create: {
-                        cafeId: 'cart-cafe',
-                        status: 'payment_pending',
-                    },
-                },
-            },
-        });
+    const added = await getServices().data.cart.addItem({
+        userId: USER_ID,
+        item: { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] },
     });
+    const target = added.items[0]!;
 
-    // All mutations should be rejected
-    const item = { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] };
+    const updated = await getServices().data.cart.updateItem({
+        userId: USER_ID,
+        itemId: target.id,
+        update: { quantity: 2 },
+    });
+    assert.equal(updated.items.find(item => item.id === target.id)?.quantity, 2);
 
-    await assert.rejects(
-        () => getServices().data.cart.addItem({ userId: USER_ID, item }),
-        (err: any) => err.code === 'CONFLICT',
-    );
-    await assert.rejects(
-        () => getServices().data.cart.updateItem({ userId: USER_ID, itemId: 'x', update: { quantity: 1 } }),
-        (err: any) => err.code === 'CONFLICT',
-    );
-    await assert.rejects(
-        () => getServices().data.cart.removeItem({ userId: USER_ID, itemId: 'x' }),
-        (err: any) => err.code === 'CONFLICT',
-    );
-    await assert.rejects(
-        () => getServices().data.cart.clearCart({ userId: USER_ID }),
-        (err: any) => err.code === 'CONFLICT',
-    );
-
-    // getCart should still work and include the activeOrder
-    const cart = await getServices().data.cart.getCart({ userId: USER_ID });
-    assert.ok(cart.activeOrder);
-    assert.equal(cart.activeOrder.cafeParts.length, 1);
-    assert.equal(cart.activeOrder.cafeParts[0]!.status, 'payment_pending');
+    const removed = await getServices().data.cart.removeItem({ userId: USER_ID, itemId: target.id });
+    assert.ok(!removed.items.some(item => item.id === target.id));
 });

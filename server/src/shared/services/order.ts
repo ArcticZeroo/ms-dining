@@ -1,54 +1,29 @@
-import type { IActiveOrderSummary } from '@msdining/common/models/cart';
+import type { IRguestCardInfo } from '@msdining/common/models/cart';
 import type {
-    IPreparePaymentResult,
+    ICafeOrderSummary,
     ICompleteOrderResultDTO,
+    IOrderItem,
+    IPreparePaymentResult,
 } from '@msdining/common/models/order';
 
 export interface IOrderService {
-    /** Create an order from the user's cart with payment identity. Returns the active order summary. */
-    startCheckout(data: {
-        userId: string;
-        alias: string;
-        phoneNumberWithCountryCode: string;
-    }): Promise<IActiveOrderSummary>;
-
-    /** Set the alias + phone for an order (before first payment). */
-    setPaymentIdentity(data: {
-        userId: string;
-        orderSessionId: string;
-        alias: string;
-        phoneNumberWithCountryCode: string;
-    }): Promise<void>;
-
-    /** Get iframe payment token for a specific cafe in an order. */
     preparePayment(data: {
         userId: string;
-        orderSessionId: string;
         cafeId: string;
+        items: IOrderItem[];
+        alias: string;
+        phoneNumberWithCountryCode: string;
         iframeCssUrl: string;
     }): Promise<IPreparePaymentResult>;
 
-    /** Complete payment for a specific cafe using the iframe token. */
     completeOrder(data: {
         userId: string;
-        orderSessionId: string;
-        cafeId: string;
+        pendingOrderId: string;
         paymentToken: string;
-        cardInfo: {
-            accountNumberMasked: string;
-            cardIssuer: string;
-            expirationYearMonth: string;
-            cardHolderName: string;
-            postalCode: string;
-        };
+        cardInfo: IRguestCardInfo;
     }): Promise<ICompleteOrderResultDTO>;
 
-    /** Abandon unfinished cafe parts and return their items to the cart. */
-    abandonRemainingCafes(data: {
+    getCompletedOrdersToday(data: {
         userId: string;
-        orderSessionId: string;
-    }): Promise<void>;
-
-    /** Get the active order for a user (if any). */
-    getActiveOrder(data: { userId: string }): Promise<IActiveOrderSummary | undefined>;
+    }): Promise<ICafeOrderSummary[]>;
 }

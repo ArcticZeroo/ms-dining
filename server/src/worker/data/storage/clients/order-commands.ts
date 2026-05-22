@@ -1,18 +1,11 @@
 import type { IOrderService } from '../../../../shared/services/order.js';
 import { OrderOrchestrator } from './order-orchestrator.js';
-import { OrderStorageClient } from './order.js';
 
 export const orderServiceCommands = {
-    startCheckout: ({ userId, alias, phoneNumberWithCountryCode }) =>
-        OrderOrchestrator.startCheckout(userId, alias, phoneNumberWithCountryCode),
-    setPaymentIdentity: ({ userId, orderSessionId, alias, phoneNumberWithCountryCode }) =>
-        OrderStorageClient.setPaymentIdentity(userId, orderSessionId, alias, phoneNumberWithCountryCode),
-    preparePayment: ({ userId, orderSessionId, cafeId, iframeCssUrl }) =>
-        OrderOrchestrator.preparePayment(userId, orderSessionId, cafeId, iframeCssUrl),
-    completeOrder: ({ userId, orderSessionId, cafeId, paymentToken, cardInfo }) =>
-        OrderOrchestrator.completeOrder(userId, orderSessionId, cafeId, paymentToken, cardInfo),
-    abandonRemainingCafes: ({ userId, orderSessionId }) =>
-        OrderOrchestrator.abandonRemainingCafes(userId, orderSessionId),
-    getActiveOrder: ({ userId }) =>
-        OrderStorageClient.getActiveOrder(userId),
+    preparePayment: ({ userId, cafeId, items, alias, phoneNumberWithCountryCode, iframeCssUrl }) =>
+        OrderOrchestrator.preparePayment(userId, cafeId, items, alias, phoneNumberWithCountryCode, iframeCssUrl),
+    completeOrder: ({ userId, pendingOrderId, paymentToken, cardInfo }) =>
+        OrderOrchestrator.completeOrder(userId, pendingOrderId, paymentToken, cardInfo),
+    getCompletedOrdersToday: ({ userId }) =>
+        OrderOrchestrator.getCompletedOrdersToday(userId),
 } satisfies IOrderService;

@@ -1,225 +1,273 @@
-import { usePrismaTransaction, usePrismaWrite } from '../client.js';
+import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
-import { CartStorageClient } from './cart.js';
-import type {
-    PrismaTransactionClient,
-    ReadOnlyPrismaLikeClient,
-} from '../../../../shared/models/prisma.js';
-import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
-import type { IActiveOrderSummary, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { ISerializedModifier } from '@msdining/common/models/cart';
+import type { ICafeOrderSummary, IOrderItem } from '@msdining/common/models/order';
 
-interface IOrderCafePartData {
-    buyOnDemandOrderId?: string;
-    buyOnDemandOrderNumber?: string;
-    subtotal?: number;
-    tax?: number;
-    total?: number;
-    waitTimeMin?: number;
-    waitTimeMax?: number;
-    lastError?: string;
-    lastStage?: string;
-    completedAt?: Date;
-}
+const ORDER_ITEMS_INCLUDE = {
+    items: {
+        include: {
+            modifiers: {
+                select: { modifierId: true, choiceId: true },
+            },
+        },
+    },
+} as const;
 
-export abstract class OrderStorageClient {
-    /**
-     * Creates an order session and transfers cart items into it, grouped by cafe.
-     * Rejects if the user already has an active order or the cart is empty.
-     * Returns the order session ID and the set of cafeIds that received items.
-     */
-    static async startOrder(
-        userId: string,
-        alias: string,
-        phoneNumberWithCountryCode: string,
-    ): Promise<{ activeOrder: IActiveOrderSummary; cafeIds: string[] }> {
-        const { orderSessionId, cafeIds } = await usePrismaTransaction(async tx => {
-            // Reject if the user already has an active order
-            const existing = await tx.orderSession.findFirst({
-                where: {
-                    userId,
-                    cafeParts: {
-                        some: { status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] } },
-                    },
-                },
-                select: { id: true },
-            });
-            if (existing) {
-                throw new ServiceError(
-                    SERVICE_ERROR_CODES.CONFLICT,
-                    'An active order already exists. Finish or abandon it before checking out again.',
-                );
-            }
+const normalizeSerializedModifiers = (modifiers: ISerializedModifier[]) => modifiers
+    .flatMap(modifier => modifier.choiceIds.map(choiceId => `${modifier.modifierId}:${choiceId}`))
+    .sort();
 
-            const cartItems = await tx.cartItem.findMany({
-                where:  { cartUserId: userId },
-                select: { id: true, menuItem: { select: { cafeId: true } } },
-            });
+const normalizeChoiceRows = (choices: Array<{ modifierId: string; choiceId: string }>) => choices
+    .map(choice => `${choice.modifierId}:${choice.choiceId}`)
+    .sort();
 
-            if (cartItems.length === 0) {
-                throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty');
-            }
+const modifiersMatch = (
+    left: ISerializedModifier[],
+    right: Array<{ modifierId: string; choiceId: string }>,
+): boolean => {
+    const leftNormalized = normalizeSerializedModifiers(left);
+    const rightNormalized = normalizeChoiceRows(right);
+    return leftNormalized.length === rightNormalized.length
+        && leftNormalized.every((value, index) => value === rightNormalized[index]);
+};
 
-            const orderSession = await tx.orderSession.create({
-                data: { userId, alias, phoneNumberWithCountryCode },
-            });
-
-            // Group cart item IDs by cafe
-            const itemsByCafe = new Map<string, string[]>();
-            for (const item of cartItems) {
-                const cafeId = item.menuItem.cafeId;
-                const ids = itemsByCafe.get(cafeId) ?? [];
-                ids.push(item.id);
-                itemsByCafe.set(cafeId, ids);
-            }
-
-            // Create a cafe part per cafe and transfer the items
-            for (const [cafeId, itemIds] of itemsByCafe) {
-                const cafePart = await tx.orderCafePart.create({
-                    data: { orderSessionId: orderSession.id, cafeId },
-                });
-                await tx.cartItem.updateMany({
-                    where: { id: { in: itemIds } },
-                    data:  { cartUserId: null, orderCafePartId: cafePart.id },
-                });
-            }
-
-            return { orderSessionId: orderSession.id, cafeIds: [...itemsByCafe.keys()] };
-        });
-
-        // Enrich outside the transaction (menu item lookups use the read semaphore)
-        const activeOrder = await CartStorageClient.getActiveOrderSummary(userId);
-        if (!activeOrder || activeOrder.orderSessionId !== orderSessionId) {
-            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Active order not found after creation');
+const groupModifierChoices = (choices: Array<{ modifierId: string; choiceId: string }>): ISerializedModifier[] => {
+    const byModifier = new Map<string, string[]>();
+    for (const { modifierId, choiceId } of choices) {
+        const existing = byModifier.get(modifierId);
+        if (existing) {
+            existing.push(choiceId);
+        } else {
+            byModifier.set(modifierId, [choiceId]);
         }
-
-        return { activeOrder, cafeIds };
     }
 
-    static async updateCafePartStatus(
-        orderSessionId: string,
-        cafeId: string,
-        status: OrderCafePartStatus,
-        data: IOrderCafePartData = {},
-    ) {
-        const { completedAt, ...restData } = data;
+    return Array.from(byModifier, ([modifierId, choiceIds]) => ({
+        modifierId,
+        choiceIds: choiceIds.sort(),
+    })).sort((a, b) => a.modifierId.localeCompare(b.modifierId));
+};
 
-        return usePrismaWrite(prisma => prisma.orderCafePart.update({
-            where: { orderSessionId_cafeId: { orderSessionId, cafeId } },
-            data:  {
-                status,
-                ...restData,
-                ...(status == 'completed'
-                    ? { completedAt: completedAt ?? new Date() }
-                    : completedAt != null
-                        ? { completedAt }
-                        : {}),
+const toOrderItem = (item: {
+    menuItemId: string;
+    quantity: number;
+    specialInstructions: string | null;
+    modifiers: Array<{ modifierId: string; choiceId: string }>;
+}): IOrderItem => ({
+    menuItemId:          item.menuItemId,
+    quantity:            item.quantity,
+    specialInstructions: item.specialInstructions ?? undefined,
+    modifiers:           groupModifierChoices(item.modifiers),
+});
+
+export const toOrderItems = (items: Array<{
+    menuItemId: string;
+    quantity: number;
+    specialInstructions: string | null;
+    modifiers: Array<{ modifierId: string; choiceId: string }>;
+}>): IOrderItem[] => items.map(toOrderItem);
+
+export abstract class OrderStorageClient {
+    static async createPendingOrder(
+        userId: string,
+        cafeId: string,
+        items: IOrderItem[],
+        alias: string,
+        phoneNumberWithCountryCode: string,
+    ): Promise<{ id: string }> {
+        if (items.length === 0) {
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Order must contain at least one item');
+        }
+
+        return usePrismaWrite(prisma => prisma.pendingCafeOrder.create({
+            data: {
+                userId,
+                cafeId,
+                alias,
+                phoneNumberWithCountryCode,
+                items: {
+                    create: items.map(item => ({
+                        menuItemId:          item.menuItemId,
+                        quantity:            item.quantity,
+                        specialInstructions: item.specialInstructions ?? null,
+                        modifiers: {
+                            create: item.modifiers.flatMap(modifier =>
+                                modifier.choiceIds.map(choiceId => ({
+                                    modifierId: modifier.modifierId,
+                                    choiceId,
+                                })),
+                            ),
+                        },
+                    })),
+                },
             },
+            select: { id: true },
         }));
     }
 
-    static async getCafePart(
-        client: ReadOnlyPrismaLikeClient,
-        orderSessionId: string,
-        cafeId: string,
-    ) {
-        const part = await client.orderCafePart.findUnique({
-            where: { orderSessionId_cafeId: { orderSessionId, cafeId } },
-            include: {
-                items: {
-                    include: { modifierChoices: { select: { modifierId: true, choiceId: true } } },
-                },
-            },
-        });
-        if (!part) {
-            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `No order part for cafe ${cafeId}`);
+    static async getPendingOrder(pendingOrderId: string) {
+        const pendingOrder = await usePrismaClient(prisma => prisma.pendingCafeOrder.findUnique({
+            where:   { id: pendingOrderId },
+            include: ORDER_ITEMS_INCLUDE,
+        }));
+
+        if (!pendingOrder) {
+            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, 'Pending order not found');
         }
-        return part;
+
+        return pendingOrder;
     }
 
-    static async getOrderSession(
-        client: ReadOnlyPrismaLikeClient,
-        orderSessionId: string,
-    ) {
-        const order = await client.orderSession.findUnique({
-            where:  { id: orderSessionId },
-            select: { alias: true, phoneNumberWithCountryCode: true },
-        });
-        if (!order) {
-            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, 'Order not found');
-        }
-        return order;
+    static async deletePendingOrder(pendingOrderId: string): Promise<void> {
+        await usePrismaWrite(prisma => prisma.pendingCafeOrder.deleteMany({
+            where: { id: pendingOrderId },
+        }));
     }
 
-    static async ensureOrderBelongsToUser(prismaTx: PrismaTransactionClient, orderSessionId: string, userId: string) {
-        const order = await prismaTx.orderSession.findUnique({
-            where:  { id: orderSessionId },
-            select: { userId: true },
-        });
-        if (!order) {
-            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, 'Order not found');
-        }
-        if (order.userId != userId) {
-            throw new ServiceError(SERVICE_ERROR_CODES.FORBIDDEN, 'Order does not belong to this user');
-        }
-    }
-
-    static async setPaymentIdentity(
-        userId: string,
-        orderSessionId: string,
-        alias: string,
-        phoneNumberWithCountryCode: string,
+    static async createCompletedOrder(
+        pendingOrderId: string,
+        financials: {
+            buyOnDemandOrderId: string;
+            buyOnDemandOrderNumber: string;
+            subtotal: number;
+            tax: number;
+            total: number;
+            waitTimeMin: number;
+            waitTimeMax: number;
+            completedAt: Date;
+        },
     ): Promise<void> {
-        await usePrismaTransaction(async prismaTx => {
-            await this.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-
-            await prismaTx.orderSession.update({
-                where: { id: orderSessionId },
-                data:  { alias, phoneNumberWithCountryCode },
-            });
-        });
-    }
-
-    static async abandonRemainingCafes(userId: string, orderSessionId: string): Promise<void> {
-        await usePrismaTransaction(async prismaTx => {
-            await this.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-
-            // Find active cafe parts
-            const activeParts = await prismaTx.orderCafePart.findMany({
-                where: {
-                    orderSessionId,
-                    status: { in: [...ACTIVE_ORDER_CAFE_PART_STATUSES] },
-                },
-                select: { id: true },
+        await usePrismaTransaction(async tx => {
+            const pendingOrder = await tx.pendingCafeOrder.findUnique({
+                where:   { id: pendingOrderId },
+                include: ORDER_ITEMS_INCLUDE,
             });
 
-            if (activeParts.length === 0) {
-                return;
+            if (!pendingOrder) {
+                throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, 'Pending order not found');
             }
 
-            const activePartIds = activeParts.map(p => p.id);
+            const menuItemIds = [...new Set(pendingOrder.items.map(item => item.menuItemId))];
+            const menuItems = await tx.menuItem.findMany({
+                where:  { id: { in: menuItemIds } },
+                select: { id: true, name: true, price: true },
+            });
+            const menuItemsById = new Map(menuItems.map(item => [item.id, item]));
 
-            // Mark them as abandoned
-            await prismaTx.orderCafePart.updateMany({
-                where: { id: { in: activePartIds } },
-                data:  { status: 'abandoned' },
+            await tx.cafeOrder.create({
+                data: {
+                    userId:                 pendingOrder.userId,
+                    cafeId:                 pendingOrder.cafeId,
+                    buyOnDemandOrderId:     financials.buyOnDemandOrderId,
+                    buyOnDemandOrderNumber: financials.buyOnDemandOrderNumber,
+                    subtotal:               financials.subtotal,
+                    tax:                    financials.tax,
+                    total:                  financials.total,
+                    waitTimeMin:            financials.waitTimeMin,
+                    waitTimeMax:            financials.waitTimeMax,
+                    completedAt:            financials.completedAt,
+                    items: {
+                        create: pendingOrder.items.map(item => {
+                            const menuItem = menuItemsById.get(item.menuItemId);
+                            if (!menuItem) {
+                                throw new ServiceError(
+                                    SERVICE_ERROR_CODES.NOT_FOUND,
+                                    `Menu item ${item.menuItemId} not found`,
+                                );
+                            }
+
+                            return {
+                                menuItemId:          item.menuItemId,
+                                name:                menuItem.name,
+                                quantity:            item.quantity,
+                                price:               menuItem.price,
+                                specialInstructions: item.specialInstructions ?? null,
+                                modifiers: {
+                                    create: item.modifiers.map(modifier => ({
+                                        modifierId: modifier.modifierId,
+                                        choiceId:   modifier.choiceId,
+                                    })),
+                                },
+                            };
+                        }),
+                    },
+                },
             });
 
-            // Ensure the user has a cart to transfer items back to
-            await prismaTx.cart.upsert({
-                where:  { userId },
-                create: { userId },
-                update: {},
-            });
-
-            // Transfer items from abandoned parts back to the user's cart
-            await prismaTx.cartItem.updateMany({
-                where: { orderCafePartId: { in: activePartIds } },
-                data:  { orderCafePartId: null, cartUserId: userId },
-            });
+            await tx.pendingCafeOrder.delete({ where: { id: pendingOrderId } });
         });
     }
 
-    static async getActiveOrder(userId: string) {
-        return CartStorageClient.getActiveOrderSummary(userId);
+    static async deductFromCart(userId: string, items: IOrderItem[]): Promise<void> {
+        await usePrismaTransaction(async tx => {
+            const cartItems = await tx.cartItem.findMany({
+                where: {
+                    cartUserId: userId,
+                    menuItemId: { in: [...new Set(items.map(item => item.menuItemId))] },
+                },
+                include: {
+                    modifierChoices: {
+                        select: { modifierId: true, choiceId: true },
+                    },
+                },
+                orderBy: { createdAt: 'asc' },
+            });
+
+            for (const item of items) {
+                const matchIndex = cartItems.findIndex(cartItem =>
+                    cartItem.menuItemId === item.menuItemId
+                    && (cartItem.specialInstructions ?? null) === (item.specialInstructions ?? null)
+                    && modifiersMatch(item.modifiers, cartItem.modifierChoices),
+                );
+
+                if (matchIndex === -1) {
+                    continue;
+                }
+
+                const cartItem = cartItems[matchIndex]!;
+                if (cartItem.quantity > item.quantity) {
+                    cartItem.quantity -= item.quantity;
+                    await tx.cartItem.update({
+                        where: { id: cartItem.id },
+                        data:  { quantity: cartItem.quantity },
+                    });
+                    continue;
+                }
+
+                cartItems.splice(matchIndex, 1);
+                await tx.cartItem.delete({ where: { id: cartItem.id } });
+            }
+        });
+    }
+
+    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderSummary[]> {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setDate(endOfDay.getDate() + 1);
+
+        const orders = await usePrismaClient(prisma => prisma.cafeOrder.findMany({
+            where: {
+                userId,
+                completedAt: {
+                    gte: startOfDay,
+                    lt:  endOfDay,
+                },
+            },
+            include: ORDER_ITEMS_INCLUDE,
+            orderBy: { completedAt: 'desc' },
+        }));
+
+        return orders.map(order => ({
+            id:                     order.id,
+            cafeId:                 order.cafeId,
+            buyOnDemandOrderNumber: order.buyOnDemandOrderNumber,
+            subtotal:               order.subtotal,
+            tax:                    order.tax,
+            total:                  order.total,
+            waitTimeMin:            order.waitTimeMin,
+            waitTimeMax:            order.waitTimeMax,
+            completedAt:            order.completedAt,
+        }));
     }
 }

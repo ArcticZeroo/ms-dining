@@ -1,5 +1,6 @@
 import Router from '@koa/router';
 import { z } from 'zod';
+import { OrderItemSchema } from '@msdining/common/models/order';
 import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { getServices } from '../../../services/registry.js';
@@ -7,11 +8,10 @@ import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 
-import { serializeActiveOrder, serializeCartResponse } from '../../../util/order-serde.js';
-
-const CheckoutSchema = z.object({
-    alias:                      z.string().min(1),
-    phoneNumberWithCountryCode: z.string().min(1),
+const PreparePaymentSchema = z.object({
+    items:       z.array(OrderItemSchema).min(1),
+    alias:       z.string().min(1),
+    phoneNumber: z.string().min(1),
 });
 
 const CompleteOrderSchema = z.object({
@@ -30,62 +30,32 @@ export const registerNewOrderingRoutes = (parent: Router) => {
 
     router.use(requireAuthenticated);
 
-    // POST /order/checkout — create order from current cart with identity
-    router.post('/checkout', async ctx => {
+    router.post('/cafes/:cafeId/prepare-payment', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const body = CheckoutSchema.parse(ctx.request.body);
-        const result = await getServices().data.order.startCheckout({
-            userId,
-            alias:                      body.alias,
-            phoneNumberWithCountryCode: body.phoneNumberWithCountryCode,
-        });
-        ctx.body = jsonStringifyWithoutNull(serializeActiveOrder(result));
-    });
-
-    // PUT /order/:orderId/identity— update alias + phone (allowed before payment completes)
-    router.put('/:orderId/identity', async ctx => {
-        const userId = getUserIdOrThrow(ctx);
-        const orderSessionId = ctx.params.orderId!;
-        const body = CheckoutSchema.parse(ctx.request.body);
-
-        await getServices().data.order.setPaymentIdentity({
-            userId,
-            orderSessionId,
-            alias:                      body.alias,
-            phoneNumberWithCountryCode: body.phoneNumberWithCountryCode,
-        });
-
-        ctx.status = 204;
-    });
-
-    // GET /order/:orderId/cafes/:cafeId/prepare-payment
-    router.get('/:orderId/cafes/:cafeId/prepare-payment', async ctx => {
-        const userId = getUserIdOrThrow(ctx);
-        const orderSessionId = ctx.params.orderId!;
         const cafeId = ctx.params.cafeId!;
+        const body = PreparePaymentSchema.parse(ctx.request.body);
         const iframeCssUrl = `${isDev ? ctx.origin : webserverHost}/iframe.css`;
 
         const result = await getServices().data.order.preparePayment({
             userId,
-            orderSessionId,
             cafeId,
+            items:                      body.items,
+            alias:                      body.alias,
+            phoneNumberWithCountryCode: body.phoneNumber,
             iframeCssUrl,
         });
 
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    // POST /order/:orderId/cafes/:cafeId/complete
-    router.post('/:orderId/cafes/:cafeId/complete', async ctx => {
+    router.post('/complete/:pendingOrderId', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const orderSessionId = ctx.params.orderId!;
-        const cafeId = ctx.params.cafeId!;
+        const pendingOrderId = ctx.params.pendingOrderId!;
         const body = CompleteOrderSchema.parse(ctx.request.body);
 
         const result = await getServices().data.order.completeOrder({
             userId,
-            orderSessionId,
-            cafeId,
+            pendingOrderId,
             paymentToken: body.paymentToken,
             cardInfo:     body.cardInfo,
         });
@@ -93,15 +63,10 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    // DELETE /order/:orderId — abandon unfinished cafe parts, return updated cart
-    router.delete('/:orderId', async ctx => {
+    router.get('/today', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const orderSessionId = ctx.params.orderId!;
-
-        await getServices().data.order.abandonRemainingCafes({ userId, orderSessionId });
-
-        const cart = await getServices().data.cart.getCart({ userId });
-        ctx.body = jsonStringifyWithoutNull(serializeCartResponse(cart));
+        const result = await getServices().data.order.getCompletedOrdersToday({ userId });
+        ctx.body = jsonStringifyWithoutNull(result);
     });
 
     attachRouter(parent, router);

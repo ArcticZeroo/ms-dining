@@ -1,17 +1,17 @@
 import { z } from 'zod';
-import { ActiveOrderSummarySchema } from './cart.js';
+import { SerializedModifierSchema } from './cart.js';
 
-// ─── Start Checkout ──────────────────────────────────────────────────
+export const OrderItemSchema = z.object({
+    menuItemId:          z.string().min(1),
+    quantity:            z.number().int().min(1),
+    specialInstructions: z.string().optional(),
+    modifiers:           z.array(SerializedModifierSchema).default([]),
+});
 
-// The checkout response is just the active order summary — the client
-// uses it to populate the store and navigate to the payment page.
-export const StartCheckoutResultSchema = ActiveOrderSummarySchema;
-
-export type IStartCheckoutResult = z.infer<typeof StartCheckoutResultSchema>;
-
-// ─── Prepare Payment ─────────────────────────────────────────────────
+export type IOrderItem = z.infer<typeof OrderItemSchema>;
 
 export const PreparePaymentResultSchema = z.object({
+    pendingOrderId:         z.string(),
     siteToken:              z.string(),
     iframeUrl:              z.string(),
     buyOnDemandOrderId:     z.string(),
@@ -21,8 +21,6 @@ export const PreparePaymentResultSchema = z.object({
 
 export type IPreparePaymentResult = z.infer<typeof PreparePaymentResultSchema>;
 
-// ─── Complete Order ──────────────────────────────────────────────────
-
 export const CompleteOrderResultSchema = z.object({
     buyOnDemandOrderNumber: z.string(),
     waitTimeMin:            z.number().int(),
@@ -30,8 +28,20 @@ export const CompleteOrderResultSchema = z.object({
     completedAt:            z.string().transform(s => new Date(s)),
 });
 
-/** Wire type (server → client, before transform). */
 export type ICompleteOrderResultDTO = z.input<typeof CompleteOrderResultSchema>;
-
-/** Client type (after zod transform — completedAt is Date). */
 export type ICompleteOrderResult = z.infer<typeof CompleteOrderResultSchema>;
+
+export const CafeOrderSummarySchema = z.object({
+    id:                     z.string(),
+    cafeId:                 z.string(),
+    buyOnDemandOrderNumber: z.string(),
+    subtotal:               z.number(),
+    tax:                    z.number(),
+    total:                  z.number(),
+    waitTimeMin:            z.number().int(),
+    waitTimeMax:            z.number().int(),
+    completedAt:            z.string().transform(s => new Date(s)),
+});
+
+export type ICafeOrderSummaryDTO = z.input<typeof CafeOrderSummarySchema>;
+export type ICafeOrderSummary = z.infer<typeof CafeOrderSummarySchema>;
