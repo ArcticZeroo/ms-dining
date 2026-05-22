@@ -17,8 +17,14 @@ const useOrderGuard = (): IOrderGuardResult => {
     const cartQuery = useCartQuery();
 
     return useMemo(() => {
+        // Still waiting for the first cart response — don't render or redirect
         if (cartQuery.isPending) {
             return { expectedPath: null, isLoading: true, activeOrder };
+        }
+
+        // Cart query failed — let the child page handle the error
+        if (cartQuery.isError) {
+            return { expectedPath: null, isLoading: false, activeOrder };
         }
 
         const hasActiveCafeParts = activeOrder?.cafeParts.some(part =>
@@ -38,7 +44,7 @@ const useOrderGuard = (): IOrderGuardResult => {
         }
 
         return { expectedPath, isLoading: false, activeOrder };
-    }, [activeOrder, cartQuery.isPending]);
+    }, [activeOrder, cartQuery.isError, cartQuery.isPending]);
 };
 
 /**
