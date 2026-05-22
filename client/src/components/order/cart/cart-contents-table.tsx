@@ -3,8 +3,8 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../constants/settings.ts';
 import { ApplicationContext } from '../../../context/app.ts';
-import { PopupContext } from '../../../context/modal.ts';
 import { useValueNotifier } from '../../../hooks/events.ts';
+import { usePopupOpener } from '../../../hooks/popup.ts';
 import { CafeView } from '../../../models/cafe.ts';
 import {
     useDebouncedUpdateCartItem,
@@ -33,18 +33,14 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
     const cartItemsByCafe = useServerCartItemsByCafe();
     const removeItem = useRemoveCartItemMutation();
     const updateCartItem = useDebouncedUpdateCartItem();
-    const modalNotifier = useContext(PopupContext);
+    const openPopup = usePopupOpener();
 
     const onRemove = useCallback((item: ICartItemRecord) => {
         removeItem.mutate(item.id);
     }, [removeItem]);
 
     const onEdit = useCallback((item: ICartItemRecord) => {
-        if (modalNotifier.value != null) {
-            return;
-        }
-
-        modalNotifier.value = {
+        openPopup({
             id:   editCartItemSymbol,
             body: <MenuItemPopup
                 cafeId={item.menuItem.cafeId}
@@ -52,8 +48,8 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                 modalSymbol={editCartItemSymbol}
                 fromCartItem={item}
             />
-        };
-    }, [modalNotifier]);
+        });
+    }, [openPopup]);
 
     const onChangeQuantity = useCallback((item: ICartItemRecord, quantity: number) => {
         if (quantity < 1) {

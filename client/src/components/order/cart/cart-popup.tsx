@@ -86,7 +86,7 @@ const CartPopupBody = () => {
                 {
                     totalItemCount > 0 && (
                         <>
-                            <CartContentsTable/>
+                            <CartContentsTable showFullDetails={true}/>
                             <WaitTime/>
                             <Link to="/order" className="checkout-button">
                                 Checkout

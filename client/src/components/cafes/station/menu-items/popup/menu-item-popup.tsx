@@ -152,6 +152,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
                     onNotesChanged={setNotes}
                     isOnlineOrderingAllowed={isOnlineOrderingAllowed}
+                    showReviews={!isUpdate}
                     stationId={stationId}
                     stationName={stationName}
                 />
