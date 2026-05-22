@@ -12,7 +12,7 @@ import type {
     ICheckoutResult,
     ICheckoutCafeResult,
     IPreparePaymentResult,
-    ICompleteOrderResult,
+    ICompleteOrderResultDTO,
 } from '@msdining/common/models/order';
 import { phone, type PhoneValidResult } from 'phone';
 
@@ -123,8 +123,8 @@ export abstract class OrderOrchestrator {
         });
     }
 
-    static async startCheckout(userId: string): Promise<ICheckoutResult> {
-        const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId);
+    static async startCheckout(userId: string, alias: string, phoneNumberWithCountryCode: string): Promise<ICheckoutResult> {
+        const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
 
         // Create live BoD sessions in parallel — fails fast if any cafe fails
         const cafeResults = await Promise.all(
@@ -226,7 +226,7 @@ export abstract class OrderOrchestrator {
             paymentToken: string;
             cardInfo: IRguestCardInfo;
         },
-    ): Promise<{ result: ICompleteOrderResult; keepSession: boolean }> {
+    ): Promise<{ result: ICompleteOrderResultDTO; keepSession: boolean }> {
         try {
             const waitTime = await session.completeOrderAfterIframePayment(params);
 
@@ -293,7 +293,7 @@ export abstract class OrderOrchestrator {
         cafeId: string,
         paymentToken: string,
         cardInfo: IRguestCardInfo,
-    ): Promise<ICompleteOrderResult> {
+    ): Promise<ICompleteOrderResultDTO> {
         const part = await this.useOrderCafePart(userId, orderSessionId, cafeId);
         if (part.status !== 'payment_pending') {
             throw new ServiceError(
@@ -316,7 +316,7 @@ export abstract class OrderOrchestrator {
         }
 
         const key = sessionKey({ orderSessionId, cafeId });
-        let completionResult: ICompleteOrderResult | undefined;
+        let completionResult: ICompleteOrderResultDTO | undefined;
 
         await liveSessions.update(key, async (session) => {
             if (!session) {

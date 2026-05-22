@@ -40,7 +40,11 @@ export const CompleteOrderResultSchema = z.object({
     buyOnDemandOrderNumber: z.string(),
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
-    completedAt:            z.string(),
+    completedAt:            z.string().transform(s => new Date(s)),
 });
 
+/** Wire type (server → client, before transform). */
+export type ICompleteOrderResultDTO = z.input<typeof CompleteOrderResultSchema>;
+
+/** Client type (after zod transform — completedAt is Date). */
 export type ICompleteOrderResult = z.infer<typeof CompleteOrderResultSchema>;

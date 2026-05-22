@@ -8,7 +8,7 @@ export interface IOrderStatusItem {
     buyOnDemandOrderNumber: string | null;
     waitTimeMin: number | null;
     waitTimeMax: number | null;
-    completedAt?: string | null;
+    completedAt?: Date | null;
 }
 
 interface IOrderStatusProps {

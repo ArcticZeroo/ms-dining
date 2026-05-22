@@ -3,6 +3,7 @@ import type { ICheckoutResult } from '@msdining/common/models/order';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
+import { formatWaitTime } from '../../util/order.ts';
 
 interface IWaitTimeProps {
     checkoutResult?: ICheckoutResult;
@@ -22,8 +23,7 @@ export const WaitTime: React.FC<IWaitTimeProps> = ({ checkoutResult, activeOrder
                 return {
                     cafeId:   part.cafeId,
                     cafeName: view ? getViewName({ view, showGroupName: true }) : part.cafeId,
-                    waitTimeMin: part.waitTimeMin,
-                    waitTimeMax: part.waitTimeMax,
+                    label:    formatWaitTime(part.waitTimeMin!, part.waitTimeMax!),
                 };
             });
     }, [activeOrder?.cafeParts, checkoutResult?.cafeResults, viewsById]);
@@ -40,7 +40,7 @@ export const WaitTime: React.FC<IWaitTimeProps> = ({ checkoutResult, activeOrder
             {waitTimes.map((waitTime) => (
                 <div key={waitTime.cafeId}>
                     {waitTimes.length > 1 && `${waitTime.cafeName}: `}
-                    {waitTime.waitTimeMin} - {waitTime.waitTimeMax} minutes
+                    {waitTime.label}
                 </div>
             ))}
         </div>

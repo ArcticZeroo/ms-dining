@@ -3,8 +3,8 @@ import { OrderOrchestrator } from './order-orchestrator.js';
 import { OrderStorageClient } from './order.js';
 
 export const orderServiceCommands = {
-    startCheckout: ({ userId }) =>
-        OrderOrchestrator.startCheckout(userId),
+    startCheckout: ({ userId, alias, phoneNumberWithCountryCode }) =>
+        OrderOrchestrator.startCheckout(userId, alias, phoneNumberWithCountryCode),
     setPaymentIdentity: ({ userId, orderSessionId, alias, phoneNumberWithCountryCode }) =>
         OrderStorageClient.setPaymentIdentity(userId, orderSessionId, alias, phoneNumberWithCountryCode),
     preparePayment: ({ userId, orderSessionId, cafeId, iframeCssUrl }) =>

@@ -2,14 +2,18 @@ import type { IActiveOrderSummary } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
     IPreparePaymentResult,
-    ICompleteOrderResult,
+    ICompleteOrderResultDTO,
 } from '@msdining/common/models/order';
 
 export type { ICheckoutCafeResult } from '@msdining/common/models/order';
 
 export interface IOrderService {
-    /** Create an order from the user's cart. Calls BoD to build each cafe's cart. */
-    startCheckout(data: { userId: string }): Promise<ICheckoutResult>;
+    /** Create an order from the user's cart with payment identity. */
+    startCheckout(data: {
+        userId: string;
+        alias: string;
+        phoneNumberWithCountryCode: string;
+    }): Promise<ICheckoutResult>;
 
     /** Set the alias + phone for an order (before first payment). */
     setPaymentIdentity(data: {
@@ -40,7 +44,7 @@ export interface IOrderService {
             cardHolderName: string;
             postalCode: string;
         };
-    }): Promise<ICompleteOrderResult>;
+    }): Promise<ICompleteOrderResultDTO>;
 
     /** Abandon unfinished cafe parts and return their items to the cart. */
     abandonRemainingCafes(data: {

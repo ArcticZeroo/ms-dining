@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useOnlineOrderingState } from '../../../hooks/cafe.ts';
 import {
     useAbandonRemainingCafesMutation,
-    useSetPaymentIdentityMutation,
     useStartCheckoutMutation,
 } from '../../../store/queries/new-ordering.ts';
 import { useCartQuery } from '../../../store/queries/server-cart.ts';
@@ -84,13 +83,9 @@ const OrderPageBody = () => {
     const cartQuery = useCartQuery();
     const navigate = useNavigate();
     const startCheckout = useStartCheckoutMutation();
-    const setPaymentIdentity = useSetPaymentIdentityMutation();
     const abandonOrder = useAbandonRemainingCafesMutation();
     const [checkoutResult, setCheckoutResult] = useState<ICheckoutResult>();
-    const [pendingCheckoutResult, setPendingCheckoutResult] = useState<ICheckoutResult>();
-    const [submittedPaymentInfo, setSubmittedPaymentInfo] = useState<IPaymentFormData>();
     const [checkoutError, setCheckoutError] = useState<string>();
-    const [canRetryCheckout, setCanRetryCheckout] = useState(false);
     const [completedResultsByCafeId, setCompletedResultsByCafeId] = useState<Record<string, ICompleteOrderResult>>({});
 
     const availableItems = useMemo(
@@ -102,7 +97,7 @@ const OrderPageBody = () => {
         () => new Set(availableItems.map(item => item.menuItem.cafeId)).size,
         [availableItems],
     );
-    const currentOrderId = activeOrder?.orderSessionId ?? checkoutResult?.orderSessionId ?? pendingCheckoutResult?.orderSessionId;
+    const currentOrderId = activeOrder?.orderSessionId ?? checkoutResult?.orderSessionId;
     const cafePayments = useMemo(
         () => mergeCafeParts(activeOrder, checkoutResult, completedResultsByCafeId),
         [activeOrder, checkoutResult, completedResultsByCafeId],
@@ -122,49 +117,26 @@ const OrderPageBody = () => {
 
     const isCheckoutInitiated =
         startCheckout.isPending
-        || setPaymentIdentity.isPending
         || checkoutResult != null
-        || activeOrder != null
-        || pendingCheckoutResult != null;
+        || activeOrder != null;
     const isShowingPaymentStep = cafePayments.length > 0 && currentOrderId != null;
     const isShowingCompletion = cafePayments.length > 0 && cafePayments.every(cafe => cafe.status === 'completed');
 
     const handleStartCheckout = useCallback(async (paymentInfo: IPaymentFormData) => {
-        if (startCheckout.isPending || setPaymentIdentity.isPending) {
+        if (startCheckout.isPending) {
             return;
         }
 
         setCheckoutError(undefined);
-        setCanRetryCheckout(false);
-        setSubmittedPaymentInfo(paymentInfo);
 
         try {
-            const result = pendingCheckoutResult ?? await startCheckout.mutateAsync();
-            setPendingCheckoutResult(result);
-            setCompletedResultsByCafeId({});
-
-            await setPaymentIdentity.mutateAsync({
-                orderId: result.orderSessionId,
-                alias: paymentInfo.alias,
-                phoneNumberWithCountryCode: paymentInfo.phoneNumberWithCountryCode,
-            });
-
+            const result = await startCheckout.mutateAsync(paymentInfo);
             setCheckoutResult(result);
-            setPendingCheckoutResult(undefined);
-            setCanRetryCheckout(false);
+            setCompletedResultsByCafeId({});
         } catch (error) {
             setCheckoutError(getErrorMessage(error, 'Failed to start checkout'));
-            setCanRetryCheckout(true);
         }
-    }, [pendingCheckoutResult, setPaymentIdentity, startCheckout]);
-
-    const handleRetryCheckout = useCallback(() => {
-        if (submittedPaymentInfo == null) {
-            return;
-        }
-
-        void handleStartCheckout(submittedPaymentInfo);
-    }, [handleStartCheckout, submittedPaymentInfo]);
+    }, [startCheckout]);
 
     const handleCafeCompleted = useCallback((cafeId: string, result: ICompleteOrderResult) => {
         setCompletedResultsByCafeId((current) => ({
@@ -181,18 +153,15 @@ const OrderPageBody = () => {
         try {
             await abandonOrder.mutateAsync(currentOrderId);
             setCheckoutResult(undefined);
-            setPendingCheckoutResult(undefined);
             setCheckoutError(undefined);
-            setCanRetryCheckout(false);
             setCompletedResultsByCafeId({});
             navigate('/');
         } catch (error) {
             setCheckoutError(getErrorMessage(error, 'Failed to cancel order'));
-            setCanRetryCheckout(false);
         }
     }, [abandonOrder, currentOrderId, navigate]);
 
-    if (cartQuery.isPending && activeOrder == null && checkoutResult == null && pendingCheckoutResult == null) {
+    if (cartQuery.isPending && activeOrder == null && checkoutResult == null) {
         return (
             <div className="flex">
                 <HourglassLoadingSpinner/>
@@ -239,10 +208,10 @@ const OrderPageBody = () => {
                         onSubmit={(paymentInfo) => void handleStartCheckout(paymentInfo)}
                     />
                     <OrderPrivacyPolicy/>
-                    {(startCheckout.isPending || setPaymentIdentity.isPending) && (
+                    {startCheckout.isPending && (
                         <div className="flex flex-justify-center">
                             <HourglassLoadingSpinner/>
-                            {startCheckout.isPending ? 'Starting checkout...' : 'Saving payment info...'}
+                            Starting checkout...
                         </div>
                     )}
                 </>
@@ -250,7 +219,6 @@ const OrderPageBody = () => {
             {checkoutError && (
                 <div className="card error">
                     {checkoutError}
-                    {(submittedPaymentInfo && canRetryCheckout) && <RetryButton onClick={handleRetryCheckout}/>} 
                 </div>
             )}
             {isShowingPaymentStep && currentOrderId && !isShowingCompletion && (

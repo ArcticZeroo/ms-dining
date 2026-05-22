@@ -1,30 +1,38 @@
-import { isDuckType } from '@arcticzeroo/typeguard';
-import { IOrderCompletionData, IOrderCompletionResponse } from '@msdining/common/models/cart';
-
-export const isValidOrderCompletionResponse = (expectedCafeIds: Set<string>, orderData: unknown): orderData is IOrderCompletionResponse => {
-    if (!orderData || typeof orderData !== 'object') {
-        return false;
+/**
+ * Format a wait time range as a human-readable string.
+ */
+export const formatWaitTime = (minMinutes: number, maxMinutes: number): string => {
+    if (minMinutes === maxMinutes) {
+        return `${minMinutes} minute${minMinutes === 1 ? '' : 's'}`;
     }
+    return `${minMinutes} - ${maxMinutes} minutes`;
+};
 
-    const entries = Object.entries(orderData);
-    if (entries.length !== expectedCafeIds.size) {
-        return false;
+/**
+ * Compute estimated ready time from a completion time + wait time range.
+ */
+export const getEstimatedReadyTime = (
+    completedAt: Date,
+    waitTimeMin: number,
+    waitTimeMax: number,
+): { earliest: Date; latest: Date } => ({
+    earliest: new Date(completedAt.getTime() + waitTimeMin * 60_000),
+    latest:   new Date(completedAt.getTime() + waitTimeMax * 60_000),
+});
+
+/**
+ * Format estimated ready time as a human-readable string.
+ */
+export const formatEstimatedReadyTime = (
+    completedAt: Date,
+    waitTimeMin: number,
+    waitTimeMax: number,
+): string => {
+    const { earliest, latest } = getEstimatedReadyTime(completedAt, waitTimeMin, waitTimeMax);
+    const fmt = (date: Date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+    if (earliest.getTime() === latest.getTime()) {
+        return fmt(earliest);
     }
-
-    for (const [key, value] of Object.entries(orderData)) {
-        if (!expectedCafeIds.has(key)) {
-            return false;
-        }
-
-        if (!isDuckType<IOrderCompletionData>(value, {
-            lastCompletedStage: 'string',
-            waitTimeMax: 'string',
-            waitTimeMin: 'string',
-            orderNumber: 'string'
-        })) {
-            return false;
-        }
-    }
-
-    return true;
-}
+    return `${fmt(earliest)} - ${fmt(latest)}`;
+};

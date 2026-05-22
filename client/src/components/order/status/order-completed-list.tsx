@@ -1,1 +1,0 @@
-export { OrderStatus as OrderCompletedList } from './order-status.tsx';

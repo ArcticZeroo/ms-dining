@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { classNames } from '../../../util/react.ts';
+import { formatEstimatedReadyTime, formatWaitTime } from '../../../util/order.ts';
 
 interface IOrderCompletedItemProps {
     cafeName: string;
     buyOnDemandOrderNumber: string | null;
     waitTimeMin: number | null;
     waitTimeMax: number | null;
-    completedAt?: string | null;
+    completedAt?: Date | null;
 }
 
 export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({
@@ -16,10 +17,14 @@ export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({
     waitTimeMax,
     completedAt,
 }) => {
-    const completedAtLabel = useMemo(
-        () => completedAt ? new Date(completedAt).toLocaleString() : undefined,
-        [completedAt],
-    );
+    const hasWaitTime = waitTimeMin != null && waitTimeMax != null;
+
+    const estimatedReadyLabel = useMemo(() => {
+        if (!hasWaitTime || !completedAt) {
+            return undefined;
+        }
+        return formatEstimatedReadyTime(completedAt, waitTimeMin, waitTimeMax);
+    }, [completedAt, hasWaitTime, waitTimeMin, waitTimeMax]);
 
     return (
         <div className={classNames('card', 'dark-blue')}>
@@ -30,14 +35,14 @@ export const OrderCompletedItem: React.FC<IOrderCompletedItemProps> = ({
             <div>
                 Your order was successfully submitted! You should receive a text message with order updates.
             </div>
-            {(waitTimeMin != null && waitTimeMax != null) && (
+            {hasWaitTime && (
                 <div>
-                    Estimated wait time: {waitTimeMin} - {waitTimeMax} minutes
+                    Estimated wait: {formatWaitTime(waitTimeMin, waitTimeMax)}
                 </div>
             )}
-            {completedAtLabel && (
+            {estimatedReadyLabel && (
                 <div>
-                    Completed: {completedAtLabel}
+                    Estimated ready: {estimatedReadyLabel}
                 </div>
             )}
         </div>

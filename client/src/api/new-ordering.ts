@@ -10,11 +10,15 @@ import { JSON_HEADERS, makeJsonRequestNoParse, makeJsonRequestWithSchema } from 
 const ORDER_BASE = '/api/dining/order';
 
 export abstract class OrderClient {
-    static async startCheckout(): Promise<ICheckoutResult> {
+    static async startCheckout(alias: string, phoneNumberWithCountryCode: string): Promise<ICheckoutResult> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/checkout`,
             schema: CheckoutResultSchema,
-            options: { method: 'POST' },
+            options: {
+                method:  'POST',
+                headers: JSON_HEADERS,
+                body:    JSON.stringify({ alias, phoneNumberWithCountryCode }),
+            },
         });
     }
 

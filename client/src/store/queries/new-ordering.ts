@@ -13,7 +13,10 @@ export const useStartCheckoutMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: () => OrderClient.startCheckout(),
+        mutationFn: ({ alias, phoneNumberWithCountryCode }: {
+            alias: string;
+            phoneNumberWithCountryCode: string;
+        }) => OrderClient.startCheckout(alias, phoneNumberWithCountryCode),
         onSuccess:  () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },

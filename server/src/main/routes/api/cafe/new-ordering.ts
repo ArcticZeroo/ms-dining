@@ -7,7 +7,7 @@ import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 
-const PaymentIdentitySchema = z.object({
+const CheckoutSchema = z.object({
     alias:                      z.string().min(1),
     phoneNumberWithCountryCode: z.string().min(1),
 });
@@ -28,18 +28,23 @@ export const registerNewOrderingRoutes = (parent: Router) => {
 
     router.use(requireAuthenticated);
 
-    // POST /order/checkout — create order from current cart
+    // POST /order/checkout — create order from current cart with identity
     router.post('/checkout', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const result = await getServices().data.order.startCheckout({ userId });
+        const body = CheckoutSchema.parse(ctx.request.body);
+        const result = await getServices().data.order.startCheckout({
+            userId,
+            alias:                      body.alias,
+            phoneNumberWithCountryCode: body.phoneNumberWithCountryCode,
+        });
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    // PUT /order/:orderId/identity — set alias + phone before first payment (idempotent)
+    // PUT /order/:orderId/identity — update alias + phone (allowed before payment completes)
     router.put('/:orderId/identity', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const orderSessionId = ctx.params.orderId!;
-        const body = PaymentIdentitySchema.parse(ctx.request.body);
+        const body = CheckoutSchema.parse(ctx.request.body);
 
         await getServices().data.order.setPaymentIdentity({
             userId,

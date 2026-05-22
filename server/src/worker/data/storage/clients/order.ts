@@ -27,7 +27,11 @@ export abstract class OrderStorageClient {
      * Rejects if the user already has an active order or the cart is empty.
      * Returns the order session ID and the set of cafeIds that received items.
      */
-    static async startOrder(userId: string): Promise<{ orderSessionId: string; cafeIds: string[] }> {
+    static async startOrder(
+        userId: string,
+        alias: string,
+        phoneNumberWithCountryCode: string,
+    ): Promise<{ orderSessionId: string; cafeIds: string[] }> {
         return usePrismaTransaction(async tx => {
             // Reject if the user already has an active order
             const existing = await tx.orderSession.findFirst({
@@ -55,7 +59,9 @@ export abstract class OrderStorageClient {
                 throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty');
             }
 
-            const orderSession = await tx.orderSession.create({ data: { userId } });
+            const orderSession = await tx.orderSession.create({
+                data: { userId, alias, phoneNumberWithCountryCode },
+            });
 
             // Group cart item IDs by cafe
             const itemsByCafe = new Map<string, string[]>();
