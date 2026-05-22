@@ -208,7 +208,6 @@ export abstract class OrderOrchestrator {
         session: CafeOrderSession,
         orderSessionId: string,
         cafeId: string,
-        waitTime: { min: number | null; max: number | null },
         params: {
             alias: string;
             phoneData: PhoneValidResult;
@@ -217,10 +216,14 @@ export abstract class OrderOrchestrator {
         },
     ): Promise<{ result: ICompleteOrderResult; keepSession: boolean }> {
         try {
-            await session.completeOrderAfterIframePayment(params);
+            const waitTime = await session.completeOrderAfterIframePayment(params);
 
             const completedAt = new Date();
-            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', { completedAt });
+            await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
+                completedAt,
+                waitTimeMin: waitTime.minTime,
+                waitTimeMax: waitTime.maxTime,
+            });
 
             const orderNumber = session.orderNumber ?? 'Unknown';
             orderLog.info(`Order completed — orderNumber: ${orderNumber}`);
@@ -229,8 +232,8 @@ export abstract class OrderOrchestrator {
                 keepSession: false,
                 result: {
                     buyOnDemandOrderNumber: orderNumber,
-                    waitTimeMin:            waitTime.min ?? 0,
-                    waitTimeMax:            waitTime.max ?? 0,
+                    waitTimeMin:            waitTime.minTime,
+                    waitTimeMax:            waitTime.maxTime,
                     completedAt:            completedAt.toISOString(),
                 },
             };
@@ -243,6 +246,10 @@ export abstract class OrderOrchestrator {
                 orderLog.error('Post-close failure (order already placed):', err);
 
                 const completedAt = new Date();
+                // Fetch stored wait time since we don't have the fresh one
+                const part = await usePrismaClient(prisma =>
+                    OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId),
+                );
                 await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
                     completedAt,
                     lastError: `Post-close: ${err instanceof Error ? err.message : String(err)}`,
@@ -252,8 +259,8 @@ export abstract class OrderOrchestrator {
                     keepSession: false,
                     result: {
                         buyOnDemandOrderNumber: session.orderNumber ?? 'Unknown',
-                        waitTimeMin:            waitTime.min ?? 0,
-                        waitTimeMax:            waitTime.max ?? 0,
+                        waitTimeMin:            part.waitTimeMin ?? 0,
+                        waitTimeMax:            part.waitTimeMax ?? 0,
                         completedAt:            completedAt.toISOString(),
                     },
                 };
@@ -309,7 +316,6 @@ export abstract class OrderOrchestrator {
 
             const { result, keepSession } = await this.executeCompletion(
                 session, orderSessionId, cafeId,
-                { min: part.waitTimeMin, max: part.waitTimeMax },
                 { alias: order.alias!, phoneData, paymentToken, cardInfo },
             );
 

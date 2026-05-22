@@ -1,4 +1,5 @@
 import { ICartItem, IRguestCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
@@ -1208,8 +1209,9 @@ export class CafeOrderSession {
         phoneData,
         paymentToken,
         cardInfo,
-    }: IIframeCloseOrderParams): Promise<void> {
+    }: IIframeCloseOrderParams): Promise<IWaitTimeResponse> {
         orderLog.info(`{${this.client.cafe.name}} Completing order ${this.#orderId} with iframe token`);
+        let waitTime: IWaitTimeResponse = { minTime: 0, maxTime: 0 };
         try {
             await this._runStages(SubmitOrderStage.initializeCardProcessor, async () => {
                 this.#lastCompletedStage = SubmitOrderStage.payment;
@@ -1224,6 +1226,7 @@ export class CafeOrderSession {
                     this.client,
                     [...this.rawCartItemsForWaitTime],
                 );
+                waitTime = readyTime;
                 orderLog.info(`{${this.client.cafe.name}} Refreshed close-order wait time: ${readyTime.minTime}-${readyTime.maxTime} min`);
 
                 orderLog.info(`{${this.client.cafe.name}} Closing order ${this.#orderId}`);
@@ -1245,5 +1248,6 @@ export class CafeOrderSession {
         } finally {
             await this.client.harCapture?.writeToFile(this.client.cafe.id);
         }
+        return waitTime;
     }
 }
