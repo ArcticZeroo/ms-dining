@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import type { IOrderStatusItem } from '../../order/status/order-status.tsx';
 import { useNavigate } from 'react-router-dom';
 import { useRequiredActiveOrder } from '../../../store/zustand/server-cart.ts';
-import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { OrderStatus } from '../../order/status/order-status.tsx';
 
 export const OrderCompletePage = () => {
@@ -20,7 +19,6 @@ export const OrderCompletePage = () => {
 
     return (
         <div id="order-checkout" className="flex-col">
-            <OnlineOrderingExperimental/>
             <OrderStatus items={completedItems}/>
             <div className="flex flex-justify-center">
                 <button className="default-container" onClick={() => navigate('/')}>
