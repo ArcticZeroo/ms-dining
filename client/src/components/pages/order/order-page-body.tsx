@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { usePaymentIdentity } from '../../../hooks/payment-identity.ts';
 import { useCompletedOrdersTodayQuery } from '../../../store/queries/new-ordering.ts';
@@ -37,45 +38,50 @@ export const OrderPageBody = () => {
     }
 
     const hasCartItems = snapshot.groupedItems.length > 0;
-    const hasCompletedOrders = completedOrdersQuery.data != null && completedOrdersQuery.data.length > 0;
 
-    return (
-        <div id="order-checkout" className="flex-col">
-            <OnlineOrderingExperimental/>
-            {hasCartItems && (
-                <>
-                    <PaymentInfoForm
-                        alias={alias}
-                        phoneValidation={phoneValidation}
-                        onAliasChanged={setAlias}
-                        onPhoneNumberChanged={setPhoneNumber}
-                    />
-                    <div className="order-page-cafes">
-                        {snapshot.groupedItems.map((group) => (
-                            <OrderCafeCard
-                                key={group.cafeId}
-                                cafeId={group.cafeId}
-                                items={group.items}
-                                paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
-                                isPayEnabled={isValid}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-            {!hasCartItems && !hasCompletedOrders && (
+    // Empty cart: show completed orders inline
+    if (!hasCartItems) {
+        return (
+            <div id="order-checkout" className="flex-col">
                 <div className="card dark-blue">
                     Your cart is empty. Add items from a cafe menu to get started.
                 </div>
-            )}
-            {hasCompletedOrders && (
-                <>
-                    <div className="card dark-blue">
-                        <div className="title">Today&apos;s Orders</div>
-                    </div>
-                    <CompletedOrdersList orders={completedOrdersQuery.data}/>
-                </>
-            )}
+                {completedOrdersQuery.data != null && completedOrdersQuery.data.length > 0 && (
+                    <>
+                        <div className="card dark-blue">
+                            <div className="title">Today&apos;s Orders</div>
+                        </div>
+                        <CompletedOrdersList orders={completedOrdersQuery.data}/>
+                    </>
+                )}
+            </div>
+        );
+    }
+
+    // Has cart items: show cafe cards + link to completed orders
+    return (
+        <div id="order-checkout" className="flex-col">
+            <OnlineOrderingExperimental/>
+            <PaymentInfoForm
+                alias={alias}
+                phoneValidation={phoneValidation}
+                onAliasChanged={setAlias}
+                onPhoneNumberChanged={setPhoneNumber}
+            />
+            <div className="order-page-cafes">
+                {snapshot.groupedItems.map((group) => (
+                    <OrderCafeCard
+                        key={group.cafeId}
+                        cafeId={group.cafeId}
+                        items={group.items}
+                        paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
+                        isPayEnabled={isValid}
+                    />
+                ))}
+            </div>
+            <Link to="/order/done" className="default-container default-button">
+                View Today&apos;s Orders
+            </Link>
         </div>
     );
 };
