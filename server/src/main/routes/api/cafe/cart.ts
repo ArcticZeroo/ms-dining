@@ -1,18 +1,10 @@
 import Router from '@koa/router';
 import { CartItemDataSchema, CartItemUpdateSchema } from '@msdining/common/models/cart';
-import type { ICartResponse } from '@msdining/common/models/cart';
 import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { getServices } from '../../../services/registry.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
-import { serializeActiveOrder, serializeCartItem } from '../../../util/order-serde.js';
-
-/** Convert the domain ICartResponse to the wire-safe shape for JSON serialization. */
-const serializeCartResponse = (cart: ICartResponse) => ({
-    ...cart,
-    items:       cart.items.map(serializeCartItem),
-    activeOrder: cart.activeOrder && serializeActiveOrder(cart.activeOrder),
-});
+import { serializeCartResponse } from '../../../util/order-serde.js';
 
 export const registerCartRoutes = (parent: Router) => {
     const router = new Router({ prefix: '/cart' });

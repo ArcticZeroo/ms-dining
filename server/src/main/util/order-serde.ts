@@ -1,4 +1,4 @@
-import type { IActiveOrderSummary, IActiveOrderSummaryDTO, ICartItemRecord, ICartItemRecordDTO } from '@msdining/common/models/cart';
+import type { IActiveOrderSummary, IActiveOrderSummaryDTO, ICartItemRecord, ICartItemRecordDTO, ICartResponse, ICartResponseDTO } from '@msdining/common/models/cart';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 
 /** Convert a domain cart item record to wire-safe shape for JSON serialization. */
@@ -19,4 +19,11 @@ export const serializeActiveOrder = (order: IActiveOrderSummary): IActiveOrderSu
         ...part,
         items: part.items.map(serializeCartItem),
     })),
+});
+
+/** Convert the domain ICartResponse to wire-safe shape for JSON serialization. */
+export const serializeCartResponse = (cart: ICartResponse): ICartResponseDTO => ({
+    ...cart,
+    items:       cart.items.map(serializeCartItem),
+    activeOrder: cart.activeOrder && serializeActiveOrder(cart.activeOrder),
 });

@@ -7,7 +7,7 @@ import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 
-import { serializeActiveOrder } from '../../../util/order-serde.js';
+import { serializeActiveOrder, serializeCartResponse } from '../../../util/order-serde.js';
 
 const CheckoutSchema = z.object({
     alias:                      z.string().min(1),
@@ -93,14 +93,15 @@ export const registerNewOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    // DELETE /order/:orderId — abandon unfinished cafe parts
+    // DELETE /order/:orderId — abandon unfinished cafe parts, return updated cart
     router.delete('/:orderId', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const orderSessionId = ctx.params.orderId!;
 
         await getServices().data.order.abandonRemainingCafes({ userId, orderSessionId });
 
-        ctx.status = 204;
+        const cart = await getServices().data.cart.getCart({ userId });
+        ctx.body = jsonStringifyWithoutNull(serializeCartResponse(cart));
     });
 
     attachRouter(parent, router);

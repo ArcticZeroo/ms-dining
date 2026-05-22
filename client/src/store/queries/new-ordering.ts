@@ -80,8 +80,9 @@ export const useAbandonRemainingCafesMutation = () => {
 
     return useMutation({
         mutationFn: (orderId: string) => OrderClient.abandonRemainingCafes(orderId),
-        onSuccess:  () => {
-            queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+        onSuccess:  (cart) => {
+            useServerCartStore.getState().setFromServerResponse(cart);
+            queryClient.setQueryData(CART_QUERY_KEY, cart);
         },
     });
 };

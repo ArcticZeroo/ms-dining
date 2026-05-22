@@ -1,4 +1,5 @@
-import type { IActiveOrderSummary, IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IActiveOrderSummary, ICartResponse, IRguestCardInfo } from '@msdining/common/models/cart';
+import { CartResponseSchema } from '@msdining/common/models/cart';
 import type { IPreparePaymentResult, ICompleteOrderResult } from '@msdining/common/models/order';
 import {
     StartCheckoutResultSchema,
@@ -57,9 +58,10 @@ export abstract class OrderClient {
         });
     }
 
-    static async abandonRemainingCafes(orderId: string): Promise<void> {
-        await makeJsonRequestNoParse({
+    static async abandonRemainingCafes(orderId: string): Promise<ICartResponse> {
+        return makeJsonRequestWithSchema({
             path:    `${ORDER_BASE}/${orderId}`,
+            schema:  CartResponseSchema,
             options: { method: 'DELETE' },
         });
     }
