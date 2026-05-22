@@ -92,8 +92,8 @@ export abstract class OrderStorageClient {
     ) {
         const { completedAt, ...restData } = data;
 
-        return usePrismaWrite(prisma => prisma.orderCafePart.updateMany({
-            where: { orderSessionId, cafeId },
+        return usePrismaWrite(prisma => prisma.orderCafePart.update({
+            where: { orderSessionId_cafeId: { orderSessionId, cafeId } },
             data:  {
                 status,
                 ...restData,
@@ -111,8 +111,8 @@ export abstract class OrderStorageClient {
         orderSessionId: string,
         cafeId: string,
     ) {
-        const part = await client.orderCafePart.findFirst({
-            where: { orderSessionId, cafeId },
+        const part = await client.orderCafePart.findUnique({
+            where: { orderSessionId_cafeId: { orderSessionId, cafeId } },
             include: {
                 items: {
                     include: { modifierChoices: { select: { modifierId: true, choiceId: true } } },
