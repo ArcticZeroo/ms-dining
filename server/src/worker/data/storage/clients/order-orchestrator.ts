@@ -327,13 +327,22 @@ export abstract class OrderOrchestrator {
     }
 
     static async abandonOrder(userId: string, orderSessionId: string): Promise<void> {
-        await usePrismaTransaction(async prismaTx => {
+        // Get the cafe IDs so we can lock each session
+        const cafeParts = await usePrismaTransaction(async prismaTx => {
             await OrderStorageClient.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
+            return prismaTx.orderCafePart.findMany({
+                where:  { orderSessionId },
+                select: { cafeId: true },
+            });
         });
 
-        await liveSessions.deleteWhere((key) => key.startsWith(`${orderSessionId}:`));
-        await OrderStorageClient.abandonOrder(userId, orderSessionId);
+        // Acquire each session lock and remove — prevents concurrent completeOrder
+        await Promise.all(cafeParts.map(({ cafeId }) => {
+            const key = sessionKey({ orderSessionId, cafeId });
+            return liveSessions.update(key, () => undefined);
+        }));
 
+        await OrderStorageClient.abandonOrder(userId, orderSessionId);
         orderLog.info(`Order ${orderSessionId} abandoned by user ${userId}`);
     }
 }
