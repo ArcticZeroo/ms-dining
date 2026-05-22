@@ -71,7 +71,7 @@ export abstract class OrderStorageClient {
         }));
     }
 
-    private static async getCafePartWithClient(
+    static async getCafePart(
         client: ReadOnlyPrismaLikeClient,
         orderSessionId: string,
         cafeId: string,
@@ -85,18 +85,7 @@ export abstract class OrderStorageClient {
         return part;
     }
 
-    static async getCafePart(
-        txOrOrderSessionId: PrismaTransactionClient | string,
-        orderSessionIdOrCafeId: string,
-        maybeCafeId?: string,
-    ) {
-        if (typeof txOrOrderSessionId === 'string') {
-            return usePrismaClient(prisma => this.getCafePartWithClient(prisma, txOrOrderSessionId, orderSessionIdOrCafeId));
-        }
-        return this.getCafePartWithClient(txOrOrderSessionId, orderSessionIdOrCafeId, maybeCafeId!);
-    }
-
-    private static async getOrderSessionWithClient(
+    static async getOrderSession(
         client: ReadOnlyPrismaLikeClient,
         orderSessionId: string,
     ) {
@@ -108,16 +97,6 @@ export abstract class OrderStorageClient {
             throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, 'Order not found');
         }
         return order;
-    }
-
-    static async getOrderSession(
-        txOrOrderSessionId: PrismaTransactionClient | string,
-        maybeOrderSessionId?: string,
-    ) {
-        if (typeof txOrOrderSessionId === 'string') {
-            return usePrismaClient(prisma => this.getOrderSessionWithClient(prisma, txOrOrderSessionId));
-        }
-        return this.getOrderSessionWithClient(txOrOrderSessionId, maybeOrderSessionId!);
     }
 
     static async ensureOrderBelongsToUser(prismaTx: PrismaTransactionClient, orderSessionId: string, userId: string) {

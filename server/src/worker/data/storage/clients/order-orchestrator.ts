@@ -1,4 +1,4 @@
-import { usePrismaTransaction, usePrismaWrite } from '../client.js';
+import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { WaitTimeSession } from '../../cafe/session/wait-time.js';
@@ -215,7 +215,7 @@ export abstract class OrderOrchestrator {
 
         if (!live) {
             orderLog.info(`Session expired for ${key}, rebuilding...`);
-            const part = await OrderStorageClient.getCafePart(orderSessionId, cafeId);
+            const part = await usePrismaClient(prisma => OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId));
 
             if (!part.buyOnDemandOrderId) {
                 throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Cannot rebuild session — missing BoD order data');
