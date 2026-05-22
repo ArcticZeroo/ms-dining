@@ -130,9 +130,21 @@ export abstract class OrderOrchestrator {
 
             const session = await createPopulatedSession(cafeId, cartItems);
 
+            const waitTime: IWaitTimeResponse = isFakeOrdering
+                ? { minTime: 5, maxTime: 10 }
+                : await fetchWaitTimeWithCartItems(
+                    session.client as BuyOnDemandClient,
+                    [...session.rawCartItemsForWaitTime],
+                );
+
             await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, part.status as OrderCafePartStatus, {
                 buyOnDemandOrderId:     session.orderId!,
                 buyOnDemandOrderNumber: session.orderNumber!,
+                subtotal:               session.orderTotalWithoutTax,
+                tax:                    session.orderTotalTax,
+                total:                  session.orderTotalWithTax,
+                waitTimeMin:            waitTime.minTime,
+                waitTimeMax:            waitTime.maxTime,
             });
 
             orderLog.info(`{${getCafeOrThrow(cafeId).name}} Live session created — orderId: ${session.orderId}`);
@@ -143,27 +155,13 @@ export abstract class OrderOrchestrator {
     static async startCheckout(userId: string, alias: string, phoneNumberWithCountryCode: string): Promise<IStartCheckoutResult> {
         const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
 
-        // Create live BoD sessions in parallel — fails fast if any cafe fails
-        await Promise.all(
-            cafeIds.map(async (cafeId) => {
-                const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
-
-                const waitTime: IWaitTimeResponse = isFakeOrdering
-                    ? { minTime: 5, maxTime: 10 }
-                    : await fetchWaitTimeWithCartItems(
-                        session.client as BuyOnDemandClient,
-                        [...session.rawCartItemsForWaitTime],
-                    );
-
-                await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'pending', {
-                    subtotal:    session.orderTotalWithoutTax,
-                    tax:         session.orderTotalTax,
-                    total:       session.orderTotalWithTax,
-                    waitTimeMin: waitTime.minTime,
-                    waitTimeMax: waitTime.maxTime,
-                });
-            }),
-        );
+        // Fire-and-forget BoD session creation — the locked map ensures
+        // preparePayment will wait if a session is still initializing.
+        for (const cafeId of cafeIds) {
+            this.getOrCreateLiveSession(orderSessionId, cafeId).catch(err => {
+                orderLog.error(`{${cafeId}} Background session init failed:`, err);
+            });
+        }
 
         // Return the full active order summary (with enriched items)
         const activeOrder = await CartStorageClient.getActiveOrderSummary(userId);
