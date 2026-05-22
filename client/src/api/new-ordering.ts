@@ -10,7 +10,7 @@ import { JSON_HEADERS, makeJsonRequestNoParse, makeJsonRequestWithSchema } from 
 const ORDER_BASE = '/api/dining/order';
 
 export abstract class OrderClient {
-    static async checkout(): Promise<ICheckoutResult> {
+    static async startCheckout(): Promise<ICheckoutResult> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/checkout`,
             schema: CheckoutResultSchema,

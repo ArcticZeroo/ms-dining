@@ -1,4 +1,4 @@
-import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
+import { usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CartStorageClient } from './cart.js';
 import type {
@@ -6,7 +6,7 @@ import type {
     ReadOnlyPrismaLikeClient,
 } from '../../../../shared/models/prisma.js';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
-import type { OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { ICartItemRecord, ISerializedModifier, OrderCafePartStatus } from '@msdining/common/models/cart';
 
 interface IOrderCafePartData {
     buyOnDemandOrderId?: string;
@@ -16,11 +16,37 @@ interface IOrderCafePartData {
     total?: number;
     waitTimeMin?: number;
     waitTimeMax?: number;
-    itemsJson?: string;
     lastError?: string;
     lastStage?: string;
     completedAt?: Date;
 }
+
+interface IOrderCafePartSnapshotItem {
+    menuItemId: string;
+    name: string;
+    quantity: number;
+    price: number;
+    modifiers: ISerializedModifier[];
+}
+
+interface ICreateCafePartData extends IOrderCafePartData {
+    status: OrderCafePartStatus;
+    cartItems: ICartItemRecord[];
+}
+
+interface ICreateCafePartBatchData extends ICreateCafePartData {
+    cafeId: string;
+}
+
+const serializeCartItems = (cartItems: ICartItemRecord[]): string => JSON.stringify(
+    cartItems.map(item => ({
+        menuItemId: item.menuItemId,
+        name:       item.menuItem.name,
+        quantity:   item.quantity,
+        price:      item.menuItem.price,
+        modifiers:  item.modifiers,
+    } satisfies IOrderCafePartSnapshotItem)),
+);
 
 export abstract class OrderStorageClient {
     static async createOrderSession(userId: string) {
@@ -45,17 +71,27 @@ export abstract class OrderStorageClient {
         });
     }
 
-    static async createCafePart(
-        orderSessionId: string,
-        cafeId: string,
-        data: IOrderCafePartData & { status: OrderCafePartStatus },
-    ) {
+    static async createCafePart(orderSessionId: string, cafeId: string, data: ICreateCafePartData) {
+        const { cartItems, ...cafePartData } = data;
+
         return usePrismaWrite(prisma => prisma.orderCafePart.create({
             data: {
                 orderSessionId,
                 cafeId,
-                ...data,
+                ...cafePartData,
+                itemsJson: serializeCartItems(cartItems),
             },
+        }));
+    }
+
+    static async createCafeParts(orderSessionId: string, parts: ICreateCafePartBatchData[]) {
+        return usePrismaWrite(prisma => prisma.orderCafePart.createMany({
+            data: parts.map(({ cafeId, cartItems, ...cafePartData }) => ({
+                orderSessionId,
+                cafeId,
+                ...cafePartData,
+                itemsJson: serializeCartItems(cartItems),
+            })),
         }));
     }
 
@@ -65,9 +101,19 @@ export abstract class OrderStorageClient {
         status: OrderCafePartStatus,
         data: IOrderCafePartData = {},
     ) {
+        const { completedAt, ...restData } = data;
+
         return usePrismaWrite(prisma => prisma.orderCafePart.updateMany({
             where: { orderSessionId, cafeId },
-            data:  { status, ...data },
+            data:  {
+                status,
+                ...restData,
+                ...(status == 'completed'
+                    ? { completedAt: completedAt ?? new Date() }
+                    : completedAt != null
+                        ? { completedAt }
+                        : {}),
+            },
         }));
     }
 
@@ -120,20 +166,6 @@ export abstract class OrderStorageClient {
     ): Promise<void> {
         await usePrismaTransaction(async prismaTx => {
             await this.ensureOrderBelongsToUser(prismaTx, orderSessionId, userId);
-
-            const advancedParts = await prismaTx.orderCafePart.findFirst({
-                where: {
-                    orderSessionId,
-                    status: { not: 'pending' },
-                },
-                select: { id: true },
-            });
-            if (advancedParts) {
-                throw new ServiceError(
-                    SERVICE_ERROR_CODES.CONFLICT,
-                    'Cannot change payment identity after payment has been prepared. Abandon the order and try again.',
-                );
-            }
 
             await prismaTx.orderSession.update({
                 where: { id: orderSessionId },

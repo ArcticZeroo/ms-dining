@@ -6,9 +6,8 @@ import { CartStorageClient } from './cart.js';
 import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
-import type { ICartItem } from '@msdining/common/models/cart';
+import type { ICartItem, ICartItemRecord, ISerializedModifier } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
-import type { ISerializedModifier } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
     ICheckoutCafeResult,
@@ -19,6 +18,8 @@ import { phone } from 'phone';
 
 const orderLog = getNamespaceLogger('Order');
 
+type ICreateCafePartInput = Parameters<typeof OrderStorageClient.createCafePart>[2];
+
 interface ILiveSession {
     session: CafeOrderSession;
     refreshInterval: ReturnType<typeof setInterval>;
@@ -27,9 +28,19 @@ interface ILiveSession {
 
 interface IStoredOrderItem {
     menuItemId: string;
+    name: string;
     quantity: number;
-    modifiers?: ISerializedModifier[];
-    specialInstructions?: string;
+    price: number;
+    modifiers: ISerializedModifier[];
+}
+
+interface ICheckoutCafeProcessingResult {
+    cafeId: string;
+    cafeName: string;
+    cartItems: ICartItemRecord[];
+    cafePart: ICreateCafePartInput;
+    cafeResult?: ICheckoutCafeResult;
+    session?: CafeOrderSession;
 }
 
 const SESSION_TTL_MS = 30 * 60 * 1000;
@@ -81,82 +92,51 @@ const cleanupLiveSessionsForOrder = (orderSessionId: string) => {
 };
 
 const deserializeModifiers = (modifiers: ISerializedModifier[]): Map<string, Set<string>> =>
-    new Map(modifiers.map(mod => [mod.modifierId, new Set(mod.choiceIds)]));
+    new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
 
 export abstract class OrderOrchestrator {
-    static async checkout(userId: string): Promise<ICheckoutResult> {
-        const cartResponse = await CartStorageClient.getCart(userId);
-        const availableItems = cartResponse.items.filter(item => item.isAvailable);
+    private static getSessionExpiry(): Date {
+        return new Date(Date.now() + SESSION_TTL_MS);
+    }
 
-        if (availableItems.length == 0) {
-            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty or has no available items');
+    private static async startCheckoutForCafe(
+        cafeId: string,
+        cartItems: ICartItemRecord[],
+    ): Promise<ICheckoutCafeProcessingResult> {
+        const cafe = CAFES_BY_ID.get(cafeId);
+        if (!cafe) {
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, `Cafe ${cafeId} not found in config during checkout`);
         }
 
-        const itemsByCafe = new Map<string, typeof availableItems>();
-        for (const item of availableItems) {
-            const cafeId = item.menuItem.cafeId;
-            const existing = itemsByCafe.get(cafeId) ?? [];
-            existing.push(item);
-            itemsByCafe.set(cafeId, existing);
-        }
+        const buyOnDemandCartItems: ICartItem[] = cartItems.map(item => ({
+            itemId:              item.menuItemId,
+            quantity:            item.quantity,
+            choicesByModifierId: deserializeModifiers(item.modifiers),
+            specialInstructions: item.specialInstructions ?? undefined,
+        }));
 
-        const orderSession = await OrderStorageClient.createOrderSession(userId);
-        const cafeResults: ICheckoutCafeResult[] = [];
+        try {
+            const session = await CafeOrderSession.createAsync(cafe, buyOnDemandCartItems);
+            await session.populateCart();
 
-        for (const [cafeId, items] of itemsByCafe) {
-            const cafe = CAFES_BY_ID.get(cafeId);
-            if (!cafe) {
-                orderLog.error(`Cafe ${cafeId} not found in config during checkout`);
-                continue;
+            const orderId = session.orderId;
+            const orderNumber = session.orderNumber;
+
+            if (!orderId || !orderNumber) {
+                throw new Error('Order ID or order number not set after cart population');
             }
 
-            const cartItems: ICartItem[] = items.map(item => ({
-                itemId:              item.menuItemId,
-                quantity:            item.quantity,
-                choicesByModifierId: deserializeModifiers(item.modifiers),
-                specialInstructions: item.specialInstructions ?? undefined,
-            }));
+            const waitTime = await WaitTimeSession.retrieveWaitTimeWithCartItems(
+                session.client,
+                [...session.rawCartItemsForWaitTime],
+            );
 
-            try {
-                const session = await CafeOrderSession.createAsync(cafe, cartItems);
-                await session.populateCart();
-
-                const orderId = session.orderId;
-                const orderNumber = session.orderNumber;
-
-                if (!orderId || !orderNumber) {
-                    throw new Error('Order ID or order number not set after cart population');
-                }
-
-                const waitTime = await WaitTimeSession.retrieveWaitTimeWithCartItems(
-                    session.client,
-                    [...session.rawCartItemsForWaitTime],
-                );
-
-                const itemsSnapshot = items.map(item => ({
-                    menuItemId: item.menuItemId,
-                    name:       item.menuItem.name,
-                    quantity:   item.quantity,
-                    price:      item.menuItem.price,
-                    modifiers:  item.modifiers,
-                }));
-
-                await OrderStorageClient.createCafePart(orderSession.id, cafeId, {
-                    buyOnDemandOrderId:     orderId,
-                    buyOnDemandOrderNumber: orderNumber,
-                    status:                 'pending',
-                    subtotal:               session.orderTotalWithoutTax,
-                    tax:                    session.orderTotalTax,
-                    total:                  session.orderTotalWithTax,
-                    waitTimeMin:            waitTime.minTime,
-                    waitTimeMax:            waitTime.maxTime,
-                    itemsJson:              JSON.stringify(itemsSnapshot),
-                });
-
-                const key = sessionKey({ orderSessionId: orderSession.id, cafeId });
-                storeLiveSession(key, session);
-
-                cafeResults.push({
+            return {
+                cafeId,
+                cafeName: cafe.name,
+                cartItems,
+                session,
+                cafeResult: {
                     cafeId,
                     buyOnDemandOrderId:     orderId,
                     buyOnDemandOrderNumber: orderNumber,
@@ -165,19 +145,116 @@ export abstract class OrderOrchestrator {
                     total:                  session.orderTotalWithTax,
                     waitTimeMin:            waitTime.minTime,
                     waitTimeMax:            waitTime.maxTime,
-                });
+                },
+                cafePart: {
+                    buyOnDemandOrderId:     orderId,
+                    buyOnDemandOrderNumber: orderNumber,
+                    status:                 'pending',
+                    subtotal:               session.orderTotalWithoutTax,
+                    tax:                    session.orderTotalTax,
+                    total:                  session.orderTotalWithTax,
+                    waitTimeMin:            waitTime.minTime,
+                    waitTimeMax:            waitTime.maxTime,
+                    cartItems,
+                },
+            };
+        } catch (err) {
+            orderLog.error(`{${cafe.name}} Checkout failed:`, err);
 
-                orderLog.info(`{${cafe.name}} Checkout complete — orderId: ${orderId}, orderNumber: ${orderNumber}`);
-            } catch (err) {
-                orderLog.error(`{${cafe.name}} Checkout failed:`, err);
-
-                await OrderStorageClient.createCafePart(orderSession.id, cafeId, {
+            return {
+                cafeId,
+                cafeName: cafe.name,
+                cartItems,
+                cafePart: {
                     status:    'failed',
                     lastError: err instanceof Error ? err.message : String(err),
-                    lastStage: 'checkout',
-                });
-            }
+                    lastStage: 'startCheckout',
+                    cartItems,
+                },
+            };
         }
+    }
+
+    private static async getOrRebuildLiveSession(orderSessionId: string, cafeId: string): Promise<ILiveSession> {
+        const key = sessionKey({ orderSessionId, cafeId });
+        const live = liveSessions.get(key);
+        if (live) {
+            return live;
+        }
+
+        orderLog.info(`Session expired for ${key}, rebuilding...`);
+        const part = await usePrismaClient(prisma => OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId));
+
+        if (!part.buyOnDemandOrderId) {
+            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Cannot rebuild session — missing BoD order data');
+        }
+
+        const cafe = CAFES_BY_ID.get(cafeId);
+        if (!cafe) {
+            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
+        }
+
+        const items = JSON.parse(part.itemsJson || '[]') as IStoredOrderItem[];
+        const cartItems: ICartItem[] = items.map(item => ({
+            itemId:              item.menuItemId,
+            quantity:            item.quantity,
+            choicesByModifierId: deserializeModifiers(item.modifiers ?? []),
+        }));
+
+        const session = await CafeOrderSession.createAsync(cafe, cartItems);
+        await session.populateCart();
+        storeLiveSession(key, session);
+
+        const rebuiltLive = liveSessions.get(key);
+        if (!rebuiltLive) {
+            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, `Failed to rebuild live session for ${key}`);
+        }
+
+        orderLog.info(`Session rebuilt for ${key}`);
+        return rebuiltLive;
+    }
+
+    static async startCheckout(userId: string): Promise<ICheckoutResult> {
+        const cart = await CartStorageClient.getCart(userId);
+        const availableItems = cart.items.filter(item => item.isAvailable);
+
+        if (availableItems.length == 0) {
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty or has no available items');
+        }
+
+        const itemsByCafe = new Map<string, ICartItemRecord[]>();
+        for (const item of availableItems) {
+            const cafeId = item.menuItem.cafeId;
+            const existing = itemsByCafe.get(cafeId) ?? [];
+            existing.push(item);
+            itemsByCafe.set(cafeId, existing);
+        }
+
+        const orderSession = await OrderStorageClient.createOrderSession(userId);
+        const checkoutResults = await Promise.all(
+            [...itemsByCafe].map(([cafeId, cartItems]) => this.startCheckoutForCafe(cafeId, cartItems)),
+        );
+
+        await OrderStorageClient.createCafeParts(
+            orderSession.id,
+            checkoutResults.map(result => ({
+                cafeId: result.cafeId,
+                ...result.cafePart,
+            })),
+        );
+
+        const cafeResults = checkoutResults.flatMap(result => {
+            if (!result.cafeResult || !result.session) {
+                return [];
+            }
+
+            const key = sessionKey({ orderSessionId: orderSession.id, cafeId: result.cafeId });
+            storeLiveSession(key, result.session);
+            orderLog.info(
+                `{${result.cafeName}} Checkout complete — orderId: ${result.cafeResult.buyOnDemandOrderId}, orderNumber: ${result.cafeResult.buyOnDemandOrderNumber}`,
+            );
+            return [result.cafeResult];
+        });
 
         if (cafeResults.length == 0) {
             throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'All cafe checkouts failed');
@@ -210,41 +287,12 @@ export abstract class OrderOrchestrator {
             }
         });
 
-        const key = sessionKey({ orderSessionId, cafeId });
-        let live = liveSessions.get(key);
-
-        if (!live) {
-            orderLog.info(`Session expired for ${key}, rebuilding...`);
-            const part = await usePrismaClient(prisma => OrderStorageClient.getCafePart(prisma, orderSessionId, cafeId));
-
-            if (!part.buyOnDemandOrderId) {
-                throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Cannot rebuild session — missing BoD order data');
-            }
-
-            const cafe = CAFES_BY_ID.get(cafeId);
-            if (!cafe) {
-                throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
-            }
-
-            const items = JSON.parse(part.itemsJson || '[]') as IStoredOrderItem[];
-            const cartItems: ICartItem[] = items.map(item => ({
-                itemId:              item.menuItemId,
-                quantity:            item.quantity,
-                choicesByModifierId: deserializeModifiers(item.modifiers ?? []),
-                specialInstructions: item.specialInstructions,
-            }));
-
-            const session = await CafeOrderSession.createAsync(cafe, cartItems);
-            await session.populateCart();
-            storeLiveSession(key, session);
-            live = liveSessions.get(key)!;
-
-            orderLog.info(`Session rebuilt for ${key}`);
-        }
-
+        const live = await this.getOrRebuildLiveSession(orderSessionId, cafeId);
         if (live.session.lastCompletedStage != SubmitOrderStage.initializeCardProcessor) {
             await live.session.prepareForIframe(iframeCssUrl);
         }
+
+        const key = sessionKey({ orderSessionId, cafeId });
         resetSessionTTL(key);
 
         const siteToken = live.session.cardProcessorToken;
@@ -258,14 +306,14 @@ export abstract class OrderOrchestrator {
 
         await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'payment_pending');
 
-        const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
+        const expiresAt = this.getSessionExpiry();
 
         return {
             siteToken,
             iframeUrl,
             buyOnDemandOrderId,
             buyOnDemandOrderNumber,
-            expiresAt,
+            expiresAt: expiresAt.toISOString(),
         };
     }
 
@@ -315,17 +363,17 @@ export abstract class OrderOrchestrator {
         cleanupLiveSession(key);
 
         try {
-            await live.session.completeWithIframeToken({
+            await live.session.completeOrderAfterIframePayment({
                 alias:        order.alias,
                 phoneData,
                 paymentToken,
                 cardInfo,
             });
 
-            const completedAt = new Date().toISOString();
+            const completedAt = new Date();
 
             await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
-                completedAt: new Date(),
+                completedAt,
             });
 
             const orderNumber = live.session.orderNumber ?? 'Unknown';
@@ -335,7 +383,7 @@ export abstract class OrderOrchestrator {
                 buyOnDemandOrderNumber: orderNumber,
                 waitTimeMin:            0,
                 waitTimeMax:            0,
-                completedAt,
+                completedAt:            completedAt.toISOString(),
             };
         } catch (err) {
             const closedSuccessfully = live.session.lastCompletedStage == 'closeOrder'
@@ -344,16 +392,18 @@ export abstract class OrderOrchestrator {
 
             if (closedSuccessfully) {
                 orderLog.error('Post-close failure (order already placed):', err);
+
+                const completedAt = new Date();
                 await OrderStorageClient.updateCafePartStatus(orderSessionId, cafeId, 'completed', {
-                    completedAt: new Date(),
-                    lastError:   `Post-close: ${err instanceof Error ? err.message : String(err)}`,
+                    completedAt,
+                    lastError: `Post-close: ${err instanceof Error ? err.message : String(err)}`,
                 });
 
                 return {
                     buyOnDemandOrderNumber: live.session.orderNumber ?? 'Unknown',
                     waitTimeMin:            0,
                     waitTimeMax:            0,
-                    completedAt:            new Date().toISOString(),
+                    completedAt:            completedAt.toISOString(),
                 };
             }
 

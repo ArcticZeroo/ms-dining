@@ -1203,7 +1203,7 @@ export class CafeOrderSession {
      * Completes an order using a payment token received from the rguest iframe.
      * Closes the order and sends phone confirmation.
      */
-    public async completeWithIframeToken({
+    public async completeOrderAfterIframePayment({
         alias,
         phoneData,
         paymentToken,

@@ -9,11 +9,11 @@ const CART_QUERY_KEY = ['cart', 'server'] as const;
  * On success, invalidates the cart query so the cart UI reflects
  * the cleared cart + active order.
  */
-export const useCheckoutMutation = () => {
+export const useStartCheckoutMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: () => OrderClient.checkout(),
+        mutationFn: () => OrderClient.startCheckout(),
         onSuccess:  () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },

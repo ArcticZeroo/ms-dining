@@ -335,7 +335,7 @@ export const registerOrderingRoutes = (parent: Router) => {
         // TODO: some sort of lock to avoid multiple completions, for now just delete to prevent a second one
         cleanupPendingSession(data.orderId);
 
-        await pending.session.completeWithIframeToken({
+        await pending.session.completeOrderAfterIframePayment({
             alias:        data.alias,
             phoneData,
             paymentToken: data.paymentToken,

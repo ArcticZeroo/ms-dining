@@ -9,7 +9,7 @@ export type { ICheckoutCafeResult } from '@msdining/common/models/order';
 
 export interface IOrderService {
     /** Create an order from the user's cart. Calls BoD to build each cafe's cart. */
-    checkout(data: { userId: string }): Promise<ICheckoutResult>;
+    startCheckout(data: { userId: string }): Promise<ICheckoutResult>;
 
     /** Set the alias + phone for an order (before first payment). */
     setPaymentIdentity(data: {

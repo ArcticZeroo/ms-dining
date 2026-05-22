@@ -31,7 +31,7 @@ export const registerNewOrderingRoutes = (parent: Router) => {
     // POST /order/checkout — create order from current cart
     router.post('/checkout', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const result = await getServices().data.order.checkout({ userId });
+        const result = await getServices().data.order.startCheckout({ userId });
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
