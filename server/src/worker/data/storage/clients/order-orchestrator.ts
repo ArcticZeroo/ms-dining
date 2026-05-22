@@ -2,12 +2,11 @@ import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
-import { CartStorageClient } from './cart.js';
 import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
-import type { ICartItem, ICartItemRecord, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { ICartItem, OrderCafePartStatus } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
@@ -114,34 +113,10 @@ export abstract class OrderOrchestrator {
     }
 
     static async startCheckout(userId: string): Promise<ICheckoutResult> {
-        const cart = await CartStorageClient.getCart(userId);
-        const availableItems = cart.items.filter(item => item.isAvailable);
-
-        if (availableItems.length == 0) {
-            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty or has no available items');
-        }
-
-        const itemsByCafe = new Map<string, ICartItemRecord[]>();
-        for (const item of availableItems) {
-            const cafeId = item.menuItem.cafeId;
-            const existing = itemsByCafe.get(cafeId) ?? [];
-            existing.push(item);
-            itemsByCafe.set(cafeId, existing);
-        }
-
-        // Create DB records first — transfers cart items to the order
         const orderSession = await OrderStorageClient.createOrderSession(userId);
-        await OrderStorageClient.createCafeParts(
-            orderSession.id,
-            [...itemsByCafe].map(([cafeId, cartItems]) => ({
-                cafeId,
-                status:      'pending' as const,
-                cartItemIds: cartItems.map(item => item.id),
-            })),
-        );
+        const cafeIds = await OrderStorageClient.transferCart(userId, orderSession.id);
 
         // Create live BoD sessions in parallel — same path as rebuild
-        const cafeIds = [...itemsByCafe.keys()];
         const results = await Promise.allSettled(
             cafeIds.map(async (cafeId) => {
                 const session = await this.getOrCreateLiveSession(orderSession.id, cafeId);

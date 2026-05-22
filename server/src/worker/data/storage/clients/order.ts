@@ -21,16 +21,6 @@ interface IOrderCafePartData {
     completedAt?: Date;
 }
 
-interface ICreateCafePartData extends IOrderCafePartData {
-    status: OrderCafePartStatus;
-    /** IDs of CartItem rows to transfer from the cart to this order part. */
-    cartItemIds: string[];
-}
-
-interface ICreateCafePartBatchData extends ICreateCafePartData {
-    cafeId: string;
-}
-
 export abstract class OrderStorageClient {
     static async createOrderSession(userId: string) {
         return usePrismaTransaction(async tx => {
@@ -54,25 +44,43 @@ export abstract class OrderStorageClient {
         });
     }
 
-    static async createCafeParts(orderSessionId: string, parts: ICreateCafePartBatchData[]) {
+    /**
+     * Transfers cart items to an order session, grouped by cafe.
+     * Creates one OrderCafePart per cafe and reassigns the CartItem rows.
+     * Returns the set of cafeIds that received items.
+     */
+    static async transferCart(userId: string, orderSessionId: string): Promise<string[]> {
         return usePrismaWrite(async prisma => {
-            for (const { cafeId, cartItemIds, ...cafePartData } of parts) {
-                const cafePart = await prisma.orderCafePart.create({
-                    data: {
-                        orderSessionId,
-                        cafeId,
-                        ...cafePartData,
-                    },
-                });
+            const cartItems = await prisma.cartItem.findMany({
+                where:   { cartUserId: userId },
+                select:  { id: true, menuItem: { select: { cafeId: true } } },
+            });
 
-                // Transfer cart items from the cart to this order part
-                if (cartItemIds.length > 0) {
-                    await prisma.cartItem.updateMany({
-                        where: { id: { in: cartItemIds } },
-                        data:  { cartUserId: null, orderCafePartId: cafePart.id },
-                    });
-                }
+            if (cartItems.length === 0) {
+                throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Cart is empty');
             }
+
+            // Group cart item IDs by cafe
+            const itemsByCafe = new Map<string, string[]>();
+            for (const item of cartItems) {
+                const cafeId = item.menuItem.cafeId;
+                const ids = itemsByCafe.get(cafeId) ?? [];
+                ids.push(item.id);
+                itemsByCafe.set(cafeId, ids);
+            }
+
+            // Create a cafe part per cafe and transfer the items
+            for (const [cafeId, itemIds] of itemsByCafe) {
+                const cafePart = await prisma.orderCafePart.create({
+                    data: { orderSessionId, cafeId },
+                });
+                await prisma.cartItem.updateMany({
+                    where: { id: { in: itemIds } },
+                    data:  { cartUserId: null, orderCafePartId: cafePart.id },
+                });
+            }
+
+            return [...itemsByCafe.keys()];
         });
     }
 
