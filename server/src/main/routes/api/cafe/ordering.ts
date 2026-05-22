@@ -18,7 +18,7 @@ import {
 import { toDateString } from '@msdining/common/util/date-util';
 import { phone } from 'phone';
 import { CafeOrderSession } from '../../../../worker/data/cafe/session/order.js';
-import { WaitTimeSession } from '../../../../worker/data/cafe/session/wait-time.js';
+import { fetchWaitTime, fetchWaitTimeWithCartItems } from '../../../../worker/data/cafe/session/wait-time.js';
 import { getServices } from '../../../../main/services/registry.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
@@ -176,7 +176,7 @@ export const registerOrderingRoutes = (parent: Router) => {
                 return ctx.throw(400, 'Invalid item count (not a positive number)');
             }
 
-            const waitTime = await WaitTimeSession.retrieveWaitTime(cafe, itemCount);
+            const waitTime = await fetchWaitTime(cafe, itemCount);
             ctx.body = JSON.stringify(waitTime);
         }
     );
@@ -252,7 +252,7 @@ export const registerOrderingRoutes = (parent: Router) => {
                 }
 
                 orderLog.info(`{${cartData.cafe.name}} Cart populated — orderId: ${orderId}, fetching wait time`);
-                const waitTime = await WaitTimeSession.retrieveWaitTimeWithCartItems(session.client, [...session.rawCartItemsForWaitTime]);
+                const waitTime = await fetchWaitTimeWithCartItems(session.client, [...session.rawCartItemsForWaitTime]);
                 orderLog.info(`{${cartData.cafe.name}} Wait time: ${waitTime.minTime}-${waitTime.maxTime} min`);
 
                 storePendingSession(orderId, session, cafeId);

@@ -24,63 +24,53 @@ const parseWaitTimeResponse = (json: unknown): IWaitTimeResponse => {
     throw new Error(`Invalid wait time response: ${JSON.stringify(json)}`);
 };
 
-export class WaitTimeSession {
-    constructor(readonly client: BuyOnDemandClient) {
+const fetchWaitTimeRaw = async (client: BuyOnDemandClient, cartItems: unknown[]): Promise<unknown> => {
+    const config = client.config;
+    if (!config) {
+        throw new Error('Cafe config is not set');
     }
 
-    // Standalone wait time (creates its own session, uses dummy items)
-    public static async retrieveWaitTime(cafe: ICafe, itemCount: number): Promise<IWaitTimeResponse> {
-        const client = await createBuyOnDemandClient(cafe);
-        return WaitTimeSession.retrieveWaitTimeWithClient(client, itemCount);
-    }
-
-    // Simple wait time with just a count (dummy kitchenVideoId)
-    public static async retrieveWaitTimeWithClient(client: BuyOnDemandClient, itemCount: number): Promise<IWaitTimeResponse> {
-        const json = await WaitTimeSession.#fetchWaitTime(client, [
-            { kitchenVideoId: ' ', quantity: itemCount }
-        ]);
-        return parseWaitTimeResponse(json);
-    }
-
-    // Full wait time with actual cart item data — more accurate, returns minTime/maxTime format
-    public static async retrieveWaitTimeWithCartItems(client: BuyOnDemandClient, cartItems: unknown[]): Promise<IWaitTimeResponse> {
-        const json = await WaitTimeSession.#fetchWaitTime(client, cartItems);
-        const result = parseWaitTimeResponse(json);
-
-        // Dev comparison: also fetch with dummy approach and log if different
-        const totalQuantity = (cartItems as Array<{ quantity?: number }>).reduce((sum, item) => sum + (item.quantity ?? 1), 0);
-        WaitTimeSession.retrieveWaitTimeWithClient(client, totalQuantity)
-            .then(dummyResult => {
-                if (dummyResult.minTime !== result.minTime || dummyResult.maxTime !== result.maxTime) {
-                    console.log(`[WaitTime] Results differ — full: ${result.minTime}-${result.maxTime}min, dummy: ${dummyResult.minTime}-${dummyResult.maxTime}min`);
-                }
+    const response = await client.requestAsync(
+        `/order/${config.tenantId}/${config.contextId}/getWaitTimeForItems`,
+        {
+            method:  'POST',
+            headers: { ...JSON_HEADERS },
+            body:    JSON.stringify({
+                cartItems,
+                varianceEnabled:    true,
+                variancePercentage: 5,
+                kitchenContextId:   null,
+                deliveryType:       'pickup'
             })
-            .catch(() => { /* ignore comparison failures */ });
-
-        return result;
-    }
-
-    static async #fetchWaitTime(client: BuyOnDemandClient, cartItems: unknown[]): Promise<unknown> {
-        const config = client.config;
-        if (!config) {
-            throw new Error('Cafe config is not set');
         }
+    );
 
-        const response = await client.requestAsync(
-            `/order/${config.tenantId}/${config.contextId}/getWaitTimeForItems`,
-            {
-                method:  'POST',
-                headers: { ...JSON_HEADERS },
-                body:    JSON.stringify({
-                    cartItems,
-                    varianceEnabled:    true,
-                    variancePercentage: 5,
-                    kitchenContextId:   null,
-                    deliveryType:       'pickup'
-                })
-            }
-        );
+    return response.json();
+};
 
-        return response.json();
-    }
-}
+/**
+ * Fetch wait time using an existing BuyOnDemandClient with actual cart item data.
+ */
+export const fetchWaitTimeWithCartItems = async (client: BuyOnDemandClient, cartItems: unknown[]): Promise<IWaitTimeResponse> => {
+    const json = await fetchWaitTimeRaw(client, cartItems);
+    return parseWaitTimeResponse(json);
+};
+
+/**
+ * Fetch wait time with a simple item count (dummy items).
+ */
+export const fetchWaitTimeWithItemCount = async (client: BuyOnDemandClient, itemCount: number): Promise<IWaitTimeResponse> => {
+    const json = await fetchWaitTimeRaw(client, [
+        { kitchenVideoId: ' ', quantity: itemCount }
+    ]);
+    return parseWaitTimeResponse(json);
+};
+
+/**
+ * Standalone wait time lookup — creates its own BuyOnDemandClient.
+ * Used by the wait-time-only endpoint.
+ */
+export const fetchWaitTime = async (cafe: ICafe, itemCount: number): Promise<IWaitTimeResponse> => {
+    const client = await createBuyOnDemandClient(cafe);
+    return fetchWaitTimeWithItemCount(client, itemCount);
+};
