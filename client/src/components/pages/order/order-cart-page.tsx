@@ -20,7 +20,7 @@ import { PaymentInfoForm, type IPaymentFormData } from '../../order/payment/paym
 export const OrderCartPage = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const { isLoading } = useOrderPageGuard();
+    const { isLoading, shouldRedirect } = useOrderPageGuard();
     const cartQuery = useCartQuery();
     const startCheckoutMutation = useStartCheckoutMutation();
     const cartItems = useServerCartItems();
@@ -49,6 +49,10 @@ export const OrderCartPage = () => {
             setCheckoutError(error instanceof Error ? error.message : 'Failed to start checkout');
         }
     }, [navigate, queryClient, startCheckoutMutation]);
+
+    if (shouldRedirect) {
+        return null;
+    }
 
     if (isLoading) {
         return (

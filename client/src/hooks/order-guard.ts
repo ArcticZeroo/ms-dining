@@ -44,18 +44,26 @@ const useOrderGuard = (): IOrderGuardResult => {
 /**
  * Reads server state, computes where the user should be, and
  * redirects if the current path doesn't match.
- * Returns activeOrder and isLoading for the page to use.
+ *
+ * Returns `shouldRedirect: true` when a redirect is pending —
+ * pages should render a loading state (not their real content)
+ * to avoid a flash of the wrong UI before the effect fires.
  */
 export const useOrderPageGuard = () => {
     const guard = useOrderGuard();
     const navigate = useNavigate();
     const location = useLocation();
 
+    const shouldRedirect = guard.expectedPath != null && guard.expectedPath !== location.pathname;
+
     useEffect(() => {
-        if (guard.expectedPath != null && guard.expectedPath !== location.pathname) {
+        if (shouldRedirect && guard.expectedPath != null) {
             navigate(guard.expectedPath, { replace: true });
         }
-    }, [guard.expectedPath, location.pathname, navigate]);
+    }, [shouldRedirect, guard.expectedPath, navigate]);
 
-    return guard;
+    return {
+        ...guard,
+        shouldRedirect,
+    };
 };

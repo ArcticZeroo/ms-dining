@@ -12,7 +12,7 @@ import { WaitTime } from '../../order/wait-time.tsx';
 export const OrderPayPage = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const { isLoading, activeOrder } = useOrderPageGuard();
+    const { isLoading, shouldRedirect, activeOrder } = useOrderPageGuard();
     const abandonMutation = useAbandonRemainingCafesMutation();
 
     const cancelOrder = useCallback(async () => {
@@ -26,6 +26,10 @@ export const OrderPayPage = () => {
     }, [abandonMutation, activeOrder, navigate, queryClient]);
 
     const handleCafeCompleted = useCallback(() => undefined, []);
+
+    if (shouldRedirect) {
+        return null;
+    }
 
     if (isLoading || activeOrder == null) {
         return (

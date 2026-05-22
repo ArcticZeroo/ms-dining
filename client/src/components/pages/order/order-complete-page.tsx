@@ -8,7 +8,7 @@ import { OrderStatus } from '../../order/status/order-status.tsx';
 
 export const OrderCompletePage = () => {
     const navigate = useNavigate();
-    const { isLoading, activeOrder } = useOrderPageGuard();
+    const { isLoading, shouldRedirect, activeOrder } = useOrderPageGuard();
 
     const completedItems = useMemo<IOrderStatusItem[]>(() => activeOrder?.cafeParts
         .filter(part => part.status === 'completed')
@@ -18,6 +18,10 @@ export const OrderCompletePage = () => {
             waitTimeMin:            part.waitTimeMin,
             waitTimeMax:            part.waitTimeMax,
         })) ?? [], [activeOrder]);
+
+    if (shouldRedirect) {
+        return null;
+    }
 
     if (isLoading || activeOrder == null) {
         return (
