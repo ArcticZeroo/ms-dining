@@ -193,18 +193,18 @@ export type ICartItemRecordDTO = z.input<typeof CartItemRecordSchema>;
 export const OrderCafePartSummarySchema = z.object({
     cafeId:                 z.string(),
     status:                 z.enum(ORDER_CAFE_PART_STATUSES),
-    buyOnDemandOrderNumber: z.string().nullable(),
-    total:                  z.number().nullable(),
-    waitTimeMin:            z.number().int().nullable(),
-    waitTimeMax:            z.number().int().nullable(),
+    buyOnDemandOrderNumber: z.string().nullish().transform(val => val ?? null),
+    total:                  z.number().nullish().transform(val => val ?? null),
+    waitTimeMin:            z.number().int().nullish().transform(val => val ?? null),
+    waitTimeMax:            z.number().int().nullish().transform(val => val ?? null),
 });
 
 export type IOrderCafePartSummary = z.infer<typeof OrderCafePartSummarySchema>;
 
 export const ActiveOrderSummarySchema = z.object({
     orderSessionId: z.string(),
-    alias:          z.string().nullable(),
-    phoneNumber:    z.string().nullable(),
+    alias:          z.string().nullish().transform(val => val ?? null),
+    phoneNumber:    z.string().nullish().transform(val => val ?? null),
     cafeParts:      z.array(OrderCafePartSummarySchema),
 });
 
