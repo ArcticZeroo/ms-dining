@@ -6,7 +6,7 @@ import type {
     ReadOnlyPrismaLikeClient,
 } from '../../../../shared/models/prisma.js';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES } from '@msdining/common/models/cart';
-import type { ICartItemRecord, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { OrderCafePartStatus } from '@msdining/common/models/cart';
 
 interface IOrderCafePartData {
     buyOnDemandOrderId?: string;
@@ -21,30 +21,15 @@ interface IOrderCafePartData {
     completedAt?: Date;
 }
 
-export interface ICreateCafePartData extends IOrderCafePartData {
+interface ICreateCafePartData extends IOrderCafePartData {
     status: OrderCafePartStatus;
-    cartItems: ICartItemRecord[];
+    /** IDs of CartItem rows to transfer from the cart to this order part. */
+    cartItemIds: string[];
 }
 
 interface ICreateCafePartBatchData extends ICreateCafePartData {
     cafeId: string;
 }
-
-const snapshotItemCreate = (item: ICartItemRecord) => ({
-    menuItemId:          item.menuItemId,
-    name:                item.menuItem.name,
-    quantity:            item.quantity,
-    price:               item.menuItem.price,
-    specialInstructions: item.specialInstructions,
-    modifiers: {
-        create: item.modifiers.flatMap(modifier =>
-            modifier.choiceIds.map(choiceId => ({
-                modifierId: modifier.modifierId,
-                choiceId,
-            }))
-        ),
-    },
-});
 
 export abstract class OrderStorageClient {
     static async createOrderSession(userId: string) {
@@ -69,36 +54,25 @@ export abstract class OrderStorageClient {
         });
     }
 
-    static async createCafePart(orderSessionId: string, cafeId: string, data: ICreateCafePartData) {
-        const { cartItems, ...cafePartData } = data;
-
-        return usePrismaWrite(prisma => prisma.orderCafePart.create({
-            data: {
-                orderSessionId,
-                cafeId,
-                ...cafePartData,
-                items: {
-                    create: cartItems.map(snapshotItemCreate),
-                },
-            },
-        }));
-    }
-
     static async createCafeParts(orderSessionId: string, parts: ICreateCafePartBatchData[]) {
-        // createMany doesn't support nested creates, so use a transaction with individual creates
         return usePrismaWrite(async prisma => {
-            await Promise.all(parts.map(({ cafeId, cartItems, ...cafePartData }) =>
-                prisma.orderCafePart.create({
+            for (const { cafeId, cartItemIds, ...cafePartData } of parts) {
+                const cafePart = await prisma.orderCafePart.create({
                     data: {
                         orderSessionId,
                         cafeId,
                         ...cafePartData,
-                        items: {
-                            create: cartItems.map(snapshotItemCreate),
-                        },
                     },
-                })
-            ));
+                });
+
+                // Transfer cart items from the cart to this order part
+                if (cartItemIds.length > 0) {
+                    await prisma.cartItem.updateMany({
+                        where: { id: { in: cartItemIds } },
+                        data:  { cartUserId: null, orderCafePartId: cafePart.id },
+                    });
+                }
+            }
         });
     }
 
@@ -133,7 +107,7 @@ export abstract class OrderStorageClient {
             where: { orderSessionId, cafeId },
             include: {
                 items: {
-                    include: { modifiers: true },
+                    include: { modifierChoices: { select: { modifierId: true, choiceId: true } } },
                 },
             },
         });

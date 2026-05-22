@@ -1,4 +1,4 @@
-import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
+import { usePrismaClient, usePrismaTransaction } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
@@ -7,7 +7,7 @@ import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
-import type { ICartItem, ICartItemRecord, ISerializedModifier, OrderCafePartStatus } from '@msdining/common/models/cart';
+import type { ICartItem, ICartItemRecord, OrderCafePartStatus } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICheckoutResult,
@@ -48,17 +48,17 @@ setInterval(() => {
 const sessionKey = ({ orderSessionId, cafeId }: { orderSessionId: string; cafeId: string }) =>
     `${orderSessionId}:${cafeId}`;
 
-const deserializeModifiers = (modifiers: ISerializedModifier[]): Map<string, Set<string>> =>
-    new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
-
-const snapshotModifiersToSerialized = (modifiers: Array<{ modifierId: string; choiceId: string }>): ISerializedModifier[] => {
-    const byModifier = new Map<string, string[]>();
-    for (const mod of modifiers) {
-        const choices = byModifier.get(mod.modifierId) ?? [];
-        choices.push(mod.choiceId);
-        byModifier.set(mod.modifierId, choices);
+const groupModifierChoices = (choices: Array<{ modifierId: string; choiceId: string }>): Map<string, Set<string>> => {
+    const result = new Map<string, Set<string>>();
+    for (const { modifierId, choiceId } of choices) {
+        const existing = result.get(modifierId);
+        if (existing) {
+            existing.add(choiceId);
+        } else {
+            result.set(modifierId, new Set([choiceId]));
+        }
     }
-    return [...byModifier].map(([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
+    return result;
 };
 
 const getCafeOrThrow = (cafeId: string) => {
@@ -87,7 +87,7 @@ const createPopulatedSession = async (cafeId: string, cartItems: ICartItem[]): P
 export abstract class OrderOrchestrator {
     /**
      * Single path for getting a live session — creates one if it doesn't exist
-     * by reading the item snapshot from DB. Updates DB with new BoD order data.
+     * by reading the cart items from DB. Updates DB with new BoD order data.
      */
     private static async getOrCreateLiveSession(orderSessionId: string, cafeId: string): Promise<CafeOrderSession> {
         const key = sessionKey({ orderSessionId, cafeId });
@@ -97,7 +97,7 @@ export abstract class OrderOrchestrator {
             const cartItems: ICartItem[] = part.items.map(item => ({
                 itemId:              item.menuItemId,
                 quantity:            item.quantity,
-                choicesByModifierId: deserializeModifiers(snapshotModifiersToSerialized(item.modifiers)),
+                choicesByModifierId: groupModifierChoices(item.modifierChoices),
                 specialInstructions: item.specialInstructions ?? undefined,
             }));
 
@@ -129,14 +129,14 @@ export abstract class OrderOrchestrator {
             itemsByCafe.set(cafeId, existing);
         }
 
-        // Create DB records first (item snapshots, no BoD data yet)
+        // Create DB records first — transfers cart items to the order
         const orderSession = await OrderStorageClient.createOrderSession(userId);
         await OrderStorageClient.createCafeParts(
             orderSession.id,
             [...itemsByCafe].map(([cafeId, cartItems]) => ({
                 cafeId,
-                status:    'pending' as const,
-                cartItems,
+                status:      'pending' as const,
+                cartItemIds: cartItems.map(item => item.id),
             })),
         );
 
@@ -192,10 +192,6 @@ export abstract class OrderOrchestrator {
         if (cafeResults.length == 0) {
             throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'All cafe checkouts failed');
         }
-
-        await usePrismaWrite(prisma => prisma.cartItem.deleteMany({
-            where: { cartUserId: userId },
-        }));
 
         return {
             orderSessionId: orderSession.id,

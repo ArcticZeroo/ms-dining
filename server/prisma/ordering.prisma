@@ -10,10 +10,15 @@ model Cart {
   items CartItem[]
 }
 
+// CartItem lives in the cart while shopping, then transfers to an
+// OrderCafePart at checkout. Exactly one of cartUserId / orderCafePartId
+// is set at any time.
 model CartItem {
   id                  String  @id @default(uuid())
-  cartUserId          String
-  cart                Cart    @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
+  cartUserId          String?
+  cart                Cart?   @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
+  orderCafePartId     String?
+  orderCafePart       OrderCafePart? @relation(fields: [orderCafePartId], references: [id], onDelete: Cascade)
   menuItemId          String
   menuItem            MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
   quantity            Int     @default(1)
@@ -88,31 +93,6 @@ model OrderCafePart {
   updatedAt   DateTime  @updatedAt
   completedAt DateTime?
 
-  items OrderCafePartItem[]
-}
-
-// Snapshot of an item that was ordered — denormalized for history.
-model OrderCafePartItem {
-  id              String        @id @default(uuid())
-  orderCafePartId String
-  orderCafePart   OrderCafePart @relation(fields: [orderCafePartId], references: [id], onDelete: Cascade)
-
-  menuItemId          String
-  name                String
-  quantity            Int
-  price               Float
-  specialInstructions String?
-
-  modifiers OrderCafePartItemModifier[]
-}
-
-// Modifier choices for a snapshot item.
-model OrderCafePartItemModifier {
-  id                   Int                @id @default(autoincrement())
-  orderCafePartItemId  String
-  orderCafePartItem    OrderCafePartItem  @relation(fields: [orderCafePartItemId], references: [id], onDelete: Cascade)
-  modifierId           String
-  choiceId             String
-
-  @@unique([orderCafePartItemId, modifierId, choiceId])
+  // Items transferred from the cart at checkout
+  items CartItem[]
 }
