@@ -10,15 +10,10 @@ model Cart {
   items CartItem[]
 }
 
-// CartItem lives in the cart while shopping, then transfers to an
-// OrderCafePart at checkout. Exactly one of cartUserId / orderCafePartId
-// is set at any time.
 model CartItem {
   id                  String  @id @default(uuid())
-  cartUserId          String?
-  cart                Cart?   @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
-  orderCafePartId     String?
-  orderCafePart       OrderCafePart? @relation(fields: [orderCafePartId], references: [id], onDelete: Cascade)
+  cartUserId          String
+  cart                Cart    @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
   menuItemId          String
   menuItem            MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
   quantity            Int     @default(1)
@@ -40,61 +35,84 @@ model CartItemModifierChoice {
   @@unique([cartItemId, modifierId, choiceId])
 }
 
-// ─── Orders ──────────────────────────────────────────────────────────
-// An OrderSession is a user-facing checkout that may span multiple cafes.
-// Each cafe's Buy On Demand interaction is tracked independently as an OrderCafePart.
+// ─── Pending Orders ──────────────────────────────────────────────────
+// A PendingCafeOrder is created when the user clicks "Pay" for a cafe.
+// It holds a snapshot of the items + identity for the BoD session.
+// Deleted on completion (promoted to CafeOrder) or TTL expiry.
 
-model OrderSession {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model PendingCafeOrder {
+  id                         String   @id @default(uuid())
+  userId                     String
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cafeId                     String
+  alias                      String
+  phoneNumberWithCountryCode String
+  createdAt                  DateTime @default(now())
 
-  // Payment identity — set when user starts payment, fixed for the session
-  alias                      String?
-  phoneNumberWithCountryCode String?
-
-  cafeParts OrderCafePart[]
+  items PendingCafeOrderItem[]
 }
 
-model OrderCafePart {
-  id             String @id @default(uuid())
-  orderSessionId String
-  orderSession   OrderSession @relation(fields: [orderSessionId], references: [id], onDelete: Cascade)
-  cafeId         String
+model PendingCafeOrderItem {
+  id                  String  @id @default(uuid())
+  pendingCafeOrderId  String
+  pendingCafeOrder    PendingCafeOrder @relation(fields: [pendingCafeOrderId], references: [id], onDelete: Cascade)
+  menuItemId          String
+  quantity            Int
+  specialInstructions String?
 
-  // Buy On Demand identifiers (populated after checkout calls BoD add-to-cart)
-  buyOnDemandOrderId     String?
-  buyOnDemandOrderNumber String?
+  modifiers PendingCafeOrderItemModifier[]
+}
 
-  // State: pending → payment_pending → completed | failed | abandoned
-  status String @default("pending")
+model PendingCafeOrderItemModifier {
+  id                     Int                  @id @default(autoincrement())
+  pendingCafeOrderItemId String
+  pendingCafeOrderItem   PendingCafeOrderItem @relation(fields: [pendingCafeOrderItemId], references: [id], onDelete: Cascade)
+  modifierId             String
+  choiceId               String
 
-  // Financial (populated from Buy On Demand response)
-  subtotal Float?
-  tax      Float?
-  total    Float?
+  @@unique([pendingCafeOrderItemId, modifierId, choiceId])
+}
 
-  // Wait time (from Buy On Demand API at close time)
-  waitTimeMin Int?
-  waitTimeMax Int?
+// ─── Completed Orders ────────────────────────────────────────────────
+// A CafeOrder is created after payment succeeds. Permanent record.
 
-  // Serialized session state needed to rebuild the CafeOrderSession
-  // if the in-memory session expires. Contains ordering context, pay config,
-  // order details, site store info, etc. (~5KB JSON)
-  sessionStateJson String?
+model CafeOrder {
+  id                     String   @id @default(uuid())
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cafeId                 String
+  buyOnDemandOrderId     String
+  buyOnDemandOrderNumber String
+  subtotal               Float
+  tax                    Float
+  total                  Float
+  waitTimeMin            Int
+  waitTimeMax            Int
+  completedAt            DateTime
+  createdAt              DateTime @default(now())
 
-  // Error tracking (diagnostic only, not used for control flow)
-  lastError String?
-  lastStage String?
+  items CafeOrderItem[]
+}
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  completedAt DateTime?
+model CafeOrderItem {
+  id                  String    @id @default(uuid())
+  cafeOrderId         String
+  cafeOrder           CafeOrder @relation(fields: [cafeOrderId], references: [id], onDelete: Cascade)
+  menuItemId          String
+  name                String
+  quantity            Int
+  price               Float
+  specialInstructions String?
 
-  // Items transferred from the cart at checkout
-  items CartItem[]
+  modifiers CafeOrderItemModifier[]
+}
 
-  @@unique([orderSessionId, cafeId])
+model CafeOrderItemModifier {
+  id              Int           @id @default(autoincrement())
+  cafeOrderItemId String
+  cafeOrderItem   CafeOrderItem @relation(fields: [cafeOrderItemId], references: [id], onDelete: Cascade)
+  modifierId      String
+  choiceId        String
+
+  @@unique([cafeOrderItemId, modifierId, choiceId])
 }
