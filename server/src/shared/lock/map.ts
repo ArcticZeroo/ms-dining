@@ -3,16 +3,11 @@ import { setInterval } from 'node:timers';
 import { logError } from '../../shared/util/log.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 
-export interface IUpdateOptions {
-	/** When true, keeps the original TTL instead of resetting it. Only meaningful for expiring maps. */
-	preserveTtl?: boolean;
-}
-
 export interface ILockedMap<K, V> {
 	size: number;
 	entries(): IterableIterator<[K, V]>;
 	has(key: K): Promise<boolean>;
-	update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, options?: IUpdateOptions): Promise<TReturn>;
+	update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn>;
 	getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V>;
 	peek<TReturn>(key: K, callback: (value: V | undefined) => TReturn): Promise<TReturn>;
 	delete(key: K): Promise<void>;
@@ -127,6 +122,7 @@ interface IExpiringEntry<V> {
 export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 	readonly #expirationTimeMs: number;
 	readonly #map: LockedMap<K, IExpiringEntry<V>>;
+	readonly #cleanupInterval: ReturnType<typeof setInterval>;
 
 	constructor(expirationTime: DurationOrMilliseconds, initialState?: Map<K, V>) {
 		this.#expirationTimeMs = Duration.fromDurationOrMilliseconds(expirationTime).inMilliseconds;
@@ -134,16 +130,18 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 			.map(([key, value]) => [key, { value, expirationTime: Date.now() + this.#expirationTimeMs } satisfies IExpiringEntry<V>] as [K, IExpiringEntry<V>]);
 		this.#map = new LockedMap<K, IExpiringEntry<V>>(expiringInitialState);
 
-		setInterval(() => {
+		this.#cleanupInterval = setInterval(() => {
 			this.#map.deleteWhere((_, entry) => {
 				return entry.expirationTime < Date.now();
 			}).catch(err => logError(`Failed to delete expired entries from LockedExpiringMap: ${err}`));
 		}, this.#expirationTimeMs);
 	}
 
-	async update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, options?: IUpdateOptions): Promise<TReturn> {
-		const { preserveTtl = false } = options ?? {};
+	destroy() {
+		clearInterval(this.#cleanupInterval);
+	}
 
+	async #updateInternal<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, preserveTtl: boolean): Promise<TReturn> {
 		const result = await this.#map.update(key, async (entry) => {
 			const now = Date.now();
 			if (entry && entry.expirationTime <= now) {
@@ -165,6 +163,14 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 		});
 
 		return result?.value as TReturn;
+	}
+
+	update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
+		return this.#updateInternal(key, callback, false);
+	}
+
+	updateWithoutRefresh<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
+		return this.#updateInternal(key, callback, true);
 	}
 
 	getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {

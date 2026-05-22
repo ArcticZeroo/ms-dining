@@ -43,7 +43,7 @@ setInterval(() => {
     orderLog.info(`Refreshing tokens for ${entries.length} live session(s)...`);
     Promise.all(
         entries.map(([key]) =>
-            liveSessions.update(key, async (session) => {
+            liveSessions.updateWithoutRefresh(key, async (session) => {
                 if (!session) return undefined;
                 try {
                     await session.client.refreshLogin();
@@ -51,7 +51,7 @@ setInterval(() => {
                     orderLog.error(`Failed to refresh token for session ${key}:`, err);
                 }
                 return session;
-            }, { preserveTtl: true })
+            })
         )
     ).catch(err => orderLog.error('Token refresh sweep failed:', err));
 }, TOKEN_REFRESH_INTERVAL_MS);
