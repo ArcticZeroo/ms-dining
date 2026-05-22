@@ -1,0 +1,169 @@
+import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { IOrderItem } from '@msdining/common/models/order';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { ApplicationContext } from '../../../context/app.ts';
+import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
+import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../store/queries/new-ordering.ts';
+import { calculatePrice, formatPrice } from '../../../util/cart.ts';
+import { getViewName } from '../../../util/cafe.ts';
+import { getErrorMessage } from '../../../util/mutation.ts';
+import { CartItemRow } from '../../order/cart/cart-item-row.tsx';
+import { PaymentIframe, type IRguestPaymentResult } from '../../order/payment/payment-iframe.tsx';
+
+const paymentPopupId = Symbol('order-cafe-payment');
+
+const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
+    menuItemId:          item.menuItemId,
+    quantity:            item.quantity,
+    modifiers:           item.modifiers,
+    specialInstructions: item.specialInstructions ?? undefined,
+});
+
+interface IOrderCafeCardProps {
+    cafeId: string;
+    items: ICartItemRecord[];
+    isBusy: boolean;
+    getPaymentIdentity: () => { alias: string; phoneNumber: string } | null;
+    onCompleted: (cafeId: string, buyOnDemandOrderNumber: string) => void;
+}
+
+export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
+    cafeId,
+    items,
+    isBusy,
+    getPaymentIdentity,
+    onCompleted,
+}) => {
+    const { viewsById } = useContext(ApplicationContext);
+    const openPopup = usePopupOpener();
+    const closePopup = usePopupCloserAlways();
+    const preparePayment = usePreparePaymentMutation();
+    const completeOrder = useCompleteOrderMutation();
+    const [error, setError] = useState<string>();
+
+    const view = viewsById.get(cafeId);
+    const cafeName = view != null
+        ? getViewName({ view, showGroupName: true })
+        : cafeId;
+
+    const totalPrice = useMemo(
+        () => items.reduce((sum, item) => sum + calculatePrice(
+            item.menuItem,
+            new Map(item.modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)])),
+            item.quantity,
+        ), 0),
+        [items],
+    );
+
+    const hasUnavailableItems = useMemo(
+        () => items.some(item => !item.isAvailable),
+        [items],
+    );
+
+    const isLocalBusy = preparePayment.isPending || completeOrder.isPending;
+
+    const handlePay = useCallback(async () => {
+        if (isBusy || isLocalBusy) {
+            return;
+        }
+
+        setError(undefined);
+
+        try {
+            const prepareResult = await preparePayment.mutateAsync({
+                cafeId,
+                items: items.map(toOrderItem),
+            });
+
+            const onPaymentComplete = async (paymentResult: IRguestPaymentResult) => {
+                const identity = getPaymentIdentity();
+                if (identity == null) {
+                    setError('Please fill in your alias and phone number.');
+                    return;
+                }
+
+                try {
+                    const completionResult = await completeOrder.mutateAsync({
+                        pendingOrderId: prepareResult.pendingOrderId,
+                        paymentToken:   paymentResult.token,
+                        cardInfo:       paymentResult.cardInfo,
+                        alias:          identity.alias,
+                        phoneNumber:    identity.phoneNumber,
+                    });
+
+                    setError(undefined);
+                    closePopup();
+                    onCompleted(cafeId, completionResult.buyOnDemandOrderNumber);
+                } catch (completeError) {
+                    setError(getErrorMessage(completeError, 'Failed to complete order'));
+                    throw completeError;
+                }
+            };
+
+            openPopup({
+                id:   paymentPopupId,
+                body: <PaymentIframe
+                    iframeUrl={prepareResult.iframeUrl}
+                    onPaymentComplete={onPaymentComplete}
+                    onPaymentError={setError}
+                    onClose={closePopup}
+                />,
+            });
+        } catch (prepareError) {
+            setError(getErrorMessage(prepareError, 'Failed to prepare payment'));
+        }
+    }, [cafeId, closePopup, completeOrder, getPaymentIdentity, isBusy, isLocalBusy, items, onCompleted, openPopup, preparePayment]);
+
+    return (
+        <div className="card dark-blue order-page-cafe">
+            <div className="order-page-cafe-header">
+                <div className="title">{cafeName}</div>
+            </div>
+            <table className="cart-contents">
+                <tbody>
+                    {items.map((item) => (
+                        <CartItemRow
+                            key={item.id}
+                            item={item}
+                            showFullDetails={true}
+                            readOnly={true}
+                            onRemove={() => {}}
+                            onEdit={() => {}}
+                            onChangeQuantity={() => {}}
+                        />
+                    ))}
+                    <tr>
+                        <td colSpan={2}></td>
+                        <td>Subtotal</td>
+                        <td className="price">{formatPrice(totalPrice)}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}></td>
+                        <td>Tax</td>
+                        <td className="price">Calculated at checkout</td>
+                    </tr>
+                </tbody>
+            </table>
+            {error && (
+                <div className="order-page-cafe-error">
+                    {error}
+                </div>
+            )}
+            {hasUnavailableItems && (
+                <div className="order-page-cafe-error">
+                    Remove unavailable items from your cart before paying this cafe.
+                </div>
+            )}
+            <div className="order-page-cafe-footer">
+                <span>{items.length} item{items.length === 1 ? '' : 's'}</span>
+                <button
+                    className="default-container"
+                    disabled={isBusy || isLocalBusy || hasUnavailableItems}
+                    onClick={handlePay}
+                >
+                    Pay {formatPrice(totalPrice)}
+                </button>
+            </div>
+        </div>
+    );
+};
