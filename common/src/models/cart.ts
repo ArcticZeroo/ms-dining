@@ -197,6 +197,7 @@ export const OrderCafePartSummarySchema = z.object({
     total:                  z.number().nullish().transform(val => val ?? null),
     waitTimeMin:            z.number().int().nullish().transform(val => val ?? null),
     waitTimeMax:            z.number().int().nullish().transform(val => val ?? null),
+    items:                  z.array(CartItemRecordSchema),
 });
 
 export type IOrderCafePartSummary = z.infer<typeof OrderCafePartSummarySchema>;

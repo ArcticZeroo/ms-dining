@@ -2,11 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IRguestCardInfo } from '@msdining/common/models/cart';
 import { OrderClient } from '../../api/new-ordering.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
+import { useServerCartStore } from '../zustand/server-cart.ts';
 
 /**
  * Checkout: create an order from the current cart.
- * On success, invalidates the cart query so the cart UI reflects
- * the cleared cart + active order.
+ * On success, sets the active order in the store from the response
+ * (no refetch needed) and invalidates the cart query for background sync.
  */
 export const useStartCheckoutMutation = () => {
     const queryClient = useQueryClient();
@@ -16,7 +17,11 @@ export const useStartCheckoutMutation = () => {
             alias: string;
             phoneNumberWithCountryCode: string;
         }) => OrderClient.startCheckout(alias, phoneNumberWithCountryCode),
-        onSuccess:  () => {
+        onSuccess: (activeOrder) => {
+            useServerCartStore.getState().setFromServerResponse({
+                items:       [],
+                activeOrder,
+            });
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
         },
     });

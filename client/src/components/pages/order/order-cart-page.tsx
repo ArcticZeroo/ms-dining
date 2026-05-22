@@ -1,7 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CART_QUERY_KEY, useCartQuery } from '../../../store/queries/server-cart.ts';
+import { useCartQuery } from '../../../store/queries/server-cart.ts';
 import { useStartCheckoutMutation } from '../../../store/queries/new-ordering.ts';
 import {
     useServerCartItems,
@@ -17,7 +16,6 @@ import { PaymentInfoForm, type IPaymentFormData } from '../../order/payment/paym
 import { getErrorMessage } from '../../../util/mutation.ts';
 
 export const OrderCartPage = () => {
-    const queryClient = useQueryClient();
     const navigate = useNavigate();
     const cartQuery = useCartQuery();
     const startCheckoutMutation = useStartCheckoutMutation();
@@ -38,12 +36,11 @@ export const OrderCartPage = () => {
 
         try {
             const result = await startCheckoutMutation.mutateAsync(paymentInfo);
-            await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
             navigate(`/order/${result.orderSessionId}/pay`);
         } catch {
             // Error state handled by startCheckoutMutation.isError
         }
-    }, [navigate, queryClient, startCheckoutMutation]);
+    }, [navigate, startCheckoutMutation]);
 
     if (cartQuery.isError) {
         return (

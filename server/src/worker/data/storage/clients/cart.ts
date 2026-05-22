@@ -82,6 +82,7 @@ const ACTIVE_ORDER_INCLUDE = {
             total:                  true,
             waitTimeMin:            true,
             waitTimeMax:            true,
+            items:                  { include: CART_ITEM_INCLUDE },
         },
     },
 };
@@ -97,22 +98,40 @@ type ActiveOrderRow = {
         total: number | null;
         waitTimeMin: number | null;
         waitTimeMax: number | null;
+        items: PrismaCartItemWithModifiers[];
     }[];
 };
 
-const toActiveOrderSummary = (order: ActiveOrderRow): IActiveOrderSummary => ({
-    orderSessionId: order.id,
-    alias:          order.alias,
-    phoneNumber:    order.phoneNumberWithCountryCode,
-    cafeParts:      order.cafeParts.map(part => ({
-        cafeId:                 part.cafeId,
-        status:                 part.status as OrderCafePartStatus,
-        buyOnDemandOrderNumber: part.buyOnDemandOrderNumber,
-        total:                  part.total,
-        waitTimeMin:            part.waitTimeMin,
-        waitTimeMax:            part.waitTimeMax,
-    } satisfies IOrderCafePartSummary)),
-});
+const toActiveOrderSummary = async (order: ActiveOrderRow): Promise<IActiveOrderSummary> => {
+    const cafeParts: IOrderCafePartSummary[] = [];
+
+    for (const part of order.cafeParts) {
+        const items: ICartItemRecord[] = [];
+        for (const item of part.items) {
+            const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(item.menuItemId);
+            if (menuItem) {
+                items.push(toCartItemRecord(item, menuItem, true));
+            }
+        }
+
+        cafeParts.push({
+            cafeId:                 part.cafeId,
+            status:                 part.status as OrderCafePartStatus,
+            buyOnDemandOrderNumber: part.buyOnDemandOrderNumber,
+            total:                  part.total,
+            waitTimeMin:            part.waitTimeMin,
+            waitTimeMax:            part.waitTimeMax,
+            items,
+        });
+    }
+
+    return {
+        orderSessionId: order.id,
+        alias:          order.alias,
+        phoneNumber:    order.phoneNumberWithCountryCode,
+        cafeParts,
+    };
+};
 
 export abstract class CartStorageClient {
     static async getActiveOrderSummary(userId: string): Promise<IActiveOrderSummary | undefined> {

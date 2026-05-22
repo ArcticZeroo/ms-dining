@@ -6,6 +6,7 @@ import type { IOrderSession } from '../../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../../cafe/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
 import { OrderStorageClient } from './order.js';
+import { CartStorageClient } from './cart.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
@@ -14,7 +15,6 @@ import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ACTIVE_ORDER_CAFE_PART_STATUSES, SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     IStartCheckoutResult,
-    IStartCheckoutCafeResult,
     IPreparePaymentResult,
     ICompleteOrderResultDTO,
 } from '@msdining/common/models/order';
@@ -144,8 +144,8 @@ export abstract class OrderOrchestrator {
         const { orderSessionId, cafeIds } = await OrderStorageClient.startOrder(userId, alias, phoneNumberWithCountryCode);
 
         // Create live BoD sessions in parallel — fails fast if any cafe fails
-        const cafeResults = await Promise.all(
-            cafeIds.map(async (cafeId): Promise<IStartCheckoutCafeResult> => {
+        await Promise.all(
+            cafeIds.map(async (cafeId) => {
                 const session = await this.getOrCreateLiveSession(orderSessionId, cafeId);
 
                 const waitTime: IWaitTimeResponse = isFakeOrdering
@@ -162,21 +162,15 @@ export abstract class OrderOrchestrator {
                     waitTimeMin: waitTime.minTime,
                     waitTimeMax: waitTime.maxTime,
                 });
-
-                return {
-                    cafeId,
-                    buyOnDemandOrderId:     session.orderId!,
-                    buyOnDemandOrderNumber: session.orderNumber!,
-                    subtotal:               session.orderTotalWithoutTax,
-                    tax:                    session.orderTotalTax,
-                    total:                  session.orderTotalWithTax,
-                    waitTimeMin:            waitTime.minTime,
-                    waitTimeMax:            waitTime.maxTime,
-                };
             }),
         );
 
-        return { orderSessionId, cafeResults };
+        // Return the full active order summary (with enriched items)
+        const activeOrder = await CartStorageClient.getActiveOrderSummary(userId);
+        if (!activeOrder) {
+            throw new ServiceError(SERVICE_ERROR_CODES.INTERNAL, 'Active order not found after checkout');
+        }
+        return activeOrder;
     }
 
     static async preparePayment(

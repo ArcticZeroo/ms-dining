@@ -1,5 +1,5 @@
-import type { IStartCheckoutResult, IPreparePaymentResult, ICompleteOrderResult } from '@msdining/common/models/order';
-import type { IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IActiveOrderSummary, IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IPreparePaymentResult, ICompleteOrderResult } from '@msdining/common/models/order';
 import {
     StartCheckoutResultSchema,
     PreparePaymentResultSchema,
@@ -10,7 +10,7 @@ import { JSON_HEADERS, makeJsonRequestNoParse, makeJsonRequestWithSchema } from 
 const ORDER_BASE = '/api/dining/order';
 
 export abstract class OrderClient {
-    static async startCheckout(alias: string, phoneNumberWithCountryCode: string): Promise<IStartCheckoutResult> {
+    static async startCheckout(alias: string, phoneNumberWithCountryCode: string): Promise<IActiveOrderSummary> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/checkout`,
             schema: StartCheckoutResultSchema,

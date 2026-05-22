@@ -1,24 +1,11 @@
 import { z } from 'zod';
+import { ActiveOrderSummarySchema } from './cart.js';
 
 // ─── Start Checkout ──────────────────────────────────────────────────
 
-export const StartCheckoutCafeResultSchema = z.object({
-    cafeId:                 z.string(),
-    buyOnDemandOrderId:     z.string(),
-    buyOnDemandOrderNumber: z.string(),
-    subtotal:               z.number(),
-    tax:                    z.number(),
-    total:                  z.number(),
-    waitTimeMin:            z.number().int(),
-    waitTimeMax:            z.number().int(),
-});
-
-export type IStartCheckoutCafeResult = z.infer<typeof StartCheckoutCafeResultSchema>;
-
-export const StartCheckoutResultSchema = z.object({
-    orderSessionId: z.string(),
-    cafeResults:    z.array(StartCheckoutCafeResultSchema),
-});
+// The checkout response is just the active order summary — the client
+// uses it to populate the store and navigate to the payment page.
+export const StartCheckoutResultSchema = ActiveOrderSummarySchema;
 
 export type IStartCheckoutResult = z.infer<typeof StartCheckoutResultSchema>;
 

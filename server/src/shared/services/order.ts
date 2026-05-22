@@ -1,19 +1,16 @@
 import type { IActiveOrderSummary } from '@msdining/common/models/cart';
 import type {
-    IStartCheckoutResult,
     IPreparePaymentResult,
     ICompleteOrderResultDTO,
 } from '@msdining/common/models/order';
 
-export type { IStartCheckoutCafeResult } from '@msdining/common/models/order';
-
 export interface IOrderService {
-    /** Create an order from the user's cart with payment identity. */
+    /** Create an order from the user's cart with payment identity. Returns the active order summary. */
     startCheckout(data: {
         userId: string;
         alias: string;
         phoneNumberWithCountryCode: string;
-    }): Promise<IStartCheckoutResult>;
+    }): Promise<IActiveOrderSummary>;
 
     /** Set the alias + phone for an order (before first payment). */
     setPaymentIdentity(data: {
