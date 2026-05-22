@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAbandonRemainingCafesMutation } from '../../../store/queries/new-ordering.ts';
 import { CART_QUERY_KEY } from '../../../store/queries/server-cart.ts';
-import { useServerCartActiveOrder } from '../../../store/zustand/server-cart.ts';
+import { useRequiredActiveOrder } from '../../../store/zustand/server-cart.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { MultiCafePayment } from '../../order/payment/multi-cafe-payment.tsx';
 import { WaitTime } from '../../order/wait-time.tsx';
@@ -11,11 +11,11 @@ import { WaitTime } from '../../order/wait-time.tsx';
 export const OrderPayPage = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const activeOrder = useServerCartActiveOrder();
+    const activeOrder = useRequiredActiveOrder();
     const abandonMutation = useAbandonRemainingCafesMutation();
 
     const cancelOrder = useCallback(async () => {
-        if (activeOrder == null || abandonMutation.isPending) {
+        if (abandonMutation.isPending) {
             return;
         }
 
@@ -25,11 +25,6 @@ export const OrderPayPage = () => {
     }, [abandonMutation, activeOrder, navigate, queryClient]);
 
     const handleCafeCompleted = useCallback(() => undefined, []);
-
-    // Layout guard guarantees activeOrder exists when this page renders
-    if (activeOrder == null) {
-        return null;
-    }
 
     return (
         <div id="order-checkout" className="flex-col">

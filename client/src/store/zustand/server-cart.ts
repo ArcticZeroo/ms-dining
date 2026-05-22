@@ -51,6 +51,18 @@ export const useServerCartStore = create<IServerCartStore>()(mutative((set) => (
 export const useServerCartItems = () => useServerCartStore(state => state.items);
 export const useServerCartActiveOrder = () => useServerCartStore(state => state.activeOrder);
 
+/**
+ * Returns the active order, throwing if none exists.
+ * Only use on pages where the layout guard guarantees an active order.
+ */
+export const useRequiredActiveOrder = () => {
+    const activeOrder = useServerCartActiveOrder();
+    if (activeOrder == null) {
+        throw new Error('Expected an active order but none exists. This is a bug — the layout guard should have redirected.');
+    }
+    return activeOrder;
+};
+
 export const useServerCartItemCount = () => useServerCartStore(state =>
     state.items.reduce((sum, item) => sum + item.quantity, 0),
 );
