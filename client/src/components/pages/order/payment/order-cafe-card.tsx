@@ -9,7 +9,7 @@ import { calculatePrice, formatPrice } from '../../../../util/cart.ts';
 import { getViewName } from '../../../../util/cafe.ts';
 import { getErrorMessage } from '../../../../util/mutation.ts';
 import { formatWaitTime } from '../../../../util/order.ts';
-import { CartItemRow } from '../cart/cart-item-row.tsx';
+import CartItemRow from '../cart/cart-item-row.tsx';
 import { type IRguestPaymentResult, PaymentIframe } from './payment-iframe.tsx';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 

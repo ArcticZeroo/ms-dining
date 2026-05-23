@@ -2,6 +2,8 @@ import React from 'react';
 import { calculatePrice, formatPrice } from '../../../../util/cart.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
 import type { IDisplayCartItem } from '../../../../store/zustand/server-cart.ts';
+import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
+import { classNames } from '../../../../util/react.js';
 
 const MAX_QUANTITY = 99;
 
@@ -36,7 +38,7 @@ interface ICartItemProps {
     onChangeQuantity: (quantity: number) => void;
 }
 
-export const CartItemRow: React.FC<ICartItemProps> = ({
+const CartItemRow: React.FC<ICartItemProps> = ({
     item,
     onRemove,
     onEdit,
@@ -70,48 +72,53 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
     };
 
     return (
-        <tr className={`cart-item ${!item.isAvailable ? 'unavailable' : ''} ${isPending ? 'pending' : ''}`.trim()}>
+        <tr className={classNames('cart-item', !item.isAvailable && 'unavailable', isPending && 'pending')} title={isPending ? 'Adding this item to your cart...' : ''}>
             <td>
-                {isPending ? (
-                    <div className="cart-item-buttons">
-                        <span className="material-symbols-outlined spinning">progress_activity</span>
-                    </div>
-                ) : (
-                    <div className="cart-item-buttons">
-                        <button
-                            className="material-symbols-outlined"
-                            onClick={onRemove}
-                            disabled={isEffectivelyReadOnly}
-                            title={isEffectivelyReadOnly ? READONLY_TITLE : 'Remove this item'}
-                        >
-                            delete
-                        </button>
-                        <button
-                            className="material-symbols-outlined"
-                            disabled={!canDecreaseQuantity}
-                            onClick={onDecreaseQuantity}
-                            title={getDecreaseTitle(readOnly, canDecreaseQuantity)}
-                        >
-                            remove
-                        </button>
-                        <button
-                            className="material-symbols-outlined"
-                            disabled={!canIncreaseQuantity}
-                            onClick={onIncreaseQuantity}
-                            title={getIncreaseTitle(readOnly, canIncreaseQuantity)}
-                        >
-                            add
-                        </button>
-                        <button
-                            className="material-symbols-outlined"
-                            onClick={onEdit}
-                            disabled={isEffectivelyReadOnly}
-                            title={isEffectivelyReadOnly ? (item.isAvailable ? READONLY_TITLE : 'Item is no longer available') : 'Edit this item'}
-                        >
-                            edit
-                        </button>
-                    </div>
-                )}
+                {
+                    isPending && (
+                        <div className="cart-item-buttons">
+                            <HourglassLoadingSpinner/>
+                        </div>
+                    )
+                }
+                {
+                    !isPending && (
+                        <div className="cart-item-buttons">
+                            <button
+                                className="material-symbols-outlined"
+                                onClick={onRemove}
+                                disabled={isEffectivelyReadOnly}
+                                title={isEffectivelyReadOnly ? READONLY_TITLE : 'Remove this item'}
+                            >
+                                delete
+                            </button>
+                            <button
+                                className="material-symbols-outlined"
+                                disabled={!canDecreaseQuantity}
+                                onClick={onDecreaseQuantity}
+                                title={getDecreaseTitle(readOnly, canDecreaseQuantity)}
+                            >
+                                remove
+                            </button>
+                            <button
+                                className="material-symbols-outlined"
+                                disabled={!canIncreaseQuantity}
+                                onClick={onIncreaseQuantity}
+                                title={getIncreaseTitle(readOnly, canIncreaseQuantity)}
+                            >
+                                add
+                            </button>
+                            <button
+                                className="material-symbols-outlined"
+                                onClick={onEdit}
+                                disabled={isEffectivelyReadOnly}
+                                title={isEffectivelyReadOnly ? (item.isAvailable ? READONLY_TITLE : 'Item is no longer available') : 'Edit this item'}
+                            >
+                                edit
+                            </button>
+                        </div>
+                    )
+                }
             </td>
             <td className="quantity">
                 {item.quantity}x
@@ -142,3 +149,4 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
         </tr>
     );
 };
+export default CartItemRow;

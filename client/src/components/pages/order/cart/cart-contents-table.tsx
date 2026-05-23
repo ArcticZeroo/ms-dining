@@ -11,7 +11,7 @@ import { getViewName } from '../../../../util/cafe.ts';
 import { getViewMenuUrl } from '../../../../util/link.ts';
 import { sortViews } from '../../../../util/sorting.ts';
 import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
-import { CartItemRow } from './cart-item-row.tsx';
+import CartItemRow from './cart-item-row.tsx';
 import './cart-contents-table.css';
 
 interface ICartContentsTableProps {
