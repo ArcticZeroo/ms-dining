@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CartClient } from '../../api/cart.ts';
 import { useServerCartStore } from '../zustand/server-cart.ts';
 import type { ICartItemData, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
+import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { useCallback } from 'react';
 import { useDebouncedCallback } from '../../hooks/debounce.ts';
 
@@ -45,7 +46,22 @@ export const useAddToCartMutation = () => {
     const onSuccess = useSyncOnSuccess();
 
     return useMutation({
-        mutationFn: (item: ICartItemData) => CartClient.addItem(item),
+        mutationFn: ({ item }: { item: ICartItemData; menuItem: IMenuItemBase }) =>
+            CartClient.addItem(item),
+        onMutate: ({ item, menuItem }) => {
+            const now = new Date().toISOString();
+            useServerCartStore.getState().optimisticAddItem({
+                id:                  `pending-${Date.now()}`,
+                menuItemId:          item.menuItemId,
+                quantity:            item.quantity,
+                specialInstructions: item.specialInstructions ?? null,
+                modifiers:           item.modifiers,
+                createdAt:           now,
+                updatedAt:           now,
+                menuItem,
+                isAvailable:         true,
+            });
+        },
         onSuccess,
     });
 };

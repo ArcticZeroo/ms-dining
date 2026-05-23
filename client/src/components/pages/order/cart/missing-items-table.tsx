@@ -1,4 +1,4 @@
-import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../../../constants/settings.ts';

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { IRguestCardInfo } from '@msdining/common/dist/models/cart.js';
+import { IRguestCardInfo } from '@msdining/common/models/cart';
 import { z } from 'zod';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';

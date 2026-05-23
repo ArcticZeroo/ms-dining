@@ -119,7 +119,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
             updateCartItem.flush();
             onUpdated?.(update);
         } else {
-            addToCart.mutate(itemData);
+            addToCart.mutate({ item: itemData, menuItem });
         }
 
         closeModal(modalSymbol);

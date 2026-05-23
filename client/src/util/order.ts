@@ -1,6 +1,16 @@
 import { formatTimeToHoursMinutes } from './date.js';
 
 /**
+ * Format a wait time range as a human-readable string.
+ */
+export const formatWaitTime = (minMinutes: number, maxMinutes: number): string => {
+    if (minMinutes === maxMinutes) {
+        return `${minMinutes} minute${minMinutes === 1 ? '' : 's'}`;
+    }
+    return `${minMinutes} - ${maxMinutes} minutes`;
+};
+
+/**
  * Compute estimated ready time from a completion time + wait time range.
  */
 export const getEstimatedReadyTime = (

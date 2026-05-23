@@ -307,6 +307,12 @@ export abstract class OrderStorageClient {
             waitTimeMin:            order.waitTimeMin,
             waitTimeMax:            order.waitTimeMax,
             completedAt:            order.completedAt,
+            items:                  order.items.map(item => ({
+                name:                item.name,
+                quantity:            item.quantity,
+                price:               item.price,
+                specialInstructions: item.specialInstructions,
+            })),
         }));
     }
 }

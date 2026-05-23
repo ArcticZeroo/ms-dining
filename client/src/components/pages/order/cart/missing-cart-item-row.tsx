@@ -1,4 +1,4 @@
-import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React from 'react';
 import { useRemoveCartItemMutation } from '../../../../store/queries/server-cart.ts';
 

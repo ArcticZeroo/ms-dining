@@ -1,5 +1,5 @@
-import type { IMenuItemModifier } from '@msdining/common/dist/models/cafe.js';
-import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
+import type { IMenuItemModifier } from '@msdining/common/models/cafe';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React from 'react';
 
 const getModifierNameDisplay = (modifier: IMenuItemModifier) => {

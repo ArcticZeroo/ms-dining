@@ -31,6 +31,15 @@ export const CompleteOrderResultSchema = z.object({
 export type ICompleteOrderResultDTO = z.input<typeof CompleteOrderResultSchema>;
 export type ICompleteOrderResult = z.infer<typeof CompleteOrderResultSchema>;
 
+export const CafeOrderItemSummarySchema = z.object({
+    name:                z.string(),
+    quantity:            z.number().int(),
+    price:               z.number(),
+    specialInstructions: z.string().nullish().transform(val => val ?? null),
+});
+
+export type ICafeOrderItemSummary = z.infer<typeof CafeOrderItemSummarySchema>;
+
 export const CafeOrderSummarySchema = z.object({
     id:                     z.string(),
     cafeId:                 z.string(),
@@ -41,6 +50,7 @@ export const CafeOrderSummarySchema = z.object({
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
     completedAt:            z.string().transform(s => new Date(s)),
+    items:                  z.array(CafeOrderItemSummarySchema),
 });
 
 export type ICafeOrderSummaryDTO = z.input<typeof CafeOrderSummarySchema>;

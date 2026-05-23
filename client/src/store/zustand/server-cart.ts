@@ -14,17 +14,26 @@ import { useMemo } from 'react';
 
 interface IServerCartStore {
     items: ICartItemRecord[];
+    pendingAddCount: number;
 
     setFromServerResponse(response: ICartResponse): void;
+    optimisticAddItem(item: ICartItemRecord): void;
     optimisticUpdateItem(itemId: string, update: ICartItemUpdate): void;
     optimisticRemoveItem(itemId: string): void;
 }
 
 export const useServerCartStore = create<IServerCartStore>()(mutative((set) => ({
     items: [],
+    pendingAddCount: 0,
 
     setFromServerResponse: (response) => set((state) => {
         state.items = response.items;
+        state.pendingAddCount = Math.max(0, state.pendingAddCount - 1);
+    }),
+
+    optimisticAddItem: (item) => set((state) => {
+        state.items.push(item);
+        state.pendingAddCount++;
     }),
 
     optimisticUpdateItem: (itemId, update) => set((state) => {
