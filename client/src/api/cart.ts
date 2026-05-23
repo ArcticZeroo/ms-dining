@@ -1,13 +1,21 @@
 import type { ICartItemData, ICartItemUpdate, ICartResponse, } from '@msdining/common/models/cart';
 import { CartResponseSchema } from '@msdining/common/models/cart';
 import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
+import { DebugSettings } from '../constants/settings.js';
 
 const CART_BASE = '/api/dining/cart';
 
 // CartResponseSchema includes a zod transform that converts the wire-format
 // IMenuItemDTO into the in-memory IMenuItemBase (string[] → Set, epoch → Date).
-const fetchCart = (path: string, options?: RequestInit): Promise<ICartResponse> =>
-    makeJsonRequestWithSchema({ path, schema: CartResponseSchema, options });
+const fetchCart = async (path: string, options?: RequestInit): Promise<ICartResponse> => {
+    const cart = await makeJsonRequestWithSchema({ path, schema: CartResponseSchema, options });
+    if (DebugSettings.forceAllowOnlineOrdering.value) {
+        for (const item of cart.items) {
+            item.isAvailable = true;
+        }
+    }
+    return cart;
+}
 
 export abstract class CartClient {
     static async getCart(): Promise<ICartResponse> {

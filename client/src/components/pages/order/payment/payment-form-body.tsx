@@ -11,6 +11,14 @@ interface IPaymentFormBodyProps {
     onPaymentSuccess: (result: IPaymentSuccessResult) => void;
 }
 
+const isAllowedMessageOrigin = (origin: string) => {
+    if (origin === 'https://pay.rguest.com') {
+        return true;
+    }
+
+    return window.location.hostname === 'localhost' && window.location.origin === origin;
+}
+
 export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
     iframeUrl,
     onPaymentCancelled,
@@ -20,13 +28,13 @@ export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
     const [error, setError] = useState<string | null>(null);
 
     const onFrameMessage = useCallback((event: MessageEvent) => {
-        if (event.origin !== 'https://pay.rguest.com' && event.origin !== window.location.origin) {
+        if (!isAllowedMessageOrigin(event.origin)) {
             return;
         }
 
         const result = parseFrameMessage(event.data);
         if (result.type === 'unknown') {
-            console.warn('Unknown postMessage from payment iframe:', event.data);
+            console.warn('Unknown postMessage from payment iframe:', event);
             return;
         }
 
@@ -53,20 +61,20 @@ export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
     return (
         <>
             {error && (
-                <div className="payment-error">
+                <div className="card error">
                     <div>{error}</div>
                     <button className="default-container" onClick={() => setError(null)}>
                         Dismiss
                     </button>
                 </div>
             )}
+            {isLoading && (
+                <div className="flex flex-center">
+                    <HourglassLoadingSpinner/>
+                    <span>Loading payment form...</span>
+                </div>
+            )}
             <div className="iframe-container default-container">
-                {isLoading && (
-                    <div className="iframe-loading">
-                        <HourglassLoadingSpinner/>
-                        <span>Loading payment form...</span>
-                    </div>
-                )}
                 <GenericIFrame
                     src={iframeUrl}
                     title="Payment Form"
