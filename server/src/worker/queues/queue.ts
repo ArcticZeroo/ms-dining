@@ -32,7 +32,7 @@ export abstract class WorkerQueue<TKey, TValue> {
 
     #logStatus() {
         if (this.#keysInOrder.length === 0) {
-            this.#logger.debug('Queue is empty');
+            // this.#logger.debug('Queue is empty');
             return;
         }
 

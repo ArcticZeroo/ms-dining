@@ -1,4 +1,5 @@
 import Router from '@koa/router';
+import { z } from 'zod';
 import { CartItemDataSchema, CartItemUpdateSchema } from '@msdining/common/models/cart';
 import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
@@ -19,11 +20,11 @@ export const registerCartRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(serializeCartResponse(cart));
     });
 
-    // POST /cart/items — add item to cart
+    // POST /cart/items — add item(s) to cart
     router.post('/items', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const item = CartItemDataSchema.parse(ctx.request.body);
-        const cart = await getServices().data.cart.addItem({ userId, item });
+        const items = z.array(CartItemDataSchema).parse(ctx.request.body);
+        const cart = await getServices().data.cart.addItems({ userId, items });
         ctx.body = jsonStringifyWithoutNull(serializeCartResponse(cart));
     });
 

@@ -22,11 +22,11 @@ export abstract class CartClient {
         return fetchCart(CART_BASE);
     }
 
-    static async addItem(item: ICartItemData): Promise<ICartResponse> {
+    static async addItems(items: ICartItemData[]): Promise<ICartResponse> {
         return fetchCart(`${CART_BASE}/items`, {
             method:  'POST',
             headers: JSON_HEADERS,
-            body:    JSON.stringify(item),
+            body:    JSON.stringify(items),
         });
     }
 

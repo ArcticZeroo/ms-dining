@@ -6,6 +6,7 @@ import { getViewName } from '../../../../util/cafe.ts';
 import { getViewMenuUrlDirect } from '../../../../util/link.ts';
 import { formatEstimatedReadyTime } from '../../../../util/order.ts';
 import { formatTimeToHoursMinutes } from '../../../../util/date.js';
+import { useReorder } from '../../../../hooks/reorder.ts';
 import { CompletedOrderItemsTable } from './completed-order-items-table.tsx';
 
 interface ICompletedOrdersListProps {
@@ -14,6 +15,7 @@ interface ICompletedOrdersListProps {
 
 export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders }) => {
     const { viewsById } = useContext(ApplicationContext);
+    const { reorder, isPending } = useReorder();
 
     if (orders.length === 0) {
         return (
@@ -23,33 +25,61 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
         );
     }
 
-    return (
-        <div className="flex flex-center flex-wrap">
-            {orders.map((order) => {
-                const view = viewsById.get(order.cafeId);
-                const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
+    const allItems = orders.flatMap(order => order.items);
 
-                return (
-                    <div key={order.id} className="card dark-blue">
-                        <div className="title">
+    return (
+        <>
+            {
+                allItems.length > 0 && (
+                    <div className="centered-content">
+                        <button
+                            className="default-container default-button"
+                            disabled={isPending}
+                            onClick={() => reorder(allItems)}
+                        >
+                            Reorder All
+                        </button>
+                    </div>
+                )
+            }
+            <div className="flex flex-center flex-wrap">
+                {orders.map((order) => {
+                    const view = viewsById.get(order.cafeId);
+                    const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
+
+                    return (
+                        <div key={order.id} className="card dark-blue">
+                            <div className="title">
+                                {
+                                    view != null
+                                        ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
+                                        : cafeName
+                                }
+                            </div>
+                            <div>Order #{order.buyOnDemandOrderNumber}</div>
+                            <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
+                            <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
+                            <CompletedOrderItemsTable
+                                items={order.items}
+                                subtotal={order.subtotal}
+                                tax={order.tax}
+                                total={order.total}
+                            />
                             {
-                                view != null
-                                    ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
-                                    : cafeName
+                                order.items.length > 0 && (
+                                    <button
+                                        className="default-container default-button"
+                                        disabled={isPending}
+                                        onClick={() => reorder(order.items)}
+                                    >
+                                        Reorder
+                                    </button>
+                                )
                             }
                         </div>
-                        <div>Order #{order.buyOnDemandOrderNumber}</div>
-                        <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
-                        <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
-                        <CompletedOrderItemsTable
-                            items={order.items}
-                            subtotal={order.subtotal}
-                            tax={order.tax}
-                            total={order.total}
-                        />
-                    </div>
-                );
-            })}
-        </div>
+                    );
+                })}
+            </div>
+        </>
     );
 };

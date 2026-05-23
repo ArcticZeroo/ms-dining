@@ -14,7 +14,7 @@ import type {
 
 export interface ICartService {
     getCart(data: { userId: string }): Promise<ICartResponse>;
-    addItem(data: { userId: string; item: ICartItemData }): Promise<ICartResponse>;
+    addItems(data: { userId: string; items: ICartItemData[] }): Promise<ICartResponse>;
     updateItem(data: { userId: string; itemId: string; update: ICartItemUpdate }): Promise<ICartResponse>;
     removeItem(data: { userId: string; itemId: string }): Promise<ICartResponse>;
     clearCart(data: { userId: string }): Promise<ICartResponse>;

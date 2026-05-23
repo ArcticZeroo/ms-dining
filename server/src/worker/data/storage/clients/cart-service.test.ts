@@ -72,16 +72,16 @@ test('getCart returns empty cart for new user', async () => {
     assert.deepEqual(cart.items, []);
 });
 
-test('addItem + getCart round-trip with normalized modifiers', async () => {
+test('addItems + getCart round-trip with normalized modifiers', async () => {
     ctx.installServices();
 
-    const result = await getServices().data.cart.addItem({
+    const result = await getServices().data.cart.addItems({
         userId: USER_ID,
-        item: {
+        items: [{
             menuItemId: MENU_ITEM_ID,
             quantity:   2,
             modifiers:  [{ modifierId: 'mod-1', choiceIds: ['choice-a', 'choice-b'] }],
-        },
+        }],
     });
 
     assert.equal(result.items.length, 1);
@@ -97,17 +97,17 @@ test('addItem + getCart round-trip with normalized modifiers', async () => {
     assert.equal(fetched.items[0]!.id, item.id);
 });
 
-test('addItem with specialInstructions', async () => {
+test('addItems with specialInstructions', async () => {
     ctx.installServices();
 
-    const result = await getServices().data.cart.addItem({
+    const result = await getServices().data.cart.addItems({
         userId: USER_ID,
-        item: {
+        items: [{
             menuItemId:          MENU_ITEM_ID_2,
             quantity:            1,
             specialInstructions: 'No onions please',
             modifiers:           [],
-        },
+        }],
     });
 
     const added = result.items.find(i => i.menuItemId === MENU_ITEM_ID_2);
@@ -118,13 +118,13 @@ test('addItem with specialInstructions', async () => {
 test('updateItem changes quantity, instructions, and modifiers', async () => {
     ctx.installServices();
 
-    const beforeUpdate = await getServices().data.cart.addItem({
+    const beforeUpdate = await getServices().data.cart.addItems({
         userId: USER_ID,
-        item: {
+        items: [{
             menuItemId: MENU_ITEM_ID,
             quantity:   1,
             modifiers:  [{ modifierId: 'mod-old', choiceIds: ['a'] }],
-        },
+        }],
     });
 
     const target = beforeUpdate.items[beforeUpdate.items.length - 1]!;
@@ -162,9 +162,9 @@ test('updateItem rejects missing item', async () => {
 test('removeItem deletes one item and returns remaining cart', async () => {
     ctx.installServices();
 
-    const result = await getServices().data.cart.addItem({
+    const result = await getServices().data.cart.addItems({
         userId: USER_ID,
-        item: { menuItemId: MENU_ITEM_ID_2, quantity: 1, modifiers: [] },
+        items: [{ menuItemId: MENU_ITEM_ID_2, quantity: 1, modifiers: [] }],
     });
     const target = result.items[result.items.length - 1]!;
 
@@ -184,9 +184,9 @@ test('removeItem rejects missing item', async () => {
 test('clearCart removes all items', async () => {
     ctx.installServices();
 
-    await getServices().data.cart.addItem({
+    await getServices().data.cart.addItems({
         userId: USER_ID,
-        item: { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] },
+        items: [{ menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] }],
     });
 
     const result = await getServices().data.cart.clearCart({ userId: USER_ID });
@@ -196,9 +196,9 @@ test('clearCart removes all items', async () => {
 test('cart mutations remain available without active-order locking', async () => {
     ctx.installServices();
 
-    const added = await getServices().data.cart.addItem({
+    const added = await getServices().data.cart.addItems({
         userId: USER_ID,
-        item: { menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] },
+        items: [{ menuItemId: MENU_ITEM_ID, quantity: 1, modifiers: [] }],
     });
     const target = added.items[0]!;
 

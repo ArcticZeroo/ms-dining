@@ -163,17 +163,19 @@ export abstract class CartStorageClient {
         return this.useCartTransaction(userId, async () => {});
     }
 
-    static async addItem(userId: string, item: ICartItemData) {
+    static async addItems(userId: string, items: ICartItemData[]) {
         return this.useCartTransaction(userId, async (tx, cart) => {
-            const created = await tx.cartItem.create({
-                data: {
-                    cartUserId:          cart.userId,
-                    menuItemId:          item.menuItemId,
-                    quantity:            item.quantity,
-                    specialInstructions: item.specialInstructions ?? null,
-                },
-            });
-            await this.createModifierChoices(tx, created.id, item.modifiers);
+            for (const item of items) {
+                const created = await tx.cartItem.create({
+                    data: {
+                        cartUserId:          cart.userId,
+                        menuItemId:          item.menuItemId,
+                        quantity:            item.quantity,
+                        specialInstructions: item.specialInstructions ?? null,
+                    },
+                });
+                await this.createModifierChoices(tx, created.id, item.modifiers);
+            }
         });
     }
 
@@ -215,8 +217,8 @@ export abstract class CartStorageClient {
 export const cartServiceCommands = {
     getCart: async ({ userId }: { userId: string }) =>
         CartStorageClient.getCart(userId),
-    addItem: async ({ userId, item }: { userId: string; item: ICartItemData }) =>
-        CartStorageClient.addItem(userId, item),
+    addItems: async ({ userId, items }: { userId: string; items: ICartItemData[] }) =>
+        CartStorageClient.addItems(userId, items),
     updateItem: async ({ userId, itemId, update }: { userId: string; itemId: string; update: ICartItemUpdate }) =>
         CartStorageClient.updateItem(userId, itemId, update),
     removeItem: async ({ userId, itemId }: { userId: string; itemId: string }) =>

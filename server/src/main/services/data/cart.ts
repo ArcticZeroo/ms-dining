@@ -4,8 +4,8 @@ import { dataHandler } from './handler.js';
 export const cartService: ICartService = {
     getCart: (data) =>
         dataHandler.sendRequest('cart', 'getCart', data),
-    addItem: (data) =>
-        dataHandler.sendRequest('cart', 'addItem', data),
+    addItems: (data) =>
+        dataHandler.sendRequest('cart', 'addItems', data),
     updateItem: (data) =>
         dataHandler.sendRequest('cart', 'updateItem', data),
     removeItem: (data) =>

@@ -51,7 +51,7 @@ export const useAddToCartMutation = () => {
 
     return useMutation({
         mutationFn: ({ item }: { item: ICartItemData; menuItem: IMenuItemBase }) =>
-            CartClient.addItem(item),
+            CartClient.addItems([item]),
         onMutate: ({ item, menuItem }) => {
             const now = new Date().toISOString();
             useServerCartStore.getState().optimisticAddItem({
@@ -67,6 +67,19 @@ export const useAddToCartMutation = () => {
                 isPending:           true,
             });
         },
+        onSuccess,
+    });
+};
+
+/**
+ * Add multiple items to the cart at once (e.g. reorder).
+ * No optimistic update — the server response replaces the store.
+ */
+export const useAddItemsToCartMutation = () => {
+    const onSuccess = useSyncOnSuccess();
+
+    return useMutation({
+        mutationFn: (items: ICartItemData[]) => CartClient.addItems(items),
         onSuccess,
     });
 };
