@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 import { useClickTracker } from '../../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
@@ -98,8 +98,9 @@ const CartPopupBody = () => {
 
 export const CartPopup = () => {
     const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
+    const location = useLocation();
 
-    if (!isOnlineOrderingAllowed) {
+    if (!isOnlineOrderingAllowed || location.pathname === '/order') {
         return;
     }
 

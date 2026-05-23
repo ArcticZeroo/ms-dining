@@ -2,7 +2,6 @@ import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { getAllSingleCafesInView, getViewLocation } from '../../util/view.ts';
-import { CartPopup } from '../pages/order/cart/cart-popup.tsx';
 import { MenuSettings } from '../settings/menu-settings.tsx';
 import { CafeMenuView } from './cafe-menu-view.tsx';
 import { NextCafeSuggestions } from './next-cafe-suggestions.tsx';
@@ -47,7 +46,6 @@ export const CombinedCafeMenuList: React.FC<ICombinedCafeMenuListProps> = ({
             </div>
             <NextCafeSuggestions excludeViews={views} locations={viewLocations}/>
             <MenuSettings/>
-            <CartPopup/>
         </>
     );
 };
