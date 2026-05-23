@@ -1,9 +1,11 @@
 import React, { useContext, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { type ISnapshotCallbacks, useCartItemActions } from '../../../../hooks/cart-item-actions.tsx';
 import { useCafePaymentFlow } from '../../../../hooks/cafe-payment-flow.tsx';
 import { calculatePrice } from '../../../../util/cart.ts';
 import { getViewName } from '../../../../util/cafe.ts';
+import { getViewMenuUrlDirect } from '../../../../util/link.ts';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import { OrderCafeItemsTable } from './order-cafe-items-table.tsx';
 import { OrderCafeFooter } from './order-cafe-footer.tsx';
@@ -55,7 +57,13 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
 
     return (
         <div className={classNames('card', hasUnavailableItems && 'error')}>
-            <div className="title">{cafeName}</div>
+            <div className="title">
+                {
+                    view != null
+                        ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
+                        : cafeName
+                }
+            </div>
             <OrderCafeItemsTable
                 items={items}
                 readOnly={isCompleted}
