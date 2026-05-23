@@ -25,22 +25,23 @@ export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item,
             </td>
             <td className="name">
                 {
-                    showFullDetails
-                        ? (
-                            <div className="full-details">
-                                <span>
-                                    {item.menuItem.name}
-                                </span>
-                                {!item.isAvailable && <span className="cart-item-unavailable">Unavailable</span>}
-                                <CartItemModifiers item={item}/>
-                            </div>
-                        )
-                        : (
-                            <>
+                    showFullDetails && (
+                        <div className="full-details">
+                            <span>
                                 {item.menuItem.name}
-                                {!item.isAvailable && <span className="cart-item-unavailable"> (Unavailable)</span>}
-                            </>
-                        )
+                            </span>
+                            {!item.isAvailable && <span className="cart-item-unavailable">Unavailable</span>}
+                            <CartItemModifiers item={item}/>
+                        </div>
+                    )
+                }
+                {
+                    !showFullDetails && (
+                        <>
+                            {item.menuItem.name}
+                            {!item.isAvailable && <span className="cart-item-unavailable"> (Unavailable)</span>}
+                        </>
+                    )
                 }
             </td>
             <td className="price">
