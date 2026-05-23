@@ -15,6 +15,10 @@ interface ICartItemModifiersProps {
 }
 
 export const CartItemModifiers: React.FC<ICartItemModifiersProps> = ({ item }) => {
+    if (item.modifiers.length === 0 && !item.specialInstructions) {
+        return null;
+    }
+
     const modifiers = item.menuItem.modifiers;
     const modifiersById = new Map(modifiers.map(modifier => [modifier.id, modifier]));
 
