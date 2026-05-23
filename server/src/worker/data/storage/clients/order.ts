@@ -1,8 +1,10 @@
 import { createHash } from 'node:crypto';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
+import { MenuItemStorageClient } from './menu-item.js';
 import type { ISerializedModifier } from '@msdining/common/models/cart';
-import type { ICafeOrder, IOrderItem } from '@msdining/common/models/order';
+import type { ICafeOrderDTO, IOrderItem } from '@msdining/common/models/order';
+import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 
 const ORDER_ITEMS_INCLUDE = {
     items: {
@@ -279,7 +281,7 @@ export abstract class OrderStorageClient {
         });
     }
 
-    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrder[]> {
+    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderDTO[]> {
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(startOfDay);
@@ -297,6 +299,15 @@ export abstract class OrderStorageClient {
             orderBy: { completedAt: 'desc' },
         }));
 
+        // Collect all unique menu item IDs across all orders for enrichment
+        const allMenuItemIds = [...new Set(orders.flatMap(o => o.items.map(i => i.menuItemId)))];
+        const menuItemResults = await Promise.all(
+            allMenuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
+        );
+        const menuItemsById = new Map(
+            allMenuItemIds.map((id, i) => [id, menuItemResults[i]] as const).filter(([, v]) => v != null),
+        );
+
         return orders.map(order => ({
             id:                     order.id,
             cafeId:                 order.cafeId,
@@ -306,8 +317,13 @@ export abstract class OrderStorageClient {
             total:                  order.total,
             waitTimeMin:            order.waitTimeMin,
             waitTimeMax:            order.waitTimeMax,
-            completedAt:            order.completedAt,
-            items:                  order.items.map(item => {
+            completedAt:            order.completedAt.toISOString(),
+            items:                  order.items.flatMap(item => {
+                const menuItem = menuItemsById.get(item.menuItemId);
+                if (!menuItem) {
+                    return [];
+                }
+
                 const modifierMap = new Map<string, string[]>();
                 for (const mod of item.modifiers) {
                     const existing = modifierMap.get(mod.modifierId);
@@ -318,9 +334,8 @@ export abstract class OrderStorageClient {
                     }
                 }
 
-                return {
+                return [{
                     menuItemId:          item.menuItemId,
-                    name:                item.name,
                     quantity:            item.quantity,
                     price:               item.price,
                     specialInstructions: item.specialInstructions,
@@ -328,7 +343,13 @@ export abstract class OrderStorageClient {
                         modifierId,
                         choiceIds,
                     })),
-                };
+                    menuItem:            {
+                        ...menuItemBaseToDTO(menuItem),
+                        totalReviewCount: 0,
+                        overallRating:    0,
+                        firstAppearance:  '',
+                    },
+                }];
             }),
         }));
     }

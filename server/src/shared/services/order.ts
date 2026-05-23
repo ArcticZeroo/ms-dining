@@ -1,6 +1,6 @@
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
-    ICafeOrder,
+    ICafeOrderDTO,
     ICompleteOrderResultDTO,
     IOrderItem,
     IPreparePaymentResult,
@@ -25,5 +25,5 @@ export interface IOrderService {
 
     getCompletedOrdersToday(data: {
         userId: string;
-    }): Promise<ICafeOrder[]>;
+    }): Promise<ICafeOrderDTO[]>;
 }

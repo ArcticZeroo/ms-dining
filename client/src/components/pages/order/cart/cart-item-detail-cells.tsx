@@ -1,4 +1,5 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ISerializedModifier } from '@msdining/common/models/cart';
+import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import React, { useContext, useMemo } from 'react';
@@ -8,22 +9,32 @@ import { formatPrice } from '../../../../util/cart.ts';
 import { useCartItemPrice } from '../../../../hooks/cart.ts';
 import { getSearchAnchorId, getViewMenuUrlDirect } from '../../../../util/link.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
-import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
+
+export interface IDisplayableItem {
+    menuItemId: string;
+    menuItem: IMenuItemBase;
+    quantity: number;
+    modifiers: ISerializedModifier[];
+    specialInstructions?: string | null;
+    isAvailable?: boolean;
+}
 
 interface ICartItemDetailCellsProps {
-    item: ICartItemRecord;
+    item: IDisplayableItem;
 }
 
 /**
- * Shared table cells for a cart item row: quantity, name (with optional
+ * Shared table cells for an item row: quantity, name (with optional
  * modifiers/instructions/unavailable badge), and price.
+ *
+ * Works with both cart items and completed order items — anything
+ * that satisfies IDisplayableItem.
  *
  * Does not include the first column (controls) — that varies by context.
  */
 export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item }) => {
     const { viewsById } = useContext(ApplicationContext);
     const price = useCartItemPrice(item);
-    const cartHasAnyAvailableItems = useServerCartHasAvailableItems();
 
     const itemUrl = useMemo(() => {
         const view = viewsById.get(item.menuItem.cafeId);
@@ -50,7 +61,7 @@ export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item 
                             ? <Link to={itemUrl}>{item.menuItem.name}</Link>
                             : <span>{item.menuItem.name}</span>
                     }
-                    {!item.isAvailable && cartHasAnyAvailableItems && <span className="cart-item-unavailable">Unavailable</span>}
+                    {item.isAvailable === false && <span className="cart-item-unavailable">Unavailable</span>}
                     <CartItemModifiers item={item}/>
                 </div>
             </td>

@@ -1,6 +1,6 @@
 import type { IMenuItemModifier } from '@msdining/common/models/cafe';
-import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React from 'react';
+import type { IDisplayableItem } from './cart-item-detail-cells.tsx';
 
 const getModifierNameDisplay = (modifier: IMenuItemModifier) => {
     if (modifier.description.endsWith(':')) {
@@ -11,7 +11,7 @@ const getModifierNameDisplay = (modifier: IMenuItemModifier) => {
 };
 
 interface ICartItemModifiersProps {
-    item: ICartItemRecord;
+    item: IDisplayableItem;
 }
 
 export const CartItemModifiers: React.FC<ICartItemModifiersProps> = ({ item }) => {

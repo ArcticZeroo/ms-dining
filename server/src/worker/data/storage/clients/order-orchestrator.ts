@@ -12,7 +12,7 @@ import { LockedExpiringMap } from '../../../../shared/lock/map.js';
 import type { ICartItem, IPaymentCardInfo, ISerializedModifier } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
-    ICafeOrder,
+    ICafeOrderDTO,
     ICompleteOrderResultDTO,
     IOrderItem,
     IPreparePaymentResult,
@@ -293,7 +293,7 @@ export abstract class OrderOrchestrator {
         return completionResult!;
     }
 
-    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrder[]> {
+    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderDTO[]> {
         return OrderStorageClient.getCompletedOrdersToday(userId);
     }
 }

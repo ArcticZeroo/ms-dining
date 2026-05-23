@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SerializedModifierSchema } from './cart.js';
+import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
 
 export const OrderItemSchema = z.object({
     menuItemId:          z.string().min(1),
@@ -33,11 +34,11 @@ export type ICompleteOrderResult = z.infer<typeof CompleteOrderResultSchema>;
 
 export const CafeOrderItemSchema = z.object({
     menuItemId:          z.string(),
-    name:                z.string(),
     quantity:            z.number().int(),
     price:               z.number(),
     specialInstructions: z.string().nullish().transform(val => val ?? null),
     modifiers:           z.array(SerializedModifierSchema).default([]),
+    menuItem:            MenuItemBaseSchema,
 });
 
 export type ICafeOrderItem = z.infer<typeof CafeOrderItemSchema>;

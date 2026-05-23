@@ -1,6 +1,7 @@
 import type { ICafeOrderItem } from '@msdining/common/models/order';
 import React from 'react';
 import { formatPrice } from '../../../../util/cart.ts';
+import { CartItemDetailCells } from '../cart/cart-item-detail-cells.tsx';
 
 interface ICompletedOrderItemsTableProps {
     items: ICafeOrderItem[];
@@ -19,24 +20,7 @@ export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> 
             <tbody>
                 {items.map((item, i) => (
                     <tr key={i} className="cart-item">
-                        <td className="quantity">
-                            {item.quantity}x
-                        </td>
-                        <td className="name">
-                            <div className="full-details">
-                                <span>{item.name}</span>
-                                {
-                                    item.specialInstructions && (
-                                        <span className="cart-item-special-instructions">
-                                            {item.specialInstructions}
-                                        </span>
-                                    )
-                                }
-                            </div>
-                        </td>
-                        <td className="price">
-                            {formatPrice(item.price * item.quantity)}
-                        </td>
+                        <CartItemDetailCells item={item}/>
                     </tr>
                 ))}
                 <tr>
