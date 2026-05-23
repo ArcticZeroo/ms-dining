@@ -34,25 +34,20 @@ export const MissingItemsTable = () => {
                     Array.from(unavailableItemsByCafe.entries())
                         .map(([cafeId, items]) => {
                             const view = viewsById.get(cafeId);
+                            if (!view) {
+                                return null;
+                            }
 
                             return (
                                 <React.Fragment key={cafeId}>
                                     <tr>
                                         <th colSpan={4}>
-                                            {
-                                                view && (
-                                                    <Link to={getViewMenuUrl({ viewsById, view, shouldUseGroups })}
-                                                        className="cart-cafe-url">
-                                                        {getViewName({
-                                                            view,
-                                                            showGroupName: true
-                                                        })}
-                                                    </Link>
-                                                )
-                                            }
-                                            {
-                                                !view && `Unknown Cafe (${cafeId})`
-                                            }
+                                            <Link to={getViewMenuUrl({ viewsById, view, shouldUseGroups })} className="cart-cafe-url">
+                                                {getViewName({
+                                                    view,
+                                                    showGroupName: true
+                                                })}
+                                            </Link>
                                         </th>
                                     </tr>
                                     {

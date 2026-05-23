@@ -4,13 +4,10 @@ import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 import { useClickTracker } from '../../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
 import { useCartQuery } from '../../../../store/queries/server-cart.ts';
-import {
-    useServerCartHasUnavailableItems,
-    useServerCartItemCount,
-} from '../../../../store/zustand/server-cart.ts';
+import { useServerCartHasUnavailableItems, useServerCartItemCount, } from '../../../../store/zustand/server-cart.ts';
 import { classNames } from '../../../../util/react.ts';
 import { CartContentsTable } from './cart-contents-table.tsx';
-import { CartHydrationView } from './cart-hydration-view.tsx';
+import { CartUnavailableItemsView } from './cart-unavailable-items-view.tsx';
 
 import './cart-popup.css';
 
@@ -84,7 +81,7 @@ const CartPopupBody = () => {
                     )
                 }
                 {
-                    totalItemCount > 0 && (
+                    !hasUnavailableItems && (
                         <>
                             <CartContentsTable showFullDetails={true}/>
                             <Link to="/order" className="checkout-button">
@@ -93,7 +90,7 @@ const CartPopupBody = () => {
                         </>
                     )
                 }
-                <CartHydrationView/>
+                <CartUnavailableItemsView/>
             </div>
         </div>
     );

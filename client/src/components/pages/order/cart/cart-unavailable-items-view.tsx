@@ -3,7 +3,7 @@ import { MissingItemsTable } from './missing-items-table.tsx';
 
 import './cart-hydration-view.css';
 
-export const CartHydrationView = () => {
+export const CartUnavailableItemsView = () => {
     const unavailableItems = useServerCartUnavailableItems();
 
     if (unavailableItems.length === 0) {
