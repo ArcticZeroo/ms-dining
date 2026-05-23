@@ -8,6 +8,7 @@ import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.ts
 import { OrderCafeCard } from './payment/order-cafe-card.tsx';
 import { PaymentInfoForm } from './payment/payment-info-form.tsx';
 import { CompletedOrdersView } from './completed-orders-view.js';
+import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 
 import './order-page.css';
 
@@ -65,18 +66,18 @@ export const OrderPageBody = () => {
                 onAliasChanged={setAlias}
                 onPhoneNumberChanged={setPhoneNumber}
             />
-            <div className="flex-col">
-                {snapshot.groupedItems.map((group) => (
-                    <OrderCafeCard
-                        key={group.cafeId}
-                        cafeId={group.cafeId}
-                        items={group.items}
-                        paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
-                        isIdentityValid={isValid}
-                        snapshotCallbacks={snapshotCallbacks}
-                    />
-                ))}
-            </div>
+            <PaymentIdentityContext.Provider value={{ alias, phoneNumber: validatedPhoneNumber ?? '', isValid }}>
+                <div className="flex-col">
+                    {snapshot.groupedItems.map((group) => (
+                        <OrderCafeCard
+                            key={group.cafeId}
+                            cafeId={group.cafeId}
+                            items={group.items}
+                            snapshotCallbacks={snapshotCallbacks}
+                        />
+                    ))}
+                </div>
+            </PaymentIdentityContext.Provider>
             <div className="centered-content">
                 <Link to="/order/done" className="default-container default-button">
                     View Your Orders From Today

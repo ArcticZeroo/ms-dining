@@ -3,7 +3,7 @@ import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/o
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/new-ordering.ts';
-import type { IPaymentIdentity } from './payment-identity.ts';
+import { usePaymentIdentityContext } from '../context/payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
 import { PaymentFrameModal } from '../components/pages/order/payment/payment-frame-modal.tsx';
 import type { Nullable } from '@msdining/common/models/util';
@@ -20,8 +20,6 @@ const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
 interface IUseCafePaymentFlowParams {
     cafeId: string;
     items: ICartItemRecord[];
-    paymentIdentity: IPaymentIdentity;
-    isIdentityValid: boolean;
 }
 
 export interface ICafePaymentFlowResult {
@@ -50,13 +48,12 @@ const getError = (prepareError: Nullable<Error>, completeError: Nullable<Error>,
 export const useCafePaymentFlow = ({
     cafeId,
     items,
-    paymentIdentity,
-    isIdentityValid,
 }: IUseCafePaymentFlowParams): ICafePaymentFlowResult => {
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
     const preparePayment = usePreparePaymentMutation();
     const completeOrder = useCompleteOrderMutation();
+    const { alias, phoneNumber, isValid: isIdentityValid } = usePaymentIdentityContext();
 
     const isLocalBusy = preparePayment.isPending || completeOrder.isPending;
     const completionResult = completeOrder.data;
@@ -87,8 +84,8 @@ export const useCafePaymentFlow = ({
                             pendingOrderId: prepareResult.pendingOrderId,
                             paymentToken:   paymentResult.token,
                             cardInfo:       paymentResult.cardInfo,
-                            alias:          paymentIdentity.alias,
-                            phoneNumber:    paymentIdentity.phoneNumber,
+                            alias:          alias,
+                            phoneNumber:    phoneNumber,
                         });
                         closePopup();
                     }}
@@ -98,7 +95,7 @@ export const useCafePaymentFlow = ({
         } catch {
             // Error is captured in preparePayment.error
         }
-    }, [cafeId, closePopup, completeOrder, isIdentityValid, isLocalBusy, items, openPopup, paymentIdentity, preparePayment]);
+    }, [cafeId, closePopup, completeOrder, isIdentityValid, isLocalBusy, items, openPopup, alias, phoneNumber, preparePayment]);
 
     return { handlePay, error, completionResult, isLocalBusy };
 };

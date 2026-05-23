@@ -2,12 +2,12 @@ import type { ICompleteOrderResult } from '@msdining/common/models/order';
 import React from 'react';
 import { formatPrice } from '../../../../util/cart.ts';
 import { formatWaitTime } from '../../../../util/order.ts';
+import { usePaymentIdentityContext } from '../../../../context/payment-identity.ts';
 
 interface IOrderCafeFooterProps {
     completionResult: ICompleteOrderResult | undefined;
     totalQuantity: number;
     totalPrice: number;
-    isIdentityValid: boolean;
     isLocalBusy: boolean;
     hasUnavailableItems: boolean;
     onPay: () => void;
@@ -33,11 +33,11 @@ export const OrderCafeFooter: React.FC<IOrderCafeFooterProps> = ({
     completionResult,
     totalQuantity,
     totalPrice,
-    isIdentityValid,
     isLocalBusy,
     hasUnavailableItems,
     onPay,
 }) => {
+    const { isValid: isIdentityValid } = usePaymentIdentityContext();
     if (completionResult != null) {
         return (
             <div className="flex align-center flex-end">
