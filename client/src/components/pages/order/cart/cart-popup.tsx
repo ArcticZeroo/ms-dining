@@ -83,7 +83,7 @@ const CartPopupBody = () => {
                 {
                     !hasUnavailableItems && (
                         <>
-                            <CartContentsTable showFullDetails={true}/>
+                            <CartContentsTable/>
                             <Link to="/order" className="checkout-button">
                                 Checkout
                             </Link>

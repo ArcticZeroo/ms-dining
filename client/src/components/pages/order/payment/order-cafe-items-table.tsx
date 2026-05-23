@@ -26,7 +26,6 @@ export const OrderCafeItemsTable: React.FC<IOrderCafeItemsTableProps> = ({
                 <CartItemRow
                     key={item.id}
                     item={item}
-                    showFullDetails={true}
                     readOnly={readOnly}
                     onRemove={() => onRemove(item)}
                     onEdit={() => onEdit(item)}

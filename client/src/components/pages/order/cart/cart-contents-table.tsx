@@ -15,12 +15,11 @@ import CartItemRow from './cart-item-row.tsx';
 import './cart-contents-table.css';
 
 interface ICartContentsTableProps {
-    showFullDetails?: boolean;
     showTotalPrice?: boolean;
     readOnly?: boolean;
 }
 
-export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullDetails = false, showTotalPrice = false, readOnly = false }) => {
+export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showTotalPrice = false, readOnly = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const cartItemsByCafe = useServerCartItemsByCafe();
@@ -66,7 +65,6 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                         cartItemsByView.get(view)?.map((item) => (
                             <CartItemRow
                                 key={item.id}
-                                showFullDetails={showFullDetails}
                                 readOnly={readOnly}
                                 item={item}
                                 onRemove={() => onRemove(item)}
@@ -78,7 +76,7 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showFullD
                 </React.Fragment>
             ));
         },
-        [cartItemsByView, viewsById, shouldUseGroups, showFullDetails, readOnly, onRemove, onEdit, onChangeQuantity]
+        [cartItemsByView, viewsById, shouldUseGroups, readOnly, onRemove, onEdit, onChangeQuantity]
     );
 
     return (

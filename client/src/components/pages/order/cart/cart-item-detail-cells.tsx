@@ -3,10 +3,10 @@ import React from 'react';
 import { formatPrice } from '../../../../util/cart.ts';
 import { useCartItemPrice } from '../../../../hooks/cart.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
+import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
 
 interface ICartItemDetailCellsProps {
     item: ICartItemRecord;
-    showFullDetails: boolean;
 }
 
 /**
@@ -15,8 +15,10 @@ interface ICartItemDetailCellsProps {
  *
  * Does not include the first column (controls) — that varies by context.
  */
-export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item, showFullDetails }) => {
+export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item }) => {
     const price = useCartItemPrice(item);
+    // Only show 'unavailable' text if there are any items in the cart that ARE available.
+    const cartHasAnyAvailableItems = useServerCartHasAvailableItems();
 
     return (
         <>
@@ -24,25 +26,13 @@ export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item,
                 {item.quantity}x
             </td>
             <td className="name">
-                {
-                    showFullDetails && (
-                        <div className="full-details">
-                            <span>
-                                {item.menuItem.name}
-                            </span>
-                            {!item.isAvailable && <span className="cart-item-unavailable">Unavailable</span>}
-                            <CartItemModifiers item={item}/>
-                        </div>
-                    )
-                }
-                {
-                    !showFullDetails && (
-                        <>
-                            {item.menuItem.name}
-                            {!item.isAvailable && <span className="cart-item-unavailable"> (Unavailable)</span>}
-                        </>
-                    )
-                }
+                <div className="full-details">
+                    <span>
+                        {item.menuItem.name}
+                    </span>
+                    {!item.isAvailable && cartHasAnyAvailableItems && <span className="cart-item-unavailable">Unavailable</span>}
+                    <CartItemModifiers item={item}/>
+                </div>
             </td>
             <td className="price">
                 {formatPrice(price)}

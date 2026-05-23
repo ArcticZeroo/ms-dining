@@ -54,6 +54,10 @@ export const useServerCartItemCount = () => useServerCartStore(state =>
     state.items.reduce((sum, item) => sum + item.quantity, 0),
 );
 
+export const useServerCartHasAvailableItems = () => useServerCartStore(state =>
+    state.items.some(item => item.isAvailable),
+);
+
 export const useServerCartHasUnavailableItems = () => useServerCartStore(state =>
     state.items.some(item => !item.isAvailable),
 );

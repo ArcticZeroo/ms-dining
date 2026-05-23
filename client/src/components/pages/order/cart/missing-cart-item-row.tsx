@@ -32,7 +32,7 @@ export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ item })
                     }
                 </div>
             </td>
-            <CartItemDetailCells item={item} showFullDetails={true}/>
+            <CartItemDetailCells item={item}/>
         </tr>
     );
 };

@@ -30,7 +30,6 @@ const getIncreaseTitle = (readOnly: boolean, canIncrease: boolean) => {
 };
 
 interface ICartItemProps {
-    showFullDetails: boolean;
     readOnly?: boolean;
     item: IDisplayCartItem;
     onRemove: () => void;
@@ -43,7 +42,6 @@ const CartItemRow: React.FC<ICartItemProps> = ({
     onRemove,
     onEdit,
     onChangeQuantity,
-    showFullDetails,
     readOnly = false
 }) => {
     const isPending = item.isPending === true;
@@ -117,7 +115,7 @@ const CartItemRow: React.FC<ICartItemProps> = ({
                     )
                 }
             </td>
-            <CartItemDetailCells item={item} showFullDetails={showFullDetails}/>
+            <CartItemDetailCells item={item}/>
         </tr>
     );
 };
