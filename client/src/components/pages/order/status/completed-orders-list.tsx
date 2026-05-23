@@ -29,19 +29,15 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
 
     return (
         <>
-            {
-                allItems.length > 0 && (
-                    <div className="centered-content">
-                        <button
-                            className="default-container default-button"
-                            disabled={isPending}
-                            onClick={() => reorder(allItems)}
-                        >
-                            Reorder All
-                        </button>
-                    </div>
-                )
-            }
+            <div className="centered-content">
+                <button
+                    className="default-container default-button"
+                    disabled={isPending}
+                    onClick={() => reorder(allItems)}
+                >
+                    Reorder All
+                </button>
+            </div>
             <div className="flex flex-center flex-wrap">
                 {orders.map((order) => {
                     const view = viewsById.get(order.cafeId);
@@ -65,17 +61,13 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                                 tax={order.tax}
                                 total={order.total}
                             />
-                            {
-                                order.items.length > 0 && (
-                                    <button
-                                        className="default-container default-button"
-                                        disabled={isPending}
-                                        onClick={() => reorder(order.items)}
-                                    >
-                                        Reorder
-                                    </button>
-                                )
-                            }
+                            <button
+                                className="default-container default-button"
+                                disabled={isPending}
+                                onClick={() => reorder(order.items)}
+                            >
+                                Reorder
+                            </button>
                         </div>
                     );
                 })}

@@ -11,10 +11,6 @@ interface ICompletedOrderItemsTableProps {
 }
 
 export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> = ({ items, subtotal, tax, total }) => {
-    if (items.length === 0) {
-        return null;
-    }
-
     return (
         <table className="cart-contents">
             <tbody>
