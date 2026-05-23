@@ -6,7 +6,7 @@ import { useIsOnlineOrderingAllowed } from '../../../../../hooks/cafe.ts';
 import { usePopupCloserSymbol } from '../../../../../hooks/popup.ts';
 import {
     useAddToCartMutation,
-    useDebouncedUpdateCartItem,
+    useUpdateCartItemMutation,
 } from '../../../../../store/queries/server-cart.ts';
 import { calculatePrice } from '../../../../../util/cart.ts';
 import { Modal } from '../../../../popup/modal.tsx';
@@ -71,7 +71,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
     const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
 
     const addToCart = useAddToCartMutation();
-    const updateCartItem = useDebouncedUpdateCartItem();
+    const updateCartItem = useUpdateCartItemMutation();
     const closeModal = usePopupCloserSymbol();
 
     const isOnlineOrderingAllowedNow = useIsOnlineOrderingAllowed();
@@ -115,8 +115,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                 specialInstructions: notes || null,
                 modifiers:           itemData.modifiers,
             };
-            updateCartItem.mutate(fromCartItem.id, update);
-            updateCartItem.flush();
+            updateCartItem.mutate({ itemId: fromCartItem.id, update });
             onUpdated?.(update);
         } else {
             addToCart.mutate({ item: itemData, menuItem });

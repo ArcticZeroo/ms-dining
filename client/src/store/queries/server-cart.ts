@@ -8,6 +8,7 @@ import { useDebouncedCallback } from '../../hooks/debounce.ts';
 
 export const CART_QUERY_KEY = ['cart', 'server'] as const;
 
+const CART_UPDATE_MUTATION_KEY = ['cart', 'update-item'] as const;
 const CART_REMOVE_MUTATION_KEY = ['cart', 'remove-item'] as const;
 
 /**
@@ -74,6 +75,9 @@ export const useAddToCartMutation = () => {
  * Update a cart item with debouncing. Optimistically updates the Zustand
  * store immediately so rapid +/- clicks feel responsive. The actual server
  * request fires after 500ms of inactivity, coalescing into a single PATCH.
+ *
+ * Use this for quantity-only changes. For full edits (modifiers,
+ * instructions) from the popup, use useUpdateCartItemMutation instead.
  */
 export const useDebouncedUpdateCartItem = () => {
     const onSuccess = useSyncOnSuccess();
@@ -95,6 +99,23 @@ export const useDebouncedUpdateCartItem = () => {
 };
 
 /**
+ * Update a cart item immediately (no debounce, no optimistic update).
+ * The row goes read-only via useIsCartItemBusy while the request is
+ * in-flight. Use this for full edits from the popup (modifiers,
+ * instructions, quantity).
+ */
+export const useUpdateCartItemMutation = () => {
+    const onSuccess = useSyncOnSuccess();
+
+    return useMutation({
+        mutationKey: CART_UPDATE_MUTATION_KEY,
+        mutationFn:  ({ itemId, update }: { itemId: string; update: ICartItemUpdate }) =>
+            CartClient.updateItem(itemId, update),
+        onSuccess,
+    });
+};
+
+/**
  * Remove an item from the cart. No optimistic removal — the row stays
  * visible in a read-only state until the server confirms deletion.
  */
@@ -109,15 +130,20 @@ export const useRemoveCartItemMutation = () => {
 };
 
 /**
- * Returns true if the given cart item has an in-flight remove mutation.
- * CartItemRow uses this to show a read-only state while deletion is pending.
+ * Returns true if the given cart item has an in-flight tracked mutation
+ * (full edit or remove). CartItemRow uses this to show a read-only state.
+ * Debounced quantity updates are NOT tracked here (they use optimistic UI).
  */
-export const useIsCartItemBeingRemoved = (itemId: string): boolean => {
+export const useIsCartItemBusy = (itemId: string): boolean => {
+    const pendingUpdates = useMutationState({
+        filters: { mutationKey: CART_UPDATE_MUTATION_KEY, status: 'pending' },
+        select:  (mutation) => (mutation.state.variables as { itemId: string } | undefined)?.itemId,
+    });
     const pendingRemoves = useMutationState({
         filters: { mutationKey: CART_REMOVE_MUTATION_KEY, status: 'pending' },
         select:  (mutation) => mutation.state.variables as string | undefined,
     });
-    return pendingRemoves.includes(itemId);
+    return pendingUpdates.includes(itemId) || pendingRemoves.includes(itemId);
 };
 
 /**

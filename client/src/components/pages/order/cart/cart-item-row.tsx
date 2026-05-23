@@ -2,7 +2,7 @@ import React from 'react';
 import { calculatePrice, formatPrice } from '../../../../util/cart.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
 import type { IDisplayCartItem } from '../../../../store/zustand/server-cart.ts';
-import { useIsCartItemBeingRemoved } from '../../../../store/queries/server-cart.ts';
+import { useIsCartItemBusy } from '../../../../store/queries/server-cart.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { classNames } from '../../../../util/react.js';
 
@@ -48,7 +48,7 @@ const CartItemRow: React.FC<ICartItemProps> = ({
     readOnly = false
 }) => {
     const isPending = item.isPending === true;
-    const isBeingRemoved = useIsCartItemBeingRemoved(item.id);
+    const isBeingRemoved = useIsCartItemBusy(item.id);
     const isEffectivelyReadOnly = readOnly || !item.isAvailable || isPending || isBeingRemoved;
     const canDecreaseQuantity = !isEffectivelyReadOnly && item.quantity > 1;
     const canIncreaseQuantity = !isEffectivelyReadOnly && item.quantity < MAX_QUANTITY;
