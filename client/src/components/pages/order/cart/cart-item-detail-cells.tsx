@@ -10,7 +10,7 @@ import { useCartItemPrice } from '../../../../hooks/cart.ts';
 import { getSearchAnchorId, getViewMenuUrlDirect } from '../../../../util/link.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
 
-export interface IDisplayableItem {
+export interface IDisplayableOrderItem {
     menuItemId: string;
     menuItem: IMenuItemBase;
     quantity: number;
@@ -20,7 +20,7 @@ export interface IDisplayableItem {
 }
 
 interface ICartItemDetailCellsProps {
-    item: IDisplayableItem;
+    item: IDisplayableOrderItem;
 }
 
 /**
@@ -28,7 +28,7 @@ interface ICartItemDetailCellsProps {
  * modifiers/instructions/unavailable badge), and price.
  *
  * Works with both cart items and completed order items — anything
- * that satisfies IDisplayableItem.
+ * that satisfies IDisplayableOrderItem.
  *
  * Does not include the first column (controls) — that varies by context.
  */
