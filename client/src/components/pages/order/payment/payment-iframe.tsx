@@ -158,54 +158,44 @@ const parseFrameMessage = (data: unknown): PaymentFrameMessage => {
 
 interface IPaymentFormBodyProps {
     iframeUrl: string;
-    iframeError: string | null;
-    isLoading: boolean;
     onFrameMessage: (event: MessageEvent) => void;
-    onDismissError: () => void;
-    onLoadComplete: () => void;
-    onFrameTimeout: () => void;
-    onFrameError: () => void;
 }
 
-const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
-    iframeUrl,
-    iframeError,
-    isLoading,
-    onFrameMessage,
-    onDismissError,
-    onLoadComplete,
-    onFrameTimeout,
-    onFrameError,
-}) => (
-    <>
-        {iframeError && (
-            <div className="payment-error">
-                <div>{iframeError}</div>
-                <button className="default-container" onClick={onDismissError}>
-                    Dismiss
-                </button>
-            </div>
-        )}
-        <div className="iframe-container default-container">
-            {isLoading && (
-                <div className="iframe-loading">
-                    <HourglassLoadingSpinner/>
-                    <span>Loading payment form...</span>
+const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({ iframeUrl, onFrameMessage }) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [iframeError, setIframeError] = useState<string | null>(null);
+
+    return (
+        <>
+            {iframeError && (
+                <div className="payment-error">
+                    <div>{iframeError}</div>
+                    <button className="default-container" onClick={() => setIframeError(null)}>
+                        Dismiss
+                    </button>
                 </div>
             )}
-            <GenericIFrame
-                src={iframeUrl}
-                title="Payment Form"
-                sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
-                loadTimeoutMs={FRAME_LOAD_TIMEOUT_MS}
-                onError={onFrameError}
-                onLoadTimeout={onFrameTimeout}
-                onMessage={onFrameMessage}
-                onLoadComplete={onLoadComplete}
-            />
-        </div>
-    </>
-);
+            <div className="iframe-container default-container">
+                {isLoading && (
+                    <div className="iframe-loading">
+                        <HourglassLoadingSpinner/>
+                        <span>Loading payment form...</span>
+                    </div>
+                )}
+                <GenericIFrame
+                    src={iframeUrl}
+                    title="Payment Form"
+                    sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+                    loadTimeoutMs={FRAME_LOAD_TIMEOUT_MS}
+                    onError={() => setIframeError('Payment form encountered an error. Please refresh the page and try again.')}
+                    onLoadTimeout={() => setIframeError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.')}
+                    onMessage={onFrameMessage}
+                    onLoadComplete={() => setIsLoading(false)}
+                />
+            </div>
+        </>
+    );
+};
 
 interface IPaymentCompletionBodyProps {
     errorMessage: string | null;
@@ -233,8 +223,6 @@ const PaymentCompletionBody: React.FC<IPaymentCompletionBodyProps> = ({ errorMes
 // ─── Main component ──────────────────────────────────────────────────
 
 export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onPaymentError, onClose }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [iframeError, setIframeError] = useState<string | null>(null);
     const lastPaymentResultRef = useRef<FramePaymentResult | null>(null);
 
     const orderCompletionState = useMutation<void, Error, FramePaymentResult>({
@@ -261,7 +249,6 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
         }
 
         if (result.type === 'error') {
-            setIframeError(result.message);
             onPaymentError(result.message);
             return;
         }
@@ -276,14 +263,6 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
         runCompletion({ token, cardInfo });
     }, [runCompletion, onPaymentError, onClose]);
 
-    const onFrameTimeout = () => {
-        setIframeError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.');
-    }
-
-    const onFrameError = () => {
-        setIframeError('Payment form encountered an error. Please refresh the page and try again.');
-    };
-
     if (orderCompletionState.isIdle) {
         return (
             <Modal
@@ -291,13 +270,7 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
                 body={
                     <PaymentFormBody
                         iframeUrl={iframeUrl}
-                        iframeError={iframeError}
-                        isLoading={isLoading}
                         onFrameMessage={onFrameMessage}
-                        onDismissError={() => setIframeError(null)}
-                        onLoadComplete={() => setIsLoading(false)}
-                        onFrameTimeout={onFrameTimeout}
-                        onFrameError={onFrameError}
                     />
                 }
             />
