@@ -31,16 +31,18 @@ export const CompleteOrderResultSchema = z.object({
 export type ICompleteOrderResultDTO = z.input<typeof CompleteOrderResultSchema>;
 export type ICompleteOrderResult = z.infer<typeof CompleteOrderResultSchema>;
 
-export const CafeOrderItemSummarySchema = z.object({
+export const CafeOrderItemSchema = z.object({
+    menuItemId:          z.string(),
     name:                z.string(),
     quantity:            z.number().int(),
     price:               z.number(),
     specialInstructions: z.string().nullish().transform(val => val ?? null),
+    modifiers:           z.array(SerializedModifierSchema).default([]),
 });
 
-export type ICafeOrderItemSummary = z.infer<typeof CafeOrderItemSummarySchema>;
+export type ICafeOrderItem = z.infer<typeof CafeOrderItemSchema>;
 
-export const CafeOrderSummarySchema = z.object({
+export const CafeOrderSchema = z.object({
     id:                     z.string(),
     cafeId:                 z.string(),
     buyOnDemandOrderNumber: z.string(),
@@ -50,8 +52,8 @@ export const CafeOrderSummarySchema = z.object({
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
     completedAt:            z.string().transform(s => new Date(s)),
-    items:                  z.array(CafeOrderItemSummarySchema).default([]),
+    items:                  z.array(CafeOrderItemSchema).default([]),
 });
 
-export type ICafeOrderSummaryDTO = z.input<typeof CafeOrderSummarySchema>;
-export type ICafeOrderSummary = z.infer<typeof CafeOrderSummarySchema>;
+export type ICafeOrderDTO = z.input<typeof CafeOrderSchema>;
+export type ICafeOrder = z.infer<typeof CafeOrderSchema>;

@@ -1,12 +1,12 @@
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
-    ICafeOrderSummary,
+    ICafeOrder,
     ICompleteOrderResult,
     IOrderItem,
     IPreparePaymentResult,
 } from '@msdining/common/models/order';
 import {
-    CafeOrderSummarySchema,
+    CafeOrderSchema,
     CompleteOrderResultSchema,
     PreparePaymentResultSchema,
 } from '@msdining/common/models/order';
@@ -49,10 +49,10 @@ export abstract class OrderClient {
         });
     }
 
-    static async getCompletedOrdersToday(): Promise<ICafeOrderSummary[]> {
+    static async getCompletedOrdersToday(): Promise<ICafeOrder[]> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/today`,
-            schema: z.array(CafeOrderSummarySchema),
+            schema: z.array(CafeOrderSchema),
         });
     }
 }

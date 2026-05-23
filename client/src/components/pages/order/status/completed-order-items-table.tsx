@@ -1,9 +1,9 @@
-import type { ICafeOrderItemSummary } from '@msdining/common/models/order';
+import type { ICafeOrderItem } from '@msdining/common/models/order';
 import React from 'react';
 import { formatPrice } from '../../../../util/cart.ts';
 
 interface ICompletedOrderItemsTableProps {
-    items: ICafeOrderItemSummary[];
+    items: ICafeOrderItem[];
     subtotal: number;
     tax: number;
     total: number;

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import type { ISerializedModifier } from '@msdining/common/models/cart';
-import type { ICafeOrderSummary, IOrderItem } from '@msdining/common/models/order';
+import type { ICafeOrder, IOrderItem } from '@msdining/common/models/order';
 
 const ORDER_ITEMS_INCLUDE = {
     items: {
@@ -279,7 +279,7 @@ export abstract class OrderStorageClient {
         });
     }
 
-    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderSummary[]> {
+    static async getCompletedOrdersToday(userId: string): Promise<ICafeOrder[]> {
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(startOfDay);
@@ -307,12 +307,29 @@ export abstract class OrderStorageClient {
             waitTimeMin:            order.waitTimeMin,
             waitTimeMax:            order.waitTimeMax,
             completedAt:            order.completedAt,
-            items:                  order.items.map(item => ({
-                name:                item.name,
-                quantity:            item.quantity,
-                price:               item.price,
-                specialInstructions: item.specialInstructions,
-            })),
+            items:                  order.items.map(item => {
+                const modifierMap = new Map<string, string[]>();
+                for (const mod of item.modifiers) {
+                    const existing = modifierMap.get(mod.modifierId);
+                    if (existing) {
+                        existing.push(mod.choiceId);
+                    } else {
+                        modifierMap.set(mod.modifierId, [mod.choiceId]);
+                    }
+                }
+
+                return {
+                    menuItemId:          item.menuItemId,
+                    name:                item.name,
+                    quantity:            item.quantity,
+                    price:               item.price,
+                    specialInstructions: item.specialInstructions,
+                    modifiers:           Array.from(modifierMap.entries()).map(([modifierId, choiceIds]) => ({
+                        modifierId,
+                        choiceIds,
+                    })),
+                };
+            }),
         }));
     }
 }

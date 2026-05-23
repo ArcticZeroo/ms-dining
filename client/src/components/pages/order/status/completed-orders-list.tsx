@@ -1,4 +1,4 @@
-import type { ICafeOrderSummary } from '@msdining/common/models/order';
+import type { ICafeOrder } from '@msdining/common/models/order';
 import React, { useContext } from 'react';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { getViewName } from '../../../../util/cafe.ts';
@@ -7,7 +7,7 @@ import { formatTimeToHoursMinutes } from '../../../../util/date.js';
 import { CompletedOrderItemsTable } from './completed-order-items-table.tsx';
 
 interface ICompletedOrdersListProps {
-    orders: ICafeOrderSummary[];
+    orders: ICafeOrder[];
 }
 
 export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders }) => {
