@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
 
 export interface ICartItem {
     itemId: string;
@@ -53,7 +54,7 @@ export interface IOrderCompletionResponse {
     [cafeId: string]: IOrderCompletionData;
 }
 
-export interface IRguestCardInfo {
+export interface IPaymentCardInfo {
     accountNumberMasked: string;
     cardIssuer: string;
     expirationYearMonth: string;
@@ -103,7 +104,7 @@ export interface IPrepareOrderResponse {
 export interface ICompleteOrderRequest {
     orderId: string;
     paymentToken: string;
-    cardInfo: IRguestCardInfo;
+    cardInfo: IPaymentCardInfo;
     alias: string;
     phoneNumberWithCountryCode: string;
 }
@@ -131,8 +132,6 @@ export const CartItemUpdateSchema = z.object({
 });
 
 export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
-
-import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
 
 export const CartItemRecordSchema = z.object({
     id:                  z.string(),

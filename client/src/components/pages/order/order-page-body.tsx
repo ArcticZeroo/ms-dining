@@ -35,7 +35,7 @@ export const OrderPageBody = () => {
         return (
             <div id="order-checkout" className="flex-col">
                 <div className="card error">
-                    {getErrorMessage(snapshot.cartError, 'Failed to load your cart.')}
+                    {getErrorMessage(snapshot.cartError, 'Failed to load your cart')}
                 </div>
             </div>
         );

@@ -11,7 +11,7 @@ import {
 	IPrepareOrderRequest,
 	IPreparePaymentRequest,
 	IPreparePaymentResponse,
-	IRguestCardInfo,
+	IPaymentCardInfo,
 	ISubmitOrderItems,
 	SubmitOrderStage
 } from '@msdining/common/models/cart';
@@ -59,7 +59,7 @@ const isValidCompleteOrderParams = (data: unknown): data is ICompleteOrderReques
         return false;
     }
 
-    return isDuckType<IRguestCardInfo>(data.cardInfo, {
+    return isDuckType<IPaymentCardInfo>(data.cardInfo, {
         accountNumberMasked: 'string',
         cardIssuer:          'string',
         expirationYearMonth: 'string',

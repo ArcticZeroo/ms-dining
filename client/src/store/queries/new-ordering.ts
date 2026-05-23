@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IOrderItem } from '@msdining/common/models/order';
-import type { IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import { OrderClient } from '../../api/new-ordering.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 
@@ -15,7 +15,7 @@ export const useCompleteOrderMutation = () => {
         mutationFn: (data: {
             pendingOrderId: string;
             paymentToken: string;
-            cardInfo: IRguestCardInfo;
+            cardInfo: IPaymentCardInfo;
             alias: string;
             phoneNumber: string;
         }) => OrderClient.completeOrder(data.pendingOrderId, data.paymentToken, data.cardInfo, data.alias, data.phoneNumber),

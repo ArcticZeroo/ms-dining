@@ -1,4 +1,4 @@
-import type { IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrderSummary,
     ICompleteOrderResult,
@@ -34,7 +34,7 @@ export abstract class OrderClient {
     static async completeOrder(
         pendingOrderId: string,
         paymentToken: string,
-        cardInfo: IRguestCardInfo,
+        cardInfo: IPaymentCardInfo,
         alias: string,
         phoneNumber: string,
     ): Promise<ICompleteOrderResult> {

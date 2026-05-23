@@ -9,7 +9,7 @@ import { OrderStorageClient, toOrderItems } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
-import type { ICartItem, IRguestCardInfo, ISerializedModifier } from '@msdining/common/models/cart';
+import type { ICartItem, IPaymentCardInfo, ISerializedModifier } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICafeOrderSummary,
@@ -209,7 +209,7 @@ export abstract class OrderOrchestrator {
         userId: string,
         pendingOrderId: string,
         paymentToken: string,
-        cardInfo: IRguestCardInfo,
+        cardInfo: IPaymentCardInfo,
         alias: string,
         phoneNumberWithCountryCode: string,
     ): Promise<ICompleteOrderResultDTO> {

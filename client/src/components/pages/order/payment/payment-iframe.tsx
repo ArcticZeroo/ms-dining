@@ -1,27 +1,29 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { IRguestCardInfo } from '@msdining/common/models/cart';
+import { IPaymentCardInfo } from '@msdining/common/models/cart';
 import { z } from 'zod';
 import { RetryButton } from '../../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
+import { getErrorMessage } from '../../../../util/mutation.js';
+import { GenericIFrame } from '../../../iframe/generic-iframe.js';
 
 import './payment-iframe.css';
 
-export interface IRguestPaymentResult {
+export interface FramePaymentResult {
     token: string;
-    cardInfo: IRguestCardInfo;
+    cardInfo: IPaymentCardInfo;
 }
 
 export interface IPaymentIframeProps {
     iframeUrl: string;
-    onPaymentComplete: (result: IRguestPaymentResult) => Promise<void>;
+    onPaymentComplete: (result: FramePaymentResult) => Promise<void>;
     onPaymentError: (error: string) => void;
     onClose: () => void;
 }
 
-const IFRAME_LOAD_TIMEOUT_MS = 15_000;
+const FRAME_LOAD_TIMEOUT_MS = 15_000;
 
-const rguestCardInfoSchema = z.object({
+const FrameCardInfoSchema = z.object({
     cardIssuer:          z.string(),
     accountNumberMasked: z.string(),
     expirationYearMonth: z.string(),
@@ -29,25 +31,25 @@ const rguestCardInfoSchema = z.object({
     postalCode:          z.string(),
 }).passthrough();
 
-const rguestPaymentSuccessSchema = z.object({
-    token: z.string().optional(),
+const FrameCompletionMessageSchema = z.object({
+    token:                    z.string().optional(),
     transactionReferenceData: z.object({
         token: z.string(),
     }).optional(),
-    cardInfo: rguestCardInfoSchema.optional(),
-    gatewayResponseData: z.object({
+    cardInfo:                 FrameCardInfoSchema.optional(),
+    gatewayResponseData:      z.object({
         decision: z.string(),
         message:  z.string().optional(),
     }).optional(),
 });
 
-const rguestPaymentErrorSchema = z.object({
+const FrameErrorSchema = z.object({
     code:    z.number(),
     reason:  z.string().optional(),
     message: z.string().optional(),
 });
 
-const rguestCancelSchema = z.object({
+const FrameCancelSchema = z.object({
     cancel: z.literal(true),
 });
 
@@ -59,14 +61,104 @@ const tryParseJson = (value: string): unknown => {
     }
 };
 
+interface IPaymentFrameMessageSuccess {
+    type: 'success';
+    token: string;
+    cardInfo: IPaymentCardInfo;
+}
+
+interface IPaymentFrameMessageCancelled {
+    type: 'cancel';
+}
+
+interface IPaymentFrameMessageFailure {
+    type: 'error';
+    message: string;
+}
+
+interface IPaymentFrameMessageUnknown {
+    type: 'unknown';
+}
+
+type PaymentFrameMessage =
+    IPaymentFrameMessageSuccess
+    | IPaymentFrameMessageCancelled
+    | IPaymentFrameMessageFailure
+    | IPaymentFrameMessageUnknown;
+
+const parseFrameErrorString = (data: string): PaymentFrameMessage => {
+    const frameErrorParseResult = FrameErrorSchema.safeParse(tryParseJson(data));
+    if (frameErrorParseResult.success) {
+        const frameError = frameErrorParseResult.data;
+        return {
+            type: 'error',
+            message: frameError.message ?? frameError.reason ?? 'Payment error'
+        };
+    }
+
+    return {
+        type: 'error',
+        message: data
+    }
+}
+
+const isFrameUserCancellationMessage = (data: unknown) => {
+    return FrameCancelSchema.safeParse(data).success;
+}
+
+const tryParseFrameCompletionMessage = (data: unknown): PaymentFrameMessage | undefined => {
+    const frameMessageParseResult = FrameCompletionMessageSchema.safeParse(data);
+    if (!frameMessageParseResult.success) {
+        return undefined;
+    }
+
+    const decision = frameMessageParseResult.data.gatewayResponseData?.decision;
+    if (decision && decision !== 'ACCEPT') {
+        const reason = frameMessageParseResult.data.gatewayResponseData?.message ?? decision;
+        return {
+            type: 'error',
+            message: `Payment declined: ${reason}`,
+        };
+    }
+
+    const token = frameMessageParseResult.data.token ?? frameMessageParseResult.data.transactionReferenceData?.token;
+    if (token) {
+        return {
+            type: 'success',
+            cardInfo: {
+                accountNumberMasked: frameMessageParseResult.data.cardInfo?.accountNumberMasked ?? '',
+                cardIssuer:          frameMessageParseResult.data.cardInfo?.cardIssuer ?? '',
+                expirationYearMonth: frameMessageParseResult.data.cardInfo?.expirationYearMonth ?? '',
+                cardHolderName:      frameMessageParseResult.data.cardInfo?.cardholderName ?? '',
+                postalCode:          frameMessageParseResult.data.cardInfo?.postalCode ?? '',
+            },
+            token,
+        };
+    }
+}
+
+const parseFrameMessage = (data: unknown): PaymentFrameMessage => {
+    if (!data) {
+        return { type: 'unknown' };
+    }
+
+    if (typeof data === 'string') {
+        return parseFrameErrorString(data);
+    }
+
+    if (isFrameUserCancellationMessage(data)) {
+        return { type: 'cancel' };
+    }
+
+    return tryParseFrameCompletionMessage(data) ?? { type: 'unknown' };
+}
+
 export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onPaymentError, onClose }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [iframeError, setIframeError] = useState<string | null>(null);
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-    const lastPaymentResultRef = useRef<IRguestPaymentResult | null>(null);
+    const lastPaymentResultRef = useRef<FramePaymentResult | null>(null);
 
-    const { isIdle, isError, error, mutate: runCompletion } = useMutation<void, Error, IRguestPaymentResult>({
+    const { isIdle, isError, error, mutate: runCompletion } = useMutation<void, Error, FramePaymentResult>({
         mutationFn: (result) => onPaymentComplete(result),
     });
 
@@ -77,107 +169,47 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
         }
     }, [runCompletion]);
 
-    const handleMessage = useCallback((event: MessageEvent) => {
+    const onFrameMessage = useCallback((event: MessageEvent) => {
         if (event.origin !== 'https://pay.rguest.com' && event.origin !== window.location.origin) {
             return;
         }
 
-        const data = event.data;
-
-        // null or empty string — no token / duplicate submit; ignore
-        if (data === null || data === '') {
+        const result = parseFrameMessage(event.data);
+        if (result.type === 'unknown') {
+            // todo: consider closing/showing a warning to the user?
+            console.warn('Unknown postMessage from payment iframe:', event.data);
             return;
         }
 
-        // String — AJAX error, data.responseText was posted as raw string
-        if (typeof data === 'string' && data !== '') {
-            const parsed = rguestPaymentErrorSchema.safeParse(tryParseJson(data));
-            if (parsed.success) {
-                const message = parsed.data.message ?? parsed.data.reason ?? 'Payment error';
-                setIframeError(message);
-                onPaymentError(message);
-            } else {
-                setIframeError(data);
-                onPaymentError(data);
-            }
+        if (result.type === 'error') {
+            setIframeError(result.message);
+            onPaymentError(result.message);
             return;
         }
 
-        // Cancel flag
-        const cancelResult = rguestCancelSchema.safeParse(data);
-        if (cancelResult.success) {
+        if (result.type === 'cancel') {
             onClose();
             return;
         }
 
-        // Success — has token or transactionReferenceData
-        const successResult = rguestPaymentSuccessSchema.safeParse(data);
-        if (successResult.success) {
-            const decision = successResult.data.gatewayResponseData?.decision;
-            if (decision && decision !== 'ACCEPT') {
-                const reason = successResult.data.gatewayResponseData?.message ?? decision;
-                const message = `Payment declined: ${reason}`;
-                setIframeError(message);
-                onPaymentError(message);
-                return;
-            }
-
-            const token = successResult.data.token ?? successResult.data.transactionReferenceData?.token;
-            if (token) {
-                const cardInfo: IRguestCardInfo = {
-                    accountNumberMasked: successResult.data.cardInfo?.accountNumberMasked ?? '',
-                    cardIssuer:          successResult.data.cardInfo?.cardIssuer ?? '',
-                    expirationYearMonth: successResult.data.cardInfo?.expirationYearMonth ?? '',
-                    cardHolderName:      successResult.data.cardInfo?.cardholderName ?? '',
-                    postalCode:          successResult.data.cardInfo?.postalCode ?? '',
-                };
-
-                lastPaymentResultRef.current = { token, cardInfo };
-                runCompletion({ token, cardInfo });
-                return;
-            }
-        }
-
-        // 3DS failure or other error object — fall through to unknown message warning
-        console.warn('Unknown postMessage from rguest iframe:', data);
+        // Must be 'success' at this point
+        const { token, cardInfo } = result;
+        lastPaymentResultRef.current = { token, cardInfo };
+        runCompletion({ token, cardInfo });
     }, [runCompletion, onPaymentError, onClose]);
 
-    useEffect(() => {
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, [handleMessage]);
 
-    useEffect(() => {
-        loadTimeoutRef.current = setTimeout(() => {
-            setIsLoading(false);
-            setIframeError('Payment form took too long to load. Please try again.');
-        }, IFRAME_LOAD_TIMEOUT_MS);
+    const onFrameTimeout = () => {
+        setIframeError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.');
+    }
 
-        return () => {
-            if (loadTimeoutRef.current) {
-                clearTimeout(loadTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    const onIframeLoad = useCallback(() => {
-        setIsLoading(false);
-        if (loadTimeoutRef.current) {
-            clearTimeout(loadTimeoutRef.current);
-        }
-    }, []);
-
-    const onIframeError = useCallback(() => {
-        setIsLoading(false);
-        if (loadTimeoutRef.current) {
-            clearTimeout(loadTimeoutRef.current);
-        }
-        setIframeError('Failed to load payment form. Please try again.');
-    }, []);
+    const onFrameError = () => {
+        setIframeError('Payment form encountered an error. Please refresh the page and try again.');
+    };
 
     if (!isIdle) {
         const errorMessage = isError
-            ? (error instanceof Error ? error.message : 'Failed to complete order')
+            ? getErrorMessage(error, 'Failed to complete order')
             : null;
 
         return (
@@ -228,13 +260,15 @@ export const PaymentIframe: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaym
                         <span>Loading payment form...</span>
                     </div>
                 )}
-                <iframe
-                    ref={iframeRef}
+                <GenericIFrame
                     src={iframeUrl}
-                    onLoad={onIframeLoad}
-                    onError={onIframeError}
                     title="Payment Form"
                     sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+                    loadTimeoutMs={FRAME_LOAD_TIMEOUT_MS}
+                    onError={onFrameError}
+                    onLoadTimeout={onFrameTimeout}
+                    onMessage={onFrameMessage}
+                    onLoadComplete={() => setIsLoading(false)}
                 />
             </div>
         </div>

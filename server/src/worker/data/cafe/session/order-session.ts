@@ -1,5 +1,5 @@
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
-import type { IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { PhoneValidResult } from 'phone';
 import type { SubmitOrderStage } from '@msdining/common/models/cart';
 import type { BuyOnDemandClient } from '../buy-ondemand/buy-ondemand-client.js';
@@ -25,6 +25,6 @@ export interface IOrderSession {
         alias: string;
         phoneData: PhoneValidResult;
         paymentToken: string;
-        cardInfo: IRguestCardInfo;
+        cardInfo: IPaymentCardInfo;
     }): Promise<IWaitTimeResponse>;
 }

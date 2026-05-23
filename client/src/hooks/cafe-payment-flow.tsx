@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
@@ -6,6 +6,7 @@ import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/qu
 import type { IPaymentIdentity } from './payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
 import { PaymentIframe } from '../components/pages/order/payment/payment-iframe.tsx';
+import type { Nullable } from '@msdining/common/models/util';
 
 const paymentPopupId = Symbol('order-cafe-payment');
 
@@ -30,6 +31,22 @@ export interface ICafePaymentFlowResult {
     isLocalBusy: boolean;
 }
 
+const getError = (prepareError: Nullable<Error>, completeError: Nullable<Error>, hasPaid: boolean) => {
+    if (prepareError) {
+        return getErrorMessage(prepareError, 'Failed to prepare payment');
+    }
+
+    if (completeError) {
+        if (hasPaid) {
+            return getErrorMessage(completeError, 'You have not been charged - any pending charge on your card will go away within a few days. Failed to complete order');
+        }
+
+        return getErrorMessage(completeError, 'Failed to complete order');
+    }
+
+    return undefined;
+}
+
 export const useCafePaymentFlow = ({
     cafeId,
     items,
@@ -43,12 +60,8 @@ export const useCafePaymentFlow = ({
 
     const isLocalBusy = preparePayment.isPending || completeOrder.isPending;
     const completionResult = completeOrder.data;
-
-    const error = preparePayment.error
-        ? getErrorMessage(preparePayment.error, 'Failed to prepare payment')
-        : completeOrder.error
-            ? getErrorMessage(completeOrder.error, 'Failed to complete order')
-            : undefined;
+    const [hasPaid, setHasPaid] = useState(false);
+    const error = getError(preparePayment.error, completeOrder.error, hasPaid);
 
     const handlePay = useCallback(async () => {
         if (!isPayEnabled || isLocalBusy) {
@@ -69,6 +82,7 @@ export const useCafePaymentFlow = ({
                 body: <PaymentIframe
                     iframeUrl={prepareResult.iframeUrl}
                     onPaymentComplete={async (paymentResult) => {
+                        setHasPaid(true);
                         await completeOrder.mutateAsync({
                             pendingOrderId: prepareResult.pendingOrderId,
                             paymentToken:   paymentResult.token,

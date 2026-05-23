@@ -1,4 +1,4 @@
-import { ICartItem, IRguestCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import { ICartItem, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 
@@ -226,7 +226,7 @@ interface IIframeCloseOrderParams {
     alias: string;
     phoneData: PhoneValidResult;
     paymentToken: string;
-    cardInfo: IRguestCardInfo;
+    cardInfo: IPaymentCardInfo;
 }
 
 export class CafeOrderSession {
@@ -824,7 +824,7 @@ export class CafeOrderSession {
         return response.text();
     }
 
-    private async _logIframeData(paymentToken: string, cardInfo: IRguestCardInfo) {
+    private async _logIframeData(paymentToken: string, cardInfo: IPaymentCardInfo) {
         await this.client.requestAsync(
             `/order/logIframeData`,
             {

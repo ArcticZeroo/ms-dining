@@ -1,4 +1,4 @@
-import type { IRguestCardInfo } from '@msdining/common/models/cart';
+import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrderSummary,
     ICompleteOrderResultDTO,
@@ -18,7 +18,7 @@ export interface IOrderService {
         userId: string;
         pendingOrderId: string;
         paymentToken: string;
-        cardInfo: IRguestCardInfo;
+        cardInfo: IPaymentCardInfo;
         alias: string;
         phoneNumberWithCountryCode: string;
     }): Promise<ICompleteOrderResultDTO>;
