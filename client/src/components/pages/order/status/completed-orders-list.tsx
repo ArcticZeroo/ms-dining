@@ -32,13 +32,22 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
     return (
         <>
             <div className="centered-content flex-col">
-                <button
-                    className="default-container default-button"
-                    disabled={isPending}
-                    onClick={() => reorder(allItems)}
-                >
-                    Reorder All
-                </button>
+                <div className="flex">
+                    <button
+                        className="default-container default-button"
+                        disabled={isPending}
+                        onClick={() => reorder(allItems, false /*navigateAfterAdd*/)}
+                    >
+                        Add All To Cart
+                    </button>
+                    <button
+                        className="default-container default-button"
+                        disabled={isPending}
+                        onClick={() => reorder(allItems)}
+                    >
+                        Reorder All
+                    </button>
+                </div>
                 {
                     cartAlreadyHasAvailableItems && (
                         <span className="subtitle">
@@ -70,6 +79,13 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                                 tax={order.tax}
                                 total={order.total}
                             />
+                            <button
+                                className="default-container default-button"
+                                disabled={isPending}
+                                onClick={() => reorder(order.items, false /*navigateAfterAdd*/)}
+                            >
+                                Add Items To Cart
+                            </button>
                             <button
                                 className="default-container default-button"
                                 disabled={isPending}

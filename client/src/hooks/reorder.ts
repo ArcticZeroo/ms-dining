@@ -15,9 +15,11 @@ export const useReorder = () => {
     const addItems = useAddItemsToCartMutation();
     const navigate = useNavigate();
 
-    const reorder = useCallback(async (items: ICafeOrderItem[]) => {
+    const reorder = useCallback(async (items: ICafeOrderItem[], navigateAfterAdd: boolean = true) => {
         await addItems.mutateAsync(items.map(toCartItemData));
-        navigate('/order');
+        if (navigateAfterAdd) {
+            navigate('/order');
+        }
     }, [addItems, navigate]);
 
     return {
