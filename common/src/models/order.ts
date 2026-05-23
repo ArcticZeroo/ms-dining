@@ -50,7 +50,7 @@ export const CafeOrderSummarySchema = z.object({
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
     completedAt:            z.string().transform(s => new Date(s)),
-    items:                  z.array(CafeOrderItemSummarySchema),
+    items:                  z.array(CafeOrderItemSummarySchema).default([]),
 });
 
 export type ICafeOrderSummaryDTO = z.input<typeof CafeOrderSummarySchema>;
