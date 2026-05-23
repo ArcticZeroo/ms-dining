@@ -1,5 +1,5 @@
-import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
-import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/dist/models/order.js';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { useCartItemActions, type ISnapshotCallbacks } from '../../../../hooks/cart-item-actions.tsx';
