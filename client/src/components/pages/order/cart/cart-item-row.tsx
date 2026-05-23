@@ -1,7 +1,7 @@
 import React from 'react';
 import { calculatePrice, formatPrice } from '../../../../util/cart.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { IDisplayCartItem } from '../../../../store/zustand/server-cart.ts';
 
 const MAX_QUANTITY = 99;
 
@@ -30,7 +30,7 @@ const getIncreaseTitle = (readOnly: boolean, canIncrease: boolean) => {
 interface ICartItemProps {
     showFullDetails: boolean;
     readOnly?: boolean;
-    item: ICartItemRecord;
+    item: IDisplayCartItem;
     onRemove: () => void;
     onEdit: () => void;
     onChangeQuantity: (quantity: number) => void;
@@ -44,7 +44,8 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
     showFullDetails,
     readOnly = false
 }) => {
-    const isEffectivelyReadOnly = readOnly || !item.isAvailable;
+    const isPending = item.isPending === true;
+    const isEffectivelyReadOnly = readOnly || !item.isAvailable || isPending;
     const canDecreaseQuantity = !isEffectivelyReadOnly && item.quantity > 1;
     const canIncreaseQuantity = !isEffectivelyReadOnly && item.quantity < MAX_QUANTITY;
     const price = calculatePrice(
@@ -69,42 +70,48 @@ export const CartItemRow: React.FC<ICartItemProps> = ({
     };
 
     return (
-        <tr className={`cart-item ${!item.isAvailable ? 'unavailable' : ''}`.trim()}>
+        <tr className={`cart-item ${!item.isAvailable ? 'unavailable' : ''} ${isPending ? 'pending' : ''}`.trim()}>
             <td>
-                <div className="cart-item-buttons">
-                    <button
-                        className="material-symbols-outlined"
-                        onClick={onRemove}
-                        disabled={readOnly}
-                        title={readOnly ? READONLY_TITLE : 'Remove this item'}
-                    >
-                        delete
-                    </button>
-                    <button
-                        className="material-symbols-outlined"
-                        disabled={!canDecreaseQuantity}
-                        onClick={onDecreaseQuantity}
-                        title={getDecreaseTitle(readOnly, canDecreaseQuantity)}
-                    >
-                        remove
-                    </button>
-                    <button
-                        className="material-symbols-outlined"
-                        disabled={!canIncreaseQuantity}
-                        onClick={onIncreaseQuantity}
-                        title={getIncreaseTitle(readOnly, canIncreaseQuantity)}
-                    >
-                        add
-                    </button>
-                    <button
-                        className="material-symbols-outlined"
-                        onClick={onEdit}
-                        disabled={isEffectivelyReadOnly}
-                        title={isEffectivelyReadOnly ? (item.isAvailable ? READONLY_TITLE : 'Item is no longer available') : 'Edit this item'}
-                    >
-                        edit
-                    </button>
-                </div>
+                {isPending ? (
+                    <div className="cart-item-buttons">
+                        <span className="material-symbols-outlined spinning">progress_activity</span>
+                    </div>
+                ) : (
+                    <div className="cart-item-buttons">
+                        <button
+                            className="material-symbols-outlined"
+                            onClick={onRemove}
+                            disabled={isEffectivelyReadOnly}
+                            title={isEffectivelyReadOnly ? READONLY_TITLE : 'Remove this item'}
+                        >
+                            delete
+                        </button>
+                        <button
+                            className="material-symbols-outlined"
+                            disabled={!canDecreaseQuantity}
+                            onClick={onDecreaseQuantity}
+                            title={getDecreaseTitle(readOnly, canDecreaseQuantity)}
+                        >
+                            remove
+                        </button>
+                        <button
+                            className="material-symbols-outlined"
+                            disabled={!canIncreaseQuantity}
+                            onClick={onIncreaseQuantity}
+                            title={getIncreaseTitle(readOnly, canIncreaseQuantity)}
+                        >
+                            add
+                        </button>
+                        <button
+                            className="material-symbols-outlined"
+                            onClick={onEdit}
+                            disabled={isEffectivelyReadOnly}
+                            title={isEffectivelyReadOnly ? (item.isAvailable ? READONLY_TITLE : 'Item is no longer available') : 'Edit this item'}
+                        >
+                            edit
+                        </button>
+                    </div>
+                )}
             </td>
             <td className="quantity">
                 {item.quantity}x

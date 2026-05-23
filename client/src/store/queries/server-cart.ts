@@ -60,6 +60,7 @@ export const useAddToCartMutation = () => {
                 updatedAt:           now,
                 menuItem,
                 isAvailable:         true,
+                isPending:           true,
             });
         },
         onSuccess,
