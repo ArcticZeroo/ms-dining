@@ -1,12 +1,12 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
 import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ApplicationSettings } from '../../../constants/settings.ts';
-import { ApplicationContext } from '../../../context/app.ts';
-import { useValueNotifier } from '../../../hooks/events.ts';
-import { useServerCartUnavailableItems } from '../../../store/zustand/server-cart.ts';
-import { getViewName } from '../../../util/cafe.ts';
-import { getViewMenuUrl } from '../../../util/link.ts';
+import { ApplicationSettings } from '../../../../constants/settings.ts';
+import { ApplicationContext } from '../../../../context/app.ts';
+import { useValueNotifier } from '../../../../hooks/events.ts';
+import { useServerCartUnavailableItems } from '../../../../store/zustand/server-cart.ts';
+import { getViewName } from '../../../../util/cafe.ts';
+import { getViewMenuUrl } from '../../../../util/link.ts';
 import { MissingCartItemRow } from './missing-cart-item-row.tsx';
 
 export const MissingItemsTable = () => {

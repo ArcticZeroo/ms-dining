@@ -6,9 +6,9 @@ import { useCompletedOrdersTodayQuery } from '../../../store/queries/new-orderin
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { OrderCafeCard } from '../../order/payment/order-cafe-card.tsx';
-import { CompletedOrdersList } from '../../order/status/completed-orders-list.tsx';
-import { PaymentInfoForm } from '../../order/payment/payment-info-form.tsx';
+import { OrderCafeCard } from './payment/order-cafe-card.tsx';
+import { CompletedOrdersList } from './status/completed-orders-list.tsx';
+import { PaymentInfoForm } from './payment/payment-info-form.tsx';
 
 import './order-page.css';
 

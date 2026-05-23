@@ -1,17 +1,17 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
-import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
+import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
+import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/dist/models/order.js';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { ApplicationContext } from '../../../context/app.ts';
-import { useCartItemActions, type ISnapshotCallbacks } from '../../../hooks/cart-item-actions.tsx';
-import { usePopupCloserAlways, usePopupOpener } from '../../../hooks/popup.ts';
-import type { IPaymentIdentity } from '../../../hooks/payment-identity.ts';
-import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../store/queries/new-ordering.ts';
-import { calculatePrice, formatPrice } from '../../../util/cart.ts';
-import { getViewName } from '../../../util/cafe.ts';
-import { getErrorMessage } from '../../../util/mutation.ts';
-import { formatWaitTime } from '../../../util/order.ts';
-import { CartItemRow } from '../../order/cart/cart-item-row.tsx';
-import { PaymentIframe, type IRguestPaymentResult } from '../../order/payment/payment-iframe.tsx';
+import { ApplicationContext } from '../../../../context/app.ts';
+import { useCartItemActions, type ISnapshotCallbacks } from '../../../../hooks/cart-item-actions.tsx';
+import { usePopupCloserAlways, usePopupOpener } from '../../../../hooks/popup.ts';
+import type { IPaymentIdentity } from '../../../../hooks/payment-identity.ts';
+import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../../store/queries/new-ordering.ts';
+import { calculatePrice, formatPrice } from '../../../../util/cart.ts';
+import { getViewName } from '../../../../util/cafe.ts';
+import { getErrorMessage } from '../../../../util/mutation.ts';
+import { formatWaitTime } from '../../../../util/order.ts';
+import { CartItemRow } from '../cart/cart-item-row.tsx';
+import { PaymentIframe, type IRguestPaymentResult } from './payment-iframe.tsx';
 
 const paymentPopupId = Symbol('order-cafe-payment');
 
@@ -162,12 +162,13 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
             )}
             <div className="order-page-cafe-footer">
                 {completionResult != null ? (
-                    <div className="order-page-cafe-completed">
+                    <div className="flex align-center flex-end">
                         <span className="material-symbols-outlined">check_circle</span>
                         <span>
                             Order #{completionResult.buyOnDemandOrderNumber}
-                            {' — '}
-                            {formatWaitTime(completionResult.waitTimeMin, completionResult.waitTimeMax)} wait
+                        </span>
+                        <span>
+                            Ready in {formatWaitTime(completionResult.waitTimeMin, completionResult.waitTimeMax)}
                         </span>
                     </div>
                 ) : (

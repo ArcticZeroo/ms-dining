@@ -2,7 +2,7 @@ import { useCompletedOrdersTodayQuery } from '../../../store/queries/new-orderin
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { CompletedOrdersList } from '../../order/status/completed-orders-list.tsx';
+import { CompletedOrdersList } from './status/completed-orders-list.tsx';
 
 export const OrderDonePage = () => {
     const ordersQuery = useCompletedOrdersTodayQuery();

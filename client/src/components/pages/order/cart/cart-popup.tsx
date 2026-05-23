@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useIsOnlineOrderingAllowed } from '../../../hooks/cafe.ts';
-import { useClickTracker } from '../../../hooks/pointer.ts';
-import { useScrollbarWidth } from '../../../hooks/scrollbar-size.ts';
-import { useCartQuery } from '../../../store/queries/server-cart.ts';
+import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
+import { useClickTracker } from '../../../../hooks/pointer.ts';
+import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
+import { useCartQuery } from '../../../../store/queries/server-cart.ts';
 import {
     useServerCartHasUnavailableItems,
     useServerCartItemCount,
-} from '../../../store/zustand/server-cart.ts';
-import { classNames } from '../../../util/react.ts';
+} from '../../../../store/zustand/server-cart.ts';
+import { classNames } from '../../../../util/react.ts';
 import { CartContentsTable } from './cart-contents-table.tsx';
 import { CartHydrationView } from './cart-hydration-view.tsx';
 

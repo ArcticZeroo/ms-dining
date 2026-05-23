@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { useServerCartAvailableItems } from '../../store/zustand/server-cart.ts';
-import { calculatePrice, formatPrice } from '../../util/cart.ts';
+import { useServerCartAvailableItems } from '../../../store/zustand/server-cart.ts';
+import { calculatePrice, formatPrice } from '../../../util/cart.ts';
 
 export const OrderPriceInlineTable: React.FC = () => {
     const availableItems = useServerCartAvailableItems();

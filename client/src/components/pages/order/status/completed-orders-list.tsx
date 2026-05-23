@@ -1,8 +1,8 @@
-import type { ICafeOrderSummary } from '@msdining/common/models/order';
+import type { ICafeOrderSummary } from '@msdining/common/dist/models/order.js';
 import React, { useContext } from 'react';
-import { ApplicationContext } from '../../../context/app.ts';
-import { getViewName } from '../../../util/cafe.ts';
-import { formatEstimatedReadyTime, formatWaitTime } from '../../../util/order.ts';
+import { ApplicationContext } from '../../../../context/app.ts';
+import { getViewName } from '../../../../util/cafe.ts';
+import { formatEstimatedReadyTime, formatWaitTime } from '../../../../util/order.ts';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrderSummary[];

@@ -1,7 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import React from 'react';
-import { getChoiceHtmlId, maybeFormatPrice } from '../../../util/cart.ts';
-import { useIsOnlineOrderingAllowed } from '../../../hooks/cafe.ts';
+import { getChoiceHtmlId, maybeFormatPrice } from '../../../../util/cart.ts';
+import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 
 interface IModifierRadioProps {
     modifier: CafeTypes.IMenuItemModifier;

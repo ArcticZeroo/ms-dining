@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ValidationState } from '../../../models/validation.ts';
+import type { ValidationState } from '../../../../models/validation.ts';
 import { PaymentField } from './payment-field.tsx';
 
 import './payment-info-form.css';

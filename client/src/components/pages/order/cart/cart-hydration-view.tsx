@@ -1,4 +1,4 @@
-import { useServerCartUnavailableItems } from '../../../store/zustand/server-cart.ts';
+import { useServerCartUnavailableItems } from '../../../../store/zustand/server-cart.ts';
 import { MissingItemsTable } from './missing-items-table.tsx';
 
 import './cart-hydration-view.css';

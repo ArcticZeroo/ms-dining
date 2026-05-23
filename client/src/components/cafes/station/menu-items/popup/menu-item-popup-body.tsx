@@ -1,7 +1,7 @@
 import { CafeTypes } from '@msdining/common';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import React from 'react';
-import { MenuItemModifierPicker } from '../../../../order/menu-item-modifier-picker.tsx';
+import { MenuItemModifierPicker } from '../../../../pages/order/menu-item-modifier-picker.tsx';
 import { MenuItemReviewsView } from '../../../../reviews/menu-item-reviews-view.tsx';
 
 interface IMenuItemPopupBodyProps {

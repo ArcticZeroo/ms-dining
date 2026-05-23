@@ -1,6 +1,6 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
 import React from 'react';
-import { useRemoveCartItemMutation } from '../../../store/queries/server-cart.ts';
+import { useRemoveCartItemMutation } from '../../../../store/queries/server-cart.ts';
 
 interface IMissingCartItemRowProps {
     item: ICartItemRecord;

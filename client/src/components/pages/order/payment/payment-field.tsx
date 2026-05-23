@@ -1,7 +1,7 @@
 import React from 'react';
-import { HtmlInputType } from '../../../models/html.ts';
-import { ValidationState } from '../../../models/validation.ts';
-import { classNames } from '../../../util/react.ts';
+import { HtmlInputType } from '../../../../models/html.ts';
+import { ValidationState } from '../../../../models/validation.ts';
+import { classNames } from '../../../../util/react.ts';
 
 interface IBasePaymentFieldProps {
     isEnabled?: boolean;
