@@ -8,7 +8,6 @@ import { formatEstimatedReadyTime } from '../../../../util/order.ts';
 import { formatTimeToHoursMinutes } from '../../../../util/date.js';
 import { useReorder } from '../../../../hooks/reorder.ts';
 import { CompletedOrderItemsTable } from './completed-order-items-table.tsx';
-import { useCartQuery } from '../../../../store/queries/server-cart.ts';
 import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
 
 interface ICompletedOrdersListProps {
@@ -18,7 +17,6 @@ interface ICompletedOrdersListProps {
 export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders }) => {
     const { viewsById } = useContext(ApplicationContext);
     const { reorder, isPending } = useReorder();
-    useCartQuery();
     const cartAlreadyHasAvailableItems = useServerCartHasAvailableItems();
 
     if (orders.length === 0) {
