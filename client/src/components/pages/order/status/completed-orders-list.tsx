@@ -1,7 +1,9 @@
 import type { ICafeOrder } from '@msdining/common/models/order';
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { getViewName } from '../../../../util/cafe.ts';
+import { getViewMenuUrlDirect } from '../../../../util/link.ts';
 import { formatEstimatedReadyTime } from '../../../../util/order.ts';
 import { formatTimeToHoursMinutes } from '../../../../util/date.js';
 import { CompletedOrderItemsTable } from './completed-order-items-table.tsx';
@@ -29,7 +31,13 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
 
                 return (
                     <div key={order.id} className="card dark-blue">
-                        <div className="title">{cafeName}</div>
+                        <div className="title">
+                            {
+                                view != null
+                                    ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
+                                    : cafeName
+                            }
+                        </div>
                         <div>Order #{order.buyOnDemandOrderNumber}</div>
                         <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
                         <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
