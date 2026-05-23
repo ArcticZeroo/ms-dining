@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/new-ordering.ts';
 import type { IPaymentIdentity } from './payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
-import { type IRguestPaymentResult, PaymentIframe } from '../components/pages/order/payment/payment-iframe.tsx';
+import { PaymentIframe } from '../components/pages/order/payment/payment-iframe.tsx';
 
 const paymentPopupId = Symbol('order-cafe-payment');
 
@@ -40,17 +40,23 @@ export const useCafePaymentFlow = ({
     const closePopup = usePopupCloserAlways();
     const preparePayment = usePreparePaymentMutation();
     const completeOrder = useCompleteOrderMutation();
-    const [error, setError] = useState<string>();
-    const [completionResult, setCompletionResult] = useState<ICompleteOrderResult>();
 
     const isLocalBusy = preparePayment.isPending || completeOrder.isPending;
+    const completionResult = completeOrder.data;
+
+    const error = preparePayment.error
+        ? getErrorMessage(preparePayment.error, 'Failed to prepare payment')
+        : completeOrder.error
+            ? getErrorMessage(completeOrder.error, 'Failed to complete order')
+            : undefined;
 
     const handlePay = useCallback(async () => {
         if (!isPayEnabled || isLocalBusy) {
             return;
         }
 
-        setError(undefined);
+        preparePayment.reset();
+        completeOrder.reset();
 
         try {
             const prepareResult = await preparePayment.mutateAsync({
@@ -58,36 +64,28 @@ export const useCafePaymentFlow = ({
                 items: items.map(toOrderItem),
             });
 
-            const onPaymentComplete = async (paymentResult: IRguestPaymentResult) => {
-                try {
-                    const result = await completeOrder.mutateAsync({
-                        pendingOrderId: prepareResult.pendingOrderId,
-                        paymentToken:   paymentResult.token,
-                        cardInfo:       paymentResult.cardInfo,
-                        alias:          paymentIdentity.alias,
-                        phoneNumber:    paymentIdentity.phoneNumber,
-                    });
-
-                    setCompletionResult(result);
-                    setError(undefined);
-                    closePopup();
-                } catch (completeError) {
-                    setError(getErrorMessage(completeError, 'Failed to complete order'));
-                    throw completeError;
-                }
-            };
-
             openPopup({
                 id:   paymentPopupId,
                 body: <PaymentIframe
                     iframeUrl={prepareResult.iframeUrl}
-                    onPaymentComplete={onPaymentComplete}
-                    onPaymentError={setError}
+                    onPaymentComplete={async (paymentResult) => {
+                        await completeOrder.mutateAsync({
+                            pendingOrderId: prepareResult.pendingOrderId,
+                            paymentToken:   paymentResult.token,
+                            cardInfo:       paymentResult.cardInfo,
+                            alias:          paymentIdentity.alias,
+                            phoneNumber:    paymentIdentity.phoneNumber,
+                        });
+                        closePopup();
+                    }}
+                    onPaymentError={() => {
+                        // rGuest errors are displayed within the iframe popup itself.
+                    }}
                     onClose={closePopup}
                 />,
             });
-        } catch (prepareError) {
-            setError(getErrorMessage(prepareError, 'Failed to prepare payment'));
+        } catch {
+            // Error is captured in preparePayment.error
         }
     }, [cafeId, closePopup, completeOrder, isPayEnabled, isLocalBusy, items, openPopup, paymentIdentity, preparePayment]);
 
