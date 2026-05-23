@@ -53,7 +53,7 @@ export const CafeOrderSchema = z.object({
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
     completedAt:            z.string().transform(s => new Date(s)),
-    items:                  z.array(CafeOrderItemSchema).default([]),
+    items:                  z.array(CafeOrderItemSchema),
 });
 
 export type ICafeOrderDTO = z.input<typeof CafeOrderSchema>;
