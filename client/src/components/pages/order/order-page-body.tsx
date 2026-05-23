@@ -65,14 +65,14 @@ export const OrderPageBody = () => {
                 onAliasChanged={setAlias}
                 onPhoneNumberChanged={setPhoneNumber}
             />
-            <div className="order-page-cafes">
+            <div className="flex-col">
                 {snapshot.groupedItems.map((group) => (
                     <OrderCafeCard
                         key={group.cafeId}
                         cafeId={group.cafeId}
                         items={group.items}
                         paymentIdentity={{ alias, phoneNumber: validatedPhoneNumber ?? '' }}
-                        isPayEnabled={isValid}
+                        isIdentityValid={isValid}
                         snapshotCallbacks={snapshotCallbacks}
                     />
                 ))}

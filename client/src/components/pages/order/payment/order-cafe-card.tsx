@@ -8,12 +8,13 @@ import { getViewName } from '../../../../util/cafe.ts';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import { OrderCafeItemsTable } from './order-cafe-items-table.tsx';
 import { OrderCafeFooter } from './order-cafe-footer.tsx';
+import { classNames } from '../../../../util/react.js';
 
 interface IOrderCafeCardProps {
     cafeId: string;
     items: ICartItemRecord[];
     paymentIdentity: IPaymentIdentity;
-    isPayEnabled: boolean;
+    isIdentityValid: boolean;
     snapshotCallbacks: ISnapshotCallbacks;
 }
 
@@ -21,7 +22,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     cafeId,
     items,
     paymentIdentity,
-    isPayEnabled,
+    isIdentityValid,
     snapshotCallbacks,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
@@ -30,7 +31,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         cafeId,
         items,
         paymentIdentity,
-        isPayEnabled,
+        isIdentityValid,
     });
 
     const isCompleted = completionResult != null;
@@ -60,7 +61,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     );
 
     return (
-        <div className="card">
+        <div className={classNames('card', hasUnavailableItems && 'error')}>
             <div className="title">{cafeName}</div>
             <OrderCafeItemsTable
                 items={items}
@@ -71,12 +72,12 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                 onChangeQuantity={onChangeQuantity}
             />
             {error && (
-                <div className="order-page-cafe-error">
+                <div>
                     {error}
                 </div>
             )}
             {hasUnavailableItems && (
-                <div className="order-page-cafe-error">
+                <div>
                     Remove unavailable items from your cart before paying this cafe.
                 </div>
             )}
@@ -84,7 +85,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                 completionResult={completionResult}
                 totalQuantity={totalQuantity}
                 totalPrice={totalPrice}
-                isPayEnabled={isPayEnabled}
+                isIdentityValid={isIdentityValid}
                 isLocalBusy={isLocalBusy}
                 hasUnavailableItems={hasUnavailableItems}
                 onPay={handlePay}

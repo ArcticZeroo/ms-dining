@@ -21,7 +21,7 @@ interface IUseCafePaymentFlowParams {
     cafeId: string;
     items: ICartItemRecord[];
     paymentIdentity: IPaymentIdentity;
-    isPayEnabled: boolean;
+    isIdentityValid: boolean;
 }
 
 export interface ICafePaymentFlowResult {
@@ -51,7 +51,7 @@ export const useCafePaymentFlow = ({
     cafeId,
     items,
     paymentIdentity,
-    isPayEnabled,
+    isIdentityValid,
 }: IUseCafePaymentFlowParams): ICafePaymentFlowResult => {
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
@@ -64,7 +64,7 @@ export const useCafePaymentFlow = ({
     const error = getError(preparePayment.error, completeOrder.error, hasPaid);
 
     const handlePay = useCallback(async () => {
-        if (!isPayEnabled || isLocalBusy) {
+        if (!isIdentityValid || isLocalBusy) {
             return;
         }
 
@@ -98,7 +98,7 @@ export const useCafePaymentFlow = ({
         } catch {
             // Error is captured in preparePayment.error
         }
-    }, [cafeId, closePopup, completeOrder, isPayEnabled, isLocalBusy, items, openPopup, paymentIdentity, preparePayment]);
+    }, [cafeId, closePopup, completeOrder, isIdentityValid, isLocalBusy, items, openPopup, paymentIdentity, preparePayment]);
 
     return { handlePay, error, completionResult, isLocalBusy };
 };
