@@ -8,7 +8,7 @@ import { useMemo } from 'react';
  *
  * TanStack Query is the source of truth (via useCartQuery). This store
  * provides immediate reads for components and optimistic updates for
- * quantity debouncing. Every successful server response reconciles
+ * add and quantity changes. Every successful server response reconciles
  * this store via setFromServerResponse().
  */
 
@@ -22,7 +22,6 @@ interface IServerCartStore {
     setFromServerResponse(response: ICartResponse): void;
     optimisticAddItem(item: IDisplayCartItem): void;
     optimisticUpdateItem(itemId: string, update: ICartItemUpdate): void;
-    optimisticRemoveItem(itemId: string): void;
 }
 
 export const useServerCartStore = create<IServerCartStore>()(mutative((set) => ({
@@ -44,10 +43,6 @@ export const useServerCartStore = create<IServerCartStore>()(mutative((set) => (
             item.specialInstructions = update.specialInstructions;
             item.modifiers = update.modifiers;
         }
-    }),
-
-    optimisticRemoveItem: (itemId) => set((state) => {
-        state.items = state.items.filter(i => i.id !== itemId);
     }),
 })));
 

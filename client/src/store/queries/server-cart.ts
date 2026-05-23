@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CartClient } from '../../api/cart.ts';
 import { useServerCartStore } from '../zustand/server-cart.ts';
 import type { ICartItemData, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
@@ -7,6 +7,8 @@ import { useCallback } from 'react';
 import { useDebouncedCallback } from '../../hooks/debounce.ts';
 
 export const CART_QUERY_KEY = ['cart', 'server'] as const;
+
+const CART_REMOVE_MUTATION_KEY = ['cart', 'remove-item'] as const;
 
 /**
  * Sync the Zustand cache from a server response.
@@ -40,7 +42,8 @@ export const useCartQuery = () => {
 };
 
 /**
- * Add an item to the cart. Returns the full cart.
+ * Add an item to the cart. Optimistically inserts a pending item into the
+ * Zustand store so the cart UI updates immediately.
  */
 export const useAddToCartMutation = () => {
     const onSuccess = useSyncOnSuccess();
@@ -68,11 +71,9 @@ export const useAddToCartMutation = () => {
 };
 
 /**
- * Update a cart item with debouncing. Handles optimistic quantity updates
- * internally — callers just call `mutate(itemId, update)`.
- *
- * The actual server request fires after 500ms of inactivity, coalescing
- * rapid +/- clicks into a single PATCH.
+ * Update a cart item with debouncing. Optimistically updates the Zustand
+ * store immediately so rapid +/- clicks feel responsive. The actual server
+ * request fires after 500ms of inactivity, coalescing into a single PATCH.
  */
 export const useDebouncedUpdateCartItem = () => {
     const onSuccess = useSyncOnSuccess();
@@ -94,23 +95,29 @@ export const useDebouncedUpdateCartItem = () => {
 };
 
 /**
- * Remove an item from the cart. Optimistically hides the item in the
- * Zustand cache immediately, then confirms with the server.
+ * Remove an item from the cart. No optimistic removal — the row stays
+ * visible in a read-only state until the server confirms deletion.
  */
 export const useRemoveCartItemMutation = () => {
     const onSuccess = useSyncOnSuccess();
 
-    const mutation = useMutation({
-        mutationFn: (itemId: string) => CartClient.removeItem(itemId),
+    return useMutation({
+        mutationKey: CART_REMOVE_MUTATION_KEY,
+        mutationFn:  (itemId: string) => CartClient.removeItem(itemId),
         onSuccess,
     });
+};
 
-    const mutate = useCallback((itemId: string) => {
-        useServerCartStore.getState().optimisticRemoveItem(itemId);
-        mutation.mutate(itemId);
-    }, [mutation]);
-
-    return { ...mutation, mutate };
+/**
+ * Returns true if the given cart item has an in-flight remove mutation.
+ * CartItemRow uses this to show a read-only state while deletion is pending.
+ */
+export const useIsCartItemBeingRemoved = (itemId: string): boolean => {
+    const pendingRemoves = useMutationState({
+        filters: { mutationKey: CART_REMOVE_MUTATION_KEY, status: 'pending' },
+        select:  (mutation) => mutation.state.variables as string | undefined,
+    });
+    return pendingRemoves.includes(itemId);
 };
 
 /**
