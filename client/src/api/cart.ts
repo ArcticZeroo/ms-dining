@@ -1,7 +1,6 @@
 import type { ICartItemData, ICartItemUpdate, ICartResponse, } from '@msdining/common/models/cart';
 import { CartResponseSchema } from '@msdining/common/models/cart';
 import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
-import { pause } from '../util/async.js';
 
 const CART_BASE = '/api/dining/cart';
 
@@ -16,7 +15,6 @@ export abstract class CartClient {
     }
 
     static async addItem(item: ICartItemData): Promise<ICartResponse> {
-        await pause(5000);
         return fetchCart(`${CART_BASE}/items`, {
             method:  'POST',
             headers: JSON_HEADERS,
