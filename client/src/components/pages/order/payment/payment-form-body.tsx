@@ -68,7 +68,7 @@ export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
                     </button>
                 </div>
             )}
-            {isLoading && (
+            {!error && isLoading && (
                 <div className="flex flex-center">
                     <HourglassLoadingSpinner/>
                     <span>Loading payment form...</span>
