@@ -86,12 +86,6 @@ export const useCartStore = create<ICartStore>()(mutative((set) => ({
 
 **Watch out**: inside a mutative draft callback, array/object entries reached from the draft are proxies. Identity comparisons (`other === item`) against an externally-passed object will fail. Identify entries by id or index, not reference.
 
-#### Legacy: `@arcticzeroo/react-promise-hook`
-
-Still installed and used in one place (`payment-iframe.tsx` for UI-local state). Do not add new server-fetch usages — use TanStack Query instead. The custom `msdining/require-promise-state-stage` lint rule still applies to the legacy hooks if you do encounter them.
-
-**Loading + error + success handling is still required.** Express it via the TanStack Query vocabulary (`isPending` / `isError` / `data`) instead of the legacy `PromiseStage` enum.
-
 ### Error Handling in Components
 Follow the pattern in `app.tsx` for error boundaries:
 - Check for `HttpException` with specific status codes
@@ -210,7 +204,7 @@ If you find yourself copying a function/component and changing one word, stop an
 
 ## Code Style
 - Use descriptive variable names in callbacks: `snapshot => snapshot.price`, not `s => s.price`
-- Component and type names should be generic where possible — `PaymentIframe` not `RguestPaymentIframe`, since the implementation detail may change
+- Component and type names should be generic where possible — `PaymentFrame` not `RguestPaymentIframe`, since the implementation detail may change
 
 ## Styling Approach
 

@@ -5,7 +5,7 @@ import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/new-ordering.ts';
 import type { IPaymentIdentity } from './payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
-import { PaymentIframe } from '../components/pages/order/payment/payment-iframe.tsx';
+import { PaymentFrameModal } from '../components/pages/order/payment/payment-frame-modal.tsx';
 import type { Nullable } from '@msdining/common/models/util';
 
 const paymentPopupId = Symbol('order-cafe-payment');
@@ -79,7 +79,7 @@ export const useCafePaymentFlow = ({
 
             openPopup({
                 id:   paymentPopupId,
-                body: <PaymentIframe
+                body: <PaymentFrameModal
                     iframeUrl={prepareResult.iframeUrl}
                     onPaymentComplete={async (paymentResult) => {
                         setHasPaid(true);
