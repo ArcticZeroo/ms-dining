@@ -6,13 +6,6 @@ export interface IPaymentSuccessResult {
     cardInfo: IPaymentCardInfo;
 }
 
-export interface IPaymentIframeProps {
-    iframeUrl: string;
-    onPaymentComplete: (result: IPaymentSuccessResult) => Promise<void>;
-    onPaymentError: (error: string) => void;
-    onClose: () => void;
-}
-
 const FrameCardInfoSchema = z.object({
     cardIssuer:          z.string(),
     accountNumberMasked: z.string(),

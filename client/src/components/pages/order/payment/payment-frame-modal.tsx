@@ -1,13 +1,19 @@
 import React, { useCallback, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Modal } from '../../../popup/modal.tsx';
-import { type IPaymentIframeProps, type IPaymentSuccessResult } from '../../../../util/payment-iframe.js';
+import { type IPaymentSuccessResult } from '../../../../util/payment-iframe.js';
 import { PaymentFormBody } from './payment-form-body.js';
 import { PaymentCompletionBody } from './payment-completion-body.js';
 
 import './payment-iframe.css';
 
-export const PaymentFrameModal: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onPaymentError, onClose }) => {
+export interface IPaymentIframeProps {
+    iframeUrl: string;
+    onPaymentComplete: (result: IPaymentSuccessResult) => Promise<void>;
+    onClose: () => void;
+}
+
+export const PaymentFrameModal: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onClose }) => {
     const lastPaymentResultRef = useRef<IPaymentSuccessResult | null>(null);
 
     const orderCompletionState = useMutation<void, Error, IPaymentSuccessResult>({
@@ -35,7 +41,6 @@ export const PaymentFrameModal: React.FC<IPaymentIframeProps> = ({ iframeUrl, on
                     <PaymentFormBody
                         iframeUrl={iframeUrl}
                         onPaymentCancelled={onClose}
-                        onPaymentError={onPaymentError}
                         onPaymentSuccess={onPaymentSuccess}
                     />
                 }

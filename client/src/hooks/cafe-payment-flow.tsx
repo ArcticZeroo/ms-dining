@@ -92,9 +92,6 @@ export const useCafePaymentFlow = ({
                         });
                         closePopup();
                     }}
-                    onPaymentError={() => {
-                        // rGuest errors are displayed within the iframe popup itself.
-                    }}
                     onClose={closePopup}
                 />,
             });

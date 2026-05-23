@@ -7,19 +7,17 @@ const FRAME_LOAD_TIMEOUT_MS = 15_000;
 
 interface IPaymentFormBodyProps {
     iframeUrl: string;
-    onPaymentError: (message: string) => void;
     onPaymentCancelled: () => void;
     onPaymentSuccess: (result: IPaymentSuccessResult) => void;
 }
 
 export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
     iframeUrl,
-    onPaymentError,
     onPaymentCancelled,
     onPaymentSuccess
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [iframeError, setIframeError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const onFrameMessage = useCallback((event: MessageEvent) => {
         if (event.origin !== 'https://pay.rguest.com' && event.origin !== window.location.origin) {
@@ -33,7 +31,7 @@ export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
         }
 
         if (result.type === 'error') {
-            onPaymentError(result.message);
+            setError(result.message);
             return;
         }
 
@@ -50,14 +48,14 @@ export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
         }
 
         throw new Error('Unexpected result type - should never be hit');
-    }, [onPaymentCancelled, onPaymentError, onPaymentSuccess]);
+    }, [onPaymentCancelled, onPaymentSuccess]);
 
     return (
         <>
-            {iframeError && (
+            {error && (
                 <div className="payment-error">
-                    <div>{iframeError}</div>
-                    <button className="default-container" onClick={() => setIframeError(null)}>
+                    <div>{error}</div>
+                    <button className="default-container" onClick={() => setError(null)}>
                         Dismiss
                     </button>
                 </div>
@@ -74,8 +72,8 @@ export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
                     title="Payment Form"
                     sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
                     loadTimeoutMs={FRAME_LOAD_TIMEOUT_MS}
-                    onError={() => setIframeError('Payment form encountered an error. Please refresh the page and try again.')}
-                    onLoadTimeout={() => setIframeError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.')}
+                    onError={() => setError('Payment form encountered an error. Please refresh the page and try again.')}
+                    onLoadTimeout={() => setError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.')}
                     onMessage={onFrameMessage}
                     onLoadComplete={() => setIsLoading(false)}
                 />
