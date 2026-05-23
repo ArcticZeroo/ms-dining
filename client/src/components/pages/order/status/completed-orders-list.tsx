@@ -4,6 +4,7 @@ import { ApplicationContext } from '../../../../context/app.ts';
 import { getViewName } from '../../../../util/cafe.ts';
 import { formatEstimatedReadyTime } from '../../../../util/order.ts';
 import { formatTimeToHoursMinutes } from '../../../../util/date.js';
+import { CompletedOrderItemsTable } from './completed-order-items-table.tsx';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrderSummary[];
@@ -32,6 +33,12 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                         <div>Order #{order.buyOnDemandOrderNumber}</div>
                         <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
                         <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
+                        <CompletedOrderItemsTable
+                            items={order.items}
+                            subtotal={order.subtotal}
+                            tax={order.tax}
+                            total={order.total}
+                        />
                     </div>
                 );
             })}
