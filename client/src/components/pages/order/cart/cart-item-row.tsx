@@ -1,11 +1,9 @@
 import React from 'react';
-import { formatPrice } from '../../../../util/cart.ts';
-import { CartItemModifiers } from './cart-item-modifiers.tsx';
 import type { IDisplayCartItem } from '../../../../store/zustand/server-cart.ts';
 import { useIsCartItemBusy } from '../../../../store/queries/server-cart.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { classNames } from '../../../../util/react.js';
-import { useCartItemPrice } from '../../../../hooks/cart.js';
+import { CartItemDetailCells } from './cart-item-detail-cells.tsx';
 
 const MAX_QUANTITY = 99;
 
@@ -53,7 +51,6 @@ const CartItemRow: React.FC<ICartItemProps> = ({
     const isEffectivelyReadOnly = readOnly || !item.isAvailable || isPending || isBeingRemoved;
     const canDecreaseQuantity = !isEffectivelyReadOnly && item.quantity > 1;
     const canIncreaseQuantity = !isEffectivelyReadOnly && item.quantity < MAX_QUANTITY;
-    const price = useCartItemPrice(item);
 
     const onDecreaseQuantity = () => {
         if (!canDecreaseQuantity) {
@@ -120,33 +117,7 @@ const CartItemRow: React.FC<ICartItemProps> = ({
                     )
                 }
             </td>
-            <td className="quantity">
-                {item.quantity}x
-            </td>
-            <td className="name">
-                {
-                    showFullDetails && (
-                        <div className="full-details">
-                            <span>
-                                {item.menuItem.name}
-                            </span>
-                            {!item.isAvailable && <span className="cart-item-unavailable">Unavailable</span>}
-                            <CartItemModifiers item={item}/>
-                        </div>
-                    )
-                }
-                {
-                    !showFullDetails && (
-                        <>
-                            {item.menuItem.name}
-                            {!item.isAvailable && <span className="cart-item-unavailable"> (Unavailable)</span>}
-                        </>
-                    )
-                }
-            </td>
-            <td className="price">
-                {formatPrice(price)}
-            </td>
+            <CartItemDetailCells item={item} showFullDetails={showFullDetails}/>
         </tr>
     );
 };

@@ -1,7 +1,7 @@
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import React from 'react';
 import { useRemoveCartItemMutation } from '../../../../store/queries/server-cart.ts';
-import { useCartItemPrice } from '../../../../hooks/cart.js';
+import { CartItemDetailCells } from './cart-item-detail-cells.tsx';
 
 interface IMissingCartItemRowProps {
     item: ICartItemRecord;
@@ -9,7 +9,6 @@ interface IMissingCartItemRowProps {
 
 export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ item }) => {
     const removeItem = useRemoveCartItemMutation();
-    const price = useCartItemPrice(item);
 
     return (
         <tr className="cart-item unavailable">
@@ -24,9 +23,7 @@ export const MissingCartItemRow: React.FC<IMissingCartItemRowProps> = ({ item })
                     </button>
                 </div>
             </td>
-            <td className="quantity">{item.quantity}x</td>
-            <td className="name">{item.menuItem.name}</td>
-            <td className="price">{price}</td>
+            <CartItemDetailCells item={item} showFullDetails={true}/>
         </tr>
     );
 };
