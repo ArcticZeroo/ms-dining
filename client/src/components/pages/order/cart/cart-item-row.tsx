@@ -1,7 +1,7 @@
-import type { ICartItemRecord } from '@msdining/common/dist/models/cart.js';
 import React from 'react';
 import { calculatePrice, formatPrice } from '../../../../util/cart.ts';
 import { CartItemModifiers } from './cart-item-modifiers.tsx';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 
 const MAX_QUANTITY = 99;
 

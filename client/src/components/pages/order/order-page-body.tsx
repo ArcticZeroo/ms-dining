@@ -2,20 +2,18 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { usePaymentIdentity } from '../../../hooks/payment-identity.ts';
-import { useCompletedOrdersTodayQuery } from '../../../store/queries/new-ordering.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from './payment/order-cafe-card.tsx';
-import { CompletedOrdersList } from './status/completed-orders-list.tsx';
 import { PaymentInfoForm } from './payment/payment-info-form.tsx';
+import { CompletedOrdersView } from './completed-orders-view.js';
 
 import './order-page.css';
 
 export const OrderPageBody = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
-    const completedOrdersQuery = useCompletedOrdersTodayQuery();
 
     const snapshotCallbacks = useMemo(() => ({
         removeItem: snapshot.removeItem,
@@ -49,17 +47,10 @@ export const OrderPageBody = () => {
     if (!hasCartItems) {
         return (
             <div id="order-checkout" className="flex-col">
-                <div className="card dark-blue">
+                <div className="card yellow text-center">
                     Your cart is empty. Add items from a cafe menu to get started.
                 </div>
-                {completedOrdersQuery.data != null && completedOrdersQuery.data.length > 0 && (
-                    <>
-                        <div className="card dark-blue">
-                            <div className="title">Today&apos;s Orders</div>
-                        </div>
-                        <CompletedOrdersList orders={completedOrdersQuery.data}/>
-                    </>
-                )}
+                <CompletedOrdersView/>
             </div>
         );
     }
@@ -86,9 +77,11 @@ export const OrderPageBody = () => {
                     />
                 ))}
             </div>
-            <Link to="/order/done" className="default-container default-button">
-                View Today&apos;s Orders
-            </Link>
+            <div className="centered-content">
+                <Link to="/order/done" className="default-container default-button">
+                    View Your Orders From Today
+                </Link>
+            </div>
         </div>
     );
 };

@@ -1,12 +1,4 @@
-/**
- * Format a wait time range as a human-readable string.
- */
-export const formatWaitTime = (minMinutes: number, maxMinutes: number): string => {
-    if (minMinutes === maxMinutes) {
-        return `${minMinutes} minute${minMinutes === 1 ? '' : 's'}`;
-    }
-    return `${minMinutes} - ${maxMinutes} minutes`;
-};
+import { formatTimeToHoursMinutes } from './date.js';
 
 /**
  * Compute estimated ready time from a completion time + wait time range.
@@ -29,10 +21,10 @@ export const formatEstimatedReadyTime = (
     waitTimeMax: number,
 ): string => {
     const { earliest, latest } = getEstimatedReadyTime(completedAt, waitTimeMin, waitTimeMax);
-    const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
     if (earliest.getTime() === latest.getTime()) {
-        return formatTime(earliest);
+        return formatTimeToHoursMinutes(earliest);
     }
-    return `${formatTime(earliest)} - ${formatTime(latest)}`;
+
+    return `${formatTimeToHoursMinutes(earliest)} - ${formatTimeToHoursMinutes(latest)}`;
 };

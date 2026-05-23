@@ -1,8 +1,9 @@
-import type { ICafeOrderSummary } from '@msdining/common/dist/models/order.js';
+import type { ICafeOrderSummary } from '@msdining/common/models/order';
 import React, { useContext } from 'react';
 import { ApplicationContext } from '../../../../context/app.ts';
 import { getViewName } from '../../../../util/cafe.ts';
-import { formatEstimatedReadyTime, formatWaitTime } from '../../../../util/order.ts';
+import { formatEstimatedReadyTime } from '../../../../util/order.ts';
+import { formatTimeToHoursMinutes } from '../../../../util/date.js';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrderSummary[];
@@ -20,7 +21,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
     }
 
     return (
-        <div className="order-done-list">
+        <div className="flex flex-center flex-wrap">
             {orders.map((order) => {
                 const view = viewsById.get(order.cafeId);
                 const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
@@ -29,7 +30,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                     <div key={order.id} className="card dark-blue">
                         <div className="title">{cafeName}</div>
                         <div>Order #{order.buyOnDemandOrderNumber}</div>
-                        <div>Estimated wait: {formatWaitTime(order.waitTimeMin, order.waitTimeMax)}</div>
+                        <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
                         <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
                     </div>
                 );

@@ -1,8 +1,7 @@
-import type { ICartItemRecord } from '@msdining/common/models/cart';
 import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ApplicationContext } from '../../../../context/app.ts';
-import { useCartItemActions, type ISnapshotCallbacks } from '../../../../hooks/cart-item-actions.tsx';
+import { type ISnapshotCallbacks, useCartItemActions } from '../../../../hooks/cart-item-actions.tsx';
 import { usePopupCloserAlways, usePopupOpener } from '../../../../hooks/popup.ts';
 import type { IPaymentIdentity } from '../../../../hooks/payment-identity.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../../../../store/queries/new-ordering.ts';
@@ -11,7 +10,8 @@ import { getViewName } from '../../../../util/cafe.ts';
 import { getErrorMessage } from '../../../../util/mutation.ts';
 import { formatWaitTime } from '../../../../util/order.ts';
 import { CartItemRow } from '../cart/cart-item-row.tsx';
-import { PaymentIframe, type IRguestPaymentResult } from './payment-iframe.tsx';
+import { type IRguestPaymentResult, PaymentIframe } from './payment-iframe.tsx';
+import type { ICartItemRecord } from '@msdining/common/models/cart';
 
 const paymentPopupId = Symbol('order-cafe-payment');
 
@@ -121,10 +121,8 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     }, [cafeId, closePopup, completeOrder, isPayEnabled, isLocalBusy, items, openPopup, paymentIdentity, preparePayment]);
 
     return (
-        <div className="card dark-blue order-page-cafe">
-            <div className="order-page-cafe-header">
-                <div className="title">{cafeName}</div>
-            </div>
+        <div className="card">
+            <div className="title">{cafeName}</div>
             <table className="cart-contents">
                 <tbody>
                     {items.map((item) => (

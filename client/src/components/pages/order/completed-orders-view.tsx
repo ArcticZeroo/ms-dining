@@ -4,7 +4,7 @@ import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { CompletedOrdersList } from './status/completed-orders-list.tsx';
 
-export const OrderDonePage = () => {
+export const CompletedOrdersView = () => {
     const ordersQuery = useCompletedOrdersTodayQuery();
 
     if (ordersQuery.isPending) {
@@ -33,11 +33,10 @@ export const OrderDonePage = () => {
 
     return (
         <div id="order-checkout" className="flex-col">
-            <div className="card dark-blue">
-                <div className="title">Today&apos;s Completed Orders</div>
-                <div>Review your cafe receipts and estimated ready times below.</div>
+            <div className="card">
+                <div className="title text-center">Your Orders Today</div>
+                <CompletedOrdersList orders={ordersQuery.data}/>
             </div>
-            <CompletedOrdersList orders={ordersQuery.data}/>
         </div>
     );
 };
