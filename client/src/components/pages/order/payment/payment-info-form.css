@@ -1,14 +1,8 @@
-#payment-info {
-
-}
-
 #payment-info .field {
-    align-self: stretch;
     justify-content: space-between;
     padding: var(--default-padding);
     border-radius: var(--default-padding);
     transition: background-color 0.25s ease;
-    background: var(--color-payment-info-field);
 }
 
 #payment-info .field.invalid {

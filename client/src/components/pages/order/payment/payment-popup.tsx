@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal } from '../../../popup/modal.tsx';
 import { type IPaymentSuccessResult } from '../../../../util/payment-iframe.js';
-import { PaymentFormBody } from './payment-form-body.js';
+import { PaymentPopupBody } from './payment-popup-body.js';
 
 import './payment-iframe.css';
 
@@ -16,7 +16,7 @@ export const PaymentPopup: React.FC<IPaymentPopupProps> = ({ iframeUrl, onPaymen
         <Modal
             title="Enter Payment Details"
             body={
-                <PaymentFormBody
+                <PaymentPopupBody
                     iframeUrl={iframeUrl}
                     onPaymentCancelled={onClose}
                     onPaymentSuccess={onPaymentComplete}

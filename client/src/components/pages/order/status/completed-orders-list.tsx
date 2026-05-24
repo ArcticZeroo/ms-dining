@@ -62,7 +62,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                     const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
 
                     return (
-                        <div key={order.id} className="card dark-blue">
+                        <div key={order.id} className="card bg-raised-2">
                             <div className="title">
                                 {
                                     view != null

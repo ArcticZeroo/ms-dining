@@ -19,7 +19,7 @@ const isAllowedMessageOrigin = (origin: string) => {
     return window.location.hostname === 'localhost' && window.location.origin === origin;
 }
 
-export const PaymentFormBody: React.FC<IPaymentFormBodyProps> = ({
+export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
     iframeUrl,
     onPaymentCancelled,
     onPaymentSuccess

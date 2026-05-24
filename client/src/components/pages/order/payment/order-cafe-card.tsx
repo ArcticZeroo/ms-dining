@@ -56,22 +56,24 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     const isReadOnly = paymentState.status !== 'ready-to-pay';
 
     return (
-        <div className={classNames('card', hasUnavailableItems && 'error')}>
-            <div className="title">
-                {
-                    view != null
-                        ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
-                        : cafeName
-                }
+        <div className={classNames('card order-cafe-card', hasUnavailableItems && 'error')}>
+            <div className="flex-col">
+                <div className="title text-center">
+                    {
+                        view != null
+                            ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
+                            : cafeName
+                    }
+                </div>
+                <OrderCafeItemsTable
+                    items={items}
+                    readOnly={isReadOnly}
+                    totalPrice={totalPrice}
+                    onRemove={onRemove}
+                    onEdit={onEdit}
+                    onChangeQuantity={onChangeQuantity}
+                />
             </div>
-            <OrderCafeItemsTable
-                items={items}
-                readOnly={isReadOnly}
-                totalPrice={totalPrice}
-                onRemove={onRemove}
-                onEdit={onEdit}
-                onChangeQuantity={onChangeQuantity}
-            />
             <OrderCafeFooter
                 paymentState={paymentState}
                 totalQuantity={totalQuantity}

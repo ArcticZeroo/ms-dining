@@ -10,7 +10,7 @@ export const CompletedOrdersView = () => {
     if (ordersQuery.isPending) {
         return (
             <div id="order-checkout" className="flex-col">
-                <div className="flex flex-justify-center">
+                <div className="card flex flex-justify-center">
                     <HourglassLoadingSpinner/>
                     <span>Loading completed orders...</span>
                 </div>

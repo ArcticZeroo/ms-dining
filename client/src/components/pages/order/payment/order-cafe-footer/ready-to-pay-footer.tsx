@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatPrice } from '../../../../../util/cart.ts';
 import { usePaymentIdentityContext } from '../../../../../context/payment-identity.ts';
-import { pluralizeWithCount } from '../../../../../util/string.ts';
+import { pluralize } from '../../../../../util/string.ts';
 
 interface IReadyToPayFooterProps {
     notice?: string;
@@ -27,7 +27,7 @@ export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, tot
     const { isValid: isIdentityValid } = usePaymentIdentityContext();
 
     return (
-        <div className="order-cafe-footer">
+        <div className="flex-col">
             {
                 notice && (
                     <div className="order-cafe-notice">
@@ -43,7 +43,7 @@ export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, tot
                 )
             }
             <div className="flex flex-between">
-                <span>{pluralizeWithCount('item', totalQuantity)}</span>
+                <span>{totalQuantity} {pluralize('item', totalQuantity)}</span>
                 <button
                     className="default-container"
                     disabled={!isIdentityValid || hasUnavailableItems}

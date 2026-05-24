@@ -49,7 +49,7 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
     return (
         <label
             htmlFor={id}
-            className={classNames('field flex-col flex-grow', shouldShowInvalid && 'invalid')}
+            className={classNames('card field flex-col', shouldShowInvalid && 'invalid')}
             title={validationState.isValid ? undefined : validationState.errorMessage}
         >
             <div className="flex-col field-info">
@@ -71,6 +71,7 @@ export const PaymentField: React.FC<IPaymentFieldWithValidationProps | IPaymentF
             </div>
             <input
                 id={id}
+                className="default-container"
                 type={inputType}
                 value={rawValue}
                 onChange={event => onValueChanged(event.target.value)}
