@@ -1,5 +1,5 @@
 import { usePrismaWrite } from '../client.js';
-import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
+import { SERVICE_ERROR_CODES, ServiceError } from '../../../rpc/errors.js';
 import { CafeOrderSession } from '../../cafe/session/order.js';
 import { FakeCafeOrderSession } from '../../cafe/session/fake-order-session.js';
 import type { IOrderSession } from '../../cafe/session/order-session.js';
@@ -19,6 +19,7 @@ import type {
 } from '@msdining/common/models/order';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { phone } from 'phone';
+import { getTodayDateString } from '@msdining/common/util/date-util';
 
 const orderLog = getNamespaceLogger('Order');
 const isFakeOrdering = process.env.FAKE_ORDERING === 'true';
@@ -29,36 +30,60 @@ if (isFakeOrdering) {
 
 const SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
-const PENDING_ORDER_CLEANUP_INTERVAL_MS = SESSION_TTL_MS;
+const ORPHAN_CLEANUP_INTERVAL_MS = 30 * 60 * 1000;
 
-const liveSessions = new LockedExpiringMap<string, IOrderSession>(SESSION_TTL_MS);
+const ACTIVE_ORDER_SESSIONS = new LockedExpiringMap<string, IOrderSession>(SESSION_TTL_MS);
 
+// Refresh BoD tokens for live sessions; evict sessions from a previous date
 setInterval(() => {
-	const entries = [...liveSessions.entries()];
-	if (entries.length === 0) return;
+	const entries = [...ACTIVE_ORDER_SESSIONS.entries()];
+	if (entries.length === 0) {
+		return;
+	}
 
-	orderLog.info(`Refreshing tokens for ${entries.length} live session(s)...`);
+	const today = getTodayDateString();
 	Promise.all(
-		entries.map(([pendingOrderId]) =>
-			liveSessions.updateWithoutRefresh(pendingOrderId, async (session) => {
-				if (!session) return undefined;
+		entries.map(([pendingOrderId, liveSession]) => {
+			if (liveSession.createdDateString !== today) {
+				orderLog.info(`Evicting stale session ${pendingOrderId} (created ${liveSession.createdDateString}, today is ${today})`);
+				return ACTIVE_ORDER_SESSIONS.delete(pendingOrderId);
+			}
+
+			return ACTIVE_ORDER_SESSIONS.peek(pendingOrderId, async (liveSession) => {
+				if (!liveSession) {
+					return;
+				}
+
 				try {
-					await session.client.refreshLogin();
+					await liveSession.client.refreshLogin();
 				} catch (err) {
 					orderLog.error(`Failed to refresh token for session ${pendingOrderId}:`, err);
 				}
-				return session;
-			}),
-		),
+			});
+		}),
 	).catch(err => orderLog.error('Token refresh sweep failed:', err));
 }, TOKEN_REFRESH_INTERVAL_MS);
 
+// Clean up orphaned pending orders: any pending order in the DB that does
+// NOT have a corresponding live session is stale (session expired or server
+// restarted).
 setInterval(() => {
-	const olderThan = new Date(Date.now() - SESSION_TTL_MS);
-	usePrismaWrite(prisma => prisma.pendingCafeOrder.deleteMany({
-		where: { createdAt: { lt: olderThan } },
-	})).catch(err => orderLog.error('Pending order cleanup failed:', err));
-}, PENDING_ORDER_CLEANUP_INTERVAL_MS);
+	const liveSessionIds = Array.from(ACTIVE_ORDER_SESSIONS.keys());
+
+	usePrismaWrite(async prisma => {
+		const orphanedOrders = await prisma.pendingCafeOrder.deleteMany({
+			where: {
+				id: {
+					notIn: liveSessionIds
+				}
+			}
+		});
+
+		if (orphanedOrders.count > 0) {
+			orderLog.info(`Cleaned up ${orphanedOrders.count} orphaned pending order(s)`);
+		}
+	}).catch(err => orderLog.error('Orphaned pending order cleanup failed:', err));
+}, ORPHAN_CLEANUP_INTERVAL_MS);
 
 const groupModifierChoices = (modifiers: ISerializedModifier[]): Map<string, Set<string>> => {
 	const result = new Map<string, Set<string>>();
@@ -153,18 +178,18 @@ export abstract class OrderOrchestrator {
 
 		// If there's already a live session for this pending order, reuse it
 		if (isExisting) {
-			const existingSession = await liveSessions.get(pendingOrderId);
-			if (existingSession) {
-				const siteToken = existingSession.cardProcessorToken;
-				const iframeUrl = existingSession.getCardProcessorUrl(iframeCssUrl);
-				if (siteToken && existingSession.orderId && existingSession.orderNumber) {
+			const existing = await ACTIVE_ORDER_SESSIONS.get(pendingOrderId);
+			if (existing && existing.createdDateString === getTodayDateString()) {
+				const siteToken = existing.cardProcessorToken;
+				const iframeUrl = existing.getCardProcessorUrl(iframeCssUrl);
+				if (siteToken && existing.orderId && existing.orderNumber) {
 					orderLog.info(`Reusing existing session for pending order ${pendingOrderId}`);
 					return {
 						pendingOrderId,
 						siteToken,
 						iframeUrl,
-						buyOnDemandOrderId:     existingSession.orderId,
-						buyOnDemandOrderNumber: existingSession.orderNumber,
+						buyOnDemandOrderId:     existing.orderId,
+						buyOnDemandOrderNumber: existing.orderNumber,
 						expiresAt:              new Date(Date.now() + SESSION_TTL_MS).toISOString(),
 					};
 				}
@@ -172,7 +197,7 @@ export abstract class OrderOrchestrator {
 		}
 
 		try {
-			const session = await liveSessions.getOrInsert(pendingOrderId, async () => {
+			const session = await ACTIVE_ORDER_SESSIONS.getOrInsert(pendingOrderId, async () => {
 				const createdSession = await createPopulatedSession(cafeId, toCartItems(items));
 				await createdSession.prepareForIframe(iframeCssUrl);
 				return createdSession;
@@ -218,7 +243,7 @@ export abstract class OrderOrchestrator {
 			throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Invalid phone number');
 		}
 
-		return liveSessions.peek(pendingOrderId, async (session) => {
+		return ACTIVE_ORDER_SESSIONS.peek(pendingOrderId, async (session) => {
 			if (!session) {
 				throw new ServiceError(
 					SERVICE_ERROR_CODES.BAD_REQUEST,

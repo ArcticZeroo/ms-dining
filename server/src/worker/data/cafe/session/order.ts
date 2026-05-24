@@ -17,6 +17,8 @@ import { ICafe, IMenuItemBase } from '../../../../shared/models/cafe.js';
 import { PhoneValidResult } from 'phone';
 import { MEAL_PERIOD } from '../../../../shared/constants/enum.js';
 import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
+import { getTodayDateString } from '@msdining/common/util/date-util';
+import { IOrderSession } from './order-session.js';
 
 const ORDER_TIMEZONE = 'PST8PDT';
 const DEFAULT_BIR_CONFIG = {
@@ -229,7 +231,7 @@ interface IIframeCloseOrderParams {
     cardInfo: IPaymentCardInfo;
 }
 
-export class CafeOrderSession {
+export class CafeOrderSession implements IOrderSession {
     #orderingContext: IOrderingContext = {
         onDemandTerminalId: '',
         onDemandEmployeeId: '',
@@ -261,6 +263,7 @@ export class CafeOrderSession {
     readonly #conceptIds = new Set<string>();
     // Per-concept schedule data, keyed by concept ID
     readonly #conceptDataById = new Map<string, { schedule: unknown[]; openScheduleExpression: string; closeScheduleExpression: string }>();
+    public readonly createdDateString = getTodayDateString();
 
     constructor(public client: BuyOnDemandClient, cartItems: ICartItem[]) {
         this.#cartItems = cartItems;

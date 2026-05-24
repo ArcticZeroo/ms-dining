@@ -35,6 +35,10 @@ export class LockedMap<K, V> implements ILockedMap<K, V> {
         return this.#values.entries();
     }
 
+	keys() {
+		return this.#values.keys();
+	}
+
     async has(key: K): Promise<boolean> {
         if (!this.#locks.has(key)) {
             return false;
@@ -195,6 +199,10 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 		return this.#map.deleteWhere((key, entry) => {
 			return entry.expirationTime <= Date.now() || shouldDelete(key, entry.value);
 		});
+	}
+
+	keys() {
+		return this.#map.keys();
 	}
 
 	entries(): IterableIterator<[K, V]> {

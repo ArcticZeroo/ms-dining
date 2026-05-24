@@ -5,6 +5,7 @@ import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IOrderSession } from './order-session.js';
 import type { ICafe } from '../../../../shared/models/cafe.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
+import { getTodayDateString } from '@msdining/common/util/date-util';
 
 const fakeLog = getNamespaceLogger('FakeOrder');
 
@@ -19,6 +20,7 @@ export class FakeCafeOrderSession implements IOrderSession {
     #cardProcessorToken = '';
     readonly #cafe: ICafe;
     readonly #cartItems: ICartItem[];
+    readonly createdDateString = getTodayDateString();
 
     readonly client = {
         async refreshLogin() {

@@ -17,6 +17,7 @@ export interface IOrderSession {
     readonly lastCompletedStage: SubmitOrderStage | string;
     readonly cardProcessorToken: string;
     readonly rawCartItemsForWaitTime: readonly unknown[];
+    readonly createdDateString: string;
 
     populateCart(): Promise<void>;
     prepareForIframe(iframeCssUrl: string): Promise<unknown>;
