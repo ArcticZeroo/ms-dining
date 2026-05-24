@@ -59,18 +59,16 @@ const derivePaymentState = ({
     if (isPreparing) {
         return { status: 'preparing' };
     }
-
-    let notice: string | undefined;
-
     if (prepareError) {
-        notice = getErrorMessage(prepareError, 'Failed to prepare payment');
-    } else if (completeError) {
-        notice = getErrorMessage(completeError, 'Failed to complete order. You have not been charged — any pending hold on your card will be released.');
-    } else if (hasCancelled) {
-        notice = 'Order payment cancelled. You have not been charged.';
+        return { status: 'ready-to-pay', notice: getErrorMessage(prepareError, 'Failed to prepare payment') };
     }
-
-    return { status: 'ready-to-pay', notice };
+    if (completeError) {
+        return { status: 'ready-to-pay', notice: getErrorMessage(completeError, 'Failed to complete order. You have not been charged — any pending hold on your card will be released.') };
+    }
+    if (hasCancelled) {
+        return { status: 'ready-to-pay', notice: 'Order payment cancelled. You have not been charged.' };
+    }
+    return { status: 'ready-to-pay' };
 };
 
 export const useCafePaymentFlow = ({
