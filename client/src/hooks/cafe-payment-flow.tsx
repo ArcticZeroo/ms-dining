@@ -24,13 +24,20 @@ interface IUseCafePaymentFlowParams {
 
 export interface ICafePaymentFlowResult {
     handlePay: () => void;
-    error: string | undefined;
+    notice: string | undefined;
     completionResult: ICompleteOrderResult | undefined;
     isBusy: boolean;
     isPaymentModalOpen: boolean;
 }
 
-const getError = (prepareError: Nullable<Error>, completeError: Nullable<Error>, hasPaid: boolean) => {
+interface IGetPaymentFlowErrorParams {
+    prepareError: Nullable<Error>;
+    completeError: Nullable<Error>;
+    hasPaid: boolean;
+    hasCancelled: boolean;
+}
+
+const getError = ({ prepareError, completeError, hasPaid, hasCancelled }: IGetPaymentFlowErrorParams) => {
     if (prepareError) {
         return getErrorMessage(prepareError, 'Failed to prepare payment');
     }
@@ -41,6 +48,10 @@ const getError = (prepareError: Nullable<Error>, completeError: Nullable<Error>,
         }
 
         return getErrorMessage(completeError, 'Failed to complete order');
+    }
+
+    if (hasCancelled) {
+        return 'Order payment cancelled. You have not been charged.';
     }
 
     return undefined;
@@ -60,7 +71,14 @@ export const useCafePaymentFlow = ({
     const completionResult = completeOrder.data;
     const [hasPaid, setHasPaid] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const error = getError(preparePayment.error, completeOrder.error, hasPaid);
+    const [hasCancelled, setHasCancelled] = useState(false);
+
+    const notice = getError({
+        prepareError: preparePayment.error,
+        completeError: completeOrder.error,
+        hasPaid,
+        hasCancelled
+    });
 
     const handleClosePopup = useCallback(() => {
         closePopup();
@@ -98,7 +116,10 @@ export const useCafePaymentFlow = ({
                         });
                         handleClosePopup();
                     }}
-                    onClose={handleClosePopup}
+                    onClose={() => {
+                        setHasCancelled(true);
+                        handleClosePopup();
+                    }}
                 />,
             });
         } catch {
@@ -106,5 +127,5 @@ export const useCafePaymentFlow = ({
         }
     }, [isIdentityValid, isBusy, preparePayment, completeOrder, cafeId, items, openPopup, handleClosePopup, alias, phoneNumber]);
 
-    return { handlePay, error, completionResult, isBusy, isPaymentModalOpen: isOpen };
+    return { handlePay, notice, completionResult, isBusy, isPaymentModalOpen: isOpen };
 };
