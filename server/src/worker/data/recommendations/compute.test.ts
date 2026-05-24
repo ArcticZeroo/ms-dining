@@ -40,7 +40,7 @@ import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { usePrismaWrite } from '../storage/client.js';
-import { ReviewStorageClient } from '../storage/clients/review.js';
+import { ReviewStorageClient } from '../storage/clients/review/review.js';
 import { SEARCH_THREAD_HANDLER } from '../threads/search.js';
 import {
     createIntegrationTestContext,

@@ -25,7 +25,7 @@ import { DateUtil } from '@msdining/common';
 import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
 import { usePrismaClient } from '../../worker/data/storage/client.js';
-import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu.js';
+import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import {

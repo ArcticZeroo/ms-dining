@@ -1,19 +1,19 @@
 import { InProcessHandler } from '../../../worker/rpc/handler.js';
-import { searchQueryServiceCommands } from '../../../worker/data/storage/clients/search-query-commands.js';
-import { tagServiceCommands } from '../../../worker/data/storage/clients/tags-commands.js';
-import { cafeServiceCommands } from '../../../worker/data/storage/clients/cafe-commands.js';
-import { stationServiceCommands } from '../../../worker/data/storage/clients/station-commands.js';
-import { userServiceCommands } from '../../../worker/data/storage/clients/user-commands.js';
-import { stationThemeServiceCommands } from '../../../worker/data/storage/clients/station-theme-commands.js';
+import { searchQueryServiceCommands } from '../../../worker/data/storage/clients/search/search-query-commands.js';
+import { tagServiceCommands } from '../../../worker/data/storage/clients/tags/tags-commands.js';
+import { cafeServiceCommands } from '../../../worker/data/storage/clients/cafe/cafe-commands.js';
+import { stationServiceCommands } from '../../../worker/data/storage/clients/station/station-commands.js';
+import { userServiceCommands } from '../../../worker/data/storage/clients/user/user-commands.js';
+import { stationThemeServiceCommands } from '../../../worker/data/storage/clients/station/station-theme-commands.js';
 import { sessionServiceCommands } from '../../util/session-store.js';
-import { reviewServiceCommands } from '../../../worker/data/storage/clients/review-commands.js';
-import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups-commands.js';
-import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item-commands.js';
-import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu-commands.js';
-import { searchServiceCommands } from '../../../worker/data/storage/clients/search-service-commands.js';
-import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/menu-analytics-commands.js';
-import { cartServiceCommands } from '../../../worker/data/storage/clients/cart-commands.js';
-import { orderServiceCommands } from '../../../worker/data/storage/clients/order-commands.js';
+import { reviewServiceCommands } from '../../../worker/data/storage/clients/review/review-commands.js';
+import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups/groups-commands.js';
+import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item/menu-item-commands.js';
+import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu/daily-menu-commands.js';
+import { searchServiceCommands } from '../../../worker/data/storage/clients/search/search-service-commands.js';
+import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/analytics/menu-analytics-commands.js';
+import { cartServiceCommands } from '../../../worker/data/storage/clients/cart/cart-commands.js';
+import { orderServiceCommands } from '../../../worker/data/storage/clients/order/order-commands.js';
 
 /**
  * Single source of truth for which worker-side service command bags are

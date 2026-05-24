@@ -29,7 +29,7 @@ import { DateUtil } from '@msdining/common';
 import { CafeMenuResponseSchema } from '@msdining/common/models/http';
 import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
-import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu.js';
+import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,

@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../../shared/constants/config.js';
 import { computeHashFromExistingImage } from '../../cafe/image/thumbnail.js';
-import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
+import { MenuItemStorageClient } from '../../storage/clients/menu-item/menu-item.js';
 import { saveManifest } from '../../cafe/image/manifest.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { IRuntimeMigration } from '../types.js';

@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import {
 	menuItemToGroupMember,
 	stationToGroupMember
-} from '../../../../worker/data/storage/clients/groups.js';
+} from '../../../../worker/data/storage/clients/groups/groups.js';
 import { attachRouter, requireAdmin } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import {

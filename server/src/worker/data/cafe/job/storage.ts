@@ -1,6 +1,6 @@
 import { ICafe, ICafeStation } from '../../../../shared/models/cafe.js';
-import { StationStorageClient } from '../../storage/clients/station.js';
-import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
+import { StationStorageClient } from '../../storage/clients/station/station.js';
+import { MenuItemStorageClient } from '../../storage/clients/menu-item/menu-item.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../queues/embeddings.js';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../queues/search-tags.js';
 import { usePrismaTransaction } from '../../storage/client.js';
