@@ -24,6 +24,7 @@ export type IPreparePaymentResult = z.infer<typeof PreparePaymentResultSchema>;
 
 export const CompleteOrderResultSchema = z.object({
     buyOnDemandOrderNumber: z.string(),
+    buyOnDemandOrderId:     z.string(),
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
     completedAt:            z.string().transform(s => new Date(s)),
@@ -46,6 +47,7 @@ export type ICafeOrderItem = z.infer<typeof CafeOrderItemSchema>;
 export const CafeOrderSchema = z.object({
     id:                     z.string(),
     cafeId:                 z.string(),
+    buyOnDemandOrderId:     z.string(),
     buyOnDemandOrderNumber: z.string(),
     subtotal:               z.number(),
     tax:                    z.number(),
