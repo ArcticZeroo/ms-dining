@@ -12,7 +12,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -20,18 +19,15 @@ after(async () => {
 });
 
 test('services.data.session is the typed client (not the storage class)', () => {
-    ctx.installServices();
     assert.equal(getServices().data.session, sessionService);
 });
 
 test('get returns undefined for nonexistent session', async () => {
-    ctx.installServices();
     const session = await getServices().data.session.get({ sessionId: `missing-${randomUUID()}` });
     assert.equal(session, undefined);
 });
 
 test('set + get round-trip', async () => {
-    ctx.installServices();
     const sessionId = `session-${randomUUID()}`;
     const user = await getServices().data.user.createUser({
         user: {
@@ -57,7 +53,6 @@ test('set + get round-trip', async () => {
 });
 
 test('destroy removes a session', async () => {
-    ctx.installServices();
     const sessionId = `session-${randomUUID()}`;
     const user = await getServices().data.user.createUser({
         user: {
@@ -84,7 +79,6 @@ test('destroy removes a session', async () => {
 });
 
 test('set without passport.user data is a no-op', async () => {
-    ctx.installServices();
     const sessionId = `session-${randomUUID()}`;
 
     await getServices().data.session.set({

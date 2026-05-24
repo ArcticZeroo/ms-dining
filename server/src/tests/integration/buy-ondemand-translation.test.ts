@@ -40,7 +40,6 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
@@ -94,7 +93,6 @@ async function buildTranslatingClient(): Promise<BuyOnDemandClient> {
 // ─── Direct-client translation pipeline ─────────────────────────────────
 
 test('translates a real BoD error code (CONCEPTS_NOT_AVAILABLE) via the default fixture', async () => {
-    ctx.installServices();
     const client = await buildTranslatingClient();
 
     ctx.server.injectBoDError({
@@ -117,7 +115,6 @@ test('translates a real BoD error code (CONCEPTS_NOT_AVAILABLE) via the default 
 });
 
 test('translates a custom code seeded via setTranslation', async () => {
-    ctx.installServices();
     ctx.server.setTranslation('SOMETHING_BROKE', 'Something specific broke for the test.');
 
     const client = await buildTranslatingClient();
@@ -140,7 +137,6 @@ test('translates a custom code seeded via setTranslation', async () => {
 });
 
 test('translation persists across multiple requests on the same client (cache works)', async () => {
-    ctx.installServices();
     ctx.server.setTranslation('FLAKY_THING', 'The flaky thing happened.');
 
     const client = await buildTranslatingClient();
@@ -169,7 +165,6 @@ test('translation persists across multiple requests on the same client (cache wo
 });
 
 test('falls back to the raw code when translation fetch fails', async () => {
-    ctx.installServices();
     ctx.server.injectFailure({
         method:      'GET',
         pathPattern: /\/translation\//,
@@ -197,7 +192,6 @@ test('falls back to the raw code when translation fetch fails', async () => {
 });
 
 test('translation map miss surfaces the raw code as the user message', async () => {
-    ctx.installServices();
     // Default fixture is in place; CODE_NOT_IN_FIXTURE is not.
     const client = await buildTranslatingClient();
 
@@ -217,7 +211,6 @@ test('translation map miss surfaces the raw code as the user message', async () 
 });
 
 test('non-translatable response body (not BoD-shape) does NOT become a BuyOnDemandError', async () => {
-    ctx.installServices();
     ctx.server.injectFailure({
         method:      'POST',
         pathPattern: /\/orders$/,
@@ -238,7 +231,6 @@ test('non-translatable response body (not BoD-shape) does NOT become a BuyOnDema
 });
 
 test('JSON body without a `message` field falls through to the generic error', async () => {
-    ctx.installServices();
     ctx.server.injectFailure({
         method:      'POST',
         pathPattern: /\/orders$/,
@@ -258,7 +250,6 @@ test('JSON body without a `message` field falls through to the generic error', a
 });
 
 test('translateErrors:false (default) preserves the legacy generic error', async () => {
-    ctx.installServices();
     const client = await createBuyOnDemandClient(cafe());   // no translateErrors
 
     ctx.server.injectBoDError({
@@ -278,7 +269,6 @@ test('translateErrors:false (default) preserves the legacy generic error', async
 // ─── End-to-end via the Koa webserver ──────────────────────────────────
 
 test('webserver: order failure surfaces as 502 with translated message + code', async () => {
-    ctx.installServices();
     // Set up a custom translation so this test doesn't depend on the
     // CONCEPTS_NOT_AVAILABLE fixture entry — that one's exercised by the
     // direct-client test above.

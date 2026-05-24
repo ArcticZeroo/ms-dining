@@ -124,7 +124,6 @@ const createMenuItem = ({
 before(async () => {
     await acquireTestLock();
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
     resetMenuItemCache();
 
     await getServices().data.cafe.resetCache({});
@@ -142,12 +141,10 @@ after(async () => {
 });
 
 test('services.data.menuItem is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.menuItem, menuItemService);
 });
 
 test('retrieveMenuItem returns null for nonexistent id', async () => {
-    ctx.installServices();
     resetMenuItemCache();
 
     const result = await getServices().data.menuItem.retrieveMenuItem({ id: 'no-such-menu-item' });
@@ -155,7 +152,6 @@ test('retrieveMenuItem returns null for nonexistent id', async () => {
 });
 
 test('saveMenuItem + retrieveMenuItem round-trip', async () => {
-    ctx.installServices();
 
     const menuItem = createMenuItem({
         id:   'menu-item-round-trip',
@@ -184,7 +180,6 @@ test('saveMenuItem + retrieveMenuItem round-trip', async () => {
 });
 
 test('retrieveAllMenuItemsWithoutGroup includes saved items without a groupId', async () => {
-    ctx.installServices();
 
     const menuItem = createMenuItem({
         id:   'menu-item-without-group',
@@ -198,7 +193,6 @@ test('retrieveAllMenuItemsWithoutGroup includes saved items without a groupId', 
 });
 
 test('getCachedMenuItemNames returns names of saved items', async () => {
-    ctx.installServices();
 
     const menuItem = createMenuItem({
         id:   'menu-item-cached-name',
@@ -212,7 +206,6 @@ test('getCachedMenuItemNames returns names of saved items', async () => {
 });
 
 test('getTopSearchTags returns an array', async () => {
-    ctx.installServices();
 
     const menuItem = createMenuItem({
         id:         'menu-item-top-tags',
@@ -228,7 +221,6 @@ test('getTopSearchTags returns an array', async () => {
 });
 
 test('updateThumbnailHash does not throw and the item remains retrievable', async () => {
-    ctx.installServices();
 
     const menuItem = createMenuItem({
         id:   'menu-item-thumbnail',
@@ -250,7 +242,6 @@ test('updateThumbnailHash does not throw and the item remains retrievable', asyn
 });
 
 test('retrieveFirstMenuItemAppearance returns a date string after publishing the item', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-16';
     const menuItem = createMenuItem({

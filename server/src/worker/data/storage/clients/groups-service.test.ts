@@ -108,7 +108,6 @@ const MENU_ITEM_C: IMenuItemBase = {
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     await getServices().data.cafe.resetCache({});
     await getServices().data.cafe.createCafe({
@@ -132,12 +131,10 @@ const findGroupById = async (groupId: string) => {
 };
 
 test('services.data.groups is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.groups, groupsService);
 });
 
 test('createGroup returns an object with id', async () => {
-    ctx.installServices();
 
     const created = await getServices().data.groups.createGroup({
         name: nextId('menu-group'),
@@ -150,7 +147,6 @@ test('createGroup returns an object with id', async () => {
 });
 
 test('getGroups includes the created group', async () => {
-    ctx.installServices();
 
     const name = nextId('listed-group');
     const created = await getServices().data.groups.createGroup({
@@ -167,7 +163,6 @@ test('getGroups includes the created group', async () => {
 });
 
 test('getGroupMembers returns the members added during creation', async () => {
-    ctx.installServices();
 
     const created = await getServices().data.groups.createGroup({
         name: nextId('members-group'),
@@ -184,7 +179,6 @@ test('getGroupMembers returns the members added during creation', async () => {
 });
 
 test('addToGroup adds members to an existing group', async () => {
-    ctx.installServices();
 
     const created = await getServices().data.groups.createGroup({
         name: nextId('add-members-group'),
@@ -206,7 +200,6 @@ test('addToGroup adds members to an existing group', async () => {
 });
 
 test('deleteMembersFromGroup removes members', async () => {
-    ctx.installServices();
 
     const created = await getServices().data.groups.createGroup({
         name: nextId('delete-members-group'),
@@ -225,7 +218,6 @@ test('deleteMembersFromGroup removes members', async () => {
 });
 
 test('deleteGroup removes the group', async () => {
-    ctx.installServices();
 
     const created = await getServices().data.groups.createGroup({
         name: nextId('delete-group'),
@@ -241,7 +233,6 @@ test('deleteGroup removes the group', async () => {
 });
 
 test('updateGroup renames a group', async () => {
-    ctx.installServices();
 
     const created = await getServices().data.groups.createGroup({
         name: nextId('rename-group'),
@@ -268,7 +259,6 @@ test('updateGroup renames a group', async () => {
  * returned via the service, leaving the real cache with groupId: null.
  */
 test('addToGroup updates the cached menu item groupId (regression: structuredClone isolation)', async () => {
-    ctx.installServices();
 
     // Save a fresh menu item with no group.
     const itemId = nextId('cache-regression-item');

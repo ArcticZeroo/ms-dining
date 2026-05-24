@@ -123,7 +123,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
     await seedCafeAndStation();
 }, { timeout: 60_000 });
 
@@ -137,7 +136,6 @@ afterEach(() => {
 
 describe('SEARCH_TAG_WORKER_QUEUE.doWorkAsync — existing tags branch (e0b6fa8)', () => {
     test('persists existing tags to a new item without calling the AI, and signals skip', async () => {
-        ctx.installServices();
         // Item A already has tags. Item B shares the normalized name but has
         // none yet — that's the queue entry being processed.
         await seedMenuItem({
@@ -175,7 +173,6 @@ describe('SEARCH_TAG_WORKER_QUEUE.doWorkAsync — existing tags branch (e0b6fa8)
     });
 
     test('source item with the existing tags is not disturbed', async () => {
-        ctx.installServices();
         // Sanity: reusing existing tags must not mutate the source's tags.
         await seedMenuItem({
             id:         'tags-source-protected',
@@ -203,7 +200,6 @@ describe('SEARCH_TAG_WORKER_QUEUE.doWorkAsync — existing tags branch (e0b6fa8)
 
 describe('SEARCH_TAG_WORKER_QUEUE.doWorkAsync — AI fallback branch', () => {
     test('calls the AI when no existing tags match the normalized name', async () => {
-        ctx.installServices();
         // Inject a deterministic AI response so the assertion is stable.
         ctx.mockAi.setTextResponse(
             'search tags',

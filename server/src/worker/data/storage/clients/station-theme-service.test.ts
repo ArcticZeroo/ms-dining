@@ -12,7 +12,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -20,12 +19,10 @@ after(async () => {
 });
 
 test('services.data.stationTheme is the typed client (not the storage class)', () => {
-    ctx.installServices();
     assert.equal(getServices().data.stationTheme, stationThemeService);
 });
 
 test('retrieveTheme returns undefined for empty itemsByCategory', async () => {
-    ctx.installServices();
     const theme = await getServices().data.stationTheme.retrieveTheme({
         stationName: 'Empty Station',
         itemsByCategory: new Map<string, IMenuItemBase[]>(),

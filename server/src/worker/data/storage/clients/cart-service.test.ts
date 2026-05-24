@@ -22,7 +22,6 @@ const MENU_ITEM_ID_2 = 'cart-test-menu-item-2';
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     await usePrismaWrite(async prisma => {
         await prisma.user.create({
@@ -62,18 +61,15 @@ after(async () => {
 });
 
 test('services.data.cart is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.cart, cartService);
 });
 
 test('getCart returns empty cart for new user', async () => {
-    ctx.installServices();
     const cart = await getServices().data.cart.getCart({ userId: USER_ID });
     assert.deepEqual(cart.items, []);
 });
 
 test('addItems + getCart round-trip with normalized modifiers', async () => {
-    ctx.installServices();
 
     const result = await getServices().data.cart.addItems({
         userId: USER_ID,
@@ -98,8 +94,6 @@ test('addItems + getCart round-trip with normalized modifiers', async () => {
 });
 
 test('addItems with specialInstructions', async () => {
-    ctx.installServices();
-
     const result = await getServices().data.cart.addItems({
         userId: USER_ID,
         items: [{
@@ -116,7 +110,6 @@ test('addItems with specialInstructions', async () => {
 });
 
 test('updateItem changes quantity, instructions, and modifiers', async () => {
-    ctx.installServices();
 
     const beforeUpdate = await getServices().data.cart.addItems({
         userId: USER_ID,
@@ -147,7 +140,6 @@ test('updateItem changes quantity, instructions, and modifiers', async () => {
 });
 
 test('updateItem rejects missing item', async () => {
-    ctx.installServices();
 
     await assert.rejects(
         () => getServices().data.cart.updateItem({
@@ -160,7 +152,6 @@ test('updateItem rejects missing item', async () => {
 });
 
 test('removeItem deletes one item and returns remaining cart', async () => {
-    ctx.installServices();
 
     const result = await getServices().data.cart.addItems({
         userId: USER_ID,
@@ -173,7 +164,6 @@ test('removeItem deletes one item and returns remaining cart', async () => {
 });
 
 test('removeItem rejects missing item', async () => {
-    ctx.installServices();
 
     await assert.rejects(
         () => getServices().data.cart.removeItem({ userId: USER_ID, itemId: 'does-not-exist' }),
@@ -182,7 +172,6 @@ test('removeItem rejects missing item', async () => {
 });
 
 test('clearCart removes all items', async () => {
-    ctx.installServices();
 
     await getServices().data.cart.addItems({
         userId: USER_ID,
@@ -194,7 +183,6 @@ test('clearCart removes all items', async () => {
 });
 
 test('cart mutations remain available without active-order locking', async () => {
-    ctx.installServices();
 
     const added = await getServices().data.cart.addItems({
         userId: USER_ID,

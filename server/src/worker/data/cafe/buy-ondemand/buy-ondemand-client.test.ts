@@ -28,7 +28,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -67,7 +66,6 @@ function hasValidScheduleTime(body: unknown): body is { scheduleTime: ScheduleTi
 }
 
 test('pay-config POST body matches BoD wire shape: storeInfo present, scheduleTime absent', async () => {
-    ctx.installServices();
     // BoD UI POSTs { storeInfo, scheduledDay: 0, isEasyMenuEnabled: false } to
     // /sites/{contextId}/{displayProfileId}. Sending a fixed scheduleTime
     // window (as we used to do, motivated by a long-ago hang at 86a9d6c)
@@ -103,7 +101,6 @@ test('pay-config POST body matches BoD wire shape: storeInfo present, scheduleTi
 });
 
 test('menu-sync concepts POST body STILL includes scheduleTime (86a9d6c)', async () => {
-    ctx.installServices();
     // Menu sync (stations.ts) hits the same concepts endpoint but for
     // non-now menus (e.g. fetching today's 11am menu at 9am). Keeping
     // scheduleTime here is correct — only the ordering-path call at
@@ -127,7 +124,6 @@ test('menu-sync concepts POST body STILL includes scheduleTime (86a9d6c)', async
 });
 
 test('ordering concepts POST body OMITS scheduleTime (ordering wants now())', async () => {
-    ctx.installServices();
     // Companion to the menu-sync test above. The ordering flow always wants
     // "concepts available right now", which is what the server returns when
     // we omit scheduleTime — so we should not be sending one here.
@@ -154,7 +150,6 @@ test('ordering concepts POST body OMITS scheduleTime (ordering wants now())', as
 });
 
 test('test server injectDelay does delay the response (sanity check for 2e3482e setup)', async () => {
-    ctx.installServices();
     // Pre-flight check that the delay-injection plumbing actually works
     // for the real BoD client → test server path. We don't go anywhere
     // near REQUEST_TIMEOUT_MS — just enough to confirm setTimeout fires.

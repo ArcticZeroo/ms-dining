@@ -144,7 +144,6 @@ const publishMenuForDate = async (dateString: string, menuItems: IMenuItemBase[]
 before(async () => {
     await acquireTestLock();
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
     resetMenuItemCache();
 
     await getServices().data.cafe.resetCache({});
@@ -163,19 +162,16 @@ after(async () => {
 });
 
 test('services.data.dailyMenu is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.dailyMenu, dailyMenuService);
 });
 
 test('isAnyMenuAvailableForDay returns false when no menus are published', async () => {
-    ctx.installServices();
 
     const isAvailable = await getServices().data.dailyMenu.isAnyMenuAvailableForDayAsync({ dateString: '2026-01-15' });
     assert.equal(isAvailable, false);
 });
 
 test('publishDailyStationMenu + retrieveDailyMenu round-trip', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-16';
     await publishMenuForDate(dateString);
@@ -197,7 +193,6 @@ test('publishDailyStationMenu + retrieveDailyMenu round-trip', async () => {
 });
 
 test('getCafesAvailableForDay returns the cafe id after publishing', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-17';
     await publishMenuForDate(dateString);
@@ -207,7 +202,6 @@ test('getCafesAvailableForDay returns the cafe id after publishing', async () =>
 });
 
 test('isAnyMenuAvailableForDay returns true after publishing', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-18';
     await publishMenuForDate(dateString);
@@ -217,7 +211,6 @@ test('isAnyMenuAvailableForDay returns true after publishing', async () => {
 });
 
 test('retrieveFirstMenuItemVisitDate returns a date string after the item appears in a daily menu', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-19';
     const menuItem = createMenuItem('daily-menu-service-visit-item', 'Garlic Herb Salmon');
@@ -231,7 +224,6 @@ test('retrieveFirstMenuItemVisitDate returns a date string after the item appear
 });
 
 test('upsertDailyCafe + retrieveDailyCafeState round-trip', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-20';
     await getServices().data.dailyMenu.upsertDailyCafeAsync({
@@ -251,7 +243,6 @@ test('upsertDailyCafe + retrieveDailyCafeState round-trip', async () => {
 });
 
 test('retrieveDailyCafeMenu returns stations after publishing a menu', async () => {
-    ctx.installServices();
 
     const cacheCafe = CAFES_BY_ID.get('cafe25');
     assert.ok(cacheCafe, 'expected cafe25 to exist for cache-backed daily menu test');
@@ -322,7 +313,6 @@ test('retrieveDailyCafeMenu returns stations after publishing a menu', async () 
 });
 
 test('getMenuWatermark returns a number', async () => {
-    ctx.installServices();
 
     const dateString = '2026-01-22';
     await publishMenuForDate(dateString);

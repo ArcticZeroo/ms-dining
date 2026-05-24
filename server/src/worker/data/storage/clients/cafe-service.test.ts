@@ -22,7 +22,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -45,14 +44,12 @@ test('services.data.cafe is the typed client (not the storage class)', () => {
 });
 
 test('retrieveCafe returns null for nonexistent id', async () => {
-    ctx.installServices();
     CafeStorageClient.resetCache();
     const result = await getServices().data.cafe.retrieveCafe({ id: 'no-such-cafe' });
     assert.equal(result, null);
 });
 
 test('createCafe + retrieveCafe round-trip', async () => {
-    ctx.installServices();
     CafeStorageClient.resetCache();
 
     await getServices().data.cafe.createCafe({ cafe: CAFE, config: CONFIG });
@@ -68,7 +65,6 @@ test('createCafe + retrieveCafe round-trip', async () => {
 });
 
 test('retrieveCafes returns Record<string, ICafeRecord>', async () => {
-    ctx.installServices();
     // Don't reset cache — the cafe from the previous test should be present.
 
     const all = await getServices().data.cafe.retrieveCafes({});
@@ -79,13 +75,11 @@ test('retrieveCafes returns Record<string, ICafeRecord>', async () => {
 });
 
 test('doesCafeExist returns true for existing cafe', async () => {
-    ctx.installServices();
     const exists = await getServices().data.cafe.doesCafeExist({ id: CAFE.id });
     assert.equal(exists, true);
 });
 
 test('doesCafeExist returns false for nonexistent cafe', async () => {
-    ctx.installServices();
     const exists = await getServices().data.cafe.doesCafeExist({ id: 'fake' });
     assert.equal(exists, false);
 });

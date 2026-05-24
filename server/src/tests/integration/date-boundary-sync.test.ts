@@ -52,7 +52,6 @@ before(async () => {
     );
 
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     // Skip weekly repair so the test only triggers our explicit populate.
     (ENVIRONMENT_SETTINGS as unknown as { skipWeeklyRepair: boolean }).skipWeeklyRepair = true;

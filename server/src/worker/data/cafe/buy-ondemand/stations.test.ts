@@ -29,7 +29,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     // Boot a config fixture for our test cafe so /config returns sane data and
     // the test cafe id resolves to a proper tenant/context/displayProfile.
@@ -57,27 +56,22 @@ beforeEach(() => {
 });
 
 test('whitespace-only station name falls back to cafe name', async () => {
-    ctx.installServices();
     assert.equal(await pickName({ name: '   ' }), STATION_TEST_CAFE.name);
 });
 
 test('empty station name falls back to cafe name', async () => {
-    ctx.installServices();
     assert.equal(await pickName({ name: '' }), STATION_TEST_CAFE.name);
 });
 
 test('normal station name is preserved', async () => {
-    ctx.installServices();
     assert.equal(await pickName({ name: 'Pizza Hut' }), 'Pizza Hut');
 });
 
 test('station name is trimmed of leading/trailing whitespace', async () => {
-    ctx.installServices();
     assert.equal(await pickName({ name: '  Pizza Hut  ' }), 'Pizza Hut');
 });
 
 test('onDemandDisplayText is preferred over displayText and name', async () => {
-    ctx.installServices();
     assert.equal(
         await pickName({
             name:           'Raw Name',
@@ -88,7 +82,6 @@ test('onDemandDisplayText is preferred over displayText and name', async () => {
 });
 
 test('displayText is preferred over name when onDemandDisplayText is whitespace', async () => {
-    ctx.installServices();
     assert.equal(
         await pickName({
             name:           'Raw Name',
@@ -99,7 +92,6 @@ test('displayText is preferred over name when onDemandDisplayText is whitespace'
 });
 
 test('displayText is preferred over name when onDemandDisplayText is missing', async () => {
-    ctx.installServices();
     assert.equal(
         await pickName({
             name:           'Raw Name',
@@ -110,7 +102,6 @@ test('displayText is preferred over name when onDemandDisplayText is missing', a
 });
 
 test('station.name is used when both conceptOptions fields are empty/whitespace', async () => {
-    ctx.installServices();
     assert.equal(
         await pickName({
             name:           'Raw Name',
@@ -121,7 +112,6 @@ test('station.name is used when both conceptOptions fields are empty/whitespace'
 });
 
 test('cafe name fallback when every option is whitespace', async () => {
-    ctx.installServices();
     assert.equal(
         await pickName({
             name:           '   ',
@@ -132,7 +122,6 @@ test('cafe name fallback when every option is whitespace', async () => {
 });
 
 test('conceptOptions values are trimmed before being returned', async () => {
-    ctx.installServices();
     assert.equal(
         await pickName({
             name:           'Raw Name',

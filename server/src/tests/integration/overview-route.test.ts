@@ -38,7 +38,6 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     // Sync a single cafe so the overview has real daily data to assemble.
     const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
@@ -72,7 +71,6 @@ after(async () => {
 });
 
 test('GET /api/dining/menu/:id/overview resolves (not 404) with a date param', async () => {
-    ctx.installServices();
     // The expected path after the 85a3fb4 fix is `/api/dining/menu/:id/overview`.
     // Before the fix it was `/api/dining/menu/:id/:id/overview` and any request
     // here 404'd at the router.
@@ -89,7 +87,6 @@ test('GET /api/dining/menu/:id/overview resolves (not 404) with a date param', a
 });
 
 test('GET /api/dining/menu/:id/overview without a date still resolves (not 404)', async () => {
-    ctx.installServices();
     // validateViewMenuAccessAsync returns '[]' with a 200 when no date is
     // supplied — important thing is the route resolves to a handler and
     // doesn't 404 because of the (formerly broken) registration path.

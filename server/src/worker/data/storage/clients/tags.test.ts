@@ -21,7 +21,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -33,7 +32,6 @@ test('services.data.tag is the typed client (not the storage class)', () => {
 });
 
 test('retrieveTags returns empty object when no tags exist', async () => {
-    ctx.installServices();
     TagStorageClient.resetCache();
 
     const tags = await getServices().data.tag.retrieveTags({});
@@ -41,7 +39,6 @@ test('retrieveTags returns empty object when no tags exist', async () => {
 });
 
 test('createTags + retrieveTags round-trip through the data handler', async () => {
-    ctx.installServices();
     TagStorageClient.resetCache();
 
     await getServices().data.tag.createTags({
@@ -60,7 +57,6 @@ test('createTags + retrieveTags round-trip through the data handler', async () =
 });
 
 test('createTags silently ignores duplicate tag ids', async () => {
-    ctx.installServices();
     TagStorageClient.resetCache();
 
     await getServices().data.tag.createTags({
@@ -77,7 +73,6 @@ test('createTags silently ignores duplicate tag ids', async () => {
 });
 
 test('TagStorageClient direct calls remain functional', async () => {
-    ctx.installServices();
     TagStorageClient.resetCache();
 
     await TagStorageClient.createTags([{ id: 'direct-1', name: 'DirectTag' }]);

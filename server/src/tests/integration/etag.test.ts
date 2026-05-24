@@ -95,7 +95,6 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
     baseUrl = await ctx.startWebserver();
 
     const found = ALL_CAFES.find((c) => c.id === CAFE_ID);
@@ -115,14 +114,12 @@ after(async () => {
 });
 
 test('first menu request emits the deterministic ETag', async () => {
-    ctx.installServices();
     const res = await fetchExpectStatus(`${baseUrl}${menuUrl}?date=${todayString}`, 200);
     assert.equal(res.headers.get('etag'), expectedEtagAt(INITIAL_SYNC_AT));
     assert.equal(res.headers.get('cache-control'), 'no-cache');
 });
 
 test('matching If-None-Match returns 304 + empty body', async () => {
-    ctx.installServices();
     const etag = expectedEtagAt(INITIAL_SYNC_AT);
 
     const revalidation = await fetchExpectStatus(
@@ -136,7 +133,6 @@ test('matching If-None-Match returns 304 + empty body', async () => {
 });
 
 test('no-op resync preserves the watermark — prior ETag still revalidates as 304', async () => {
-    ctx.installServices();
     mock.timers.setTime(SECOND_SYNC_AT);
 
     const event = await resyncCafe();
@@ -154,7 +150,6 @@ test('no-op resync preserves the watermark — prior ETag still revalidates as 3
 });
 
 test('real menu change bumps the watermark to the resync clock value', async () => {
-    ctx.installServices();
     mock.timers.setTime(THIRD_SYNC_AT);
 
     // Inject a brand-new menu item into cafe25's fixture so the resync

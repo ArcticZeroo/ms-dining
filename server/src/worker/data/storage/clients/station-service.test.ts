@@ -20,7 +20,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     // Stations have a FK to Cafe, so seed one.
     CafeStorageClient.resetCache();
@@ -55,13 +54,11 @@ test('services.data.station is the typed client', () => {
 });
 
 test('retrieveStation returns null for nonexistent id', async () => {
-    ctx.installServices();
     const result = await getServices().data.station.retrieveStation({ stationId: 'no-such-station' });
     assert.equal(result, null);
 });
 
 test('createStation + retrieveStation round-trip', async () => {
-    ctx.installServices();
 
     await getServices().data.station.createStation({ station: STATION });
 
@@ -76,13 +73,11 @@ test('createStation + retrieveStation round-trip', async () => {
 });
 
 test('retrieveAllStationsWithoutGroup includes ungrouped stations', async () => {
-    ctx.installServices();
     const ungrouped = await getServices().data.station.retrieveAllStationsWithoutGroup({});
     assert.ok(ungrouped.some(s => s.id === STATION.id));
 });
 
 test('retrieveAllStationNames includes station names', async () => {
-    ctx.installServices();
     const names = await getServices().data.station.retrieveAllStationNames({});
     assert.ok(names.includes(STATION.name));
 });

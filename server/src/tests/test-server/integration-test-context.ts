@@ -37,6 +37,7 @@ import { EMBEDDINGS_WORKER_QUEUE } from '../../worker/queues/embeddings.js';
 import {
     enterWithServices,
     runWithServices,
+    setDefaultServices,
 } from '../../main/services/registry.js';
 import type { Services } from '../../main/services/types.js';
 import { defaultDataServices } from '../../main/services/data/index.js';
@@ -84,17 +85,6 @@ export interface IntegrationTestContext {
      * resolves to the test services.
      */
     run<T>(fn: () => Promise<T>): Promise<T>;
-    /**
-     * Calls enterWithServices(ctx.services). Intended for use inside a
-     * `beforeEach(() => ctx.installServices())` hook so each test body
-     * inherits the services context (node:test's beforeEach callback runs in
-     * the parent async resource of the test() body).
-     *
-     * Strictly an alternative to wrapping every test in `ctx.run(...)` — the
-     * net effect is the same. Files that don't touch services don't need
-     * either; files that do should pick one pattern and stick with it.
-     */
-    installServices(): void;
     /** Cleanup: stops webserver, disconnects Prisma, deletes temp dir. */
     cleanup: () => Promise<void>;
 }
@@ -151,10 +141,10 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         data:               defaultDataServices,
     };
 
-    // Belt-and-suspenders: enterWith makes services visible to async work
-    // started from the current resource (including most node:test before/test
-    // chains in serial execution). ctx.run() additionally guarantees scope
-    // for any test that explicitly wraps its body.
+    // Belt-and-suspenders: set the test fallback so getServices() works
+    // in any async context without per-test installServices() boilerplate.
+    // Also enterWith for the current async resource (before() hook scope).
+    setDefaultServices(services);
     enterWithServices(services);
 
     // ── 5. Webserver (lazy) ─────────────────────────────────────────────
@@ -192,6 +182,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
 
     // ── 6. Cleanup function ─────────────────────────────────────────────
     const cleanup = async (): Promise<void> => {
+        setDefaultServices(null);
         if (webserver) {
             try {
                 await webserver.close();
@@ -224,7 +215,6 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         searchDbPath,
         startWebserver,
         run: <T>(fn: () => Promise<T>) => runWithServices(services, fn),
-        installServices: () => enterWithServices(services),
         cleanup,
     };
 }

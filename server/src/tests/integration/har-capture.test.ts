@@ -32,6 +32,10 @@ import { AddressInfo } from 'node:net';
 import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
 import { HarCapture } from '../../shared/util/har.js';
 import { ICafe } from '../../shared/models/cafe.js';
+import {
+    createIntegrationTestContext,
+    IntegrationTestContext,
+} from '../test-server/integration-test-context.js';
 
 /**
  * Subclass that overrides _getUrl to point at our local HTTP server.
@@ -104,8 +108,11 @@ const FAKE_CAFE: ICafe = {
 };
 
 let handle: ServerHandle;
+let ctx: IntegrationTestContext;
 
 before(async () => {
+    ctx = await createIntegrationTestContext();
+
     handle = await startLocalHttpServer(new Map([
         ['/login/anonymous', {
             status: 200,
@@ -125,6 +132,7 @@ before(async () => {
 
 after(async () => {
     await handle.close();
+    await ctx.cleanup();
 });
 
 test('BuyOnDemandClient with HAR capture lets the caller read the response body', async () => {

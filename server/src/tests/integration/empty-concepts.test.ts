@@ -72,7 +72,6 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
@@ -136,7 +135,6 @@ after(async () => {
 });
 
 test('GET /api/dining/menu/:cafeId/menu omits stations with all-empty categories', async () => {
-    ctx.installServices();
     const body = await fetchJson(
         `${baseUrl}/api/dining/menu/${CAFE_ID}/menu?date=${todayString}`,
         CafeMenuResponseSchema,
@@ -159,7 +157,6 @@ test('GET /api/dining/menu/:cafeId/menu omits stations with all-empty categories
 });
 
 test('every returned station has at least one category with at least one item', async () => {
-    ctx.installServices();
     const body = await fetchJson(
         `${baseUrl}/api/dining/menu/${CAFE_ID}/menu?date=${todayString}`,
         CafeMenuResponseSchema,

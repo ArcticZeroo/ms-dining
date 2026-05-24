@@ -65,7 +65,6 @@ const STATION_NORMALIZED_NAME = normalizeNameForSearch(STATION.name);
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     await getServices().data.cafe.resetCache({});
     await getServices().data.cafe.createCafe({
@@ -81,12 +80,10 @@ after(async () => {
 });
 
 test('services.data.review is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.review, reviewService);
 });
 
 test('createMenuItemReview + getReviewsForMenuItem round-trip', async () => {
-    ctx.installServices();
 
     const review = await getServices().data.review.createMenuItemReview({
         review: {
@@ -109,7 +106,6 @@ test('createMenuItemReview + getReviewsForMenuItem round-trip', async () => {
 });
 
 test('createStationReview + getReviewsForStation round-trip', async () => {
-    ctx.installServices();
 
     const comment = nextId('station-comment');
     const review = await getServices().data.review.createStationReview({
@@ -135,7 +131,6 @@ test('createStationReview + getReviewsForStation round-trip', async () => {
 });
 
 test('isOwnedByUser returns false for nonexistent review', async () => {
-    ctx.installServices();
 
     const isOwned = await getServices().data.review.isOwnedByUser({
         reviewId: 'missing-review-id',
@@ -146,7 +141,6 @@ test('isOwnedByUser returns false for nonexistent review', async () => {
 });
 
 test('getRecentReviews returns reviews ordered by recency', async () => {
-    ctx.installServices();
 
     const older = await getServices().data.review.createMenuItemReview({
         review: {
@@ -181,7 +175,6 @@ test('getRecentReviews returns reviews ordered by recency', async () => {
 });
 
 test('getAllMenuItemReviewHeaders returns aggregate data after creating reviews', async () => {
-    ctx.installServices();
 
     const entityKey = getEntityKey(MENU_ITEM);
     const headersBefore = await getServices().data.review.getAllMenuItemReviewHeaders({});
@@ -221,7 +214,6 @@ test('getAllMenuItemReviewHeaders returns aggregate data after creating reviews'
 });
 
 test('deleteReview removes a review', async () => {
-    ctx.installServices();
 
     const review = await getServices().data.review.createMenuItemReview({
         review: {
@@ -244,7 +236,6 @@ test('deleteReview removes a review', async () => {
 });
 
 test('retrieveReviewHeader returns aggregate data for a menu item', async () => {
-    ctx.installServices();
 
     const header = await getServices().data.review.retrieveReviewHeader({ menuItem: MENU_ITEM });
     assert.ok(header);
@@ -253,7 +244,6 @@ test('retrieveReviewHeader returns aggregate data for a menu item', async () => 
 });
 
 test('retrieveReviewHeaderByParts returns data for a name', async () => {
-    ctx.installServices();
 
     const header = await getServices().data.review.retrieveReviewHeaderByParts({
         groupId: null,
@@ -264,7 +254,6 @@ test('retrieveReviewHeaderByParts returns data for a name', async () => {
 });
 
 test('retrieveStationReviewHeader returns aggregate data', async () => {
-    ctx.installServices();
 
     const header = await getServices().data.review.retrieveStationReviewHeader({
         station: { name: STATION.name, groupId: null },
@@ -274,7 +263,6 @@ test('retrieveStationReviewHeader returns aggregate data', async () => {
 });
 
 test('retrieveStationReviewHeaderByParts returns data', async () => {
-    ctx.installServices();
 
     const header = await getServices().data.review.retrieveStationReviewHeaderByParts({
         groupId: null,

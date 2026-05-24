@@ -113,7 +113,6 @@ const DATE_STRING = toDateString(getMondayForWeek(new Date()));
 before(async () => {
     await acquireTestLock();
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     await getServices().data.cafe.resetCache({});
     await getServices().data.cafe.createCafe({
@@ -150,12 +149,10 @@ after(async () => {
 });
 
 test('services.data.menuAnalytics is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.menuAnalytics, menuAnalyticsService);
 });
 
 test('getShutdownCafeState returns a record', async () => {
-    ctx.installServices();
 
     const state = await getServices().data.menuAnalytics.getShutdownCafeState({
         dateString: DATE_STRING,
@@ -166,7 +163,6 @@ test('getShutdownCafeState returns a record', async () => {
 });
 
 test('retrieveVisitData returns an array', async () => {
-    ctx.installServices();
 
     const visits = await getServices().data.menuAnalytics.retrieveVisitData({
         entityType: SearchEntityType.menuItem,
@@ -177,7 +173,6 @@ test('retrieveVisitData returns an array', async () => {
 });
 
 test('retrieveUniquenessDataForCafe returns a record', async () => {
-    ctx.installServices();
 
     const data = await getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({
         cafeId: CAFE.id,

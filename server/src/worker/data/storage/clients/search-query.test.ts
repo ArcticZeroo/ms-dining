@@ -24,7 +24,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -39,7 +38,6 @@ test('services.data.searchQuery is the typed client (not the storage class)', ()
 });
 
 test('incrementSearchCount + getTopSearchQueries round-trip through the data handler', async () => {
-    ctx.installServices();
     const { searchQuery } = getServices().data;
 
     await searchQuery.incrementSearchCount({ query: 'Burger' });
@@ -56,7 +54,6 @@ test('incrementSearchCount + getTopSearchQueries round-trip through the data han
 });
 
 test('getTopSearchQueries default limit matches the storage client default (10)', async () => {
-    ctx.installServices();
     const { searchQuery } = getServices().data;
 
     // Seed 12 distinct queries with distinct counts so we know the limit
@@ -73,7 +70,6 @@ test('getTopSearchQueries default limit matches the storage client default (10)'
 });
 
 test('incrementSearchCount normalizes input (trim + lowercase) so reads see canonical keys', async () => {
-    ctx.installServices();
     const { searchQuery } = getServices().data;
 
     await searchQuery.incrementSearchCount({ query: '  Latte  ' });
@@ -90,7 +86,6 @@ test('SearchQueryClient direct calls remain functional (only proxied via service
     // The storage class is still used internally by searchQueryServiceCommands.
     // This test pins that the class works on its own so a future refactor that
     // accidentally breaks the direct API gets caught.
-    ctx.installServices();
     await SearchQueryClient.incrementSearchCount('directcall');
     const top = await SearchQueryClient.getTopSearchQueries(50);
     assert.ok(top.some(row => row.query === 'directcall'));

@@ -62,7 +62,6 @@ before(async () => {
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     // Skip weekly repair so the test only syncs today (not 5+ days).
     // Cast through unknown because ENVIRONMENT_SETTINGS is exported Readonly.
@@ -92,7 +91,6 @@ after(async () => {
 });
 
 test('boot syncs all cafes with the expected entity counts', async () => {
-    ctx.installServices();
     const summary = ctx.server.getFixtureSummary();
     const unavailable = summary.perCafe.get(UNAVAILABLE_CAFE_ID);
     assert.ok(unavailable, `${UNAVAILABLE_CAFE_ID} should have a fixture`);
@@ -129,7 +127,6 @@ test('boot syncs all cafes with the expected entity counts', async () => {
 });
 
 test('shutdown cafe is the only shut-down cafe', async () => {
-    ctx.installServices();
     const dailyCafe = await usePrismaClient(client =>
         client.dailyCafe.findUnique({
             where: { dateString_cafeId: { dateString: todayString, cafeId: SHUTDOWN_CAFE_ID } },
@@ -154,7 +151,6 @@ test('shutdown cafe is the only shut-down cafe', async () => {
 });
 
 test('unavailable (410) cafe is the only unavailable cafe', async () => {
-    ctx.installServices();
     const dailyCafe = await usePrismaClient(client =>
         client.dailyCafe.findUnique({
             where: { dateString_cafeId: { dateString: todayString, cafeId: UNAVAILABLE_CAFE_ID } },
@@ -183,7 +179,6 @@ test('unavailable (410) cafe is the only unavailable cafe', async () => {
 });
 
 test('menu items have tags and modifiers from fixtures', async () => {
-    ctx.installServices();
     const summary = ctx.server.getFixtureSummary();
     const cafe25Summary = summary.perCafe.get('cafe25');
     assert.ok(cafe25Summary, 'cafe25 should have a fixture');
@@ -213,7 +208,6 @@ test('menu items have tags and modifiers from fixtures', async () => {
 });
 
 test('GET /api/dining/ returns exactly the available cafes', async () => {
-    ctx.installServices();
     const body = await fetchJson(`${baseUrl}/api/dining/`, DiningCoreResponseSchema);
 
     // The route filters out cafes whose firstAvailableDate is past the
@@ -229,7 +223,6 @@ test('GET /api/dining/ returns exactly the available cafes', async () => {
 });
 
 test('GET /api/dining/menu/cafe25/menu (legacy) returns stations + items', async () => {
-    ctx.installServices();
     const summary = ctx.server.getFixtureSummary();
     const cafe25Summary = summary.perCafe.get('cafe25');
     assert.ok(cafe25Summary);
@@ -265,7 +258,6 @@ test('GET /api/dining/menu/cafe25/menu (legacy) returns stations + items', async
 });
 
 test('GET /api/dining/menu/cafe25 (canonical) returns array shape without version tag', async () => {
-    ctx.installServices();
     const summary = ctx.server.getFixtureSummary();
     const cafe25Summary = summary.perCafe.get('cafe25');
     assert.ok(cafe25Summary);
@@ -280,7 +272,6 @@ test('GET /api/dining/menu/cafe25 (canonical) returns array shape without versio
 });
 
 test('GET /api/dining/menu/cafe25 (canonical) returns object shape WITH version tag', async () => {
-    ctx.installServices();
     const summary = ctx.server.getFixtureSummary();
     const cafe25Summary = summary.perCafe.get('cafe25');
     assert.ok(cafe25Summary);
@@ -297,7 +288,6 @@ test('GET /api/dining/menu/cafe25 (canonical) returns object shape WITH version 
 });
 
 test('GET /api/dining/menu/{shutdown-cafe}/menu surfaces shutdown state', async () => {
-    ctx.installServices();
     const body = await fetchJson(
         `${baseUrl}/api/dining/menu/${SHUTDOWN_CAFE_ID}/menu?date=${todayString}`,
         CafeMenuResponseSchema,
@@ -309,7 +299,6 @@ test('GET /api/dining/menu/{shutdown-cafe}/menu surfaces shutdown state', async 
 });
 
 test('GET /api/dining/search returns a (possibly empty) result array', async () => {
-    ctx.installServices();
     // Mock embeddings are deterministic but not semantically meaningful, and
     // the embeddings worker queue throttles processing to 1s/item, so the
     // index isn't fully populated by the time we query. We only assert the

@@ -17,16 +17,28 @@ const PRODUCTION_SERVICES = lazy<Services>(createProductionServices);
 
 const servicesStorage = new AsyncLocalStorage<Services>();
 
+let defaultServices: Services | null = null;
+
 /**
- * Returns the active services bag. If the caller is inside a
- * `runWithServices(...)` scope, that scope's services are returned;
- * otherwise the lazy production singleton is returned.
- *
- * Use `getServices()` (matches codebase convention `get*()` for direct value
- * access). `use*()` is reserved for callback-based helpers like `usePrismaClient(cb)`.
+ * Sets the process-wide default services bag. When set, getServices()
+ * returns this if no ALS-scoped services are active — before falling
+ * back to the lazy production singleton.
  */
-export const getServices = (): Services =>
-    servicesStorage.getStore() ?? PRODUCTION_SERVICES.value;
+export const setDefaultServices = (services: Services | null): void => {
+    defaultServices = services;
+};
+
+/**
+ * Returns the active services bag. Resolution order:
+ * 1. ALS-scoped services (per-request middleware, runWithServices)
+ * 2. Explicit default (set via setDefaultServices)
+ * 3. Lazy production singleton
+ */
+export const getServices = (): Services => {
+    return servicesStorage.getStore()
+        ?? defaultServices
+        ?? PRODUCTION_SERVICES.value;
+};
 
 /**
  * Runs `fn` inside an async scope where `getServices()` returns the current

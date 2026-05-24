@@ -113,7 +113,6 @@ const DATE_STRING = toDateString(getMondayForWeek(new Date()));
 before(async () => {
     await acquireTestLock();
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 
     await getServices().data.cafe.resetCache({});
     await getServices().data.cafe.createCafe({
@@ -150,19 +149,16 @@ after(async () => {
 });
 
 test('services.data.search is the typed client', () => {
-    ctx.installServices();
     assert.equal(getServices().data.search, searchService);
 });
 
 test('autocomplete returns an array', async () => {
-    ctx.installServices();
 
     const suggestions = await getServices().data.search.autocomplete({ query: 'Sea' });
     assert.ok(Array.isArray(suggestions));
 });
 
 test('getSimilarQueries returns an array', async () => {
-    ctx.installServices();
 
     const similarQueries = await getServices().data.search.getSimilarQueries({ query: MENU_ITEM.name })
         .catch(() => []);
@@ -170,7 +166,6 @@ test('getSimilarQueries returns an array', async () => {
 });
 
 test('search returns a Map result (may be empty in test without full index)', async () => {
-    ctx.installServices();
 
     const results = await getServices().data.search.search({
         query: MENU_ITEM.name,
@@ -181,7 +176,6 @@ test('search returns a Map result (may be empty in test without full index)', as
 });
 
 test('getRecommendations returns an array', async () => {
-    ctx.installServices();
 
     const recommendations = await getServices().data.search.getRecommendations({
         dateString: DATE_STRING,

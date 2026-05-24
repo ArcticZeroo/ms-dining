@@ -12,7 +12,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -20,12 +19,10 @@ after(async () => {
 });
 
 test('services.data.user is the typed client (not the storage class)', () => {
-    ctx.installServices();
     assert.equal(getServices().data.user, userService);
 });
 
 test('createUser + getUser round-trip', async () => {
-    ctx.installServices();
     const userInput = {
         displayName: 'Round Trip User',
         externalId: `external-${randomUUID()}`,
@@ -44,13 +41,11 @@ test('createUser + getUser round-trip', async () => {
 });
 
 test('getUser returns null for nonexistent id', async () => {
-    ctx.installServices();
     const user = await getServices().data.user.getUser({ id: `missing-${randomUUID()}` });
     assert.equal(user, null);
 });
 
 test('updateUserDisplayName changes the display name', async () => {
-    ctx.installServices();
     const createdUser = await getServices().data.user.createUser({
         user: {
             displayName: 'Original Name',
@@ -70,7 +65,6 @@ test('updateUserDisplayName changes the display name', async () => {
 });
 
 test('updateUserSettings persists favorites', async () => {
-    ctx.installServices();
     const createdUser = await getServices().data.user.createUser({
         user: {
             displayName: 'Settings User',
@@ -101,7 +95,6 @@ test('updateUserSettings persists favorites', async () => {
 });
 
 test('createUser with duplicate externalId+provider returns existing user', async () => {
-    ctx.installServices();
     const externalId = `external-${randomUUID()}`;
     const provider = 'duplicate-provider';
 

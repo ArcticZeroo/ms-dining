@@ -28,7 +28,6 @@ let ctx: IntegrationTestContext;
 
 before(async () => {
     ctx = await createIntegrationTestContext();
-    ctx.installServices();
 });
 
 after(async () => {
@@ -36,7 +35,6 @@ after(async () => {
 });
 
 test('sync a single cafe end-to-end', async () => {
-    ctx.installServices();
     const cafe = ALL_CAFES.find(c => c.id === 'cafe25');
     assert.ok(cafe, 'cafe25 should exist in ALL_CAFES');
 
@@ -86,7 +84,6 @@ test('sync a single cafe end-to-end', async () => {
 });
 
 test('mock AI provider returns deterministic embeddings', async () => {
-    ctx.installServices();
     const embedding = await ctx.mockAi.retrieveEmbedding('hello world');
     assert.equal(embedding.length, 1536);
     // Same input produces same output (deterministic).
@@ -98,7 +95,6 @@ test('mock AI provider returns deterministic embeddings', async () => {
 });
 
 test('failure injection works through full stack', async () => {
-    ctx.installServices();
     ctx.server.clearFailures();
     ctx.server.injectFailure({
         method: 'POST',
@@ -123,7 +119,6 @@ test('failure injection works through full stack', async () => {
 });
 
 test('test server rejects requests without an Authorization header', async () => {
-    ctx.installServices();
     // Direct handleRequest call with no Authorization header — mirrors what
     // would happen if a production code path forgot to include credentials.
     const res = await ctx.server.handleRequest('cafe25', 'GET', '/config');
@@ -131,7 +126,6 @@ test('test server rejects requests without an Authorization header', async () =>
 });
 
 test('test server rejects requests with an unknown Bearer token', async () => {
-    ctx.installServices();
     const res = await ctx.server.handleRequest('cafe25', 'GET', '/config', {
         headers: { Authorization: 'Bearer not-a-real-token' },
     });
@@ -139,7 +133,6 @@ test('test server rejects requests with an unknown Bearer token', async () => {
 });
 
 test('test server allows /login/anonymous without a token', async () => {
-    ctx.installServices();
     const res = await ctx.server.handleRequest('cafe25', 'GET', '/login/anonymous');
     assert.equal(res.status, 200);
 });
