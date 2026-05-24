@@ -4,6 +4,7 @@ import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import type { ISerializedModifier } from '@msdining/common/models/cart';
 import type { ICafeOrderDTO, IOrderItem } from '@msdining/common/models/order';
+import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 
 const ORDER_ITEMS_INCLUDE = {
@@ -166,6 +167,10 @@ export abstract class OrderStorageClient {
 		}));
 	}
 
+	/**
+	 * Atomically: verifies ownership, creates CafeOrder from pending order,
+	 * deducts matching items from the user's cart, and deletes the pending order.
+	 */
 	static async createCompletedOrder(
 		pendingOrderId: string,
 		userId: string,
@@ -241,50 +246,56 @@ export abstract class OrderStorageClient {
 				},
 			});
 
+			// Deduct ordered items from cart
+			const orderedItems = toOrderItems(pendingOrder.items);
+			await this.deductFromCartInTransaction(tx, pendingOrder.userId, orderedItems);
+
 			await tx.pendingCafeOrder.delete({ where: { id: pendingOrderId } });
 		});
 	}
 
-	static async deductFromCart(userId: string, items: IOrderItem[]): Promise<void> {
-		await usePrismaTransaction(async tx => {
-			const cartItems = await tx.cartItem.findMany({
-				where:   {
-					cartUserId: userId,
-					menuItemId: { in: [...new Set(items.map(item => item.menuItemId))] },
+	private static async deductFromCartInTransaction(
+		tx: PrismaTransactionClient,
+		userId: string,
+		items: IOrderItem[],
+	): Promise<void> {
+		const cartItems = await tx.cartItem.findMany({
+			where:   {
+				cartUserId: userId,
+				menuItemId: { in: [...new Set(items.map(item => item.menuItemId))] },
+			},
+			include: {
+				modifierChoices: {
+					select: { modifierId: true, choiceId: true },
 				},
-				include: {
-					modifierChoices: {
-						select: { modifierId: true, choiceId: true },
-					},
-				},
-				orderBy: { createdAt: 'asc' },
-			});
-
-			for (const item of items) {
-				const matchIndex = cartItems.findIndex(cartItem =>
-					cartItem.menuItemId === item.menuItemId
-					&& (cartItem.specialInstructions ?? null) === (item.specialInstructions ?? null)
-					&& modifiersMatch(item.modifiers, cartItem.modifierChoices),
-				);
-
-				if (matchIndex === -1) {
-					continue;
-				}
-
-				const cartItem = cartItems[matchIndex]!;
-				if (cartItem.quantity > item.quantity) {
-					cartItem.quantity -= item.quantity;
-					await tx.cartItem.update({
-						where: { id: cartItem.id },
-						data:  { quantity: cartItem.quantity },
-					});
-					continue;
-				}
-
-				cartItems.splice(matchIndex, 1);
-				await tx.cartItem.delete({ where: { id: cartItem.id } });
-			}
+			},
+			orderBy: { createdAt: 'asc' },
 		});
+
+		for (const item of items) {
+			const matchIndex = cartItems.findIndex(cartItem =>
+				cartItem.menuItemId === item.menuItemId
+				&& (cartItem.specialInstructions ?? null) === (item.specialInstructions ?? null)
+				&& modifiersMatch(item.modifiers, cartItem.modifierChoices),
+			);
+
+			if (matchIndex === -1) {
+				continue;
+			}
+
+			const cartItem = cartItems[matchIndex]!;
+			if (cartItem.quantity > item.quantity) {
+				cartItem.quantity -= item.quantity;
+				await tx.cartItem.update({
+					where: { id: cartItem.id },
+					data:  { quantity: cartItem.quantity },
+				});
+				continue;
+			}
+
+			cartItems.splice(matchIndex, 1);
+			await tx.cartItem.delete({ where: { id: cartItem.id } });
+		}
 	}
 
 	static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderDTO[]> {

@@ -5,7 +5,7 @@ import { FakeCafeOrderSession } from '../../cafe/session/fake-order-session.js';
 import type { IOrderSession } from '../../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../../cafe/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../../cafe/buy-ondemand/wait-time.js';
-import { OrderStorageClient, toOrderItems } from './order.js';
+import { OrderStorageClient } from './order.js';
 import { CAFES_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../../shared/lock/map.js';
@@ -226,62 +226,37 @@ export abstract class OrderOrchestrator {
 				);
 			}
 
-			const pendingOrder = await OrderStorageClient.getPendingOrder(pendingOrderId);
-			const orderedItems = toOrderItems(pendingOrder.items);
-
+			let waitTime: IWaitTimeResponse;
 			try {
-				const waitTime = await session.completeOrderAfterIframePayment({
+				waitTime = await session.completeOrderAfterIframePayment({
 					alias,
 					phoneData,
 					paymentToken,
 					cardInfo,
 				});
-				const completedAt = new Date();
-				const financials = toCompletionFinancials(session, waitTime, completedAt);
-
-				await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
-				try {
-					await OrderStorageClient.deductFromCart(pendingOrder.userId, orderedItems);
-				} catch (err) {
-					orderLog.error(`Failed to deduct cart items for pending order ${pendingOrderId}:`, err);
-				}
-
-				orderLog.info(`Order completed — orderNumber: ${financials.buyOnDemandOrderNumber}`);
-				return {
-					buyOnDemandOrderId:     financials.buyOnDemandOrderId,
-					buyOnDemandOrderNumber: financials.buyOnDemandOrderNumber,
-					waitTimeMin:            financials.waitTimeMin,
-					waitTimeMax:            financials.waitTimeMax,
-					completedAt:            financials.completedAt.toISOString(),
-				};
 			} catch (err) {
 				if (!shouldTreatAsPostCloseFailure(session)) {
 					throw err;
 				}
 
 				orderLog.error('Post-close failure (order already placed):', err);
-				const waitTime = await getWaitTimeForSession(session).catch(waitErr => {
+				waitTime = await getWaitTimeForSession(session).catch(waitErr => {
 					orderLog.error(`Failed to fetch fallback wait time for pending order ${pendingOrderId}:`, waitErr);
 					return { minTime: 0, maxTime: 0 };
 				});
-				const completedAt = new Date();
-				const financials = toCompletionFinancials(session, waitTime, completedAt);
-
-				await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
-				try {
-					await OrderStorageClient.deductFromCart(pendingOrder.userId, orderedItems);
-				} catch (deductErr) {
-					orderLog.error(`Failed to deduct cart items for pending order ${pendingOrderId}:`, deductErr);
-				}
-
-				return {
-					buyOnDemandOrderId:     financials.buyOnDemandOrderId,
-					buyOnDemandOrderNumber: financials.buyOnDemandOrderNumber,
-					waitTimeMin:            financials.waitTimeMin,
-					waitTimeMax:            financials.waitTimeMax,
-					completedAt:            financials.completedAt.toISOString(),
-				};
 			}
+
+			const financials = toCompletionFinancials(session, waitTime, new Date());
+			await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
+			orderLog.info(`Order completed — orderNumber: ${financials.buyOnDemandOrderNumber}`);
+
+			return {
+				buyOnDemandOrderId:     financials.buyOnDemandOrderId,
+				buyOnDemandOrderNumber: financials.buyOnDemandOrderNumber,
+				waitTimeMin:            financials.waitTimeMin,
+				waitTimeMax:            financials.waitTimeMax,
+				completedAt:            financials.completedAt.toISOString(),
+			};
 		});
 	}
 
