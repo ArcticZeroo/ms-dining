@@ -16,6 +16,17 @@
     left: 0;
 }
 
+@media screen and (max-width: 800px) {
+    .modal .body:has(.iframe-container) {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal .iframe-container {
+        min-height: 0;
+    }
+}
+
 .modal .iframe-loading {
     display: flex;
     align-items: center;
