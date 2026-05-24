@@ -68,7 +68,6 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                 <OrderCafeItemsTable
                     items={items}
                     readOnly={isReadOnly}
-                    totalPrice={totalPrice}
                     onRemove={onRemove}
                     onEdit={onEdit}
                     onChangeQuantity={onChangeQuantity}
