@@ -1,5 +1,5 @@
 import { usePrismaClient, usePrismaWrite } from '../client.js';
-import type { ISearchQueryService, ITopSearchQuery } from '../../../../shared/services/search-query.js';
+import type { ITopSearchQuery } from '../../../../shared/services/search-query.js';
 
 export abstract class SearchQueryClient {
     public static async incrementSearchCount(query: string): Promise<void> {
@@ -22,17 +22,3 @@ export abstract class SearchQueryClient {
     }
 }
 
-/**
- * Worker-side implementation of {@link ISearchQueryService}. Typed against
- * the shared interface so TypeScript enforces parity — adding a method to
- * the interface without implementing it here is a compile error.
- *
- * Registered with the data handler under the `searchQuery` service name.
- * In phase 2 this file moves to `src/worker-db/services/search-query.ts`.
- */
-export const searchQueryServiceCommands = {
-    incrementSearchCount: async ({ query }: { query: string }) =>
-        SearchQueryClient.incrementSearchCount(query),
-    getTopSearchQueries: async ({ limit }: { limit?: number }) =>
-        SearchQueryClient.getTopSearchQueries(limit),
-} satisfies ISearchQueryService;

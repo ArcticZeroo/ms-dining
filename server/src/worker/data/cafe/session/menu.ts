@@ -5,7 +5,6 @@ import { ICafe, ICafeStation, IMenuItemBase } from '../../../../shared/models/ca
 import { logError } from '../../../../shared/util/log.js';
 import { ENVIRONMENT_SETTINGS } from '../../../../shared/util/env.js';
 import { Lock } from '@frozor/lock';
-import { SEARCH_TAG_WORKER_QUEUE } from '../../../queues/search-tags.js';
 import { IStationListResult, retrieveStationListAsync } from '../buy-ondemand/stations.js';
 import { retrieveTagDefinitionsAsync } from '../buy-ondemand/tags.js';
 import { retrieveMenuItemsAsync } from '../buy-ondemand/menu-items.js';
@@ -218,23 +217,7 @@ export class CafeMenuSession {
             const serverItems = await this.#retrieveMenuItemsFromBuyOnDemandAsync(station, localItemsById, Array.from(itemIdsToRetrieve));
 
             for (const item of serverItems) {
-                // we save menu items at the end of the process now
-                // try {
-                // 	await getServices().data.menuItem.saveMenuItem({ menuItem: item, allowUpdateIfExisting: true });
-                // } catch (err) {
-                // 	logError(`Unable to save menu item "${item.name}"@${item.id} to the database:`, err);
-                // 	continue;
-                // }
-
                 items.push(item);
-
-                if (item.searchTags.size === 0) {
-                    SEARCH_TAG_WORKER_QUEUE.add({
-                        id:          item.id,
-                        name:        item.name,
-                        description: item.description
-                    });
-                }
             }
         }
 

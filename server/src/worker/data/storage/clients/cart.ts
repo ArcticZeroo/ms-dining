@@ -3,7 +3,6 @@ import { ServiceError, SERVICE_ERROR_CODES } from '../../../rpc/errors.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import { toDateString } from '@msdining/common/util/date-util';
 import type { PrismaTransactionClient } from '../../../../shared/models/prisma.js';
-import type { ICartService } from '../../../../shared/services/cart.js';
 import type {
     ICartItemData,
     ICartItemRecord,
@@ -214,15 +213,3 @@ export abstract class CartStorageClient {
     }
 }
 
-export const cartServiceCommands = {
-    getCart: async ({ userId }: { userId: string }) =>
-        CartStorageClient.getCart(userId),
-    addItems: async ({ userId, items }: { userId: string; items: ICartItemData[] }) =>
-        CartStorageClient.addItems(userId, items),
-    updateItem: async ({ userId, itemId, update }: { userId: string; itemId: string; update: ICartItemUpdate }) =>
-        CartStorageClient.updateItem(userId, itemId, update),
-    removeItem: async ({ userId, itemId }: { userId: string; itemId: string }) =>
-        CartStorageClient.removeItem(userId, itemId),
-    clearCart: async ({ userId }: { userId: string }) =>
-        CartStorageClient.clearCart(userId),
-} satisfies ICartService;

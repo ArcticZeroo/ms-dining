@@ -1,18 +1,18 @@
 import { InProcessHandler } from '../../../worker/rpc/handler.js';
-import { searchQueryServiceCommands } from '../../../worker/data/storage/clients/search-query.js';
-import { tagServiceCommands } from '../../../worker/data/storage/clients/tags.js';
-import { cafeServiceCommands } from '../../../worker/data/storage/clients/cafe.js';
-import { stationServiceCommands } from '../../../worker/data/storage/clients/station.js';
-import { userServiceCommands } from '../../../worker/data/storage/clients/user.js';
-import { stationThemeServiceCommands } from '../../../worker/data/storage/clients/station-theme.js';
+import { searchQueryServiceCommands } from '../../../worker/data/storage/clients/search-query-commands.js';
+import { tagServiceCommands } from '../../../worker/data/storage/clients/tags-commands.js';
+import { cafeServiceCommands } from '../../../worker/data/storage/clients/cafe-commands.js';
+import { stationServiceCommands } from '../../../worker/data/storage/clients/station-commands.js';
+import { userServiceCommands } from '../../../worker/data/storage/clients/user-commands.js';
+import { stationThemeServiceCommands } from '../../../worker/data/storage/clients/station-theme-commands.js';
 import { sessionServiceCommands } from '../../util/session-store.js';
-import { reviewServiceCommands } from '../../../worker/data/storage/clients/review.js';
-import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups.js';
+import { reviewServiceCommands } from '../../../worker/data/storage/clients/review-commands.js';
+import { groupsServiceCommands } from '../../../worker/data/storage/clients/groups-commands.js';
 import { menuItemServiceCommands } from '../../../worker/data/storage/clients/menu-item-commands.js';
-import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu.js';
-import { searchServiceCommands } from '../../../worker/data/storage/clients/search-service.js';
-import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/menu-analytics.js';
-import { cartServiceCommands } from '../../../worker/data/storage/clients/cart.js';
+import { dailyMenuServiceCommands } from '../../../worker/data/storage/clients/daily-menu-commands.js';
+import { searchServiceCommands } from '../../../worker/data/storage/clients/search-service-commands.js';
+import { menuAnalyticsServiceCommands } from '../../../worker/data/storage/clients/menu-analytics-commands.js';
+import { cartServiceCommands } from '../../../worker/data/storage/clients/cart-commands.js';
 import { orderServiceCommands } from '../../../worker/data/storage/clients/order-commands.js';
 
 /**

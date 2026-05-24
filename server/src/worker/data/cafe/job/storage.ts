@@ -2,6 +2,7 @@ import { ICafe, ICafeStation } from '../../../../shared/models/cafe.js';
 import { StationStorageClient } from '../../storage/clients/station.js';
 import { MenuItemStorageClient } from '../../storage/clients/menu-item.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../queues/embeddings.js';
+import { SEARCH_TAG_WORKER_QUEUE } from '../../../queues/search-tags.js';
 import { usePrismaTransaction } from '../../storage/client.js';
 import { getServices } from '../../../../main/services/registry.js';
 
@@ -45,6 +46,20 @@ export const saveDailyMenuAsync = async ({
             station,
             shouldUpdateExistingItems
         });
+    }
+
+    // Queue search tag generation only after menu items are persisted,
+    // so the worker won't hit a missing MenuItem record.
+    for (const station of stations) {
+        for (const menuItem of station.menuItemsById.values()) {
+            if (menuItem.searchTags.size === 0) {
+                SEARCH_TAG_WORKER_QUEUE.add({
+                    id:          menuItem.id,
+                    name:        menuItem.name,
+                    description: menuItem.description
+                });
+            }
+        }
     }
 
     await getServices().data.dailyMenu.publishDailyStationMenuAsync({

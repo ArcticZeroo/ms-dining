@@ -43,6 +43,7 @@ import { defaultDataServices } from '../../main/services/data/index.js';
 import { applySchemaToTempDb } from './db-test-helper.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { TestBuyOnDemandClient } from './test-client.js';
 import { MockAiProvider } from './mock-ai-provider.js';
 
@@ -116,6 +117,25 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
 
     // ── 3. Push schema to the empty dining.db ───────────────────────────
     await applySchemaToTempDb(dbPath);
+
+    // ── 3b. Seed all known cafes so FK constraints are satisfied ─────────
+    const { PrismaClient } = await import('@prisma/client');
+    const seedPrisma = new PrismaClient({ datasourceUrl: `file:${dbPath}` });
+    try {
+        await seedPrisma.cafe.createMany({
+            data: ALL_CAFES.map(cafe => ({
+                id:               cafe.id,
+                name:             cafe.name,
+                tenantId:         '',
+                contextId:        '',
+                displayProfileId: '',
+                storeId:          '',
+                externalName:     cafe.id,
+            })),
+        });
+    } finally {
+        await seedPrisma.$disconnect();
+    }
 
     // ── 4. Build per-context services ────────────────────────────────────
     const mockAi = new MockAiProvider();

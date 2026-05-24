@@ -1,7 +1,6 @@
 import { usePrismaClient, usePrismaWrite } from '../client.js';
 import { IMenuItemTag } from '../../../../shared/models/cafe.js';
 import { isUniqueConstraintFailedError } from '../../../../shared/util/prisma.js';
-import type { ITagService } from '../../../../shared/services/tag.js';
 
 export abstract class TagStorageClient {
     private static readonly _tagNamesById = new Map<string, string>();
@@ -39,14 +38,3 @@ export abstract class TagStorageClient {
     }
 }
 
-/**
- * Worker-side implementation of {@link ITagService}.
- */
-export const tagServiceCommands = {
-    retrieveTags: async (_data: {}) => {
-        const map = await TagStorageClient.retrieveTagsAsync();
-        return Object.fromEntries(map);
-    },
-    createTags: async ({ tags }: { tags: IMenuItemTag[] }) =>
-        TagStorageClient.createTags(tags),
-} satisfies ITagService;
