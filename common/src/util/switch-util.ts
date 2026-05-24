@@ -1,5 +1,5 @@
 /**
- * Exhaustive switch guard. Place in the `default` case of a switch statement
+ * Exhaustive switch guard. Throw in the `default` case of a switch statement
  * over a discriminated union to get a compile-time error if a variant is
  * unhandled.
  *
@@ -7,9 +7,12 @@
  * switch (state.status) {
  *     case 'a': return handleA();
  *     case 'b': return handleB();
- *     default:  throw preventUnhandledDefault(state);
+ *     default:  throw new UnhandledDefaultError(state);
  * }
  */
-export const preventUnhandledDefault = (value: never): Error => {
-    return new Error(`Unhandled case: ${JSON.stringify(value)}`);
-};
+export class UnhandledDefaultError extends Error {
+    constructor(value: never) {
+        super(`Unhandled case: ${JSON.stringify(value)}`);
+        this.name = 'UnhandledDefaultError';
+    }
+}

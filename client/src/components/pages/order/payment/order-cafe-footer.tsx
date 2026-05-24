@@ -4,7 +4,7 @@ import { formatWaitTime } from '../../../../util/order.ts';
 import { usePaymentIdentityContext } from '../../../../context/payment-identity.ts';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
 import type { PaymentState } from '../../../../hooks/cafe-payment-flow.tsx';
-import { preventUnhandledDefault } from '@msdining/common/util/switch-util';
+import { UnhandledDefaultError } from '@msdining/common/util/switch-util';
 
 interface IOrderCafeFooterProps {
     paymentState: PaymentState;
@@ -109,6 +109,6 @@ export const OrderCafeFooter: React.FC<IOrderCafeFooterProps> = ({
             />
         );
     default:
-        throw preventUnhandledDefault(paymentState);
+        throw new UnhandledDefaultError(paymentState);
     }
 };
