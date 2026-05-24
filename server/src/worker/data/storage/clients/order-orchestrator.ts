@@ -227,10 +227,6 @@ export abstract class OrderOrchestrator {
 			}
 
 			const pendingOrder = await OrderStorageClient.getPendingOrder(pendingOrderId);
-			if (pendingOrder.userId !== userId) {
-				throw new ServiceError(SERVICE_ERROR_CODES.FORBIDDEN, 'Pending order does not belong to this user');
-			}
-
 			const orderedItems = toOrderItems(pendingOrder.items);
 
 			try {
@@ -243,7 +239,7 @@ export abstract class OrderOrchestrator {
 				const completedAt = new Date();
 				const financials = toCompletionFinancials(session, waitTime, completedAt);
 
-				await OrderStorageClient.createCompletedOrder(pendingOrderId, financials);
+				await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
 				try {
 					await OrderStorageClient.deductFromCart(pendingOrder.userId, orderedItems);
 				} catch (err) {
@@ -271,7 +267,7 @@ export abstract class OrderOrchestrator {
 				const completedAt = new Date();
 				const financials = toCompletionFinancials(session, waitTime, completedAt);
 
-				await OrderStorageClient.createCompletedOrder(pendingOrderId, financials);
+				await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
 				try {
 					await OrderStorageClient.deductFromCart(pendingOrder.userId, orderedItems);
 				} catch (deductErr) {

@@ -109,41 +109,42 @@ export abstract class OrderStorageClient {
 
 		const itemsHash = hashOrderItems(items);
 
-		// Check for existing pending order with matching items
-		const existing = await usePrismaClient(prisma => prisma.pendingCafeOrder.findFirst({
-			where:  { userId, cafeId, itemsHash },
-			select: { id: true },
-		}));
+		return usePrismaTransaction(async tx => {
+			const existing = await tx.pendingCafeOrder.findFirst({
+				where:  { userId, cafeId, itemsHash },
+				select: { id: true },
+			});
 
-		if (existing) {
-			return { id: existing.id, isExisting: true };
-		}
+			if (existing) {
+				return { id: existing.id, isExisting: true };
+			}
 
-		const created = await usePrismaWrite(prisma => prisma.pendingCafeOrder.create({
-			data:   {
-				userId,
-				cafeId,
-				itemsHash,
-				items: {
-					create: items.map(item => ({
-						menuItemId:          item.menuItemId,
-						quantity:            item.quantity,
-						specialInstructions: item.specialInstructions ?? null,
-						modifiers:           {
-							create: item.modifiers.flatMap(modifier =>
-								modifier.choiceIds.map(choiceId => ({
-									modifierId: modifier.modifierId,
-									choiceId,
-								})),
-							),
-						},
-					})),
+			const created = await tx.pendingCafeOrder.create({
+				data: {
+					userId,
+					cafeId,
+					itemsHash,
+					items: {
+						create: items.map(item => ({
+							menuItemId:          item.menuItemId,
+							quantity:            item.quantity,
+							specialInstructions: item.specialInstructions ?? null,
+							modifiers: {
+								create: item.modifiers.flatMap(modifier =>
+									modifier.choiceIds.map(choiceId => ({
+										modifierId: modifier.modifierId,
+										choiceId,
+									})),
+								),
+							},
+						})),
+					},
 				},
-			},
-			select: { id: true },
-		}));
+				select: { id: true },
+			});
 
-		return { id: created.id, isExisting: false };
+			return { id: created.id, isExisting: false };
+		});
 	}
 
 	static async getPendingOrder(pendingOrderId: string) {
@@ -167,6 +168,7 @@ export abstract class OrderStorageClient {
 
 	static async createCompletedOrder(
 		pendingOrderId: string,
+		userId: string,
 		financials: {
 			buyOnDemandOrderId: string;
 			buyOnDemandOrderNumber: string;
@@ -186,6 +188,10 @@ export abstract class OrderStorageClient {
 
 			if (!pendingOrder) {
 				throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, 'Pending order not found');
+			}
+
+			if (pendingOrder.userId !== userId) {
+				throw new ServiceError(SERVICE_ERROR_CODES.FORBIDDEN, 'Pending order does not belong to this user');
 			}
 
 			const menuItemIds = [...new Set(pendingOrder.items.map(item => item.menuItemId))];
