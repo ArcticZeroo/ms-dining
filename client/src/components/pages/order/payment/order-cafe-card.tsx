@@ -53,7 +53,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         [items],
     );
 
-    const isReadOnly = paymentState.status !== 'ready';
+    const isReadOnly = paymentState.status !== 'ready-to-pay';
 
     return (
         <div className={classNames('card', hasUnavailableItems && 'error')}>

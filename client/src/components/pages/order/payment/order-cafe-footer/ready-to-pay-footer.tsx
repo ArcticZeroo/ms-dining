@@ -3,7 +3,7 @@ import { formatPrice } from '../../../../../util/cart.ts';
 import { usePaymentIdentityContext } from '../../../../../context/payment-identity.ts';
 import { pluralizeWithCount } from '../../../../../util/string.ts';
 
-interface IReadyFooterProps {
+interface IReadyToPayFooterProps {
     notice?: string;
     totalQuantity: number;
     totalPrice: number;
@@ -23,7 +23,7 @@ const getPayButtonTitle = (isIdentityValid: boolean, hasUnavailableItems: boolea
     return 'Click to open payment popup';
 }
 
-export const ReadyFooter: React.FC<IReadyFooterProps> = ({ notice, totalQuantity, totalPrice, hasUnavailableItems, onPay }) => {
+export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, totalQuantity, totalPrice, hasUnavailableItems, onPay }) => {
     const { isValid: isIdentityValid } = usePaymentIdentityContext();
 
     return (

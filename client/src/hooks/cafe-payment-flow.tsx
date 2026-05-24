@@ -22,7 +22,7 @@ interface IUseCafePaymentFlowParams {
 }
 
 export type PaymentState =
-    | { status: 'ready'; notice?: string }
+    | { status: 'ready-to-pay'; notice?: string }
     | { status: 'preparing' }
     | { status: 'completing' }
     | { status: 'completed'; result: ICompleteOrderResult };
@@ -104,7 +104,7 @@ export const useCafePaymentFlow = ({
             notice = 'Order payment cancelled. You have not been charged.';
         }
 
-        return { status: 'ready', notice };
+        return { status: 'ready-to-pay', notice };
     })();
 
     return { handlePay, paymentState };

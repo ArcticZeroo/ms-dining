@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PaymentState } from '../../../../../hooks/cafe-payment-flow.tsx';
 import { UnhandledDefaultError } from '@msdining/common/util/switch-util';
-import { ReadyFooter } from './ready-footer.tsx';
+import { ReadyToPayFooter } from './ready-to-pay-footer.tsx';
 import { CompletingFooter } from './completing-footer.tsx';
 import { CompletedFooter } from './completed-footer.tsx';
 
@@ -26,9 +26,9 @@ export const OrderCafeFooter: React.FC<IOrderCafeFooterProps> = ({
     case 'completing':
     case 'preparing':
         return <CompletingFooter/>;
-    case 'ready':
+    case 'ready-to-pay':
         return (
-            <ReadyFooter
+            <ReadyToPayFooter
                 notice={paymentState.notice}
                 totalQuantity={totalQuantity}
                 totalPrice={totalPrice}
