@@ -5,7 +5,7 @@ import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/new-ordering.ts';
 import { usePaymentIdentityContext } from '../context/payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
-import { PaymentFrameModal } from '../components/pages/order/payment/payment-frame-modal.tsx';
+import { PaymentPopup } from '../components/pages/order/payment/payment-popup.tsx';
 import type { Nullable } from '@msdining/common/models/util';
 
 const paymentPopupId = Symbol('order-cafe-payment');
@@ -26,7 +26,8 @@ export interface ICafePaymentFlowResult {
     handlePay: () => void;
     error: string | undefined;
     completionResult: ICompleteOrderResult | undefined;
-    isLocalBusy: boolean;
+    isBusy: boolean;
+    isPaymentModalOpen: boolean;
 }
 
 const getError = (prepareError: Nullable<Error>, completeError: Nullable<Error>, hasPaid: boolean) => {
@@ -55,13 +56,19 @@ export const useCafePaymentFlow = ({
     const completeOrder = useCompleteOrderMutation();
     const { alias, phoneNumber, isValid: isIdentityValid } = usePaymentIdentityContext();
 
-    const isLocalBusy = preparePayment.isPending || completeOrder.isPending;
+    const isBusy = preparePayment.isPending || completeOrder.isPending;
     const completionResult = completeOrder.data;
     const [hasPaid, setHasPaid] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const error = getError(preparePayment.error, completeOrder.error, hasPaid);
 
+    const handleClosePopup = useCallback(() => {
+        closePopup();
+        setIsOpen(false);
+    }, [closePopup]);
+
     const handlePay = useCallback(async () => {
-        if (!isIdentityValid || isLocalBusy) {
+        if (!isIdentityValid || isBusy) {
             return;
         }
 
@@ -74,9 +81,11 @@ export const useCafePaymentFlow = ({
                 items: items.map(toOrderItem),
             });
 
+            setIsOpen(true);
+
             openPopup({
                 id:   paymentPopupId,
-                body: <PaymentFrameModal
+                body: <PaymentPopup
                     iframeUrl={prepareResult.iframeUrl}
                     onPaymentComplete={async (paymentResult) => {
                         setHasPaid(true);
@@ -87,15 +96,15 @@ export const useCafePaymentFlow = ({
                             alias:          alias,
                             phoneNumber:    phoneNumber,
                         });
-                        closePopup();
+                        handleClosePopup();
                     }}
-                    onClose={closePopup}
+                    onClose={handleClosePopup}
                 />,
             });
         } catch {
             // Error is captured in preparePayment.error
         }
-    }, [cafeId, closePopup, completeOrder, isIdentityValid, isLocalBusy, items, openPopup, alias, phoneNumber, preparePayment]);
+    }, [isIdentityValid, isBusy, preparePayment, completeOrder, cafeId, items, openPopup, handleClosePopup, alias, phoneNumber]);
 
-    return { handlePay, error, completionResult, isLocalBusy };
+    return { handlePay, error, completionResult, isBusy, isPaymentModalOpen: isOpen };
 };

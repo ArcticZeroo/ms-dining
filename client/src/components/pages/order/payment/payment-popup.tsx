@@ -13,7 +13,7 @@ export interface IPaymentIframeProps {
     onClose: () => void;
 }
 
-export const PaymentFrameModal: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onClose }) => {
+export const PaymentPopup: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onClose }) => {
     const lastPaymentResultRef = useRef<IPaymentSuccessResult | null>(null);
 
     const orderCompletionState = useMutation<void, Error, IPaymentSuccessResult>({
