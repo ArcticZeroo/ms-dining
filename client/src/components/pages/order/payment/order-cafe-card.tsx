@@ -8,7 +8,7 @@ import { getViewName } from '../../../../util/cafe.ts';
 import { getViewMenuUrlDirect } from '../../../../util/link.ts';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import { OrderCafeItemsTable } from './order-cafe-items-table.tsx';
-import { OrderCafeFooter } from './order-cafe-footer.tsx';
+import { OrderCafeFooter } from './order-cafe-footer/order-cafe-footer.tsx';
 import { classNames } from '../../../../util/react.js';
 
 interface IOrderCafeCardProps {
