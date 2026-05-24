@@ -107,5 +107,9 @@ export const OrderCafeFooter: React.FC<IOrderCafeFooterProps> = ({
                 onPay={onPay}
             />
         );
+    default: {
+        const exhaustive: never = paymentState;
+        throw new Error(`Unhandled payment state: ${(exhaustive as PaymentState).status}`);
+    }
     }
 };
