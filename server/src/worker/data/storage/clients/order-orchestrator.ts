@@ -153,7 +153,7 @@ export abstract class OrderOrchestrator {
 
 		// If there's already a live session for this pending order, reuse it
 		if (isExisting) {
-			const existingSession = await liveSessions.peek(pendingOrderId, session => session);
+			const existingSession = await liveSessions.get(pendingOrderId);
 			if (existingSession) {
 				const siteToken = existingSession.cardProcessorToken;
 				const iframeUrl = existingSession.getCardProcessorUrl(iframeCssUrl);
@@ -247,7 +247,12 @@ export abstract class OrderOrchestrator {
 			}
 
 			const financials = toCompletionFinancials(session, waitTime, new Date());
-			await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
+			try {
+				await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
+			} catch (err) {
+				// Failing to create the order in DB is bad, but the order has already been sent to cafe, so we need to tell the user about it.
+				orderLog.error(`Failed to create completed order for pending order ${pendingOrderId}:`, err);
+			}
 			orderLog.info(`Order completed — orderNumber: ${financials.buyOnDemandOrderNumber}`);
 
 			return {

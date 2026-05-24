@@ -219,6 +219,10 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
 		});
 	}
 
+	get(key: K): Promise<V | undefined> {
+		return this.peek(key, value => value);
+	}
+
 	has(key: K): Promise<boolean> {
 		return this.peek(key, (entry) => {
 			// Peek will send undefined if the key doesn't exist or if it has expired, so treat both cases as "not found"
