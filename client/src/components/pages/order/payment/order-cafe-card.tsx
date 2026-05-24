@@ -24,12 +24,10 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const { onRemove, onEdit, onChangeQuantity } = useCartItemActions(snapshotCallbacks);
-    const { handlePay, retryCompletion, notice, completionResult, isCompleting, isBusy } = useCafePaymentFlow({
+    const { handlePay, paymentState } = useCafePaymentFlow({
         cafeId,
         items,
     });
-
-    const isCompleted = completionResult != null;
 
     const view = viewsById.get(cafeId);
     const cafeName = view != null
@@ -55,6 +53,8 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         [items],
     );
 
+    const isReadOnly = paymentState.status !== 'ready';
+
     return (
         <div className={classNames('card', hasUnavailableItems && 'error')}>
             <div className="title">
@@ -66,22 +66,18 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
             </div>
             <OrderCafeItemsTable
                 items={items}
-                readOnly={isCompleted || isBusy}
+                readOnly={isReadOnly}
                 totalPrice={totalPrice}
                 onRemove={onRemove}
                 onEdit={onEdit}
                 onChangeQuantity={onChangeQuantity}
             />
             <OrderCafeFooter
-                completionResult={completionResult}
+                paymentState={paymentState}
                 totalQuantity={totalQuantity}
                 totalPrice={totalPrice}
-                isBusy={isBusy}
-                isCompleting={isCompleting}
                 hasUnavailableItems={hasUnavailableItems}
-                notice={notice}
                 onPay={handlePay}
-                onRetryCompletion={retryCompletion}
             />
         </div>
     );

@@ -6,7 +6,6 @@ import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/qu
 import { usePaymentIdentityContext } from '../context/payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
 import { PaymentPopup } from '../components/pages/order/payment/payment-popup.tsx';
-import type { Nullable } from '@msdining/common/models/util';
 
 const paymentPopupId = Symbol('order-cafe-payment');
 
@@ -22,29 +21,15 @@ interface IUseCafePaymentFlowParams {
     items: ICartItemRecord[];
 }
 
+export type PaymentState =
+    | { status: 'ready'; notice?: string }
+    | { status: 'preparing' }
+    | { status: 'completing' }
+    | { status: 'completed'; result: ICompleteOrderResult };
+
 export interface ICafePaymentFlowResult {
     handlePay: () => void;
-    retryCompletion: () => void;
-    notice: string | undefined;
-    completionResult: ICompleteOrderResult | undefined;
-    isCompleting: boolean;
-    isBusy: boolean;
-}
-
-const getNotice = (prepareError: Nullable<Error>, completeError: Nullable<Error>, hasCancelled: boolean) => {
-    if (prepareError) {
-        return getErrorMessage(prepareError, 'Failed to prepare payment');
-    }
-
-    if (completeError) {
-        return getErrorMessage(completeError, 'Failed to complete order. You have not been charged — any pending hold on your card will be released.');
-    }
-
-    if (hasCancelled) {
-        return 'Order payment cancelled. You have not been charged.';
-    }
-
-    return undefined;
+    paymentState: PaymentState;
 }
 
 export const useCafePaymentFlow = ({
@@ -56,29 +41,10 @@ export const useCafePaymentFlow = ({
     const preparePayment = usePreparePaymentMutation();
     const completeOrder = useCompleteOrderMutation();
     const { alias, phoneNumber, isValid: isIdentityValid } = usePaymentIdentityContext();
-
-    const isCompleting = completeOrder.isPending;
-    const isBusy = preparePayment.isPending || isCompleting;
-    const completionResult = completeOrder.data;
     const [hasCancelled, setHasCancelled] = useState(false);
 
-    const notice = getNotice(preparePayment.error, completeOrder.error, hasCancelled);
-
-    const handleClosePopup = useCallback(() => {
-        closePopup();
-    }, [closePopup]);
-
-    const retryCompletion = useCallback(() => {
-        completeOrder.reset();
-        // Re-attempt uses the same pending order — the mutation variables are still set
-        const vars = completeOrder.variables;
-        if (vars) {
-            completeOrder.mutate(vars);
-        }
-    }, [completeOrder]);
-
     const handlePay = useCallback(async () => {
-        if (!isIdentityValid || isBusy) {
+        if (!isIdentityValid || preparePayment.isPending || completeOrder.isPending) {
             return;
         }
 
@@ -97,7 +63,7 @@ export const useCafePaymentFlow = ({
                 body: <PaymentPopup
                     iframeUrl={prepareResult.iframeUrl}
                     onPaymentComplete={(paymentResult) => {
-                        handleClosePopup();
+                        closePopup();
                         completeOrder.mutate({
                             pendingOrderId: prepareResult.pendingOrderId,
                             paymentToken:   paymentResult.token,
@@ -108,14 +74,38 @@ export const useCafePaymentFlow = ({
                     }}
                     onClose={() => {
                         setHasCancelled(true);
-                        handleClosePopup();
+                        closePopup();
                     }}
                 />,
             });
         } catch {
             // Error is captured in preparePayment.error
         }
-    }, [isIdentityValid, isBusy, preparePayment, completeOrder, cafeId, items, openPopup, handleClosePopup, alias, phoneNumber]);
+    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, openPopup, closePopup, alias, phoneNumber]);
 
-    return { handlePay, retryCompletion, notice, completionResult, isCompleting, isBusy };
+    const paymentState = ((): PaymentState => {
+        if (completeOrder.data) {
+            return { status: 'completed', result: completeOrder.data };
+        }
+        if (completeOrder.isPending) {
+            return { status: 'completing' };
+        }
+        if (preparePayment.isPending) {
+            return { status: 'preparing' };
+        }
+
+        let notice: string | undefined;
+
+        if (preparePayment.error) {
+            notice = getErrorMessage(preparePayment.error, 'Failed to prepare payment');
+        } else if (completeOrder.error) {
+            notice = getErrorMessage(completeOrder.error, 'Failed to complete order. You have not been charged — any pending hold on your card will be released.');
+        } else if (hasCancelled) {
+            notice = 'Order payment cancelled. You have not been charged.';
+        }
+
+        return { status: 'ready', notice };
+    })();
+
+    return { handlePay, paymentState };
 };
