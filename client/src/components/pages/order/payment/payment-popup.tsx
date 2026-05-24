@@ -1,60 +1,25 @@
-import React, { useCallback, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import React from 'react';
 import { Modal } from '../../../popup/modal.tsx';
 import { type IPaymentSuccessResult } from '../../../../util/payment-iframe.js';
 import { PaymentFormBody } from './payment-form-body.js';
-import { PaymentCompletionBody } from './payment-completion-body.js';
 
 import './payment-iframe.css';
 
-export interface IPaymentIframeProps {
+export interface IPaymentPopupProps {
     iframeUrl: string;
-    onPaymentComplete: (result: IPaymentSuccessResult) => Promise<void>;
+    onPaymentComplete: (result: IPaymentSuccessResult) => void;
     onClose: () => void;
 }
 
-export const PaymentPopup: React.FC<IPaymentIframeProps> = ({ iframeUrl, onPaymentComplete, onClose }) => {
-    const lastPaymentResultRef = useRef<IPaymentSuccessResult | null>(null);
-
-    const orderCompletionState = useMutation<void, Error, IPaymentSuccessResult>({
-        mutationFn: (result) => onPaymentComplete(result),
-    });
-    const { mutate: runCompletion } = orderCompletionState;
-
-    const retryCompletion = useCallback(() => {
-        const result = lastPaymentResultRef.current;
-        if (result) {
-            runCompletion(result);
-        }
-    }, [runCompletion]);
-
-    const onPaymentSuccess = ({ token, cardInfo }: IPaymentSuccessResult) => {
-        lastPaymentResultRef.current = { token, cardInfo };
-        runCompletion({ token, cardInfo });
-    }
-
-    if (orderCompletionState.isIdle) {
-        return (
-            <Modal
-                title="Enter Payment Details"
-                body={
-                    <PaymentFormBody
-                        iframeUrl={iframeUrl}
-                        onPaymentCancelled={onClose}
-                        onPaymentSuccess={onPaymentSuccess}
-                    />
-                }
-            />
-        );
-    }
-
+export const PaymentPopup: React.FC<IPaymentPopupProps> = ({ iframeUrl, onPaymentComplete, onClose }) => {
     return (
         <Modal
-            title="Processing Payment"
+            title="Enter Payment Details"
             body={
-                <PaymentCompletionBody
-                    error={orderCompletionState.error}
-                    onRetry={retryCompletion}
+                <PaymentFormBody
+                    iframeUrl={iframeUrl}
+                    onPaymentCancelled={onClose}
+                    onPaymentSuccess={onPaymentComplete}
                 />
             }
         />

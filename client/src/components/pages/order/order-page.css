@@ -67,6 +67,22 @@
     color: var(--color-error, red);
 }
 
+.order-cafe-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+}
+
+.order-cafe-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--default-padding);
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    background: rgba(255, 255, 255, 0.08);
+}
+
 .order-done-list {
     display: flex;
     flex-direction: column;

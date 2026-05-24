@@ -24,30 +24,20 @@ interface IUseCafePaymentFlowParams {
 
 export interface ICafePaymentFlowResult {
     handlePay: () => void;
+    retryCompletion: () => void;
     notice: string | undefined;
     completionResult: ICompleteOrderResult | undefined;
+    isCompleting: boolean;
     isBusy: boolean;
-    isPaymentModalOpen: boolean;
 }
 
-interface IGetPaymentFlowErrorParams {
-    prepareError: Nullable<Error>;
-    completeError: Nullable<Error>;
-    hasPaid: boolean;
-    hasCancelled: boolean;
-}
-
-const getError = ({ prepareError, completeError, hasPaid, hasCancelled }: IGetPaymentFlowErrorParams) => {
+const getNotice = (prepareError: Nullable<Error>, completeError: Nullable<Error>, hasCancelled: boolean) => {
     if (prepareError) {
         return getErrorMessage(prepareError, 'Failed to prepare payment');
     }
 
     if (completeError) {
-        if (hasPaid) {
-            return getErrorMessage(completeError, 'You have not been charged - any pending charge on your card will go away within a few days. Failed to complete order');
-        }
-
-        return getErrorMessage(completeError, 'Failed to complete order');
+        return getErrorMessage(completeError, 'Failed to complete order. You have not been charged — any pending hold on your card will be released.');
     }
 
     if (hasCancelled) {
@@ -67,23 +57,25 @@ export const useCafePaymentFlow = ({
     const completeOrder = useCompleteOrderMutation();
     const { alias, phoneNumber, isValid: isIdentityValid } = usePaymentIdentityContext();
 
-    const isBusy = preparePayment.isPending || completeOrder.isPending;
+    const isCompleting = completeOrder.isPending;
+    const isBusy = preparePayment.isPending || isCompleting;
     const completionResult = completeOrder.data;
-    const [hasPaid, setHasPaid] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
     const [hasCancelled, setHasCancelled] = useState(false);
 
-    const notice = getError({
-        prepareError: preparePayment.error,
-        completeError: completeOrder.error,
-        hasPaid,
-        hasCancelled
-    });
+    const notice = getNotice(preparePayment.error, completeOrder.error, hasCancelled);
 
     const handleClosePopup = useCallback(() => {
         closePopup();
-        setIsOpen(false);
     }, [closePopup]);
+
+    const retryCompletion = useCallback(() => {
+        completeOrder.reset();
+        // Re-attempt uses the same pending order — the mutation variables are still set
+        const vars = completeOrder.variables;
+        if (vars) {
+            completeOrder.mutate(vars);
+        }
+    }, [completeOrder]);
 
     const handlePay = useCallback(async () => {
         if (!isIdentityValid || isBusy) {
@@ -92,6 +84,7 @@ export const useCafePaymentFlow = ({
 
         preparePayment.reset();
         completeOrder.reset();
+        setHasCancelled(false);
 
         try {
             const prepareResult = await preparePayment.mutateAsync({
@@ -99,22 +92,19 @@ export const useCafePaymentFlow = ({
                 items: items.map(toOrderItem),
             });
 
-            setIsOpen(true);
-
             openPopup({
                 id:   paymentPopupId,
                 body: <PaymentPopup
                     iframeUrl={prepareResult.iframeUrl}
-                    onPaymentComplete={async (paymentResult) => {
-                        setHasPaid(true);
-                        await completeOrder.mutateAsync({
+                    onPaymentComplete={(paymentResult) => {
+                        handleClosePopup();
+                        completeOrder.mutate({
                             pendingOrderId: prepareResult.pendingOrderId,
                             paymentToken:   paymentResult.token,
                             cardInfo:       paymentResult.cardInfo,
-                            alias:          alias,
-                            phoneNumber:    phoneNumber,
+                            alias,
+                            phoneNumber,
                         });
-                        handleClosePopup();
                     }}
                     onClose={() => {
                         setHasCancelled(true);
@@ -127,5 +117,5 @@ export const useCafePaymentFlow = ({
         }
     }, [isIdentityValid, isBusy, preparePayment, completeOrder, cafeId, items, openPopup, handleClosePopup, alias, phoneNumber]);
 
-    return { handlePay, notice, completionResult, isBusy, isPaymentModalOpen: isOpen };
+    return { handlePay, retryCompletion, notice, completionResult, isCompleting, isBusy };
 };
