@@ -9,6 +9,7 @@ import { formatTimeToHoursMinutes } from '../../../../util/date.js';
 import { useReorder } from '../../../../hooks/reorder.ts';
 import { CompletedOrderItemsTable } from './completed-order-items-table.tsx';
 import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
+import { pluralize } from '../../../../util/string.js';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrder[];
@@ -55,6 +56,17 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                         </span>
                     )
                 }
+            </div>
+            <div className="flex flex-center">
+                <span>
+                    {orders.length} {pluralize('Order', orders.length)}
+                </span>
+                <span>
+                    -
+                </span>
+                <span>
+                    {allItems.length} {pluralize('Total Item', orders.length)}
+                </span>
             </div>
             <div className="flex flex-center flex-wrap">
                 {orders.map((order) => {
