@@ -8,7 +8,7 @@ import { logDebug, logError } from '../../../../shared/util/log.js';
 import { buildHarEntry, HarCapture } from '../../../../shared/util/har.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../../shared/util/request.js';
 import { Semaphore } from '@frozor/lock';
-import { getServices } from '../../../../main/services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { StringUtil } from '../../../../shared/util/string.js';
 import hat from 'hat';
 import { maybeThrowBuyOnDemandError } from './buy-ondemand-error.js';

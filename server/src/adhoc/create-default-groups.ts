@@ -1,6 +1,6 @@
 import { SearchEntityType } from '@msdining/common/models/search';
 import { usePrismaClient } from '../worker/data/storage/client.js';
-import { getServices } from '../main/services/registry.js';
+import { getServices } from '../shared/services/registry.js';
 
 console.log('Fetching group candidates without context...');
 

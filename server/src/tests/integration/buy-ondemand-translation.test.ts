@@ -22,7 +22,7 @@ import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-
 import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../worker/rpc/errors.js';
-import { createBuyOnDemandClient } from '../../main/services/registry.js';
+import { createBuyOnDemandClient } from '../../shared/services/registry.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,

@@ -17,7 +17,7 @@ import { ALL_CAFES, CAFE_GROUP_LIST, CAFES_BY_ID } from '../../../shared/constan
 import { MaybePromise } from '../../../shared/models/async.js';
 import { ensureThumbnailDataHasBeenRetrievedAsync } from '../../interface/thumbnail.js';
 import { ICafe } from '../../../shared/models/cafe.js';
-import { getServices } from '../../../main/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 
 import { NON_ENTREE_FILTER } from '../../../shared/util/menu-item-filter.js';
 

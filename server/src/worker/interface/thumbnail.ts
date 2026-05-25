@@ -2,7 +2,7 @@ import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../shared/m
 import { THUMBNAIL_THREAD_HANDLER } from '../data/threads/thumbnail.js';
 import { logError } from '../../shared/util/log.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import { getServices } from '../../main/services/registry.js';
+import { getServices } from '../../shared/services/registry.js';
 
 const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnailExistenceData> => {
     try {

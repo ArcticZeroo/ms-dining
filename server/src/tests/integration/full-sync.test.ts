@@ -27,7 +27,7 @@ import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
 import { performMenuBootTasks } from '../../worker/data/cafe/job/boot.js';
 import { usePrismaClient } from '../../worker/data/storage/client.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
-import { isCafeAvailable } from '../../main/util/date.js';
+import { isCafeAvailable } from '../../shared/util/date.js';
 import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
 import {
     CafeMenuResponseSchema,

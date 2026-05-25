@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { CartItemDataSchema, CartItemUpdateSchema } from '@msdining/common/models/cart';
 import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
-import { getServices } from '../../../services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { serializeCartResponse } from '../../../util/order-serde.js';
 

@@ -7,7 +7,7 @@
  */
 
 import * as http from 'node:http';
-import type { Services } from '../../main/services/types.js';
+import type { Services } from '../../shared/services/types.js';
 
 export interface TestWebserverHandle {
     /** Base URL of the test webserver, e.g. http://127.0.0.1:54321 */

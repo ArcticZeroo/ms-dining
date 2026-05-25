@@ -11,7 +11,7 @@ import { IServerUser } from '../../shared/models/auth.js';
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import { ICafe } from '../../shared/models/cafe.js';
 import { getDateStringForMenuRequest } from './date.js';
-import { getServices } from '../services/registry.js';
+import { getServices } from '../../shared/services/registry.js';
 import { setTelemetryProperties } from '../middleware/telemetry.js';
 
 export const attachRouter= (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());

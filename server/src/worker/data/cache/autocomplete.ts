@@ -2,7 +2,7 @@ import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/mode
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { type IAutocompleteMatch, matchAutocomplete } from '@msdining/common/util/autocomplete';
-import { getServices } from '../../../main/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 
 const stationNames = new Map<string /*normalizedName*/, string /*displayName*/>();
 const menuItemNames = new Map<string /*normalizedName*/, string /*displayName*/>();

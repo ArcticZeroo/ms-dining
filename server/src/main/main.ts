@@ -8,7 +8,7 @@ import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
 import { startSearchTagWorkerQueue } from '../worker/queues/search-tags.js';
 import { flushTelemetry } from '../shared/telemetry/app-insights.js';
 import { shutdownDataHandler } from './services/data/handler.js';
-import { getServices } from './services/registry.js';
+import { getServices } from '../shared/services/registry.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();

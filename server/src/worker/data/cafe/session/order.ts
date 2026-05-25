@@ -5,7 +5,7 @@ import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
 import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient, getServices } from '../../../../main/services/registry.js';
+import { createBuyOnDemandClient, getServices } from '../../../../shared/services/registry.js';
 import {
     IOrderLineItem,
 } from '../../../../shared/models/buyondemand/cart.js';

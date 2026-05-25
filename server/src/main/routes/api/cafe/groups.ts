@@ -11,7 +11,7 @@ import {
 	IGroupMember,
 	UpdateGroupRequest
 } from '@msdining/common/models/group';
-import { getServices } from '../../../../main/services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { doNotCacheMiddleware } from '../../../middleware/cache.js';
 import { Context } from 'koa';
 import { treatPrismaNotFoundAs404 } from '../../../middleware/prisma.js';

@@ -13,7 +13,7 @@ import {
     createIntegrationTestContext,
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
-import { getServices } from '../../../../../main/services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 import { dailyMenuService } from '../../../../../main/services/data/daily-menu.js';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';

@@ -11,7 +11,7 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import { toDateString } from '@msdining/common/util/date-util';
 import { IServerSearchResult } from '../../../../shared/models/search.js';
 import { assignCacheControlMiddleware, DEFAULT_CACHE_EXPIRATION_TIME } from '../../../middleware/cache.js';
-import { getServices } from '../../../../main/services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { CAFES_BY_ID, GROUPS_BY_ID } from '../../../../shared/constants/cafes.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
 import { IRecommendationsResponse } from '@msdining/common/models/recommendation';

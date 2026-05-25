@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import { getServices } from '../services/registry.js';
+import { getServices } from '../../shared/services/registry.js';
 import { getVisitorId } from './analytics.js';
 import { CATCH_ALL_PATH } from '../util/koa.js';
 

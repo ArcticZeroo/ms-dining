@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/models/http';
 import { toMaybeDateString } from '@msdining/common/util/date-util';
-import { getServices } from '../../../../main/services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import * as diningConfig from '../../../../shared/constants/cafes.js';
 import { ApplicationContext } from '../../../../shared/constants/context.js';
 import { getLogoUrl } from '../../../../shared/util/cafe.js';

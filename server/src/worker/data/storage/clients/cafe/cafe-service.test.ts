@@ -13,7 +13,7 @@ import {
     createIntegrationTestContext,
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
-import { getServices } from '../../../../../main/services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 import { cafeService } from '../../../../../main/services/data/cafe.js';
 import { CafeStorageClient } from './cafe.js';
 import type { ICafe, ICafeConfig } from '../../../../../shared/models/cafe.js';

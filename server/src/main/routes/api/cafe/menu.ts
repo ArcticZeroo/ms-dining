@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { memoizeResponseBody } from '../../../middleware/cache.js';
 import { attachRouter } from '../../../util/koa.js';
-import { getServices } from '../../../services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { registerViewRoutes } from './menu/view.js';
 import { registerReviewRoutes } from './menu/reviews/index.js';
 

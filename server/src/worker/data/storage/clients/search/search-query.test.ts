@@ -16,7 +16,7 @@ import {
     createIntegrationTestContext,
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
-import { getServices } from '../../../../../main/services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 import { searchQueryService } from '../../../../../main/services/data/search-query.js';
 import { SearchQueryClient } from './search-query.js';
 

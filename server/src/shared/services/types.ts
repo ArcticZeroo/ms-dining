@@ -1,12 +1,12 @@
 import type { TelemetryClient } from 'applicationinsights';
-import type { ICafe } from '../../shared/models/cafe.js';
+import type { ICafe } from '../models/cafe.js';
 import type { IAiProvider } from '../../worker/data/ai/provider.js';
 import type { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
 import type {
     BuyOnDemandClient,
     BuyOnDemandClientOptions,
 } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
-import type { DataServices } from './data/index.js';
+import type { DataServices } from '../../main/services/data/index.js';
 
 /**
  * Process-level (or per-scope) service bag. Read via `getServices()`,

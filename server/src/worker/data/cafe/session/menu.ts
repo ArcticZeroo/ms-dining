@@ -1,5 +1,5 @@
 import { BuyOnDemandClient } from '../buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient, getServices } from '../../../../main/services/registry.js';
+import { createBuyOnDemandClient, getServices } from '../../../../shared/services/registry.js';
 import { ICafeMenuItemListResponseItem } from '../../../../shared/models/buyondemand/responses.js';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../../shared/models/cafe.js';
 import { logError } from '../../../../shared/util/log.js';

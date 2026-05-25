@@ -33,7 +33,6 @@ module.exports = {
         },
         {
             // Worker data layer should not import from main thread code.
-            // Allowed exceptions (until they move to shared/): registry.ts, main/util/date.ts
             files: ['src/worker/data/**/*.ts'],
             excludedFiles: ['src/worker/data/**/*.test.ts'],
             rules: {

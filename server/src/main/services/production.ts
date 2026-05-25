@@ -3,7 +3,7 @@ import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondem
 import { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
 import { getTelemetryClient } from '../../shared/telemetry/app-insights.js';
 import { defaultDataServices } from './data/index.js';
-import type { Services } from './types.js';
+import type { Services } from '../../shared/services/types.js';
 
 /**
  * Builds the production services bag. Called once, lazily, by the services

@@ -13,7 +13,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { getServices } from '../../main/services/registry.js';
+import { getServices } from '../../shared/services/registry.js';
 import type { IServerUser } from '../../shared/models/auth.js';
 import type { ICreateUserInput } from '../../shared/services/user.js';
 

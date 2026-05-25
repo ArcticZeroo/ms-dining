@@ -4,7 +4,7 @@ import {
     createIntegrationTestContext,
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
-import { getServices } from '../../../../../main/services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 import { stationThemeService } from '../../../../../main/services/data/station-theme.js';
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
 

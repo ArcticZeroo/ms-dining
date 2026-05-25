@@ -13,7 +13,7 @@ import {
     createIntegrationTestContext,
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
-import { getServices } from '../../../../../main/services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 import { tagService } from '../../../../../main/services/data/tag.js';
 import { TagStorageClient } from './tags.js';
 

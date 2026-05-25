@@ -32,8 +32,8 @@ import {
     enterWithServices,
     runWithServices,
     setDefaultServices,
-} from '../../main/services/registry.js';
-import type { Services } from '../../main/services/types.js';
+} from '../../shared/services/registry.js';
+import type { Services } from '../../shared/services/types.js';
 import { defaultDataServices } from '../../main/services/data/index.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';

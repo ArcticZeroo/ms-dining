@@ -2,7 +2,7 @@ import { DateUtil } from '@msdining/common';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 import { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
-import { isDateValid } from '../../../../../main/util/date.js';
+import { isDateValid } from '../../../../../shared/util/date.js';
 import { logDebug, logError, logInfo } from '../../../../../shared/util/log.js';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../client.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';

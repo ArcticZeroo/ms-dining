@@ -6,7 +6,7 @@
 
 import { Response } from 'node-fetch';
 import { BuyOnDemandClient, BuyOnDemandClientOptions } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
-import { getServices } from '../../main/services/registry.js';
+import { getServices } from '../../shared/services/registry.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import { TestBuyOnDemandServer } from './index.js';
 import { TestResponse } from './models.js';

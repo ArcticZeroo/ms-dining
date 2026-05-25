@@ -2,7 +2,7 @@ import { LockedMap } from '../../../shared/lock/map.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { logError } from '../../../shared/util/log.js';
 import { throwError } from '../../../shared/util/error.js';
-import { getServices } from '../../../main/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 
 const FIRST_STATION_APPEARANCE_CACHE = new LockedMap<string /*stationId*/, Date>();
 

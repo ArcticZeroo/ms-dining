@@ -11,7 +11,7 @@ import { getGoogleStrategy, getMicrosoftStrategy } from '../../passport/strategi
 import { attachRouter, getUserIdOrThrow, getUserOrThrowAsync } from '../../util/koa.js';
 import { logError, logInfo } from '../../../shared/util/log.js';
 import { isUpdateUserSettingsInput } from '../../../shared/util/typeguard.js';
-import { getServices } from '../../services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 
 const isAuthorizationError = (err: unknown) => {
     return err instanceof Error && err.constructor.name === 'AuthorizationError';

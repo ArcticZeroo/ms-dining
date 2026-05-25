@@ -4,7 +4,7 @@ import { isDuckType } from '@arcticzeroo/typeguard';
 import { DISPLAY_NAME_MAX_LENGTH_CHARS, PROVIDER_MICROSOFT } from '@msdining/common/models/auth';
 import { requireEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
 import { IMicrosoftProfileData } from '../../shared/models/auth.js';
-import { getServices } from '../services/registry.js';
+import { getServices } from '../../shared/services/registry.js';
 
 export const getMicrosoftStrategy = () => new MicrosoftStrategy.Strategy(
     {

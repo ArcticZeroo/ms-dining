@@ -14,11 +14,11 @@ import { logError } from '../../../shared/util/log.js';
 import { ICafeStation } from '../../../shared/models/cafe.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getDefaultUniquenessDataForStation } from '../../../shared/util/cafe.js';
-import { getServices } from '../../../main/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
-import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../main/util/date.js';
+import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 

@@ -19,7 +19,7 @@ import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { setTelemetryProperties } from '../../../../middleware/telemetry.js';
 import { registerOverviewRoutes } from './overview.js';
 import { VERSION_TAG } from '@msdining/common/constants/versions';
-import { getServices } from '../../../../services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 
 const getUniquenessDataForStation = (station: ICafeStation, uniquenessData: Record<string, IStationUniquenessData> | null): IStationUniquenessData => {
 	const stationUniquenessData = uniquenessData?.[station.name];

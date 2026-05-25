@@ -3,7 +3,7 @@ import { IUpdateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getTrimmedQueryParam, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
-import { getServices } from '../../../../../../main/services/registry.js';
+import { getServices } from '../../../../../../shared/services/registry.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
 

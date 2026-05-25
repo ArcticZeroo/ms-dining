@@ -4,7 +4,7 @@ import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/revi
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getMaybeUserId, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../../shared/util/serde.js';
-import { getServices } from '../../../../../../main/services/registry.js';
+import { getServices } from '../../../../../../shared/services/registry.js';
 import { requireAuthenticated } from '../../../../../middleware/auth.js';
 import { reviewCacheController, serializeReview } from './shared.js';
 

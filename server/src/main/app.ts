@@ -20,8 +20,8 @@ import { treatZodErrorsAsBadRequest } from './middleware/zod.js';
 import { serviceErrorMiddleware } from './middleware/service-error.js';
 import { dbPriorityMiddleware } from './middleware/db-priority.js';
 import { appInsightsMiddleware } from './middleware/telemetry.js';
-import { getServices, runWithServices } from './services/registry.js';
-import type { Services } from './services/types.js';
+import { getServices, runWithServices } from '../shared/services/registry.js';
+import type { Services } from '../shared/services/types.js';
 
 /**
  * Koa-session store adapter that delegates to the data service.

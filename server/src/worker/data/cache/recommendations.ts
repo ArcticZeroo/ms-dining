@@ -5,14 +5,14 @@ import {
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { setInterval } from 'node:timers';
-import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../main/util/date.js';
+import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { getNamespaceLogger, logError } from '../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
 import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
 import { getAllAvailableItems, IRecommendationContext, IUserRecommendationContext } from '../recommendations/shared.js';
 import { lazyAsync } from '../../../shared/util/lazy.js';
-import { getServices } from '../../../main/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 import { getShutDownCafeIdsAsync } from './daily-cafe-state.js';
 import { getPopularItems } from '../recommendations/signals/cafe-specific/popular.js';
 import { getHiddenGems } from '../recommendations/signals/cafe-specific/hidden-gems.js';

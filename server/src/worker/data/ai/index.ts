@@ -1,6 +1,6 @@
 import { runPromiseWithRetries } from '../../../shared/util/async.js';
 import { rethrowWithoutStatus } from '../../../shared/util/error.js';
-import { getServices } from '../../../main/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../../shared/constants/env.js';
 import { logInfo } from '../../../shared/util/log.js';
 import { anthropicProvider } from './providers/anthropic.js';

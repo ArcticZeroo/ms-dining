@@ -3,7 +3,7 @@ import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { retrieveDailyCafeMenuAsync } from '../cache/daily-menu.js';
 import { retrieveItemAppearancesForCafe, retrieveUniquenessDataForCafe } from '../cache/daily-uniqueness.js';
 import { logError } from '../../../shared/util/log.js';
-import { canFetchMenuForDateString } from '../../../main/util/date.js';
+import { canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { DRINK_FILTER } from '../../../shared/util/menu-item-filter.js';
 
 export const DRINK_WEIGHT = 0.75;

@@ -1,8 +1,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { lazy } from '../../shared/util/lazy.js';
-import { createProductionServices } from './production.js';
+import { lazy } from '../util/lazy.js';
+import { createProductionServices } from '../../main/services/production.js';
 import type { Services } from './types.js';
-import type { ICafe } from '../../shared/models/cafe.js';
+import type { ICafe } from '../models/cafe.js';
 import type {
     BuyOnDemandClient,
     BuyOnDemandClientOptions,
@@ -86,4 +86,3 @@ export const createBuyOnDemandClient = (
     cafe: ICafe,
     options: BuyOnDemandClientOptions = {},
 ): Promise<BuyOnDemandClient> => getServices().buyOnDemandFactory(cafe, options);
-

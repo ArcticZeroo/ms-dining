@@ -5,7 +5,7 @@ import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
 import { ALL_CAFES } from '../../../../shared/constants/cafes.js';
-import { getServices } from '../../../../main/services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import Duration from '@arcticzeroo/duration';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 import { runWithDbPriority } from '../../storage/db-context.js';

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { OrderItemSchema } from '@msdining/common/models/order';
 import { attachRouter, getUserIdOrThrow } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
-import { getServices } from '../../../services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';

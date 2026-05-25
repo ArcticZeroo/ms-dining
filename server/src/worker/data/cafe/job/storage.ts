@@ -4,7 +4,7 @@ import { MenuItemStorageClient } from '../../storage/clients/menu-item/menu-item
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../queues/embeddings.js';
 import { SEARCH_TAG_WORKER_QUEUE } from '../../../queues/search-tags.js';
 import { usePrismaTransaction } from '../../storage/client.js';
-import { getServices } from '../../../../main/services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 
 interface ISaveStationParams {
     station: ICafeStation;

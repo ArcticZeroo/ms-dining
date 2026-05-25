@@ -5,7 +5,7 @@ import { CafeGroup, ICafe } from '../shared/models/cafe.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { logError } from '../shared/util/log.js';
-import { getServices } from './services/registry.js';
+import { getServices } from '../shared/services/registry.js';
 
 const addMenu = (sitemap: SitemapStream, site: CafeGroup | ICafe) => {
     sitemap.write({ url: `/menu/${site.id}`, changefreq: 'daily', priority: 0.9 });

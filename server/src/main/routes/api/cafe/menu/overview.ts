@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { ICafe } from '../../../../../shared/models/cafe.js';
 import { ICafeOverviewResponse, ICafeOverviewStation } from '@msdining/common/models/cafe';
-import { getServices } from '../../../../services/registry.js';
+import { getServices } from '../../../../../shared/services/registry.js';
 import { getDefaultUniquenessDataForStation } from '../../../../../shared/util/cafe.js';
 import { IRecommendationItem, RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { sendVisitFromCafeParamMiddleware } from '../../../../middleware/analytics.js';

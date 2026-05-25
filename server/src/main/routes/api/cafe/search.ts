@@ -16,7 +16,7 @@ import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { logDebug, logError } from '../../../../shared/util/log.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../../../worker/queues/embeddings.js';
 import { Middleware } from 'koa';
-import { getServices } from '../../../services/registry.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { getDateForMenuRequest } from '../../../util/date.js';
 import Duration from '@arcticzeroo/duration';
 
