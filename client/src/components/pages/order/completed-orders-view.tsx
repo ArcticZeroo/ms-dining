@@ -1,4 +1,4 @@
-import { useCompletedOrdersTodayQuery } from '../../../store/queries/new-ordering.ts';
+import { useCompletedOrdersTodayQuery } from '../../../store/queries/ordering.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';

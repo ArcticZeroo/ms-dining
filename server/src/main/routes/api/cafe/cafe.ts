@@ -13,7 +13,6 @@ import { registerSearchRoutes } from './search.js';
 import { registerRecommendationsRoutes } from './recommendations.js';
 import { registerGroupsRoutes } from './groups.js';
 import { registerCartRoutes } from './cart.js';
-import { registerNewOrderingRoutes } from './new-ordering.js';
 import { memoizeResponseBody } from '../../../middleware/cache.js';
 
 export const registerCafeRoutes = (parent: Router) => {
@@ -27,7 +26,6 @@ export const registerCafeRoutes = (parent: Router) => {
     registerRecommendationsRoutes(router);
     registerGroupsRoutes(router);
     registerCartRoutes(router);
-    registerNewOrderingRoutes(router);
 
     const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
         const cafeDataById = await getServices().data.cafe.retrieveCafes({});

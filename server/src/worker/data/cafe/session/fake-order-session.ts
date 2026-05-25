@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
-import type { ICartItem } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
+import type { IOrderItem } from '@msdining/common/models/order';
 import type { IOrderSession } from './order-session.js';
 import type { ICafe } from '../../../../shared/models/cafe.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
@@ -19,7 +19,7 @@ export class FakeCafeOrderSession implements IOrderSession {
     #lastCompletedStage: string = SubmitOrderStage.notStarted;
     #cardProcessorToken = '';
     readonly #cafe: ICafe;
-    readonly #cartItems: ICartItem[];
+    readonly #orderItems: IOrderItem[];
     readonly createdDateString = getTodayDateString();
 
     readonly client = {
@@ -28,9 +28,9 @@ export class FakeCafeOrderSession implements IOrderSession {
         },
     };
 
-    constructor(cafe: ICafe, cartItems: ICartItem[]) {
+    constructor(cafe: ICafe, orderItems: IOrderItem[]) {
         this.#cafe = cafe;
-        this.#cartItems = cartItems;
+        this.#orderItems = orderItems;
     }
 
     get orderId() {
@@ -62,8 +62,8 @@ export class FakeCafeOrderSession implements IOrderSession {
     }
 
     get rawCartItemsForWaitTime(): readonly unknown[] {
-        return this.#cartItems.map(item => ({
-            kitchenVideoId: item.itemId,
+        return this.#orderItems.map(item => ({
+            kitchenVideoId: item.menuItemId,
             quantity:        item.quantity,
         }));
     }

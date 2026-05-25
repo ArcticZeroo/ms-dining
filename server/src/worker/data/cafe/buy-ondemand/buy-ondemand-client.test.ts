@@ -15,7 +15,7 @@
 
 import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { ICartItem } from '@msdining/common/models/cart';
+import { IOrderItem } from '@msdining/common/models/order';
 import { CafeMenuSession } from '../session/menu.js';
 import { CafeOrderSession } from '../session/order.js';
 import { ICafe } from '../../../../shared/models/cafe.js';
@@ -42,10 +42,10 @@ beforeEach(() => {
 const CAFE_ID = 'cafe25';
 const CAFE: ICafe = { id: CAFE_ID, name: 'Test Cafe 25' };
 
-const NONEXISTENT_CART_ITEM: ICartItem = {
-    itemId:              'nonexistent-bod-client-item',
+const NONEXISTENT_CART_ITEM: IOrderItem = {
+    menuItemId:          'nonexistent-bod-client-item',
     quantity:            1,
-    choicesByModifierId: new Map<string, Set<string>>(),
+    modifiers:           [],
     specialInstructions: '',
 };
 

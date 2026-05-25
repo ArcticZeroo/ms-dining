@@ -4,7 +4,7 @@ import type { BuyOnDemandClient } from '../cafe/buy-ondemand/buy-ondemand-client
 import { fetchWaitTimeWithCartItems } from '../cafe/buy-ondemand/wait-time.js';
 import { OrderStorageClient } from '../storage/clients/order/order.js';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
-import type { ICartItem, IPaymentCardInfo, ISerializedModifier } from '@msdining/common/models/cart';
+import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
 	ICafeOrderDTO,
@@ -22,14 +22,6 @@ const orderLog = getNamespaceLogger('Order');
 if (isFakeOrderingEnabled) {
 	orderLog.info('⚠️  FAKE_ORDERING is enabled — no real charges will be made');
 }
-
-const groupModifierChoices = (modifiers: ISerializedModifier[]): Map<string, Set<string>> => {
-	const result = new Map<string, Set<string>>();
-	for (const modifier of modifiers) {
-		result.set(modifier.modifierId, new Set(modifier.choiceIds));
-	}
-	return result;
-};
 
 const getWaitTimeForSession = async (session: IOrderSession): Promise<IWaitTimeResponse> => {
 	if (isFakeOrderingEnabled) {

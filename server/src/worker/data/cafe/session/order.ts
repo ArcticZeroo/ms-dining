@@ -1,4 +1,5 @@
-import { ICartItem, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import { IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import type { IOrderItem } from '@msdining/common/models/order';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 
@@ -201,6 +202,9 @@ const kioskItemDetailSchema = z.object({
     properties:              z.record(z.unknown()).optional(),
 }).passthrough();
 
+const toChoicesByModifierId = (modifiers: IOrderItem['modifiers']): Map<string, Set<string>> =>
+    new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
+
 interface ISerializedModifier {
     // ID of selected option
     id: string;
@@ -257,7 +261,7 @@ export class CafeOrderSession implements IOrderSession {
     #siteStoreInfo: z.infer<typeof siteStoreInfoSchema> = {};
     // pickUpConfig from /sites/{tenantId}
     #sitePickUpConfig: z.infer<typeof pickUpConfigSchema> | null = null;
-    readonly #cartItems: ICartItem[];
+    readonly #orderItems: IOrderItem[];
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #rawCartItemsForWaitTime: unknown[] = [];
     readonly #conceptIds = new Set<string>();
@@ -265,15 +269,15 @@ export class CafeOrderSession implements IOrderSession {
     readonly #conceptDataById = new Map<string, { schedule: unknown[]; openScheduleExpression: string; closeScheduleExpression: string }>();
     public readonly createdDateString = getTodayDateString();
 
-    constructor(public client: BuyOnDemandClient, cartItems: ICartItem[]) {
-        this.#cartItems = cartItems;
+    constructor(public client: BuyOnDemandClient, orderItems: IOrderItem[]) {
+        this.#orderItems = orderItems;
     }
 
-    public static async createAsync(cafe: ICafe, cartItems: ICartItem[]): Promise<CafeOrderSession> {
-        orderLog.info(`{${cafe.name}} Creating order session with ${cartItems.length} item(s)`);
+    public static async createAsync(cafe: ICafe, orderItems: IOrderItem[]): Promise<CafeOrderSession> {
+        orderLog.info(`{${cafe.name}} Creating order session with ${orderItems.length} item(s)`);
         const client = await createBuyOnDemandClient(cafe, { enableHar: true, translateErrors: true });
         orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
-        return new CafeOrderSession(client, cartItems);
+        return new CafeOrderSession(client, orderItems);
     }
 
     get lastCompletedStage() {
@@ -431,12 +435,12 @@ export class CafeOrderSession implements IOrderSession {
         return this._requestOrderingContextAsync();
     }
 
-    private _serializeModifiers(cartItem: ICartItem, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
+    private _serializeModifiers(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
         const modifiersById = new Map(localMenuItem.modifiers.map(modifier => [modifier.id, modifier]));
 
         const modifiers: ISerializedModifier[] = [];
 
-        for (const [modifierId, choiceIds] of cartItem.choicesByModifierId) {
+        for (const [modifierId, choiceIds] of choicesByModifierId) {
             const modifier = modifiersById.get(modifierId);
 
             if (modifier == null) {
@@ -522,35 +526,37 @@ export class CafeOrderSession implements IOrderSession {
         return rawItemDetail;
     }
 
-    private async _addItemToCart(cartItem: ICartItem) {
-        orderLog.info(`{${this.client.cafe.name}} Adding item ${cartItem.itemId} (qty: ${cartItem.quantity}) to cart`);
-        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: cartItem.itemId });
+    private async _addItemToCart(orderItem: IOrderItem) {
+        const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
+
+        orderLog.info(`{${this.client.cafe.name}} Adding item ${orderItem.menuItemId} (qty: ${orderItem.quantity}) to cart`);
+        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
 
         if (menuItem == null) {
-            throw new Error(`Failed to find menu item with id "${cartItem.itemId}"`);
+            throw new Error(`Failed to find menu item with id "${orderItem.menuItemId}"`);
         }
 
         const station = await getServices().data.station.retrieveStation({ stationId: menuItem.stationId });
 
         if (station == null) {
-            throw new Error(`Failed to find station for menu item "${cartItem.itemId}"`);
+            throw new Error(`Failed to find station for menu item "${orderItem.menuItemId}"`);
         }
 
         logOrderingDebugJson(this.client.cafe.name, 'Local cart item lookup', {
-            cartItemId:        cartItem.itemId,
-            quantity:          cartItem.quantity,
+            cartItemId:        orderItem.menuItemId,
+            quantity:          orderItem.quantity,
             stationId:         station.id,
             stationName:       station.name,
             stationMenuId:     station.menuId,
             localMenuItemId:   menuItem.id,
             localMenuItemName: menuItem.name,
-            selectedModifiers: [...cartItem.choicesByModifierId].map(([modifierId, choiceIds]) => ({
+            selectedModifiers: [...choicesByModifierId].map(([modifierId, choiceIds]) => ({
                 modifierId,
                 choiceIds: [...choiceIds],
             })),
         });
 
-        const rawItemDetail = await this._fetchRawItemDetail(cartItem.itemId, station);
+        const rawItemDetail = await this._fetchRawItemDetail(orderItem.menuItemId, station);
 
         this.#conceptIds.add(station.id);
 
@@ -559,12 +565,12 @@ export class CafeOrderSession implements IOrderSession {
             throw new Error(`No concept schedule data found for concept "${station.id}" (${station.name}). Available: ${[...this.#conceptDataById.keys()].join(', ')}`);
         }
 
-        const serializedModifiers = this._serializeModifiers(cartItem, menuItem);
+        const serializedModifiers = this._serializeModifiers(choicesByModifierId, menuItem);
         const cartItemId = hat();
         const cartGuid = `${menuItem.id}-${Date.now()}`;
 
-        const instructions = cartItem.specialInstructions ? [
-            { label: '', text: cartItem.specialInstructions }
+        const instructions = orderItem.specialInstructions ? [
+            { label: '', text: orderItem.specialInstructions }
         ] : [];
 
         const modifierTotal = serializedModifiers.reduce((sum, mod) => sum + Number(mod.amount), 0);
@@ -582,8 +588,8 @@ export class CafeOrderSession implements IOrderSession {
                     scannedItem:  false,
                     priceLevelId: this.#orderingContext.storePriceLevel,
                 },
-                count:                cartItem.quantity,
-                quantity:             cartItem.quantity,
+                count:                orderItem.quantity,
+                quantity:             orderItem.quantity,
                 // BoD UI omits selectedModifiers entirely for items with no
                 // modifiers. Always-present `[]` is most likely benign, but
                 // matching the wire shape removes one more delta from the
@@ -658,7 +664,7 @@ export class CafeOrderSession implements IOrderSession {
         this.#orderTotalWithoutTax += Number(orderDetails.taxExcludedTotalAmount.amount);
         this.#orderTotalWithTax += Number(orderDetails.totalDueAmount.amount);
 
-        orderLog.info(`{${this.client.cafe.name}} Item ${cartItem.itemId} added — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#orderTotalWithTax.toFixed(2)}`);
+        orderLog.info(`{${this.client.cafe.name}} Item ${orderItem.menuItemId} added — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#orderTotalWithTax.toFixed(2)}`);
 
         for (const lineItem of orderDetails.lineItems) {
             this.#lineItemsById.set(lineItem.lineItemId, lineItem);
@@ -666,12 +672,12 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     private async _populateCart() {
-        orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#cartItems.length} item(s))`);
+        orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#orderItems.length} item(s))`);
         await this._fetchConceptSchedule();
 
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
-        for (const cartItem of this.#cartItems) {
-            await this._addItemToCart(cartItem);
+        for (const orderItem of this.#orderItems) {
+            await this._addItemToCart(orderItem);
         }
         orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#orderTotalWithTax.toFixed(2)}`);
     }

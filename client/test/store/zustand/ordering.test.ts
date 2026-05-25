@@ -1,4 +1,4 @@
-import { IPreparePaymentResponse } from '@msdining/common/models/cart';
+import { IPreparePaymentResponse } from '../../../src/api/order.ts';
 import * as assert from 'node:assert';
 import { beforeEach, describe, it } from 'vitest';
 import { IPaymentFormData, useOrderingStore } from '../../../src/store/zustand/ordering.ts';

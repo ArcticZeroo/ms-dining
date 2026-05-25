@@ -1,6 +1,6 @@
 import type { IOrderItem } from '@msdining/common/models/order';
 import { createHash } from 'node:crypto';
-import { ICartItem, ISerializedModifier } from '@msdining/common/models/cart';
+import { ISerializedModifier } from '@msdining/common/models/cart';
 
 /**
  * Deterministic hash of order items for deduplication.
@@ -77,10 +77,3 @@ export const toOrderItems = (items: Array<{
 	specialInstructions: string | null;
 	modifiers: Array<{ modifierId: string; choiceId: string }>;
 }>): IOrderItem[] => items.map(toOrderItem);
-
-export const toCartItems = (items: IOrderItem[]): ICartItem[] => items.map(item => ({
-	itemId:              item.menuItemId,
-	quantity:            item.quantity,
-	choicesByModifierId: groupModifierChoices(item.modifiers),
-	specialInstructions: item.specialInstructions,
-}));

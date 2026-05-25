@@ -1,17 +1,55 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import {
-    ICompleteOrderRequest,
-    ICompleteOrderResponse,
-    IPrepareCartResponse,
-    IPreparePaymentResponse,
-    ISerializedCartItem,
-    ISerializedModifier,
-    ISubmitOrderItems
-} from '@msdining/common/models/cart';
+import { IPaymentCardInfo, ISerializedModifier, SubmitOrderStage } from '@msdining/common/models/cart';
 import { JSON_HEADERS, makeJsonRequest } from './request.ts';
-import { CartItemsByCafeId, ICartItemWithMetadata, IHydratedCartData, ISerializedCartItemWithName } from '../models/cart.ts';
+import {
+    CartItemsByCafeId,
+    ICartItemWithMetadata,
+    IHydratedCartData,
+    ISerializedCartItem,
+    ISerializedCartItemWithName,
+} from '../models/cart.ts';
 import { getRandomId } from '../util/id.ts';
 import { calculatePrice } from '../util/cart.ts';
+
+export interface ISubmitOrderItems {
+    [cafeId: string]: ISerializedCartItem[];
+}
+
+export interface IPrepareCartResponse {
+    [cafeId: string]: {
+        orderId: string;
+        orderNumber: string;
+        totalPriceWithTax: number;
+        totalPriceWithoutTax: number;
+        totalTax: number;
+        waitTimeMin: number;
+        waitTimeMax: number;
+        expiresAt: string;
+    };
+}
+
+export interface IPreparePaymentResponse {
+    siteToken: string;
+    iframeUrl: string;
+    orderId: string;
+    orderNumber: string;
+    expiresAt: string;
+}
+
+export interface ICompleteOrderRequest {
+    orderId: string;
+    paymentToken: string;
+    cardInfo: IPaymentCardInfo;
+    alias: string;
+    phoneNumberWithCountryCode: string;
+}
+
+export interface ICompleteOrderResponse {
+    lastCompletedStage: SubmitOrderStage;
+    orderNumber: string;
+    waitTimeMin: string;
+    waitTimeMax: string;
+}
 
 export abstract class OrderingClient {
     private static _serializeCart(cart: CartItemsByCafeId): ISubmitOrderItems {

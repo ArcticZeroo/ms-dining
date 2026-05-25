@@ -3,7 +3,7 @@ import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/o
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import type { Nullable } from '@msdining/common/models/util';
 import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
-import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/new-ordering.ts';
+import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/ordering.ts';
 import { usePaymentIdentityContext } from '../context/payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
 import { PaymentPopup } from '../components/pages/order/payment/payment-popup.tsx';

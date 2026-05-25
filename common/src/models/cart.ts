@@ -1,27 +1,9 @@
 import { z } from 'zod';
 import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
 
-export interface ICartItem {
-    itemId: string;
-    quantity: number;
-    choicesByModifierId: Map<string, Set<string>>;
-    specialInstructions?: string;
-}
-
 export interface ISerializedModifier {
     modifierId: string;
     choiceIds: Array<string>;
-}
-
-export interface ISerializedCartItem {
-    itemId: string;
-    quantity: number;
-    modifiers: Array<ISerializedModifier>;
-    specialInstructions?: string;
-}
-
-export interface ISubmitOrderItems {
-    [cafeId: string]: ISerializedCartItem[];
 }
 
 export enum SubmitOrderStage {
@@ -43,17 +25,6 @@ export const SUBMIT_ORDER_STAGES_IN_ORDER = [
     SubmitOrderStage.complete
 ];
 
-export interface IOrderCompletionData {
-    lastCompletedStage: SubmitOrderStage;
-    orderNumber: string;
-    waitTimeMin: string;
-    waitTimeMax: string;
-}
-
-export interface IOrderCompletionResponse {
-    [cafeId: string]: IOrderCompletionData;
-}
-
 export interface IPaymentCardInfo {
     accountNumberMasked: string;
     cardIssuer: string;
@@ -61,55 +32,6 @@ export interface IPaymentCardInfo {
     cardHolderName: string;
     postalCode: string;
 }
-
-export interface IPrepareOrderRequest {
-    itemsByCafeId: ISubmitOrderItems;
-}
-
-export interface IPrepareCartResponse {
-    [cafeId: string]: {
-        orderId: string;
-        orderNumber: string;
-        totalPriceWithTax: number;
-        totalPriceWithoutTax: number;
-        totalTax: number;
-        waitTimeMin: number;
-        waitTimeMax: number;
-        expiresAt: string;
-    };
-}
-
-export interface IPreparePaymentRequest {
-    orderId: string;
-}
-
-export interface IPreparePaymentResponse {
-    siteToken: string;
-    iframeUrl: string;
-    orderId: string;
-    orderNumber: string;
-    expiresAt: string;
-}
-
-export interface IPrepareOrderResponse {
-    [cafeId: string]: {
-        siteToken: string;
-        iframeUrl: string;
-        orderId: string;
-        orderNumber: string;
-        expiresAt: string;
-    };
-}
-
-export interface ICompleteOrderRequest {
-    orderId: string;
-    paymentToken: string;
-    cardInfo: IPaymentCardInfo;
-    alias: string;
-    phoneNumberWithCountryCode: string;
-}
-
-export type ICompleteOrderResponse = IOrderCompletionData;
 
 export const SerializedModifierSchema = z.object({
     modifierId: z.string(),

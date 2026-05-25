@@ -1,6 +1,5 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import { ISerializedCartItem } from '@msdining/common/models/cart';
-import { ICartItemWithMetadata, ISerializedCartItemWithName } from '../../src/models/cart.ts';
+import { ICartItemWithMetadata, ISerializedCartItem, ISerializedCartItemWithName } from '../../src/models/cart.ts';
 
 export const makeMenuItem = (overrides: Partial<IMenuItemBase> = {}): IMenuItemBase => ({
     id:           'menu-item-1',

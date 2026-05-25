@@ -1,4 +1,3 @@
-import type { ICartItem } from '@msdining/common/models/cart';
 import type { IOrderSession } from '../cafe/session/order-session.js';
 import { FakeCafeOrderSession } from '../cafe/session/fake-order-session.js';
 import { CafeOrderSession } from '../cafe/session/order.js';
@@ -10,7 +9,6 @@ import { getTodayDateString } from '@msdining/common/util/date-util';
 import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { ICompleteOrderResultDTO, IOrderItem } from '@msdining/common/models/order';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
-import { toCartItems } from '../util/order.js';
 
 export const ORDER_SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
@@ -62,16 +60,16 @@ const getCafeOrThrow = (cafeId: string) => {
 	return cafe;
 };
 
-export const createOrderSessionWithCartItems = async (cafeId: string, cartItems: ICartItem[]): Promise<IOrderSession> => {
+export const createOrderSession = async (cafeId: string, items: IOrderItem[]): Promise<IOrderSession> => {
 	const cafe = getCafeOrThrow(cafeId);
 
 	if (isFakeOrderingEnabled) {
-		const session = new FakeCafeOrderSession(cafe, cartItems);
+		const session = new FakeCafeOrderSession(cafe, items);
 		await session.populateCart();
 		return session;
 	}
 
-	const session = await CafeOrderSession.createAsync(cafe, cartItems);
+	const session = await CafeOrderSession.createAsync(cafe, items);
 	await session.populateCart();
 
 	if (!session.orderId || !session.orderNumber) {
@@ -97,7 +95,7 @@ export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl }:
 
 	const session = await ACTIVE_ORDER_SESSIONS.update(pendingOrderId, async (session) => {
 		if (!session || session.createdDateString !== getTodayDateString()) {
-			session = await createOrderSessionWithCartItems(cafeId, toCartItems(items));
+			session = await createOrderSession(cafeId, items);
 			await session.prepareForIframe(iframeCssUrl);
 		}
 

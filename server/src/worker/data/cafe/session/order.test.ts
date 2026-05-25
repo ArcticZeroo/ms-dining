@@ -18,7 +18,7 @@
 
 import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { ICartItem } from '@msdining/common/models/cart';
+import { IOrderItem } from '@msdining/common/models/order';
 import { CafeOrderSession } from './order.js';
 import { ICafe } from '../../../../shared/models/cafe.js';
 import {
@@ -44,13 +44,13 @@ beforeEach(() => {
 const CAFE_ID = 'cafe25';
 const CAFE: ICafe = { id: CAFE_ID, name: 'Test Cafe 25' };
 
-// A cart item whose itemId doesn't exist in the local DB. This makes
+// An order item whose menuItemId doesn't exist in the local DB. This makes
 // _populateCart throw with "Failed to find menu item ..." once the
 // ordering context (the thing under test) has already been fetched.
-const NONEXISTENT_CART_ITEM: ICartItem = {
-    itemId:              'nonexistent-item-for-order-test',
+const NONEXISTENT_CART_ITEM: IOrderItem = {
+    menuItemId:          'nonexistent-item-for-order-test',
     quantity:            1,
-    choicesByModifierId: new Map<string, Set<string>>(),
+    modifiers:           [],
     specialInstructions: '',
 };
 

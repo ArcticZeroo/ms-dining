@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IOrderItem } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
-import { OrderClient } from '../../api/new-ordering.ts';
+import { OrderClient } from '../../api/ordering.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
