@@ -3,6 +3,7 @@ import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondem
 import { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
 import { getTelemetryClient } from '../../shared/telemetry/app-insights.js';
 import { defaultDataServices } from './data/index.js';
+import { startDataHandler } from './data/handler.js';
 import type { Services } from '../../shared/services/types.js';
 
 /**
@@ -21,10 +22,14 @@ import type { Services } from '../../shared/services/types.js';
  * + config init, telemetry connection-string handling) lives in the owning
  * module — this file is intentionally a thin wiring composition.
  */
-export const createProductionServices = (): Services => ({
-    ai:                 createProductionAi(),
-    translations:       new TranslationCache(),
-    buyOnDemandFactory: BuyOnDemandClient.createAsync,
-    telemetry:          getTelemetryClient(),
-    data:               defaultDataServices,
-});
+export const createProductionServices = (): Services => {
+    startDataHandler();
+
+    return {
+        ai:                 createProductionAi(),
+        translations:       new TranslationCache(),
+        buyOnDemandFactory: BuyOnDemandClient.createAsync,
+        telemetry:          getTelemetryClient(),
+        data:               defaultDataServices,
+    };
+};

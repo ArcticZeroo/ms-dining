@@ -6,7 +6,7 @@ import type {
     BuyOnDemandClient,
     BuyOnDemandClientOptions,
 } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
-import type { DataServices } from '../../main/services/data/index.js';
+import type { DataServices } from './create-data-services.js';
 
 /**
  * Process-level (or per-scope) service bag. Read via `getServices()`,

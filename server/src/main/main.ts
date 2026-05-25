@@ -1,11 +1,8 @@
-import { performMenuBootTasks } from '../worker/data/cafe/job/boot.js';
 import { createApp } from './app.js';
 import { webserverPort } from '../shared/constants/config.js';
 import { logDebug, logError, logInfo } from '../shared/util/log.js';
 import { createAnalyticsApplications } from './tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from '../shared/util/env.js';
-import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
-import { startSearchTagWorkerQueue } from '../worker/queues/search-tags.js';
 import { flushTelemetry } from '../shared/telemetry/app-insights.js';
 import { shutdownDataHandler } from './services/data/handler.js';
 import { getServices } from '../shared/services/registry.js';
@@ -47,13 +44,3 @@ createAnalyticsApplications()
 
         logError('Could not create analytics applications:', err);
     });
-
-performMenuBootTasks()
-    .catch(err => logError('Could not perform boot tasks:', err));
-
-// Start the search-tag worker queue (formerly auto-started on module load).
-startSearchTagWorkerQueue();
-
-// Initialize cafe embeddings
-logInfo('Adding cafe embeddings to queue...');
-EMBEDDINGS_WORKER_QUEUE.addFromCafeGroups();

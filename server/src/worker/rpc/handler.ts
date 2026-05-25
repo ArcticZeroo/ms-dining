@@ -161,6 +161,14 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         }
     }
 
+    start(): void {
+        if (!isMainThread) {
+            return;
+        }
+
+        this.#ensureWorker();
+    }
+
     async sendRequest<S extends keyof TServices & string, M extends keyof TServices[S] & string>(
         serviceName: S,
         methodName: M,

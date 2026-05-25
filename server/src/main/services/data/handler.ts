@@ -19,6 +19,12 @@ if (dataHandlerImpl instanceof WorkerThreadHandler) {
 
 export const dataHandler: IServiceHandler<DataServiceMap> = dataHandlerImpl;
 
+export const startDataHandler = (): void => {
+    if (dataHandlerImpl instanceof WorkerThreadHandler) {
+        dataHandlerImpl.start();
+    }
+};
+
 export const shutdownDataHandler = async () => {
     if (dataHandlerImpl instanceof WorkerThreadHandler) {
         await dataHandlerImpl.terminate();
