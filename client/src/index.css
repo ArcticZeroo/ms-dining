@@ -230,6 +230,16 @@ a:visited {
     color: var(--color-card-foreground);
 }
 
+.card.warning-overlay {
+    background: var(--color-warning-overlay);
+    color: var(--color-card-foreground);
+}
+
+.warning-detail {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 .card.theme {
     background: var(--color-theme);
     color: var(--color-almost-white);

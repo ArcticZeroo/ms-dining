@@ -1,6 +1,14 @@
 import type { ICafeAvailability } from '@msdining/common/models/cart';
 import React from 'react';
 import { minutesToTimeString } from '@msdining/common/util/date-util';
+import { UnhandledDefaultError } from '@msdining/common/util/switch-util';
+
+const WarningCard: React.FC<{ icon: string; children: React.ReactNode }> = ({ icon, children }) => (
+    <div className="card warning-overlay horizontal align-center">
+        <span className="material-symbols-outlined">{icon}</span>
+        {children}
+    </div>
+);
 
 interface ICafeAvailabilityWarningProps {
     availability: ICafeAvailability;
@@ -14,19 +22,17 @@ export const CafeAvailabilityWarning: React.FC<ICafeAvailabilityWarningProps> = 
 
         if (currentMinutes < availability.hours.opensAt) {
             return (
-                <div className="order-cafe-warning">
-                    <span className="material-symbols-outlined">schedule</span>
+                <WarningCard icon="schedule">
                     <span>This cafe opens at {minutesToTimeString(availability.hours.opensAt)}</span>
-                </div>
+                </WarningCard>
             );
         }
 
         if (currentMinutes >= availability.hours.closesAt) {
             return (
-                <div className="order-cafe-warning">
-                    <span className="material-symbols-outlined">schedule</span>
+                <WarningCard icon="schedule">
                     <span>This cafe closed at {minutesToTimeString(availability.hours.closesAt)}</span>
-                </div>
+                </WarningCard>
             );
         }
 
@@ -38,30 +44,30 @@ export const CafeAvailabilityWarning: React.FC<ICafeAvailabilityWarningProps> = 
             : 'This cafe is currently closed.';
 
         return (
-            <div className="order-cafe-warning">
-                <span className="material-symbols-outlined">warning</span>
+            <WarningCard icon="warning">
                 <div>
-                    <div>{shutdownType}</div>
+                    <span>{shutdownType}</span>
                     {
                         availability.shutdown.message && (
-                            <div className="order-cafe-warning-detail">{availability.shutdown.message}</div>
+                            <span className="warning-detail">{availability.shutdown.message}</span>
                         )
                     }
                     {
                         availability.shutdown.isTemporary && availability.shutdown.resumeInfo && (
-                            <div className="order-cafe-warning-detail">{availability.shutdown.resumeInfo}</div>
+                            <span className="warning-detail">{availability.shutdown.resumeInfo}</span>
                         )
                     }
                 </div>
-            </div>
+            </WarningCard>
         );
     }
     case 'unknown':
         return (
-            <div className="order-cafe-warning">
-                <span className="material-symbols-outlined">help</span>
-                <span>We don't have hours for this cafe today — it may be closed.</span>
-            </div>
+            <WarningCard icon="help">
+                <span>We don't have hours for this cafe today, it may be closed.</span>
+            </WarningCard>
         );
+    default:
+        throw new UnhandledDefaultError(availability);
     }
 };
