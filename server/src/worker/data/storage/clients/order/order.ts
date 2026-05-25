@@ -1,11 +1,10 @@
-import { createHash } from 'node:crypto';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../client.js';
-import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
+import { SERVICE_ERROR_CODES, ServiceError } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
-import type { ISerializedModifier } from '@msdining/common/models/cart';
 import type { ICafeOrderDTO, IOrderItem } from '@msdining/common/models/order';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
+import { hashOrderItems, modifiersMatch, toOrderItems } from '../../../util/order.js';
 
 const ORDER_ITEMS_INCLUDE = {
 	items: {
@@ -17,93 +16,16 @@ const ORDER_ITEMS_INCLUDE = {
 	},
 } as const;
 
-const normalizeSerializedModifiers = (modifiers: ISerializedModifier[]) => modifiers
-	.flatMap(modifier => modifier.choiceIds.map(choiceId => `${modifier.modifierId}:${choiceId}`))
-	.sort();
-
-const normalizeChoiceRows = (choices: Array<{ modifierId: string; choiceId: string }>) => choices
-	.map(choice => `${choice.modifierId}:${choice.choiceId}`)
-	.sort();
-
-const modifiersMatch = (
-	left: ISerializedModifier[],
-	right: Array<{ modifierId: string; choiceId: string }>,
-): boolean => {
-	const leftNormalized = normalizeSerializedModifiers(left);
-	const rightNormalized = normalizeChoiceRows(right);
-	return leftNormalized.length === rightNormalized.length
-		&& leftNormalized.every((value, index) => value === rightNormalized[index]);
-};
-
-const groupModifierChoices = (choices: Array<{ modifierId: string; choiceId: string }>): ISerializedModifier[] => {
-	const byModifier = new Map<string, string[]>();
-	for (const { modifierId, choiceId } of choices) {
-		const existing = byModifier.get(modifierId);
-		if (existing) {
-			existing.push(choiceId);
-		} else {
-			byModifier.set(modifierId, [choiceId]);
-		}
-	}
-
-	return Array.from(byModifier, ([modifierId, choiceIds]) => ({
-		modifierId,
-		choiceIds: choiceIds.sort(),
-	})).sort((a, b) => a.modifierId.localeCompare(b.modifierId));
-};
-
-const toOrderItem = (item: {
-	menuItemId: string;
-	quantity: number;
-	specialInstructions: string | null;
-	modifiers: Array<{ modifierId: string; choiceId: string }>;
-}): IOrderItem => ({
-	menuItemId:          item.menuItemId,
-	quantity:            item.quantity,
-	specialInstructions: item.specialInstructions ?? undefined,
-	modifiers:           groupModifierChoices(item.modifiers),
-});
-
-export const toOrderItems = (items: Array<{
-	menuItemId: string;
-	quantity: number;
-	specialInstructions: string | null;
-	modifiers: Array<{ modifierId: string; choiceId: string }>;
-}>): IOrderItem[] => items.map(toOrderItem);
-
-/**
- * Deterministic hash of order items for deduplication.
- * Sorts by menuItemId, then by modifiers, to ensure identical item sets
- * produce the same hash regardless of array order.
- */
-const hashOrderItems = (items: IOrderItem[]): string => {
-	const normalized = items
-		.map(item => ({
-			menuItemId:          item.menuItemId,
-			quantity:            item.quantity,
-			specialInstructions: item.specialInstructions ?? '',
-			modifiers:           item.modifiers
-									 .map(mod => `${mod.modifierId}:${[...mod.choiceIds].sort().join(',')}`)
-									 .sort(),
-		}))
-		.sort((left, right) => left.menuItemId.localeCompare(right.menuItemId));
-
-	return createHash('sha256')
-		.update(JSON.stringify(normalized))
-		.digest('hex')
-		.slice(0, 16);
-};
-
 export abstract class OrderStorageClient {
 	/**
 	 * Creates a PendingCafeOrder with item snapshots, or returns an existing
 	 * one if there's already a pending order for this user+cafe with the same items.
 	 */
-	static async createPendingOrder(
+	static async getOrCreatePendingOrder(
 		userId: string,
 		cafeId: string,
 		items: IOrderItem[],
-	): Promise<{ id: string; isExisting: boolean }> {
+	): Promise<string> {
 		if (items.length === 0) {
 			throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'Order must contain at least one item');
 		}
@@ -117,7 +39,7 @@ export abstract class OrderStorageClient {
 			});
 
 			if (existing) {
-				return { id: existing.id, isExisting: true };
+				return existing.id;
 			}
 
 			const created = await tx.pendingCafeOrder.create({
@@ -144,7 +66,7 @@ export abstract class OrderStorageClient {
 				select: { id: true },
 			});
 
-			return { id: created.id, isExisting: false };
+			return created.id;
 		});
 	}
 
@@ -370,5 +292,19 @@ export abstract class OrderStorageClient {
 				}];
 			}),
 		}));
+	}
+
+	static async removeOrphanedPendingOrders(activeIds: string[]): Promise<number> {
+		return usePrismaWrite(async prisma => {
+			const orphanedOrders = await prisma.pendingCafeOrder.deleteMany({
+				where: {
+					id: {
+						notIn: activeIds
+					}
+				}
+			});
+
+			return orphanedOrders.count;
+		});
 	}
 }

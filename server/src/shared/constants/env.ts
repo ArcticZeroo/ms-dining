@@ -34,3 +34,5 @@ export const hasAuthEnvironmentVariables = () => {
     return hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.authMicrosoftClientId) &&
         hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.authMicrosoftClientSecret);
 }
+
+export const isFakeOrderingEnabled = process.env.FAKE_ORDERING === 'true';

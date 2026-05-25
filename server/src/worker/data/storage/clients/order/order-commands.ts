@@ -1,5 +1,5 @@
 import type { IOrderService } from '../../../../../shared/services/order.js';
-import { OrderOrchestrator } from './order-orchestrator.js';
+import { OrderOrchestrator } from '../../../ordering/order-orchestrator.js';
 
 export const orderServiceCommands = {
     preparePayment: ({ userId, cafeId, items, iframeCssUrl }) =>
