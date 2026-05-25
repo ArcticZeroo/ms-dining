@@ -39,24 +39,24 @@ export const CafeAvailabilityWarning: React.FC<ICafeAvailabilityWarningProps> = 
         return null;
     }
     case 'shutdown': {
+        const messageParts: string[] = [];
+
         const shutdownType = availability.shutdown.type === 'online_ordering_only'
             ? 'Online ordering is currently unavailable for this cafe.'
             : 'This cafe is currently closed.';
 
+        messageParts.push(shutdownType);
+        if (availability.shutdown.message) {
+            messageParts.push(availability.shutdown.message);
+        }
+        if (availability.shutdown.isTemporary && availability.shutdown.resumeInfo) {
+            messageParts.push(availability.shutdown.resumeInfo);
+        }
+
         return (
             <WarningCard icon="warning">
-                <div>
-                    <span>{shutdownType}</span>
-                    {
-                        availability.shutdown.message && (
-                            <span className="warning-detail">{availability.shutdown.message}</span>
-                        )
-                    }
-                    {
-                        availability.shutdown.isTemporary && availability.shutdown.resumeInfo && (
-                            <span className="warning-detail">{availability.shutdown.resumeInfo}</span>
-                        )
-                    }
+                <div className="warning-detail">
+                    {messageParts.join(' ')}
                 </div>
             </WarningCard>
         );

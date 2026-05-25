@@ -31,7 +31,7 @@ export const MultiCafeOrderWarning = () => {
                     You may need to pick up your orders from different buildings.
                 </li>
                 <li>
-                    It is possible that your order is accepted by one cafe but rejected by another.
+                    Your order is sent to the kitchen as soon as you pay. It is possible that your order is accepted by one cafe but rejected by another.
                 </li>
             </ul>
             <div className="flex">
