@@ -8,7 +8,6 @@ import { ALL_CAFES } from '../../../../shared/constants/cafes.js';
 import { getServices } from '../../../../main/services/registry.js';
 import Duration from '@arcticzeroo/duration';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
-import { runPendingMigrations } from '../../runtime-migrations/runner.js';
 import { runWithDbPriority } from '../../storage/db-context.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
@@ -88,8 +87,6 @@ const scheduleJob = (job: () => void, didRepair: boolean, name: string) => {
 
 export const performMenuBootTasks = async () => {
 	const [didDailyRepair, didWeeklyRepair] = await runWithDbPriority('critical', async () => {
-		await runPendingMigrations();
-
 		console.time('boot: repairTodaySessions');
 		const didDailyRepair = await repairTodaySessionsAsync();
 		console.timeEnd('boot: repairTodaySessions');

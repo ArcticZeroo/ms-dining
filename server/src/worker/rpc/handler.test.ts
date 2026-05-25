@@ -185,7 +185,7 @@ const workerEntryPath = (): URL => {
 };
 
 describe('WorkerThreadHandler (cross-thread)', () => {
-    const handler = new WorkerThreadHandler(workerEntryPath(), TEST_WORKER_SERVICES);
+    const handler = new WorkerThreadHandler<typeof TEST_WORKER_SERVICES>(workerEntryPath());
 
     // Terminate the worker after the suite so the test runner can exit
     // without --test-force-exit needing to kill it.
@@ -238,5 +238,10 @@ describe('WorkerThreadHandler (cross-thread)', () => {
         assert.equal(a, 3);
         assert.equal(b, 20);
         assert.equal(c, 100);
+    });
+
+    it('works without providing the service map on the main thread', async () => {
+        const result = await handler.sendRequest('echo', 'sum', { numbers: [4, 5] });
+        assert.equal(result, 9);
     });
 });

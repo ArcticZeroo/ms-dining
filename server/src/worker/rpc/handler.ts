@@ -136,22 +136,26 @@ type PendingRequest = [resolve: (value: unknown) => void, reject: (err: Error) =
  */
 export class WorkerThreadHandler<TServices extends ServiceMap> implements IServiceHandler<TServices> {
     readonly #filePath: URL;
-    readonly #services: TServices;
+    readonly #services: TServices | undefined;
     readonly #pendingRequests = new Map<string, PendingRequest>();
     #worker: Worker | undefined;
+    #unhandledMessageHandler: ((message: unknown) => boolean) | undefined;
 
     /**
      * @param filePath - URL of the worker entry file. Used on the main side
      *   to spawn the worker; ignored on the worker side.
-     * @param services - The service map. The worker side uses this for
-     *   dispatch; the main side currently ignores it at runtime but uses
-     *   it for type inference on `sendRequest`.
+     * @param services - The service map. Required inside the worker thread
+     *   for dispatch, but optional on the main thread so worker-only storage
+     *   code does not need to be imported there.
      */
-    constructor(filePath: URL, services: TServices) {
+    constructor(filePath: URL, services?: TServices) {
         this.#filePath = filePath;
         this.#services = services;
 
         if (!isMainThread) {
+            if (services == null) {
+                throw new Error('WorkerThreadHandler requires services when constructed inside a worker thread');
+            }
             logDebug('WorkerThreadHandler is running in worker thread, registering listener');
             this.#registerWorkerRequestListener();
         }
@@ -211,10 +215,17 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         await worker.terminate();
     }
 
+    setUnhandledMessageHandler(handler: ((message: unknown) => boolean) | undefined) {
+        this.#unhandledMessageHandler = handler;
+    }
+
     #registerMainThreadResponseListener(worker: Worker) {
         worker.on('message', (rawMessage: unknown) => {
             const parsed = WorkerResponseSchema.safeParse(rawMessage);
             if (!parsed.success) {
+                if (this.#unhandledMessageHandler?.(rawMessage)) {
+                    return;
+                }
                 logError('Invalid worker thread command response:', rawMessage, parsed.error.message);
                 return;
             }
@@ -241,6 +252,10 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
     }
 
     #registerWorkerRequestListener() {
+        const services = this.#services;
+        if (services == null) {
+            throw new Error('WorkerThreadHandler requires services to dispatch worker requests');
+        }
         if (parentPort == null) {
             throw new Error('parentPort is missing in worker thread WorkerThreadHandler');
         }
@@ -256,7 +271,7 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
 
             const runHandler = async () => {
                 try {
-                    const responseData = await dispatch(this.#services, serviceName, methodName, data);
+                    const responseData = await dispatch(services, serviceName, methodName, data);
                     const response: WorkerResponseSuccess = { requestId, success: true, data: responseData };
                     port.postMessage(response);
                 } catch (err) {

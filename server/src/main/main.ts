@@ -7,7 +7,7 @@ import { ENVIRONMENT_SETTINGS } from '../shared/util/env.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../worker/queues/embeddings.js';
 import { startSearchTagWorkerQueue } from '../worker/queues/search-tags.js';
 import { flushTelemetry } from '../shared/telemetry/app-insights.js';
-import { disconnectPrismaClient } from '../worker/data/storage/client.js';
+import { shutdownDataHandler } from './services/data/handler.js';
 import { getServices } from './services/registry.js';
 import * as dotenv from 'dotenv';
 
@@ -17,7 +17,7 @@ const handleShutdown = async (signal: string) => {
     logInfo(`${signal} received, shutting down gracefully...`);
     const results = await Promise.allSettled([
         flushTelemetry(),
-        disconnectPrismaClient(),
+        shutdownDataHandler(),
     ]);
     for (const result of results) {
         if (result.status === 'rejected') {
