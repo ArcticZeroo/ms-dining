@@ -46,7 +46,12 @@ class SessionStoreAdapter implements ISessionStore {
  * integration tests pass their per-context test services so HTTP requests
  * resolve `getServices()` to the test mocks.
  */
-export const createApp = (services: Services): Koa => {
+export interface CreateAppOptions {
+    /** Disable cookie signing for sessions (useful in tests). Defaults to true. */
+    sessionSigned?: boolean;
+}
+
+export const createApp = (services: Services, { sessionSigned = true }: CreateAppOptions = {}): Koa => {
     // Validate session secret early — fail fast at boot rather than at first
     // session use. (Used to be a module-load-time check; same intent.)
     if (!hasEnvironmentVariable(WELL_KNOWN_ENVIRONMENT_VARIABLES.sessionSecret)) {
@@ -72,6 +77,7 @@ export const createApp = (services: Services): Koa => {
     app.use(session({
         maxAge: new Duration({ days: 180 }).inMilliseconds,
         renew: true,
+        signed: sessionSigned ?? true,
         store: new SessionStoreAdapter()
     }, app));
 

@@ -26,12 +26,6 @@
  *   }));
  */
 
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs';
-import * as http from 'node:http';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import { disconnectPrismaClient } from '../../worker/data/storage/client.js';
 import { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../worker/queues/embeddings.js';
 import {
@@ -41,19 +35,17 @@ import {
 } from '../../main/services/registry.js';
 import type { Services } from '../../main/services/types.js';
 import { defaultDataServices } from '../../main/services/data/index.js';
-import { applySchemaToTempDb } from './db-test-helper.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';
-import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { TestBuyOnDemandClient } from './test-client.js';
 import { MockAiProvider } from './mock-ai-provider.js';
+import { createTestUser, TestAuthManager } from './auth-helper.js';
+import { createTestDatabase } from './test-database.js';
+import { createLazyWebserver } from './test-webserver.js';
+import type { IServerUser } from '../../shared/models/auth.js';
+import type { ICreateUserInput } from '../../shared/services/user.js';
 
-export interface TestWebserverHandle {
-    /** Base URL of the test webserver, e.g. http://127.0.0.1:54321 */
-    url: string;
-    /** Shut down the webserver. */
-    close(): Promise<void>;
-}
+export type { TestWebserverHandle } from './test-webserver.js';
 
 export interface IntegrationTestContext {
     /** The in-memory BuyOnDemand mock server. */
@@ -85,49 +77,26 @@ export interface IntegrationTestContext {
      * resolves to the test services.
      */
     run<T>(fn: () => Promise<T>): Promise<T>;
+    /**
+     * Creates a test user in the DB. Shorthand for the auth-helper's
+     * `createTestUser()` — call inside `ctx.run(...)` so services resolve.
+     */
+    createTestUser(overrides?: Partial<ICreateUserInput>): Promise<IServerUser>;
+    /**
+     * Sends an HTTP request authenticated as `userId`. Lazily creates a
+     * session row + unsigned cookie on first use per user, then caches it.
+     * The webserver must be started first (`startWebserver()`).
+     */
+    fetchAs(userId: string, url: string, init?: RequestInit): Promise<Response>;
     /** Cleanup: stops webserver, disconnects Prisma, deletes temp dir. */
     cleanup: () => Promise<void>;
 }
 
 export async function createIntegrationTestContext(): Promise<IntegrationTestContext> {
-    // ── 1. Allocate temp directory ──────────────────────────────────────
-    const testId = `test-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
-    const dbDir = path.join(os.tmpdir(), 'ms-dining-tests', testId);
-    await fs.promises.mkdir(dbDir, { recursive: true });
-    const dbPath = path.join(dbDir, 'dining.db');
-    const searchDbPath = path.join(dbDir, 'search.db');
+    // ── 1. Database ─────────────────────────────────────────────────────
+    const db = await createTestDatabase();
 
-    // ── 2. Set env BEFORE first storage/AI consumer triggers init ──────
-    // Both api/storage/client.ts (Prisma) and api/storage/vector/db.ts (vec) are
-    // lazy, so as long as no module has triggered their factories yet, setting
-    // env here is sufficient.
-    process.env.DATABASE_URL = `file:${dbPath}`;
-    process.env.SEARCH_DB_PATH = searchDbPath;
-    delete process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
-
-    // ── 3. Push schema to the empty dining.db ───────────────────────────
-    await applySchemaToTempDb(dbPath);
-
-    // ── 3b. Seed all known cafes so FK constraints are satisfied ─────────
-    const { PrismaClient } = await import('@prisma/client');
-    const seedPrisma = new PrismaClient({ datasourceUrl: `file:${dbPath}` });
-    try {
-        await seedPrisma.cafe.createMany({
-            data: ALL_CAFES.map(cafe => ({
-                id:               cafe.id,
-                name:             cafe.name,
-                tenantId:         '',
-                contextId:        '',
-                displayProfileId: '',
-                storeId:          '',
-                externalName:     cafe.id,
-            })),
-        });
-    } finally {
-        await seedPrisma.$disconnect();
-    }
-
-    // ── 4. Build per-context services ────────────────────────────────────
+    // ── 2. Services ─────────────────────────────────────────────────────
     const mockAi = new MockAiProvider();
     const server = createTestServerWithFixtures();
     const translationCache = new TranslationCache();
@@ -147,63 +116,17 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
     setDefaultServices(services);
     enterWithServices(services);
 
-    // ── 5. Webserver (lazy) ─────────────────────────────────────────────
-    let webserver: TestWebserverHandle | null = null;
+    // ── 3. Webserver (lazy) ─────────────────────────────────────────────
+    const webserver = createLazyWebserver(services);
 
-    const startWebserver = async (): Promise<string> => {
-        if (webserver) {
-            return webserver.url;
-        }
-        // Dynamic import so loading the app (which constructs Koa, registers
-        // routes, requires the SESSION_SECRET, etc.) only happens for tests
-        // that actually exercise HTTP — keeps the smoke test light.
-        const { createApp } = await import('../../main/app.js');
-        const app = createApp(services);
-        const httpServer = http.createServer(app.callback());
-        await new Promise<void>((resolve, reject) => {
-            httpServer.once('error', reject);
-            httpServer.listen(0, '127.0.0.1', () => {
-                httpServer.off('error', reject);
-                resolve();
-            });
-        });
-        const addr = httpServer.address();
-        if (addr == null || typeof addr === 'string') {
-            throw new Error('Test webserver did not bind to a TCP port');
-        }
-        const url = `http://127.0.0.1:${addr.port}`;
-        webserver = {
-            url,
-            close: () => new Promise<void>((resolve, reject) =>
-                httpServer.close(err => err ? reject(err) : resolve())),
-        };
-        return url;
-    };
+    // ── 4. Auth ─────────────────────────────────────────────────────────
+    const authManager = new TestAuthManager();
 
-    // ── 6. Cleanup function ─────────────────────────────────────────────
+    // ── 5. Cleanup ──────────────────────────────────────────────────────
     const cleanup = async (): Promise<void> => {
         setDefaultServices(null);
-        if (webserver) {
-            try {
-                await webserver.close();
-            } catch {
-                // Best-effort.
-            }
-            webserver = null;
-        }
-        try {
-            await disconnectPrismaClient();
-        } catch {
-            // Best-effort: a failed disconnect shouldn't block cleanup.
-        }
-        // search.db may still be held open by the worker thread; try to remove
-        // the whole dir and ignore EBUSY (the OS will reap it once handles are
-        // released, and the temp dir is in os.tmpdir() anyway).
-        try {
-            await fs.promises.rm(dbDir, { recursive: true, force: true });
-        } catch {
-            // Ignore — best-effort cleanup.
-        }
+        await webserver.cleanup();
+        await db.cleanup();
     };
 
     return {
@@ -211,10 +134,12 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         mockAi,
         translationCache,
         services,
-        dbPath,
-        searchDbPath,
-        startWebserver,
+        dbPath:       db.dbPath,
+        searchDbPath: db.searchDbPath,
+        startWebserver: webserver.start,
         run: <T>(fn: () => Promise<T>) => runWithServices(services, fn),
+        createTestUser: (overrides) => createTestUser(overrides),
+        fetchAs: (userId, url, init) => authManager.fetchAs(userId, url, init),
         cleanup,
     };
 }

@@ -34,12 +34,16 @@ const FAKE_NOW = new Date('2026-05-13T12:00:00Z');
 let ctx: IntegrationTestContext;
 let baseUrl: string;
 let todayString: string;
+let testUserId: string;
 
 before(async () => {
     mock.timers.enable({ apis: ['Date'], now: FAKE_NOW });
     todayString = DateUtil.toDateString(new Date());
 
     ctx = await createIntegrationTestContext();
+
+    const testUser = await ctx.createTestUser();
+    testUserId = testUser.id;
 
     const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
@@ -269,39 +273,33 @@ test('translateErrors:false (default) preserves the legacy generic error', async
 // ─── End-to-end via the Koa webserver ──────────────────────────────────
 
 test('webserver: order failure surfaces as 502 with translated message + code', async () => {
-    // Set up a custom translation so this test doesn't depend on the
-    // CONCEPTS_NOT_AVAILABLE fixture entry — that one's exercised by the
-    // direct-client test above.
     ctx.server.setTranslation('STATION_GONE', 'That station is no longer available.');
 
-    // We need a real menu item to build a valid cart. Pick the first one
-    // available on today's menu for the test cafe.
+    // We need a real menu item to build a valid prepare-payment request.
     const menu = await DailyMenuStorageClient.retrieveDailyMenuAsync(CAFE_ID, todayString);
     assert.ok(menu.length > 0, 'sanity: menu should have stations');
     const firstStation = menu[0]!;
     const firstItemId = Array.from(firstStation.menuItemsById.keys())[0];
     assert.ok(firstItemId, 'sanity: first station should have at least one item');
 
-    const cartPayload = {
-        itemsByCafeId: {
-            [CAFE_ID]: [
-                { itemId: firstItemId, quantity: 1, modifiers: [], specialInstructions: '' },
-            ],
-        },
+    const payload = {
+        items: [
+            { menuItemId: firstItemId, quantity: 1, modifiers: [] },
+        ],
     };
 
     // Inject the failure on the addToCart endpoint — fails immediately during
-    // /prepare/cart, no need to drive the full payment flow.
+    // prepare-payment's session creation, no need to drive the full payment flow.
     ctx.server.injectBoDError({
         method:      'POST',
         pathPattern: /\/orders$/,
         code:        'STATION_GONE',
     });
 
-    const res = await fetch(`${baseUrl}/api/dining/order/prepare/cart`, {
+    const res = await ctx.fetchAs(testUserId, `${baseUrl}/api/dining/order/cafes/${CAFE_ID}/prepare-payment`, {
         method:  'POST',
         headers: { 'content-type': 'application/json' },
-        body:    JSON.stringify(cartPayload),
+        body:    JSON.stringify(payload),
     });
 
     assert.equal(res.status, 502, `expected 502 from BoD-error mapping middleware, got ${res.status}`);

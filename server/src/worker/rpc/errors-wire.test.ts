@@ -80,6 +80,7 @@ describe('ServiceErrorWireSchema / parseServiceErrorWire', () => {
             message: 'something new',
         });
         assert.ok(restored != null);
+        assert.ok(restored instanceof ServiceError);
         assert.equal(restored.code, 'INTERNAL');
         assert.equal(restored.message, 'something new');
     });

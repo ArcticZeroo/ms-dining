@@ -212,6 +212,36 @@ test('/api/auth/me is registered and protected when auth env vars are set', asyn
     assert.equal(res.status, 401, `expected 401 for unauthenticated /auth/me; got ${res.status}`);
 });
 
+test('/api/auth/me returns 200 with user data for authenticated request', async () => {
+    await ctx.run(async () => {
+        const user = await ctx.createTestUser({ displayName: 'Auth Test User' });
+        const res = await ctx.fetchAs(user.id, `${baseUrl}/api/auth/me`);
+        assert.equal(res.status, 200, `expected 200 for authenticated /auth/me; got ${res.status}`);
+
+        const body = await res.json() as { id: string; displayName: string; provider: string };
+        assert.equal(body.id, user.id);
+        assert.equal(body.displayName, 'Auth Test User');
+    });
+});
+
+test('PATCH /api/auth/me/name updates display name for authenticated user', async () => {
+    await ctx.run(async () => {
+        const user = await ctx.createTestUser({ displayName: 'Original Name' });
+
+        const patchRes = await ctx.fetchAs(user.id, `${baseUrl}/api/auth/me/name`, {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ displayName: 'Updated Name' }),
+        });
+        assert.equal(patchRes.status, 204, `expected 204 for name update; got ${patchRes.status}`);
+
+        // Verify the name persisted
+        const meRes = await ctx.fetchAs(user.id, `${baseUrl}/api/auth/me`);
+        const body = await meRes.json() as { displayName: string };
+        assert.equal(body.displayName, 'Updated Name');
+    });
+});
+
 // Note: a test asserting Cache-Control isn't `public` on /auth/me would be
 // vacuous here — the route returns 401 for unauthenticated requests and Koa
 // skips cache-control on error responses regardless of route config. The
