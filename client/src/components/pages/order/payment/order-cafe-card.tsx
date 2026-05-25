@@ -6,20 +6,23 @@ import { useCafePaymentFlow } from '../../../../hooks/cafe-payment-flow.tsx';
 import { calculatePrice } from '../../../../util/cart.ts';
 import { getViewName } from '../../../../util/cafe.ts';
 import { getViewMenuUrlDirect } from '../../../../util/link.ts';
-import type { ICartItemRecord } from '@msdining/common/models/cart';
+import type { ICafeAvailability, ICartItemRecord } from '@msdining/common/models/cart';
 import { OrderCafeItemsTable } from './order-cafe-items-table.tsx';
 import { OrderCafeFooter } from './order-cafe-footer/order-cafe-footer.tsx';
+import { CafeAvailabilityWarning } from './cafe-availability-warning.tsx';
 import { classNames } from '../../../../util/react.js';
 
 interface IOrderCafeCardProps {
     cafeId: string;
     items: ICartItemRecord[];
+    availability: ICafeAvailability;
     snapshotCallbacks: ISnapshotCallbacks;
 }
 
 export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     cafeId,
     items,
+    availability,
     snapshotCallbacks,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
@@ -65,6 +68,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                             : cafeName
                     }
                 </div>
+                <CafeAvailabilityWarning availability={availability}/>
                 <OrderCafeItemsTable
                     items={items}
                     readOnly={isReadOnly}

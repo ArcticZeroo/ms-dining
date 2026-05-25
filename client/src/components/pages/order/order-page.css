@@ -83,6 +83,26 @@
     background: rgba(255, 255, 255, 0.08);
 }
 
+.order-cafe-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--default-padding);
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    background: rgba(255, 200, 0, 0.15);
+    color: var(--color-text);
+}
+
+.order-cafe-warning .material-symbols-outlined {
+    color: #e8a800;
+    flex-shrink: 0;
+}
+
+.order-cafe-warning-detail {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 .order-done-list {
     display: flex;
     flex-direction: column;

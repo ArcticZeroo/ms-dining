@@ -4,6 +4,7 @@ import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { usePaymentIdentity } from '../../../hooks/payment-identity.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { OnlineOrderingExperimental } from '../../notice/online-ordering-experimental.tsx';
+import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from './payment/order-cafe-card.tsx';
 import { PaymentInfoForm } from './payment/payment-info-form.tsx';
@@ -66,6 +67,11 @@ export const OrderPageBody = () => {
                 onAliasChanged={setAlias}
                 onPhoneNumberChanged={setPhoneNumber}
             />
+            {
+                snapshot.groupedItems.length > 1 && (
+                    <MultiCafeOrderWarning/>
+                )
+            }
             <PaymentIdentityContext.Provider value={{ alias, phoneNumber: validatedPhoneNumber ?? '', isValid }}>
                 <div className="flex-col">
                     {snapshot.groupedItems.map((group) => (
@@ -73,6 +79,7 @@ export const OrderPageBody = () => {
                             key={group.cafeId}
                             cafeId={group.cafeId}
                             items={group.items}
+                            availability={group.availability}
                             snapshotCallbacks={snapshotCallbacks}
                         />
                     ))}
