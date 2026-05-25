@@ -104,13 +104,24 @@ export const HomeRecommendationsView: React.FC = () => {
             id="home-recommendations"
             featureToggle={ApplicationSettings.showRecommendationsOnHome}
         >
-            <TabView
-                options={tabOptions}
-                selectedTabId={selectedTabId}
-                onTabIdChanged={setSelectedTabId}
-                renderTab={renderTab}
-                loadingTabCount={loadingTabCount}
-            />
+            {
+                tabOptions.length === 0 && (
+                    <div className="centered-content">
+                        No recommendations available today. Check back tomorrow!
+                    </div>
+                )
+            }
+            {
+                tabOptions.length > 0 && (
+                    <TabView
+                        options={tabOptions}
+                        selectedTabId={selectedTabId}
+                        onTabIdChanged={setSelectedTabId}
+                        renderTab={renderTab}
+                        loadingTabCount={loadingTabCount}
+                    />
+                )
+            }
         </HomeCollapse>
     );
 };
