@@ -57,6 +57,11 @@ export const CafeAvailabilityWarning: React.FC<ICafeAvailabilityWarningProps> = 
         );
     }
     case 'unknown':
-        return null;
+        return (
+            <div className="order-cafe-warning">
+                <span className="material-symbols-outlined">help</span>
+                <span>We don't have hours for this cafe today — it may be closed.</span>
+            </div>
+        );
     }
 };
