@@ -89,13 +89,8 @@
     gap: var(--default-padding);
     padding: var(--default-padding);
     border-radius: var(--default-padding);
-    background: rgba(255, 200, 0, 0.15);
-    color: var(--color-text);
-}
-
-.order-cafe-warning .material-symbols-outlined {
-    color: #e8a800;
-    flex-shrink: 0;
+    background: var(--color-warning-overlay);
+    color: var(--color-card-foreground);
 }
 
 .order-cafe-warning-detail {

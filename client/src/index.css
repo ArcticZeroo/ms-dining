@@ -32,6 +32,7 @@
     --color-card-blue: var(--color-theme);
     --color-card-dark-blue: var(--color-theme-dark);
     --color-card-yellow: #D3973C;
+    --color-warning-overlay: rgba(255, 200, 0, 0.15);
     --color-card-background: var(--color-background-raised);
     --color-search-ideas-entry-hover: var(--color-theme-dark);
     --color-search-ideas-entry: var(--color-theme);
