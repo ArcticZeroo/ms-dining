@@ -1,5 +1,6 @@
 import { createDataServices, type DataServices } from '../../../shared/services/create-data-services.js';
 import { dataHandler } from './handler.js';
+import { DATA_SERVICES } from '../../../worker/data/data-services.js';
 
 /**
  * Composite of all typed data-service clients. Lives at `Services['data']`
@@ -11,7 +12,7 @@ import { dataHandler } from './handler.js';
  */
 export type { DataServices } from '../../../shared/services/create-data-services.js';
 
-export const defaultDataServices: DataServices = createDataServices(dataHandler);
+export const defaultDataServices: DataServices = createDataServices(dataHandler, DATA_SERVICES);
 
 export { searchQueryService } from './search-query.js';
 export { tagService } from './tag.js';
