@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SerializedModifierSchema } from './cart.js';
+import { SerializedModifierSchema } from './shared.js';
 import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
 
 export const OrderItemSchema = z.object({

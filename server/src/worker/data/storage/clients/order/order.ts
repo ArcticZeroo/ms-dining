@@ -3,8 +3,9 @@ import { SERVICE_ERROR_CODES, ServiceError } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import type { ICafeOrderDTO, IOrderItem } from '@msdining/common/models/order';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
+import { flattenModifiers, groupModifierRows, modifiersEqual } from '@msdining/common/util/modifier-util';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
-import { hashOrderItems, modifiersMatch, toOrderItems } from '../../../util/order.js';
+import { hashOrderItems, toOrderItems } from '../../../util/order.js';
 
 const ORDER_ITEMS_INCLUDE = {
 	items: {
@@ -53,12 +54,7 @@ export abstract class OrderStorageClient {
 							quantity:            item.quantity,
 							specialInstructions: item.specialInstructions ?? null,
 							modifiers: {
-								create: item.modifiers.flatMap(modifier =>
-									modifier.choiceIds.map(choiceId => ({
-										modifierId: modifier.modifierId,
-										choiceId,
-									})),
-								),
+								create: flattenModifiers(item.modifiers),
 							},
 						})),
 					},
@@ -198,7 +194,7 @@ export abstract class OrderStorageClient {
 			const matchIndex = cartItems.findIndex(cartItem =>
 				cartItem.menuItemId === item.menuItemId
 				&& (cartItem.specialInstructions ?? null) === (item.specialInstructions ?? null)
-				&& modifiersMatch(item.modifiers, cartItem.modifierChoices),
+				&& modifiersEqual(item.modifiers, cartItem.modifierChoices),
 			);
 
 			if (matchIndex === -1) {
@@ -264,25 +260,12 @@ export abstract class OrderStorageClient {
 					return [];
 				}
 
-				const modifierMap = new Map<string, string[]>();
-				for (const mod of item.modifiers) {
-					const existing = modifierMap.get(mod.modifierId);
-					if (existing) {
-						existing.push(mod.choiceId);
-					} else {
-						modifierMap.set(mod.modifierId, [mod.choiceId]);
-					}
-				}
-
 				return [{
 					menuItemId:          item.menuItemId,
 					quantity:            item.quantity,
 					price:               item.price,
 					specialInstructions: item.specialInstructions,
-					modifiers:           Array.from(modifierMap.entries()).map(([modifierId, choiceIds]) => ({
-						modifierId,
-						choiceIds,
-					})),
+					modifiers:           groupModifierRows(item.modifiers),
 					menuItem:            {
 						...menuItemBaseToDTO(menuItem),
 						totalReviewCount: 0,

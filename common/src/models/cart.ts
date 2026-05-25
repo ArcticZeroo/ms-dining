@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
+import { OrderItemSchema } from './order.js';
+import { SerializedModifierSchema } from './shared.js';
 
-export interface ISerializedModifier {
-    modifierId: string;
-    choiceIds: Array<string>;
-}
+export type { ISerializedModifier } from './shared.js';
 
 export enum SubmitOrderStage {
     notStarted = 'notStarted',
@@ -33,17 +32,9 @@ export interface IPaymentCardInfo {
     postalCode: string;
 }
 
-export const SerializedModifierSchema = z.object({
-    modifierId: z.string(),
-    choiceIds:  z.array(z.string()),
-});
+export { SerializedModifierSchema } from './shared.js';
 
-export const CartItemDataSchema = z.object({
-    menuItemId:          z.string().min(1),
-    quantity:            z.number().int().min(1),
-    specialInstructions: z.string().optional(),
-    modifiers:           z.array(SerializedModifierSchema).default([]),
-});
+export const CartItemDataSchema = OrderItemSchema;
 
 export type ICartItemData = z.infer<typeof CartItemDataSchema>;
 

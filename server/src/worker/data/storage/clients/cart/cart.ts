@@ -2,6 +2,7 @@ import { usePrismaClient, usePrismaTransaction } from '../../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { toDateString } from '@msdining/common/util/date-util';
+import { groupModifierRows } from '@msdining/common/util/modifier-util';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import type {
     ICartItemData,
@@ -21,19 +22,6 @@ type PrismaCartItemWithModifiers = {
     modifierChoices: { modifierId: string; choiceId: string }[];
 };
 
-const groupModifierChoices = (choices: { modifierId: string; choiceId: string }[]): ISerializedModifier[] => {
-    const byModifier = new Map<string, string[]>();
-    for (const { modifierId, choiceId } of choices) {
-        const existing = byModifier.get(modifierId);
-        if (existing) {
-            existing.push(choiceId);
-        } else {
-            byModifier.set(modifierId, [choiceId]);
-        }
-    }
-    return Array.from(byModifier, ([modifierId, choiceIds]) => ({ modifierId, choiceIds }));
-};
-
 const toCartItemRecord = (
     item: PrismaCartItemWithModifiers,
     menuItem: IMenuItemBase,
@@ -43,7 +31,7 @@ const toCartItemRecord = (
     menuItemId:          item.menuItemId,
     quantity:            item.quantity,
     specialInstructions: item.specialInstructions,
-    modifiers:           groupModifierChoices(item.modifierChoices),
+    modifiers:           groupModifierRows(item.modifierChoices),
     createdAt:           item.createdAt.toISOString(),
     updatedAt:           item.updatedAt.toISOString(),
     menuItem,
