@@ -24,7 +24,7 @@ export const CompletedOrdersView = () => {
                 <div className="card error">
                     {getErrorMessage(ordersQuery.error, 'Failed to load completed orders')}
                 </div>
-                <div className="order-page-actions">
+                <div className="flex flex-justify-center">
                     <RetryButton onClick={() => ordersQuery.refetch()}/>
                 </div>
             </div>

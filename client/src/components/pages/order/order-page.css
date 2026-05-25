@@ -6,67 +6,6 @@
     width: min-content;
 }
 
-#order-checkout .prepare-error {
-    color: var(--color-error, red);
-}
-
-.order-page-actions {
-    display: flex;
-    justify-content: center;
-}
-
-.order-page-completed-link {
-    display: flex;
-    justify-content: center;
-}
-
-.order-page-completed-list,
-.order-page-cafes {
-    display: flex;
-    flex-direction: column;
-    gap: var(--default-padding);
-}
-
-.order-page-completed-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.order-page-cafe {
-    display: flex;
-    flex-direction: column;
-    gap: var(--default-padding);
-}
-
-.order-page-cafe-header,
-.order-page-cafe-item-row,
-.order-page-cafe-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--default-padding);
-}
-
-.order-page-cafe-items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.order-page-cafe-item-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.order-page-cafe-error {
-    color: var(--color-error, red);
-}
-
 .order-cafe-card .cart-contents {
     background: var(--color-background-raised-2);
     padding: var(--default-padding) 0;
@@ -96,10 +35,4 @@
 .order-cafe-warning-detail {
     font-size: 0.9em;
     opacity: 0.8;
-}
-
-.order-done-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--default-padding);
 }
