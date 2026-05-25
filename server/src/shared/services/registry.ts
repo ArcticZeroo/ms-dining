@@ -1,6 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { lazy } from '../util/lazy.js';
-import { createProductionServices } from '../../main/services/production.js';
 import type { Services } from './types.js';
 import type { ICafe } from '../models/cafe.js';
 import type {
@@ -9,11 +8,35 @@ import type {
 } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
 
 /**
- * Process-wide production services bag, constructed lazily on first read via
- * the codebase's `lazy()` helper. Tests never see these — they wrap their
- * work in `runWithServices(testServices, fn)` instead.
+ * Process-wide production services bag, constructed lazily on first read.
+ * Tests never see these — they call setDefaultServices() before any
+ * getServices() access.
+ *
+ * The import of `production.js` is intentionally dynamic (not top-level)
+ * to avoid pulling the main-thread wiring (handler.ts, data/index.ts, etc.)
+ * into the worker thread's module graph, which would cause a circular-dep
+ * deadlock between entry.ts and handler.ts.
  */
-const PRODUCTION_SERVICES = lazy<Services>(createProductionServices);
+let productionServicesFactory: (() => Services) | null = null;
+
+/**
+ * Registers the production services factory. Called once from main.ts
+ * so that getServices() can fall back to production services on the main
+ * thread without a static import from this (shared) module into main/.
+ */
+export const setProductionServicesFactory = (factory: () => Services): void => {
+    productionServicesFactory = factory;
+};
+
+const PRODUCTION_SERVICES = lazy<Services>(() => {
+    if (productionServicesFactory == null) {
+        throw new Error(
+            'getServices() called but no services are available. '
+            + 'Call setDefaultServices() or setProductionServicesFactory() during initialization.',
+        );
+    }
+    return productionServicesFactory();
+});
 
 const servicesStorage = new AsyncLocalStorage<Services>();
 
@@ -21,8 +44,10 @@ let defaultServices: Services | null = null;
 
 /**
  * Sets the process-wide default services bag. When set, getServices()
- * returns this if no ALS-scoped services are active — before falling
- * back to the lazy production singleton.
+ * returns this if no ALS-scoped services are active.
+ *
+ * Must be called before the first getServices() access — both main.ts
+ * and the worker entry call this during initialization.
  */
 export const setDefaultServices = (services: Services | null): void => {
     defaultServices = services;
@@ -32,7 +57,7 @@ export const setDefaultServices = (services: Services | null): void => {
  * Returns the active services bag. Resolution order:
  * 1. ALS-scoped services (per-request middleware, runWithServices)
  * 2. Explicit default (set via setDefaultServices)
- * 3. Lazy production singleton
+ * 3. Lazy production singleton (registered via setProductionServicesFactory)
  */
 export const getServices = (): Services => {
     return servicesStorage.getStore()

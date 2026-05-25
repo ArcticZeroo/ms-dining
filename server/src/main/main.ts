@@ -5,7 +5,8 @@ import { createAnalyticsApplications } from './tracking/boot.js';
 import { ENVIRONMENT_SETTINGS } from '../shared/util/env.js';
 import { flushTelemetry } from '../shared/telemetry/app-insights.js';
 import { shutdownDataHandler } from './services/data/handler.js';
-import { getServices } from '../shared/services/registry.js';
+import { getServices, setProductionServicesFactory } from '../shared/services/registry.js';
+import { createProductionServices } from './services/production.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -31,8 +32,12 @@ process.on('SIGINT',  () => handleShutdown('SIGINT'));
 logDebug('Starting in debug mode');
 logInfo('Starting server on port', webserverPort);
 
-// Build the app with the lazy-initialized production services bag. First
-// getServices() call constructs production services via createProductionServices().
+// Register the production services factory so getServices() can lazily
+// construct the production bag on first access. This avoids a static
+// import from registry.ts → production.ts which would pull main-thread
+// wiring into the worker thread's module graph.
+setProductionServicesFactory(createProductionServices);
+
 const app = createApp(getServices());
 app.listen(webserverPort);
 

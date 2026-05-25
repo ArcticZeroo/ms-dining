@@ -1,4 +1,4 @@
-import { isMainThread, parentPort, Worker } from 'node:worker_threads';
+import { isMainThread, parentPort, Worker, workerData } from 'node:worker_threads';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { logDebug, logError } from '../../shared/util/log.js';
@@ -152,7 +152,7 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         this.#filePath = filePath;
         this.#services = services;
 
-        if (!isMainThread) {
+        if (!isMainThread && workerData?.__handlerEntryUrl === filePath.href) {
             if (services == null) {
                 throw new Error('WorkerThreadHandler requires services when constructed inside a worker thread');
             }
@@ -196,7 +196,9 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         if (this.#worker != null) {
             return this.#worker;
         }
-        this.#worker = new Worker(this.#filePath);
+        this.#worker = new Worker(this.#filePath, {
+            workerData: { __handlerEntryUrl: this.#filePath.href },
+        });
         this.#registerMainThreadResponseListener(this.#worker);
         return this.#worker;
     }

@@ -22,7 +22,7 @@ const createDataServiceMethod = <
     serviceName: S,
     methodName: M,
 ): DataServiceMethod<S, M> => {
-    const callHandler = handler.sendRequest as (
+    const callHandler = handler.sendRequest.bind(handler) as (
         serviceName: S,
         methodName: M,
         data?: Parameters<DataServiceMethod<S, M>>[0],
