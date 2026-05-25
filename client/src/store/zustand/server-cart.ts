@@ -69,9 +69,10 @@ export const useServerCartStore = create<IServerCartStore>()(mutative((set) => (
 
 // ─── Derived selectors ───────────────────────────────────────────────
 
-export const useServerCartItems = () => useServerCartStore(state =>
-    state.cafes.flatMap(cafe => cafe.items),
-);
+export const useServerCartItems = () => {
+    const cafes = useServerCartStore(state => state.cafes);
+    return useMemo(() => cafes.flatMap(cafe => cafe.items), [cafes]);
+};
 
 export const useServerCartItemCount = () => useServerCartStore(state =>
     state.cafes.reduce((sum, cafe) => sum + cafe.items.reduce((cafeSum, item) => cafeSum + item.quantity, 0), 0),
