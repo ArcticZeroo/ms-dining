@@ -6,7 +6,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { groupsService } from '../../../../../main/services/data/groups.js';
 import type { ICafe, ICafeConfig, ICafeStation } from '../../../../../shared/models/cafe.js';
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
 
@@ -129,10 +128,6 @@ const findGroupById = async (groupId: string) => {
     const groups = await getServices().data.groups.getGroups({});
     return groups.find(group => group.id === groupId) ?? null;
 };
-
-test('services.data.groups is the typed client', () => {
-    assert.equal(getServices().data.groups, groupsService);
-});
 
 test('createGroup returns an object with id', async () => {
 

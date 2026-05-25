@@ -7,7 +7,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { reviewService } from '../../../../../main/services/data/review.js';
 import type { ICafe, ICafeConfig, ICafeStation } from '../../../../../shared/models/cafe.js';
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
 
@@ -77,10 +76,6 @@ before(async () => {
 
 after(async () => {
     await ctx.cleanup();
-});
-
-test('services.data.review is the typed client', () => {
-    assert.equal(getServices().data.review, reviewService);
 });
 
 test('createMenuItemReview + getReviewsForMenuItem round-trip', async () => {

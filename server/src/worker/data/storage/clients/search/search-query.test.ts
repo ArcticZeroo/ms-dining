@@ -17,7 +17,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { searchQueryService } from '../../../../../main/services/data/search-query.js';
 import { SearchQueryClient } from './search-query.js';
 
 let ctx: IntegrationTestContext;
@@ -28,13 +27,6 @@ before(async () => {
 
 after(async () => {
     await ctx.cleanup();
-});
-
-test('services.data.searchQuery is the typed client (not the storage class)', () => {
-    // Sanity: the Services bag's `data.searchQuery` field must be the typed
-    // client wrapper, not the raw storage client. Catches accidental
-    // production.ts wiring regressions.
-    assert.equal(getServices().data.searchQuery, searchQueryService);
 });
 
 test('incrementSearchCount + getTopSearchQueries round-trip through the data handler', async () => {

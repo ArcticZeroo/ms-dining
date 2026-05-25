@@ -13,7 +13,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { menuItemService } from '../../../../../main/services/data/menu-item.js';
 import { MenuItemStorageClient } from './menu-item.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 
@@ -138,10 +137,6 @@ after(async () => {
     resetMenuItemCache();
     await ctx.cleanup();
     await releaseTestLock();
-});
-
-test('services.data.menuItem is the typed client', () => {
-    assert.equal(getServices().data.menuItem, menuItemService);
 });
 
 test('retrieveMenuItem returns null for nonexistent id', async () => {

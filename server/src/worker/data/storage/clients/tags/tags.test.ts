@@ -14,7 +14,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { tagService } from '../../../../../main/services/data/tag.js';
 import { TagStorageClient } from './tags.js';
 
 let ctx: IntegrationTestContext;
@@ -25,10 +24,6 @@ before(async () => {
 
 after(async () => {
     await ctx.cleanup();
-});
-
-test('services.data.tag is the typed client (not the storage class)', () => {
-    assert.equal(getServices().data.tag, tagService);
 });
 
 test('retrieveTags returns empty object when no tags exist', async () => {

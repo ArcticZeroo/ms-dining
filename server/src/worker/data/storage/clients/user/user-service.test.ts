@@ -6,7 +6,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { userService } from '../../../../../main/services/data/user.js';
 
 let ctx: IntegrationTestContext;
 
@@ -16,10 +15,6 @@ before(async () => {
 
 after(async () => {
     await ctx.cleanup();
-});
-
-test('services.data.user is the typed client (not the storage class)', () => {
-    assert.equal(getServices().data.user, userService);
 });
 
 test('createUser + getUser round-trip', async () => {

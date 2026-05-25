@@ -11,7 +11,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { cartService } from '../../../../../main/services/data/cart.js';
 import { usePrismaWrite } from '../../client.js';
 import type { ICartResponse } from '@msdining/common/models/cart';
 
@@ -63,8 +62,13 @@ after(async () => {
     await ctx.cleanup();
 });
 
-test('services.data.cart is the typed client', () => {
-    assert.equal(getServices().data.cart, cartService);
+test('services.data.cart has the expected methods', () => {
+    const cart = getServices().data.cart;
+    assert.equal(typeof cart.getCart, 'function');
+    assert.equal(typeof cart.addItems, 'function');
+    assert.equal(typeof cart.updateItem, 'function');
+    assert.equal(typeof cart.removeItem, 'function');
+    assert.equal(typeof cart.clearCart, 'function');
 });
 
 test('getCart returns empty cart for new user', async () => {

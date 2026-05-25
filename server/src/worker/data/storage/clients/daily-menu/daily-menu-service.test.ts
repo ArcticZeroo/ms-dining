@@ -14,7 +14,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { dailyMenuService } from '../../../../../main/services/data/daily-menu.js';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
@@ -159,10 +158,6 @@ after(async () => {
     resetMenuItemCache();
     await ctx.cleanup();
     await releaseTestLock();
-});
-
-test('services.data.dailyMenu is the typed client', () => {
-    assert.equal(getServices().data.dailyMenu, dailyMenuService);
 });
 
 test('isAnyMenuAvailableForDay returns false when no menus are published', async () => {

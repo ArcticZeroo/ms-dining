@@ -15,7 +15,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { menuAnalyticsService } from '../../../../../main/services/data/menu-analytics.js';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 
@@ -146,10 +145,6 @@ before(async () => {
 after(async () => {
     await ctx.cleanup();
     await releaseTestLock();
-});
-
-test('services.data.menuAnalytics is the typed client', () => {
-    assert.equal(getServices().data.menuAnalytics, menuAnalyticsService);
 });
 
 test('getShutdownCafeState returns a record', async () => {

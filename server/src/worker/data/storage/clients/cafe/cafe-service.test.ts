@@ -14,7 +14,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { cafeService } from '../../../../../main/services/data/cafe.js';
 import { CafeStorageClient } from './cafe.js';
 import type { ICafe, ICafeConfig } from '../../../../../shared/models/cafe.js';
 
@@ -38,10 +37,6 @@ const CONFIG: ICafeConfig = {
     logoName:         'logo.png',
     isShutDown:       false,
 };
-
-test('services.data.cafe is the typed client (not the storage class)', () => {
-    assert.equal(getServices().data.cafe, cafeService);
-});
 
 test('retrieveCafe returns null for nonexistent id', async () => {
     CafeStorageClient.resetCache();

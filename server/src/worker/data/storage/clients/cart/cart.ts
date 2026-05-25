@@ -1,10 +1,11 @@
-import { usePrismaClient, usePrismaTransaction } from '../../client.js';
+import { usePrismaTransaction } from '../../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { DailyMenuStorageClient } from '../daily-menu/daily-menu.js';
 import { toDateString } from '@msdining/common/util/date-util';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
 import { getShutdownCafeStateAsync } from '../../../cache/daily-cafe-state.js';
+import { getAvailableMenuItemIds } from '../../../cache/menu-item-availability.js';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import type {
     ICafeAvailability,
@@ -49,30 +50,6 @@ const CART_ITEM_INCLUDE = {
 } as const;
 
 export abstract class CartStorageClient {
-    private static async getAvailableMenuItemIds(menuItemIds: string[]): Promise<Set<string>> {
-        if (menuItemIds.length === 0) {
-            return new Set();
-        }
-
-        const todayString = toDateString(new Date());
-
-        const availableRows = await usePrismaClient(prisma => prisma.dailyMenuItem.findMany({
-            where: {
-                menuItemId: { in: menuItemIds },
-                category: {
-                    station: {
-                        dailyCafe: {
-                            dateString: todayString,
-                        },
-                    },
-                },
-            },
-            select: { menuItemId: true },
-            distinct: ['menuItemId'],
-        }));
-
-        return new Set(availableRows.map(r => r.menuItemId));
-    }
 
     private static async readRawCartData(tx: PrismaTransactionClient, userId: string) {
         const cart = await tx.cart.findUnique({
@@ -92,7 +69,7 @@ export abstract class CartStorageClient {
         const todayString = toDateString(new Date());
         const menuItemIds = rawItems.map(i => i.menuItemId);
         const [availableIds, ...menuItems] = await Promise.all([
-            this.getAvailableMenuItemIds(menuItemIds),
+            getAvailableMenuItemIds(todayString),
             ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
         ]);
 

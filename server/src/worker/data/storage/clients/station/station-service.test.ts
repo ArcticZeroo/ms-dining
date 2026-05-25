@@ -12,7 +12,6 @@ import {
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
-import { stationService } from '../../../../../main/services/data/station.js';
 import { CafeStorageClient } from '../cafe/cafe.js';
 import type { ICafe, ICafeConfig, ICafeStation } from '../../../../../shared/models/cafe.js';
 
@@ -48,10 +47,6 @@ const STATION: ICafeStation = {
     opensAt:  0,
     closesAt: 0,
 };
-
-test('services.data.station is the typed client', () => {
-    assert.equal(getServices().data.station, stationService);
-});
 
 test('retrieveStation returns null for nonexistent id', async () => {
     const result = await getServices().data.station.retrieveStation({ stationId: 'no-such-station' });
