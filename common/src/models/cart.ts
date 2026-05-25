@@ -61,14 +61,67 @@ export const CartItemRecordSchema = z.object({
 export type ICartItemRecord = z.output<typeof CartItemRecordSchema>;
 export type ICartItemRecordDTO = z.input<typeof CartItemRecordSchema>;
 
+// ─── Cafe availability ───────────────────────────────────────────────
+
+export interface ICafeHours {
+    opensAt: number;
+    closesAt: number;
+}
+
+const CafeHoursSchema = z.object({
+    opensAt:  z.number().int(),
+    closesAt: z.number().int(),
+});
+
+const CafeShutdownStateSchema = z.object({
+    message:     z.string().nullable(),
+    type:        z.enum(['full', 'online_ordering_only']),
+    isTemporary: z.boolean(),
+    resumeInfo:  z.string().optional(),
+});
+
+const CafeAvailabilityOpenSchema = z.object({
+    status: z.literal('open'),
+    hours:  CafeHoursSchema,
+});
+
+const CafeAvailabilityShutdownSchema = z.object({
+    status:   z.literal('shutdown'),
+    shutdown: CafeShutdownStateSchema,
+    hours:    CafeHoursSchema.optional(),
+});
+
+const CafeAvailabilityUnknownSchema = z.object({
+    status: z.literal('unknown'),
+});
+
+export const CafeAvailabilitySchema = z.discriminatedUnion('status', [
+    CafeAvailabilityOpenSchema,
+    CafeAvailabilityShutdownSchema,
+    CafeAvailabilityUnknownSchema,
+]);
+
+export type ICafeAvailability = z.infer<typeof CafeAvailabilitySchema>;
+
+// ─── Cart response ───────────────────────────────────────────────────
+
+export const CafeCartGroupSchema = z.object({
+    cafeId:       z.string(),
+    items:        z.array(CartItemRecordSchema),
+    availability: CafeAvailabilitySchema,
+});
+
+export type ICafeCartGroup = z.output<typeof CafeCartGroupSchema>;
+export type ICafeCartGroupDTO = z.input<typeof CafeCartGroupSchema>;
+
 export const CartResponseSchema = z.object({
-    items: z.array(CartItemRecordSchema),
+    cafes: z.array(CafeCartGroupSchema),
 });
 
 export interface ICartResponse {
-    items: ICartItemRecord[];
+    cafes: ICafeCartGroup[];
 }
 
 export interface ICartResponseDTO {
-    items: ICartItemRecordDTO[];
+    cafes: ICafeCartGroupDTO[];
 }

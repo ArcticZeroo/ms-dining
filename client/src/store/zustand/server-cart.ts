@@ -1,4 +1,4 @@
-import type { ICartItemRecord, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
+import type { ICafeCartGroup, ICartItemRecord, ICartItemUpdate, ICartResponse } from '@msdining/common/models/cart';
 import { create } from 'zustand';
 import { mutative } from 'zustand-mutative';
 import { useMemo } from 'react';
@@ -16,8 +16,12 @@ export interface IDisplayCartItem extends ICartItemRecord {
     isPending?: boolean;
 }
 
-interface IServerCartStore {
+interface IDisplayCafeCartGroup extends Omit<ICafeCartGroup, 'items'> {
     items: IDisplayCartItem[];
+}
+
+interface IServerCartStore {
+    cafes: IDisplayCafeCartGroup[];
 
     setFromServerResponse(response: ICartResponse): void;
     optimisticAddItem(item: IDisplayCartItem): void;
@@ -25,67 +29,70 @@ interface IServerCartStore {
 }
 
 export const useServerCartStore = create<IServerCartStore>()(mutative((set) => ({
-    items: [],
+    cafes: [],
 
     setFromServerResponse: (response) => set((state) => {
         // Server response replaces all items — pending items are dropped
-        state.items = response.items;
+        state.cafes = response.cafes;
     }),
 
     optimisticAddItem: (item) => set((state) => {
-        state.items.push(item);
+        const cafeId = item.menuItem.cafeId;
+        const cafe = state.cafes.find(group => group.cafeId === cafeId);
+
+        if (cafe) {
+            cafe.items.push(item);
+            return;
+        }
+
+        state.cafes.push({
+            cafeId,
+            items: [item],
+            availability: { status: 'unknown' },
+        });
     }),
 
     optimisticUpdateItem: (itemId, update) => set((state) => {
-        const item = state.items.find(i => i.id === itemId);
-        if (item) {
+        for (const cafe of state.cafes) {
+            const item = cafe.items.find(entry => entry.id === itemId);
+            if (!item) {
+                continue;
+            }
+
             item.quantity = update.quantity;
             item.specialInstructions = update.specialInstructions;
             item.modifiers = update.modifiers;
+            break;
         }
     }),
 })));
 
 // ─── Derived selectors ───────────────────────────────────────────────
 
-export const useServerCartItems = () => useServerCartStore(state => state.items);
+export const useServerCartItems = () => useServerCartStore(state =>
+    state.cafes.flatMap(cafe => cafe.items),
+);
 
 export const useServerCartItemCount = () => useServerCartStore(state =>
-    state.items.reduce((sum, item) => sum + item.quantity, 0),
+    state.cafes.reduce((sum, cafe) => sum + cafe.items.reduce((cafeSum, item) => cafeSum + item.quantity, 0), 0),
 );
 
 export const useServerCartHasAvailableItems = () => useServerCartStore(state =>
-    state.items.some(item => item.isAvailable),
+    state.cafes.some(cafe => cafe.items.some(item => item.isAvailable)),
 );
 
 export const useServerCartHasUnavailableItems = () => useServerCartStore(state =>
-    state.items.some(item => !item.isAvailable),
+    state.cafes.some(cafe => cafe.items.some(item => !item.isAvailable)),
 );
 
 export const useServerCartAvailableItems = () => {
-    const items = useServerCartStore(state => state.items);
+    const items = useServerCartItems();
     return useMemo(() => items.filter(item => item.isAvailable), [items]);
 };
 
 export const useServerCartUnavailableItems = () => {
-    const items = useServerCartStore(state => state.items);
+    const items = useServerCartItems();
     return useMemo(() => items.filter(item => !item.isAvailable), [items]);
 };
 
-/** Group cart items by cafeId for display. */
-export const useServerCartItemsByCafe = () => {
-    const items = useServerCartStore(state => state.items);
-    return useMemo(() => {
-        const byCafe = new Map<string, ICartItemRecord[]>();
-        for (const item of items) {
-            const cafeId = item.menuItem.cafeId;
-            const existing = byCafe.get(cafeId);
-            if (existing) {
-                existing.push(item);
-            } else {
-                byCafe.set(cafeId, [item]);
-            }
-        }
-        return byCafe;
-    }, [items]);
-};
+export const useServerCartItemsByCafe = () => useServerCartStore(state => state.cafes);

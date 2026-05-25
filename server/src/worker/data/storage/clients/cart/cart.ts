@@ -1,13 +1,17 @@
 import { usePrismaClient, usePrismaTransaction } from '../../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
+import { DailyMenuStorageClient } from '../daily-menu/daily-menu.js';
 import { toDateString } from '@msdining/common/util/date-util';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
+import { getShutdownCafeStateAsync } from '../../../cache/daily-cafe-state.js';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import type {
+    ICafeAvailability,
     ICartItemData,
     ICartItemRecord,
     ICartItemUpdate,
+    ICartResponse,
     ISerializedModifier,
 } from '@msdining/common/models/cart';
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
@@ -80,11 +84,12 @@ export abstract class CartStorageClient {
 
     private static async enrichCartResponse(
         rawItems: Awaited<ReturnType<typeof CartStorageClient.readRawCartData>>['items'],
-    ) {
+    ): Promise<ICartResponse> {
         if (rawItems.length === 0) {
-            return { items: [] };
+            return { cafes: [] };
         }
 
+        const todayString = toDateString(new Date());
         const menuItemIds = rawItems.map(i => i.menuItemId);
         const [availableIds, ...menuItems] = await Promise.all([
             this.getAvailableMenuItemIds(menuItemIds),
@@ -101,7 +106,50 @@ export abstract class CartStorageClient {
             items.push(toCartItemRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
         }
 
-        return { items };
+        if (items.length === 0) {
+            return { cafes: [] };
+        }
+
+        const itemsByCafeId = new Map<string, ICartItemRecord[]>();
+        for (const item of items) {
+            const cafeId = item.menuItem.cafeId;
+            const existing = itemsByCafeId.get(cafeId);
+            if (existing) {
+                existing.push(item);
+            } else {
+                itemsByCafeId.set(cafeId, [item]);
+            }
+        }
+
+        const cafeIds = [...itemsByCafeId.keys()];
+        const [shutdownCafeStates, ...hoursByCafe] = await Promise.all([
+            getShutdownCafeStateAsync(todayString),
+            ...cafeIds.map(cafeId => DailyMenuStorageClient.getCafeHoursForDate(cafeId, todayString)),
+        ]);
+
+        return {
+            cafes: cafeIds.map((cafeId, index) => {
+                const shutdown = shutdownCafeStates[cafeId];
+                const hours = hoursByCafe[index] ?? null;
+
+                let availability: ICafeAvailability;
+                if (shutdown !== undefined) {
+                    availability = hours !== null
+                        ? { status: 'shutdown', shutdown, hours }
+                        : { status: 'shutdown', shutdown };
+                } else if (hours !== null) {
+                    availability = { status: 'open', hours };
+                } else {
+                    availability = { status: 'unknown' };
+                }
+
+                return {
+                    cafeId,
+                    items: itemsByCafeId.get(cafeId)!,
+                    availability,
+                };
+            }),
+        };
     }
 
     private static readonly CART_WITH_ITEMS_INCLUDE = {

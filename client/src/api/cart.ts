@@ -10,8 +10,10 @@ const CART_BASE = '/api/dining/cart';
 const fetchCart = async (path: string, options?: RequestInit): Promise<ICartResponse> => {
     const cart = await makeJsonRequestWithSchema({ path, schema: CartResponseSchema, options });
     if (DebugSettings.forceAllowOnlineOrdering.value) {
-        for (const item of cart.items) {
-            item.isAvailable = true;
+        for (const cafe of cart.cafes) {
+            for (const item of cafe.items) {
+                item.isAvailable = true;
+            }
         }
     }
     return cart;

@@ -12,5 +12,9 @@ export const serializeCartItem = (item: ICartItemRecord): ICartItemRecordDTO => 
 });
 
 export const serializeCartResponse = (cart: ICartResponse): ICartResponseDTO => ({
-    items: cart.items.map(serializeCartItem),
+    cafes: cart.cafes.map(group => ({
+        cafeId:       group.cafeId,
+        items:        group.items.map(serializeCartItem),
+        availability: group.availability,
+    })),
 });

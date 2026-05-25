@@ -29,15 +29,15 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showTotal
         () => {
             const groupedByView = new Map<CafeView, ICartItemRecord[]>();
 
-            for (const [cafeId, items] of cartItemsByCafe) {
-                const cafeView = viewsById.get(cafeId);
+            for (const group of cartItemsByCafe) {
+                const cafeView = viewsById.get(group.cafeId);
 
                 if (cafeView == null) {
-                    console.error('Could not get view for cafe id', cafeId);
+                    console.error('Could not get view for cafe id', group.cafeId);
                     continue;
                 }
 
-                groupedByView.set(cafeView, [...items]);
+                groupedByView.set(cafeView, [...group.items]);
             }
 
             return groupedByView;
