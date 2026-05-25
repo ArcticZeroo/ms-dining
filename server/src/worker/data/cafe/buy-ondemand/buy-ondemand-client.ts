@@ -40,9 +40,10 @@ export interface BuyOnDemandClientOptions {
     enableHar?: boolean;
     /**
      * On failed BoD responses with a `{ message: <code> }` body, translate the
-     * code via the locale-aware i18n cache and throw a `BuyOnDemandError`
-     * carrying the user-facing message. When false (the default), failures
-     * still throw, but as the legacy generic `"Response failed with status: X"`.
+     * code via the locale-aware i18n cache and throw a
+     * `ServiceError(UPSTREAM_FAIL)` carrying the user-facing message. When
+     * false (the default), failures still throw, but as the legacy generic
+     * `"Response failed with status: X"`.
      */
     translateErrors?: boolean;
 }
@@ -207,7 +208,7 @@ export class BuyOnDemandClient {
      * TestBuyOnDemandClient. Reads the body once (if needed for translation)
      * and either:
      *  - returns silently (response.ok or shouldValidateSuccess=false)
-     *  - throws BuyOnDemandError for translatable BoD error bodies
+     *  - throws ServiceError(UPSTREAM_FAIL) for translatable BoD error bodies
      *  - throws a generic Error (with body for debugging) otherwise.
      */
     protected async _validateResponse(
@@ -222,7 +223,7 @@ export class BuyOnDemandClient {
 
         if (this.#translateErrors) {
             const text = bodyText ?? await response.text();
-            await maybeThrowBuyOnDemandError(this, response.status, text);
+            await maybeThrowBuyOnDemandError(this, text);
             throw new Error(
                 `{${this.cafe.name}} BoD request to ${path} failed (${response.status}): ${text}`,
             );

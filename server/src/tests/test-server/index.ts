@@ -366,8 +366,8 @@ export class TestBuyOnDemandServer {
     /**
      * Inject a BoD-shape error response for one or more requests. Builds a
      * `{ statusCode, error, message: <code> }` JSON body with the right
-     * content-type so the production `BuyOnDemandError` translation path
-     * exercises end-to-end.
+     * content-type so the production `ServiceError(UPSTREAM_FAIL)` translation
+     * path exercises end-to-end.
      */
     injectBoDError(opts: {
         /** Path matcher; can be a substring or a regex (regex strongly preferred). */

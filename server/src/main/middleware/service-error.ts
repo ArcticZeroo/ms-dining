@@ -40,6 +40,8 @@ export const serviceErrorMiddleware: Middleware = async (ctx, next) => {
             // expected control flow and don't need a log line.
             if (err.code === 'INTERNAL') {
                 logError(`Unhandled ServiceError on ${ctx.method} ${ctx.path}:`, err);
+            } else if (err.code === 'UPSTREAM_FAIL') {
+                logError(`Upstream failure on ${ctx.method} ${ctx.path}: ${err.message}`);
             }
             ctx.status = status;
             ctx.type = 'application/json';

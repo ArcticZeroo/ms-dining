@@ -71,8 +71,8 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
         const response = testResponseToNodeFetchResponse(testResponse);
 
         // Delegate to the shared validation path so tests exercise the real
-        // BuyOnDemandError translation flow (and the legacy generic-error
-        // fallback) just like production.
+        // ServiceError(UPSTREAM_FAIL) translation flow (and the legacy generic-
+        // error fallback) just like production.
         await this._validateResponse(response, path, shouldValidateSuccess);
 
         return response;

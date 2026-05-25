@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { ServiceError, ServiceErrorCode, SERVICE_ERROR_CODES } from './errors.js';
-import { BuyOnDemandError } from '../data/cafe/buy-ondemand/buy-ondemand-error.js';
 
 /**
  * Wire format for a ServiceError crossing a worker (or process) boundary.
@@ -36,16 +35,6 @@ export type ServiceErrorWire = z.infer<typeof ServiceErrorWireSchema>;
  * they want to expose the underlying message.
  */
 export const toWire = (err: unknown): ServiceErrorWire => {
-    if (err instanceof BuyOnDemandError) {
-        return {
-            kind:    'ServiceError',
-            code:    SERVICE_ERROR_CODES.INTERNAL,
-            message: err.message,
-            details: { buyOnDemand: { rawCode: err.rawCode, userMessage: err.userMessage, httpStatus: err.httpStatus } },
-            stack:   err.stack,
-        };
-    }
-
     if (err instanceof ServiceError) {
         return {
             kind:    'ServiceError',
@@ -81,17 +70,7 @@ export const toWire = (err: unknown): ServiceErrorWire => {
  * If you're unsure whether the payload is well-formed, use
  * {@link parseServiceErrorWire} which validates and reconstructs in one call.
  */
-export const fromWire = (wire: ServiceErrorWire): ServiceError | BuyOnDemandError => {
-    // Reconstruct BuyOnDemandError if the details carry the marker
-    const bod = wire.details as { buyOnDemand?: { rawCode: string; userMessage: string; httpStatus: number } } | undefined;
-    if (bod?.buyOnDemand) {
-        const error = new BuyOnDemandError(bod.buyOnDemand.rawCode, bod.buyOnDemand.userMessage, bod.buyOnDemand.httpStatus);
-        if (wire.stack) {
-            error.stack = wire.stack;
-        }
-        return error;
-    }
-
+export const fromWire = (wire: ServiceErrorWire): ServiceError => {
     const error = new ServiceError(wire.code, wire.message, wire.details);
     if (wire.stack) {
         error.stack = wire.stack;
@@ -105,7 +84,7 @@ export const fromWire = (wire: ServiceErrorWire): ServiceError | BuyOnDemandErro
  * callers can then surface a generic transport-level error instead of
  * forwarding a malformed payload.
  */
-export const parseServiceErrorWire = (value: unknown): ServiceError | BuyOnDemandError | null => {
+export const parseServiceErrorWire = (value: unknown): ServiceError | null => {
     const result = ServiceErrorWireSchema.safeParse(value);
     if (!result.success) {
         return null;

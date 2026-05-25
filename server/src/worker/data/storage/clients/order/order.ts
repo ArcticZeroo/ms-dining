@@ -79,12 +79,6 @@ export abstract class OrderStorageClient {
 		return pendingOrder;
 	}
 
-	static async deletePendingOrder(pendingOrderId: string): Promise<void> {
-		await usePrismaWrite(prisma => prisma.pendingCafeOrder.deleteMany({
-			where: { id: pendingOrderId },
-		}));
-	}
-
 	/**
 	 * Atomically: verifies ownership, creates CafeOrder from pending order,
 	 * deducts matching items from the user's cart, and deletes the pending order.

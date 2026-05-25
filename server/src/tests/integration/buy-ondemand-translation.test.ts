@@ -4,7 +4,8 @@
  * Verifies that when a BoD request fails with a JSON `{ message: <code> }`
  * body, our `BuyOnDemandClient` (constructed with `translateErrors: true`)
  * fetches the i18n map from /api/translation/..., looks up the code, and
- * throws a `BuyOnDemandError` carrying the translated user-facing message.
+ * throws a `ServiceError(UPSTREAM_FAIL)` carrying the translated user-facing
+ * message.
  *
  * Most cases drive the BoD client directly to keep the tests focused on the
  * translation pipeline. The end-to-end case at the bottom drives the full
@@ -19,8 +20,8 @@ import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
 import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
 import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
-import { BuyOnDemandError } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-error.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../worker/rpc/errors.js';
 import { createBuyOnDemandClient } from '../../main/services/registry.js';
 import {
     createIntegrationTestContext,
@@ -109,13 +110,8 @@ test('translates a real BoD error code (CONCEPTS_NOT_AVAILABLE) via the default 
         () => client.requestAsync(`/order/t/c/orderId/abc/processPaymentAndClosedOrder`, { method: 'POST' }),
     );
 
-    assert.ok(err instanceof BuyOnDemandError, `expected BuyOnDemandError, got ${err?.constructor?.name}: ${err}`);
-    assert.equal(err.rawCode, 'CONCEPTS_NOT_AVAILABLE');
-    assert.equal(err.httpStatus, 400);
-    assert.match(err.userMessage, /Order cannot be processed/i);
-    // super(userMessage) — `.message` is the translated string so generic
-    // logging surfaces useful info without callers needing to know the type.
-    assert.equal(err.message, err.userMessage);
+    assert.ok(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL, `expected ServiceError(UPSTREAM_FAIL), got ${err?.constructor?.name}: ${err}`);
+    assert.match(err.message, /Order cannot be processed/i);
 });
 
 test('translates a custom code seeded via setTranslation', async () => {
@@ -134,10 +130,8 @@ test('translates a custom code seeded via setTranslation', async () => {
         () => client.requestAsync(`/order/t/c/orders`, { method: 'POST' }),
     );
 
-    assert.ok(err instanceof BuyOnDemandError);
-    assert.equal(err.rawCode, 'SOMETHING_BROKE');
-    assert.equal(err.httpStatus, 409);
-    assert.equal(err.userMessage, 'Something specific broke for the test.');
+    assert.ok(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL);
+    assert.equal(err.message, 'Something specific broke for the test.');
 });
 
 test('translation persists across multiple requests on the same client (cache works)', async () => {
@@ -187,12 +181,8 @@ test('falls back to the raw code when translation fetch fails', async () => {
         () => client.requestAsync(`/order/t/c/orderId/abc/processPaymentAndClosedOrder`, { method: 'POST' }),
     );
 
-    assert.ok(err instanceof BuyOnDemandError, `expected BuyOnDemandError, got ${err}`);
-    assert.equal(err.rawCode, 'OBSCURE_CODE');
-    // No translation map available → user message degrades to the raw code,
-    // strictly better than failing the whole request when ordering already
-    // hit an upstream error.
-    assert.equal(err.userMessage, 'OBSCURE_CODE');
+    assert.ok(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL, `expected ServiceError(UPSTREAM_FAIL), got ${err}`);
+    assert.equal(err.message, 'OBSCURE_CODE');
 });
 
 test('translation map miss surfaces the raw code as the user message', async () => {
@@ -209,12 +199,11 @@ test('translation map miss surfaces the raw code as the user message', async () 
         () => client.requestAsync(`/order/t/c/orders`, { method: 'POST' }),
     );
 
-    assert.ok(err instanceof BuyOnDemandError);
-    assert.equal(err.rawCode, 'CODE_NOT_IN_FIXTURE');
-    assert.equal(err.userMessage, 'CODE_NOT_IN_FIXTURE');
+    assert.ok(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL);
+    assert.equal(err.message, 'CODE_NOT_IN_FIXTURE');
 });
 
-test('non-translatable response body (not BoD-shape) does NOT become a BuyOnDemandError', async () => {
+test('non-translatable response body (not BoD-shape) does NOT become a ServiceError(UPSTREAM_FAIL)', async () => {
     ctx.server.injectFailure({
         method:      'POST',
         pathPattern: /\/orders$/,
@@ -229,7 +218,7 @@ test('non-translatable response body (not BoD-shape) does NOT become a BuyOnDema
         () => client.requestAsync(`/order/t/c/orders`, { method: 'POST' }),
     );
 
-    assert.ok(!(err instanceof BuyOnDemandError), 'should be a plain Error, not BuyOnDemandError');
+    assert.ok(!(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL), 'should be a plain Error, not ServiceError(UPSTREAM_FAIL)');
     assert.match(err.message, /failed \(500\)/);
     assert.match(err.message, /upstream proxy 502/);
 });
@@ -249,7 +238,7 @@ test('JSON body without a `message` field falls through to the generic error', a
         () => client.requestAsync(`/order/t/c/orders`, { method: 'POST' }),
     );
 
-    assert.ok(!(err instanceof BuyOnDemandError));
+    assert.ok(!(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL));
     assert.match(err.message, /failed \(400\)/);
 });
 
@@ -266,7 +255,7 @@ test('translateErrors:false (default) preserves the legacy generic error', async
         () => client.requestAsync(`/order/t/c/orders`, { method: 'POST' }),
     );
 
-    assert.ok(!(err instanceof BuyOnDemandError));
+    assert.ok(!(err instanceof ServiceError && err.code === SERVICE_ERROR_CODES.UPSTREAM_FAIL));
     assert.match(err.message, /Response failed with status: 400/);
 });
 
@@ -302,9 +291,9 @@ test('webserver: order failure surfaces as 502 with translated message + code', 
         body:    JSON.stringify(payload),
     });
 
-    assert.equal(res.status, 502, `expected 502 from BoD-error mapping middleware, got ${res.status}`);
+    assert.equal(res.status, 502, `expected 502 from service error middleware, got ${res.status}`);
     const body = await res.json() as { message: string; code: string };
-    assert.equal(body.code, 'STATION_GONE');
+    assert.equal(body.code, 'UPSTREAM_FAIL');
     assert.equal(body.message, 'That station is no longer available.');
 });
 
