@@ -138,6 +138,7 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
     readonly #filePath: URL;
     readonly #services: TServices | undefined;
     readonly #pendingRequests = new Map<string, PendingRequest>();
+    readonly #isReceiver: boolean;
     #worker: Worker | undefined;
     #unhandledMessageHandler: ((message: unknown) => boolean) | undefined;
 
@@ -152,7 +153,13 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         this.#filePath = filePath;
         this.#services = services;
 
-        if (!isMainThread && workerData?.__handlerEntryUrl === filePath.href) {
+        // Register as a receiver only when this handler's filePath matches
+        // the entry URL that spawned this worker. Other WorkerThreadHandler
+        // instances imported as dependencies (e.g. search/thumbnail handlers
+        // inside the data worker) are spawners, not receivers.
+        this.#isReceiver = !isMainThread && workerData?.__handlerEntryUrl === filePath.href;
+
+        if (this.#isReceiver) {
             if (services == null) {
                 throw new Error('WorkerThreadHandler requires services when constructed inside a worker thread');
             }
@@ -162,7 +169,7 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
     }
 
     start(): void {
-        if (!isMainThread) {
+        if (this.#isReceiver) {
             return;
         }
 
@@ -174,8 +181,8 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         methodName: M,
         ...rest: SendRequestTail<RequestData<TServices, S, M>>
     ): Promise<ResponseData<TServices, S, M>> {
-        if (!isMainThread) {
-            throw new Error('Cannot send requests from inside the worker thread');
+        if (this.#isReceiver) {
+            throw new Error('Cannot send requests on the receiver side of a WorkerThreadHandler');
         }
 
         const data = rest[0];
