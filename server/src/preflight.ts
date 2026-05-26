@@ -30,7 +30,6 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as dotenv from 'dotenv';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
 import { resolveDatabaseUrl } from './shared/util/database-url.js';
 
@@ -100,11 +99,7 @@ async function main(): Promise<void> {
     }
 
     const resolvedUrl = resolveDatabaseUrl(databaseUrl);
-    const adapter = new PrismaLibSql(
-        { url: resolvedUrl },
-        { timestampFormat: 'unixepoch-ms' },
-    );
-    const prisma = new PrismaClient({ adapter });
+    const prisma = new PrismaClient({ datasourceUrl: resolvedUrl });
 
     let counts: Record<string, number> = {};
     let readErr: unknown;

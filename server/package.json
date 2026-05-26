@@ -30,7 +30,7 @@
     "@frozor/lock": "^1.0.0",
     "@koa/router": "^12.0.0",
     "@libsql/client": "^0.17.3",
-    "@prisma/adapter-libsql": "^7.8.0",
+    "@prisma/adapter-libsql": "^6.19.3",
     "@prisma/client": "^6.19.3",
     "@types/hat": "^0.0.4",
     "@types/koa-json": "^2.0.20",

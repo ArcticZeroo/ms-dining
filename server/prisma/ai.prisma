@@ -1,4 +1,4 @@
 model StationTheme {
-  itemHash String @id
+  itemHash String @id @unique
   theme    String
 }

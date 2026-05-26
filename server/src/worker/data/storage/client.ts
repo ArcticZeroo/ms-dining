@@ -1,4 +1,3 @@
-import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
 import { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../../shared/models/prisma.js';
 import { ENVIRONMENT_SETTINGS } from '../../../shared/util/env.js';
@@ -44,24 +43,12 @@ const PRISMA_TRANSACTION_TIMEOUT_MS = 30_000;
 // is always tuned correctly. Queued behind a `READY` promise so the first
 // caller waits for tuning to finish before issuing real work.
 
-// We pass the URL through the libsql adapter explicitly (rather than letting
-// Prisma's bundled dotenv pick up process.env on import) so the snapshot
-// taken at module-load time doesn't leak into integration tests that set
-// DATABASE_URL after import.
-//
-// `timestampFormat: 'unixepoch-ms'` preserves backward compatibility with
-// the existing production database, whose DateTime columns were stored as
-// unix epoch milliseconds by Prisma's native sqlite driver. The libsql
-// adapter defaults to ISO 8601 strings; we override here to avoid reading
-// old data as garbage.
+// datasourceUrl is passed explicitly (rather than letting Prisma's bundled
+// dotenv pick up process.env on import) so the snapshot taken at module-load
+// time doesn't leak into integration tests that set DATABASE_URL after import.
 const PRISMA_CLIENT = lazy(() => {
     const databaseUrl = resolveDatabaseUrl(requireEnvironmentVariable('DATABASE_URL'));
-
-    const adapter = new PrismaLibSql(
-        { url: databaseUrl },
-        { timestampFormat: 'unixepoch-ms' },
-    );
-    return new PrismaClient({ adapter });
+    return new PrismaClient({ datasourceUrl: databaseUrl });
 });
 
 const READY = lazyAsync(async () => {

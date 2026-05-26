@@ -1,4 +1,4 @@
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -93,7 +93,7 @@ const main = async (): Promise<void> => {
                     const runs: RunResult[] = [];
                     for (let r = 0; r < config.repeats; r++) {
                         const copied = copyDatabase(config.sourceDb);
-                        const adapter = new PrismaLibSql(
+                        const adapter = new PrismaLibSQL(
                             { url: copied.url },
                             { timestampFormat: 'unixepoch-ms' },
                         );
