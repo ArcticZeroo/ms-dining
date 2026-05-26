@@ -115,8 +115,15 @@ export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl }:
 			await session.prepareForIframe(iframeCssUrl);
 		}
 
-		return session;
+		return session!;
 	});
+
+	if (!session) {
+		throw new ServiceError(
+			SERVICE_ERROR_CODES.INTERNAL,
+			'Failed to create order session',
+		);
+	}
 
 	return [pendingOrderId, session];
 }
