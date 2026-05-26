@@ -16,6 +16,7 @@ import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { phone } from 'phone';
 import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
 import { completeOrder, getPaymentSession, ORDER_SESSION_TTL_MS } from './order-session-manager.js';
+import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from './order-telemetry.js';
 
 const orderLog = getNamespaceLogger('Order');
 
@@ -55,7 +56,8 @@ const toCompletionFinancials = (
 	};
 };
 
-const shouldTreatAsPostCloseFailure = (session: IOrderSession) => session.lastCompletedStage === SubmitOrderStage.closeOrder
+const wasOrderSentToKitchen = (session: IOrderSession) =>
+	session.lastCompletedStage === SubmitOrderStage.closeOrder
 	|| session.lastCompletedStage === SubmitOrderStage.sendTextReceipt
 	|| session.lastCompletedStage === SubmitOrderStage.complete;
 
@@ -113,11 +115,12 @@ export abstract class OrderOrchestrator {
 					cardInfo,
 				});
 			} catch (err) {
-				if (!shouldTreatAsPostCloseFailure(session)) {
+				if (!wasOrderSentToKitchen(session)) {
+					trackPreKitchenFailure(pendingOrderId, session.lastCompletedStage, err);
 					throw err;
 				}
 
-				orderLog.error('Post-close failure (order already placed):', err);
+				trackPostCloseRecovery(pendingOrderId, session.lastCompletedStage, err);
 				waitTime = await getWaitTimeForSession(session).catch(waitErr => {
 					orderLog.error(`Failed to fetch fallback wait time for pending order ${pendingOrderId}:`, waitErr);
 					return { minTime: 0, maxTime: 0 };
@@ -128,8 +131,7 @@ export abstract class OrderOrchestrator {
 			try {
 				await OrderStorageClient.createCompletedOrder(pendingOrderId, userId, financials);
 			} catch (err) {
-				// Failing to create the order in DB is bad, but the order has already been sent to cafe, so we need to tell the user about it.
-				orderLog.error(`Failed to create completed order for pending order ${pendingOrderId}:`, err);
+				trackDbPersistFailed(pendingOrderId, financials.buyOnDemandOrderNumber, err);
 			}
 			orderLog.info(`Order completed — orderNumber: ${financials.buyOnDemandOrderNumber}`);
 

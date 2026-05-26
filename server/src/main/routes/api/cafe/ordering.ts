@@ -7,6 +7,8 @@ import { getServices } from '../../../../shared/services/registry.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
+import { setTelemetryProperties } from '../../../middleware/telemetry.js';
+import { executeTrackedOrderStep } from '../../../../worker/data/ordering/order-telemetry.js';
 
 const PreparePaymentSchema = z.object({
     items: z.array(OrderItemSchema).min(1),
@@ -36,13 +38,18 @@ export const registerOrderingRoutes = (parent: Router) => {
         const body = PreparePaymentSchema.parse(ctx.request.body);
         const iframeCssUrl = `${isDev ? ctx.origin : webserverHost}/iframe.css`;
 
-        const result = await getServices().data.order.preparePayment({
-            userId,
-            cafeId,
-            items: body.items,
-            iframeCssUrl,
+        setTelemetryProperties(ctx, { cafeId, itemCount: String(body.items.length) });
+
+        const result = await executeTrackedOrderStep({
+            name:       'prepare',
+            properties: { cafeId, userId, itemCount: String(body.items.length) },
+            execute:    () => getServices().data.order.preparePayment({ userId, cafeId, items: body.items, iframeCssUrl }),
+            completedProperties: (result) => ({ pendingOrderId: result.pendingOrderId }),
+            durationMetric:           'prepare.durationMs',
+            durationMetricProperties: { cafeId },
         });
 
+        setTelemetryProperties(ctx, { pendingOrderId: result.pendingOrderId });
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
@@ -51,13 +58,21 @@ export const registerOrderingRoutes = (parent: Router) => {
         const pendingOrderId = ctx.params.pendingOrderId!;
         const body = CompleteOrderSchema.parse(ctx.request.body);
 
-        const result = await getServices().data.order.completeOrder({
-            userId,
-            pendingOrderId,
-            paymentToken:               body.paymentToken,
-            cardInfo:                   body.cardInfo,
-            alias:                      body.alias,
-            phoneNumberWithCountryCode: body.phoneNumber,
+        setTelemetryProperties(ctx, { pendingOrderId });
+
+        const result = await executeTrackedOrderStep({
+            name:       'complete',
+            properties: { pendingOrderId, userId },
+            execute:    () => getServices().data.order.completeOrder({
+                userId,
+                pendingOrderId,
+                paymentToken:               body.paymentToken,
+                cardInfo:                   body.cardInfo,
+                alias:                      body.alias,
+                phoneNumberWithCountryCode: body.phoneNumber,
+            }),
+            completedProperties: (result) => ({ orderNumber: String(result.buyOnDemandOrderNumber) }),
+            durationMetric:      'complete.durationMs',
         });
 
         ctx.body = jsonStringifyWithoutNull(result);

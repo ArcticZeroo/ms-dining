@@ -9,6 +9,7 @@ import { getTodayDateString } from '@msdining/common/util/date-util';
 import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { ICompleteOrderResultDTO, IOrderItem } from '@msdining/common/models/order';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
+import { trackOrderEvent } from './order-telemetry.js';
 
 export const ORDER_SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
@@ -21,6 +22,12 @@ const orderLog = getNamespaceLogger('OrderSessions');
 const refreshSessionToken = (pendingOrderId: string, liveSession: IOrderSession) => {
 	const todayDateString = getTodayDateString();
 	if (liveSession.createdDateString !== todayDateString) {
+		trackOrderEvent('session.evicted', {
+			pendingOrderId,
+			reason:      'staleDate',
+			createdDate: liveSession.createdDateString,
+			today:       todayDateString,
+		});
 		orderLog.info(`Evicting stale session ${pendingOrderId} (created ${liveSession.createdDateString}, today is ${todayDateString})`);
 		return ACTIVE_ORDER_SESSIONS.delete(pendingOrderId);
 	}
@@ -46,6 +53,10 @@ setInterval(() => {
 	OrderStorageClient.removeOrphanedPendingOrders(liveSessionIds)
 		.then(removedCount => {
 			if (removedCount > 0) {
+				trackOrderEvent('orphans.cleanup', {
+					removedCount: String(removedCount),
+					liveCount:    String(liveSessionIds.length),
+				});
 				orderLog.info(`Cleaned up ${removedCount} orphaned pending order(s)`);
 			}
 		})
