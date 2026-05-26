@@ -5,11 +5,12 @@ import { computeMenuHash, IMenuRoleRow, getIngredientsMenuByHash, setRolesForMen
 import { categorizeIngredientsMenu } from '../cafe/ingredients/ai-categorizer.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { logInfo } from '../../../shared/util/log.js';
+import { MenuDateLockedMap } from '../../../shared/lock/menu-date-map.js';
 
 const INGREDIENTS_CAFE_ID = 'in-gredients';
 
 // Cache keyed by dateString — pre-populated on menu publish, so route requests don't re-hash
-const INGREDIENTS_MENU_CACHE = new LockedMap<string /*dateString*/, IIngredientsMenuDTO>();
+const INGREDIENTS_MENU_CACHE = new MenuDateLockedMap<IIngredientsMenuDTO>();
 
 const ROLE_TO_DTO_KEY: Record<string, keyof Pick<IIngredientsMenuDTO, 'starterChoiceIds' | 'entreeChoiceIds' | 'dessertChoiceIds' | 'drinkChoiceIds' | 'sideChoiceIds' | 'otherItemIds'>> = {
     STARTER: 'starterChoiceIds',

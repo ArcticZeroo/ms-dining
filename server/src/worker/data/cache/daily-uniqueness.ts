@@ -21,8 +21,9 @@ import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js
 import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
+import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
 
-const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, Map<string /*dateString*/, ICafeWeeklyUniqueness>>();
+const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, MenuDateMap<ICafeWeeklyUniqueness>>();
 
 interface ICafeWeeklyUniqueness {
     uniquenessByStation: Map<string /*stationName*/, IStationUniquenessData>;
@@ -287,12 +288,6 @@ const cleanOldUniquenessData = async () => {
         await UNIQUENESS_DATA.update(cafeId, (cafeData) => {
             if (!cafeData) {
                 return undefined;
-            }
-
-            for (const dateString of cafeData.keys()) {
-                if (!isDateStringWithinMenuWindow(dateString)) {
-                    cafeData.delete(dateString);
-                }
             }
 
             return cafeData.size > 0 ? cafeData : undefined;

@@ -340,11 +340,7 @@ export abstract class DailyMenuStorageClient {
 		return new Set(stations.map(station => station.cafeId));
 	}
 
-	/**
-	 * Returns all distinct menu item IDs that appear on a given date,
-	 * across all cafes. Single query — no per-cafe fan-out.
-	 */
-	public static async getAllMenuItemIdsForDate(dateString: string): Promise<string[]> {
+	public static async getAllMenuItemIdsForDate(dateString: string): Promise<Set<string>> {
 		const rows = await usePrismaClient(prisma => prisma.dailyMenuItem.findMany({
 			where: {
 				category: {
@@ -357,7 +353,7 @@ export abstract class DailyMenuStorageClient {
 			distinct: ['menuItemId'],
 		}));
 
-		return rows.map(r => r.menuItemId);
+		return new Set(rows.map(row => row.menuItemId));
 	}
 
 	public static async isAnyAllowedMenuAvailableForCafe(cafeId: string): Promise<boolean> {

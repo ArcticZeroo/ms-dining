@@ -4,8 +4,7 @@ import {
 	IRecommendationSection,
 	RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
-import { setInterval } from 'node:timers';
-import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../shared/util/date.js';
+import { canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { getNamespaceLogger, logError } from '../../../shared/util/log.js';
 import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { getNewAtCafe } from '../recommendations/signals/cafe-specific/new-items.js';
@@ -24,15 +23,15 @@ import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
 import { CACHE_EVENTS } from '../storage/events.js';
 import { IServerReview } from '../../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
+import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
 
 const logger = getNamespaceLogger('recommendations');
 
 const RECOMMENDATIONS_SEMAPHORE = new Semaphore(2);
-const GLOBAL_RECOMMENDATION_SECTIONS_CACHE = new Map<string /*dateString*/, LockedExpiringMap<string /*cafeId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
-const USER_RECOMMENDATION_SECTIONS_CACHE = new Map<string /*dateString*/, LockedExpiringMap<string /*userId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
+const GLOBAL_RECOMMENDATION_SECTIONS_CACHE = new MenuDateMap<LockedExpiringMap<string /*cafeId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
+const USER_RECOMMENDATION_SECTIONS_CACHE = new MenuDateMap<LockedExpiringMap<string /*userId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
 
 const RECOMMENDATIONS_CACHE_EXPIRATION = new Duration({ hours: 12 });
-const RECOMMENDATIONS_CACHE_CLEANUP_INTERVAL = new Duration({ hours: 12 });
 
 const ensureGlobalCacheForDateString = (dateString: string) => {
 	if (!GLOBAL_RECOMMENDATION_SECTIONS_CACHE.has(dateString)) {
@@ -209,20 +208,6 @@ export const getRecommendationsAsync = async ({
 		itemWeights: itemWeights.size > 0 ? itemWeights : null,
 	});
 };
-
-setInterval(() => {
-	for (const dateString of GLOBAL_RECOMMENDATION_SECTIONS_CACHE.keys()) {
-		if (!isDateStringWithinMenuWindow(dateString)) {
-			GLOBAL_RECOMMENDATION_SECTIONS_CACHE.delete(dateString);
-		}
-	}
-
-	for (const dateString of USER_RECOMMENDATION_SECTIONS_CACHE.keys()) {
-		if (!isDateStringWithinMenuWindow(dateString)) {
-			USER_RECOMMENDATION_SECTIONS_CACHE.delete(dateString);
-		}
-	}
-}, RECOMMENDATIONS_CACHE_CLEANUP_INTERVAL.inMilliseconds);
 
 const seedCafeRecommendationsForDate = (dateString: string, cafeId: string) => {
 	const context = buildContext({
