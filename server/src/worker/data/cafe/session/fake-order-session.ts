@@ -57,6 +57,10 @@ export class FakeCafeOrderSession implements IOrderSession {
         return this.#lastCompletedStage;
     }
 
+    get isReadyForPayment() {
+        return true;
+    }
+
     get cardProcessorToken() {
         return this.#cardProcessorToken;
     }

@@ -18,6 +18,7 @@ export interface IOrderSession {
     readonly cardProcessorToken: string;
     readonly rawCartItemsForWaitTime: readonly unknown[];
     readonly createdDateString: string;
+    readonly isReadyForPayment: boolean;
 
     populateCart(): Promise<void>;
     prepareForIframe(iframeCssUrl: string): Promise<unknown>;

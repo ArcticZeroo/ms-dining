@@ -284,6 +284,11 @@ export class CafeOrderSession implements IOrderSession {
         return this.#lastCompletedStage;
     }
 
+    get isReadyForPayment() {
+        return this.createdDateString === getTodayDateString()
+            && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
+    }
+
     public get orderNumber() {
         return this.#orderNumber;
     }
@@ -923,7 +928,7 @@ export class CafeOrderSession implements IOrderSession {
             storeName:         this.client.config.externalName,
         });
         const browserStoreInfoOptions = asRecord(browserStoreInfo.storeInfoOptions) ?? {};
-        const taxAmountValue = fixed(this.orderTotalTax, 2);
+        const taxAmountValue = fixed(this.orderTotalTax, 2).toFixed(2);
         const taxClassList = this.orderTotalTax > 0
             ? [{ amount: `$${taxAmountValue}`, amountValue: taxAmountValue }]
             : [];
