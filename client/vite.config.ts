@@ -33,6 +33,9 @@ export default defineConfig(({ mode }) => ({
             template: 'treemap',
         }) as PluginOption,
     ],
+    resolve: {
+        dedupe: ['zod'],
+    },
     server:  {
         proxy: {
             '/api':    defaultLocalProxy,
