@@ -111,3 +111,5 @@ export const getViewMarkerDisplay = (view: CafeView): IViewMarkerDisplayData => 
 export const getViewPrimaryCafe = (view: CafeView): ICafe | undefined => view.type === CafeViewType.single
     ? view.value
     : view.value.members.find(member => member.name === view.value.name);
+
+export const getViewMemberCount = (view: CafeView): number => view.type === CafeViewType.group ? view.value.members.length : 1;
