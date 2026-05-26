@@ -6,3 +6,4 @@ static/menu-items/thumbnail
 .env
 *.csv
 har-captures/
+profiles/

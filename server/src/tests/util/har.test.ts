@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildHarEntry, HarCapture } from '../../util/har.js';
+import { buildHarEntry, HarCapture } from '../../shared/util/har.js';
 
 // 35b84c6: response.clone() tees the underlying ReadableStream and requires
 // BOTH branches to be consumed before data flows. When HAR capture cloned

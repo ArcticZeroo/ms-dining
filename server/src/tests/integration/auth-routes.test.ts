@@ -3,19 +3,18 @@
  * silently, when its environment is misconfigured.
  *
  * Three scenarios:
- *   1. `SESSION_SECRET` unset → importing `app.ts` throws at module init.
- *   2. Auth env vars unset (but session secret present) → `app.ts` loads
- *      successfully but auth routes (`/api/auth/microsoft/login`, etc.)
- *      are not registered, so requests hit the API catch-all 404.
+ *   1. `SESSION_SECRET` unset → `createApp(...)` throws.
+ *   2. Auth env vars unset (but session secret present) → `createApp(...)`
+ *      builds the app successfully but auth routes (`/api/auth/microsoft/login`,
+ *      etc.) are not registered, so requests hit the API catch-all 404.
  *   3. With all auth env vars set, `/api/auth/me` IS registered and
  *      enforces auth (401 when unauthenticated). The route must not be
  *      cached as a public, shareable response.
  *
- * Scenarios 1 and 2 run in subprocesses because `app.ts` reads its env
- * variables at module-init time and the ES module registry caches the
- * result for the life of the process. Scenario 3 uses the regular
- * integration context, but takes care to set AUTH env vars BEFORE
- * `app.ts` is first imported (which happens lazily inside startWebserver).
+ * Scenarios 1 and 2 run in subprocesses because `app.ts` (and other modules
+ * it imports transitively) reads env vars during import. ES module loaders
+ * cache modules for the life of the process, so a fresh subprocess is the
+ * only reliable way to test multiple env configurations.
  */
 
 import { after, before, test } from 'node:test';
@@ -23,19 +22,20 @@ import * as assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
+import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../shared/constants/env.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// dist/tests/integration → dist/. The subprocess imports the compiled app
-// via a file:// URL — required on Windows where bare absolute paths like
-// `I:\…\app.js` aren't valid ESM specifiers.
-const APP_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'app.js')).href;
+// dist/tests/integration → dist/main/app.js. The subprocess imports the
+// compiled app via a file:// URL — required on Windows where bare absolute
+// paths like `I:\…\app.js` aren't valid ESM specifiers.
+const APP_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'main', 'app.js')).href;
+const REGISTRY_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'main', 'services', 'registry.js')).href;
 const SERVER_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 
 const AUTH_VAR_NAMES: ReadonlyArray<keyof typeof WELL_KNOWN_ENVIRONMENT_VARIABLES> = [
@@ -110,18 +110,21 @@ after(async () => {
     await ctx.cleanup();
 });
 
-test('importing app.ts throws when SESSION_SECRET is unset', () => {
-    // The subprocess strips SESSION_SECRET (and all auth vars) before
-    // importing the compiled app. We assert that the import rejects with
-    // a recognisable message and the process exits non-zero. Captured via
-    // a small inline harness that prints the error to stderr.
+test('createApp throws when SESSION_SECRET is unset', () => {
+    // SESSION_SECRET is checked by createApp(services); failing fast at app
+    // construction time keeps the misconfiguration loud (regression target
+    // 17f6423). The subprocess strips SESSION_SECRET and asserts createApp
+    // rejects with a recognisable message + non-zero exit.
     const script = `
-        import('${APP_DIST_URL}')
-            .then(() => { process.exit(0); })
-            .catch((err) => {
-                process.stderr.write(String(err && err.message ? err.message : err));
-                process.exit(2);
-            });
+        const appModule = await import('${APP_DIST_URL}');
+        const { getServices } = await import('${REGISTRY_DIST_URL}');
+        try {
+            appModule.createApp(getServices());
+            process.exit(0);
+        } catch (err) {
+            process.stderr.write(String(err && err.message ? err.message : err));
+            process.exit(2);
+        }
     `;
 
     const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
@@ -154,8 +157,10 @@ test('auth routes are NOT registered when auth env vars are missing', () => {
 
     const script = `
         const appModule = await import('${APP_DIST_URL}');
+        const { getServices } = await import('${REGISTRY_DIST_URL}');
         const http = await import('node:http');
-        const server = http.createServer(appModule.app.callback());
+        const app = appModule.createApp(getServices());
+        const server = http.createServer(app.callback());
         await new Promise((resolve, reject) => {
             server.once('error', reject);
             server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
@@ -205,6 +210,36 @@ test('/api/auth/me is registered and protected when auth env vars are set', asyn
     // requireAuthenticated rejects the unauthenticated request with 401.
     // The fact that we get 401 (not 404) proves the route is registered.
     assert.equal(res.status, 401, `expected 401 for unauthenticated /auth/me; got ${res.status}`);
+});
+
+test('/api/auth/me returns 200 with user data for authenticated request', async () => {
+    await ctx.run(async () => {
+        const user = await ctx.createTestUser({ displayName: 'Auth Test User' });
+        const res = await ctx.fetchAs(user.id, `${baseUrl}/api/auth/me`);
+        assert.equal(res.status, 200, `expected 200 for authenticated /auth/me; got ${res.status}`);
+
+        const body = await res.json() as { id: string; displayName: string; provider: string };
+        assert.equal(body.id, user.id);
+        assert.equal(body.displayName, 'Auth Test User');
+    });
+});
+
+test('PATCH /api/auth/me/name updates display name for authenticated user', async () => {
+    await ctx.run(async () => {
+        const user = await ctx.createTestUser({ displayName: 'Original Name' });
+
+        const patchRes = await ctx.fetchAs(user.id, `${baseUrl}/api/auth/me/name`, {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ displayName: 'Updated Name' }),
+        });
+        assert.equal(patchRes.status, 204, `expected 204 for name update; got ${patchRes.status}`);
+
+        // Verify the name persisted
+        const meRes = await ctx.fetchAs(user.id, `${baseUrl}/api/auth/me`);
+        const body = await meRes.json() as { displayName: string };
+        assert.equal(body.displayName, 'Updated Name');
+    });
 });
 
 // Note: a test asserting Cache-Control isn't `public` on /auth/me would be

@@ -4,7 +4,7 @@ import {
 	ACCOMPANIMENT_FILTER,
 	DRINK_FILTER,
 	NON_ENTREE_FILTER,
-} from '../../util/menu-item-filter.js';
+} from '../../shared/util/menu-item-filter.js';
 
 const makeItem = (overrides: { name?: string; description?: string | null; searchTags?: string[] } = {}) => ({
     name: overrides.name ?? 'Test Item',

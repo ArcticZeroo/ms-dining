@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseClassificationResponse, hashShutdownMessage } from '../../../api/cafe/shutdown-classifier.js';
+import { parseClassificationResponse, hashShutdownMessage } from '../../../worker/data/cafe/shutdown-classifier.js';
 
 describe('hashShutdownMessage', () => {
 	it('returns consistent hash for the same message', () => {

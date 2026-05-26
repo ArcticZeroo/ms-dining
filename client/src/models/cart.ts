@@ -1,10 +1,20 @@
-import { CafeTypes } from '@msdining/common';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import { ISerializedCartItem } from '@msdining/common/models/cart';
+import { ISerializedModifier } from '@msdining/common/models/cart';
 
-export interface ICartItemWithMetadata extends CafeTypes.ICartItem {
+export interface ISerializedCartItem {
+    itemId: string;
+    quantity: number;
+    modifiers: Array<ISerializedModifier>;
+    specialInstructions?: string;
+}
+
+export interface ICartItemWithMetadata {
     id: string;
     cafeId: string;
+    itemId: string;
+    quantity: number;
+    choicesByModifierId: Map<string, Set<string>>;
+    specialInstructions?: string;
     associatedItem: IMenuItemBase;
     price: number;
 }

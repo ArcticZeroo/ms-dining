@@ -6,7 +6,7 @@ import {
 	DRINK_WEIGHT,
 	isDrink,
 	TRAVELING_WEIGHT,
-} from '../../../api/recommendations/item-weights.js';
+} from '../../../worker/data/recommendations/item-weights.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 
 const makeMenuItem = (overrides: Partial<IMenuItemBase> = {}): IMenuItemBase => ({

@@ -1,4 +1,4 @@
-import { usePrismaWrite } from '../api/storage/client.js';
+import { usePrismaWrite } from '../worker/data/storage/client.js';
 
 await usePrismaWrite(client => client.runtimeMigration.update({
     where: { name: 'backfill-thumbnail-hashes' },

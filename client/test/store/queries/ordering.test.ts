@@ -1,7 +1,6 @@
 import * as assert from 'node:assert';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
-import { IPrepareCartResponse } from '@msdining/common/models/cart';
-import { OrderingClient } from '../../../src/api/order.ts';
+import { IPrepareCartResponse, OrderingClient } from '../../../src/api/order.ts';
 import { CartItemsByCafeId } from '../../../src/models/cart.ts';
 import { queryClient } from '../../../src/store/query-client.ts';
 import {
@@ -126,8 +125,8 @@ describe('getFreshOrCachedCartSession', () => {
             totalPriceWithTax:    11.03,
             totalPriceWithoutTax: 9.99,
             totalTax:             1.04,
-            waitTimeMin:          '10',
-            waitTimeMax:          '15',
+            waitTimeMin:          10,
+            waitTimeMax:          15,
             expiresAt:            new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         },
     };

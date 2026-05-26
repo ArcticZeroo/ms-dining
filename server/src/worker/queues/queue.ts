@@ -1,6 +1,6 @@
 import Duration from '@arcticzeroo/duration';
-import { getNamespaceLogger, Logger } from '../../util/log.js';
-import { Nullable } from '../../models/util.js';
+import { getNamespaceLogger, Logger } from '../../shared/util/log.js';
+import { Nullable } from '../../shared/models/util.js';
 
 const LOG_STATUS_INTERVAL = new Duration({ minutes: 1 });
 
@@ -32,7 +32,7 @@ export abstract class WorkerQueue<TKey, TValue> {
 
     #logStatus() {
         if (this.#keysInOrder.length === 0) {
-            this.#logger.debug('Queue is empty');
+            // this.#logger.debug('Queue is empty');
             return;
         }
 

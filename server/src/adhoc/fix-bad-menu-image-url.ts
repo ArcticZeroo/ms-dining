@@ -1,5 +1,5 @@
 import { getAllMenuItemsWithBadImageUrl } from '@prisma/client/sql';
-import { usePrismaTransaction } from '../api/storage/client.js';
+import { usePrismaTransaction } from '../worker/data/storage/client.js';
 
 console.log('Searching for menu items with bad image URLs...');
 

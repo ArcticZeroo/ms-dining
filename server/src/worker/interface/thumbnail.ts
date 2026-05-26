@@ -1,7 +1,8 @@
-import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../models/thumbnail.js';
-import { THUMBNAIL_THREAD_HANDLER } from '../../api/worker-thread/thumbnail.js';
-import { logError } from '../../util/log.js';
+import { IThumbnailExistenceData, IThumbnailWorkerRequest } from '../../shared/models/thumbnail.js';
+import { THUMBNAIL_THREAD_HANDLER } from '../data/threads/thumbnail.js';
+import { logError } from '../../shared/util/log.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { getServices } from '../../shared/services/registry.js';
 
 const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnailExistenceData> => {
     try {
@@ -17,11 +18,19 @@ const retrieveThumbnailData = async (menuItem: IMenuItemBase): Promise<IThumbnai
             lastUpdateTime: menuItem.lastUpdateTime
         };
 
-        const result = await THUMBNAIL_THREAD_HANDLER.sendRequest('getThumbnailData', request);
+        const result = await THUMBNAIL_THREAD_HANDLER.sendRequest('thumbnail', 'getThumbnailData', request);
         if (!result) {
             return {
                 hasThumbnail: false
             };
+        }
+
+        // Persist the hash to the DB (main-thread side, not in the thumbnail worker)
+        if (result.hash) {
+            getServices().data.menuItem.updateThumbnailHash({
+                menuItemId: menuItem.id,
+                hash:       result.hash,
+            }).catch(err => logError(`Failed to persist thumbnail hash for ${menuItem.id}`, err));
         }
 
         return {

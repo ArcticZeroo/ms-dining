@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
     hasAnythingChangedInPublishedMenu,
     IMenuPublishEvent,
-} from '../../models/storage-events.js';
+} from '../../shared/models/storage-events.js';
 
 const makeEvent = (overrides: Partial<IMenuPublishEvent> = {}): IMenuPublishEvent => ({
     cafe:                      { id: 'cafe-test', name: 'Test Cafe' },

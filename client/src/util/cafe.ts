@@ -65,6 +65,22 @@ export const getViewName = ({ view, showGroupName, useShortNames = false, includ
     return view.value.name;
 }
 
+interface ITryGetViewNameParams {
+    cafeId: string;
+    viewsById: Map<string, CafeView>;
+    showGroupName: boolean;
+    useShortNames?: boolean;
+    includeEmoji?: boolean;
+}
+
+export const tryGetViewName = ({ cafeId, viewsById, showGroupName, useShortNames, includeEmoji }: ITryGetViewNameParams) => {
+    const view = viewsById.get(cafeId);
+    if (!view) {
+        return cafeId;
+    }
+    return getViewName({ view, showGroupName, useShortNames, includeEmoji });
+}
+
 export const getTargetSettingForFavorite = (type: SearchEntityType) => {
     if (type === SearchEntityType.menuItem) {
         return ApplicationSettings.favoriteItemNames;

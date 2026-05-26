@@ -1,25 +1,9 @@
-export interface ICartItem {
-    itemId: string;
-    quantity: number;
-    choicesByModifierId: Map<string, Set<string>>;
-    specialInstructions?: string;
-}
+import { z } from 'zod';
+import { MenuItemBaseSchema } from '../util/menu-item-serde.js';
+import { OrderItemSchema } from './order.js';
+import { SerializedModifierSchema } from './shared.js';
 
-export interface ISerializedModifier {
-    modifierId: string;
-    choiceIds: Array<string>;
-}
-
-export interface ISerializedCartItem {
-    itemId: string;
-    quantity: number;
-    modifiers: Array<ISerializedModifier>;
-    specialInstructions?: string;
-}
-
-export interface ISubmitOrderItems {
-    [cafeId: string]: ISerializedCartItem[];
-}
+export type { ISerializedModifier } from './shared.js';
 
 export enum SubmitOrderStage {
     notStarted = 'notStarted',
@@ -40,20 +24,7 @@ export const SUBMIT_ORDER_STAGES_IN_ORDER = [
     SubmitOrderStage.complete
 ];
 
-export interface IOrderCompletionData {
-    lastCompletedStage: SubmitOrderStage;
-    orderNumber: string;
-    waitTimeMin: string;
-    waitTimeMax: string;
-}
-
-export interface IOrderCompletionResponse {
-    [cafeId: string]: IOrderCompletionData;
-}
-
-// --- rguest iframe payment flow types ---
-
-export interface IRguestCardInfo {
+export interface IPaymentCardInfo {
     accountNumberMasked: string;
     cardIssuer: string;
     expirationYearMonth: string;
@@ -61,54 +32,96 @@ export interface IRguestCardInfo {
     postalCode: string;
 }
 
-export interface IPrepareOrderRequest {
-    itemsByCafeId: ISubmitOrderItems;
+export { SerializedModifierSchema } from './shared.js';
+
+export const CartItemDataSchema = OrderItemSchema;
+
+export type ICartItemData = z.infer<typeof CartItemDataSchema>;
+
+export const CartItemUpdateSchema = z.object({
+    quantity:            z.number().int().min(1),
+    specialInstructions: z.string().nullish().transform(val => val ?? null),
+    modifiers:           z.array(SerializedModifierSchema),
+});
+
+export type ICartItemUpdate = z.infer<typeof CartItemUpdateSchema>;
+
+export const CartItemRecordSchema = z.object({
+    id:                  z.string(),
+    menuItemId:          z.string(),
+    quantity:            z.number().int(),
+    specialInstructions: z.string().nullish().transform(val => val ?? null),
+    modifiers:           z.array(SerializedModifierSchema),
+    createdAt:           z.string(),
+    updatedAt:           z.string(),
+    menuItem:            MenuItemBaseSchema,
+    isAvailable:         z.boolean(),
+});
+
+export type ICartItemRecord = z.output<typeof CartItemRecordSchema>;
+export type ICartItemRecordDTO = z.input<typeof CartItemRecordSchema>;
+
+// ─── Cafe availability ───────────────────────────────────────────────
+
+export interface ICafeHours {
+    opensAt: number;
+    closesAt: number;
 }
 
-// Response from /prepare/cart — builds cart on server and returns price data
-export interface IPrepareCartResponse {
-    [cafeId: string]: {
-        orderId: string;
-        orderNumber: string;
-        totalPriceWithTax: number;
-        totalPriceWithoutTax: number;
-        totalTax: number;
-        waitTimeMin: number;
-        waitTimeMax: number;
-        expiresAt: string;
-    };
+const CafeHoursSchema = z.object({
+    opensAt:  z.number().int(),
+    closesAt: z.number().int(),
+});
+
+const CafeShutdownStateSchema = z.object({
+    message:     z.string().nullable(),
+    type:        z.enum(['full', 'online_ordering_only']),
+    isTemporary: z.boolean(),
+    resumeInfo:  z.string().optional(),
+});
+
+const CafeAvailabilityOpenSchema = z.object({
+    status: z.literal('open'),
+    hours:  CafeHoursSchema,
+});
+
+const CafeAvailabilityShutdownSchema = z.object({
+    status:   z.literal('shutdown'),
+    shutdown: CafeShutdownStateSchema,
+    hours:    CafeHoursSchema.optional(),
+});
+
+const CafeAvailabilityUnknownSchema = z.object({
+    status: z.literal('unknown'),
+});
+
+export const CafeAvailabilitySchema = z.discriminatedUnion('status', [
+    CafeAvailabilityOpenSchema,
+    CafeAvailabilityShutdownSchema,
+    CafeAvailabilityUnknownSchema,
+]);
+
+export type ICafeAvailability = z.infer<typeof CafeAvailabilitySchema>;
+
+// ─── Cart response ───────────────────────────────────────────────────
+
+export const CafeCartGroupSchema = z.object({
+    cafeId:       z.string(),
+    items:        z.array(CartItemRecordSchema),
+    availability: CafeAvailabilitySchema,
+});
+
+export type ICafeCartGroup = z.output<typeof CafeCartGroupSchema>;
+export type ICafeCartGroupDTO = z.input<typeof CafeCartGroupSchema>;
+
+export const CartResponseSchema = z.object({
+    cafes: z.array(CafeCartGroupSchema),
+});
+
+export interface ICartResponse {
+    cafes: ICafeCartGroup[];
 }
 
-// Request/response for /prepare/payment — gets card processor token for an existing cart session
-export interface IPreparePaymentRequest {
-    orderId: string;
+export interface ICartResponseDTO {
+    cafes: ICafeCartGroupDTO[];
 }
-
-export interface IPreparePaymentResponse {
-    siteToken: string;
-    iframeUrl: string;
-    orderId: string;
-    orderNumber: string;
-    expiresAt: string;
-}
-
-// Legacy combined prepare response (kept for backwards compat)
-export interface IPrepareOrderResponse {
-    [cafeId: string]: {
-        siteToken: string;
-        iframeUrl: string;
-        orderId: string;
-        orderNumber: string;
-        expiresAt: string;
-    };
-}
-
-export interface ICompleteOrderRequest {
-    orderId: string;
-    paymentToken: string;
-    cardInfo: IRguestCardInfo;
-    alias: string;
-    phoneNumberWithCountryCode: string;
-}
-
-export type ICompleteOrderResponse = IOrderCompletionData;

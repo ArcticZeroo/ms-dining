@@ -71,6 +71,7 @@ export const doMigrationAndRedirectToDiningSite = () => {
             },
             debugSettings: {
                 allowOnlineOrdering: DebugSettings.allowOnlineOrdering.value.toString(),
+                forceAllowOnlineOrdering: DebugSettings.forceAllowOnlineOrdering.value.toString(),
                 suppressExperimentalOnlineOrderingWarning: DebugSettings.suppressExperimentalOnlineOrderingWarning.value.toString(),
                 verboseLogging: DebugSettings.verboseLogging.value.toString(),
                 noVectorSearch: DebugSettings.noVectorSearch.value.toString(),

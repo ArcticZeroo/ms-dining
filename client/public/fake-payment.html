@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Payment</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        h2 { margin-top: 0; }
+        .info { color: #666; font-size: 14px; margin: 16px 0; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 8px;
+        }
+        button:hover { background: #45a049; }
+        button.cancel {
+            background: #f44336;
+        }
+        button.cancel:hover { background: #da190b; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🧪 Fake Payment</h2>
+        <p class="info">
+            This is a test payment page. No real charges will be made.
+        </p>
+        <div>
+            <button onclick="submitPayment()">Complete Payment</button>
+            <button class="cancel" onclick="cancelPayment()">Cancel</button>
+        </div>
+    </div>
+    <script>
+        function submitPayment() {
+            window.parent.postMessage({
+                token: 'fake-payment-token-' + Math.random().toString(36).slice(2, 10),
+                cardInfo: {
+                    accountNumberMasked: '****1234',
+                    cardIssuer: 'Visa',
+                    expirationYearMonth: '2028-12',
+                    cardholderName: 'Test User',
+                    postalCode: '98052'
+                }
+            }, '*');
+        }
+
+        function cancelPayment() {
+            window.parent.postMessage({ cancel: true }, '*');
+        }
+    </script>
+</body>
+</html>

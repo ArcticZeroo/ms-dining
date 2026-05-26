@@ -1,0 +1,119 @@
+// ─── Cart ────────────────────────────────────────────────────────────
+// Server-side cart replaces client localStorage. One cart per user.
+// userId is the PK (one cart per user, no separate surrogate id).
+
+model Cart {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+}
+
+model CartItem {
+  id                  String  @id @default(uuid())
+  cartUserId          String
+  cart                Cart    @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
+  menuItemId          String
+  menuItem            MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  quantity            Int     @default(1)
+  specialInstructions String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modifierChoices CartItemModifierChoice[]
+}
+
+model CartItemModifierChoice {
+  id         Int      @id @default(autoincrement())
+  cartItemId String
+  cartItem   CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  modifierId String
+  choiceId   String
+
+  @@unique([cartItemId, modifierId, choiceId])
+}
+
+// ─── Pending Orders ──────────────────────────────────────────────────
+// A PendingCafeOrder is created when the user clicks "Pay" for a cafe.
+// It holds a snapshot of the items + identity for the BoD session.
+// Deleted on completion (promoted to CafeOrder) or TTL expiry.
+
+model PendingCafeOrder {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cafeId    String
+  itemsHash String
+  createdAt DateTime @default(now())
+
+  items PendingCafeOrderItem[]
+
+  @@index([userId, cafeId, itemsHash])
+}
+
+model PendingCafeOrderItem {
+  id                  String  @id @default(uuid())
+  pendingCafeOrderId  String
+  pendingCafeOrder    PendingCafeOrder @relation(fields: [pendingCafeOrderId], references: [id], onDelete: Cascade)
+  menuItemId          String
+  quantity            Int
+  specialInstructions String?
+
+  modifiers PendingCafeOrderItemModifier[]
+}
+
+model PendingCafeOrderItemModifier {
+  id                     Int                  @id @default(autoincrement())
+  pendingCafeOrderItemId String
+  pendingCafeOrderItem   PendingCafeOrderItem @relation(fields: [pendingCafeOrderItemId], references: [id], onDelete: Cascade)
+  modifierId             String
+  choiceId               String
+
+  @@unique([pendingCafeOrderItemId, modifierId, choiceId])
+}
+
+// ─── Completed Orders ────────────────────────────────────────────────
+// A CafeOrder is created after payment succeeds. Permanent record.
+
+model CafeOrder {
+  id                     String   @id @default(uuid())
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cafeId                 String
+  buyOnDemandOrderId     String
+  buyOnDemandOrderNumber String
+  subtotal               Float
+  tax                    Float
+  total                  Float
+  waitTimeMin            Int
+  waitTimeMax            Int
+  completedAt            DateTime
+  createdAt              DateTime @default(now())
+
+  items CafeOrderItem[]
+}
+
+model CafeOrderItem {
+  id                  String    @id @default(uuid())
+  cafeOrderId         String
+  cafeOrder           CafeOrder @relation(fields: [cafeOrderId], references: [id], onDelete: Cascade)
+  menuItemId          String
+  name                String
+  quantity            Int
+  price               Float
+  specialInstructions String?
+
+  modifiers CafeOrderItemModifier[]
+}
+
+model CafeOrderItemModifier {
+  id              Int           @id @default(autoincrement())
+  cafeOrderItemId String
+  cafeOrderItem   CafeOrderItem @relation(fields: [cafeOrderItemId], references: [id], onDelete: Cascade)
+  modifierId      String
+  choiceId        String
+
+  @@unique([cafeOrderItemId, modifierId, choiceId])
+}

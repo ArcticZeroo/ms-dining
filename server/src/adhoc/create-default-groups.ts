@@ -1,10 +1,10 @@
-import { GroupStorageClient } from '../api/storage/clients/groups.js';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { usePrismaClient } from '../api/storage/client.js';
+import { usePrismaClient } from '../worker/data/storage/client.js';
+import { getServices } from '../shared/services/registry.js';
 
 console.log('Fetching group candidates without context...');
 
-const candidates = await GroupStorageClient.getGroupCandidatesZeroContext();
+const candidates = await getServices().data.groups.getGroupCandidatesZeroContext({});
 
 console.log('Checking', candidates.length, 'candidates to create default groups...');
 
@@ -45,11 +45,19 @@ for (const group of candidates) {
     const name = group.members[0]!.name;
     if (group.type === SearchEntityType.station) {
         console.log('Creating station group:', name);
-        await GroupStorageClient.createGroup(name, group.type, group.members.map(member => member.id));
+        await getServices().data.groups.createGroup({
+            name,
+            entityType: group.type,
+            initialMembers: group.members.map(member => member.id)
+        });
     } else if (group.type === SearchEntityType.menuItem) {
         if (await isSameStation(group.members.map(member => member.id))) {
             console.log(`Creating menu item group ${name} with the same station`);
-            await GroupStorageClient.createGroup(name, group.type, group.members.map(member => member.id));
+            await getServices().data.groups.createGroup({
+                name,
+                entityType: group.type,
+                initialMembers: group.members.map(member => member.id)
+            });
         }
     }
 }

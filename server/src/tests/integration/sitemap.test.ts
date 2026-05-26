@@ -14,15 +14,15 @@
 import { after, before, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { CafeMenuSession } from '../../api/cafe/session/menu.js';
-import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
-import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
+import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
+import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
+import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchExpectStatus } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchExpectStatus } from '../test-server/test-helpers.js';
 
 // Pinned weekday so any date-sensitive code path observes a stable clock.
 const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday

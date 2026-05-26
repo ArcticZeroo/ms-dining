@@ -18,12 +18,12 @@
 import { after, before, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { CafeMenuSession } from '../../api/cafe/session/menu.js';
-import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
-import { classifyShutdownMessageAsync } from '../../api/cafe/shutdown-classifier.js';
-import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
-import { ICafe } from '../../models/cafe.js';
+import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
+import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
+import { classifyShutdownMessageAsync } from '../../worker/data/cafe/shutdown-classifier.js';
+import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { ICafe } from '../../shared/models/cafe.js';
 import {
     RecommendationsResponseSchema,
 } from '@msdining/common/models/recommendation';
@@ -31,8 +31,8 @@ import { SearchResponseSchema } from '@msdining/common/models/http';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchJson } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchJson } from '../test-server/test-helpers.js';
 
 const SHUTDOWN_CAFE_IDS = ['cafe83', 'cafe92'] as const;
 const SHUTDOWN_MESSAGE = 'Closed for the integration test — back soon';

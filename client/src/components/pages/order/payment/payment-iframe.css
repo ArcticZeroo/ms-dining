@@ -1,0 +1,59 @@
+/* Payment iframe modal — scoped under .modal for specificity */
+
+.modal .iframe-container {
+    position: relative;
+    flex: 1;
+    min-height: 500px;
+    background: var(--color-background);
+}
+
+.modal .iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+@media screen and (max-width: 800px) {
+    .modal .iframe-container {
+        min-height: unset;
+    }
+}
+
+.modal .iframe-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    gap: 0.5rem;
+    color: var(--color-text-secondary);
+}
+
+.modal .payment-error {
+    padding: var(--default-padding);
+    background: var(--color-payment-info-field-invalid);
+    color: var(--color-text);
+    text-align: center;
+}
+
+.modal .payment-error button {
+    margin-top: 0.5rem;
+    cursor: pointer;
+}
+
+.modal .payment-completing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--default-padding) * 4);
+    gap: 0.5rem;
+    color: var(--color-text-secondary);
+}

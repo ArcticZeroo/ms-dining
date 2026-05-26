@@ -24,11 +24,11 @@
 import { after, afterEach, before, describe, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { usePrismaClient, usePrismaWrite } from '../../api/storage/client.js';
+import { usePrismaClient, usePrismaWrite } from '../data/storage/client.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../../tests/test-server/integration-test-context.js';
 import { SEARCH_TAG_WORKER_QUEUE } from './search-tags.js';
 
 const CAFE_ID = 'search-tags-test-cafe';

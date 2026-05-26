@@ -1,7 +1,23 @@
+#order-checkout {
+    gap: var(--default-padding);
+}
+
 #order-checkout .cart-item-buttons {
     width: min-content;
 }
 
-#order-checkout .prepare-error {
-    color: var(--color-error, red);
+.order-cafe-card .cart-contents {
+    background: var(--color-background-raised-2);
+    padding: var(--default-padding) 0;
+    border-radius: var(--default-padding);
+}
+
+.order-cafe-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--default-padding);
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    background: var(--color-cart-warning);
 }

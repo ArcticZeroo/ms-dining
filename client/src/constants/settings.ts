@@ -1,7 +1,8 @@
 import { randomUserId } from '../util/random.ts';
 import {
     BooleanSetting,
-    CartSetting, DateSetting,
+    CartSetting,
+    DateSetting,
     NumberSetting,
     StringArraySetting,
     StringSetSetting,
@@ -66,6 +67,7 @@ export const ApplicationSettings = {
 } as const;
 
 export const DebugSettings = {
+    forceAllowOnlineOrdering:                  new BooleanSetting('forceAllowOnlineOrdering', false /*defaultValue*/),
     allowOnlineOrdering:                       new BooleanSetting('PROBABLY_BROKEN_ONLINE_ORDERING_DO_NOT_USE', false /*defaultValue*/),
     suppressExperimentalOnlineOrderingWarning: new BooleanSetting('SUPPRESS_EXPERIMENTAL_ONLINE_ORDERING_WARNING_DO_NOT_USE', false /*defaultValue*/),
     verboseLogging:                            new BooleanSetting('verboseLogging', false /*defaultValue*/),

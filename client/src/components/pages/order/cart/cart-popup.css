@@ -1,0 +1,121 @@
+.cart-popup {
+    position: absolute;
+    top: 0;
+    z-index: var(--z-index-everything-but-top);
+    gap: var(--default-padding);
+    transition: transform 0.2s ease;
+    padding: 0 0 1rem 1rem;
+}
+
+.cart-popup .cart-header {
+    background: var(--color-cart-popup);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--default-padding);
+    padding: var(--default-padding);
+    border-bottom-left-radius: var(--default-padding);
+    transition: background-color 0.25s ease
+}
+
+.cart-popup .cart-info {
+    cursor: pointer;
+}
+
+.cart-popup.has-error .cart-info {
+    --color-cart-popup: var(--color-error-dark);
+}
+
+.cart-popup.hidden {
+    transform: translateY(-100%);
+}
+
+.device-type-desktop .cart-popup:hover .cart-info,
+.cart-popup.expanded .cart-info {
+    border-bottom-left-radius: 0;
+}
+
+.cart-body {
+    display: none;
+}
+
+.device-type-desktop .cart-popup:hover .cart-body,
+.cart-popup.expanded .cart-body {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-cart-popup-body);
+    border-bottom-left-radius: var(--default-padding);
+}
+
+.cart-popup .cart-contents {
+    border-spacing: var(--default-padding);
+    margin: 0;
+}
+
+.device-type-desktop .cart-popup:hover .cart-contents td, .device-type-desktop .cart-popup:hover .cart-contents th,
+.cart-popup.expanded .cart-contents td, .cart-popup.expanded .cart-contents th {
+    margin: 0;
+    padding: 0;
+}
+
+.cart-item-buttons {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--default-padding);
+    padding: 0.5rem;
+    justify-content: space-around;
+}
+
+.cart-item-buttons button {
+    color: white;
+    background: none;
+    transition: opacity 0.25s ease;
+}
+
+.cart-item-buttons button:disabled {
+    opacity: 0.25;
+}
+
+.cart-cafe-url {
+    text-decoration: none;
+    color: unset;
+}
+
+.cart-popup .checkout-button {
+    background: var(--color-cart-popup-checkout);
+    color: var(--color-almost-white);
+    text-decoration: none;
+    margin: var(--default-padding);
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+    cursor: pointer;
+    text-align: center;
+}
+
+.cart-popup .cart-hydration-error {
+    border-bottom-left-radius: var(--default-padding);
+}
+
+.cart-popup .cart-warning {
+    position: absolute;
+    padding: 0.25rem;
+    left: 0;
+    bottom: 0;
+    background: var(--color-cart-warning);
+    border-radius: 100%;
+}
+
+/* The table above the loading div has border-spacing which provides a default-padding size gap above and below it. */
+/* We want to have default-padding amounts of padding regardless of whether the table is there. */
+.cart-popup .cart-loading {
+    padding: 0 var(--default-padding) var(--default-padding) var(--default-padding);
+}
+
+.cart-popup .cart-loading:only-child {
+    padding-top: var(--default-padding);
+}
+
+.device-type-mobile .cart-popup {
+    top: calc(var(--icon-size) + (2 * var(--default-padding)));
+}

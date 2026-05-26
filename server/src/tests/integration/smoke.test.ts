@@ -14,15 +14,15 @@
 
 import { after, before, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { CafeMenuSession } from '../../api/cafe/session/menu.js';
-import { saveDailyMenuAsync } from '../../api/cafe/job/storage.js';
-import { usePrismaClient } from '../../api/storage/client.js';
-import { DailyMenuStorageClient } from '../../api/storage/clients/daily-menu.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
+import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
+import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
+import { usePrismaClient } from '../../worker/data/storage/client.js';
+import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
+} from '../test-server/integration-test-context.js';
 
 let ctx: IntegrationTestContext;
 
@@ -39,8 +39,8 @@ test('sync a single cafe end-to-end', async () => {
     assert.ok(cafe, 'cafe25 should exist in ALL_CAFES');
 
     // Drive the real production sync code path. CafeMenuSession.retrieveMenuAsync
-    // calls BuyOnDemandClient.createAsync(cafe) which the factory hook redirects
-    // to a TestBuyOnDemandClient backed by our in-memory test server.
+    // calls createBuyOnDemandClient(cafe), which is routed via getServices()
+    // to the per-context test buyOnDemandFactory backed by our in-memory test server.
     const result = await CafeMenuSession.retrieveMenuAsync(cafe, 0);
 
     assert.ok(result.isAvailable, 'cafe should be available');

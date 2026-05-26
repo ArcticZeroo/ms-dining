@@ -21,6 +21,16 @@ export const mutationButtonClass = (mutation: AnyMutation): string => {
 };
 
 /**
+ * Extract a display message from an unknown error, with a base message.
+ */
+export const getErrorMessage = (error: unknown, base: string): string => {
+    if (error instanceof Error && error.message.trim().length > 0) {
+        return `${base}: ${error.message}`;
+    }
+
+    return base;
+};
+/**
  * "Is the user allowed to click this button right now?". Mutation is idle or
  * errored (so a retry click should go through). Pending or just-succeeded
  * buttons are disabled.

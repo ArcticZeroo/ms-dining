@@ -1,0 +1,38 @@
+#payment-info .field {
+    justify-content: space-between;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
+    transition: background-color 0.25s ease;
+}
+
+#payment-info .field.invalid {
+    background: var(--color-payment-info-field-invalid);
+}
+
+#payment-info .field .field-info {
+    gap: var(--constant-padding);
+}
+
+#payment-info .payment-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--default-padding);
+    align-items: center;
+    justify-content: center;
+}
+
+#payment-info #payment-submit {
+    background: var(--color-payment-submit);
+    transition: background-color 0.25s ease, opacity 0.25s ease;
+}
+
+#payment-info #payment-submit.invalid {
+    background: var(--color-payment-submit-invalid);
+    opacity: 0.75;
+}
+
+@media screen and (max-width: 800px) {
+    #payment-info .field {
+        flex-grow: 1;
+    }
+}

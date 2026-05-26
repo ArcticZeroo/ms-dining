@@ -1,0 +1,96 @@
+import Duration from '@arcticzeroo/duration';
+import { DateUtil } from '@msdining/common';
+import type { ICafe } from '../models/cafe.js';
+
+const MENU_REQUEST_DAYS_WINDOW = 30;
+
+export const isDateStringWithinMenuWindow = (dateString: string): boolean => {
+    const date = DateUtil.fromDateString(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return false;
+    }
+
+    const timeFromNowMs = Math.abs(Date.now() - date.getTime());
+    const daysFromNow = new Duration({ milliseconds: timeFromNowMs }).inDays;
+
+    return daysFromNow <= MENU_REQUEST_DAYS_WINDOW;
+};
+
+/**
+ * True when we both have menus for the date (within the request window) and operate on it
+ * (weekdays only). Use at any entry point that fetches or computes per-day menu data; cache
+ * cleanup and pure range iteration should keep using the individual predicates.
+ */
+export const canFetchMenuForDateString = (dateString: string): boolean => {
+    if (!isDateStringWithinMenuWindow(dateString)) {
+        return false;
+    }
+    return !DateUtil.isDateOnWeekend(DateUtil.fromDateString(dateString));
+};
+
+export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {
+    if (cafe.firstAvailable == null) {
+        return true;
+    }
+
+    return DateUtil.isDateBefore(cafe.firstAvailable, date);
+};
+
+export const isDateValid = (date: Date | null | undefined): date is Date => date != null && !Number.isNaN(date.getTime());
+
+export const needsUpdate = (serverLastUpdateTime: Date, storedLastUpdateTime: Date | undefined | null) => {
+    // Shrug, lean towards keeping us up-to-date if we messed something up when parsing the response
+    if (!isDateValid(serverLastUpdateTime)) {
+        return true;
+    }
+
+    // If we've never stored the last update time, we don't know when the last update was... so just update again
+    if (!isDateValid(storedLastUpdateTime)) {
+        return true;
+    }
+
+    return serverLastUpdateTime.getTime() > storedLastUpdateTime.getTime();
+};
+
+type ParseDateWithNull = (header: string | undefined | null, allowNull: true) => Date | undefined;
+type ParseDateWithoutNull = (header: string | undefined | null, allowNull: false) => Date;
+export const parseDateFromLastUpdateHeader: ParseDateWithNull | ParseDateWithoutNull = (header: string | undefined | null, allowNull: boolean): Date | undefined => {
+    if (!header) {
+        return allowNull ? undefined : new Date(0);
+    }
+
+    const date = new Date(header);
+
+    if (!isDateValid(date)) {
+        return allowNull ? undefined : new Date(0);
+    }
+
+    return date;
+};
+
+export const getPaymentProcessorTimezoneOffset = () => {
+    const now = new Date();
+    const timezoneOffset = -now.getTimezoneOffset();
+    const differencePrefix = timezoneOffset >= 0 ? '+' : '-';
+
+    const pad = function(num: number) {
+        const norm = Math.floor(Math.abs(num));
+        return norm.toString().padStart(2, '0');
+    };
+
+    const zeroConcat = function(num: number) {
+        const norm = Math.floor(Math.abs(num));
+        return norm.toString().padStart(3, '0');
+    };
+
+    return now.getFullYear() +
+                '-' + pad(now.getMonth() + 1) +
+                '-' + pad(now.getDate()) +
+                'T' + pad(now.getHours()) +
+                ':' + pad(now.getMinutes()) +
+                ':' + pad(now.getSeconds()) +
+                '.' + zeroConcat(now.getMilliseconds()) +
+                differencePrefix + pad(timezoneOffset / 60) +
+                ':' + pad(timezoneOffset % 60);
+};

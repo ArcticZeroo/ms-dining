@@ -1,4 +1,4 @@
-import { usePrismaWrite } from '../api/storage/client.js';
+import { usePrismaWrite } from '../worker/data/storage/client.js';
 
 console.log('Clearing themes...');
 console.time('Clear Themes');

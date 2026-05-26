@@ -24,11 +24,11 @@ import { after, before, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
 import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
-import { performMenuBootTasks } from '../../api/cafe/job/boot.js';
-import { usePrismaClient } from '../../api/storage/client.js';
-import { ALL_CAFES } from '../../constants/cafes.js';
-import { isCafeAvailable } from '../../util/date.js';
-import { ENVIRONMENT_SETTINGS } from '../../util/env.js';
+import { performMenuBootTasks } from '../../worker/data/cafe/job/boot.js';
+import { usePrismaClient } from '../../worker/data/storage/client.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { isCafeAvailable } from '../../shared/util/date.js';
+import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
 import {
     CafeMenuResponseSchema,
     DiningCoreResponseSchema,
@@ -39,8 +39,8 @@ import { VERSION_TAG } from '@msdining/common/constants/versions';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../test-server/integration-test-context.js';
-import { fetchJson } from '../../test-server/test-helpers.js';
+} from '../test-server/integration-test-context.js';
+import { fetchJson } from '../test-server/test-helpers.js';
 
 const SHUTDOWN_CAFE_ID = 'cafe83';     // small kiosk — closed for maintenance
 const UNAVAILABLE_CAFE_ID = 'cafe109'; // returns 410 on concepts call

@@ -1,7 +1,7 @@
-import { BuyOnDemandClient } from '../api/cafe/buy-ondemand/buy-ondemand-client.js';
-import { retrieveStationListAsync } from '../api/cafe/buy-ondemand/stations.js';
-import { retrieveMenuItemsAsync } from '../api/cafe/buy-ondemand/menu-items.js';
-import { ICafe } from '../models/cafe.js';
+import { BuyOnDemandClient } from '../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+import { retrieveStationListAsync } from '../worker/data/cafe/buy-ondemand/stations.js';
+import { retrieveMenuItemsAsync } from '../worker/data/cafe/buy-ondemand/menu-items.js';
+import { ICafe } from '../shared/models/cafe.js';
 
 const FOODHALL4: ICafe = {
     name: 'Food Hall 4',

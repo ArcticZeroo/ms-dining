@@ -22,16 +22,16 @@ export const MultiCafeOrderWarning = () => {
 
     return (
         <div className="card notice visible yellow">
-            Warning: Your order contains items from multiple cafes.
+            Your order contains items from multiple cafes.
             <ul className="left-align">
                 <li>
-                    It will take much longer to process your order.
+                    Each cafe requires a separate payment.
                 </li>
                 <li>
-                    It is possible that your order is accepted by one cafe but rejected by another. Accepted orders cannot be cancelled, so you must still pick them up.
+                    You may need to pick up your orders from different buildings.
                 </li>
                 <li>
-                    You may have to pick up your order from different buildings, depending on the cafes you've chosen.
+                    Your order is sent to the kitchen as soon as you pay. It is possible that your order is accepted by one cafe but rejected by another.
                 </li>
             </ul>
             <div className="flex">
