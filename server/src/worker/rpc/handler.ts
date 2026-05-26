@@ -224,9 +224,10 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         }
         this.#worker = undefined;
 
-        for (const [, [, reject]] of this.#pendingRequests) {
+        for (const [, reject] of this.#pendingRequests.values()) {
             reject(new Error('WorkerThreadHandler terminated before response arrived'));
         }
+
         this.#pendingRequests.clear();
 
         await worker.terminate();
