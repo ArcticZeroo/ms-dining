@@ -5,7 +5,7 @@ export const webserverHost = 'https://dining.frozor.io';
 
 export const webserverPort = 3002;
 
-export const serverFolderPath = path.resolve(getDirname(import.meta.url), '../../');
+export const serverFolderPath = path.resolve(getDirname(import.meta.url), '../../../');
 
 export const rootFolderPath = path.resolve(serverFolderPath, '../');
 
