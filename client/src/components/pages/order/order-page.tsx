@@ -1,6 +1,8 @@
-import { Outlet } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { useOnlineOrderingStatus } from '../../../hooks/cafe.ts';
 import { OnlineOrderingUnavailableNotice } from '../../notice/online-ordering-unavailable-notice.tsx';
+import { OrderCheckoutView } from './order-checkout-view.tsx';
+import { CompletedOrdersView } from './completed-orders-view.tsx';
 
 import './order-page.css';
 
@@ -10,5 +12,10 @@ export const OrderPageLayout = () => {
         return <OnlineOrderingUnavailableNotice state={orderingState}/>;
     }
 
-    return <Outlet/>;
+    return (
+        <Routes>
+            <Route index={true} element={<OrderCheckoutView/>}/>
+            <Route path="done" element={<CompletedOrdersView/>}/>
+        </Routes>
+    );
 };

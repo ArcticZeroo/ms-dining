@@ -13,7 +13,7 @@ import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 
 import './order-page.css';
 
-export const OrderPageBody = () => {
+export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
 
