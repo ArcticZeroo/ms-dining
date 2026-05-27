@@ -196,6 +196,10 @@
     outline: 2px solid var(--color-theme);
 }
 
+.map-search-result.tag-highlighted {
+    border-left: 5px solid var(--highlight-tag-color);
+}
+
 .map-search-result .result-description {
     font-size: 0.85em;
     overflow: hidden;
