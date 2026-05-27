@@ -84,5 +84,20 @@ export const registerOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
+    const OrderHistorySinceSchema = z.enum(['7d', '30d', 'all']).default('30d');
+
+    router.get('/history', async ctx => {
+        const userId = getUserIdOrThrow(ctx);
+        const since = OrderHistorySinceSchema.parse(ctx.query.since);
+        const result = await getServices().data.order.getOrderHistory({ userId, since });
+        ctx.body = jsonStringifyWithoutNull(result);
+    });
+
+    router.get('/count', async ctx => {
+        const userId = getUserIdOrThrow(ctx);
+        const count = await getServices().data.order.getOrderCount({ userId });
+        ctx.body = JSON.stringify({ count });
+    });
+
     attachRouter(parent, router);
 };

@@ -8,4 +8,8 @@ export const orderService: IOrderService = {
         dataHandler.sendRequest('order', 'completeOrder', data),
     getCompletedOrdersToday: (data) =>
         dataHandler.sendRequest('order', 'getCompletedOrdersToday', data),
+    getOrderHistory: (data) =>
+        dataHandler.sendRequest('order', 'getOrderHistory', data),
+    getOrderCount: (data) =>
+        dataHandler.sendRequest('order', 'getOrderCount', data),
 };

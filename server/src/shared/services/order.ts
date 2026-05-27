@@ -6,6 +6,8 @@ import type {
     IPreparePaymentResult,
 } from '@msdining/common/models/order';
 
+export type OrderHistorySince = '7d' | '30d' | 'all';
+
 export interface IOrderService {
     preparePayment(data: {
         userId: string;
@@ -26,4 +28,13 @@ export interface IOrderService {
     getCompletedOrdersToday(data: {
         userId: string;
     }): Promise<ICafeOrderDTO[]>;
+
+    getOrderHistory(data: {
+        userId: string;
+        since: OrderHistorySince;
+    }): Promise<ICafeOrderDTO[]>;
+
+    getOrderCount(data: {
+        userId: string;
+    }): Promise<number>;
 }

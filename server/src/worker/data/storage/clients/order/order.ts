@@ -6,6 +6,8 @@ import type { PrismaTransactionClient } from '../../../../../shared/models/prism
 import { flattenModifiers, groupModifierRows, modifiersEqual } from '@msdining/common/util/modifier-util';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 import { hashOrderItems, toOrderItems } from '../../../util/order.js';
+import type { OrderHistorySince } from '../../../../../shared/services/order.js';
+import type { CafeOrder, CafeOrderItem, CafeOrderItemModifier } from '@prisma/client';
 
 const ORDER_ITEMS_INCLUDE = {
 	items: {
@@ -16,6 +18,72 @@ const ORDER_ITEMS_INCLUDE = {
 		},
 	},
 } as const;
+
+type OrderWithItems = CafeOrder & {
+	items: Array<CafeOrderItem & {
+		modifiers: Array<Pick<CafeOrderItemModifier, 'modifierId' | 'choiceId'>>;
+	}>;
+};
+
+const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> => {
+	const allMenuItemIds = [...new Set(orders.flatMap(order => order.items.map(item => item.menuItemId)))];
+	const menuItemResults = await Promise.all(
+		allMenuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
+	);
+	const menuItemsById = new Map(
+		allMenuItemIds.map((id, i) => [id, menuItemResults[i]] as const).filter(([, v]) => v != null),
+	);
+
+	return orders.map(order => ({
+		id:                     order.id,
+		cafeId:                 order.cafeId,
+		buyOnDemandOrderId:     order.buyOnDemandOrderId,
+		buyOnDemandOrderNumber: order.buyOnDemandOrderNumber,
+		subtotal:               order.subtotal,
+		tax:                    order.tax,
+		total:                  order.total,
+		waitTimeMin:            order.waitTimeMin,
+		waitTimeMax:            order.waitTimeMax,
+		completedAt:            order.completedAt.toISOString(),
+		items:                  order.items.flatMap(item => {
+			const menuItem = menuItemsById.get(item.menuItemId);
+			if (!menuItem) {
+				return [];
+			}
+
+			return [{
+				menuItemId:          item.menuItemId,
+				quantity:            item.quantity,
+				price:               item.price,
+				specialInstructions: item.specialInstructions,
+				modifiers:           groupModifierRows(item.modifiers),
+				menuItem:            {
+					...menuItemBaseToDTO(menuItem),
+					totalReviewCount: 0,
+					overallRating:    0,
+					firstAppearance:  '',
+				},
+			}];
+		}),
+	}));
+};
+
+const SINCE_TO_DAYS: Record<OrderHistorySince, number | null> = {
+	'7d':  7,
+	'30d': 30,
+	'all': null,
+};
+
+const getSinceDate = (since: OrderHistorySince): Date | null => {
+	const days = SINCE_TO_DAYS[since];
+	if (days == null) {
+		return null;
+	}
+	const date = new Date();
+	date.setDate(date.getDate() - days);
+	date.setHours(0, 0, 0, 0);
+	return date;
+};
 
 export abstract class OrderStorageClient {
 	/**
@@ -228,46 +296,27 @@ export abstract class OrderStorageClient {
 			orderBy: { completedAt: 'desc' },
 		}));
 
-		// Collect all unique menu item IDs across all orders for enrichment
-		const allMenuItemIds = [...new Set(orders.flatMap(order => order.items.map(item => item.menuItemId)))];
-		const menuItemResults = await Promise.all(
-			allMenuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
-		);
-		const menuItemsById = new Map(
-			allMenuItemIds.map((id, i) => [id, menuItemResults[i]] as const).filter(([, v]) => v != null),
-		);
+		return enrichOrders(orders);
+	}
 
-		return orders.map(order => ({
-			id:                     order.id,
-			cafeId:                 order.cafeId,
-			buyOnDemandOrderId:     order.buyOnDemandOrderId,
-			buyOnDemandOrderNumber: order.buyOnDemandOrderNumber,
-			subtotal:               order.subtotal,
-			tax:                    order.tax,
-			total:                  order.total,
-			waitTimeMin:            order.waitTimeMin,
-			waitTimeMax:            order.waitTimeMax,
-			completedAt:            order.completedAt.toISOString(),
-			items:                  order.items.flatMap(item => {
-				const menuItem = menuItemsById.get(item.menuItemId);
-				if (!menuItem) {
-					return [];
-				}
+	static async getOrderHistory(userId: string, since: OrderHistorySince): Promise<ICafeOrderDTO[]> {
+		const sinceDate = getSinceDate(since);
 
-				return [{
-					menuItemId:          item.menuItemId,
-					quantity:            item.quantity,
-					price:               item.price,
-					specialInstructions: item.specialInstructions,
-					modifiers:           groupModifierRows(item.modifiers),
-					menuItem:            {
-						...menuItemBaseToDTO(menuItem),
-						totalReviewCount: 0,
-						overallRating:    0,
-						firstAppearance:  '',
-					},
-				}];
-			}),
+		const orders = await usePrismaClient(prisma => prisma.cafeOrder.findMany({
+			where: {
+				userId,
+				...(sinceDate && { completedAt: { gte: sinceDate } }),
+			},
+			include: ORDER_ITEMS_INCLUDE,
+			orderBy: { completedAt: 'desc' },
+		}));
+
+		return enrichOrders(orders);
+	}
+
+	static async getOrderCount(userId: string): Promise<number> {
+		return usePrismaClient(prisma => prisma.cafeOrder.count({
+			where: { userId },
 		}));
 	}
 
