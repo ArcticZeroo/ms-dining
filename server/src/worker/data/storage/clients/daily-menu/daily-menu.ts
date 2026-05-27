@@ -3,7 +3,7 @@ import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { ICafe, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 import { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import { isDateValid } from '../../../../../shared/util/date.js';
-import { logDebug, logError, logInfo } from '../../../../../shared/util/log.js';
+import { getNamespaceLogger, logDebug, logError, logInfo } from '../../../../../shared/util/log.js';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../client.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { SearchEntityType } from '@msdining/common/models/search';
@@ -18,6 +18,9 @@ import type {
     ICafeMenuOverviewHeader,
     IPublishDailyMenuParams,
 } from '../../../../../shared/services/daily-menu.js';
+import { createDebouncedCafeDataLogger } from '../../../../../shared/util/debounced-logger.js';
+
+const menuPublishLogger = createDebouncedCafeDataLogger(getNamespaceLogger('DailyMenu'), 'Daily menu published');
 
 const areMenuItemsByCategoryNameEqual = (left: Map<string, Array<string>>, right: Map<string, Array<string>>) => {
 	if (left.size !== right.size) {
@@ -217,7 +220,7 @@ export abstract class DailyMenuStorageClient {
 		]);
 
 		STORAGE_EVENTS.emit('menuPublished', publishEvent);
-		logDebug(`{${dateString} Published daily menu for cafe ${cafeId}`);
+		menuPublishLogger({ dateString, cafeId });
 	}
 
 	public static async retrieveDailyMenuAsync(cafeId: string, dateString: string) {

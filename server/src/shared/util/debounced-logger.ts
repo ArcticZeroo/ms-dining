@@ -1,38 +1,31 @@
 import { type Logger } from './log.js';
+import { clearTimeout } from 'node:timers';
+import Duration from '@arcticzeroo/duration';
 
-/**
- * Creates a debounced logger that batches entries over a time window
- * and logs a single summary line instead of one line per entry.
- *
- * - Single entry within the window: logs `"{prefix} {entry}"`
- * - Multiple entries: logs `"{prefix} {count} {pluralNoun}"`
- */
-export const createDebouncedLogger = (
-    logger: Logger,
-    options: {
-        prefix: string;
-        pluralNoun: string;
-        windowMs?: number;
-    },
-) => {
-    const { prefix, pluralNoun, windowMs = 5_000 } = options;
-    let pending: string[] = [];
-    let timer: ReturnType<typeof setTimeout> | null = null;
+const DEBOUNCE_WINDOW_MS = new Duration({ seconds: 5 }).inMilliseconds;
 
-    return (entry: string) => {
-        pending.push(entry);
-        if (timer != null) {
-            return;
-        }
+interface ICafeDataLog {
+    cafeId: string;
+    dateString: string;
+}
+
+export const createDebouncedCafeDataLogger = (logger: Logger, baseMessage: string) => {
+    const pendingCafeIdsByDateString = new Map<string /*dateString*/, Set<string /*cafeId*/>>();
+    let timer: ReturnType<typeof setTimeout> | undefined = undefined;
+
+    return ({ cafeId, dateString }: ICafeDataLog) => {
+        const cafeIdsForDateString = pendingCafeIdsByDateString.get(dateString) ?? new Set<string>();
+        cafeIdsForDateString.add(cafeId);
+        pendingCafeIdsByDateString.set(dateString, cafeIdsForDateString);
+
+        clearTimeout(timer);
         timer = setTimeout(() => {
-            const entries = pending;
-            pending = [];
-            timer = null;
-            if (entries.length === 1) {
-                logger.info(`${prefix} ${entries[0]}`);
-            } else {
-                logger.info(`${prefix} ${entries.length} ${pluralNoun}`);
+            const subMessages: string[] = [];
+            for (const [dateString, cafeIds] of pendingCafeIdsByDateString.entries()) {
+                subMessages.push(`${dateString}: ${Array.from(cafeIds).sort().join(', ')} (${cafeIds.size})`);
             }
-        }, windowMs);
+            logger.info(`${baseMessage}:\n${subMessages.join('\n')}`);
+            pendingCafeIdsByDateString.clear();
+        }, DEBOUNCE_WINDOW_MS);
     };
 };

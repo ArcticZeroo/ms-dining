@@ -25,14 +25,11 @@ import { IServerReview } from '../../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
 
-import { createDebouncedLogger } from '../../../shared/util/debounced-logger.js';
+import { createDebouncedCafeDataLogger } from '../../../shared/util/debounced-logger.js';
 
 const logger = getNamespaceLogger('recommendations');
 
-const logRecommendationUpdate = createDebouncedLogger(logger, {
-	prefix:     'Updated recommendations for',
-	pluralNoun: 'cafe-dates',
-});
+const logRecommendationUpdate = createDebouncedCafeDataLogger(logger, 'Updated recommendations');
 
 const RECOMMENDATIONS_SEMAPHORE = new Semaphore(2);
 const GLOBAL_RECOMMENDATION_SECTIONS_CACHE = new MenuDateMap<LockedExpiringMap<string /*cafeId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();
@@ -225,7 +222,7 @@ const seedCafeRecommendationsForDate = (dateString: string, cafeId: string) => {
 	});
 
 	getRecommendationsForCafe(context)
-		.then(() => logRecommendationUpdate(`${cafeId}@${dateString}`))
+		.then(() => logRecommendationUpdate({ cafeId, dateString }))
 		.catch(err => logError(`Error seeding cafe recommendations for cafe ${cafeId} on ${dateString}:`, err));
 }
 
