@@ -268,6 +268,12 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
                 emoji: '🍛'
             },
             {
+                name:  'Bowlna',
+                id:    'bowlna',
+                emoji: '🍛',
+                firstAvailable: new Date(2026, 4, 26)
+            },
+            {
                 name: 'Hometown',
                 id:   'hometown',
             },
