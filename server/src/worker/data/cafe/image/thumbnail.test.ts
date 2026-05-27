@@ -1,68 +1,50 @@
 /**
- * Tests for the thumbnail subsystem — commits 8ef6826 ("fix always
- * downloading thumbnail") and c7aeef8 ("Fix problem with thumbnails not
- * updating over time").
+ * Tests for the thumbnail subsystem.
  *
- * ⚠️  Honest scope note: the actual cache-staleness logic targeted by
- * those two commits lives in api/worker-thread/thumbnail.ts inside the
- * file-scoped (non-exported) `getThumbnailData` function. It runs as a
- * Worker thread command handler (THUMBNAIL_THREAD_HANDLER). Driving it
- * end-to-end requires (a) spawning a real Worker thread (which executes
- * loadExistingThumbnailsOnBoot against the on-disk production thumbnail
- * directory at module load — off-limits) and (b) intercepting the global
- * fetch() call that loadImageData makes. Neither seam exists today
- * without modifying production code.
- *
- * So the regression coverage for 8ef6826 / c7aeef8 is currently *not*
- * exercised by any test in this file — the it.skip() blocks at the bottom
- * are TODO markers that should be filled in if/when a pure cache-check
- * helper (e.g. an exported `isThumbnailUpToDate(metadata, lastUpdateTime)`)
- * gets factored out.
- *
- * What we DO test below:
+ * Coverage:
  *   - computeDHash determinism (same image → same hash; different images
- *     → different hashes; output shape). This locks in the perceptual
- *     hash the cache-up-to-date check would eventually compare against,
- *     so a future regression that scrambles dHash output is caught.
+ *     → different hashes; output shape).
  *   - getThumbnailFilepath / getHashThumbnailFilepath path shape.
+ *   - processImageToThumbnail on large images (regression for OOM with
+ *     jpeg-js / Jimp on high-resolution JPEGs).
+ *   - isThumbnailUpToDate cache-staleness logic (regressions for 8ef6826
+ *     and c7aeef8).
  *
- * Manifest CRUD tests were moved to ./manifest.test.ts — they don't
- * cover c7aeef8 / 8ef6826, so co-locating them here was misleading about
- * the regression coverage this file delivers.
+ * Manifest CRUD tests live in ./manifest.test.ts.
  */
 
 import { describe, it } from 'node:test';
 import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
-import Jimp from 'jimp';
+import sharp from 'sharp';
 import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../../shared/constants/config.js';
 import {
     computeDHash,
     getHashThumbnailFilepath,
     getThumbnailFilepath,
+    processImageToThumbnail,
 } from './thumbnail.js';
+import { isThumbnailUpToDate } from '../../../data/threads/thumbnail.js';
 
 // --- helpers ---------------------------------------------------------
 
 /**
- * Builds a small in-memory Jimp image filled with a simple horizontal
+ * Builds a small in-memory PNG buffer filled with a simple horizontal
  * gradient seeded by `seed`. Different seeds → visually different images
  * → different dHashes.
  */
-const buildImage = async (width: number, height: number, seed: number): Promise<Jimp> => {
-    const image = await Jimp.create(width, height, 0xffffffff);
+const buildImage = async (width: number, height: number, seed: number): Promise<Buffer> => {
+    const channels = 3;
+    const pixels = Buffer.alloc(width * height * channels);
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            // Deterministic per-pixel color driven by (x, y, seed).
-            const r = (x * 7 + seed * 13) & 0xff;
-            const g = (y * 11 + seed * 17) & 0xff;
-            const b = ((x + y) * 5 + seed * 19) & 0xff;
-            // Hex 0xRRGGBBAA with full alpha.
-            const color = (r << 24) | (g << 16) | (b << 8) | 0xff;
-            image.setPixelColor(color >>> 0, x, y);
+            const offset = (y * width + x) * channels;
+            pixels[offset]     = (x * 7 + seed * 13) & 0xff;
+            pixels[offset + 1] = (y * 11 + seed * 17) & 0xff;
+            pixels[offset + 2] = ((x + y) * 5 + seed * 19) & 0xff;
         }
     }
-    return image;
+    return sharp(pixels, { raw: { width, height, channels } }).png().toBuffer();
 };
 
 // --- tests -----------------------------------------------------------
@@ -71,29 +53,27 @@ describe('computeDHash — perceptual stability', () => {
     it('returns the same hash for the same image content', async () => {
         const a = await buildImage(64, 48, 1);
         const b = await buildImage(64, 48, 1);
-        assert.equal(computeDHash(a), computeDHash(b),
+        assert.equal(await computeDHash(a), await computeDHash(b),
             'identical pixel content must produce identical hashes');
     });
 
-    it('returns the same hash when run twice against the same image instance', async () => {
-        // computeDHash clones internally, so repeated calls against the
-        // same image must remain deterministic.
+    it('returns the same hash when run twice against the same buffer', async () => {
         const img = await buildImage(64, 48, 2);
-        const first = computeDHash(img);
-        const second = computeDHash(img);
+        const first = await computeDHash(img);
+        const second = await computeDHash(img);
         assert.equal(first, second);
     });
 
     it('returns different hashes for substantially different images', async () => {
         const a = await buildImage(64, 48, 1);
         const b = await buildImage(64, 48, 99);
-        assert.notEqual(computeDHash(a), computeDHash(b),
+        assert.notEqual(await computeDHash(a), await computeDHash(b),
             'a different gradient seed should perturb enough pixels to flip the dHash');
     });
 
     it('produces a 16-character hex string (64 bits)', async () => {
         const img = await buildImage(64, 48, 3);
-        const hash = computeDHash(img);
+        const hash = await computeDHash(img);
         assert.equal(hash.length, 16, `dHash should be 16 hex chars, got "${hash}"`);
         assert.match(hash, /^[0-9a-f]{16}$/, 'dHash should be lowercase hex');
     });
@@ -120,40 +100,61 @@ describe('thumbnail path helpers', () => {
     });
 });
 
-// Manifest CRUD assertions moved to ./manifest.test.ts — they're unrelated
-// to the c7aeef8 / 8ef6826 cache-staleness regressions documented above.
+describe('large image handling', () => {
+    // Regression: a 8256×5504 JPEG caused jpeg-js (used by Jimp) to exceed
+    // its 512MB memory limit. sharp handles this via DCT shrink-on-load.
+    // We use 4000×3000 here to keep test memory reasonable while still being
+    // large enough to have caused OOM under the old Jimp implementation.
+    it('processImageToThumbnail succeeds on a large JPEG without OOM', async () => {
+        const width = 4000;
+        const height = 3000;
+        const channels = 3;
+        const pixels = Buffer.alloc(width * height * channels);
+        for (let i = 0; i < pixels.length; i++) {
+            pixels[i] = (i * 7) & 0xff;
+        }
 
-// ---------------------------------------------------------------------
-// Skipped: cache-staleness regressions for 8ef6826 + c7aeef8.
-// ---------------------------------------------------------------------
-//
-// These tests would pin the actual fix points but require either a
-// refactor that exposes the cache-up-to-date helper, or test seams for
-// global fetch() + the Worker-thread boundary. Documented here so a
-// future cleanup can drop the `.skip` and fill in the assertions.
+        const jpegBuffer = await sharp(pixels, { raw: { width, height, channels } })
+            .jpeg({ quality: 50 })
+            .toBuffer();
 
-describe('cache-staleness behavior (api/worker-thread/thumbnail.ts:getThumbnailData)', () => {
-    it.skip('reuses cached metadata when cached lastUpdateTime >= source lastUpdateTime', () => {
-        // Regression for 8ef6826. Currently untestable because:
-        //   - getThumbnailData is not exported (it's wrapped by
-        //     THUMBNAIL_THREAD_HANDLER), and
-        //   - the cache-hit path in worker-thread/thumbnail.ts requires
-        //     the Worker-thread module's private `thumbnailDataByMenuItemId`
-        //     map to be pre-populated.
-        // Exposing `isThumbnailUpToDate(metadata, sourceLastUpdateTime)`
-        // as a pure helper would let us test this without spinning a
-        // Worker.
+        const result = await processImageToThumbnail(jpegBuffer);
+
+        assert.equal(result.hash.length, 16);
+        assert.match(result.hash, /^[0-9a-f]{16}$/);
+        assert.ok(result.width <= 400, `thumbnail width ${result.width} exceeds 400`);
+        assert.ok(result.height <= 200, `thumbnail height ${result.height} exceeds 200`);
+        assert.ok(result.pngBuffer.length > 0, 'should produce a non-empty PNG');
+    });
+});
+
+// Manifest CRUD assertions live in ./manifest.test.ts.
+
+describe('isThumbnailUpToDate — cache-staleness logic', () => {
+    it('returns true when cached lastUpdateTime >= source lastUpdateTime', () => {
+        const cached = new Date('2024-06-01T12:00:00Z');
+        const source = new Date('2024-05-01T12:00:00Z');
+        assert.equal(isThumbnailUpToDate(cached, source), true);
     });
 
-    it.skip('regenerates the thumbnail when the source is newer than the cached copy', () => {
-        // Regression for c7aeef8. Same blocker — needs a pure helper or
-        // an injectable fetch seam to assert that loadImageData was
-        // called for the stale source.
+    it('returns true when cached and source lastUpdateTime are equal', () => {
+        const time = new Date('2024-06-01T12:00:00Z');
+        assert.equal(isThumbnailUpToDate(time, new Date(time.getTime())), true);
     });
 
-    it.skip('forces re-download when the request carries no lastUpdateTime', () => {
-        // Regression for 8ef6826 — pre-fix, missing lastUpdateTime caused
-        // the cache check to silently return cached metadata in some
-        // arrangements. Same testability blocker.
+    it('returns false when the source is newer than the cached copy', () => {
+        const cached = new Date('2024-05-01T12:00:00Z');
+        const source = new Date('2024-06-01T12:00:00Z');
+        assert.equal(isThumbnailUpToDate(cached, source), false);
+    });
+
+    it('returns true when the request carries no lastUpdateTime (null)', () => {
+        const cached = new Date('2024-06-01T12:00:00Z');
+        assert.equal(isThumbnailUpToDate(cached, null), true);
+    });
+
+    it('returns true when the request carries no lastUpdateTime (undefined)', () => {
+        const cached = new Date('2024-06-01T12:00:00Z');
+        assert.equal(isThumbnailUpToDate(cached, undefined), true);
     });
 });

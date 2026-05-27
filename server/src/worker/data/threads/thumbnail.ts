@@ -61,12 +61,27 @@ const loadExistingThumbnailsOnBoot = async () => {
     console.timeEnd('thumbnail loading on boot');
 }
 
+/**
+ * Determines whether cached thumbnail metadata is still up-to-date
+ * relative to the source's lastUpdateTime.
+ *
+ * Returns true (cache hit) when:
+ *  - The request carries no lastUpdateTime (nothing to compare against), OR
+ *  - The cached metadata's lastUpdateTime is >= the request's lastUpdateTime
+ */
+export const isThumbnailUpToDate = (cachedLastUpdateTime: Date, requestLastUpdateTime: Date | null | undefined): boolean => {
+    if (requestLastUpdateTime == null) {
+        return true;
+    }
+    return cachedLastUpdateTime.getTime() >= requestLastUpdateTime.getTime();
+};
+
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult | null> => {
     await loadThumbnailsPromise;
     return THUMBNAIL_SEMAPHORE_BY_ID.acquire(request.id, async () => {
         if (thumbnailDataByMenuItemId.has(request.id)) {
             const metadata = thumbnailDataByMenuItemId.get(request.id)!;
-            if (request.lastUpdateTime == null || metadata.lastUpdateTime.getTime() >= request.lastUpdateTime.getTime()) {
+            if (isThumbnailUpToDate(metadata.lastUpdateTime, request.lastUpdateTime)) {
                 return metadata;
             }
         }

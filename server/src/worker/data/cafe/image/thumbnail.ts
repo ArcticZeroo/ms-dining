@@ -1,4 +1,4 @@
-import Jimp from 'jimp';
+import sharp from 'sharp';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serverMenuItemThumbnailPath, serverThumbnailPath } from '../../../../shared/constants/config.js';
@@ -25,20 +25,22 @@ export interface IThumbnailResult extends IImageMetadata {
  * Compute a difference hash (dHash) for perceptual image comparison.
  * Resizes to 9x8 grayscale, compares adjacent pixels per row to produce a 64-bit hash.
  */
-export const computeDHash = (image: Jimp): string => {
-    const resized = image.clone()
-        .resize(DHASH_WIDTH, DHASH_HEIGHT)
-        .greyscale();
+export const computeDHash = async (imageInput: Buffer | string): Promise<string> => {
+    const { data } = await sharp(imageInput)
+        .greyscale()
+        .resize(DHASH_WIDTH, DHASH_HEIGHT, { fit: 'fill' })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
 
     let hash = BigInt(0);
 
     for (let y = 0; y < DHASH_HEIGHT; y++) {
         for (let x = 0; x < DHASH_WIDTH - 1; x++) {
-            const leftPixel = Jimp.intToRGBA(resized.getPixelColor(x, y));
-            const rightPixel = Jimp.intToRGBA(resized.getPixelColor(x + 1, y));
+            const leftPixel = data[y * DHASH_WIDTH + x]!;
+            const rightPixel = data[y * DHASH_WIDTH + x + 1]!;
 
             hash <<= BigInt(1);
-            if (leftPixel.r > rightPixel.r) {
+            if (leftPixel > rightPixel) {
                 hash |= BigInt(1);
             }
         }
@@ -81,35 +83,55 @@ export const getThumbnailFilepath = (id: string) => path.join(serverMenuItemThum
 export const getHashThumbnailFilepath = (hash: string) => path.join(serverThumbnailPath, `${hash}.png`);
 
 export const computeHashFromExistingImage = async (id: string, imagePath: string): Promise<{ hash: string; width: number; height: number }> => {
-    const image = await Jimp.read(imagePath);
-    const hash = computeDHash(image);
-    updateManifestEntry(id, { hash, width: image.getWidth(), height: image.getHeight(), lastUpdateTime: new Date().toISOString() });
-    return { hash, width: image.getWidth(), height: image.getHeight() };
+    const metadata = await sharp(imagePath).metadata();
+    const hash = await computeDHash(imagePath);
+    const width = metadata.width!;
+    const height = metadata.height!;
+    updateManifestEntry(id, { hash, width, height, lastUpdateTime: new Date().toISOString() });
+    return { hash, width, height };
+};
+
+export interface IProcessedThumbnail extends IThumbnailResult {
+    pngBuffer: Buffer;
+}
+
+export const processImageToThumbnail = async (imageData: Buffer): Promise<IProcessedThumbnail> => {
+    const image = sharp(imageData);
+    const metadata = await image.metadata();
+    const { height: origHeight, width: origWidth } = metadata;
+
+    if (!origHeight || !origWidth) {
+        throw new Error('Could not determine image dimensions');
+    }
+
+    const scale = Math.min(maxThumbnailHeightPx / origHeight, maxThumbnailWidthPx / origWidth);
+    const width = Math.round(origWidth * scale);
+    const height = Math.round(origHeight * scale);
+
+    const resized = image.resize(width, height);
+    const pngBuffer = await resized.png().toBuffer();
+
+    const hash = await computeDHash(pngBuffer);
+
+    return {
+        width,
+        height,
+        lastUpdateTime: new Date(),
+        hash,
+        pngBuffer
+    };
 };
 
 export const createAndSaveThumbnailForMenuItem = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult> => {
     const imageData = await loadImageData(request.imageUrl);
-    const image = await Jimp.read(imageData);
-
-    const { height, width } = image.bitmap;
-    const scale = Math.min(maxThumbnailHeightPx / height, maxThumbnailWidthPx / width);
-
-    image.scale(scale);
-
-    const hash = computeDHash(image);
+    const { pngBuffer, ...result } = await processImageToThumbnail(imageData);
 
     // Save to old path (backward compat)
-    await image.writeAsync(getThumbnailFilepath(request.id));
+    await fs.writeFile(getThumbnailFilepath(request.id), pngBuffer);
 
     // Save to new hash-based path (always overwrite — collision rate is negligible)
-    const hashPath = getHashThumbnailFilepath(hash);
     await fs.mkdir(serverThumbnailPath, { recursive: true });
-    await image.writeAsync(hashPath);
+    await fs.writeFile(getHashThumbnailFilepath(result.hash), pngBuffer);
 
-    return {
-        width:          image.getWidth(),
-        height:         image.getHeight(),
-        lastUpdateTime: new Date(),
-        hash
-    };
+    return result;
 };

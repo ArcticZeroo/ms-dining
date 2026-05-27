@@ -1,9 +1,6 @@
-import { promisify } from 'node:util';
-import { imageSize as getImageSizeSync } from 'image-size';
+import sharp from 'sharp';
 import fs from 'node:fs/promises';
 import { logError } from './log.js';
-
-const getImageSizeAsync = promisify(getImageSizeSync);
 
 export interface IImageMetadata {
 	width: number;
@@ -13,13 +10,9 @@ export interface IImageMetadata {
 
 export const retrieveImageMetadataAsync = async (imagePath: string): Promise<IImageMetadata | null> => {
     try {
-        const [imageSizeResult, { mtime: lastUpdateTime }] = await Promise.all([getImageSizeAsync(imagePath), fs.stat(imagePath)]);
+        const [metadata, { mtime: lastUpdateTime }] = await Promise.all([sharp(imagePath).metadata(), fs.stat(imagePath)]);
 
-        if (imageSizeResult == null) {
-            return null;
-        }
-
-        const { width, height } = imageSizeResult;
+        const { width, height } = metadata;
 
         if (width == null || height == null) {
             return null;
