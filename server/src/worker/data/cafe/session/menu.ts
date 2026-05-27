@@ -10,6 +10,7 @@ import { retrieveTagDefinitionsAsync } from '../buy-ondemand/tags.js';
 import { retrieveMenuItemsAsync } from '../buy-ondemand/menu-items.js';
 import { retrieveModifiersForMenuItemAsync } from '../buy-ondemand/modifiers.js';
 import { IMenuItemModifier } from '@msdining/common/models/cafe';
+import { normalizeTagName } from '@msdining/common/constants/tags';
 
 const tagLock = new Lock();
 
@@ -141,7 +142,7 @@ export class CafeMenuSession {
             for (const tagId of jsonItem.tagIds) {
                 const tag = await this.#retrieveTagNameAsync(tagId, station);
                 if (tag != null) {
-                    tags.add(tag);
+                    tags.add(normalizeTagName(tag));
                 }
             }
         }
