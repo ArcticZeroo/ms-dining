@@ -3,7 +3,7 @@ import { SearchEntityType } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import React, { useContext, useMemo } from 'react';
 import { ApplicationSettings } from '../../../../constants/settings.ts';
-import { knownTags } from '../../../../constants/tags.tsx';
+import { isTagHighlighted, knownTags } from '../../../../constants/tags.tsx';
 import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../../context/html.ts';
 import { CurrentCafeContext, StationInfoContext } from '../../../../context/menu-item.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
@@ -83,7 +83,7 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
 
     const currentHighlightTag = useMemo(() => {
         for (const tagName of menuItem.tags) {
-            if (highlightTagNames.has(tagName)) {
+            if (isTagHighlighted(tagName, highlightTagNames)) {
                 return knownTags[tagName];
             }
         }
