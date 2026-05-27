@@ -9,12 +9,12 @@ export interface ITagData {
 const EMISSIONS_TAG_COLOR = '#384c6e';
 
 /**
- * Tags that should also be highlighted when a given tag is selected.
- * e.g. selecting "vegetarian" also highlights "vegan" items since
- * all vegan food is vegetarian.
+ * Maps a tag to the set of tags that imply it. If any of the implying
+ * tags are selected, this tag should also be highlighted.
+ * e.g. "vegan" is implied by "vegetarian" — all vegan food is vegetarian.
  */
-export const tagImplications: Partial<Record<string, string[]>> = {
-    'vegetarian': ['vegan'],
+const tagImpliedBy: Partial<Record<string, Set<string>>> = {
+    'vegan': new Set(['vegetarian']),
 };
 
 /**
@@ -25,12 +25,8 @@ export const isTagHighlighted = (tagName: string, selectedTags: ReadonlySet<stri
     if (selectedTags.has(tagName)) {
         return true;
     }
-    for (const selectedTag of selectedTags) {
-        if (tagImplications[selectedTag]?.includes(tagName)) {
-            return true;
-        }
-    }
-    return false;
+
+    return tagImpliedBy[tagName]?.has(tagName) === true;
 };
 
 // The first one hit will be the highlight color.
