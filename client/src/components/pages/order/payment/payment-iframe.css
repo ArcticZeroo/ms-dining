@@ -3,6 +3,7 @@
 .modal .iframe-container {
     position: relative;
     flex: 1;
+    min-width: 450px;
     min-height: 500px;
     background: var(--color-background);
 }
@@ -18,6 +19,7 @@
 
 @media screen and (max-width: 800px) {
     .modal .iframe-container {
+        min-width: unset;
         min-height: unset;
     }
 }
