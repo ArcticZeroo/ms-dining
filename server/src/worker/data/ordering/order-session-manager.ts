@@ -105,13 +105,25 @@ export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl }:
 	);
 
 	const session = await ACTIVE_ORDER_SESSIONS.update(pendingOrderId, async (session) => {
-		if (!session || session.createdDateString !== getTodayDateString()) {
+		const isReusable = session && session.isReadyForPayment;
+
+		if (!isReusable) {
+			if (session) {
+				orderLog.info(`Discarding stale session for ${pendingOrderId} (stage=${session.lastCompletedStage}, created=${session.createdDateString})`);
+			}
 			session = await createOrderSession(cafeId, items);
 			await session.prepareForIframe(iframeCssUrl);
 		}
 
-		return session;
+		return session!;
 	});
+
+	if (!session) {
+		throw new ServiceError(
+			SERVICE_ERROR_CODES.INTERNAL,
+			'Failed to create order session',
+		);
+	}
 
 	return [pendingOrderId, session];
 }
