@@ -198,11 +198,11 @@ export abstract class DailyMenuStorageClient {
 
 		// Atomic write: delete old data + insert new data in a single transaction.
 		// Goes through the write semaphore to avoid SQLite write-lock contention.
-		const transactionStartMs = Date.now();
-		await usePrismaTransaction(
-			async tx => writeMenuInTransaction(tx, { cafeId, dateString, stations }),
-		);
-
+		let transactionStartMs = 0;
+		await usePrismaTransaction(async tx => {
+			transactionStartMs = Date.now();
+			await writeMenuInTransaction(tx, { cafeId, dateString, stations });
+		});
 		const transactionElapsedMs = Date.now() - transactionStartMs;
 		if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
 			logInfo(`{${dateString}} WARNING: Menu publish transaction for cafe ${cafe.name} took ${transactionElapsedMs}ms (exceeds ${MENU_PUBLISH_TRANSACTION_WARN_MS}ms threshold)`);
