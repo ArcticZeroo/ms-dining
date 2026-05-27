@@ -1,4 +1,5 @@
-import { isMainThread, parentPort, Worker, workerData } from 'node:worker_threads';
+import { isMainThread, parentPort, Worker } from 'node:worker_threads';
+import { isWorkerEntryModule } from './worker-identity.js';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { logDebug, logError } from '../../shared/util/log.js';
@@ -157,7 +158,7 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         // the entry URL that spawned this worker. Other WorkerThreadHandler
         // instances imported as dependencies (e.g. search/thumbnail handlers
         // inside the data worker) are spawners, not receivers.
-        this.#isReceiver = !isMainThread && workerData?.__handlerEntryUrl === filePath.href;
+        this.#isReceiver = !isMainThread && isWorkerEntryModule(filePath);
 
         if (this.#isReceiver) {
             if (services == null) {

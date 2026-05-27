@@ -102,7 +102,9 @@ const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThum
     });
 }
 
-const loadThumbnailsPromise = isMainThread ? Promise.resolve() : loadExistingThumbnailsOnBoot();
+import { isWorkerEntryModule } from '../../rpc/worker-identity.js';
+
+const loadThumbnailsPromise = isWorkerEntryModule(new URL(import.meta.url)) ? loadExistingThumbnailsOnBoot() : Promise.resolve();
 
 loadThumbnailsPromise
     .catch(err => logError('[Thumbnail Thread] Failed to load thumbnail data', err));
