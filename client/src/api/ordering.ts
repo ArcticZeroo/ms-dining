@@ -14,6 +14,9 @@ import z from 'zod';
 import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
 
 const ORDER_BASE = '/api/dining/order';
+const OrderCountSchema = z.object({ count: z.number() });
+
+export type OrderHistorySince = '7d' | '30d' | 'all';
 
 export abstract class OrderClient {
     static async preparePayment(
@@ -53,6 +56,20 @@ export abstract class OrderClient {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/today`,
             schema: z.array(CafeOrderSchema),
+        });
+    }
+
+    static async getOrderHistory(since: OrderHistorySince): Promise<ICafeOrder[]> {
+        return makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/history?since=${since}`,
+            schema: z.array(CafeOrderSchema),
+        });
+    }
+
+    static async getOrderCount(): Promise<{ count: number }> {
+        return makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/count`,
+            schema: OrderCountSchema,
         });
     }
 }

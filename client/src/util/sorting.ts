@@ -51,14 +51,15 @@ export const sortViews = (views: Iterable<CafeView>) => {
         .sort((a, b) => compareViewNames(a.value.name, b.value.name));
 };
 
+export const getHomepageCafeIds = (viewsById: Map<string, CafeView>) => new Set(
+    Array.from(ApplicationSettings.homepageViews.value)
+        .filter(viewId => viewsById.has(viewId))
+        .flatMap(viewId => getAllSingleCafesInView(viewId, viewsById))
+        .map(cafe => cafe.id)
+);
+
 export const sortCafesInPriorityOrder = (cafes: ICafe[], viewsById: Map<string, CafeView>) => {
-    const homepageViewIds = ApplicationSettings.homepageViews.value;
-    const homepageCafeIds = new Set(
-        Array.from(homepageViewIds)
-            .filter(viewId => viewsById.has(viewId))
-            .flatMap(viewId => getAllSingleCafesInView(viewId, viewsById))
-            .map(cafe => cafe.id)
-    );
+    const homepageCafeIds = getHomepageCafeIds(viewsById);
 
     const lastUsedCafeIds = InternalSettings.lastUsedCafeIds.value;
 

@@ -52,6 +52,11 @@ export const OrderCheckoutView = () => {
                 <div className="card yellow text-center">
                     Your cart is empty. Add items from a cafe menu to get started.
                 </div>
+                <div className="centered-content">
+                    <Link to="/order/history" className="default-container default-button">
+                        Order History
+                    </Link>
+                </div>
                 <CompletedOrdersView/>
             </div>
         );
@@ -88,6 +93,11 @@ export const OrderCheckoutView = () => {
             <div className="centered-content">
                 <Link to="/order/done" className="default-container default-button">
                     View Your Orders From Today
+                </Link>
+            </div>
+            <div className="centered-content">
+                <Link to="/order/history" className="default-container default-button">
+                    Order History
                 </Link>
             </div>
         </div>

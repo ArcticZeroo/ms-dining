@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCompletedOrdersTodayQuery } from '../../../store/queries/ordering.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
 import { RetryButton } from '../../button/retry-button.tsx';
@@ -36,6 +37,11 @@ export const CompletedOrdersView = () => {
             <div className="card">
                 <div className="title text-center">Your Orders Today</div>
                 <CompletedOrdersList orders={ordersQuery.data}/>
+                <div className="centered-content">
+                    <Link to="/order/history" className="default-container default-button">
+                        View Full History
+                    </Link>
+                </div>
             </div>
         </div>
     );
