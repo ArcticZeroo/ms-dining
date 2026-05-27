@@ -9,7 +9,7 @@ interface IHomepageCafesFilterButtonProps {
 export const HomepageCafesFilterButton = ({ isActive, onClick }: IHomepageCafesFilterButtonProps) => (
     <button
         type="button"
-        className={classNames('default-container default-button flex flex-center', isActive && 'active')}
+        className={classNames('default-container flex flex-center default-button grey', isActive && 'active')}
         onClick={onClick}
         title={isActive ? 'Showing only your homepage cafes' : 'Filter to your homepage cafes'}
     >

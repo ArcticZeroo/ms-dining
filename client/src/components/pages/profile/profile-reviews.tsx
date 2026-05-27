@@ -5,6 +5,9 @@ import { IReview } from '@msdining/common/models/review';
 import { useMemo } from 'react';
 import { ReviewStats } from '../../reviews/review-stats.tsx';
 import { useMyReviews } from '../../../store/queries/reviews.ts';
+import { CollapsibleContainer } from '../../collapsible/collapsible-container.js';
+import { CollapsibleHeader } from '../../collapsible/collapsible-header.js';
+import { CollapsibleBody } from '../../collapsible/collapsible-body.js';
 
 interface IReviewStats {
     counts: Record<number, number>;
@@ -96,17 +99,24 @@ export const ProfileReviews = () => {
             }
             {
                 reviews.length > 0 && (
-                    <div className="flex-col">
-                        {
-                            reviews.map(review => (
-                                <ReviewCard
-                                    key={review.id}
-                                    review={review}
-                                    showMyself={true}
-                                />
-                            ))
-                        }
-                    </div>
+                    <CollapsibleContainer>
+                        <CollapsibleHeader>
+                            Show My Reviews
+                        </CollapsibleHeader>
+                        <CollapsibleBody>
+                            <div className="flex-col">
+                                {
+                                    reviews.map(review => (
+                                        <ReviewCard
+                                            key={review.id}
+                                            review={review}
+                                            showMyself={true}
+                                        />
+                                    ))
+                                }
+                            </div>
+                        </CollapsibleBody>
+                    </CollapsibleContainer>
                 )
             }
         </div>
