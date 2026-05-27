@@ -1,24 +1,31 @@
 /**
- * Canonical tag IDs and their display names.
- *
- * When the upstream API provides a tag whose display name matches
- * a known tag (case-insensitive), we normalize it to the canonical
- * ID so duplicates are eliminated at parse time.
+ * Maps cryptic upstream tag IDs to human-readable canonical names.
+ * Tags not in this map are kept as-is (they're already readable).
  */
-export const KNOWN_TAG_DISPLAY_NAMES: Record<string, string> = {
-	'low_circle':    'Low Emissions',
-	'medium_circle': 'Medium Emissions',
-	'high_circle':   'High Emissions',
-	'vegan':         'Vegan',
-	'vegetarian':    'Vegetarian',
-	'gluten free':   'Gluten Free',
+const TAG_ID_TO_CANONICAL: Record<string, string> = {
+    'low_circle':    'low emissions',
+    'medium_circle': 'medium emissions',
+    'high_circle':   'high emissions',
 };
 
-// Reverse map: lowercased display name → canonical tag ID
-const displayNameToTagId = new Map(Object.entries(KNOWN_TAG_DISPLAY_NAMES).map(([tagId, name]) => [name.toLowerCase(), tagId]));
+/**
+ * Normalizes a tag name to its canonical form.
+ * Converts cryptic API tag IDs (e.g. "low_circle") to readable names
+ * (e.g. "low emissions"). Already-readable names pass through unchanged,
+ * and duplicates collapse since both map to the same canonical name.
+ */
+export const normalizeTagName = (tagName: string): string =>
+    TAG_ID_TO_CANONICAL[tagName] ?? tagName;
 
 /**
- * If the tag name (case-insensitive) matches a known tag's display name,
- * returns the canonical tag ID. Otherwise returns the original tag name.
+ * Known tag display names, keyed by canonical tag name.
+ * Used by client for rendering icons/colors, by server for normalization.
  */
-export const normalizeTagName = (tagName: string): string => displayNameToTagId.get(tagName.toLowerCase()) ?? tagName;
+export const KNOWN_TAG_NAMES: Record<string, string> = {
+    'gluten free':      'Gluten Free',
+    'vegan':            'Vegan',
+    'vegetarian':       'Vegetarian',
+    'low emissions':    'Low Emissions',
+    'medium emissions': 'Medium Emissions',
+    'high emissions':   'High Emissions',
+};

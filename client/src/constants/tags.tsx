@@ -46,17 +46,17 @@ export const knownTags: Record<string, ITagData> = {
         icon: '🥦',
         color: '#7d967d'
     },
-    'low_circle': {
+    'low emissions': {
         name: 'Low Emissions',
         icon: '🌎',
         color: EMISSIONS_TAG_COLOR
     },
-    'medium_circle': {
+    'medium emissions': {
         name: 'Medium Emissions',
         icon: '🌎',
         color: EMISSIONS_TAG_COLOR
     },
-    'high_circle': {
+    'high emissions': {
         name: 'High Emissions',
         icon: '🌎',
         color: EMISSIONS_TAG_COLOR
