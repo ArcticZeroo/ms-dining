@@ -8,8 +8,7 @@ import { MapEntityFilterDropdown } from './map-entity-filter-dropdown.tsx';
 import { MapSearchResultItem } from './map-search-result-item.tsx';
 import { MapSearchSortSelector } from './map-search-sort-selector.tsx';
 import { SimilarQueries } from '../../search/similar-queries.tsx';
-import starIcon from '../../../assets/icons/filled/star-white.svg';
-import { classNames } from '../../../util/react.ts';
+import { HomepageCafesFilterButton } from '../../button/homepage-cafes-filter-button.tsx';
 import { RetryButton } from '../../button/retry-button.js';
 
 interface IMapSearchResultsProps {
@@ -81,15 +80,10 @@ export const MapSearchResults: React.FC<IMapSearchResultsProps> = ({ results, is
                     hasHomeCafes={hasHomeCafes}
                 />
                 {hasHomeCafes && (
-                    <button
+                    <HomepageCafesFilterButton
+                        isActive={isFilteredToHomeCafes}
                         onClick={onFilterToHomeCafes}
-                        className={classNames('map-home-cafes-button default-container default-button flex flex-center', isFilteredToHomeCafes && 'active')}
-                        title={isFilteredToHomeCafes ? 'Already filtered to your favorite cafes' : 'Filter to your favorite cafes'}
-                        disabled={isFilteredToHomeCafes}
-                    >
-                        <img src={starIcon} alt="" className="icon-sized"/>
-                        My Cafes
-                    </button>
+                    />
                 )}
             </div>
             <span className="subtitle map-search-result-count">

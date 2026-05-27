@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import { getViewMenuUrlDirect } from '../../../util/link.js';
-import { formatTimeToHoursMinutes } from '../../../util/date.js';
-import { formatEstimatedReadyTime } from '../../../util/order.js';
-import { CompletedOrderItemsTable } from './status/completed-order-items-table.js';
+import { getViewMenuUrlDirect } from '../../../../util/link.js';
+import { formatTimeToHoursMinutes } from '../../../../util/date.js';
+import { formatEstimatedReadyTime } from '../../../../util/order.js';
+import { CompletedOrderItemsTable } from '../status/completed-order-items-table.js';
 import type { ICafeOrder, ICafeOrderItem } from '@msdining/common/models/order';
-import { getViewName } from '../../../util/cafe.js';
+import { getViewName } from '../../../../util/cafe.js';
 import React, { useContext } from 'react';
-import { ApplicationContext } from '../../../context/app.js';
+import { ApplicationContext } from '../../../../context/app.js';
 
 interface ICompletedOrderItemProps {
     order: ICafeOrder;
@@ -14,7 +14,7 @@ interface ICompletedOrderItemProps {
     reorder: (items: ICafeOrderItem[], navigateAfterAdd?: boolean) => void;
 }
 
-export const CompletedOrderItem: React.FC<ICompletedOrderItemProps> = ({ order, isPending, reorder }) => {
+export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, isPending, reorder }) => {
     const { viewsById } = useContext(ApplicationContext);
     const view = viewsById.get(order.cafeId);
     const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });

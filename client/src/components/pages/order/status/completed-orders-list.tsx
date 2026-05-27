@@ -3,7 +3,7 @@ import React from 'react';
 import { useReorder } from '../../../../hooks/reorder.ts';
 import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
 import { pluralize } from '../../../../util/string.js';
-import { CompletedOrderItem } from '../completed-order-item.js';
+import { CompletedOrderCard } from '../history/completed-order-card.js';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrder[];
@@ -63,7 +63,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
             </div>
             <div className="flex flex-center flex-wrap">
                 {orders.map((order) => (
-                    <CompletedOrderItem
+                    <CompletedOrderCard
                         key={order.id}
                         order={order}
                         reorder={reorder}

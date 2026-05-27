@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
-import { useCompletedOrdersTodayQuery } from '../../../store/queries/ordering.ts';
-import { getErrorMessage } from '../../../util/mutation.ts';
-import { RetryButton } from '../../button/retry-button.tsx';
-import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
-import { CompletedOrdersList } from './status/completed-orders-list.tsx';
+import { useCompletedOrdersTodayQuery } from '../../../../store/queries/ordering.ts';
+import { getErrorMessage } from '../../../../util/mutation.ts';
+import { RetryButton } from '../../../button/retry-button.tsx';
+import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
+import { CompletedOrdersList } from '../status/completed-orders-list.tsx';
+import { usePageData } from '../../../../hooks/location.js';
 
-export const CompletedOrdersView = () => {
+export const TodayOrdersView = () => {
     const ordersQuery = useCompletedOrdersTodayQuery();
+
+    usePageData('Order', 'Completed orders from today');
 
     if (ordersQuery.isPending) {
         return (

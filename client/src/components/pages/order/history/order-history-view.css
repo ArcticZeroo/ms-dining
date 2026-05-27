@@ -7,18 +7,6 @@
     justify-content: center;
 }
 
-#order-history .order-history-filter-group {
-    gap: var(--constant-padding);
-}
-
-#order-history .order-history-chip {
-    background: var(--color-button-radio-option);
-}
-
-#order-history .order-history-chip.active {
-    background: var(--color-button-radio-selected);
-}
-
 #order-history .order-history-summary {
     color: var(--color-text-secondary);
 }

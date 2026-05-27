@@ -31,7 +31,7 @@ export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, tot
             <div className="flex flex-between">
                 <span>{totalQuantity} {pluralize('item', totalQuantity)}</span>
                 <button
-                    className="default-container"
+                    className="default-container default-button"
                     disabled={!isIdentityValid || hasUnavailableItems}
                     onClick={onPay}
                     title={getPayButtonTitle(isIdentityValid, hasUnavailableItems)}

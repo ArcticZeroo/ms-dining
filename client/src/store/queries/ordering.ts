@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IOrderItem, ICafeOrder } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { OrderHistorySince } from '../../api/ordering.ts';
@@ -80,13 +80,15 @@ export const useOrderHistoryQuery = (since: OrderHistorySince) => {
 
     // If a larger range is already cached, seed this range's cache from it
     // so we don't refetch. Otherwise fetch normally.
+    // keepPreviousData keeps the old list visible while fetching a new range.
     return useQuery({
-        queryKey:    ORDER_HISTORY_QUERY_KEY(since),
-        queryFn:     () => OrderClient.getOrderHistory(since),
-        enabled:     !hasCachedSuperset,
-        initialData: hasCachedSuperset
+        queryKey:        ORDER_HISTORY_QUERY_KEY(since),
+        queryFn:         () => OrderClient.getOrderHistory(since),
+        enabled:         !hasCachedSuperset,
+        initialData:     hasCachedSuperset
             ? () => filterOrdersBySince(cachedResult.orders, since)
             : undefined,
+        placeholderData: keepPreviousData,
     });
 };
 

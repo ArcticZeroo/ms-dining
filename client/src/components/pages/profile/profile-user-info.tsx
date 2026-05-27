@@ -15,7 +15,7 @@ export const ProfileUserInfo = () => {
     }
 
     return (
-        <>
+        <div className="card horizontal flex-wrap">
             <div className="flex flex-center">
                 <div className="provider-chip flex flex-center default-container">
                     <span>
@@ -45,6 +45,6 @@ export const ProfileUserInfo = () => {
                 </div>
                 <DisplayNameControl user={user}/>
             </div>
-        </>
+        </div>
     );
 }

@@ -383,6 +383,10 @@ html, body, #root, .App {
     background: var(--color-theme-green);
 }
 
+.default-button.active {
+    background: var(--color-theme-turquoise-dark);
+}
+
 .mono {
     font-family: monospace;
 }

@@ -8,14 +8,17 @@ import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from './payment/order-cafe-card.tsx';
 import { PaymentInfoForm } from './payment/payment-info-form.tsx';
-import { CompletedOrdersView } from './completed-orders-view.js';
+import { TodayOrdersView } from './history/today-orders-view.js';
 import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 
 import './order-page.css';
+import { usePageData } from '../../../hooks/location.js';
 
 export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
+
+    usePageData('Order', 'Online ordering checkout');
 
     const snapshotCallbacks = useMemo(() => ({
         removeItem: snapshot.removeItem,
@@ -57,7 +60,7 @@ export const OrderCheckoutView = () => {
                         Order History
                     </Link>
                 </div>
-                <CompletedOrdersView/>
+                <TodayOrdersView/>
             </div>
         );
     }
