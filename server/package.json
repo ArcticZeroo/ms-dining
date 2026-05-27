@@ -17,6 +17,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.57.1",
     "prisma": "^6.19.3",
+    "tsx": "^4.22.3",
     "typescript": "^5.9.3",
     "undici": "^5.24.0"
   },
@@ -71,6 +72,7 @@
     "predeploy": "npx tsc --project ../common/tsconfig.json && npx prisma migrate deploy && npx prisma generate",
     "deploy": "npm run predeploy && npm run start",
     "deploy-dev": "npm run predeploy && npm run start-dev",
+    "gen:service-contract": "npx tsx scripts/gen-service-contract.ts",
     "test": "npx tsc && node --test --test-force-exit dist/**/*.test.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"

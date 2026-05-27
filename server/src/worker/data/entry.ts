@@ -22,7 +22,7 @@ await runPendingMigrations();
 
 const workerDataHandler = new InProcessHandler(DATA_SERVICES, { cloneOverWire: false });
 setDefaultServices({
-    data:               createDataServices(workerDataHandler, DATA_SERVICES),
+    data:               createDataServices(workerDataHandler),
     ai:                 createProductionAi(),
     translations:       new TranslationCache(),
     buyOnDemandFactory: BuyOnDemandClient.createAsync,

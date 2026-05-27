@@ -13,9 +13,8 @@
 import { after, before, describe, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { WorkerThreadHandler } from '../../worker/rpc/handler.js';
-import type { DataServiceMap } from '../../worker/data/data-services.js';
+import type { DataServiceMap } from '../../shared/services/data-service-contract.generated.js';
 import { createDataServices } from '../../shared/services/create-data-services.js';
-import { DATA_SERVICES } from '../../worker/data/data-services.js';
 import type { DataServices } from '../../shared/services/create-data-services.js';
 import { createTestDatabase, type TestDatabase } from '../test-server/test-database.js';
 
@@ -30,7 +29,7 @@ before(async () => {
         new URL('../../worker/data/entry.js', import.meta.url),
     );
 
-    data = createDataServices(handler, DATA_SERVICES);
+    data = createDataServices(handler);
 
     // Wait for worker to initialize (migrations, etc.) by probing
     // until the parentPort listener is registered and responsive.

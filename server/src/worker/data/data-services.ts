@@ -1,3 +1,4 @@
+import type { DataServiceMap } from '../../shared/services/data-service-contract.generated.js';
 import { searchQueryServiceCommands } from './storage/clients/search/search-query-commands.js';
 import { tagServiceCommands } from './storage/clients/tags/tags-commands.js';
 import { cafeServiceCommands } from './storage/clients/cafe/cafe-commands.js';
@@ -15,21 +16,21 @@ import { cartServiceCommands } from './storage/clients/cart/cart-commands.js';
 import { orderServiceCommands } from './storage/clients/order/order-commands.js';
 
 export const DATA_SERVICES = {
-    searchQuery:  searchQueryServiceCommands,
-    tag:          tagServiceCommands,
-    cafe:         cafeServiceCommands,
-    station:      stationServiceCommands,
-    user:         userServiceCommands,
-    stationTheme: stationThemeServiceCommands,
-    session:      sessionServiceCommands,
-    review:       reviewServiceCommands,
-    groups:       groupsServiceCommands,
-    menuItem:     menuItemServiceCommands,
-    dailyMenu:    dailyMenuServiceCommands,
-    search:       searchServiceCommands,
+    searchQuery:   searchQueryServiceCommands,
+    tag:           tagServiceCommands,
+    cafe:          cafeServiceCommands,
+    station:       stationServiceCommands,
+    user:          userServiceCommands,
+    stationTheme:  stationThemeServiceCommands,
+    session:       sessionServiceCommands,
+    review:        reviewServiceCommands,
+    groups:        groupsServiceCommands,
+    menuItem:      menuItemServiceCommands,
+    dailyMenu:     dailyMenuServiceCommands,
+    search:        searchServiceCommands,
     menuAnalytics: menuAnalyticsServiceCommands,
-    cart:         cartServiceCommands,
-    order:        orderServiceCommands,
-} as const;
+    cart:          cartServiceCommands,
+    order:         orderServiceCommands,
+} as const satisfies DataServiceMap;
 
-export type DataServiceMap = typeof DATA_SERVICES;
+export type { DataServiceMap };

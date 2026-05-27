@@ -1,5 +1,5 @@
 import { WorkerThreadHandler, type IServiceHandler } from '../../../worker/rpc/handler.js';
-import type { DataServiceMap } from '../../../worker/data/data-services.js';
+import type { DataServiceMap } from '../../../shared/services/data-service-contract.generated.js';
 import { tryReemitDataWorkerEvent } from '../../../worker/data/storage/events.js';
 
 export type { DataServiceMap };
