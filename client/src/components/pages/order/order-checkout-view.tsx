@@ -93,12 +93,10 @@ export const OrderCheckoutView = () => {
                     ))}
                 </div>
             </PaymentIdentityContext.Provider>
-            <div className="centered-content">
+            <div className="flex flex-center">
                 <Link to="/order/done" className="default-container default-button">
-                    View Your Orders From Today
+                    Orders From Today
                 </Link>
-            </div>
-            <div className="centered-content">
                 <Link to="/order/history" className="default-container default-button">
                     Order History
                 </Link>
