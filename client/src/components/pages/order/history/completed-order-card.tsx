@@ -28,7 +28,7 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, 
                         : cafeName
                 }
             </div>
-            <div>Order #{order.buyOnDemandOrderNumber} / #{order.buyOnDemandOrderId}</div>
+            <div>Order #{order.buyOnDemandOrderNumber}</div>
             <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
             <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
             <CompletedOrderItemsTable
