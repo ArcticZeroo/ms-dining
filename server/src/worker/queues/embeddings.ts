@@ -2,11 +2,11 @@ import Duration from '@arcticzeroo/duration';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
 import {
-	embedCafe,
-	embedDailyStation,
-	embedMenuItem,
-	isEmbeddedEntity,
-	makeDailyStationId
+    embedCafe,
+    embedDailyStation,
+    embedMenuItem,
+    isEmbeddedEntity,
+    makeDailyStationId
 } from '../data/storage/vector/client.js';
 import { ICafe, ICafeStation } from '../../shared/models/cafe.js';
 import { Nullable } from '../../shared/models/util.js';

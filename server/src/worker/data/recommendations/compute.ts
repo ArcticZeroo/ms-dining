@@ -1,7 +1,7 @@
 import {
-	IRecommendationItem,
-	IRecommendationSection,
-	RecommendationSectionType,
+    IRecommendationItem,
+    IRecommendationSection,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -98,7 +98,9 @@ const selectWithEmbeddingDiversity = async (
     const idToItem = new Map(pool.map(item => [item.menuItemId, item]));
     const selected: IRecommendationItem[] = [];
     for (const id of diverseOrder) {
-        if (selected.length >= count) break;
+        if (selected.length >= count) {
+            break;
+        }
         const item = idToItem.get(id);
         if (item && filter(item)) {
             selected.push(item);
@@ -143,13 +145,13 @@ export const assembleSections = async ({
 }: IAssembleSectionsParams): Promise<IRecommendationSection[]> => {
     const result: IRecommendationSection[] = [];
     const tryClaim = (item: IRecommendationItem) => {
-		if (claimedKeys.has(getEntityKey(item))) {
-			return false;
-		}
+        if (claimedKeys.has(getEntityKey(item))) {
+            return false;
+        }
 
-		claimedKeys.add(getEntityKey(item));
-		return true;
-	}
+        claimedKeys.add(getEntityKey(item));
+        return true;
+    }
 
     for (const sectionType of SECTION_PRIORITY) {
         const items = sectionsByType.get(sectionType);

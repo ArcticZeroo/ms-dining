@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-	ACCOMPANIMENT_FILTER,
-	DRINK_FILTER,
-	NON_ENTREE_FILTER,
+    ACCOMPANIMENT_FILTER,
+    DRINK_FILTER,
+    NON_ENTREE_FILTER,
 } from '../../shared/util/menu-item-filter.js';
 
 const makeItem = (overrides: { name?: string; description?: string | null; searchTags?: string[] } = {}) => ({

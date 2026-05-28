@@ -163,14 +163,20 @@ for (const [normalized, osmName] of Object.entries(BUILDING_NAME_MAP)) {
 const resolveBuilding = (tags: Record<string, string>, wayId: number): string | undefined => {
     // Check Millennium by way ID first (they have generic single-letter names)
     const millenniumName = MILLENNIUM_WAY_IDS[wayId];
-    if (millenniumName) return millenniumName;
+    if (millenniumName) {
+        return millenniumName;
+    }
 
     const osmName = tags['name'];
-    if (!osmName) return undefined;
+    if (!osmName) {
+        return undefined;
+    }
 
     // Check exact name match
     const exact = osmNameToNormalized.get(osmName);
-    if (exact) return exact;
+    if (exact) {
+        return exact;
+    }
 
     return undefined;
 };
@@ -283,9 +289,15 @@ async function main() {
 
     // Sort by building number (numbered first), then by name
     buildings.sort((a, b) => {
-        if (a.number != null && b.number != null) return a.number - b.number;
-        if (a.number != null) return -1;
-        if (b.number != null) return 1;
+        if (a.number != null && b.number != null) {
+            return a.number - b.number;
+        }
+        if (a.number != null) {
+            return -1;
+        }
+        if (b.number != null) {
+            return 1;
+        }
         return a.name.localeCompare(b.name);
     });
 

@@ -7,7 +7,7 @@ interface ICompletedFooterProps {
 }
 
 export const CompletedFooter: React.FC<ICompletedFooterProps> = ({ result }) => (
-    <div className="flex align-center flex-end">
+    <div className="order-cafe-notice ready flex-center">
         <span className="material-symbols-outlined">check_circle</span>
         <span>Order #{result.buyOnDemandOrderNumber}</span>
         <span>Ready at {formatEstimatedReadyTime(result.completedAt, result.waitTimeMin, result.waitTimeMax)}</span>

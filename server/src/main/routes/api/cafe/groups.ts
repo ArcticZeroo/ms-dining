@@ -1,15 +1,15 @@
 import Router from '@koa/router';
 import {
-	menuItemToGroupMember,
-	stationToGroupMember
+    menuItemToGroupMember,
+    stationToGroupMember
 } from '../../../../worker/data/storage/clients/groups/groups.js';
 import { attachRouter, requireAdmin } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import {
-	AddGroupMembersRequestSchema,
-	CreateGroupRequestSchema,
-	IGroupMember,
-	UpdateGroupRequest
+    AddGroupMembersRequestSchema,
+    CreateGroupRequestSchema,
+    IGroupMember,
+    UpdateGroupRequest
 } from '@msdining/common/models/group';
 import { getServices } from '../../../../shared/services/registry.js';
 import { doNotCacheMiddleware } from '../../../middleware/cache.js';

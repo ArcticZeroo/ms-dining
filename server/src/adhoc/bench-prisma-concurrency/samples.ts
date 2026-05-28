@@ -49,11 +49,21 @@ export const sampleIds = async (prisma: PrismaClient): Promise<SampledIds> => {
 
 export const validateSamples = (samples: SampledIds): void => {
     const empties: string[] = [];
-    if (samples.menuItemIds.length === 0) empties.push('menuItemIds');
-    if (samples.stationIds.length === 0) empties.push('stationIds');
-    if (samples.cafeIds.length === 0) empties.push('cafeIds');
-    if (samples.dateStrings.length === 0) empties.push('dateStrings');
-    if (samples.normalizedMenuItemNames.length === 0) empties.push('normalizedMenuItemNames');
+    if (samples.menuItemIds.length === 0) {
+        empties.push('menuItemIds');
+    }
+    if (samples.stationIds.length === 0) {
+        empties.push('stationIds');
+    }
+    if (samples.cafeIds.length === 0) {
+        empties.push('cafeIds');
+    }
+    if (samples.dateStrings.length === 0) {
+        empties.push('dateStrings');
+    }
+    if (samples.normalizedMenuItemNames.length === 0) {
+        empties.push('normalizedMenuItemNames');
+    }
     if (empties.length > 0) {
         throw new Error(`Source DB is missing data needed for benchmark: ${empties.join(', ')}`);
     }

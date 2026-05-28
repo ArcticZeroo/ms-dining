@@ -16,8 +16,8 @@ export const registerMenuRoutes = (parent: Router) => {
             ctx.body = await getServices().data.menuItem.getTopSearchTags({});
         });
 
-	registerReviewRoutes(router);
-	registerViewRoutes(router);
+    registerReviewRoutes(router);
+    registerViewRoutes(router);
 
     attachRouter(parent, router);
 };

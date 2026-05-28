@@ -133,7 +133,7 @@ export const serializeSearchResults = async (ctx: Koa.Context, searchResultsById
         }
     }
 
-	setTelemetryProperties(ctx, { resultCount: String(searchResultPromises.length) });
+    setTelemetryProperties(ctx, { resultCount: String(searchResultPromises.length) });
 
     ctx.body = jsonStringifyWithoutNull(await Promise.all(searchResultPromises));
 };
@@ -239,48 +239,48 @@ export const assignCacheControl = (ctx: Koa.Context, maxAge: DurationOrMilliseco
 export const CATCH_ALL_PATH = '(.*)';
 
 const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
-	const id = ctx.params.id?.toLowerCase();
-	if (!id) {
-		ctx.throw(400, 'Missing cafe id');
-	}
-	return id;
+    const id = ctx.params.id?.toLowerCase();
+    if (!id) {
+        ctx.throw(400, 'Missing cafe id');
+    }
+    return id;
 }
 
 const getCafeFromRequest = async (ctx: Router.RouterContext) => {
-	const id = getCafeIdFromRequest(ctx);
-	const cafe = await getServices().data.cafe.retrieveCafe({ id });
-	if (!cafe) {
-		ctx.throw(404, 'Cafe not found or data is missing');
-	}
+    const id = getCafeIdFromRequest(ctx);
+    const cafe = await getServices().data.cafe.retrieveCafe({ id });
+    if (!cafe) {
+        ctx.throw(404, 'Cafe not found or data is missing');
+    }
 
-	return cafe;
+    return cafe;
 }
 
 export const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
-	const cafe = await getCafeFromRequest(ctx);
+    const cafe = await getCafeFromRequest(ctx);
 
-	const dateString = getDateStringForMenuRequest(ctx);
-	if (dateString == null) {
-		ctx.body = JSON.stringify([]);
-		return;
-	}
+    const dateString = getDateStringForMenuRequest(ctx);
+    if (dateString == null) {
+        ctx.body = JSON.stringify([]);
+        return;
+    }
 
-	return onReady(cafe, dateString);
+    return onReady(cafe, dateString);
 };
 
 export const validateViewMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafes: ICafe[], dateString: string) => Promise<void>) => {
-	const id = getCafeIdFromRequest(ctx);
+    const id = getCafeIdFromRequest(ctx);
 
-	const cafes = resolveViewToCafes(id);
-	if (!cafes) {
-		ctx.throw(404, 'View not found');
-	}
+    const cafes = resolveViewToCafes(id);
+    if (!cafes) {
+        ctx.throw(404, 'View not found');
+    }
 
-	const dateString = getDateStringForMenuRequest(ctx);
-	if (dateString == null) {
-		ctx.body = JSON.stringify([]);
-		return;
-	}
+    const dateString = getDateStringForMenuRequest(ctx);
+    if (dateString == null) {
+        ctx.body = JSON.stringify([]);
+        return;
+    }
 
-	return onReady(cafes, dateString);
+    return onReady(cafes, dateString);
 }

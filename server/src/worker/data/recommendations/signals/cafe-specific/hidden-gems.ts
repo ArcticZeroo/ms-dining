@@ -1,7 +1,7 @@
 import {
-	IRecommendationItem,
-	IRecommendationSection,
-	RecommendationSectionType,
+    IRecommendationItem,
+    IRecommendationSection,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -9,12 +9,12 @@ import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
 import {
-	HIDDEN_GEM_MAX_REVIEW_COUNT,
-	IRecommendationContext,
-	log,
-	POSITIVE_REVIEW_THRESHOLD,
-	TOP_RATED_SEED_COUNT,
-	VECTOR_SEARCH_LIMIT,
+    HIDDEN_GEM_MAX_REVIEW_COUNT,
+    IRecommendationContext,
+    log,
+    POSITIVE_REVIEW_THRESHOLD,
+    TOP_RATED_SEED_COUNT,
+    VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
 
 /**

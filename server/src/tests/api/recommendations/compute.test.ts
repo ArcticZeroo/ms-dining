@@ -2,8 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyWeights } from '../../../worker/data/recommendations/compute.js';
 import {
-	IRecommendationItem,
-	RecommendationSectionType,
+    IRecommendationItem,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 
 const makeItem = (overrides: Partial<IRecommendationItem> & Pick<IRecommendationItem, 'menuItemId' | 'cafeId' | 'score'>): IRecommendationItem => ({

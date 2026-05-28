@@ -55,9 +55,13 @@ interface ScheduleTimeShape {
 }
 
 function hasValidScheduleTime(body: unknown): body is { scheduleTime: ScheduleTimeShape } {
-    if (body == null || typeof body !== 'object') return false;
+    if (body == null || typeof body !== 'object') {
+        return false;
+    }
     const candidate = (body as { scheduleTime?: unknown }).scheduleTime;
-    if (candidate == null || typeof candidate !== 'object') return false;
+    if (candidate == null || typeof candidate !== 'object') {
+        return false;
+    }
     const st = candidate as { startTime?: unknown; endTime?: unknown };
     return typeof st.startTime === 'string'
         && st.startTime.length > 0

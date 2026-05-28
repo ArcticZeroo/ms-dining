@@ -5,24 +5,24 @@ import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { DEFAULT_CLOSES_AT_MINUTES, DEFAULT_OPENS_AT_MINUTES, parseTimeToMinutes } from '@msdining/common/util/date-util';
 
 const pickStationName = (stationJson: ICafeStationListItem, client: BuyOnDemandClient): string => {
-	// onDemandDisplayText is the name shown on the on-demand web ordering site,
-	// while displayText is for in-store kiosks and may contain promotional text
-	// (e.g. "$0.54 Ice Cream Cone" instead of "Big Chicken").
-	// Some station names are just a space, so fall back to the cafe name.
-	const nameOptionsInOrder: Array<string | undefined> = [
-		stationJson.conceptOptions?.onDemandDisplayText,
-		stationJson.conceptOptions?.displayText,
-		stationJson.name
-	];
+    // onDemandDisplayText is the name shown on the on-demand web ordering site,
+    // while displayText is for in-store kiosks and may contain promotional text
+    // (e.g. "$0.54 Ice Cream Cone" instead of "Big Chicken").
+    // Some station names are just a space, so fall back to the cafe name.
+    const nameOptionsInOrder: Array<string | undefined> = [
+        stationJson.conceptOptions?.onDemandDisplayText,
+        stationJson.conceptOptions?.displayText,
+        stationJson.name
+    ];
 
-	for (const nameOption of nameOptionsInOrder) {
-		const trimmedName = nameOption?.trim();
-		if (trimmedName) {
-			return trimmedName;
-		}
-	}
+    for (const nameOption of nameOptionsInOrder) {
+        const trimmedName = nameOption?.trim();
+        if (trimmedName) {
+            return trimmedName;
+        }
+    }
 
-	return client.cafe.name;
+    return client.cafe.name;
 }
 
 const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafeStationListItem): ICafeStation => {
@@ -34,7 +34,7 @@ const convertBuyOnDemandStation = (client: BuyOnDemandClient, stationJson: ICafe
         id:      stationJson.id,
         cafeId:  client.cafe.id,
         groupId: undefined,
-		name:                      pickStationName(stationJson, client),
+        name:                      pickStationName(stationJson, client),
         logoUrl:                   url?.href,
         menuId:                    stationJson.priceLevelConfig.menuId,
         menuLastUpdateTime:        new Date(0),

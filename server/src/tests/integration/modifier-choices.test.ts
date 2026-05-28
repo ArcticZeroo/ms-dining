@@ -165,15 +165,21 @@ test('re-sync succeeds when two modifiers share the same choice IDs', async () =
     // Place both new items into the first station's first category so they
     // get returned by /concepts and then fetched by /kiosk-items/get-items.
     const augmentedStations = stations.map((station, stationIndex) => {
-        if (stationIndex !== 0) return station;
+        if (stationIndex !== 0) {
+            return station;
+        }
         return {
             ...station,
             menus: station.menus.map((menu, menuIndex) => {
-                if (menuIndex !== 0) return menu;
+                if (menuIndex !== 0) {
+                    return menu;
+                }
                 return {
                     ...menu,
                     categories: menu.categories.map((category, catIndex) => {
-                        if (catIndex !== 0) return category;
+                        if (catIndex !== 0) {
+                            return category;
+                        }
                         return {
                             ...category,
                             items: [...category.items, ITEM_A_ID, ITEM_B_ID],

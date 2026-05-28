@@ -1,9 +1,9 @@
 import sqlite3 from 'better-sqlite3';
 import * as vec from 'sqlite-vec';
 import {
-	DB_ID_TO_SEARCH_ENTITY_TYPE,
-	SEARCH_ENTITY_TYPE_TO_DB_ID,
-	SearchEntityType
+    DB_ID_TO_SEARCH_ENTITY_TYPE,
+    SEARCH_ENTITY_TYPE_TO_DB_ID,
+    SearchEntityType
 } from '@msdining/common/models/search';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { isValidEmbeddingResult, isValidVectorSearchResultArray } from '../../../../shared/util/typeguard.js';
@@ -389,7 +389,9 @@ export const sortByEmbeddingDiversity = (
             for (const selectedEmb of selectedEmbeddings) {
                 // cosine distance = 1 - cosine similarity
                 const sim = 1 - cosineDistance(candidate.embedding!, selectedEmb);
-                if (sim > maxSim) maxSim = sim;
+                if (sim > maxSim) {
+                    maxSim = sim;
+                }
             }
 
             const mmr = lambda * relevance - (1 - lambda) * maxSim + TIEBREAK_NOISE * random();
@@ -455,7 +457,9 @@ export const diverseWeightedSample = (
                 let minSim = 1;
                 for (const selEmb of selectedEmbeddings) {
                     const sim = 1 - cosineDistance(candidate.embedding, selEmb);
-                    if (sim < minSim) minSim = sim;
+                    if (sim < minSim) {
+                        minSim = sim;
+                    }
                 }
                 // Higher distance (lower similarity) = larger bonus
                 diversityBonus = 1 + (1 - minSim);

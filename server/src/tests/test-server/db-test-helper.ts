@@ -52,8 +52,12 @@ export async function applySchemaToTempDb(dbPath: string): Promise<void> {
 
         let stdout = '';
         let stderr = '';
-        child.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
-        child.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
+        child.stdout.on('data', (chunk: Buffer) => {
+            stdout += chunk.toString(); 
+        });
+        child.stderr.on('data', (chunk: Buffer) => {
+            stderr += chunk.toString(); 
+        });
 
         child.on('error', err => {
             reject(new Error(`Failed to spawn prisma db push: ${err.message}`));

@@ -1,9 +1,9 @@
 import { SEARCH_THREAD_HANDLER } from '../../threads/search.js';
 import {
-	retrieveCafeEmbeddings,
-	retrieveEmbeddings,
-	retrieveMenuItemEmbeddings,
-	retrieveStationEmbeddings
+    retrieveCafeEmbeddings,
+    retrieveEmbeddings,
+    retrieveMenuItemEmbeddings,
+    retrieveStationEmbeddings
 } from '../../embeddings.js';
 import { IEntityRef, IVectorSearchResult } from '../../../../shared/models/vector.js';
 import { type INegativePenaltyResult } from './db.js';

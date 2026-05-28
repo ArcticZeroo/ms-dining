@@ -2,12 +2,12 @@ import { LockedMap } from '../../../shared/lock/map.js';
 import { IMenuItemBase, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { CACHE_EVENTS } from '../storage/events.js';
 import {
-	fromDateString,
-	getFridayForWeek,
-	getIsRecentlyAvailable,
-	getMondayForWeek,
-	toDateString,
-	yieldDaysInRange
+    fromDateString,
+    getFridayForWeek,
+    getIsRecentlyAvailable,
+    getMondayForWeek,
+    toDateString,
+    yieldDaysInRange
 } from '@msdining/common/util/date-util';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../../shared/models/storage-events.js';
 import { logError } from '../../../shared/util/log.js';

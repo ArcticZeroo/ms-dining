@@ -85,7 +85,9 @@ const main = async (): Promise<void> => {
 
             for (const useLock of [true, false]) {
                 for (const concurrency of config.concurrencies) {
-                    if (useLock && concurrency !== 1) continue;
+                    if (useLock && concurrency !== 1) {
+                        continue;
+                    }
 
                     const cellLabel = `${def.name}@${journalMode} | lock=${useLock ? 'on' : 'off'} | c=${concurrency}`;
                     console.log(`\n  ${cellLabel}`);
@@ -147,7 +149,9 @@ const main = async (): Promise<void> => {
                             runs.push(result);
                         } finally {
                             await prisma.$disconnect();
-                            if (!config.keepDb) copied.cleanup();
+                            if (!config.keepDb) {
+                                copied.cleanup();
+                            }
                         }
                     }
 

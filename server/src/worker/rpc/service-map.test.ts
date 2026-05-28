@@ -56,7 +56,9 @@ describe('dispatch', () => {
     it('propagates a ServiceError thrown from inside the method', async () => {
         const withThrowingService = {
             menu: {
-                getItem: async () => { throw new ServiceError('NOT_FOUND', 'gone'); },
+                getItem: async () => {
+                    throw new ServiceError('NOT_FOUND', 'gone'); 
+                },
             },
         } satisfies ServiceMap;
         await assert.rejects(
@@ -73,7 +75,9 @@ describe('dispatch', () => {
     it('propagates a plain Error thrown from inside the method (caller can decide what to do with it)', async () => {
         const withThrowingService = {
             menu: {
-                getItem: async () => { throw new Error('uncaught boom'); },
+                getItem: async () => {
+                    throw new Error('uncaught boom'); 
+                },
             },
         } satisfies ServiceMap;
         await assert.rejects(

@@ -7,6 +7,7 @@ import { calculatePrice } from '../../../../util/cart.ts';
 import { getViewName } from '../../../../util/cafe.ts';
 import { getViewMenuUrlDirect } from '../../../../util/link.ts';
 import type { ICafeAvailability, ICartItemRecord } from '@msdining/common/models/cart';
+import type { ISynthesisFlags } from '../../../../api/ordering.ts';
 import { OrderCafeItemsTable } from './order-cafe-items-table.tsx';
 import { OrderCafeFooter } from './order-cafe-footer/order-cafe-footer.tsx';
 import { CafeAvailabilityWarning } from './cafe-availability-warning.tsx';
@@ -17,6 +18,7 @@ interface IOrderCafeCardProps {
     items: ICartItemRecord[];
     availability: ICafeAvailability;
     snapshotCallbacks: ISnapshotCallbacks;
+    synthesisFlags?: ISynthesisFlags;
 }
 
 export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
@@ -24,12 +26,14 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     items,
     availability,
     snapshotCallbacks,
+    synthesisFlags,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const { onRemove, onEdit, onChangeQuantity } = useCartItemActions(snapshotCallbacks);
     const { handlePay, paymentState } = useCafePaymentFlow({
         cafeId,
         items,
+        synthesisFlags,
     });
 
     const view = viewsById.get(cafeId);

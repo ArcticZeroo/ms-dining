@@ -24,8 +24,8 @@ export const updateWeeklyCafeMenus = (forceUseNextWeek: boolean) => {
 
 const scheduleWeeklyJobs = (conditions: string[], forceUseNextWeek: boolean) => {
     const job = () => runWithDbPriority('background', () => {
-		updateWeeklyCafeMenus(forceUseNextWeek);
-	});
+        updateWeeklyCafeMenus(forceUseNextWeek);
+    });
 
     for (const condition of conditions) {
         cron.schedule(condition, job);

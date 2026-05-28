@@ -50,7 +50,9 @@ const fail = (msg: string, exitCode: number): never => {
  */
 function resolveDbPath(databaseUrl: string): string | null {
     const resolved = resolveDatabaseUrl(databaseUrl);
-    if (!resolved.startsWith('file:')) return null;
+    if (!resolved.startsWith('file:')) {
+        return null;
+    }
     return resolved.slice('file:'.length);
 }
 

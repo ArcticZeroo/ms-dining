@@ -1,8 +1,8 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
-	IRecommendationItem,
-	IRecommendationSection,
-	RecommendationSectionType,
+    IRecommendationItem,
+    IRecommendationSection,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { Nullable } from '@msdining/common/models/util';
@@ -62,18 +62,18 @@ export const computePopularityScore = (overallRating: number, totalReviewCount: 
 	Math.log(totalReviewCount + 1) * COUNT_WEIGHT;
 
 export const getDefaultReasonForSectionType = (sectionType: RecommendationSectionType): string | undefined => {
-	switch (sectionType) {
-		case RecommendationSectionType.newAtFavorites:
-			return 'New';
-		case RecommendationSectionType.basedOnReviews:
-			return 'Based on your reviews';
-		case RecommendationSectionType.popular:
-			return 'Highly rated';
-		case RecommendationSectionType.hiddenGems:
-			return 'Similar to highly-rated items';
-		case RecommendationSectionType.trySomethingDifferent:
-			return 'Try something different';
-		default:
-			return undefined;
-	}
+    switch (sectionType) {
+    case RecommendationSectionType.newAtFavorites:
+        return 'New';
+    case RecommendationSectionType.basedOnReviews:
+        return 'Based on your reviews';
+    case RecommendationSectionType.popular:
+        return 'Highly rated';
+    case RecommendationSectionType.hiddenGems:
+        return 'Similar to highly-rated items';
+    case RecommendationSectionType.trySomethingDifferent:
+        return 'Try something different';
+    default:
+        return undefined;
+    }
 }

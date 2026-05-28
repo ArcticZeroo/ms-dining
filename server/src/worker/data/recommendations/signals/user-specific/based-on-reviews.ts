@@ -1,7 +1,7 @@
 import {
-	IRecommendationItem,
-	IRecommendationSection,
-	RecommendationSectionType,
+    IRecommendationItem,
+    IRecommendationSection,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -29,8 +29,8 @@ const SOURCE_REVIEWS_COUNT = 5;
  */
 export const getBasedOnReviews = async (
     context: IUserRecommendationContext,
-	getUserReviews: () => Promise<Array<IServerReview>>,
-	seed: string,
+    getUserReviews: () => Promise<Array<IServerReview>>,
+    seed: string,
 ): Promise<IRecommendationSection | null> => {
     const allReviews = await getUserReviews();
     const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);

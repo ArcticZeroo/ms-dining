@@ -11,6 +11,7 @@ import {
 } from '../../../../shared/models/buyondemand/cart.js';
 import hat from 'hat';
 import { IOrderingContext } from '../../../../shared/models/cart.js';
+import type { ISynthesisFlags } from '../../../../shared/services/order.js';
 import { StringUtil } from '../../../../shared/util/string.js';
 import { z } from 'zod';
 import { fixed } from '../../../../shared/util/math.js';
@@ -56,7 +57,7 @@ function toLocalIsoOffset(date: Date, timeZone: string = ORDER_TIMEZONE): string
     }).formatToParts(date);
 
     const find = (type: Intl.DateTimeFormatPartTypes) =>
-        parts.find(p => p.type === type)?.value ?? '';
+        parts.find(part => part.type === type)?.value ?? '';
 
     // Intl's longOffset is `GMT-07:00` (or `GMT` for UTC). Strip the `GMT`
     // prefix; treat bare `GMT` as `+00:00`.
@@ -155,7 +156,6 @@ function synthesizeConceptScheduleData(
 ): ISynthesizedConceptData {
     const openCron = minutesToCron(opensAtMinutes, dayOfWeek);
     const closeCron = minutesToCron(closesAtMinutes, dayOfWeek);
-    const dow = DAY_ABBREVIATIONS[dayOfWeek];
 
     return {
         openScheduleExpression:  openCron,
@@ -186,14 +186,12 @@ function synthesizeConceptScheduleData(
  * Set individual flags to `false` to fall back to the real API call.
  * This makes it easy to toggle each synthesis independently during testing.
  */
-const SYNTHESIS_FLAGS = {
-    /** Use DB station hours instead of POST /concepts for schedule data. */
-    conceptSchedule: true,
-    /** Use DB ordering context instead of GET /sites + POST pay-config + GET profitCenter. */
-    orderingContext: true,
-    /** Use /sites response (already fetched by siteData) as pay config source instead of POST pay-config. */
-    payConfig: true,
-} as const;
+const DEFAULT_SYNTHESIS_FLAGS: ISynthesisFlags = {
+    conceptSchedule: false,
+    orderingContext: false,
+    payConfig: false,
+    kioskItems: false,
+};
 
 // Validates the POST /orders response. Uses passthrough() so the full object
 // (including lineItems, financial totals, taxBreakdown, etc.) is preserved
@@ -348,16 +346,18 @@ export class CafeOrderSession implements IOrderSession {
     // Per-concept schedule data, keyed by concept ID
     readonly #conceptDataById = new Map<string, { schedule: unknown[]; openScheduleExpression: string; closeScheduleExpression: string }>();
     public readonly createdDateString = getTodayDateString();
+    readonly #synthesisFlags: ISynthesisFlags;
 
-    constructor(public client: BuyOnDemandClient, orderItems: IOrderItem[]) {
+    constructor(public client: BuyOnDemandClient, orderItems: IOrderItem[], synthesisFlags: ISynthesisFlags = DEFAULT_SYNTHESIS_FLAGS) {
         this.#orderItems = orderItems;
+        this.#synthesisFlags = synthesisFlags;
     }
 
-    public static async createAsync(cafe: ICafe, orderItems: IOrderItem[]): Promise<CafeOrderSession> {
+    public static async createAsync(cafe: ICafe, orderItems: IOrderItem[], synthesisFlags?: ISynthesisFlags): Promise<CafeOrderSession> {
         orderLog.info(`{${cafe.name}} Creating order session with ${orderItems.length} item(s)`);
         const client = await createBuyOnDemandClient(cafe, { enableHar: true, translateErrors: true });
         orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
-        return new CafeOrderSession(client, orderItems);
+        return new CafeOrderSession(client, orderItems, synthesisFlags);
     }
 
     get lastCompletedStage() {
@@ -521,7 +521,7 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
-        if (SYNTHESIS_FLAGS.orderingContext) {
+        if (this.#synthesisFlags.orderingContext) {
             return this._synthesizeOrderingContext();
         }
         return this._requestOrderingContextAsync();
@@ -549,7 +549,7 @@ export class CafeOrderSession implements IOrderSession {
         this.#siteStoreInfo = (this.client.config.storeInfo as Record<string, unknown>) ?? {};
         this.#sitePickUpConfig = null;
 
-        if (!SYNTHESIS_FLAGS.payConfig) {
+        if (!this.#synthesisFlags.payConfig) {
             await this._fetchPayConfig();
         } else {
             this._synthesizePayConfig();
@@ -560,34 +560,67 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     /**
-     * Build a minimal pay config from what's already available on the client
-     * and site data, avoiding the POST /sites/{contextId}/{displayProfileId} call.
+     * Build a pay config from known constants and ordering context data,
+     * avoiding the POST /sites/{contextId}/{displayProfileId} call.
      *
-     * The pay config response is essentially a superset of the /sites/{tenantId}
-     * response. The fields we actually use in close-order (displayOptions,
-     * pickUpConfig, emailReceipt, tax/price flags, specialInstructions) are
-     * all present in the /sites response. The only unique addition is
-     * pay.clientId, which is already in DailyCafeOrderingContext.
+     * Constants are sourced from observed HAR responses across multiple cafes.
+     * Dynamic values (terminalId, employeeId, etc.) come from the ordering
+     * context which is already populated at this point.
      */
     private _synthesizePayConfig() {
         orderLog.info(`{${this.client.cafe.name}} Synthesizing pay config from client config`);
 
-        // Build a PayConfig-shaped object from what we have.
-        // These values match what the /sites/{tenantId} response returns.
         this.#payConfig = {
-            pay:                 { clientId: '' }, // not used here — already in ordering context
-            displayOptions:      {},
-            pickUpConfig:        undefined,
-            emailReceipt:        undefined,
-            checkTypeId:         undefined,
+            pay:                 { clientId: this.#orderingContext.payClientId },
+            displayOptions:      {
+                'timezone':                       ORDER_TIMEZONE,
+                'currency/currencyCode':          'USD',
+                'currency/currencySymbol':        '$',
+                'currency/currencyDecimalDigits': '2',
+                'currency/currencyCultureName':   'en-US',
+                'useIgOrderApi':                  'true',
+                'useIgPosApi':                    'false',
+                'voidReasonId':                   '11',
+                'onDemandTerminalId':             this.#orderingContext.onDemandTerminalId,
+                'onDemandEmployeeId':             this.#orderingContext.onDemandEmployeeId,
+                'profit-center-id':               this.#orderingContext.profitCenterId,
+                'check-type':                     this.#orderingContext.checkTypeId ?? '1',
+                'isSmsEnabled':                   'true',
+                'isMobileNumberRequired':         'true',
+                'isProfileValid':                 'true',
+                'name-capture/isOptional':        'false',
+                'name-capture/lastInitialOnly':   'true',
+            },
+            pickUpConfig: {
+                featureEnabled:  true,
+                kitchenText:     'PICK-UP',
+                buttonText:      'PICK-UP',
+            },
+            emailReceipt: {
+                featureEnabled:          true,
+                overrideFromStoreConfig: false,
+            },
+            checkTypeId:         this.#orderingContext.checkTypeId ?? '1',
             taxBreakupEnabled:   false,
             hideVATInReceipts:   false,
             hideAllPrices:       false,
             hideZeroPrice:       false,
-            specialInstructions: undefined,
+            specialInstructions: {
+                headerText:     'Special instructions',
+                characterLimit: 250,
+                featureEnabled: true,
+                instructionText: 'Any allergies or requests?',
+                additionalSpecialInstructions: [
+                    {
+                        characterLimit:  250,
+                        instructionText: 'Any allergies or requests?',
+                        kitchenText:     '',
+                    }
+                ],
+            },
         };
 
-        orderLog.info(`{${this.client.cafe.name}} Pay config synthesized (using defaults)`);
+        orderLog.info(`{${this.client.cafe.name}} Pay config synthesized`);
     }
 
     private _serializeModifiers(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
@@ -681,6 +714,84 @@ export class CafeOrderSession implements IOrderSession {
         return rawItemDetail;
     }
 
+    /**
+     * Synthesize kiosk-item detail from our DB instead of fetching from
+     * POST /kiosk-items/{itemId}. Builds the same shape that
+     * kioskItemDetailSchema.parse() would return.
+     *
+     * Fields come from:
+     * - MenuItem: id, name, price, receiptText, description
+     * - Station: menuId
+     * - Cafe config: contextId, tenantId
+     * - Ordering context: storePriceLevel
+     * - Constants: currency, booleans, empty arrays
+     */
+    private _synthesizeItemDetail(
+        menuItem: IMenuItemBase,
+        station: { menuId: string },
+    ): z.infer<typeof kioskItemDetailSchema> {
+        const amount = menuItem.price.toFixed(2);
+        const receiptText = menuItem.receiptText ?? menuItem.name;
+
+        const synthesized = {
+            id:                    menuItem.id,
+            contextId:             this.client.config.contextId,
+            tenantId:              this.client.config.tenantId,
+            itemId:                menuItem.id,
+            name:                  menuItem.name,
+            displayText:           menuItem.name,
+            amount,
+            price:                 { currencyUnit: 'USD', amount },
+            menuId:                station.menuId,
+            menuPriceLevelId:      this.#orderingContext.storePriceLevel,
+            menuPriceLevelApplied: false,
+            receiptText,
+            kpText:                receiptText,
+            kitchenDisplayText:    receiptText,
+            // Stripped before cart-add, but included for shape consistency
+            childGroups:           [],
+            modifiers:             {},
+            properties:            {},
+            // Constants from observed HAR responses
+            isDeleted:             false,
+            isActive:              false,
+            isSoldByWeight:        false,
+            tareWeight:            0,
+            isDiscountable:        true,
+            allowPriceOverride:    true,
+            isTaxIncluded:         false,
+            taxClasses:            [],
+            kitchenVideoCategoryId: 0,
+            kitchenCookTimeSeconds: 0,
+            skus:                  [],
+            itemType:              'ITEM',
+            itemImages:            [],
+            isAvailableToGuests:   true,
+            isPreselectedToGuests: false,
+            tagNames:              [],
+            tagIds:                [],
+            substituteItemId:      '',
+            isSubstituteItem:      false,
+            sequence:              0,
+            description:           menuItem.description ?? '',
+            longDescription:       menuItem.description ?? '',
+            options:               [],
+            attributes:            [],
+            choiceGroupsUnavailable: false,
+        };
+
+        logOrderingDebugJson(this.client.cafe.name, 'Synthesized kiosk item detail', {
+            id:                    synthesized.id,
+            itemId:                synthesized.itemId,
+            menuId:                synthesized.menuId,
+            menuPriceLevelId:      synthesized.menuPriceLevelId,
+            amount:                synthesized.amount,
+            displayText:           synthesized.displayText,
+        });
+
+        return synthesized;
+    }
+
     private async _addItemToCart(orderItem: IOrderItem) {
         const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
 
@@ -711,7 +822,9 @@ export class CafeOrderSession implements IOrderSession {
             })),
         });
 
-        const rawItemDetail = await this._fetchRawItemDetail(orderItem.menuItemId, station);
+        const rawItemDetail = this.#synthesisFlags.kioskItems
+            ? this._synthesizeItemDetail(menuItem, station)
+            : await this._fetchRawItemDetail(orderItem.menuItemId, station);
 
         this.#conceptIds.add(station.id);
 
@@ -732,7 +845,8 @@ export class CafeOrderSession implements IOrderSession {
 
         // Build item by spreading the raw API response and adding/overriding cart-specific fields.
         // Remove childGroups and modifiers since the cart request uses selectedModifiers instead.
-        const { childGroups: _, modifiers: __, ...rawItemFields } = rawItemDetail;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { childGroups: _cg, modifiers: _mod, ...rawItemFields } = rawItemDetail;
 
         const requestBody = {
             item:               {
@@ -829,7 +943,7 @@ export class CafeOrderSession implements IOrderSession {
     private async _populateCart() {
         orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#orderItems.length} item(s))`);
 
-        if (SYNTHESIS_FLAGS.conceptSchedule) {
+        if (this.#synthesisFlags.conceptSchedule) {
             await this._synthesizeConceptSchedule();
         } else {
             await this._fetchConceptSchedule();

@@ -18,10 +18,18 @@ const OrderCountSchema = z.object({ count: z.number() });
 
 export type OrderHistorySince = '7d' | '30d' | 'all';
 
+export interface ISynthesisFlags {
+    conceptSchedule: boolean;
+    orderingContext: boolean;
+    payConfig: boolean;
+    kioskItems: boolean;
+}
+
 export abstract class OrderClient {
     static async preparePayment(
         cafeId: string,
         items: IOrderItem[],
+        synthesisFlags?: ISynthesisFlags,
     ): Promise<IPreparePaymentResult> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/cafes/${cafeId}/prepare-payment`,
@@ -29,7 +37,7 @@ export abstract class OrderClient {
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify({ items }),
+                body:    JSON.stringify({ items, synthesisFlags }),
             },
         });
     }

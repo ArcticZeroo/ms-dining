@@ -13,28 +13,28 @@ export const TRAVELING_WEIGHT = 1.25;
 // Items appearing only 1-2 days are novel and get a small boost; items that
 // show up every day are "boring" baseline-menu items and get penalized.
 const NOVELTY_BY_DAYS_THIS_WEEK: Record<number, number> = {
-	1: 1.15,
-	2: 1.05,
-	3: 1.0,
-	4: 0.85,
-	5: 0.7,
+    1: 1.15,
+    2: 1.05,
+    3: 1.0,
+    4: 0.85,
+    5: 0.7,
 };
 
 export const isDrink = (menuItem: IMenuItemBase, stationName: string): boolean => {
-	if (DRINK_FILTER.matchesSearchTags(menuItem.searchTags)) {
-		return true;
-	}
-	return DRINK_FILTER.matchesStationOrCategory(stationName);
+    if (DRINK_FILTER.matchesSearchTags(menuItem.searchTags)) {
+        return true;
+    }
+    return DRINK_FILTER.matchesStationOrCategory(stationName);
 };
 
 export const computeDrinkWeight = (menuItem: IMenuItemBase, stationName: string): number => {
-	return isDrink(menuItem, stationName) ? DRINK_WEIGHT : 1;
+    return isDrink(menuItem, stationName) ? DRINK_WEIGHT : 1;
 };
 
 export const computeNoveltyWeight = (daysThisWeek: number, isTraveling: boolean): number => {
-	const baseWeight = NOVELTY_BY_DAYS_THIS_WEEK[daysThisWeek] ?? 1;
-	const travelingMultiplier = isTraveling ? TRAVELING_WEIGHT : 1;
-	return baseWeight * travelingMultiplier;
+    const baseWeight = NOVELTY_BY_DAYS_THIS_WEEK[daysThisWeek] ?? 1;
+    const travelingMultiplier = isTraveling ? TRAVELING_WEIGHT : 1;
+    return baseWeight * travelingMultiplier;
 };
 
 /**
@@ -44,44 +44,44 @@ export const computeNoveltyWeight = (daysThisWeek: number, isTraveling: boolean)
  * Returns an empty map for weekends (uniqueness data isn't computed for them).
  */
 export const buildItemWeightsForCafe = async (
-	cafeId: string,
-	dateString: string,
+    cafeId: string,
+    dateString: string,
 ): Promise<Map<string /*menuItemId*/, number>> => {
-	const weights = new Map<string, number>();
+    const weights = new Map<string, number>();
 
-	if (!canFetchMenuForDateString(dateString)) {
-		return weights;
-	}
+    if (!canFetchMenuForDateString(dateString)) {
+        return weights;
+    }
 
-	let todaysMenu;
-	let uniquenessData;
-	let itemDaysByStation;
-	try {
-		[todaysMenu, uniquenessData, itemDaysByStation] = await Promise.all([
-			retrieveDailyCafeMenuAsync(cafeId, dateString),
-			retrieveUniquenessDataForCafe(cafeId, dateString),
-			retrieveItemAppearancesForCafe(cafeId, dateString),
-		]);
-	} catch (err) {
-		logError(`Failed to build item weights for cafe ${cafeId} on ${dateString}:`, err);
-		return weights;
-	}
+    let todaysMenu;
+    let uniquenessData;
+    let itemDaysByStation;
+    try {
+        [todaysMenu, uniquenessData, itemDaysByStation] = await Promise.all([
+            retrieveDailyCafeMenuAsync(cafeId, dateString),
+            retrieveUniquenessDataForCafe(cafeId, dateString),
+            retrieveItemAppearancesForCafe(cafeId, dateString),
+        ]);
+    } catch (err) {
+        logError(`Failed to build item weights for cafe ${cafeId} on ${dateString}:`, err);
+        return weights;
+    }
 
-	for (const station of todaysMenu) {
-		const stationUniqueness = uniquenessData.get(station.name);
-		const isTraveling = stationUniqueness?.isTraveling ?? false;
-		const itemDaysForStation = itemDaysByStation.get(station.name);
+    for (const station of todaysMenu) {
+        const stationUniqueness = uniquenessData.get(station.name);
+        const isTraveling = stationUniqueness?.isTraveling ?? false;
+        const itemDaysForStation = itemDaysByStation.get(station.name);
 
-		for (const menuItem of station.menuItemsById.values()) {
-			const normalizedName = normalizeNameForSearch(menuItem.name);
-			const daysThisWeek = itemDaysForStation?.get(normalizedName) ?? 1;
+        for (const menuItem of station.menuItemsById.values()) {
+            const normalizedName = normalizeNameForSearch(menuItem.name);
+            const daysThisWeek = itemDaysForStation?.get(normalizedName) ?? 1;
 
-			const weight = computeDrinkWeight(menuItem, station.name) * computeNoveltyWeight(daysThisWeek, isTraveling);
-			if (weight !== 1) {
-				weights.set(menuItem.id, weight);
-			}
-		}
-	}
+            const weight = computeDrinkWeight(menuItem, station.name) * computeNoveltyWeight(daysThisWeek, isTraveling);
+            if (weight !== 1) {
+                weights.set(menuItem.id, weight);
+            }
+        }
+    }
 
-	return weights;
+    return weights;
 };

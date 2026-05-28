@@ -76,6 +76,10 @@ export const DebugSettings = {
     enableMapPageSearch:                       new BooleanSetting('enableMapPage', false /*defaultValue*/),
     showAdminReviewControls:                   new BooleanSetting('showAdminReviewControls', false /*defaultValue*/),
     showCafeHours:                             new BooleanSetting('showCafeHours', false /*defaultValue*/),
+    synthesizeConceptSchedule:                 new BooleanSetting('synthesizeConceptSchedule', false /*defaultValue*/),
+    synthesizeOrderingContext:                 new BooleanSetting('synthesizeOrderingContext', false /*defaultValue*/),
+    synthesizePayConfig:                       new BooleanSetting('synthesizePayConfig', false /*defaultValue*/),
+    synthesizeKioskItems:                      new BooleanSetting('synthesizeKioskItems', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

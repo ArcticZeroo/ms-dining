@@ -54,15 +54,15 @@ export const getDefaultUniquenessDataForStation = (itemCount: number = 0): IStat
 });
 
 export const resolveViewToCafes = (viewId: string): ICafe[] | undefined => {
-	const view = VIEWS_BY_ID.get(viewId);
+    const view = VIEWS_BY_ID.get(viewId);
 
-	if (view) {
-		if (view.type === CafeViewType.group) {
-			return view.value.members;
-		} else {
-			return [view.value];
-		}
-	}
+    if (view) {
+        if (view.type === CafeViewType.group) {
+            return view.value.members;
+        } else {
+            return [view.value];
+        }
+    }
 
     return undefined;
 };

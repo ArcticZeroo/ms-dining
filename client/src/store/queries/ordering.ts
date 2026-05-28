@@ -3,6 +3,7 @@ import type { IOrderItem, ICafeOrder } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { OrderHistorySince } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
+import type { ISynthesisFlags } from '../../api/ordering.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
@@ -45,8 +46,8 @@ const getBestCachedOrderHistory = (queryClient: ReturnType<typeof useQueryClient
 };
 
 export const usePreparePaymentMutation = () => useMutation({
-    mutationFn: (data: { cafeId: string; items: IOrderItem[] }) =>
-        OrderClient.preparePayment(data.cafeId, data.items),
+    mutationFn: (data: { cafeId: string; items: IOrderItem[]; synthesisFlags?: ISynthesisFlags }) =>
+        OrderClient.preparePayment(data.cafeId, data.items, data.synthesisFlags),
 });
 
 export const useCompleteOrderMutation = () => {

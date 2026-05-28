@@ -11,8 +11,12 @@ const buildServices = () => {
         menu: {
             getItem: async (data: { id: string }) => ({ id: data.id, name: `Item ${data.id}` }),
             count:   async () => 42,
-            failing: async () => { throw new ServiceError('NOT_FOUND', 'gone', { reason: 'expired' }); },
-            crashy:  async () => { throw new Error('boom'); },
+            failing: async () => {
+                throw new ServiceError('NOT_FOUND', 'gone', { reason: 'expired' }); 
+            },
+            crashy:  async () => {
+                throw new Error('boom'); 
+            },
         },
     } satisfies ServiceMap;
 };

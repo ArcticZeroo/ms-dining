@@ -128,7 +128,9 @@ export class TestBuyOnDemandServer {
      */
     clearCafeShutdown(cafeId: string): void {
         const existing = this._state.getFixture<Record<string, unknown>>(cafeId, 'config');
-        if (existing == null) return;
+        if (existing == null) {
+            return;
+        }
         const properties = { ...((existing.properties ?? {}) as Record<string, unknown>) };
         delete properties.applicationShutOffConfig;
         this._state.setFixture(cafeId, 'config', { ...existing, properties });
@@ -280,10 +282,14 @@ export class TestBuyOnDemandServer {
 
     private _matchRoute(method: string, path: string): MatchedRoute | null {
         for (const route of this._routes) {
-            if (route.method !== method) continue;
+            if (route.method !== method) {
+                continue;
+            }
 
             const match = route.regex.exec(path);
-            if (!match) continue;
+            if (!match) {
+                continue;
+            }
 
             const params: RouteParams = {};
             for (let i = 0; i < route.paramNames.length; i++) {
@@ -408,9 +414,15 @@ export class TestBuyOnDemandServer {
         for (let i = this._failures.length - 1; i >= 0; i--) {
             const rule = this._failures[i]!;
 
-            if (rule.cafeId && rule.cafeId !== cafeId) continue;
-            if (rule.method && rule.method !== method) continue;
-            if (!matchesPathPattern(rule.pathPattern, path)) continue;
+            if (rule.cafeId && rule.cafeId !== cafeId) {
+                continue;
+            }
+            if (rule.method && rule.method !== method) {
+                continue;
+            }
+            if (!matchesPathPattern(rule.pathPattern, path)) {
+                continue;
+            }
 
             // Matched — decrement count and remove if exhausted
             if (rule.count != null) {
@@ -434,8 +446,12 @@ export class TestBuyOnDemandServer {
         for (let i = this._delays.length - 1; i >= 0; i--) {
             const rule = this._delays[i]!;
 
-            if (rule.cafeId && rule.cafeId !== cafeId) continue;
-            if (!matchesPathPattern(rule.pathPattern, path)) continue;
+            if (rule.cafeId && rule.cafeId !== cafeId) {
+                continue;
+            }
+            if (!matchesPathPattern(rule.pathPattern, path)) {
+                continue;
+            }
 
             if (rule.count != null) {
                 rule.count--;

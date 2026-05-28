@@ -19,7 +19,7 @@ export const CAFE_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentCa
 const cafeDiscoveryRetryDelayMs = 1000;
 
 export class DailyCafeUpdateSession {
-	#firstAttemptFailureCount = 0;
+    #firstAttemptFailureCount = 0;
     readonly #cancellation: ICancellationToken;
 
     constructor(
@@ -43,20 +43,20 @@ export class DailyCafeUpdateSession {
     }
 
     async #discoverCafeAsync(cafe: ICafe, attemptIndex: number): Promise<IStationListResult> {
-		try {
-			return CAFE_SEMAPHORE.acquire(async () => {
-				logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
-				return CafeMenuSession.retrieveMenuAsync(cafe, this.daysInFuture);
-			});
+        try {
+            return CAFE_SEMAPHORE.acquire(async () => {
+                logInfo(`{${this.dateString}} (${attemptIndex}) Discovering menu for "${cafe.name}" @ ${cafe.id}...`);
+                return CafeMenuSession.retrieveMenuAsync(cafe, this.daysInFuture);
+            });
         } catch (err) {
-			if (!(err instanceof PromiseCancelledException) && attemptIndex === 0) {
-				this.#firstAttemptFailureCount++;
+            if (!(err instanceof PromiseCancelledException) && attemptIndex === 0) {
+                this.#firstAttemptFailureCount++;
 
-				if (this.#firstAttemptFailureCount >= ENVIRONMENT_SETTINGS.cafeMenuUpdateCircuitBreakerThreshold) {
-					this.#cancellation.isCancelled = true;
-					logError(`{${this.dateString}}`, `Cafe menu update breaker tripped: ${this.#firstAttemptFailureCount} cafe(s) have failed. Skipping remaining cafes.`);
-				}
-			}
+                if (this.#firstAttemptFailureCount >= ENVIRONMENT_SETTINGS.cafeMenuUpdateCircuitBreakerThreshold) {
+                    this.#cancellation.isCancelled = true;
+                    logError(`{${this.dateString}}`, `Cafe menu update breaker tripped: ${this.#firstAttemptFailureCount} cafe(s) have failed. Skipping remaining cafes.`);
+                }
+            }
 
             throw new Error(`Failed to discover menu for "${cafe.name}" @ ${cafe.id} (attempt ${attemptIndex}): ${err}`);
         }
@@ -76,10 +76,10 @@ export class DailyCafeUpdateSession {
                 this.#cancellation
             );
 
-			if (this.#cancellation.isCancelled) {
-				logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} after discovery because too many cafes have failed update`);
-				return;
-			}
+            if (this.#cancellation.isCancelled) {
+                logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} after discovery because too many cafes have failed update`);
+                return;
+            }
 
             let shutdownMessageHash: string | null = null;
             if (result.isShutDown && result.shutDownMessage) {

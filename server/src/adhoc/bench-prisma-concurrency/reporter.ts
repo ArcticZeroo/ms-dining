@@ -21,7 +21,9 @@ export interface CellSummary {
 }
 
 const percentile = (sorted: number[], p: number): number => {
-    if (sorted.length === 0) return 0;
+    if (sorted.length === 0) {
+        return 0;
+    }
     const idx = Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length));
     return sorted[idx]!;
 };
@@ -29,7 +31,9 @@ const percentile = (sorted: number[], p: number): number => {
 const mean = (xs: number[]): number => xs.length === 0 ? 0 : xs.reduce((a, b) => a + b, 0) / xs.length;
 
 const stddev = (xs: number[]): number => {
-    if (xs.length < 2) return 0;
+    if (xs.length < 2) {
+        return 0;
+    }
     const m = mean(xs);
     return Math.sqrt(xs.reduce((acc, x) => acc + (x - m) ** 2, 0) / (xs.length - 1));
 };
@@ -44,7 +48,9 @@ export const summarizeCell = (
 ): CellSummary => {
     const allLatencies: number[] = [];
     for (const r of runs) {
-        for (const l of r.latenciesMs) allLatencies.push(l);
+        for (const l of r.latenciesMs) {
+            allLatencies.push(l);
+        }
     }
     allLatencies.sort((a, b) => a - b);
 

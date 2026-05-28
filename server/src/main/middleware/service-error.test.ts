@@ -128,7 +128,9 @@ describe('serviceErrorMiddleware', () => {
         const plainError = new Error('not ours');
 
         await assert.rejects(
-            () => serviceErrorMiddleware(ctx, async () => { throw plainError; }),
+            () => serviceErrorMiddleware(ctx, async () => {
+                throw plainError; 
+            }),
             (err: unknown) => {
                 assert.equal(err, plainError, 'middleware must rethrow the exact error instance');
                 return true;

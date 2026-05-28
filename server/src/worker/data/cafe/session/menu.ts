@@ -265,16 +265,16 @@ export class CafeMenuSession {
         const result = await retrieveStationListAsync(this.client, this.daysInFuture);
         await this.#populateMenuItemsForAllStationsAsync(result.stations, this.daysInFuture === 0 /*alwaysGetServerItems*/);
 
-		// We still want to fetch the menu even if the cafe is shut down -
-		// some shutdowns are online ordering only and we can still show the menu.
-		// We'll classify it at a later stage.
-		if (this.client.config.isShutDown) {
-			return {
-				...result,
-				isShutDown: true,
-				shutDownMessage: this.client.config.shutDownMessage ?? undefined,
-			};
-		}
+        // We still want to fetch the menu even if the cafe is shut down -
+        // some shutdowns are online ordering only and we can still show the menu.
+        // We'll classify it at a later stage.
+        if (this.client.config.isShutDown) {
+            return {
+                ...result,
+                isShutDown: true,
+                shutDownMessage: this.client.config.shutDownMessage ?? undefined,
+            };
+        }
 
         return result;
     }

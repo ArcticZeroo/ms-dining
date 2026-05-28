@@ -87,10 +87,14 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
         const json = await response.json() as any;
 
         const [store] = json.storeList;
-        if (!store) throw new Error('Test server config: storeList is empty');
+        if (!store) {
+            throw new Error('Test server config: storeList is empty');
+        }
 
         const [displayProfileId] = store.displayProfileId;
-        if (!displayProfileId) throw new Error('Test server config: displayProfileId is missing');
+        if (!displayProfileId) {
+            throw new Error('Test server config: displayProfileId is missing');
+        }
 
         const shutOffConfig = json.properties?.applicationShutOffConfig;
 

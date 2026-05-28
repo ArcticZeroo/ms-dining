@@ -1,8 +1,8 @@
 import { IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
-	IRecommendationSection,
-	RECOMMENDATION_SECTION_DISPLAY_NAMES,
-	RecommendationSectionType,
+    IRecommendationSection,
+    RECOMMENDATION_SECTION_DISPLAY_NAMES,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getEntityKey } from '@msdining/common/util/entity-key';
 import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/util/recommendation.js';

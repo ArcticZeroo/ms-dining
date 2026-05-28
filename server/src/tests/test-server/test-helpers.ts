@@ -19,7 +19,9 @@ interface FetchJsonOptions extends RequestInit {
 }
 
 const buildInit = (init: RequestInit, versionTag: number | undefined): RequestInit => {
-    if (versionTag == null) return init;
+    if (versionTag == null) {
+        return init;
+    }
     return {
         ...init,
         headers: {

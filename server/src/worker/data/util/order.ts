@@ -8,20 +8,20 @@ import { groupModifierRows } from '@msdining/common/util/modifier-util';
  * produce the same hash regardless of array order.
  */
 export const hashOrderItems = (items: IOrderItem[]): string => {
-	const normalized = items
-		.map(item => ({
-			menuItemId:          item.menuItemId,
-			quantity:            item.quantity,
-			specialInstructions: item.specialInstructions ?? '',
-			modifiers:           item.modifiers
+    const normalized = items
+        .map(item => ({
+            menuItemId:          item.menuItemId,
+            quantity:            item.quantity,
+            specialInstructions: item.specialInstructions ?? '',
+            modifiers:           item.modifiers
 									 .map(mod => `${mod.modifierId}:${[...mod.choiceIds].sort().join(',')}`)
 									 .sort(),
-		}))
-		.sort((left, right) => left.menuItemId.localeCompare(right.menuItemId));
+        }))
+        .sort((left, right) => left.menuItemId.localeCompare(right.menuItemId));
 
-	return createHash('sha256')
-		.update(JSON.stringify(normalized))
-		.digest('hex');
+    return createHash('sha256')
+        .update(JSON.stringify(normalized))
+        .digest('hex');
 };
 
 interface IOrderItemFromDatabase {
@@ -32,10 +32,10 @@ interface IOrderItemFromDatabase {
 }
 
 export const toOrderItem = (item: IOrderItemFromDatabase): IOrderItem => ({
-	menuItemId:          item.menuItemId,
-	quantity:            item.quantity,
-	specialInstructions: item.specialInstructions ?? undefined,
-	modifiers:           groupModifierRows(item.modifiers),
+    menuItemId:          item.menuItemId,
+    quantity:            item.quantity,
+    specialInstructions: item.specialInstructions ?? undefined,
+    modifiers:           groupModifierRows(item.modifiers),
 });
 
 export const toOrderItems = (items: Array<IOrderItemFromDatabase>): IOrderItem[] => items.map(toOrderItem);

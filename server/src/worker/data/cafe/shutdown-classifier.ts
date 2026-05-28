@@ -14,9 +14,9 @@ export interface IShutdownClassification {
 }
 
 const CLASSIFICATION_SCHEMA = z.object({
-	shutdownType: z.enum(['full', 'online_ordering_only']),
-	isTemporary:  z.boolean(),
-	resumeInfo:   z.string().max(60).nullable().optional().default(null),
+    shutdownType: z.enum(['full', 'online_ordering_only']),
+    isTemporary:  z.boolean(),
+    resumeInfo:   z.string().max(60).nullable().optional().default(null),
 });
 
 const SYSTEM_PROMPT = `You are a classifier for café shutdown messages at a corporate campus.
@@ -40,86 +40,86 @@ Respond with your classification inside XML tags. You may include reasoning befo
 export const hashShutdownMessage = (message: string): string => sha256(message);
 
 export const parseClassificationResponse = (responseText: string): z.infer<typeof CLASSIFICATION_SCHEMA> => {
-	const xmlMatch = responseText.match(/<shutdown-classification>(?<json>[\s\S]*?)<\/shutdown-classification>/);
+    const xmlMatch = responseText.match(/<shutdown-classification>(?<json>[\s\S]*?)<\/shutdown-classification>/);
 
-	if (!xmlMatch?.groups?.json) {
-		throw new Error(`No <shutdown-classification> tag found in AI response: ${responseText}`);
-	}
+    if (!xmlMatch?.groups?.json) {
+        throw new Error(`No <shutdown-classification> tag found in AI response: ${responseText}`);
+    }
 
-	const parsed = JSON.parse(xmlMatch.groups.json);
-	const result = CLASSIFICATION_SCHEMA.safeParse(parsed);
+    const parsed = JSON.parse(xmlMatch.groups.json);
+    const result = CLASSIFICATION_SCHEMA.safeParse(parsed);
 
-	if (!result.success) {
-		throw new Error(`AI response failed validation: ${result.error.message}`);
-	}
+    if (!result.success) {
+        throw new Error(`AI response failed validation: ${result.error.message}`);
+    }
 
-	if (!result.data.isTemporary) {
-		result.data.resumeInfo = null;
-	}
+    if (!result.data.isTemporary) {
+        result.data.resumeInfo = null;
+    }
 
-	return result.data;
+    return result.data;
 };
 
 // Calls AI to classify and persists the result to DB. Throws on failure.
 const classifyAndPersistAsync = async (messageHash: string, message: string): Promise<IShutdownClassification> => {
-	const response = await retrieveTextCompletion({
-		systemPrompt: SYSTEM_PROMPT,
-		userMessage:  `Classify this café shutdown message:\n\n"${message}"`,
-		maxTokens:    256,
-	});
+    const response = await retrieveTextCompletion({
+        systemPrompt: SYSTEM_PROMPT,
+        userMessage:  `Classify this café shutdown message:\n\n"${message}"`,
+        maxTokens:    256,
+    });
 
-	const classification = parseClassificationResponse(response);
-	const result: IShutdownClassification = { messageHash, message, ...classification };
+    const classification = parseClassificationResponse(response);
+    const result: IShutdownClassification = { messageHash, message, ...classification };
 
-	await usePrismaWrite(prisma => prisma.cafeShutdown.upsert({
-		where:  { messageHash },
-		update: {
-			shutdownType: result.shutdownType,
-			isTemporary:  result.isTemporary,
-			resumeInfo:   result.resumeInfo,
-		},
-		create: {
-			messageHash,
-			message,
-			shutdownType: result.shutdownType,
-			isTemporary:  result.isTemporary,
-			resumeInfo:   result.resumeInfo,
-		},
-	}));
+    await usePrismaWrite(prisma => prisma.cafeShutdown.upsert({
+        where:  { messageHash },
+        update: {
+            shutdownType: result.shutdownType,
+            isTemporary:  result.isTemporary,
+            resumeInfo:   result.resumeInfo,
+        },
+        create: {
+            messageHash,
+            message,
+            shutdownType: result.shutdownType,
+            isTemporary:  result.isTemporary,
+            resumeInfo:   result.resumeInfo,
+        },
+    }));
 
-	return result;
+    return result;
 };
 
 // Ensures only one AI call per unique message hash, even under concurrent discovery
 const CLASSIFICATION_CACHE = new LockedMap<string /*messageHash*/, IShutdownClassification>();
 
 export const classifyShutdownMessageAsync = async (message: string): Promise<IShutdownClassification> => {
-	const messageHash = hashShutdownMessage(message);
+    const messageHash = hashShutdownMessage(message);
 
-	return CLASSIFICATION_CACHE.getOrInsert(messageHash, async () => {
-		// Check DB first
-		const existing = await usePrismaClient(prisma => prisma.cafeShutdown.findUnique({
-			where: { messageHash },
-		}));
+    return CLASSIFICATION_CACHE.getOrInsert(messageHash, async () => {
+        // Check DB first
+        const existing = await usePrismaClient(prisma => prisma.cafeShutdown.findUnique({
+            where: { messageHash },
+        }));
 
-		if (existing?.shutdownType) {
-			logDebug(`Shutdown message hash ${messageHash} already classified in DB as "${existing.shutdownType}"`);
-			return {
-				messageHash,
-				message:      existing.message,
-				shutdownType: existing.shutdownType as IShutdownClassification['shutdownType'],
-				isTemporary:  existing.isTemporary ?? false,
-				resumeInfo:   existing.resumeInfo ?? null,
-			};
-		}
+        if (existing?.shutdownType) {
+            logDebug(`Shutdown message hash ${messageHash} already classified in DB as "${existing.shutdownType}"`);
+            return {
+                messageHash,
+                message:      existing.message,
+                shutdownType: existing.shutdownType as IShutdownClassification['shutdownType'],
+                isTemporary:  existing.isTemporary ?? false,
+                resumeInfo:   existing.resumeInfo ?? null,
+            };
+        }
 
-		logDebug(`Classifying shutdown message (hash=${messageHash}): "${message.substring(0, 80)}..."`);
+        logDebug(`Classifying shutdown message (hash=${messageHash}): "${message.substring(0, 80)}..."`);
 
-		try {
-			return await classifyAndPersistAsync(messageHash, message);
-		} catch (err) {
-			logError(`Failed to classify shutdown message, defaulting to "full":`, err);
-			return { messageHash, message, shutdownType: 'full', isTemporary: false, resumeInfo: null };
-		}
-	});
+        try {
+            return await classifyAndPersistAsync(messageHash, message);
+        } catch (err) {
+            logError(`Failed to classify shutdown message, defaulting to "full":`, err);
+            return { messageHash, message, shutdownType: 'full', isTemporary: false, resumeInfo: null };
+        }
+    });
 };

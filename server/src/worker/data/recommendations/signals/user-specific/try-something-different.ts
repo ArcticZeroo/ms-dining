@@ -1,7 +1,7 @@
 import {
-	IRecommendationItem,
-	IRecommendationSection,
-	RecommendationSectionType,
+    IRecommendationItem,
+    IRecommendationSection,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -9,9 +9,9 @@ import { IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { computeCentroidSearch, computeNegativePenalties } from '../../../storage/vector/client.js';
 import {
-	ITEMS_PER_SECTION, IUserRecommendationContext,
-	NEGATIVE_REVIEW_THRESHOLD,
-	VECTOR_SEARCH_LIMIT,
+    ITEMS_PER_SECTION, IUserRecommendationContext,
+    NEGATIVE_REVIEW_THRESHOLD,
+    VECTOR_SEARCH_LIMIT,
 } from '../../shared.js';
 import { IServerReview } from '../../../../../shared/models/review.js';
 
@@ -33,7 +33,7 @@ import { IServerReview } from '../../../../../shared/models/review.js';
  */
 export const getTrySomethingDifferent = async (
     context: IUserRecommendationContext,
-	getUserReviews: () => Promise<Array<IServerReview>>,
+    getUserReviews: () => Promise<Array<IServerReview>>,
 ): Promise<IRecommendationSection | null> => {
     const allReviews = await getUserReviews();
     const reviews = allReviews.filter(review => review.menuItemId != null && review.menuItem != null);

@@ -110,11 +110,11 @@ export class MenuItemFilter {
         return false;
     }
 
-	matchesMenuItem(menuItem: { name: string; description?: Nullable<string>; searchTags: Set<string> }): boolean {
-		return this.matchesItemText(menuItem.name)
+    matchesMenuItem(menuItem: { name: string; description?: Nullable<string>; searchTags: Set<string> }): boolean {
+        return this.matchesItemText(menuItem.name)
 			|| (menuItem.description && this.matchesItemText(menuItem.description))
 			|| this.matchesSearchTags(menuItem.searchTags);
-	}
+    }
 }
 
 export const ACCOMPANIMENT_FILTER = new MenuItemFilter(ACCOMPANIMENT_FILTER_TERMS);

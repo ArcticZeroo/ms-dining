@@ -35,9 +35,9 @@ export class LockedMap<K, V> implements ILockedMap<K, V> {
         return this.#values.entries();
     }
 
-	keys() {
-		return this.#values.keys();
-	}
+    keys() {
+        return this.#values.keys();
+    }
 
     async has(key: K): Promise<boolean> {
         if (!this.#locks.has(key)) {
@@ -72,17 +72,17 @@ export class LockedMap<K, V> implements ILockedMap<K, V> {
         });
     }
 
-	async getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {
-		return this.update(key, async (value) => {
-			if (value !== undefined) {
-				return value;
-			}
+    async getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {
+        return this.update(key, async (value) => {
+            if (value !== undefined) {
+                return value;
+            }
 
-			return callback();
-		});
-	}
+            return callback();
+        });
+    }
 
-	async delete(key: K) {
+    async delete(key: K) {
         const lock = this.#locks.get(key);
         if (!lock) {
             return;
@@ -105,17 +105,17 @@ export class LockedMap<K, V> implements ILockedMap<K, V> {
         await Promise.all(keysToDelete.map(key => this.delete(key)));
     }
 
-	async peek<TReturn>(key: K, callback: (value: V | undefined) => TReturn): Promise<TReturn> {
-		const lock = this.#locks.get(key);
-		if (!lock) {
-			return callback(undefined);
-		}
+    async peek<TReturn>(key: K, callback: (value: V | undefined) => TReturn): Promise<TReturn> {
+        const lock = this.#locks.get(key);
+        if (!lock) {
+            return callback(undefined);
+        }
 
-		return lock.acquire(() => {
-			const value = this.#values.get(key);
-			return callback(value);
-		});
-	}
+        return lock.acquire(() => {
+            const value = this.#values.get(key);
+            return callback(value);
+        });
+    }
 }
 
 interface IExpiringEntry<V> {
@@ -124,117 +124,117 @@ interface IExpiringEntry<V> {
 }
 
 export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
-	readonly #expirationTimeMs: number;
-	readonly #map: LockedMap<K, IExpiringEntry<V>>;
-	readonly #cleanupInterval: ReturnType<typeof setInterval>;
+    readonly #expirationTimeMs: number;
+    readonly #map: LockedMap<K, IExpiringEntry<V>>;
+    readonly #cleanupInterval: ReturnType<typeof setInterval>;
 
-	constructor(expirationTime: DurationOrMilliseconds, initialState?: Map<K, V>) {
-		this.#expirationTimeMs = Duration.fromDurationOrMilliseconds(expirationTime).inMilliseconds;
-		const expiringInitialState = Array.from(initialState ?? [])
-			.map(([key, value]) => [key, { value, expirationTime: Date.now() + this.#expirationTimeMs } satisfies IExpiringEntry<V>] as [K, IExpiringEntry<V>]);
-		this.#map = new LockedMap<K, IExpiringEntry<V>>(expiringInitialState);
+    constructor(expirationTime: DurationOrMilliseconds, initialState?: Map<K, V>) {
+        this.#expirationTimeMs = Duration.fromDurationOrMilliseconds(expirationTime).inMilliseconds;
+        const expiringInitialState = Array.from(initialState ?? [])
+            .map(([key, value]) => [key, { value, expirationTime: Date.now() + this.#expirationTimeMs } satisfies IExpiringEntry<V>] as [K, IExpiringEntry<V>]);
+        this.#map = new LockedMap<K, IExpiringEntry<V>>(expiringInitialState);
 
-		this.#cleanupInterval = setInterval(() => {
-			this.#map.deleteWhere((_, entry) => {
-				return entry.expirationTime < Date.now();
-			}).catch(err => logError(`Failed to delete expired entries from LockedExpiringMap: ${err}`));
-		}, this.#expirationTimeMs);
-	}
+        this.#cleanupInterval = setInterval(() => {
+            this.#map.deleteWhere((_, entry) => {
+                return entry.expirationTime < Date.now();
+            }).catch(err => logError(`Failed to delete expired entries from LockedExpiringMap: ${err}`));
+        }, this.#expirationTimeMs);
+    }
 
-	destroy() {
-		clearInterval(this.#cleanupInterval);
-	}
+    destroy() {
+        clearInterval(this.#cleanupInterval);
+    }
 
-	async #updateInternal<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, preserveTtl: boolean): Promise<TReturn> {
-		const result = await this.#map.update(key, async (entry) => {
-			const now = Date.now();
-			if (entry && entry.expirationTime <= now) {
-				entry = undefined;
-			}
+    async #updateInternal<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>, preserveTtl: boolean): Promise<TReturn> {
+        const result = await this.#map.update(key, async (entry) => {
+            const now = Date.now();
+            if (entry && entry.expirationTime <= now) {
+                entry = undefined;
+            }
 
-			const value = entry?.value;
-			const newValue = await callback(value);
+            const value = entry?.value;
+            const newValue = await callback(value);
 
-			if (newValue === undefined) {
-				return undefined;
-			}
+            if (newValue === undefined) {
+                return undefined;
+            }
 
-			const expirationTime = (preserveTtl && entry)
-				? entry.expirationTime
-				: now + this.#expirationTimeMs;
+            const expirationTime = (preserveTtl && entry)
+                ? entry.expirationTime
+                : now + this.#expirationTimeMs;
 
-			return { value: newValue, expirationTime } satisfies IExpiringEntry<V>;
-		});
+            return { value: newValue, expirationTime } satisfies IExpiringEntry<V>;
+        });
 
-		return result?.value as TReturn;
-	}
+        return result?.value as TReturn;
+    }
 
-	update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
-		return this.#updateInternal(key, callback, false);
-	}
+    update<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
+        return this.#updateInternal(key, callback, false);
+    }
 
-	updateWithoutRefresh<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
-		return this.#updateInternal(key, callback, true);
-	}
+    updateWithoutRefresh<TReturn extends V | undefined>(key: K, callback: (value: V | undefined) => MaybePromise<TReturn>): Promise<TReturn> {
+        return this.#updateInternal(key, callback, true);
+    }
 
-	getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {
-		return this.update(key, async (value) => {
-			if (value !== undefined) {
-				return value;
-			}
+    getOrInsert(key: K, callback: () => MaybePromise<V>): Promise<V> {
+        return this.update(key, async (value) => {
+            if (value !== undefined) {
+                return value;
+            }
 
-			return callback();
-		});
-	}
+            return callback();
+        });
+    }
 
-	get size() {
-		return this.#map.size;
-	}
+    get size() {
+        return this.#map.size;
+    }
 
-	delete(key: K): Promise<void> {
-		return this.#map.delete(key);
-	}
+    delete(key: K): Promise<void> {
+        return this.#map.delete(key);
+    }
 
-	deleteWhere(shouldDelete: (key: K, value: V) => boolean): Promise<void> {
-		return this.#map.deleteWhere((key, entry) => {
-			return entry.expirationTime <= Date.now() || shouldDelete(key, entry.value);
-		});
-	}
+    deleteWhere(shouldDelete: (key: K, value: V) => boolean): Promise<void> {
+        return this.#map.deleteWhere((key, entry) => {
+            return entry.expirationTime <= Date.now() || shouldDelete(key, entry.value);
+        });
+    }
 
-	keys() {
-		return this.#map.keys();
-	}
+    keys() {
+        return this.#map.keys();
+    }
 
-	entries(): IterableIterator<[K, V]> {
-		const iterator = this.#map.entries();
-		const entriesGenerator = function*() {
-			for (const [key, entry] of iterator) {
-				if (entry.expirationTime > Date.now()) {
-					yield [key, entry.value] as [K, V];
-				}
-			}
-		}
-		return entriesGenerator();
-	}
+    entries(): IterableIterator<[K, V]> {
+        const iterator = this.#map.entries();
+        const entriesGenerator = function*() {
+            for (const [key, entry] of iterator) {
+                if (entry.expirationTime > Date.now()) {
+                    yield [key, entry.value] as [K, V];
+                }
+            }
+        }
+        return entriesGenerator();
+    }
 
-	peek<TReturn>(key: K, callback: (value: (V | undefined)) => TReturn): Promise<TReturn> {
-		return this.#map.peek(key, (entry) => {
-			if (!entry || entry.expirationTime <= Date.now()) {
-				return callback(undefined);
-			}
+    peek<TReturn>(key: K, callback: (value: (V | undefined)) => TReturn): Promise<TReturn> {
+        return this.#map.peek(key, (entry) => {
+            if (!entry || entry.expirationTime <= Date.now()) {
+                return callback(undefined);
+            }
 
-			return callback(entry.value);
-		});
-	}
+            return callback(entry.value);
+        });
+    }
 
-	get(key: K): Promise<V | undefined> {
-		return this.peek(key, value => value);
-	}
+    get(key: K): Promise<V | undefined> {
+        return this.peek(key, value => value);
+    }
 
-	has(key: K): Promise<boolean> {
-		return this.peek(key, (entry) => {
-			// Peek will send undefined if the key doesn't exist or if it has expired, so treat both cases as "not found"
-			return entry != null;
-		});
-	}
+    has(key: K): Promise<boolean> {
+        return this.peek(key, (entry) => {
+            // Peek will send undefined if the key doesn't exist or if it has expired, so treat both cases as "not found"
+            return entry != null;
+        });
+    }
 }

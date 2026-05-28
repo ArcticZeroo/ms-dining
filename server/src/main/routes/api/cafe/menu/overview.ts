@@ -13,82 +13,82 @@ import { createSeededRandom, selectWithVariety } from '../../../../../shared/uti
 import { getDefaultReasonForSectionType } from '../../../../../shared/util/recommendation.js';
 
 export const registerOverviewRoutes = (router: Router) => {
-	const retrieveAllOverviewStations = async (cafes: ICafe[], dateString: string): Promise<Map<string /*cafeId**/, Array<ICafeOverviewStation>>> => {
-		const overviewStationsByCafeId = new Map<string, Array<ICafeOverviewStation>>();
+    const retrieveAllOverviewStations = async (cafes: ICafe[], dateString: string): Promise<Map<string /*cafeId**/, Array<ICafeOverviewStation>>> => {
+        const overviewStationsByCafeId = new Map<string, Array<ICafeOverviewStation>>();
 
-		await Promise.all(
-			cafes.map(async (cafe) => {
-				const [stationHeaders, uniquenessData] = await Promise.all([
-					getServices().data.dailyMenu.retrieveDailyMenuOverviewHeadersAsync({ cafeId: cafe.id, dateString }),
-					getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({ cafeId: cafe.id, targetDateString: dateString })
-				]);
+        await Promise.all(
+            cafes.map(async (cafe) => {
+                const [stationHeaders, uniquenessData] = await Promise.all([
+                    getServices().data.dailyMenu.retrieveDailyMenuOverviewHeadersAsync({ cafeId: cafe.id, dateString }),
+                    getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({ cafeId: cafe.id, targetDateString: dateString })
+                ]);
 
-				const stations = stationHeaders.map(station => ({
-					...station,
-					uniqueness: uniquenessData[station.name] ?? getDefaultUniquenessDataForStation()
-				}));
+                const stations = stationHeaders.map(station => ({
+                    ...station,
+                    uniqueness: uniquenessData[station.name] ?? getDefaultUniquenessDataForStation()
+                }));
 
-				overviewStationsByCafeId.set(cafe.id, stations);
-			})
-		);
+                overviewStationsByCafeId.set(cafe.id, stations);
+            })
+        );
 
-		return overviewStationsByCafeId;
-	}
+        return overviewStationsByCafeId;
+    }
 
-	const retrieveFeaturedItemsForOverviewAsync = async (cafeIds: string[], dateString: string): Promise<Array<IRecommendationItem>> => {
-		const recommendations = await getServices().data.search.getRecommendations({
-			dateString,
-			cafeIdFilter:      cafeIds,
-			homepageIds:       cafeIds,
-			favoriteItemNames: []
-		});
+    const retrieveFeaturedItemsForOverviewAsync = async (cafeIds: string[], dateString: string): Promise<Array<IRecommendationItem>> => {
+        const recommendations = await getServices().data.search.getRecommendations({
+            dateString,
+            cafeIdFilter:      cafeIds,
+            homepageIds:       cafeIds,
+            favoriteItemNames: []
+        });
 
-		const sortedRecommendations: Array<[IRecommendationItem, RecommendationSectionType]> = [];
-		for (const recommendationSection of recommendations) {
-			for (const item of recommendationSection.items) {
-				sortedRecommendations.push([item, recommendationSection.type]);
-			}
-		}
+        const sortedRecommendations: Array<[IRecommendationItem, RecommendationSectionType]> = [];
+        for (const recommendationSection of recommendations) {
+            for (const item of recommendationSection.items) {
+                sortedRecommendations.push([item, recommendationSection.type]);
+            }
+        }
 
-		sortedRecommendations.sort(([itemA], [itemB]) => itemB.score - itemA.score);
+        sortedRecommendations.sort(([itemA], [itemB]) => itemB.score - itemA.score);
 
-		const random = createSeededRandom(dateString);
-		const selectedRecommendations = selectWithVariety(sortedRecommendations, 10, random);
+        const random = createSeededRandom(dateString);
+        const selectedRecommendations = selectWithVariety(sortedRecommendations, 10, random);
 
-		const result: Array<IRecommendationItem> = [];
-		for (const [item, sectionType] of selectedRecommendations) {
-			const reason = item.reason || getDefaultReasonForSectionType(sectionType);
-			result.push({
-				...item,
-				reason
-			});
-		}
+        const result: Array<IRecommendationItem> = [];
+        for (const [item, sectionType] of selectedRecommendations) {
+            const reason = item.reason || getDefaultReasonForSectionType(sectionType);
+            result.push({
+                ...item,
+                reason
+            });
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	router.get('/overview',
-		sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
-		memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
-		async ctx => validateViewMenuAccessAsync(ctx, async (cafes, dateString) => {
-			const cafeIds = cafes.map(cafe => cafe.id);
+    router.get('/overview',
+        sendVisitFromCafeParamMiddleware(getApplicationNameForMenuOverview),
+        memoizeResponseBodyWithResetOnMenuUpdate({ isPublic: true }),
+        async ctx => validateViewMenuAccessAsync(ctx, async (cafes, dateString) => {
+            const cafeIds = cafes.map(cafe => cafe.id);
 
-			const [
-				recommendations,
-				overviewStations,
-				shutdownCafeState
-			] = await Promise.all([
-				retrieveFeaturedItemsForOverviewAsync(cafeIds, dateString),
-				retrieveAllOverviewStations(cafes, dateString),
-				getServices().data.menuAnalytics.getShutdownCafeState({ dateString })
-			]);
+            const [
+                recommendations,
+                overviewStations,
+                shutdownCafeState
+            ] = await Promise.all([
+                retrieveFeaturedItemsForOverviewAsync(cafeIds, dateString),
+                retrieveAllOverviewStations(cafes, dateString),
+                getServices().data.menuAnalytics.getShutdownCafeState({ dateString })
+            ]);
 
-			const response: ICafeOverviewResponse = {
-				stations:      Object.fromEntries(overviewStations),
-				featuredItems: recommendations,
-				shutdownState: shutdownCafeState
-			};
+            const response: ICafeOverviewResponse = {
+                stations:      Object.fromEntries(overviewStations),
+                featuredItems: recommendations,
+                shutdownState: shutdownCafeState
+            };
 
-			ctx.body = jsonStringifyWithoutNull(response);
-		}));
+            ctx.body = jsonStringifyWithoutNull(response);
+        }));
 }

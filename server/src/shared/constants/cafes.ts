@@ -551,14 +551,14 @@ export type CafeView = ICafeView | IGroupView;
 export const VIEWS_BY_ID: Map<string, CafeView> = new Map();
 
 for (const group of CAFE_GROUP_LIST) {
-	VIEWS_BY_ID.set(group.id, { type: CafeViewType.group, value: group });
-	for (const alias of group.aliases ?? []) {
-		VIEWS_BY_ID.set(alias, { type: CafeViewType.group, value: group });
-	}
+    VIEWS_BY_ID.set(group.id, { type: CafeViewType.group, value: group });
+    for (const alias of group.aliases ?? []) {
+        VIEWS_BY_ID.set(alias, { type: CafeViewType.group, value: group });
+    }
 }
 for (const cafe of ALL_CAFES) {
-	VIEWS_BY_ID.set(cafe.id, { type: CafeViewType.cafe, value: cafe });
-	for (const alias of cafe.aliases ?? []) {
-		VIEWS_BY_ID.set(alias, { type: CafeViewType.cafe, value: cafe });
-	}
+    VIEWS_BY_ID.set(cafe.id, { type: CafeViewType.cafe, value: cafe });
+    for (const alias of cafe.aliases ?? []) {
+        VIEWS_BY_ID.set(alias, { type: CafeViewType.cafe, value: cafe });
+    }
 }

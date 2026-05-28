@@ -675,9 +675,9 @@ function generateForCafe(cafeId: string): GeneratedFixtures {
                 const modRoll = modRng.next();
                 const modCount = modRoll < 0.45 ? 1
                     : modRoll < 0.75 ? 2
-                    : modRoll < 0.92 ? 3
-                    : modRoll < 0.98 ? 5
-                    : modRng.int(6, 9);
+                        : modRoll < 0.92 ? 3
+                            : modRoll < 0.98 ? 5
+                                : modRng.int(6, 9);
                 const selectedMods = modRng.pick(MODIFIER_POOL, modCount);
                 modifiers = {
                     modifiers: selectedMods.map((mod, modIdx) => ({

@@ -114,7 +114,9 @@ const getSearchTagsForItem = async (id: string): Promise<string[]> => {
             where:   { id },
             include: { searchTags: { select: { name: true } } },
         });
-        if (!item) return [];
+        if (!item) {
+            return [];
+        }
         return item.searchTags.map(t => t.name).sort();
     });
 };

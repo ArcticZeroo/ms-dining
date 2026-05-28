@@ -1,7 +1,7 @@
 import {
-	IRecommendationItem,
-	IRecommendationSection,
-	RecommendationSectionType,
+    IRecommendationItem,
+    IRecommendationSection,
+    RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -100,18 +100,18 @@ export const getNewItemsForCafe = async (cafeId: string, dateString: string): Pr
 export const getNewAtCafe = async (
     context: IRecommendationContext,
 ): Promise<IRecommendationSection | null> => {
-	const newItemsForCafe = await getNewItemsForCafe(context.cafeId, context.dateString);
+    const newItemsForCafe = await getNewItemsForCafe(context.cafeId, context.dateString);
 
     const seenEntityKeys = new Set<string>();
     const items: IRecommendationItem[] = [];
-	for (const item of newItemsForCafe) {
-		const entityKey = getEntityKey(item);
-		if (seenEntityKeys.has(entityKey)) {
-			continue;
-		}
-		seenEntityKeys.add(entityKey);
-		items.push(item);
-	}
+    for (const item of newItemsForCafe) {
+        const entityKey = getEntityKey(item);
+        if (seenEntityKeys.has(entityKey)) {
+            continue;
+        }
+        seenEntityKeys.add(entityKey);
+        items.push(item);
+    }
 
     if (items.length === 0) {
         return null;

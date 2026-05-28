@@ -30,47 +30,47 @@ export interface IUserRecommendationContext {
 }
 
 const getCafeIds = async (dateString: string, cafeId?: string): Promise<string[]> => {
-	const shutDownCafeIds = await getShutDownCafeIdsAsync(dateString);
-	const cafeIds = cafeId ? [cafeId] : Array.from(CAFES_BY_ID.keys());
-	return cafeIds.filter(cafeId => !shutDownCafeIds.has(cafeId));
+    const shutDownCafeIds = await getShutDownCafeIdsAsync(dateString);
+    const cafeIds = cafeId ? [cafeId] : Array.from(CAFES_BY_ID.keys());
+    return cafeIds.filter(cafeId => !shutDownCafeIds.has(cafeId));
 }
 
 export const getAllAvailableItems = async (dateString: string, cafeId?: string): Promise<IMenuItemCandidate[]> => {
     const items: IMenuItemCandidate[] = [];
-	const cafeIds = await getCafeIds(dateString, cafeId);
+    const cafeIds = await getCafeIds(dateString, cafeId);
 
-	await Promise.all(cafeIds.map(async (cafeId) => {
-		const cafe = CAFES_BY_ID.get(cafeId);
-		if (!cafe) {
-			return;
-		}
+    await Promise.all(cafeIds.map(async (cafeId) => {
+        const cafe = CAFES_BY_ID.get(cafeId);
+        if (!cafe) {
+            return;
+        }
 
-		const stations = await retrieveDailyCafeMenuAsync(cafeId, dateString);
-		for (const station of stations) {
-			if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(station.name)) {
-				continue;
-			}
+        const stations = await retrieveDailyCafeMenuAsync(cafeId, dateString);
+        for (const station of stations) {
+            if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(station.name)) {
+                continue;
+            }
 
-			for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
-				if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(categoryName)) {
-					continue;
-				}
+            for (const [categoryName, itemIds] of station.menuItemIdsByCategoryName) {
+                if (ACCOMPANIMENT_FILTER.matchesStationOrCategory(categoryName)) {
+                    continue;
+                }
 
-				for (const itemId of itemIds) {
-					const menuItem = station.menuItemsById.get(itemId);
-					if (!menuItem) {
-						continue;
-					}
+                for (const itemId of itemIds) {
+                    const menuItem = station.menuItemsById.get(itemId);
+                    if (!menuItem) {
+                        continue;
+                    }
 
-					if (ACCOMPANIMENT_FILTER.matchesMenuItem(menuItem)) {
-						continue;
-					}
+                    if (ACCOMPANIMENT_FILTER.matchesMenuItem(menuItem)) {
+                        continue;
+                    }
 
-					items.push({ menuItem, cafeId, cafeName: cafe.name, stationName: station.name });
-				}
-			}
-		}
-	}));
+                    items.push({ menuItem, cafeId, cafeName: cafe.name, stationName: station.name });
+                }
+            }
+        }
+    }));
 
     return items;
 };

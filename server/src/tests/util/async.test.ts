@@ -68,7 +68,9 @@ describe('runPromiseWithRetries', () => {
         const start = Date.now();
         await assert.rejects(
             runPromiseWithRetries(
-                async () => { throw new Error('boom'); },
+                async () => {
+                    throw new Error('boom'); 
+                },
                 0,    // single attempt
                 500   // would add a noticeable delay if applied wrongly
             ),
@@ -84,7 +86,9 @@ describe('runPromiseWithRetries', () => {
         const start = Date.now();
         await assert.rejects(
             runPromiseWithRetries(
-                async () => { throw new Error('boom'); },
+                async () => {
+                    throw new Error('boom'); 
+                },
                 retries,
                 delayMs
             ),
@@ -148,7 +152,9 @@ describe('runPromiseWithRetries', () => {
         const start = Date.now();
         await assert.rejects(
             runPromiseWithRetries(
-                async () => { throw new Error('quick'); },
+                async () => {
+                    throw new Error('quick'); 
+                },
                 3
             ),
             /quick/

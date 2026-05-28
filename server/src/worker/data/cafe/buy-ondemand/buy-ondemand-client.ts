@@ -68,10 +68,10 @@ export class BuyOnDemandClient {
     };
 
     protected constructor(public readonly cafe: ICafe, options: BuyOnDemandClientOptions = {}) {
-		if (options.enableHar) {
-			this.enableHarCapture();
-		}
-		this.#translateErrors = options.translateErrors ?? false;
+        if (options.enableHar) {
+            this.enableHarCapture();
+        }
+        this.#translateErrors = options.translateErrors ?? false;
     }
 
     /**

@@ -16,33 +16,33 @@ const toCafeRecord = (cafe: Cafe): ICafeRecord => ({
 });
 
 export abstract class CafeStorageClient {
-	private static _hasInitialized = false;
-	private static _cacheLock = new Lock();
+    private static _hasInitialized = false;
+    private static _cacheLock = new Lock();
     private static readonly _cafeDataById = new Map<string, Cafe>();
 
     public static resetCache() {
         this._cafeDataById.clear();
-		this._hasInitialized = false;
+        this._hasInitialized = false;
     }
 
     private static async _ensureCafesExist(): Promise<void> {
-		if (this._hasInitialized) {
-			return;
-		}
+        if (this._hasInitialized) {
+            return;
+        }
 
-		return this._cacheLock.acquire(async () => {
-			// We initialized between the first check and acquiring the lock, so we can skip initialization.
-			if (this._hasInitialized) {
-				return;
-			}
+        return this._cacheLock.acquire(async () => {
+            // We initialized between the first check and acquiring the lock, so we can skip initialization.
+            if (this._hasInitialized) {
+                return;
+            }
 
-			const cafes = await usePrismaClient(prismaClient => prismaClient.cafe.findMany());
-			for (const cafe of cafes) {
-				this._cafeDataById.set(cafe.id, cafe);
-			}
+            const cafes = await usePrismaClient(prismaClient => prismaClient.cafe.findMany());
+            for (const cafe of cafes) {
+                this._cafeDataById.set(cafe.id, cafe);
+            }
 
-			this._hasInitialized = true;
-		});
+            this._hasInitialized = true;
+        });
     }
 
     public static async retrieveCafeAsync(id: string): Promise<Cafe | undefined> {

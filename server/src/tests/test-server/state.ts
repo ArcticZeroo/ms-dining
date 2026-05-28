@@ -117,7 +117,9 @@ export class ServerState {
 
     getTranslations(namespace: string): Record<string, string> {
         const ns = this._translations.get(namespace);
-        if (!ns) return {};
+        if (!ns) {
+            return {};
+        }
         return Object.fromEntries(ns);
     }
 

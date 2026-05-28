@@ -6,11 +6,11 @@ import { ISearchQuery } from '@msdining/common/models/search';
 import { sendVisitFromQueryParamMiddleware, sendVisitMiddleware } from '../../../middleware/analytics.js';
 import { assignCacheControlMiddleware, memoizeResponseBody } from '../../../middleware/cache.js';
 import {
-	attachRouter,
-	getEntityTypeAndName,
-	getTrimmedQueryParam,
-	serializeMapOfStringToSet,
-	serializeSearchResults
+    attachRouter,
+    getEntityTypeAndName,
+    getTrimmedQueryParam,
+    serializeMapOfStringToSet,
+    serializeSearchResults
 } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { logDebug, logError } from '../../../../shared/util/log.js';

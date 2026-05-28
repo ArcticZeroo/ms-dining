@@ -6,6 +6,17 @@ import type {
     IPreparePaymentResult,
 } from '@msdining/common/models/order';
 
+export interface ISynthesisFlags {
+    /** Use DB station hours instead of POST /concepts for schedule data. */
+    conceptSchedule: boolean;
+    /** Use DB ordering context instead of GET /sites + POST pay-config + GET profitCenter. */
+    orderingContext: boolean;
+    /** Use /sites response (already fetched by siteData) as pay config source instead of POST pay-config. */
+    payConfig: boolean;
+    /** Synthesize kiosk-item detail from DB instead of POST /kiosk-items/{itemId}. */
+    kioskItems: boolean;
+}
+
 export type OrderHistorySince = '7d' | '30d' | 'all';
 
 export interface IOrderService {
@@ -14,6 +25,7 @@ export interface IOrderService {
         cafeId: string;
         items: IOrderItem[];
         iframeCssUrl: string;
+        synthesisFlags?: ISynthesisFlags;
     }): Promise<IPreparePaymentResult>;
 
     completeOrder(data: {

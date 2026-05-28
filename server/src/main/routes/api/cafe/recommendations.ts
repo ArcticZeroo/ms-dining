@@ -1,11 +1,11 @@
 import Router from '@koa/router';
 import {
-	attachRouter,
-	getEntityTypeAndName,
-	getMaybeNumberQueryParam,
-	getMaybeUserId,
-	getTrimmedQueryParam,
-	serializeSearchResults
+    attachRouter,
+    getEntityTypeAndName,
+    getMaybeNumberQueryParam,
+    getMaybeUserId,
+    getTrimmedQueryParam,
+    serializeSearchResults
 } from '../../../util/koa.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { toDateString } from '@msdining/common/util/date-util';

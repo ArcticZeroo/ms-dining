@@ -1,11 +1,11 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-	computeDrinkWeight,
-	computeNoveltyWeight,
-	DRINK_WEIGHT,
-	isDrink,
-	TRAVELING_WEIGHT,
+    computeDrinkWeight,
+    computeNoveltyWeight,
+    DRINK_WEIGHT,
+    isDrink,
+    TRAVELING_WEIGHT,
 } from '../../../worker/data/recommendations/item-weights.js';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 
