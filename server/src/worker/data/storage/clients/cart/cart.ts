@@ -1,6 +1,7 @@
 import { usePrismaTransaction } from '../../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
+import { getStationNamesByIds } from '../../../cache/stations.js';
 import { DailyMenuStorageClient } from '../daily-menu/daily-menu.js';
 import { toDateString } from '@msdining/common/util/date-util';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
@@ -31,6 +32,7 @@ const toCartItemRecord = (
     item: PrismaCartItemWithModifiers,
     menuItem: IMenuItemBase,
     isAvailable: boolean,
+    stationName?: string,
 ): ICartItemRecord => ({
     id:                  item.id,
     menuItemId:          item.menuItemId,
@@ -41,6 +43,7 @@ const toCartItemRecord = (
     updatedAt:           item.updatedAt.toISOString(),
     menuItem,
     isAvailable,
+    stationName,
 });
 
 const CART_ITEM_INCLUDE = {
@@ -73,6 +76,12 @@ export abstract class CartStorageClient {
             ...menuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
         ]);
 
+        // Bulk-fetch station names for all referenced menu items
+        const stationIds = [...new Set(
+            menuItems.filter((item): item is IMenuItemBase => item != null).map(item => item.stationId),
+        )];
+        const stationNamesById = await getStationNamesByIds(stationIds);
+
         const items: ICartItemRecord[] = [];
         for (let i = 0; i < rawItems.length; i++) {
             const raw = rawItems[i]!;
@@ -80,7 +89,7 @@ export abstract class CartStorageClient {
             if (!menuItem) {
                 continue;
             }
-            items.push(toCartItemRecord(raw, menuItem, availableIds.has(raw.menuItemId)));
+            items.push(toCartItemRecord(raw, menuItem, availableIds.has(raw.menuItemId), stationNamesById.get(menuItem.stationId)));
         }
 
         if (items.length === 0) {

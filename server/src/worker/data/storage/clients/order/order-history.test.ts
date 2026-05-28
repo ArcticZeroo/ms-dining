@@ -132,6 +132,13 @@ test('getOrderHistory enriches items with menu item data', async () => {
     assert.equal(firstItem.menuItem.name, 'Test Burger');
 });
 
+test('getOrderHistory enriches items with stationName', async () => {
+    const orders = await getServices().data.order.getOrderHistory({ userId: USER_ID, since: '7d' });
+    assert.ok(orders.length > 0);
+    const firstItem = orders[0]!.items[0]!;
+    assert.equal(firstItem.stationName, 'Station', 'item should include station name');
+});
+
 test('getOrderHistory returns empty for unknown user', async () => {
     const orders = await getServices().data.order.getOrderHistory({ userId: 'nobody', since: 'all' });
     assert.equal(orders.length, 0);

@@ -40,6 +40,7 @@ export const CafeOrderItemSchema = z.object({
     specialInstructions: z.string().nullish().transform(val => val ?? null),
     modifiers:           z.array(SerializedModifierSchema).default([]),
     menuItem:            MenuItemBaseSchema,
+    stationName:         z.string().optional(),
 });
 
 export type ICafeOrderItem = z.infer<typeof CafeOrderItemSchema>;

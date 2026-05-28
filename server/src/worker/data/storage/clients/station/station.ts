@@ -6,7 +6,7 @@ import { PrismaLikeClient } from '../../../../../shared/models/prisma.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import type { IStationRecord } from '../../../../../shared/services/station.js';
 
-const toStationRecord = (s: Station): IStationRecord => ({
+export const toStationRecord = (s: Station): IStationRecord => ({
     id:             s.id,
     name:           s.name,
     normalizedName: s.normalizedName,
@@ -77,6 +77,10 @@ export abstract class StationStorageClient {
         }));
     }
 
+    public static async retrieveAllStationsAsync(): Promise<Array<Station>> {
+        return usePrismaClient(prismaClient => prismaClient.station.findMany());
+    }
+
     public static async retrieveAllStationNamesAsync(): Promise<string[]> {
         const stations = await usePrismaClient(prismaClient => prismaClient.station.findMany({
             select: { name: true }
@@ -84,4 +88,3 @@ export abstract class StationStorageClient {
         return stations.map(station => station.name);
     }
 }
-

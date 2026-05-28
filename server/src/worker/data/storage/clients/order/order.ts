@@ -1,10 +1,12 @@
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../client.js';
 import { SERVICE_ERROR_CODES, ServiceError } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
+import { getStationNamesByIds } from '../../../cache/stations.js';
 import type { ICafeOrderDTO, IOrderItem } from '@msdining/common/models/order';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import { flattenModifiers, groupModifierRows, modifiersEqual } from '@msdining/common/util/modifier-util';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
+import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { hashOrderItems, toOrderItems } from '../../../util/order.js';
 import type { OrderHistorySince } from '../../../../../shared/services/order.js';
 import type { CafeOrder, CafeOrderItem, CafeOrderItemModifier } from '@prisma/client';
@@ -30,9 +32,19 @@ const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> 
     const menuItemResults = await Promise.all(
         allMenuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
     );
-    const menuItemsById = new Map(
-        allMenuItemIds.map((id, i) => [id, menuItemResults[i]] as const).filter(([, v]) => v != null),
-    );
+    const menuItemsById = new Map<string, IMenuItemBase>();
+    for (let i = 0; i < allMenuItemIds.length; i++) {
+        const menuItem = menuItemResults[i];
+        if (menuItem != null) {
+            menuItemsById.set(allMenuItemIds[i]!, menuItem);
+        }
+    }
+
+    // Bulk-fetch station names for all referenced stations
+    const stationIds = [...new Set(
+        Array.from(menuItemsById.values()).map(item => item.stationId),
+    )];
+    const stationNamesById = await getStationNamesByIds(stationIds);
 
     return orders.map(order => ({
         id:                     order.id,
@@ -57,6 +69,7 @@ const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> 
                 price:               item.price,
                 specialInstructions: item.specialInstructions,
                 modifiers:           groupModifierRows(item.modifiers),
+                stationName:         stationNamesById.get(menuItem.stationId),
                 menuItem:            {
                     ...menuItemBaseToDTO(menuItem),
                     totalReviewCount: 0,

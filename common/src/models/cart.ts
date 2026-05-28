@@ -56,6 +56,7 @@ export const CartItemRecordSchema = z.object({
     updatedAt:           z.string(),
     menuItem:            MenuItemBaseSchema,
     isAvailable:         z.boolean(),
+    stationName:         z.string().optional(),
 });
 
 export type ICartItemRecord = z.output<typeof CartItemRecordSchema>;
