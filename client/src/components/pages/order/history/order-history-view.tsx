@@ -5,8 +5,6 @@ import { ApplicationContext } from '../../../../context/app.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
 import { usePageData } from '../../../../hooks/location.ts';
 import { useOrderHistoryQuery } from '../../../../store/queries/ordering.ts';
-import { formatPrice } from '../../../../util/cart.ts';
-import { pluralize } from '../../../../util/string.ts';
 import { OrderHistoryFilters } from './order-history-filters.tsx';
 import { useExpandedViewIds } from '../../../../hooks/search.js';
 import { OrderHistoryBody } from './order-history-body.tsx';
@@ -29,13 +27,6 @@ export const OrderHistoryView = () => {
         return orders.filter((orderData) => !isHomepageOnly || expandedHomepageViewIds.has(orderData.cafeId));
     }, [historyQuery.data, isHomepageOnly, expandedHomepageViewIds]);
 
-    const totalSpent = useMemo(
-        () => visibleOrders.reduce((total, orderData) => total + orderData.total, 0),
-        [visibleOrders]
-    );
-
-    const hasData = historyQuery.data != null;
-
     return (
         <div id="order-history" className="flex-col">
             <div className="card flex-col">
@@ -47,11 +38,6 @@ export const OrderHistoryView = () => {
                     onHomepageOnlyChanged={setIsHomepageOnly}
                     hasHomepageViews={hasHomepageViews}
                 />
-                {hasData && (
-                    <div className="order-history-summary subtitle text-center">
-                        {visibleOrders.length} {pluralize('order', visibleOrders.length)} • {formatPrice(totalSpent)} total
-                    </div>
-                )}
             </div>
             <OrderHistoryBody
                 orders={visibleOrders}

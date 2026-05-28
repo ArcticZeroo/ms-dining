@@ -1,17 +1,20 @@
 import type { ICafeOrder } from '@msdining/common/models/order';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useReorder } from '../../../../hooks/reorder.ts';
 import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
 import { pluralize } from '../../../../util/string.js';
 import { CompletedOrderCard } from '../history/completed-order-card.js';
+import { formatPrice } from '../../../../util/cart.js';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrder[];
+    showCompoundReorderButtons: boolean;
 }
 
-export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders }) => {
+export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders, showCompoundReorderButtons }) => {
     const { reorder, isPending } = useReorder();
     const cartAlreadyHasAvailableItems = useServerCartHasAvailableItems();
+    const totalPrice = useMemo(() => orders.reduce((total, order) => total + order.total, 0), [orders]);
 
     if (orders.length === 0) {
         return (
@@ -25,31 +28,35 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
 
     return (
         <>
-            <div className="centered-content flex-col">
-                <div className="flex">
-                    <button
-                        className="default-container default-button"
-                        disabled={isPending}
-                        onClick={() => reorder(allItems, false /*navigateAfterAdd*/)}
-                    >
-                        Add All To Cart
-                    </button>
-                    <button
-                        className="default-container default-button"
-                        disabled={isPending}
-                        onClick={() => reorder(allItems)}
-                    >
-                        Reorder All
-                    </button>
-                </div>
-                {
-                    cartAlreadyHasAvailableItems && (
-                        <span className="subtitle">
-                            You already have items in your cart. Reorder will add to your existing cart.
-                        </span>
-                    )
-                }
-            </div>
+            {
+                showCompoundReorderButtons && (
+                    <div className="flex-col flex-center">
+                        <div className="flex">
+                            <button
+                                className="default-container default-button"
+                                disabled={isPending}
+                                onClick={() => reorder(allItems, false /*navigateAfterAdd*/)}
+                            >
+                                Add All To Cart
+                            </button>
+                            <button
+                                className="default-container default-button"
+                                disabled={isPending}
+                                onClick={() => reorder(allItems)}
+                            >
+                                Reorder All
+                            </button>
+                        </div>
+                        {
+                            cartAlreadyHasAvailableItems && (
+                                <span className="subtitle">
+                                    You already have items in your cart. Reorder will add to your existing cart.
+                                </span>
+                            )
+                        }
+                    </div>
+                )
+            }
             <div className="flex flex-center">
                 <span>
                     {orders.length} {pluralize('Order', orders.length)}
@@ -59,6 +66,12 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                 </span>
                 <span>
                     {allItems.length} {pluralize('Total Item', orders.length)}
+                </span>
+                <span>
+                    -
+                </span>
+                <span>
+                    {formatPrice(totalPrice)} Total
                 </span>
             </div>
             <div className="flex flex-center flex-wrap">
