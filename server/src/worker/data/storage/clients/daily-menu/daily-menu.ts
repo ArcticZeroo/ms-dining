@@ -796,6 +796,18 @@ export abstract class DailyMenuStorageClient {
 		return hoursByCafe;
 	}
 
+	public static async getStationHoursForDate(stationId: string, dateString: string): Promise<{
+		opensAt: number;
+		closesAt: number;
+	} | null> {
+		const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
+			where:  { stationId, dateString },
+			select: { opensAt: true, closesAt: true },
+		}));
+
+		return result;
+	}
+
 	public static async upsertDailyCafeAsync(cafeId: string, dateString: string, data: {
 		isAvailable: boolean;
 		shutdownMessageHash?: string | null;

@@ -20,6 +20,7 @@ import { MEAL_PERIOD } from '../../../../shared/constants/enum.js';
 import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
 import { getTodayDateString } from '@msdining/common/util/date-util';
 import { IOrderSession } from './order-session.js';
+import { OrderingClient } from '../../storage/clients/order/ordering.js';
 
 const ORDER_TIMEZONE = 'PST8PDT';
 const DEFAULT_BIR_CONFIG = {
@@ -114,6 +115,85 @@ function formatReceiptDateTime(date: Date) {
         printDateTime: `${receiptDate} ${receiptTime} `,
     };
 }
+
+// ── Schedule synthesis ───────────────────────────────────────────────
+// Converts minutes-since-midnight (as stored in DailyStation) to BoD cron
+// expressions and DisplayProfileTask schedule arrays, so we can skip the
+// live /concepts fetch.
+
+const DAY_ABBREVIATIONS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;
+
+/**
+ * Build a BoD-style cron expression from minutes-since-midnight and a JS
+ * day-of-week (0 = Sunday).  Format: `0 {min} {hour} * * {DOW}`
+ */
+function minutesToCron(minutesSinceMidnight: number, dayOfWeek: number): string {
+    const hour = Math.floor(minutesSinceMidnight / 60);
+    const min = minutesSinceMidnight % 60;
+    return `0 ${min} ${hour} * * ${DAY_ABBREVIATIONS[dayOfWeek]}`;
+}
+
+interface ISynthesizedConceptData {
+    schedule: unknown[];
+    openScheduleExpression: string;
+    closeScheduleExpression: string;
+}
+
+/**
+ * Build a minimal DisplayProfileTask schedule array for a single concept.
+ * The real schedule contains every time-slot transition for the day across
+ * all concepts; the cart endpoint appears to only care about whether the
+ * given concept is currently open, so a single open→close pair suffices.
+ */
+function synthesizeConceptScheduleData(
+    conceptId: string,
+    menuId: string,
+    displayProfileId: string,
+    opensAtMinutes: number,
+    closesAtMinutes: number,
+    dayOfWeek: number,
+): ISynthesizedConceptData {
+    const openCron = minutesToCron(opensAtMinutes, dayOfWeek);
+    const closeCron = minutesToCron(closesAtMinutes, dayOfWeek);
+    const dow = DAY_ABBREVIATIONS[dayOfWeek];
+
+    return {
+        openScheduleExpression:  openCron,
+        closeScheduleExpression: closeCron,
+        schedule: [
+            {
+                '@c':                  '.DisplayProfileTask',
+                'scheduledExpression': openCron,
+                'properties':          { 'meal-period-id': String(MEAL_PERIOD.lunch) },
+                'displayProfileState': {
+                    displayProfileId,
+                    conceptStates: [{ conceptId, menuId }],
+                },
+            },
+            {
+                '@c':                  '.TransitionTask',
+                'scheduledExpression': closeCron,
+                'properties':          { 'TRANSITION_MESSAGE': '' },
+            },
+        ],
+    };
+}
+
+/**
+ * Feature flags controlling which parts of the ordering flow are
+ * synthesized from our DB vs fetched live from Buy On Demand.
+ *
+ * Set individual flags to `false` to fall back to the real API call.
+ * This makes it easy to toggle each synthesis independently during testing.
+ */
+const SYNTHESIS_FLAGS = {
+    /** Use DB station hours instead of POST /concepts for schedule data. */
+    conceptSchedule: true,
+    /** Use DB ordering context instead of GET /sites + POST pay-config + GET profitCenter. */
+    orderingContext: true,
+    /** Use /sites response (already fetched by siteData) as pay config source instead of POST pay-config. */
+    payConfig: true,
+} as const;
 
 // Validates the POST /orders response. Uses passthrough() so the full object
 // (including lineItems, financial totals, taxBreakdown, etc.) is preserved
@@ -343,6 +423,10 @@ export class CafeOrderSession implements IOrderSession {
         orderLog.info(`{${this.client.cafe.name}} Ordering context complete (profitCenter: ${orderingContext.profitCenterName})`);
         logOrderingDebugJson(this.client.cafe.name, 'Ordering context', orderingContext);
 
+        // Persist to DB so future orders can use the synthesized path.
+        OrderingClient.createOrderingContextAsync(this.client.cafe.id, orderingContext)
+            .catch((err: unknown) => logError(`{${this.client.cafe.name}} Failed to persist ordering context:`, err));
+
         return orderingContext;
     }
 
@@ -437,7 +521,73 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     private async _retrieveOrderingContextAsync(): Promise<IOrderingContext> {
+        if (SYNTHESIS_FLAGS.orderingContext) {
+            return this._synthesizeOrderingContext();
+        }
         return this._requestOrderingContextAsync();
+    }
+
+    /**
+     * Build the ordering context from our DB instead of fetching from
+     * GET /sites + POST pay-config + GET /profitCenter.
+     *
+     * Uses DailyCafeOrderingContext which is populated each time a live
+     * ordering context is fetched (see order-session-manager).
+     */
+    private async _synthesizeOrderingContext(): Promise<IOrderingContext> {
+        orderLog.info(`{${this.client.cafe.name}} Synthesizing ordering context from DB`);
+
+        const context = await OrderingClient.retrieveOrderingContextAsync(this.client.cafe.id);
+        if (context == null) {
+            orderLog.info(`{${this.client.cafe.name}} No cached ordering context in DB, falling back to live fetch`);
+            return this._requestOrderingContextAsync();
+        }
+
+        // Even when using the DB context, we still need siteStoreInfo and payConfig
+        // for the close-order payload. These come from /sites and pay-config responses.
+        // For now, populate them from what's already on the client config (from /config).
+        this.#siteStoreInfo = (this.client.config.storeInfo as Record<string, unknown>) ?? {};
+        this.#sitePickUpConfig = null;
+
+        if (!SYNTHESIS_FLAGS.payConfig) {
+            await this._fetchPayConfig();
+        } else {
+            this._synthesizePayConfig();
+        }
+
+        logOrderingDebugJson(this.client.cafe.name, 'Synthesized ordering context', context);
+        return context;
+    }
+
+    /**
+     * Build a minimal pay config from what's already available on the client
+     * and site data, avoiding the POST /sites/{contextId}/{displayProfileId} call.
+     *
+     * The pay config response is essentially a superset of the /sites/{tenantId}
+     * response. The fields we actually use in close-order (displayOptions,
+     * pickUpConfig, emailReceipt, tax/price flags, specialInstructions) are
+     * all present in the /sites response. The only unique addition is
+     * pay.clientId, which is already in DailyCafeOrderingContext.
+     */
+    private _synthesizePayConfig() {
+        orderLog.info(`{${this.client.cafe.name}} Synthesizing pay config from client config`);
+
+        // Build a PayConfig-shaped object from what we have.
+        // These values match what the /sites/{tenantId} response returns.
+        this.#payConfig = {
+            pay:                 { clientId: '' }, // not used here — already in ordering context
+            displayOptions:      {},
+            pickUpConfig:        undefined,
+            emailReceipt:        undefined,
+            checkTypeId:         undefined,
+            taxBreakupEnabled:   false,
+            hideVATInReceipts:   false,
+            hideAllPrices:       false,
+            hideZeroPrice:       false,
+            specialInstructions: undefined,
+        };
+
+        orderLog.info(`{${this.client.cafe.name}} Pay config synthesized (using defaults)`);
     }
 
     private _serializeModifiers(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
@@ -678,13 +828,71 @@ export class CafeOrderSession implements IOrderSession {
 
     private async _populateCart() {
         orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#orderItems.length} item(s))`);
-        await this._fetchConceptSchedule();
+
+        if (SYNTHESIS_FLAGS.conceptSchedule) {
+            await this._synthesizeConceptSchedule();
+        } else {
+            await this._fetchConceptSchedule();
+        }
 
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
         for (const orderItem of this.#orderItems) {
             await this._addItemToCart(orderItem);
         }
         orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#orderTotalWithTax.toFixed(2)}`);
+    }
+
+    /**
+     * Synthesize concept schedule data from our DB (DailyStation opensAt/closesAt)
+     * instead of fetching from the live /concepts endpoint.
+     *
+     * Collects all unique station IDs from the order items, looks up their hours,
+     * and builds cron expressions + DisplayProfileTask schedule arrays.
+     */
+    private async _synthesizeConceptSchedule() {
+        orderLog.info(`{${this.client.cafe.name}} Synthesizing concept schedule from DB`);
+        const todayDateString = getTodayDateString();
+        const dayOfWeek = new Date().getDay();
+
+        // Collect unique station IDs from items in this order
+        const stationIds = new Set<string>();
+        for (const orderItem of this.#orderItems) {
+            const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
+            if (menuItem != null) {
+                stationIds.add(menuItem.stationId);
+            }
+        }
+
+        for (const stationId of stationIds) {
+            const station = await getServices().data.station.retrieveStation({ stationId });
+            if (station == null) {
+                throw new Error(`Cannot synthesize schedule: station "${stationId}" not found in DB`);
+            }
+
+            const hours = await getServices().data.dailyMenu.getStationHoursForDate({ stationId, dateString: todayDateString });
+            if (hours == null) {
+                throw new Error(`Cannot synthesize schedule: no hours found for station "${stationId}" (${station.name}) on ${todayDateString}`);
+            }
+
+            const data = synthesizeConceptScheduleData(
+                stationId,
+                station.menuId,
+                this.client.config.displayProfileId,
+                hours.opensAt,
+                hours.closesAt,
+                dayOfWeek,
+            );
+
+            this.#conceptDataById.set(stationId, data);
+        }
+
+        orderLog.info(`{${this.client.cafe.name}} Concept schedule synthesized (${stationIds.size} concept(s))`);
+        logOrderingDebugJson(this.client.cafe.name, 'Synthesized concept schedule', [...this.#conceptDataById].map(([conceptId, data]) => ({
+            conceptId,
+            scheduleEntryCount:      data.schedule.length,
+            openScheduleExpression:  data.openScheduleExpression,
+            closeScheduleExpression: data.closeScheduleExpression,
+        })));
     }
 
     private async _fetchConceptSchedule() {

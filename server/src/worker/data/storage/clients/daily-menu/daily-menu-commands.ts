@@ -62,6 +62,8 @@ export const dailyMenuServiceCommands = {
         mapToRecord(await DailyMenuStorageClient.retrieveAllFirstMenuItemAppearances()),
     getCafeHoursForDate: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
         DailyMenuStorageClient.getCafeHoursForDate(cafeId, dateString),
+    getStationHoursForDate: async ({ stationId, dateString }: { stationId: string; dateString: string }) =>
+        DailyMenuStorageClient.getStationHoursForDate(stationId, dateString),
     getAllCafeHoursForDate: async ({ dateString }: { dateString: string }) =>
         mapToRecord(await DailyMenuStorageClient.getAllCafeHoursForDate(dateString)),
     upsertDailyCafeAsync: async ({ cafeId, dateString, data }: { cafeId: string; dateString: string; data: { isAvailable: boolean; shutdownMessageHash?: string | null } }) =>

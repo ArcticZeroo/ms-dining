@@ -81,6 +81,7 @@ export interface IDailyMenuService {
     retrieveFirstMenuItemVisitDate(data: { menuItemId: string }): Promise<string | null>;
     retrieveAllFirstMenuItemAppearances(data: {}): Promise<Record<string, string>>;
     getCafeHoursForDate(data: { cafeId: string; dateString: string }): Promise<ICafeHours | null>;
+    getStationHoursForDate(data: { stationId: string; dateString: string }): Promise<ICafeHours | null>;
     getAllCafeHoursForDate(data: { dateString: string }): Promise<Record<string, ICafeHours>>;
     upsertDailyCafeAsync(data: { cafeId: string; dateString: string; data: { isAvailable: boolean; shutdownMessageHash?: string | null } }): Promise<void>;
     getShutDownCafesAsync(data: { dateString: string }): Promise<Record<string, ICafeShutdownState>>;
