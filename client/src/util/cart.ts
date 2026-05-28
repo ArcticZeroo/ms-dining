@@ -1,5 +1,22 @@
 import { CafeTypes } from '@msdining/common';
-import { IMenuItemBase } from '@msdining/common/models/cafe';
+import type { IMenuItemBase } from '@msdining/common/models/cafe';
+
+export const groupByStation = <T extends { stationName?: string }>(items: T[]): Map<string, T[]> => {
+    const groups = new Map<string, T[]>();
+
+    for (const item of items) {
+        const key = item.stationName ?? '';
+        const group = groups.get(key);
+
+        if (group) {
+            group.push(item);
+        } else {
+            groups.set(key, [item]);
+        }
+    }
+
+    return groups;
+};
 
 export const formatPrice = (price: number, addCurrencySign: boolean = true) => {
     return `${addCurrencySign ? '$' : ''}${price.toFixed(2)}`;

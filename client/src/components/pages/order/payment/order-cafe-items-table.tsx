@@ -1,6 +1,9 @@
 import type { ICartItemRecord } from '@msdining/common/models/cart';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { groupByStation } from '../../../../util/cart.ts';
 import CartItemRow from '../cart/cart-item-row.tsx';
+import { StationItemGroup } from '../cart/station-item-group.tsx';
+import '../cart/cart-contents-table.css';
 
 interface IOrderCafeItemsTableProps {
     items: ICartItemRecord[];
@@ -16,19 +19,32 @@ export const OrderCafeItemsTable: React.FC<IOrderCafeItemsTableProps> = ({
     onRemove,
     onEdit,
     onChangeQuantity,
-}) => (
-    <table className="cart-contents">
-        <tbody>
-            {items.map((item) => (
-                <CartItemRow
-                    key={item.id}
-                    item={item}
-                    readOnly={readOnly}
-                    onRemove={() => onRemove(item)}
-                    onEdit={() => onEdit(item)}
-                    onChangeQuantity={(quantity) => onChangeQuantity(item, quantity)}
-                />
-            ))}
-        </tbody>
-    </table>
-);
+}) => {
+    const cafeId = items[0]?.menuItem.cafeId;
+    const stationGroups = useMemo(() => groupByStation(items), [items]);
+
+    return (
+        <table className="cart-contents">
+            <tbody>
+                {Array.from(stationGroups.entries()).map(([stationName, stationItems]) => (
+                    <StationItemGroup
+                        key={stationName || 'other'}
+                        stationName={stationName}
+                        cafeId={cafeId}
+                    >
+                        {stationItems.map((item) => (
+                            <CartItemRow
+                                key={item.id}
+                                item={item}
+                                readOnly={readOnly}
+                                onRemove={() => onRemove(item)}
+                                onEdit={() => onEdit(item)}
+                                onChangeQuantity={(quantity) => onChangeQuantity(item, quantity)}
+                            />
+                        ))}
+                    </StationItemGroup>
+                ))}
+            </tbody>
+        </table>
+    );
+};

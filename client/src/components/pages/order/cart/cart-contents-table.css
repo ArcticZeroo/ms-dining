@@ -51,3 +51,11 @@
     font-size: 0.85em;
     font-weight: bold;
 }
+
+.cart-contents .station-subheader {
+    padding: calc(var(--default-padding) / 2) var(--default-padding);
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    font-weight: normal;
+    text-align: left;
+}

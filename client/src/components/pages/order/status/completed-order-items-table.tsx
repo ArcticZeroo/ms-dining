@@ -1,7 +1,9 @@
 import type { ICafeOrderItem } from '@msdining/common/models/order';
 import React from 'react';
-import { formatPrice } from '../../../../util/cart.ts';
+import { formatPrice, groupByStation } from '../../../../util/cart.ts';
 import { CartItemDetailCells } from '../cart/cart-item-detail-cells.tsx';
+import { StationItemGroup } from '../cart/station-item-group.tsx';
+import '../cart/cart-contents-table.css';
 
 interface ICompletedOrderItemsTableProps {
     items: ICafeOrderItem[];
@@ -11,13 +13,24 @@ interface ICompletedOrderItemsTableProps {
 }
 
 export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> = ({ items, subtotal, tax, total }) => {
+    const cafeId = items[0]?.menuItem.cafeId;
+    const stationGroups = groupByStation(items);
+
     return (
         <table className="cart-contents">
             <tbody>
-                {items.map((item, i) => (
-                    <tr key={i} className="cart-item">
-                        <CartItemDetailCells item={item}/>
-                    </tr>
+                {Array.from(stationGroups.entries()).map(([stationName, stationItems]) => (
+                    <StationItemGroup
+                        key={stationName || 'other'}
+                        stationName={stationName}
+                        cafeId={cafeId}
+                    >
+                        {stationItems.map((item, index) => (
+                            <tr key={`${item.menuItemId}-${index}`} className="cart-item">
+                                <CartItemDetailCells item={item}/>
+                            </tr>
+                        ))}
+                    </StationItemGroup>
                 ))}
                 <tr>
                     <td></td>

@@ -8,10 +8,12 @@ import { useValueNotifier } from '../../../../hooks/events.ts';
 import { CafeView } from '../../../../models/cafe.ts';
 import { useServerCartItemsByCafe } from '../../../../store/zustand/server-cart.ts';
 import { getViewName } from '../../../../util/cafe.ts';
+import { groupByStation } from '../../../../util/cart.ts';
 import { getViewMenuUrl } from '../../../../util/link.ts';
 import { sortViews } from '../../../../util/sorting.ts';
 import { OrderPriceInlineTable } from '../order-price-inline-table.tsx';
 import CartItemRow from './cart-item-row.tsx';
+import { StationItemGroup } from './station-item-group.tsx';
 import './cart-contents-table.css';
 
 interface ICartContentsTableProps {
@@ -49,32 +51,40 @@ export const CartContentsTable: React.FC<ICartContentsTableProps> = ({ showTotal
         () => {
             const viewsInOrder = sortViews(cartItemsByView.keys());
 
-            return viewsInOrder.map(view => (
-                <React.Fragment key={view.value.id}>
-                    <tr>
-                        <th colSpan={4}>
-                            <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="cart-cafe-url">
-                                {getViewName({
-                                    view,
-                                    showGroupName: true
-                                })}
-                            </Link>
-                        </th>
-                    </tr>
-                    {
-                        cartItemsByView.get(view)?.map((item) => (
-                            <CartItemRow
-                                key={item.id}
-                                readOnly={readOnly}
-                                item={item}
-                                onRemove={() => onRemove(item)}
-                                onEdit={() => onEdit(item)}
-                                onChangeQuantity={(quantity) => onChangeQuantity(item, quantity)}
-                            />
-                        ))
-                    }
-                </React.Fragment>
-            ));
+            return viewsInOrder.map(view => {
+                const items = cartItemsByView.get(view) ?? [];
+                const stationGroups = groupByStation(items);
+
+                return (
+                    <React.Fragment key={view.value.id}>
+                        <tr>
+                            <th colSpan={4}>
+                                <Link to={getViewMenuUrl({ view, viewsById, shouldUseGroups })} className="cart-cafe-url">
+                                    {getViewName({ view, showGroupName: true })}
+                                </Link>
+                            </th>
+                        </tr>
+                        {Array.from(stationGroups.entries()).map(([stationName, stationItems]) => (
+                            <StationItemGroup
+                                key={`${view.value.id}-${stationName || 'other'}`}
+                                stationName={stationName}
+                                cafeId={view.value.id}
+                            >
+                                {stationItems.map((item) => (
+                                    <CartItemRow
+                                        key={item.id}
+                                        readOnly={readOnly}
+                                        item={item}
+                                        onRemove={() => onRemove(item)}
+                                        onEdit={() => onEdit(item)}
+                                        onChangeQuantity={(quantity) => onChangeQuantity(item, quantity)}
+                                    />
+                                ))}
+                            </StationItemGroup>
+                        ))}
+                    </React.Fragment>
+                );
+            });
         },
         [cartItemsByView, viewsById, shouldUseGroups, readOnly, onRemove, onEdit, onChangeQuantity]
     );
