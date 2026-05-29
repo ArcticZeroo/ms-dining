@@ -15,6 +15,7 @@ import { useSynthesisFlags } from '../../../hooks/synthesis-flags.ts';
 
 import './order-page.css';
 import { usePageData } from '../../../hooks/location.js';
+import { OnlineOrderingPrivacy } from '../../notice/online-ordering-privacy.js';
 
 export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
@@ -84,6 +85,7 @@ export const OrderCheckoutView = () => {
                     <MultiCafeOrderWarning/>
                 )
             }
+            <OnlineOrderingPrivacy/>
             <PaymentIdentityContext.Provider value={{ alias, phoneNumber: validatedPhoneNumber ?? '', isValid }}>
                 <div className="flex-col">
                     {snapshot.groupedItems.map((group) => (

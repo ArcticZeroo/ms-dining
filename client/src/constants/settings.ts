@@ -22,6 +22,7 @@ export const InternalSettings = {
     lastRoamingSettingsUpdateTime:   new DateSetting('lastRoamingSettingsUpdateTime', new Date(NaN) /*defaultValue*/),
     mapBottomSheetHeightFraction:    new NumberSetting('mapBottomSheetHeightFraction', 0.5 /*defaultValue*/),
     lastOrderPrepDismissCreatedTime: new NumberSetting('lastOrderPrepDismissTime', 0 /*defaultValue*/),
+    suppressOrderPrivacyPolicy:      new BooleanSetting('suppressOrderPrivacyPolicy', false /*defaultValue*/),
 } as const;
 
 export const ApplicationSettings = {
