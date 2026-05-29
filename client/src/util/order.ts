@@ -1,4 +1,5 @@
 import { formatTimeToHoursMinutes } from './date.js';
+import type { ICafeOrder } from '@msdining/common/models/order';
 
 /**
  * Format a wait time range as a human-readable string.
@@ -38,3 +39,5 @@ export const formatEstimatedReadyTime = (
 
     return `${formatTimeToHoursMinutes(earliest)} - ${formatTimeToHoursMinutes(latest)}`;
 };
+
+export const getTotalCostForOrders = (orders: ICafeOrder[]) => orders.reduce((total, order) => total + order.total, 0);

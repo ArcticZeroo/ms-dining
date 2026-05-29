@@ -3,9 +3,9 @@ import React, { useMemo } from 'react';
 import { useReorder } from '../../../../hooks/reorder.ts';
 import { useServerCartHasAvailableItems } from '../../../../store/zustand/server-cart.js';
 import { pluralize } from '../../../../util/string.js';
-import { CompletedOrderCard } from '../history/completed-order-card.js';
 import { formatPrice } from '../../../../util/cart.js';
-import { fromDateString, toDateString } from '@msdining/common/util/date-util';
+import { toDateString } from '@msdining/common/util/date-util';
+import { OrderHistoryDateGroup } from '../history/order-history-date-group.js';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrder[];
@@ -72,41 +72,23 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                     </div>
                 )
             }
-            <div className="card horizontal flex-center">
-                <span>
-                    {orders.length} {pluralize('Order', orders.length)} {ordersByDate.length > 1 && `across ${ordersByDate.length} ${pluralize('day', ordersByDate.length)}`}
-                </span>
-                <span>
-                    -
-                </span>
-                <span>
-                    {allItems.length} {pluralize('Total Item', orders.length)}
-                </span>
-                <span>
-                    -
-                </span>
-                <span>
-                    {formatPrice(totalPrice)} Total
-                </span>
+            <div className="section-divider">
+                {orders.length} {pluralize('Order', orders.length)} {ordersByDate.length > 1 && `across ${ordersByDate.length} ${pluralize('day', ordersByDate.length)}`}
+                {' · '}
+                {allItems.length} {pluralize('Total Item', orders.length)}
+                {' · '}
+                {formatPrice(totalPrice)} Total
             </div>
-            <div className="flex flex-col">
+            <div className="flex-col">
                 {
                     ordersByDate.map(([dateString, ordersForDate]) => (
-                        <>
-                            <div className="flex-center card">
-                                {fromDateString(dateString).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
-                            </div>
-                            <div className="flex flex-center flex-wrap">
-                                {ordersForDate.map((order) => (
-                                    <CompletedOrderCard
-                                        key={order.id}
-                                        order={order}
-                                        reorder={reorder}
-                                        isPending={isPending}
-                                    />
-                                ))}
-                            </div>
-                        </>
+                        <OrderHistoryDateGroup
+                            key={dateString}
+                            dateString={dateString}
+                            orders={ordersForDate}
+                            reorder={reorder}
+                            isPending={isPending}
+                        />
                     ))
                 }
             </div>

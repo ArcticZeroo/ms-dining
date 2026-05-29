@@ -338,6 +338,20 @@ html, body, #root, .App {
     font-style: italic;
 }
 
+.section-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--default-padding);
+    opacity: 0.75;
+}
+
+.section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid currentColor;
+    opacity: 0.4;
+}
+
 .card.blue {
     background: var(--color-card-blue);
     color: white;
