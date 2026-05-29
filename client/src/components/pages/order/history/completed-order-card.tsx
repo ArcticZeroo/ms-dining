@@ -12,22 +12,12 @@ interface ICompletedOrderItemProps {
     order: ICafeOrder;
     isPending: boolean;
     reorder: (items: ICafeOrderItem[], navigateAfterAdd?: boolean) => void;
-    showDate?: boolean;
 }
-
-const formatOrderDate = (completedAt: Date): string => {
-    const today = new Date();
-    if (completedAt.toDateString() === today.toDateString()) {
-        return 'Today';
-    }
-    return completedAt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-};
 
 export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
     order,
     isPending,
     reorder,
-    showDate = false
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const view = viewsById.get(order.cafeId);
@@ -44,11 +34,6 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
                     }
                 </div>
                 <div>Order #{order.buyOnDemandOrderNumber}</div>
-                <div>
-                    {
-                        showDate && formatOrderDate(order.completedAt)
-                    }
-                </div>
             </div>
             <div className="text-center">Placed at {formatTimeToHoursMinutes(order.completedAt)}</div>
             <div className="text-center">Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
@@ -60,20 +45,22 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
                     total={order.total}
                 />
             </div>
-            <button
-                className="default-container default-button"
-                disabled={isPending}
-                onClick={() => reorder(order.items, false /*navigateAfterAdd*/)}
-            >
-                Add Items To Cart
-            </button>
-            <button
-                className="default-container default-button"
-                disabled={isPending}
-                onClick={() => reorder(order.items)}
-            >
-                Reorder
-            </button>
+            <div className="flex flex-between">
+                <button
+                    className="default-container default-button"
+                    disabled={isPending}
+                    onClick={() => reorder(order.items, false /*navigateAfterAdd*/)}
+                >
+                    Add Items To Cart
+                </button>
+                <button
+                    className="default-container default-button"
+                    disabled={isPending}
+                    onClick={() => reorder(order.items)}
+                >
+                    Reorder
+                </button>
+            </div>
         </div>
     );
 };

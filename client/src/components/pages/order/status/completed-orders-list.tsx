@@ -5,17 +5,31 @@ import { useServerCartHasAvailableItems } from '../../../../store/zustand/server
 import { pluralize } from '../../../../util/string.js';
 import { CompletedOrderCard } from '../history/completed-order-card.js';
 import { formatPrice } from '../../../../util/cart.js';
+import { fromDateString, toDateString } from '@msdining/common/util/date-util';
 
 interface ICompletedOrdersListProps {
     orders: ICafeOrder[];
     showCompoundReorderButtons: boolean;
-    showDate?: boolean;
 }
 
-export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders, showCompoundReorderButtons, showDate = false }) => {
+export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders, showCompoundReorderButtons }) => {
     const { reorder, isPending } = useReorder();
     const cartAlreadyHasAvailableItems = useServerCartHasAvailableItems();
     const totalPrice = useMemo(() => orders.reduce((total, order) => total + order.total, 0), [orders]);
+    const ordersByDate: Array<[string /*dateString*/, Array<ICafeOrder>]> = useMemo(
+        () => {
+            const ordersByDateMap = new Map<string, Array<ICafeOrder>>();
+            for (const order of orders) {
+                const dateString = toDateString(order.completedAt);
+                const ordersForDate = ordersByDateMap.get(dateString) ?? [];
+                ordersForDate.push(order);
+                ordersByDateMap.set(dateString, ordersForDate);
+            }
+            
+            return Array.from(ordersByDateMap.entries());
+        },
+        [orders]
+    );
 
     if (orders.length === 0) {
         return (
@@ -75,16 +89,26 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                     {formatPrice(totalPrice)} Total
                 </span>
             </div>
-            <div className="flex flex-center flex-wrap">
-                {orders.map((order) => (
-                    <CompletedOrderCard
-                        key={order.id}
-                        order={order}
-                        reorder={reorder}
-                        isPending={isPending}
-                        showDate={showDate}
-                    />
-                ))}
+            <div className="flex flex-col">
+                {
+                    ordersByDate.map(([dateString, ordersForDate]) => (
+                        <>
+                            <div className="flex-center card">
+                                {fromDateString(dateString).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
+                            </div>
+                            <div className="flex flex-center flex-wrap">
+                                {ordersForDate.map((order) => (
+                                    <CompletedOrderCard
+                                        key={order.id}
+                                        order={order}
+                                        reorder={reorder}
+                                        isPending={isPending}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    ))
+                }
             </div>
         </>
     );

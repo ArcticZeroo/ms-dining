@@ -39,12 +39,12 @@ export const TodayOrdersView = () => {
         <div id="order-checkout" className="flex-col">
             <div className="card">
                 <div className="title text-center">Your Orders Today</div>
-                <CompletedOrdersList orders={ordersQuery.data} showCompoundReorderButtons={true}/>
                 <div className="centered-content">
                     <Link to="/order/history" className="default-container default-button">
                         View Full History
                     </Link>
                 </div>
+                <CompletedOrdersList orders={ordersQuery.data} showCompoundReorderButtons={true}/>
             </div>
         </div>
     );
