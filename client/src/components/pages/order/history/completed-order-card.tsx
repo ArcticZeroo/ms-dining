@@ -23,30 +23,43 @@ const formatOrderDate = (completedAt: Date): string => {
     return completedAt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
-export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, isPending, reorder, showDate = false }) => {
+export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
+    order,
+    isPending,
+    reorder,
+    showDate = false
+}) => {
     const { viewsById } = useContext(ApplicationContext);
     const view = viewsById.get(order.cafeId);
     const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
 
     return (
         <div className="card bg-raised-2">
-            <div className="title">
-                {
-                    view != null
-                        ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
-                        : cafeName
-                }
+            <div className="flex flex-between">
+                <div className="title">
+                    {
+                        view != null
+                            ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
+                            : cafeName
+                    }
+                </div>
+                <div>Order #{order.buyOnDemandOrderNumber}</div>
+                <div>
+                    {
+                        showDate && formatOrderDate(order.completedAt)
+                    }
+                </div>
             </div>
-            <div>Order #{order.buyOnDemandOrderNumber}</div>
-            {showDate && <div>{formatOrderDate(order.completedAt)}</div>}
-            <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
-            <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
-            <CompletedOrderItemsTable
-                items={order.items}
-                subtotal={order.subtotal}
-                tax={order.tax}
-                total={order.total}
-            />
+            <div className="text-center">Placed at {formatTimeToHoursMinutes(order.completedAt)}</div>
+            <div className="text-center">Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
+            <div className="card">
+                <CompletedOrderItemsTable
+                    items={order.items}
+                    subtotal={order.subtotal}
+                    tax={order.tax}
+                    total={order.total}
+                />
+            </div>
             <button
                 className="default-container default-button"
                 disabled={isPending}
@@ -63,4 +76,4 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, 
             </button>
         </div>
     );
-}
+};
