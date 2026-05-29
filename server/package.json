@@ -1,4 +1,7 @@
 {
+  "name": "@msdining/server",
+  "version": "1.0.0",
+  "private": true,
   "type": "module",
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
@@ -22,11 +25,9 @@
     "typescript": "^5.9.3",
     "undici": "^5.24.0"
   },
-  "workspaces": [
-    "../common"
-  ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
+    "@msdining/common": "*",
     "@arcticzeroo/duration": "^2.0.2",
     "@arcticzeroo/typeguard": "^1.0.0",
     "@frozor/lock": "^1.0.0",
@@ -39,7 +40,7 @@
     "@types/koa-passport": "^6.0.3",
     "@types/koa-session": "^6.4.5",
     "applicationinsights": "^3.14.0",
-    "better-sqlite3": "^11.8.1",
+    "better-sqlite3": "^12.10.0",
     "chatgpt": "^5.2.5",
     "dotenv": "^16.4.1",
     "hat": "^0.0.3",

@@ -1,0 +1,26 @@
+{
+  "name": "ms-dining",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dining @ Microsoft (Unofficial) monorepo",
+  "workspaces": [
+    "common",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "build:common": "npm run build -w @msdining/common",
+    "build:server": "npm run build -w @msdining/server",
+    "build:client": "npm run build -w @msdining/client",
+    "build": "npm run build:common && npm run build:server && npm run build:client",
+    "dev:server": "npm run dev -w @msdining/server",
+    "dev:client": "npm run dev -w @msdining/client",
+    "lint:server": "npm run lint -w @msdining/server",
+    "lint:client": "npm run lint -w @msdining/client",
+    "test:common": "npm test -w @msdining/common",
+    "test:server": "npm test -w @msdining/server",
+    "test:client": "npm test -w @msdining/client",
+    "test": "npm run test:common && npm run test:server && npm run test:client"
+  },
+  "license": "ISC"
+}

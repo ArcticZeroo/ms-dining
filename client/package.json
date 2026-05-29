@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "@msdining/client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,11 +15,9 @@
   "lint-staged": {
     "src/**/*.{ts,tsx}": "eslint --max-warnings 0 --report-unused-disable-directives"
   },
-  "workspaces": [
-    "../common"
-  ],
   "dependencies": {
     "@arcticzeroo/duration": "^2.0.2",
+    "@msdining/common": "*",
     "@arcticzeroo/typeguard": "^1.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
