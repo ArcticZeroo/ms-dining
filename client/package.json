@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx tsc --project ../common/tsconfig.json && tsc && vite build",
+    "build": "npx tsc --project ../common/tsconfig.json && tsc && vite build && npx tsx scripts/cleanup-stale-assets.ts",
     "test": "vitest run",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

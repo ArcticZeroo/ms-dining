@@ -21,7 +21,11 @@ import { LazyDevPage } from './components/pages/dev/lazy-dev-page.js';
 import { LazyMapPage } from './components/pages/map/lazy-map-page.js';
 import { initializeSelectedDate } from './store/zustand/selected-date.ts';
 
+import { registerChunkLoadErrorHandler } from './util/chunk-reload.ts';
+
 import './index.css';
+
+registerChunkLoadErrorHandler();
 
 const startApp = () => {
     const router = createBrowserRouter(

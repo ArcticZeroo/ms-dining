@@ -43,12 +43,15 @@ export default defineConfig(({ mode }) => ({
         }
     },
     build: {
+        // Don't wipe dist/ — we keep old hashed assets around so stale
+        // tabs can still load them after a deploy. A post-build script
+        // cleans up assets older than 14 days.
+        emptyOutDir: false,
         rollupOptions: {
             output: {
-                // Avoids issues with sleeping tabs/keeping the site loaded around when changes are made
-                entryFileNames: 'assets/[name].js',
-                chunkFileNames: 'assets/[name].js',
-                assetFileNames: 'assets/[name].[ext]'
+                entryFileNames: 'assets/[name]-[hash].js',
+                chunkFileNames: 'assets/[name]-[hash].js',
+                assetFileNames: 'assets/[name]-[hash].[ext]'
             }
         }
     }

@@ -29,6 +29,9 @@ export const serveSpaHtmlRoute = (filePath: string): Koa.Middleware => {
 
         ctx.type = 'html';
         ctx.set('Content-Length', cacheData.contentLength);
+        // Short cache so deploys are picked up within a few minutes,
+        // but browsers don't re-download on every navigation.
+        ctx.set('Cache-Control', 'public, max-age=300');
         ctx.body = cacheData.body;
     };
 }

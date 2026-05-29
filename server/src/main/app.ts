@@ -92,7 +92,14 @@ export const createApp = (services: Services, { sessionSigned = true }: CreateAp
 
     registerRoutes(app);
 
-    // Mostly to get assets included for free
+    // Hashed asset files (e.g. index-abc123.js) are immutable — the hash
+    // changes when content changes, so browsers can cache them indefinitely.
+    const assetsPath = path.join(clientFolderDistPath, 'assets');
+    app.use(mount('/assets', serve(assetsPath, {
+        maxage: new Duration({ days: 365 }).inMilliseconds,
+        immutable: true,
+    })));
+    // Serve other client files (favicon, etc.) without long cache
     app.use(mount('/', serve(clientFolderDistPath)));
 
     const spaRouter = new Router();
