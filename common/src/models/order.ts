@@ -27,11 +27,20 @@ export const CompleteOrderResultSchema = z.object({
     buyOnDemandOrderId:     z.string(),
     waitTimeMin:            z.number().int(),
     waitTimeMax:            z.number().int(),
-    completedAt:            z.string().transform(s => new Date(s)),
+    completedAt:            z.string().transform(completedAtString => new Date(completedAtString)),
 });
 
 export type ICompleteOrderResultDTO = z.input<typeof CompleteOrderResultSchema>;
 export type ICompleteOrderResult = z.infer<typeof CompleteOrderResultSchema>;
+
+export const RecentOrderSummarySchema = z.object({
+    cafeId:      z.string(),
+    orderNumber: z.string(),
+    completedAt: z.string().transform(completedAtString => new Date(completedAtString)),
+});
+
+export type IRecentOrderSummaryDTO = z.input<typeof RecentOrderSummarySchema>;
+export type IRecentOrderSummary = z.infer<typeof RecentOrderSummarySchema>;
 
 export const CafeOrderItemSchema = z.object({
     menuItemId:          z.string(),

@@ -6,6 +6,8 @@ export const orderService: IOrderService = {
         dataHandler.sendRequest('order', 'preparePayment', data),
     completeOrder: (data) =>
         dataHandler.sendRequest('order', 'completeOrder', data),
+    getRecentOrders: (data) =>
+        dataHandler.sendRequest('order', 'getRecentOrders', data),
     getCompletedOrdersToday: (data) =>
         dataHandler.sendRequest('order', 'getCompletedOrdersToday', data),
     getOrderHistory: (data) =>

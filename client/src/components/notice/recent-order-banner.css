@@ -1,0 +1,46 @@
+.recent-order-banner {
+    background: color-mix(in srgb, var(--color-theme-dark) 35%, var(--color-card-background));
+    border: 1px solid color-mix(in srgb, var(--color-theme-light) 45%, transparent);
+}
+
+.recent-order-banner__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--default-padding);
+    flex-wrap: wrap;
+}
+
+.recent-order-banner__content {
+    display: flex;
+    align-items: center;
+    gap: var(--constant-padding);
+    flex-wrap: wrap;
+}
+
+.recent-order-banner__emoji {
+    font-size: 1.25rem;
+}
+
+.recent-order-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--constant-padding);
+    margin-left: auto;
+}
+
+.recent-order-banner__dismiss {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--constant-mini-padding);
+    border: none;
+    border-radius: var(--default-padding);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.recent-order-banner__dismiss:hover {
+    background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}

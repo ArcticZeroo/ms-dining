@@ -4,17 +4,22 @@ import type {
     ICompleteOrderResult,
     IOrderItem,
     IPreparePaymentResult,
+    IRecentOrderSummary,
 } from '@msdining/common/models/order';
 import {
     CafeOrderSchema,
     CompleteOrderResultSchema,
     PreparePaymentResultSchema,
+    RecentOrderSummarySchema,
 } from '@msdining/common/models/order';
 import z from 'zod';
 import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
 
 const ORDER_BASE = '/api/dining/order';
 const OrderCountSchema = z.object({ count: z.number() });
+const RecentOrdersResponseSchema = z.object({
+    orders: z.array(RecentOrderSummarySchema),
+});
 
 export type OrderHistorySince = '7d' | '30d' | 'all';
 
@@ -58,6 +63,15 @@ export abstract class OrderClient {
                 body:    JSON.stringify({ paymentToken, cardInfo, alias, phoneNumber }),
             },
         });
+    }
+
+    static async getRecentOrders(): Promise<IRecentOrderSummary[]> {
+        const result = await makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/recent`,
+            schema: RecentOrdersResponseSchema,
+        });
+
+        return result.orders;
     }
 
     static async getCompletedOrdersToday(): Promise<ICafeOrder[]> {

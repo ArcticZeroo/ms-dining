@@ -7,6 +7,8 @@ export const orderServiceCommands = {
         OrderOrchestrator.preparePayment(userId, cafeId, items, iframeCssUrl, synthesisFlags),
     completeOrder: ({ userId, pendingOrderId, paymentToken, cardInfo, alias, phoneNumberWithCountryCode }) =>
         OrderOrchestrator.completeOrder(userId, pendingOrderId, paymentToken, cardInfo, alias, phoneNumberWithCountryCode),
+    getRecentOrders: ({ userId }) =>
+        OrderStorageClient.getRecentOrders(userId),
     getCompletedOrdersToday: ({ userId }) =>
         OrderOrchestrator.getCompletedOrdersToday(userId),
     getOrderHistory: ({ userId, since }) =>

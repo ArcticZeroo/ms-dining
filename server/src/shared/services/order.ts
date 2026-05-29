@@ -4,6 +4,7 @@ import type {
     ICompleteOrderResultDTO,
     IOrderItem,
     IPreparePaymentResult,
+    IRecentOrderSummary,
 } from '@msdining/common/models/order';
 
 export interface ISynthesisFlags {
@@ -36,6 +37,10 @@ export interface IOrderService {
         alias: string;
         phoneNumberWithCountryCode: string;
     }): Promise<ICompleteOrderResultDTO>;
+
+    getRecentOrders(data: {
+        userId: string;
+    }): Promise<IRecentOrderSummary[]>;
 
     getCompletedOrdersToday(data: {
         userId: string;

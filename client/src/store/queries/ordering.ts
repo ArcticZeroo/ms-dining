@@ -4,9 +4,11 @@ import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { OrderHistorySince } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
 import type { ISynthesisFlags } from '../../api/ordering.ts';
+import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
+const RECENT_ORDERS_QUERY_KEY = ['order', 'recent'] as const;
 const ORDER_HISTORY_QUERY_KEY = (since: OrderHistorySince) => ['order', 'history', since] as const;
 const ORDER_HISTORY_RANGE_OPTIONS: OrderHistorySince[] = ['7d', '30d', 'all'];
 const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistorySince, number> = {
@@ -63,9 +65,21 @@ export const useCompleteOrderMutation = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
             queryClient.invalidateQueries({ queryKey: COMPLETED_ORDERS_TODAY_KEY });
+            queryClient.invalidateQueries({ queryKey: RECENT_ORDERS_QUERY_KEY });
             queryClient.removeQueries({ queryKey: ['order', 'history'] });
             queryClient.removeQueries({ queryKey: ORDER_COUNT_QUERY_KEY });
         },
+    });
+};
+
+export const useRecentOrdersQuery = () => {
+    const isLoggedIn = useIsLoggedIn();
+
+    return useQuery({
+        queryKey:  RECENT_ORDERS_QUERY_KEY,
+        queryFn:   () => OrderClient.getRecentOrders(),
+        staleTime: Infinity,
+        enabled:   isLoggedIn,
     });
 };
 

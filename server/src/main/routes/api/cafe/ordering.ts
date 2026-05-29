@@ -95,6 +95,12 @@ export const registerOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
+    router.get('/recent', async ctx => {
+        const userId = getUserIdOrThrow(ctx);
+        const orders = await getServices().data.order.getRecentOrders({ userId });
+        ctx.body = jsonStringifyWithoutNull({ orders });
+    });
+
     router.get('/today', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const result = await getServices().data.order.getCompletedOrdersToday({ userId });

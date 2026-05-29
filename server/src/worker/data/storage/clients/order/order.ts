@@ -2,7 +2,7 @@ import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../cli
 import { SERVICE_ERROR_CODES, ServiceError } from '../../../../rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { getStationNamesByIds } from '../../../cache/stations.js';
-import type { ICafeOrderDTO, IOrderItem } from '@msdining/common/models/order';
+import type { ICafeOrderDTO, IOrderItem, IRecentOrderSummary } from '@msdining/common/models/order';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import { flattenModifiers, groupModifierRows, modifiersEqual } from '@msdining/common/util/modifier-util';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
@@ -289,6 +289,29 @@ export abstract class OrderStorageClient {
             cartItems.splice(matchIndex, 1);
             await tx.cartItem.delete({ where: { id: cartItem.id } });
         }
+    }
+
+    static async getRecentOrders(userId: string): Promise<IRecentOrderSummary[]> {
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+        const orders = await usePrismaClient(prisma => prisma.cafeOrder.findMany({
+            where: {
+                userId,
+                completedAt: { gte: thirtyMinutesAgo },
+            },
+            select: {
+                cafeId:                 true,
+                buyOnDemandOrderNumber: true,
+                completedAt:            true,
+            },
+            orderBy: { completedAt: 'desc' },
+        }));
+
+        return orders.map(orderData => ({
+            cafeId:      orderData.cafeId,
+            orderNumber: orderData.buyOnDemandOrderNumber,
+            completedAt: orderData.completedAt,
+        }));
     }
 
     static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderDTO[]> {

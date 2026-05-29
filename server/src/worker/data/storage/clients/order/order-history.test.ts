@@ -14,16 +14,14 @@ import { usePrismaTransaction, usePrismaWrite } from '../../client.js';
 let ctx: IntegrationTestContext;
 
 const USER_ID = 'order-history-user';
+const RECENT_USER_ID = 'recent-order-user';
 const CAFE_ID = 'order-history-cafe';
 const MENU_ITEM_ID = 'order-history-item';
 
-const createOrder = (daysAgo: number, orderNumber: string) => {
-    const completedAt = new Date();
-    completedAt.setDate(completedAt.getDate() - daysAgo);
-
+const createOrderAt = (userId: string, completedAt: Date, orderNumber: string) => {
     return usePrismaWrite(prisma => prisma.cafeOrder.create({
         data: {
-            userId:                 USER_ID,
+            userId,
             cafeId:                 CAFE_ID,
             buyOnDemandOrderId:     `bod-${orderNumber}`,
             buyOnDemandOrderNumber: orderNumber,
@@ -46,12 +44,29 @@ const createOrder = (daysAgo: number, orderNumber: string) => {
     }));
 };
 
+const createOrder = (daysAgo: number, orderNumber: string) => {
+    const completedAt = new Date();
+    completedAt.setDate(completedAt.getDate() - daysAgo);
+
+    return createOrderAt(USER_ID, completedAt, orderNumber);
+};
+
+const createRecentOrder = (minutesAgo: number, orderNumber: string) => {
+    const completedAt = new Date();
+    completedAt.setMinutes(completedAt.getMinutes() - minutesAgo);
+
+    return createOrderAt(RECENT_USER_ID, completedAt, orderNumber);
+};
+
 before(async () => {
     ctx = await createIntegrationTestContext();
 
     await usePrismaTransaction(async prisma => {
         await prisma.user.create({
             data: { id: USER_ID, externalId: 'hist-ext', provider: 'test', displayName: 'History Tester' },
+        });
+        await prisma.user.create({
+            data: { id: RECENT_USER_ID, externalId: 'recent-ext', provider: 'test', displayName: 'Recent Tester' },
         });
         await prisma.cafe.create({
             data: {
@@ -79,6 +94,10 @@ before(async () => {
     await createOrder(5, '002');   // 5 days ago (within 7d)
     await createOrder(15, '003'); // 15 days ago (within 30d, outside 7d)
     await createOrder(45, '004'); // 45 days ago (outside 30d)
+
+    await createRecentOrder(10, '101');
+    await createRecentOrder(29, '102');
+    await createRecentOrder(31, '103');
 });
 
 after(async () => {
@@ -93,6 +112,18 @@ test('getOrderCount returns total count', async () => {
 test('getOrderCount returns 0 for unknown user', async () => {
     const count = await getServices().data.order.getOrderCount({ userId: 'nobody' });
     assert.equal(count, 0);
+});
+
+test('getRecentOrders returns only orders from the last 30 minutes', async () => {
+    const orders = await getServices().data.order.getRecentOrders({ userId: RECENT_USER_ID });
+    assert.equal(orders.length, 2);
+    assert.deepEqual(orders.map(order => order.orderNumber), ['101', '102']);
+    assert.ok(orders.every(order => order.completedAt instanceof Date));
+});
+
+test('getRecentOrders returns empty for unknown user', async () => {
+    const orders = await getServices().data.order.getRecentOrders({ userId: 'nobody' });
+    assert.equal(orders.length, 0);
 });
 
 test('getOrderHistory with since=7d returns only recent orders', async () => {
