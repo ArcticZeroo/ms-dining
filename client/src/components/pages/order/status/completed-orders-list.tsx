@@ -72,7 +72,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                     </div>
                 )
             }
-            <div className="flex flex-center">
+            <div className="card horizontal flex-center">
                 <span>
                     {orders.length} {pluralize('Order', orders.length)}
                 </span>

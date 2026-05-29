@@ -16,7 +16,6 @@ interface IOrderHistoryViewProps {
     pageDescription: string;
     defaultSince?: OrderHistorySince;
     showFilters?: boolean;
-    showDate?: boolean;
     showHistoryLink?: boolean;
 }
 
@@ -25,7 +24,6 @@ export const OrderHistoryView = ({
     pageDescription,
     defaultSince = '30d',
     showFilters = true,
-    showDate = true,
     showHistoryLink = false,
 }: IOrderHistoryViewProps) => {
     const [selectedSince, setSelectedSince] = useState<OrderHistorySince>(defaultSince);
@@ -72,7 +70,6 @@ export const OrderHistoryView = ({
                 isError={historyQuery.isError}
                 error={historyQuery.error}
                 onRetry={() => historyQuery.refetch()}
-                showDate={showDate}
             />
         </div>
     );

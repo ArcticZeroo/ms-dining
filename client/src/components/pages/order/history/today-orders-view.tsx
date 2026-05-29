@@ -6,7 +6,6 @@ export const TodayOrdersView = () => (
         pageDescription="Completed orders from today"
         defaultSince="today"
         showFilters={false}
-        showDate={false}
         showHistoryLink={true}
     />
 );
