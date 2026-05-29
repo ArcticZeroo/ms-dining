@@ -25,11 +25,11 @@ import { IServerReview } from '../../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
 
-import { createDebouncedCafeDataLogger } from '../../../shared/util/debounced-logger.js';
+import { createDenoisedCafeLogger } from '../../../shared/util/denoised-logger.js';
 
 const logger = getNamespaceLogger('recommendations');
 
-const logRecommendationUpdate = createDebouncedCafeDataLogger(logger, 'Updated recommendations');
+const logRecommendationUpdate = createDenoisedCafeLogger(logger, 'Updated recommendations');
 
 const RECOMMENDATIONS_SEMAPHORE = new Semaphore(2);
 const GLOBAL_RECOMMENDATION_SECTIONS_CACHE = new MenuDateMap<LockedExpiringMap<string /*cafeId*/, Map<RecommendationSectionType, Array<IRecommendationItem>>>>();

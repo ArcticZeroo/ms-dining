@@ -18,9 +18,9 @@ import type {
     ICafeMenuOverviewHeader,
     IPublishDailyMenuParams,
 } from '../../../../../shared/services/daily-menu.js';
-import { createDebouncedCafeDataLogger } from '../../../../../shared/util/debounced-logger.js';
+import { createDenoisedCafeLogger } from '../../../../../shared/util/denoised-logger.js';
 
-const menuPublishLogger = createDebouncedCafeDataLogger(getNamespaceLogger('DailyMenu'), 'Daily menu published');
+const menuPublishLogger = createDenoisedCafeLogger(getNamespaceLogger('DailyMenu'), 'Daily menu published');
 
 const areMenuItemsByCategoryNameEqual = (left: Map<string, Array<string>>, right: Map<string, Array<string>>) => {
     if (left.size !== right.size) {
