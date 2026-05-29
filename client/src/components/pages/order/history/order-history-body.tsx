@@ -12,9 +12,10 @@ interface IOrderHistoryBodyProps {
     isError: boolean;
     error: Error | null;
     onRetry: () => void;
+    showDate?: boolean;
 }
 
-export const OrderHistoryBody = ({ orders, isLoading, isFetching, isError, error, onRetry }: IOrderHistoryBodyProps) => {
+export const OrderHistoryBody = ({ orders, isLoading, isFetching, isError, error, onRetry, showDate = false }: IOrderHistoryBodyProps) => {
     if (isError) {
         return (
             <>
@@ -39,7 +40,7 @@ export const OrderHistoryBody = ({ orders, isLoading, isFetching, isError, error
 
     return (
         <div className={classNames('flex-col', isFetching && 'loading-skeleton')}>
-            <CompletedOrdersList orders={orders} showCompoundReorderButtons={false} />
+            <CompletedOrdersList orders={orders} showCompoundReorderButtons={false} showDate={showDate}/>
         </div>
     );
 };

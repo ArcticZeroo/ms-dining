@@ -107,7 +107,7 @@ export const registerOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    const OrderHistorySinceSchema = z.enum(['7d', '30d', 'all']).default('30d');
+    const OrderHistorySinceSchema = z.enum(['today', '7d', '30d', 'all']).default('30d');
 
     router.get('/history', async ctx => {
         const userId = getUserIdOrThrow(ctx);

@@ -17,7 +17,12 @@ export const OrderPageLayout = () => {
         <Routes>
             <Route index={true} element={<OrderCheckoutView/>}/>
             <Route path="done" element={<TodayOrdersView/>}/>
-            <Route path="history" element={<OrderHistoryView/>}/>
+            <Route path="history" element={
+                <OrderHistoryView
+                    title="Order History"
+                    pageDescription="Browse your past dining orders."
+                />
+            }/>
         </Routes>
     );
 };

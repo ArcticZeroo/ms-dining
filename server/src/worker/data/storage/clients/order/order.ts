@@ -81,18 +81,16 @@ const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> 
     }));
 };
 
-const SINCE_TO_DAYS: Record<OrderHistorySince, number | null> = {
-    '7d':  7,
-    '30d': 30,
-    'all': null,
-};
-
 const getSinceDate = (since: OrderHistorySince): Date | null => {
-    const days = SINCE_TO_DAYS[since];
-    if (days == null) {
+    if (since === 'all') {
         return null;
     }
     const date = new Date();
+    if (since === 'today') {
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+    const days = since === '7d' ? 7 : 30;
     date.setDate(date.getDate() - days);
     date.setHours(0, 0, 0, 0);
     return date;

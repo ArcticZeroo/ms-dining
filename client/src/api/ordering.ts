@@ -21,7 +21,7 @@ const RecentOrdersResponseSchema = z.object({
     orders: z.array(RecentOrderSummarySchema),
 });
 
-export type OrderHistorySince = '7d' | '30d' | 'all';
+export type OrderHistorySince = 'today' | '7d' | '30d' | 'all';
 
 export interface ISynthesisFlags {
     conceptSchedule: boolean;

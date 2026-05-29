@@ -10,15 +10,11 @@ import { CART_QUERY_KEY } from './server-cart.ts';
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
 const RECENT_ORDERS_QUERY_KEY = ['order', 'recent'] as const;
 const ORDER_HISTORY_QUERY_KEY = (since: OrderHistorySince) => ['order', 'history', since] as const;
-const ORDER_HISTORY_RANGE_OPTIONS: OrderHistorySince[] = ['7d', '30d', 'all'];
 const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistorySince, number> = {
-    '7d':  0,
-    '30d': 1,
-    all:   2,
-};
-const ORDER_HISTORY_RANGE_DAYS: Record<Exclude<OrderHistorySince, 'all'>, number> = {
-    '7d':  7,
-    '30d': 30,
+    today: 0,
+    '7d':  1,
+    '30d': 2,
+    all:   3,
 };
 const ORDER_COUNT_QUERY_KEY = ['order', 'count'] as const;
 
@@ -27,14 +23,23 @@ const filterOrdersBySince = (orders: ICafeOrder[], since: OrderHistorySince) => 
         return orders;
     }
 
-    const dayCount = ORDER_HISTORY_RANGE_DAYS[since];
+    if (since === 'today') {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        return orders.filter((orderData) => orderData.completedAt >= startOfDay);
+    }
+
+    const dayCount = since === '7d' ? 7 : 30;
     const minimumCompletedAtMs = Date.now() - dayCount * 24 * 60 * 60 * 1000;
     return orders.filter((orderData) => orderData.completedAt.getTime() >= minimumCompletedAtMs);
 };
 
+const ORDER_HISTORY_RANGES_BY_SIZE = (Object.keys(ORDER_HISTORY_RANGE_ORDER) as OrderHistorySince[])
+    .sort((rangeA, rangeB) => ORDER_HISTORY_RANGE_ORDER[rangeA] - ORDER_HISTORY_RANGE_ORDER[rangeB]);
+
 const getBestCachedOrderHistory = (queryClient: ReturnType<typeof useQueryClient>, since: OrderHistorySince) => {
     const minimumRangeIndex = ORDER_HISTORY_RANGE_ORDER[since];
-    for (const rangeOption of ORDER_HISTORY_RANGE_OPTIONS.slice(minimumRangeIndex)) {
+    for (const rangeOption of ORDER_HISTORY_RANGES_BY_SIZE.slice(minimumRangeIndex)) {
         const cachedOrders = queryClient.getQueryData<ICafeOrder[]>(ORDER_HISTORY_QUERY_KEY(rangeOption));
         if (cachedOrders != null) {
             return {
