@@ -27,18 +27,26 @@ const useSyncOnSuccess = () => {
     };
 };
 
+const CART_REFETCH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Fetches the cart from the server. The response includes enriched menu item
  * data and availability — this replaces the old hydration flow entirely.
+ *
+ * Refetches every 5 minutes while the window is visible so availability
+ * stays current across date boundaries (e.g. user loads cart Tuesday,
+ * comes back Wednesday).
  */
 export const useCartQuery = () => {
     return useQuery({
-        queryKey: CART_QUERY_KEY,
-        queryFn:  async () => {
+        queryKey:                  CART_QUERY_KEY,
+        queryFn:                   async () => {
             const response = await CartClient.getCart();
             syncStoreFromResponse(response);
             return response;
         },
+        refetchInterval:           CART_REFETCH_INTERVAL_MS,
+        refetchIntervalInBackground: false,
     });
 };
 
