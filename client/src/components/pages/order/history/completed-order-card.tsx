@@ -12,9 +12,18 @@ interface ICompletedOrderItemProps {
     order: ICafeOrder;
     isPending: boolean;
     reorder: (items: ICafeOrderItem[], navigateAfterAdd?: boolean) => void;
+    showDate?: boolean;
 }
 
-export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, isPending, reorder }) => {
+const formatOrderDate = (completedAt: Date): string => {
+    const today = new Date();
+    if (completedAt.toDateString() === today.toDateString()) {
+        return 'Today';
+    }
+    return completedAt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+};
+
+export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, isPending, reorder, showDate = false }) => {
     const { viewsById } = useContext(ApplicationContext);
     const view = viewsById.get(order.cafeId);
     const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
@@ -29,6 +38,7 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({ order, 
                 }
             </div>
             <div>Order #{order.buyOnDemandOrderNumber}</div>
+            {showDate && <div>{formatOrderDate(order.completedAt)}</div>}
             <div>Sent to kitchen at {formatTimeToHoursMinutes(order.completedAt)}</div>
             <div>Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
             <CompletedOrderItemsTable

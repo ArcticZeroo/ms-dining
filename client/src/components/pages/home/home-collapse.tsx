@@ -17,6 +17,7 @@ export const HomeCollapse: React.FC<IHomeCollapseProps> = ({ title, children, fe
 
     const onRemoveClicked = (event: React.MouseEvent) => {
         if (featureToggle) {
+            event.stopPropagation();
             event.preventDefault();
             featureToggle.value = false;
         }

@@ -9,9 +9,10 @@ import { formatPrice } from '../../../../util/cart.js';
 interface ICompletedOrdersListProps {
     orders: ICafeOrder[];
     showCompoundReorderButtons: boolean;
+    showDate?: boolean;
 }
 
-export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders, showCompoundReorderButtons }) => {
+export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ orders, showCompoundReorderButtons, showDate = false }) => {
     const { reorder, isPending } = useReorder();
     const cartAlreadyHasAvailableItems = useServerCartHasAvailableItems();
     const totalPrice = useMemo(() => orders.reduce((total, order) => total + order.total, 0), [orders]);
@@ -81,6 +82,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
                         order={order}
                         reorder={reorder}
                         isPending={isPending}
+                        showDate={showDate}
                     />
                 ))}
             </div>

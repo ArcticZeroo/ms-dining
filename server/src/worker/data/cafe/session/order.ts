@@ -795,7 +795,6 @@ export class CafeOrderSession implements IOrderSession {
     private async _addItemToCart(orderItem: IOrderItem) {
         const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
 
-        orderLog.info(`{${this.client.cafe.name}} Adding item ${orderItem.menuItemId} (qty: ${orderItem.quantity}) to cart`);
         const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
 
         if (menuItem == null) {
@@ -807,6 +806,8 @@ export class CafeOrderSession implements IOrderSession {
         if (station == null) {
             throw new Error(`Failed to find station for menu item "${orderItem.menuItemId}"`);
         }
+
+        orderLog.info(`{${this.client.cafe.name}} Adding item "${menuItem.name}" (id: ${orderItem.menuItemId}, qty: ${orderItem.quantity}, modifiers: ${orderItem.modifiers.length}, specialInstructions: ${orderItem.specialInstructions ?? 'none'}) to cart`);
 
         logOrderingDebugJson(this.client.cafe.name, 'Local cart item lookup', {
             cartItemId:        orderItem.menuItemId,

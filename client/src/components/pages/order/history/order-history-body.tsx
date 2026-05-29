@@ -39,7 +39,7 @@ export const OrderHistoryBody = ({ orders, isLoading, isFetching, isError, error
 
     return (
         <div className={classNames('flex-col', isFetching && 'loading-skeleton')}>
-            <CompletedOrdersList orders={orders} showCompoundReorderButtons={false}/>
+            <CompletedOrdersList orders={orders} showCompoundReorderButtons={false} showDate={true}/>
         </div>
     );
 };
