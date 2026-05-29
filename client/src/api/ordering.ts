@@ -65,7 +65,7 @@ export abstract class OrderClient {
         });
     }
 
-    static async getRecentOrders(): Promise<IRecentOrderSummary[]> {
+    static async getRecentOrders(): Promise<Array<IRecentOrderSummary>> {
         const result = await makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/recent`,
             schema: RecentOrdersResponseSchema,

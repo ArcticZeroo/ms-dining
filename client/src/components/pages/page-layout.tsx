@@ -4,7 +4,7 @@ import { ScrollTopButton } from '../button/scroll-top-button.tsx';
 import { Nav } from '../nav/nav.tsx';
 import { PopupContainer } from '../popup/popup-container.tsx';
 import { CartPopup } from '../pages/order/cart/cart-popup.tsx';
-import { RecentOrderBanner } from '../notice/recent-order-banner.tsx';
+import { RecentOrderBanner } from '../order/recent-order-banner.tsx';
 import { PopupContext } from '../../context/modal.ts';
 import { NavExpansionContext } from '../../context/nav.ts';
 import { useValueNotifierContext } from '../../hooks/events.ts';

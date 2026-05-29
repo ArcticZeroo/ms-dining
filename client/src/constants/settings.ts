@@ -10,17 +10,18 @@ import {
 } from '../api/settings.ts';
 
 export const InternalSettings = {
-    lastUsedCafeIds:                new StringArraySetting('lastUsedDiningHalls'),
-    collapsedStations:              new StringSetSetting('collapsedStations'),
-    visitorId:                      new StringSetting('visitorId'),
-    alias:                          new StringSetting('alias'),
-    phoneNumber:                    new StringSetting('phoneNumber'),
-    nameOnCard:                     new StringSetting('nameOnCard'),
-    postalCode:                     new StringSetting('postalCode'),
-    cart:                           new CartSetting('cart'),
-    hasMigratedToDiningSite:        new BooleanSetting('hasMigratedToDiningSite', false /*defaultValue*/),
-    lastRoamingSettingsUpdateTime:  new DateSetting('lastRoamingSettingsUpdateTime', new Date(NaN) /*defaultValue*/),
-    mapBottomSheetHeightFraction:   new NumberSetting('mapBottomSheetHeightFraction', 0.5 /*defaultValue*/),
+    lastUsedCafeIds:                 new StringArraySetting('lastUsedDiningHalls'),
+    collapsedStations:               new StringSetSetting('collapsedStations'),
+    visitorId:                       new StringSetting('visitorId'),
+    alias:                           new StringSetting('alias'),
+    phoneNumber:                     new StringSetting('phoneNumber'),
+    nameOnCard:                      new StringSetting('nameOnCard'),
+    postalCode:                      new StringSetting('postalCode'),
+    cart:                            new CartSetting('cart'),
+    hasMigratedToDiningSite:         new BooleanSetting('hasMigratedToDiningSite', false /*defaultValue*/),
+    lastRoamingSettingsUpdateTime:   new DateSetting('lastRoamingSettingsUpdateTime', new Date(NaN) /*defaultValue*/),
+    mapBottomSheetHeightFraction:    new NumberSetting('mapBottomSheetHeightFraction', 0.5 /*defaultValue*/),
+    lastOrderPrepDismissCreatedTime: new NumberSetting('lastOrderPrepDismissTime', 0 /*defaultValue*/),
 } as const;
 
 export const ApplicationSettings = {
