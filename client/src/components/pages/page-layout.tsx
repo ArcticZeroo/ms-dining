@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { ScrollTopButton } from '../button/scroll-top-button.tsx';
 import { Nav } from '../nav/nav.tsx';
 import { PopupContainer } from '../popup/popup-container.tsx';
-import { CartPopup } from '../pages/order/cart/cart-popup.tsx';
+import { CartPopup } from './order/cart/cart-popup.js';
 import { RecentOrderBanner } from '../order/recent-order-banner.tsx';
 import { PopupContext } from '../../context/modal.ts';
 import { NavExpansionContext } from '../../context/nav.ts';

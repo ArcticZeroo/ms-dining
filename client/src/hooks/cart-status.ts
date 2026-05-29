@@ -11,7 +11,7 @@ export interface CartStatusInput {
     hasUnavailableItems: boolean;
 }
 
-export interface CartStatus {
+export interface ICartStatus {
     /** True while the initial cart fetch is in progress (no data yet). */
     isLoading: boolean;
     /** True if the cart fetch failed and we have no existing data to show. */
@@ -30,7 +30,7 @@ export interface CartStatus {
     refetch: () => void;
 }
 
-export const computeCartStatus = (input: CartStatusInput): CartStatus => {
+export const computeCartStatus = (input: CartStatusInput): Omit<ICartStatus, 'refetch'> => {
     const isError = input.isError && !input.hasData;
 
     return {
@@ -50,7 +50,7 @@ export const computeCartStatus = (input: CartStatusInput): CartStatus => {
  * background refetch fails but we already have cart data, the error
  * is suppressed.
  */
-export const useCartStatus = () => {
+export const useCartStatus = (): ICartStatus=> {
     const cartQuery = useCartQuery();
     const totalItemCount = useServerCartItemCount();
     const hasUnavailableItems = useServerCartHasUnavailableItems();
