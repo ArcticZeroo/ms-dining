@@ -1,10 +1,9 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
+import { useCartStatus } from '../../../../hooks/cart-status.ts';
 import { useClickTracker } from '../../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
-import { useCartQuery } from '../../../../store/queries/server-cart.ts';
-import { useServerCartHasUnavailableItems, useServerCartItemCount, } from '../../../../store/zustand/server-cart.ts';
 import { classNames } from '../../../../util/react.ts';
 import { CartContentsTable } from './cart-contents-table.tsx';
 import { CartUnavailableItemsView } from './cart-unavailable-items-view.tsx';
@@ -12,9 +11,7 @@ import { CartUnavailableItemsView } from './cart-unavailable-items-view.tsx';
 import './cart-popup.css';
 
 const CartPopupBody = () => {
-    const totalItemCount = useServerCartItemCount();
-    const hasUnavailableItems = useServerCartHasUnavailableItems();
-    const cartQuery = useCartQuery();
+    const cart = useCartStatus();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
@@ -29,17 +26,14 @@ const CartPopupBody = () => {
 
     useClickTracker(popupRef, onClickAnywhere, isExpanded /*enabled*/);
 
-    const shouldShow = totalItemCount > 0 || hasUnavailableItems || cartQuery.isPending || cartQuery.isError;
-    const hasWarning = hasUnavailableItems || cartQuery.isError;
-
     return (
         <div
             ref={popupRef}
             className={classNames(
                 'cart-popup',
-                !shouldShow && 'hidden',
+                !cart.shouldShow && 'hidden',
                 isExpanded && 'expanded',
-                hasWarning && 'has-error',
+                cart.hasWarning && 'has-error',
             )}
             style={{
                 right: `${scrollbarWidth}px`
@@ -47,8 +41,8 @@ const CartPopupBody = () => {
         >
             <div className="cart-header cart-info" onClick={toggleExpanded}>
                 {
-                    hasWarning && (
-                        <span className="cart-warning material-symbols-outlined" title={cartQuery.isError ? 'Failed to load cart' : 'Some cart items are no longer available'}>
+                    cart.hasWarning && (
+                        <span className="cart-warning material-symbols-outlined" title={cart.isError ? 'Failed to load cart' : 'Some cart items are no longer available'}>
                             error
                         </span>
                     )
@@ -58,21 +52,21 @@ const CartPopupBody = () => {
                 </span>
                 <span className="cart-count">
                     {
-                        cartQuery.isPending
+                        cart.isLoading
                             ? 'Loading...'
-                            : totalItemCount
+                            : cart.totalItemCount
                     }
                 </span>
             </div>
             <div className="cart-body">
                 {
-                    cartQuery.isError && (
+                    cart.isError && (
                         <div className="cart-hydration-error">
                             <span>Failed to load your cart.</span>
                             <div className="cart-hydration-actions flex">
                                 <button
                                     className="default-container default-button"
-                                    onClick={() => cartQuery.refetch()}
+                                    onClick={() => cart.refetch()}
                                 >
                                     Retry
                                 </button>
@@ -81,7 +75,7 @@ const CartPopupBody = () => {
                     )
                 }
                 {
-                    !hasUnavailableItems && (
+                    !cart.hasUnavailableItems && (
                         <>
                             <CartContentsTable/>
                             <Link to="/order" className="checkout-button">
