@@ -74,7 +74,7 @@ export const CompletedOrdersList: React.FC<ICompletedOrdersListProps> = ({ order
             }
             <div className="card horizontal flex-center">
                 <span>
-                    {orders.length} {pluralize('Order', orders.length)}
+                    {orders.length} {pluralize('Order', orders.length)} {ordersByDate.length > 1 && `across ${ordersByDate.length} ${pluralize('day', ordersByDate.length)}`}
                 </span>
                 <span>
                     -
