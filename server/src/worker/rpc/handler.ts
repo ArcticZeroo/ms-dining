@@ -99,6 +99,7 @@ const WorkerRequestSchema = z.object({
     serviceName: z.string(),
     methodName:  z.string(),
     data:        z.unknown(),
+    metadata:    z.record(z.string(), z.unknown()).optional(),
 });
 
 const WorkerResponseSuccessSchema = z.object({
@@ -124,6 +125,9 @@ type WorkerResponseFailure = z.infer<typeof WorkerResponseFailureSchema>;
 
 type PendingRequest = [resolve: (value: unknown) => void, reject: (err: Error) => void];
 
+export type RequestMetadataProvider = () => Record<string, unknown> | undefined;
+export type DispatchMiddleware = (metadata: Record<string, unknown> | undefined, run: () => Promise<unknown>) => Promise<unknown>;
+
 /**
  * Phase 2 transport: spawns a worker thread, sends each `sendRequest` as a
  * `postMessage`, and matches the response by `requestId`. Both the main
@@ -140,6 +144,8 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
     readonly #services: TServices | undefined;
     readonly #pendingRequests = new Map<string, PendingRequest>();
     readonly #isReceiver: boolean;
+    readonly #getRequestMetadata: RequestMetadataProvider | undefined;
+    readonly #dispatchMiddleware: DispatchMiddleware | undefined;
     #worker: Worker | undefined;
     #unhandledMessageHandler: ((message: unknown) => boolean) | undefined;
 
@@ -150,9 +156,14 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
      *   for dispatch, but optional on the main thread so worker-only storage
      *   code does not need to be imported there.
      */
-    constructor(filePath: URL, services?: TServices) {
+    constructor(filePath: URL, services?: TServices, options?: {
+        getRequestMetadata?: RequestMetadataProvider;
+        dispatchMiddleware?: DispatchMiddleware;
+    }) {
         this.#filePath = filePath;
         this.#services = services;
+        this.#getRequestMetadata = options?.getRequestMetadata;
+        this.#dispatchMiddleware = options?.dispatchMiddleware;
 
         // Register as a receiver only when this handler's filePath matches
         // the entry URL that spawned this worker. Other WorkerThreadHandler
@@ -189,12 +200,13 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
         const data = rest[0];
         const worker = this.#ensureWorker();
         const requestId = randomUUID();
+        const metadata = this.#getRequestMetadata?.();
 
         const responsePromise = new Promise<unknown>((resolve, reject) => {
             this.#pendingRequests.set(requestId, [resolve, reject]);
         });
 
-        const request: WorkerRequest = { requestId, serviceName, methodName, data };
+        const request: WorkerRequest = { requestId, serviceName, methodName, data, metadata };
         worker.postMessage(request);
 
         return responsePromise as Promise<ResponseData<TServices, S, M>>;
@@ -286,11 +298,14 @@ export class WorkerThreadHandler<TServices extends ServiceMap> implements IServi
                 logError('Invalid worker thread command request:', rawMessage, parsed.error.message);
                 return;
             }
-            const { requestId, serviceName, methodName, data } = parsed.data;
+            const { requestId, serviceName, methodName, data, metadata } = parsed.data;
 
             const runHandler = async () => {
                 try {
-                    const responseData = await dispatch(services, serviceName, methodName, data);
+                    const doDispatch = () => dispatch(services, serviceName, methodName, data);
+                    const responseData = this.#dispatchMiddleware
+                        ? await this.#dispatchMiddleware(metadata, doDispatch)
+                        : await doDispatch();
                     const response: WorkerResponseSuccess = { requestId, success: true, data: responseData };
                     port.postMessage(response);
                 } catch (err) {

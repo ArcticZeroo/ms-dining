@@ -2,9 +2,9 @@ import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 import { ICafeStation } from '../../../shared/models/cafe.js';
 import { computeMenuHash, IMenuRoleRow, getIngredientsMenuByHash, setRolesForMenuHash } from '../cafe/ingredients/cache.js';
 import { categorizeIngredientsMenu } from '../cafe/ingredients/ai-categorizer.js';
-import { CACHE_EVENTS } from '../storage/events.js';
 import { logInfo } from '../../../shared/util/log.js';
 import { MenuDateLockedMap } from '../../../shared/lock/menu-date-map.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 const INGREDIENTS_CAFE_ID = 'in-gredients';
 

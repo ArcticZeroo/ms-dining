@@ -20,12 +20,12 @@ import { getTrySomethingDifferent } from '../recommendations/signals/user-specif
 import { buildProximityWeightMap } from '../../../shared/util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
 import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
-import { CACHE_EVENTS } from '../storage/events.js';
 import { IServerReview } from '../../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
 
 import { createDenoisedCafeLogger } from '../../../shared/util/denoised-logger.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 const logger = getNamespaceLogger('recommendations');
 

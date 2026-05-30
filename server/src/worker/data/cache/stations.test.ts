@@ -13,9 +13,9 @@ import {
 } from '../../../tests/test-server/integration-test-context.js';
 import { usePrismaTransaction } from '../storage/client.js';
 import { retrieveStation, getStationNamesByIds } from './stations.js';
-import { STORAGE_EVENTS } from '../storage/events.js';
 import type { IMenuPublishEvent } from '../../../shared/models/storage-events.js';
 import type { ICafeStation } from '../../../shared/models/cafe.js';
+import { STORAGE_EVENTS } from '../../../shared/util/events.js';
 
 let ctx: IntegrationTestContext;
 

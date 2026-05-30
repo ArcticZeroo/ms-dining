@@ -8,7 +8,7 @@ import { ALL_CAFES } from '../../../../shared/constants/cafes.js';
 import { getServices } from '../../../../shared/services/registry.js';
 import Duration from '@arcticzeroo/duration';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
-import { runWithDbPriority } from '../../storage/db-context.js';
+import { runWithDbPriority } from '../../../../shared/util/db-priority.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
     const date = DateUtil.getNowWithDaysInFuture(i);

@@ -1,6 +1,7 @@
 import { WorkerThreadHandler, type IServiceHandler } from '../../../worker/rpc/handler.js';
 import type { DataServiceMap } from '../../../shared/services/data-service-contract.generated.js';
 import { tryReemitDataWorkerEvent } from '../../../worker/data/storage/events.js';
+import { getDbPriority } from '../../../shared/util/db-priority.js';
 
 export type { DataServiceMap };
 
@@ -8,6 +9,8 @@ export type { DataServiceMap };
 // The worker thread uses its own entry.ts with an InProcessHandler.
 const dataHandlerImpl = new WorkerThreadHandler<DataServiceMap>(
     new URL('../../../worker/data/entry.js', import.meta.url),
+    undefined,
+    { getRequestMetadata: () => ({ dbPriority: getDbPriority() }) },
 );
 
 dataHandlerImpl.setUnhandledMessageHandler(message => tryReemitDataWorkerEvent(message));

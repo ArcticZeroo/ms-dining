@@ -10,9 +10,9 @@
  * the menu window on each menuPublished event.
  */
 
-import { CACHE_EVENTS } from '../storage/events.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu/daily-menu.js';
 import { MenuDateLockedMap } from '../../../shared/lock/menu-date-map.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 const availabilityByDate = new MenuDateLockedMap<Set<string /*menuItemId*/>>();
 

@@ -1,8 +1,8 @@
 import Duration, { DurationOrMilliseconds } from '@arcticzeroo/duration';
 import Koa from 'koa';
 import { assignCacheControl, getVersionTag } from '../util/koa.js';
-import { CACHE_EVENTS } from '../../worker/data/storage/events.js';
 import { setTelemetryProperties } from './telemetry.js';
+import { CACHE_EVENTS } from '../../shared/util/events.js';
 
 interface ICacheEntry {
     expirationTime: number;

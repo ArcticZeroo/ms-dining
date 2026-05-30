@@ -31,9 +31,16 @@ setDefaultServices({
 
 registerDataWorkerEventBridge();
 
+import { type DbPriority, runWithDbPriority } from '../../shared/util/db-priority.js';
+
 // WorkerThreadHandler self-registers as a parentPort listener
 // when constructed outside the main thread.
-const _handler = new WorkerThreadHandler(new URL(import.meta.url), DATA_SERVICES);
+const _handler = new WorkerThreadHandler(new URL(import.meta.url), DATA_SERVICES, {
+    dispatchMiddleware: (metadata, run) => {
+        const priority = metadata?.dbPriority as DbPriority | undefined;
+        return priority ? runWithDbPriority(priority, run) : run();
+    },
+});
 
 if (!ENVIRONMENT_SETTINGS.skipBootTasks) {
     performMenuBootTasks()

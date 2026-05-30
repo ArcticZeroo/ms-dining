@@ -1,8 +1,8 @@
 import Duration from '@arcticzeroo/duration';
 import type { ICafeShutdownState } from '@msdining/common/models/cafe';
-import { STORAGE_EVENTS } from '../storage/events.js';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import { getServices } from '../../../shared/services/registry.js';
+import { STORAGE_EVENTS } from '../../../shared/util/events.js';
 
 const SHUT_DOWN_CACHE_TIME = new Duration({ minutes: 5 });
 

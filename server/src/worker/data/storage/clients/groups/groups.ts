@@ -14,7 +14,8 @@ import { SearchEntityType, searchEntityTypeFromString } from '@msdining/common/m
 import { IGroupData, IGroupMember, IUpdateGroupRequest } from '@msdining/common/models/group';
 import { PrismaLikeClient } from '../../../../../shared/models/prisma.js';
 import hat from 'hat';
-import { STORAGE_EVENTS } from '../../events.js';
+
+import { STORAGE_EVENTS } from '../../../../../shared/util/events.js';
 
 interface IResultWithId {
 	id: string;

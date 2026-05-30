@@ -24,7 +24,6 @@ import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
 import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
-import { CACHE_EVENTS } from '../../worker/data/storage/events.js';
 import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { ICafe } from '../../shared/models/cafe.js';
@@ -34,6 +33,7 @@ import {
     IntegrationTestContext,
 } from '../test-server/integration-test-context.js';
 import { fetchExpectStatus } from '../test-server/test-helpers.js';
+import { CACHE_EVENTS } from '../../shared/util/events.js';
 
 const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday — avoid weekend skip
 const INITIAL_SYNC_AT = FAKE_NOW.getTime();

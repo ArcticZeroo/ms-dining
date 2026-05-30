@@ -9,7 +9,6 @@ import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { SearchEntityType } from '@msdining/common/models/search';
 import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { IMenuPublishEvent } from '../../../../../shared/models/storage-events.js';
-import { STORAGE_EVENTS } from '../../events.js';
 import Duration from '@arcticzeroo/duration';
 import { getAllMenuItemsFirstAppearance } from '@prisma/client/sql';
 import { CafeShutdownType, ICafeShutdownState } from '@msdining/common/models/cafe';
@@ -19,6 +18,7 @@ import type {
     IPublishDailyMenuParams,
 } from '../../../../../shared/services/daily-menu.js';
 import { createDenoisedCafeLogger } from '../../../../../shared/util/denoised-logger.js';
+import { STORAGE_EVENTS } from '../../../../../shared/util/events.js';
 
 const menuPublishLogger = createDenoisedCafeLogger(getNamespaceLogger('DailyMenu'), 'Daily menu published');
 

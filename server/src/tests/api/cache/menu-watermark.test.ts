@@ -10,8 +10,8 @@
 import { describe, it } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { getMenuWatermark } from '../../../worker/data/cache/menu-watermark.js';
-import { CACHE_EVENTS } from '../../../worker/data/storage/events.js';
 import { IMenuPublishEvent } from '../../../shared/models/storage-events.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 const SERVER_START_CAPTURED_AT = Date.now();
 

@@ -1,5 +1,4 @@
 import { usePrismaClient, usePrismaWrite } from '../../client.js';
-import { STORAGE_EVENTS } from '../../events.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
     ENTITY_KEY_GROUP_PREFIX,
@@ -24,6 +23,7 @@ import type {
     IMenuItemReviewsResult,
     IUpdateReviewInput,
 } from '../../../../../shared/services/review.js';
+import { STORAGE_EVENTS } from '../../../../../shared/util/events.js';
 
 // Local types replaced by shared service types (ICreateMenuItemReviewInput, etc.)
 // Re-export for callers that still need the old names during migration.

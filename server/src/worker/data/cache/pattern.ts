@@ -3,11 +3,11 @@ import { IEntityVisitData } from '@msdining/common/models/pattern';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
 import { calculatePattern, IPatternData } from '@msdining/common/util/pattern-util';
-import { CACHE_EVENTS } from '../storage/events.js';
 import { hasAnythingChangedInPublishedMenu, IMenuPublishEvent } from '../../../shared/models/storage-events.js';
 import { getServices } from '../../../shared/services/registry.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { logError } from '../../../shared/util/log.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 // todo: consider making a form of LockedMap which has nonexclusive and exclusive reads so that we don't need the invalidation promise
 const VISIT_DATA_CACHE = new Map<SearchEntityType, ExpiringCacheMap<string /*name*/, Array<IEntityVisitData>>>();

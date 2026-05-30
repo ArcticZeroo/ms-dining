@@ -16,8 +16,8 @@
  * ETag once and clients re-download once.
  */
 
-import { CACHE_EVENTS } from '../storage/events.js';
 import { hasAnythingChangedInPublishedMenu } from '../../../shared/models/storage-events.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 const SERVER_START_MS = Date.now();
 

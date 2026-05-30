@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import { logError, logInfo } from '../../../../shared/util/log.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { DateUtil } from '@msdining/common';
-import { runWithDbPriority } from '../../storage/db-context.js';
+import { runWithDbPriority } from '../../../../shared/util/db-priority.js';
 
 export const populateDailySessionsAsync = async () => {
     const updateSession = new DailyCafeUpdateSession(0 /*daysInFuture*/);

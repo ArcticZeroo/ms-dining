@@ -1,18 +1,14 @@
-import EventEmitter from 'node:events';
 import { isMainThread, parentPort } from 'node:worker_threads';
 import { z } from 'zod';
-import type TypedEmitter from '../../../shared/models/typed-emitter.js';
-import { IGroupMembershipDirtyEvent, IMenuPublishEvent, IReviewDirtyEvent } from '../../../shared/models/storage-events.js';
+import {
+    IGroupMembershipDirtyEvent,
+    IMenuPublishEvent,
+    IReviewDirtyEvent
+} from '../../../shared/models/storage-events.js';
 import { logDebug } from '../../../shared/util/log.js';
-
-type StorageEvents = {
-    menuPublished: (diff: IMenuPublishEvent) => void;
-    reviewDirty: (event: IReviewDirtyEvent) => void;
-    groupMembershipDirty: (event: IGroupMembershipDirtyEvent) => void;
-};
+import { CACHE_EVENTS, STORAGE_EVENTS, StorageEventName } from '../../../shared/util/events.js';
 
 type EventSource = 'storage' | 'cache';
-type StorageEventName = keyof StorageEvents;
 type DataWorkerEvent = IMenuPublishEvent | IReviewDirtyEvent | IGroupMembershipDirtyEvent;
 
 const DataWorkerEventMessageSchema = z.object({
@@ -23,9 +19,6 @@ const DataWorkerEventMessageSchema = z.object({
 });
 
 export type DataWorkerEventMessage = z.infer<typeof DataWorkerEventMessageSchema>;
-
-export const STORAGE_EVENTS = new EventEmitter() as TypedEmitter<StorageEvents>;
-export const CACHE_EVENTS = new EventEmitter() as TypedEmitter<StorageEvents>;
 
 STORAGE_EVENTS.on('menuPublished', (event) => {
     logDebug(`Menu published for cafe "${event.cafe.id}" on ${event.dateString} with ${event.menu.length} stations. Added: ${event.addedStations.size}, Removed: ${event.removedStations.size}, Updated: ${event.updatedStations.size}`);

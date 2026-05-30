@@ -2,9 +2,9 @@ import { ICafeStation } from '../../../shared/models/cafe.js';
 import { ExpiringCacheMap } from './expiring-cache.js';
 import Duration from '@arcticzeroo/duration';
 import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
-import { CACHE_EVENTS, STORAGE_EVENTS } from '../storage/events.js';
 import { logError } from '../../../shared/util/log.js';
 import { getServices } from '../../../shared/services/registry.js';
+import { CACHE_EVENTS, STORAGE_EVENTS } from '../../../shared/util/events.js';
 
 const MENU_CACHE_TIME = new Duration({ minutes: 5 });
 

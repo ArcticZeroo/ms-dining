@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { getDbPriority, runWithDbPriority } from './db-context.js';
+import { getDbPriority, runWithDbPriority } from '../../../shared/util/db-priority.js';
 
 describe('db-context', () => {
     it('should default to background when no context is set', () => {

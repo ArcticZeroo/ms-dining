@@ -1,4 +1,4 @@
-import { DbPriority } from './db-context.js';
+import { DbPriority } from '../../../shared/util/db-priority.js';
 
 const PRIORITY_ORDER: DbPriority[] = ['critical', 'normal', 'background'];
 

@@ -1,6 +1,5 @@
 import { LockedMap } from '../../../shared/lock/map.js';
 import { IMenuItemBase, IStationUniquenessData } from '@msdining/common/models/cafe';
-import { CACHE_EVENTS } from '../storage/events.js';
 import {
     fromDateString,
     getFridayForWeek,
@@ -22,6 +21,7 @@ import { canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
+import { CACHE_EVENTS } from '../../../shared/util/events.js';
 
 const UNIQUENESS_DATA = new LockedMap<string /*cafeId*/, MenuDateMap<ICafeWeeklyUniqueness>>();
 

@@ -7,10 +7,10 @@
  */
 
 import { StationStorageClient, toStationRecord } from '../storage/clients/station/station.js';
-import { STORAGE_EVENTS } from '../storage/events.js';
 import { lazyAsync } from '../../../shared/util/lazy.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import type { IStationRecord } from '../../../shared/services/station.js';
+import { STORAGE_EVENTS } from '../../../shared/util/events.js';
 
 const STATION_CACHE = lazyAsync(async () => {
     const stations = await StationStorageClient.retrieveAllStationsAsync();
