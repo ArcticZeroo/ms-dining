@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { ServiceError, SERVICE_ERROR_CODES } from './errors.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../shared/rpc/errors.js';
 import { fromWire, isServiceErrorWire, parseServiceErrorWire, ServiceErrorWireSchema, toWire } from './errors-wire.js';
 
 describe('toWire', () => {

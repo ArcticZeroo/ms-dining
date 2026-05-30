@@ -1,5 +1,5 @@
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../client.js';
-import { SERVICE_ERROR_CODES, ServiceError } from '../../../../rpc/errors.js';
+import { SERVICE_ERROR_CODES, ServiceError } from '../../../../../shared/rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { getStationNamesByIds } from '../../../cache/stations.js';
 import type { ICafeOrderDTO, IOrderItem, IRecentOrderSummary } from '@msdining/common/models/order';

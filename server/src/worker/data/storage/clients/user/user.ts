@@ -5,7 +5,7 @@ import { IServerUser } from '../../../../../shared/models/auth.js';
 import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
 import { Nullable } from '../../../../../shared/models/util.js';
 import { logDebug } from '../../../../../shared/util/log.js';
-import { sendVisitFireAndForget } from '../../../../../main/tracking/visitors.js';
+import { sendVisitFireAndForget } from '../../../../../shared/tracking/visitors.js';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { randomUUID } from 'node:crypto';
 

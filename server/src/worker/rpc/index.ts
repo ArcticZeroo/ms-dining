@@ -1,5 +1,5 @@
-export { ServiceError, SERVICE_ERROR_CODES } from './errors.js';
-export type { ServiceErrorCode } from './errors.js';
+export { ServiceError, SERVICE_ERROR_CODES } from '../../shared/rpc/errors.js';
+export type { ServiceErrorCode } from '../../shared/rpc/errors.js';
 export { fromWire, isServiceErrorWire, toWire } from './errors-wire.js';
 export type { ServiceErrorWire } from './errors-wire.js';
 export { dispatch } from './service-map.js';

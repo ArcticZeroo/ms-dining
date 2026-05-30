@@ -2,7 +2,7 @@ import { after, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ServiceError } from './errors.js';
+import { ServiceError } from '../../shared/rpc/errors.js';
 import { InProcessHandler, WorkerThreadHandler } from './handler.js';
 import { ServiceMap } from './service-map.js';
 

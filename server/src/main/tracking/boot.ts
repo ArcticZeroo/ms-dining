@@ -3,7 +3,7 @@ import {
     getApplicationNameForCafeMenu,
     getApplicationNameForMenuOverview
 } from '@msdining/common/constants/analytics';
-import { createAnalyticsApplicationAsync } from './visitors.js';
+import { createAnalyticsApplicationAsync } from '../../shared/tracking/visitors.js';
 import { ApplicationContext } from '../../shared/constants/context.js';
 import { logError, logInfo } from '../../shared/util/log.js';
 import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';

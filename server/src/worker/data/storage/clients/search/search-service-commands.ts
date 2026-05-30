@@ -5,7 +5,7 @@ import { SearchManager } from '../../search.js';
 import { searchAutocomplete } from '../../../cache/autocomplete.js';
 import { getSimilarQueries as getSimilarQueriesAsync } from '../../vector/client.js';
 import { getRecommendationsAsync } from '../../../cache/recommendations.js';
-import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../../../../shared/rpc/errors.js';
 
 const parseDate = (dateString: string | null): Date | null =>
     dateString ? new Date(dateString) : null;

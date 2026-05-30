@@ -6,7 +6,7 @@
  * a parentPort listener when constructed outside the main thread.
  */
 import { WorkerThreadHandler } from './handler.js';
-import { ServiceError, SERVICE_ERROR_CODES } from './errors.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../shared/rpc/errors.js';
 import { ServiceMap } from './service-map.js';
 
 const TEST_SERVICES = {

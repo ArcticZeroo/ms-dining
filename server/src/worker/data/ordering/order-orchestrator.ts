@@ -1,4 +1,4 @@
-import { SERVICE_ERROR_CODES, ServiceError } from '../../rpc/errors.js';
+import { SERVICE_ERROR_CODES, ServiceError } from '../../../shared/rpc/errors.js';
 import type { IOrderSession } from '../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../cafe/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../cafe/buy-ondemand/wait-time.js';

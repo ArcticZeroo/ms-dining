@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { ServiceError } from './errors.js';
+import { ServiceError } from '../../shared/rpc/errors.js';
 import { dispatch, ServiceMap } from './service-map.js';
 
 describe('dispatch', () => {

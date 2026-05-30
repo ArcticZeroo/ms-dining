@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ServiceError, ServiceErrorCode, SERVICE_ERROR_CODES } from './errors.js';
+import { ServiceError, ServiceErrorCode, SERVICE_ERROR_CODES } from '../../shared/rpc/errors.js';
 
 /**
  * Wire format for a ServiceError crossing a worker (or process) boundary.

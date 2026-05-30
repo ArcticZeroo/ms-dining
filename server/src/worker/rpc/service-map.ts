@@ -1,4 +1,4 @@
-import { ServiceError, SERVICE_ERROR_CODES } from './errors.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../shared/rpc/errors.js';
 
 /**
  * Shape of every leaf method registered with the handler. Methods take

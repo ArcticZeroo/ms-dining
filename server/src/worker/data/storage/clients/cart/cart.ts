@@ -1,5 +1,5 @@
 import { usePrismaTransaction } from '../../client.js';
-import { ServiceError, SERVICE_ERROR_CODES } from '../../../../rpc/errors.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../../../../../shared/rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { getStationNamesByIds } from '../../../cache/stations.js';
 import { DailyMenuStorageClient } from '../daily-menu/daily-menu.js';
