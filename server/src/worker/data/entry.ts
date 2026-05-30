@@ -5,7 +5,6 @@
 import { InProcessHandler, WorkerThreadHandler } from '../rpc/handler.js';
 import { DATA_SERVICES } from './data-services.js';
 import { runPendingMigrations } from './runtime-migrations/runner.js';
-import { registerDataWorkerEventBridge } from './storage/events.js';
 import { createProductionAi } from './ai/index.js';
 import { BuyOnDemandClient } from './cafe/buy-ondemand/buy-ondemand-client.js';
 import { TranslationCache } from './cafe/buy-ondemand/i18n.js';
@@ -32,6 +31,7 @@ setDefaultServices({
 registerDataWorkerEventBridge();
 
 import { type DbPriority, runWithDbPriority } from '../../shared/util/db-priority.js';
+import { registerDataWorkerEventBridge } from '../../shared/util/events.js';
 
 // WorkerThreadHandler self-registers as a parentPort listener
 // when constructed outside the main thread.

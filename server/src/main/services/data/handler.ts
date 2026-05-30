@@ -1,7 +1,7 @@
 import { WorkerThreadHandler, type IServiceHandler } from '../../../worker/rpc/handler.js';
 import type { DataServiceMap } from '../../../shared/services/data-service-contract.generated.js';
-import { tryReemitDataWorkerEvent } from '../../../worker/data/storage/events.js';
 import { getDbPriority } from '../../../shared/util/db-priority.js';
+import { tryReemitDataWorkerEvent } from '../../../shared/util/events.js';
 
 export type { DataServiceMap };
 
