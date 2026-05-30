@@ -15,7 +15,7 @@ const SAMPLE_SIZE = 200;
 const distinct = <T>(arr: T[]): T[] => Array.from(new Set(arr));
 
 export const sampleIds = async (prisma: PrismaClient): Promise<SampledIds> => {
-    const [menuItems, stations, cafes, dailyCafes, groups] = await Promise.all([
+    const [menuItems, stations, cafes, dailyCafes] = await Promise.all([
         prisma.menuItem.findMany({
             select:  { id: true, normalizedName: true, groupId: true },
             take:    SAMPLE_SIZE,
@@ -33,17 +33,16 @@ export const sampleIds = async (prisma: PrismaClient): Promise<SampledIds> => {
             take:    SAMPLE_SIZE,
             orderBy: { dateString: 'desc' },
         }),
-        prisma.crossCafeGroup.findMany({ select: { id: true }, take: SAMPLE_SIZE }),
     ]);
 
     return {
-        menuItemIds:             menuItems.map(m => m.id),
-        stationIds:              stations.map(s => s.id),
-        cafeIds:                 cafes.map(c => c.id),
-        dateStrings:             dailyCafes.map(d => d.dateString),
-        normalizedMenuItemNames: distinct(menuItems.map(m => m.normalizedName).filter(n => n.length > 0)),
-        normalizedStationNames:  distinct(stations.map(s => s.normalizedName).filter(n => n.length > 0)),
-        groupIds:                distinct(menuItems.map(m => m.groupId).filter((g): g is string => g != null)),
+        menuItemIds:             menuItems.map(menuItem => menuItem.id),
+        stationIds:              stations.map(station => station.id),
+        cafeIds:                 cafes.map(cafe => cafe.id),
+        dateStrings:             dailyCafes.map(dailyCafe => dailyCafe.dateString),
+        normalizedMenuItemNames: distinct(menuItems.map(menuItem => menuItem.normalizedName).filter(normalizedName => normalizedName.length > 0)),
+        normalizedStationNames:  distinct(stations.map(station => station.normalizedName).filter(normalizedName => normalizedName.length > 0)),
+        groupIds:                distinct(menuItems.map(menuItem => menuItem.groupId).filter((groupId): groupId is string => groupId != null)),
     };
 };
 

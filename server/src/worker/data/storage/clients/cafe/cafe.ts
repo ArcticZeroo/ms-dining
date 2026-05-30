@@ -2,18 +2,6 @@ import { Cafe } from '@prisma/client';
 import { usePrismaClient, usePrismaWrite } from '../../client.js';
 import { ICafe, ICafeConfig } from '../../../../../shared/models/cafe.js';
 import { Lock } from '@frozor/lock';
-import type { ICafeRecord } from '../../../../../shared/services/cafe.js';
-
-const toCafeRecord = (cafe: Cafe): ICafeRecord => ({
-    id:               cafe.id,
-    name:             cafe.name,
-    tenantId:         cafe.tenantId,
-    logoName:         cafe.logoName,
-    contextId:        cafe.contextId,
-    displayProfileId: cafe.displayProfileId,
-    storeId:          cafe.storeId,
-    externalName:     cafe.externalName,
-});
 
 export abstract class CafeStorageClient {
     private static _hasInitialized = false;

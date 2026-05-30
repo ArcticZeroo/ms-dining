@@ -17,7 +17,7 @@ export const populateDailySessionsAsync = async () => {
 
 const populateDailySessions = () => {
     populateDailySessionsAsync()
-        .catch(e => logError('Failed to populate cafe sessions', e));
+        .catch(error => logError('Failed to populate cafe sessions', error));
 };
 
 export const scheduleDailyUpdateJob = () => {

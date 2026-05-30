@@ -82,61 +82,61 @@ describe('isCafeAvailable', () => {
 // silently clamp invalid or out-of-window date params - they return null so
 // the route can short-circuit instead of returning data for the wrong day.
 describe('getDateForMenuRequest', () => {
-    it('returns null when the date query param is missing', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null when the date query param is missing', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateForMenuRequest(makeCtx({})), null);
     });
 
-    it('returns null when the date query param is an empty / whitespace string', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null when the date query param is an empty / whitespace string', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateForMenuRequest(makeCtx({ date: '' })), null);
         assert.equal(getDateForMenuRequest(makeCtx({ date: '   ' })), null);
     });
 
-    it('returns null when the date query param is an array (not a string)', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null when the date query param is an array (not a string)', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateForMenuRequest(makeCtx({ date: ['2024-06-19', '2024-06-20'] })), null);
     });
 
-    it('returns null for an unparseable date string', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null for an unparseable date string', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateForMenuRequest(makeCtx({ date: 'not-a-date' })), null);
     });
 
-    it('returns null when the date is outside the 30-day request window (future)', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null when the date is outside the 30-day request window (future)', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         // 60 days after pinned now, well past the 30-day window.
         assert.equal(getDateForMenuRequest(makeCtx({ date: '2024-08-18' })), null);
     });
 
-    it('returns null when the date is outside the 30-day request window (past)', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null when the date is outside the 30-day request window (past)', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateForMenuRequest(makeCtx({ date: '2024-04-01' })), null);
     });
 
-    it('returns the date when it is the same day as "now"', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns the date when it is the same day as "now"', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         const result = getDateForMenuRequest(makeCtx({ date: '2024-06-19' }));
         assert.ok(result instanceof Date);
         assert.equal(toDateString(result!), '2024-06-19');
     });
 
-    it('returns the date when it is within the window (future, weekday)', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns the date when it is within the window (future, weekday)', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         const result = getDateForMenuRequest(makeCtx({ date: '2024-06-25' }));
         assert.ok(result instanceof Date);
         assert.equal(toDateString(result!), '2024-06-25');
     });
 
-    it('returns the date when it is within the window (past, weekday)', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns the date when it is within the window (past, weekday)', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         const result = getDateForMenuRequest(makeCtx({ date: '2024-06-10' }));
         assert.ok(result instanceof Date);
         assert.equal(toDateString(result!), '2024-06-10');
     });
 
-    it('trims whitespace around an otherwise-valid date string', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('trims whitespace around an otherwise-valid date string', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         const result = getDateForMenuRequest(makeCtx({ date: '  2024-06-19  ' }));
         assert.ok(result instanceof Date);
         assert.equal(toDateString(result!), '2024-06-19');
@@ -144,15 +144,15 @@ describe('getDateForMenuRequest', () => {
 });
 
 describe('getDateStringForMenuRequest', () => {
-    it('returns null when getDateForMenuRequest would return null', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns null when getDateForMenuRequest would return null', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateStringForMenuRequest(makeCtx({})), null);
         assert.equal(getDateStringForMenuRequest(makeCtx({ date: 'garbage' })), null);
         assert.equal(getDateStringForMenuRequest(makeCtx({ date: '2099-01-01' })), null);
     });
 
-    it('returns the canonical YYYY-MM-DD string for a valid in-window date', (t) => {
-        t.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
+    it('returns the canonical YYYY-MM-DD string for a valid in-window date', (testContext) => {
+        testContext.mock.timers.enable({ apis: ['Date'], now: PINNED_NOW });
         assert.equal(getDateStringForMenuRequest(makeCtx({ date: '2024-06-19' })), '2024-06-19');
     });
 });
@@ -164,24 +164,24 @@ describe('getDateStringForMenuRequest', () => {
 // after this fix, but the regression still applies — assert here that calling
 // it from the server side honors the contract.
 describe('getMinimumDateForMenu (regression coverage for 65c0ebf)', () => {
-    it('clamps dates before the weekly-menus baseline (2023-10-31) to the baseline itself', (t) => {
+    it('clamps dates before the weekly-menus baseline (2023-10-31) to the baseline itself', (testContext) => {
         // Pin "now" to before the baseline; the function should clamp.
-        t.mock.timers.enable({ apis: ['Date'], now: new Date('2023-10-15T12:00:00') });
+        testContext.mock.timers.enable({ apis: ['Date'], now: new Date('2023-10-15T12:00:00') });
         const result = getMinimumDateForMenu();
         assert.equal(toDateString(result), toDateString(fromDateString('2023-10-31')));
     });
 
-    it('returns a Monday of the relevant week for dates after the baseline', (t) => {
+    it('returns a Monday of the relevant week for dates after the baseline', (testContext) => {
         // Pinned Wednesday 2024-06-19 -> previous Monday 2024-06-17.
-        t.mock.timers.enable({ apis: ['Date'], now: new Date('2024-06-19T12:00:00') });
+        testContext.mock.timers.enable({ apis: ['Date'], now: new Date('2024-06-19T12:00:00') });
         const result = getMinimumDateForMenu();
         assert.equal(result.getDay(), 1, 'returned date must be a Monday');
         assert.equal(toDateString(result), '2024-06-17');
     });
 
-    it('does not mutate the baseline between calls (regression: baseline used to be shared)', (t) => {
+    it('does not mutate the baseline between calls (regression: baseline used to be shared)', (testContext) => {
         // Pin to a date that triggers the baseline-clamp branch.
-        t.mock.timers.enable({ apis: ['Date'], now: new Date('2023-10-10T12:00:00') });
+        testContext.mock.timers.enable({ apis: ['Date'], now: new Date('2023-10-10T12:00:00') });
 
         const first = getMinimumDateForMenu();
         const firstString = toDateString(first);

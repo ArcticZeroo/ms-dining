@@ -47,14 +47,14 @@ beforeEach(async () => {
     // Each test seeds its own data. Clean the DB between tests.
     // Cascade delete from Cafe takes care of MenuItem, Station, DailyCafe,
     // DailyStation, DailyCategory, DailyMenuItem.
-    await usePrismaWrite(c => c.cafe.deleteMany({}));
+    await usePrismaWrite(prisma => prisma.cafe.deleteMany({}));
     CafeStorageClient.resetCache();
 });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const seedCafe = (id: string, name: string) =>
-    usePrismaWrite(c => c.cafe.create({
+    usePrismaWrite(prisma => prisma.cafe.create({
         data: {
             id,
             name,
@@ -68,7 +68,7 @@ const seedCafe = (id: string, name: string) =>
     }));
 
 const seedStation = (id: string, cafeId: string, name: string, opts: { groupId?: string | null; logoUrl?: string | null } = {}) =>
-    usePrismaWrite(c => c.station.create({
+    usePrismaWrite(prisma => prisma.station.create({
         data: {
             id,
             cafeId,
@@ -81,7 +81,7 @@ const seedStation = (id: string, cafeId: string, name: string, opts: { groupId?:
     }));
 
 const seedMenuItem = (id: string, cafeId: string, stationId: string, name: string) =>
-    usePrismaWrite(c => c.menuItem.create({
+    usePrismaWrite(prisma => prisma.menuItem.create({
         data: {
             id,
             cafeId,
@@ -108,20 +108,20 @@ interface SeedDailyStationParams {
 }
 
 const seedDailyStation = async ({ cafeId, dateString, stationId, itemsByCategory, opensAt = 660, closesAt = 840 }: SeedDailyStationParams) => {
-    await usePrismaWrite(c => c.dailyCafe.upsert({
+    await usePrismaWrite(prisma => prisma.dailyCafe.upsert({
         where:  { dateString_cafeId: { dateString, cafeId } },
         update: {},
         create: { dateString, cafeId, isAvailable: true },
     }));
-    const dailyStation = await usePrismaWrite(c => c.dailyStation.create({
+    const dailyStation = await usePrismaWrite(prisma => prisma.dailyStation.create({
         data: { cafeId, dateString, stationId, opensAt, closesAt },
     }));
     for (const [categoryName, menuItemIds] of itemsByCategory) {
-        const category = await usePrismaWrite(c => c.dailyCategory.create({
+        const category = await usePrismaWrite(prisma => prisma.dailyCategory.create({
             data: { name: categoryName, stationId: dailyStation.id },
         }));
         for (const menuItemId of menuItemIds) {
-            await usePrismaWrite(c => c.dailyMenuItem.create({
+            await usePrismaWrite(prisma => prisma.dailyMenuItem.create({
                 data: { menuItemId, categoryId: category.id },
             }));
         }
@@ -183,7 +183,7 @@ test('retrieveDailyMenuAsync preserves the station groupId from the underlying S
     const cafeId = 'test-cafe-group';
     const stationId = 'test-station-group';
     // Create a CrossCafeGroup so the FK is valid.
-    const group = await usePrismaWrite(c => c.crossCafeGroup.create({
+    const group = await usePrismaWrite(prisma => prisma.crossCafeGroup.create({
         data: { name: 'Diner', entityType: 'station' },
     }));
 
@@ -213,17 +213,17 @@ test('retrieveDailyMenuAsync returns an empty array for a date with no daily sta
 
 // ─── c860a02 — duplicate item names count once per station ─────────────────
 
-test('duplicate item names at the same station count once in the appearance calc (regression c860a02)', async (t) => {
+test('duplicate item names at the same station count once in the appearance calc (regression c860a02)', async (testContext) => {
     // The cache is keyed off CAFES_BY_ID — only known cafes have a cache slot.
     // Use a real cafe id (cafe25) so retrieveDailyCafeMenuAsync resolves.
-    const cafe = ALL_CAFES.find(c => c.id === 'cafe25');
+    const cafe = ALL_CAFES.find(cafeCandidate => cafeCandidate.id === 'cafe25');
     assert.ok(cafe, 'cafe25 should exist');
     const cafeId = cafe.id;
 
     // Pin the clock so canFetchMenuForDateString() accepts our date (within
     // window and not a weekend) and "today" lands on a Monday for the week math.
     mock.timers.enable({ apis: ['Date'], now: FAKE_NOW });
-    t.after(() => mock.timers.reset());
+    testContext.after(() => mock.timers.reset());
 
     const mondayString = toDateString(getMondayForWeek(FAKE_NOW));
 

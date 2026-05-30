@@ -63,11 +63,11 @@ export const getHiddenGems = async (
         return null;
     }
 
-    seeds.sort((a, b) => computePopularityScore(b.header.overallRating, b.header.totalReviewCount) - computePopularityScore(a.header.overallRating, a.header.totalReviewCount));
+    seeds.sort((seedA, seedB) => computePopularityScore(seedB.header.overallRating, seedB.header.totalReviewCount) - computePopularityScore(seedA.header.overallRating, seedA.header.totalReviewCount));
 
     // Select seeds using embedding-based diversity weighted by popularity
-    const seedMenuItemIds = seeds.map(s => s.item.menuItem.id);
-    const seedWeights = seeds.map(s => computePopularityScore(s.header.overallRating, s.header.totalReviewCount));
+    const seedMenuItemIds = seeds.map(seed => seed.item.menuItem.id);
+    const seedWeights = seeds.map(seed => computePopularityScore(seed.header.overallRating, seed.header.totalReviewCount));
     const selectedSeedIds = await diverseWeightedSample(
         seedMenuItemIds,
         SearchEntityType.menuItem,
@@ -76,7 +76,7 @@ export const getHiddenGems = async (
         `${context.dateString}:${context.cafeId}:hidden-gems-seeds`,
     );
     const selectedSeedIdSet = new Set(selectedSeedIds);
-    const topSeeds = seeds.filter(s => selectedSeedIdSet.has(s.item.menuItem.id));
+    const topSeeds = seeds.filter(seed => selectedSeedIdSet.has(seed.item.menuItem.id));
 
     // Build gem candidates from header results
     const seedEntityKeys = new Set(topSeeds.map(seed => getEntityKey(seed.item.menuItem)));
@@ -139,7 +139,7 @@ export const getHiddenGems = async (
     }
 
     const items = Array.from(candidates.values())
-        .sort((a, b) => a.distance - b.distance)
+        .sort((candidateA, candidateB) => candidateA.distance - candidateB.distance)
         .map(({ item }) => item);
 
     if (items.length === 0) {

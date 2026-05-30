@@ -42,15 +42,15 @@ after(async () => {
 beforeEach(async () => {
     // Clean DB + reset clock between tests so static OrderingClient cache state
     // doesn't poison subsequent assertions.
-    await usePrismaWrite(c => c.dailyCafeOrderingContext.deleteMany({}));
-    await usePrismaWrite(c => c.cafe.deleteMany({}));
+    await usePrismaWrite(prisma => prisma.dailyCafeOrderingContext.deleteMany({}));
+    await usePrismaWrite(prisma => prisma.cafe.deleteMany({}));
     mock.timers.reset();
 });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const seedCafe = (id: string) =>
-    usePrismaWrite(c => c.cafe.create({
+    usePrismaWrite(prisma => prisma.cafe.create({
         data: {
             id,
             name:             id,
@@ -94,7 +94,7 @@ test('createOrderingContextAsync upserts on duplicate (cafeId, dateString) inste
     await OrderingClient.createOrderingContextAsync(cafeId, first);
 
     // Sanity: row landed.
-    const rowCount = await usePrismaClient(c => c.dailyCafeOrderingContext.count({ where: { cafeId } }));
+    const rowCount = await usePrismaClient(prisma => prisma.dailyCafeOrderingContext.count({ where: { cafeId } }));
     assert.equal(rowCount, 1);
 
     // The bug: this used to throw P2002 because (dateString, cafeId) is the
@@ -106,7 +106,7 @@ test('createOrderingContextAsync upserts on duplicate (cafeId, dateString) inste
     );
 
     // Still exactly one row.
-    const rowCountAfter = await usePrismaClient(c => c.dailyCafeOrderingContext.count({ where: { cafeId } }));
+    const rowCountAfter = await usePrismaClient(prisma => prisma.dailyCafeOrderingContext.count({ where: { cafeId } }));
     assert.equal(rowCountAfter, 1);
 
     // The retrieved context reflects the second write.
@@ -114,7 +114,7 @@ test('createOrderingContextAsync upserts on duplicate (cafeId, dateString) inste
     assertContextsEqual(retrieved, second);
 
     // And the DB row matches too (not just the in-memory cache).
-    const dbRow = await usePrismaClient(c => c.dailyCafeOrderingContext.findFirst({ where: { cafeId } }));
+    const dbRow = await usePrismaClient(prisma => prisma.dailyCafeOrderingContext.findFirst({ where: { cafeId } }));
     assert.ok(dbRow);
     assert.equal(dbRow.profitCenterId, second.profitCenterId);
 });
@@ -141,7 +141,7 @@ test('per-cafe cache: operations on cafe A do not evict cafe B from the cache', 
     // cache properly per-cafe-keys B's entry, retrieve(B) should still hit
     // cache and return the original ctxB (not see the DB mutation).
     const dayOneDateString = toDateString(new Date());
-    await usePrismaWrite(c => c.dailyCafeOrderingContext.update({
+    await usePrismaWrite(prisma => prisma.dailyCafeOrderingContext.update({
         where: { dateString_cafeId: { dateString: dayOneDateString, cafeId: 'order-cafe-b' } },
         data:  { profitCenterId: 'CHANGED-IN-DB' },
     }));
@@ -223,7 +223,7 @@ test('a cached entry from yesterday is dropped on a fresh retrieval today', asyn
     assertContextsEqual(await OrderingClient.retrieveOrderingContextAsync(cafeId), todayContext);
 
     // Two distinct rows exist: yesterday's and today's.
-    const rows = await usePrismaClient(c => c.dailyCafeOrderingContext.findMany({
+    const rows = await usePrismaClient(prisma => prisma.dailyCafeOrderingContext.findMany({
         where:   { cafeId },
         orderBy: { dateString: 'asc' },
     }));

@@ -54,8 +54,8 @@ const CART_ITEM_INCLUDE = {
 
 export abstract class CartStorageClient {
 
-    private static async readRawCartData(tx: PrismaTransactionClient, userId: string) {
-        const cart = await tx.cart.findUnique({
+    private static async readRawCartData(prisma: PrismaTransactionClient, userId: string) {
+        const cart = await prisma.cart.findUnique({
             where:   { userId },
             include: { items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } } },
         });
@@ -142,8 +142,8 @@ export abstract class CartStorageClient {
         items: { include: CART_ITEM_INCLUDE, orderBy: { createdAt: 'asc' } as const },
     };
 
-    private static async getOrCreateCart(tx: PrismaTransactionClient, userId: string) {
-        return tx.cart.upsert({
+    private static async getOrCreateCart(prisma: PrismaTransactionClient, userId: string) {
+        return prisma.cart.upsert({
             where:   { userId },
             create:  { userId },
             update:  {},
@@ -153,18 +153,18 @@ export abstract class CartStorageClient {
 
     private static async useCartTransaction(
         userId: string,
-        callback: (tx: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
+        callback: (prisma: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
     ) {
-        const rawData = await usePrismaTransaction(async tx => {
-            const cart = await this.getOrCreateCart(tx, userId);
-            await callback(tx, cart);
-            return this.readRawCartData(tx, userId);
+        const rawData = await usePrismaTransaction(async prisma => {
+            const cart = await this.getOrCreateCart(prisma, userId);
+            await callback(prisma, cart);
+            return this.readRawCartData(prisma, userId);
         });
         return this.enrichCartResponse(rawData.items);
     }
 
     private static async createModifierChoices(
-        tx: PrismaTransactionClient,
+        prisma: PrismaTransactionClient,
         cartItemId: string,
         modifiers: ISerializedModifier[],
     ): Promise<void> {
@@ -176,7 +176,7 @@ export abstract class CartStorageClient {
             })),
         );
         if (rows.length > 0) {
-            await tx.cartItemModifierChoice.createMany({ data: rows });
+            await prisma.cartItemModifierChoice.createMany({ data: rows });
         }
     }
 
@@ -185,9 +185,9 @@ export abstract class CartStorageClient {
     }
 
     static async addItems(userId: string, items: ICartItemData[]) {
-        return this.useCartTransaction(userId, async (tx, cart) => {
+        return this.useCartTransaction(userId, async (prisma, cart) => {
             for (const item of items) {
-                const created = await tx.cartItem.create({
+                const created = await prisma.cartItem.create({
                     data: {
                         cartUserId:          cart.userId,
                         menuItemId:          item.menuItemId,
@@ -195,18 +195,18 @@ export abstract class CartStorageClient {
                         specialInstructions: item.specialInstructions ?? null,
                     },
                 });
-                await this.createModifierChoices(tx, created.id, item.modifiers);
+                await this.createModifierChoices(prisma, created.id, item.modifiers);
             }
         });
     }
 
     static async updateItem(userId: string, itemId: string, update: ICartItemUpdate) {
-        return this.useCartTransaction(userId, async (tx, cart) => {
+        return this.useCartTransaction(userId, async (prisma, cart) => {
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
 
-            await tx.cartItem.update({
+            await prisma.cartItem.update({
                 where: { id: itemId },
                 data:  {
                     quantity:            update.quantity,
@@ -214,23 +214,23 @@ export abstract class CartStorageClient {
                 },
             });
 
-            await tx.cartItemModifierChoice.deleteMany({ where: { cartItemId: itemId } });
-            await this.createModifierChoices(tx, itemId, update.modifiers);
+            await prisma.cartItemModifierChoice.deleteMany({ where: { cartItemId: itemId } });
+            await this.createModifierChoices(prisma, itemId, update.modifiers);
         });
     }
 
     static async removeItem(userId: string, itemId: string) {
-        return this.useCartTransaction(userId, async (tx, cart) => {
+        return this.useCartTransaction(userId, async (prisma, cart) => {
             if (!cart.items.some(i => i.id === itemId)) {
                 throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cart item ${itemId} not found`);
             }
-            await tx.cartItem.delete({ where: { id: itemId } });
+            await prisma.cartItem.delete({ where: { id: itemId } });
         });
     }
 
     static async clearCart(userId: string) {
-        return this.useCartTransaction(userId, async (tx, cart) => {
-            await tx.cartItem.deleteMany({ where: { cartUserId: cart.userId } });
+        return this.useCartTransaction(userId, async (prisma, cart) => {
+            await prisma.cartItem.deleteMany({ where: { cartUserId: cart.userId } });
         });
     }
 }

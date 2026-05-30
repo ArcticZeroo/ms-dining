@@ -40,7 +40,7 @@ before(async () => {
     ctx = await createIntegrationTestContext();
 
     // Sync a single cafe so the overview has real daily data to assemble.
-    const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
 
     const result = await CafeMenuSession.retrieveMenuAsync(cafe, 0);

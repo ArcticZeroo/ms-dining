@@ -16,10 +16,10 @@ export const getDbPriority = (): DbPriority => dbPriorityStorage.getStore() ?? '
  * Run `fn` with the given DB priority.
  * If a higher (lower-numbered) priority is already active, keep it.
  */
-export const runWithDbPriority = <T>(priority: DbPriority, fn: () => T): T => {
+export const runWithDbPriority = <T>(priority: DbPriority, callback: () => T): T => {
     const current = dbPriorityStorage.getStore();
     if (current != null && PRIORITY_RANK[current] <= PRIORITY_RANK[priority]) {
-        return fn();
+        return callback();
     }
-    return dbPriorityStorage.run(priority, fn);
+    return dbPriorityStorage.run(priority, callback);
 };

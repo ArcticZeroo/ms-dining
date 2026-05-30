@@ -8,6 +8,29 @@ const FOODHALL4: ICafe = {
     id:   'foodhall4',
 };
 
+interface ModifierOptionDebug {
+    id: string;
+    description: string;
+    amount: number;
+    [key: string]: unknown;
+}
+
+interface ModifierDebug {
+    id: string;
+    description: string;
+    type?: string;
+    minimum: number;
+    maximum: number;
+    options?: ModifierOptionDebug[];
+    [key: string]: unknown;
+}
+
+interface ItemDetailResponse {
+    modifiers?: {
+        modifiers?: ModifierDebug[];
+    };
+}
+
 const run = async () => {
     console.log('Creating BuyOnDemand client for FH4...');
     const client = await BuyOnDemandClient.createAsync(FOODHALL4);
@@ -20,10 +43,10 @@ const run = async () => {
         console.log(`  - ${station.name} (id: ${station.id}, menuId: ${station.menuId})`);
     }
 
-    const papaya = stations.find(s => s.name.toLowerCase().includes('papaya'));
+    const papaya = stations.find(station => station.name.toLowerCase().includes('papaya'));
     if (!papaya) {
         console.error('Could not find Papaya Viet Kitchen station!');
-        console.log('Available stations:', stations.map(s => s.name));
+        console.log('Available stations:', stations.map(station => station.name));
         return;
     }
 
@@ -61,8 +84,8 @@ const run = async () => {
                 false /*shouldValidateSuccess*/
             );
 
-            const rawJson = await response.json();
-            const modifiersData = (rawJson as any)?.modifiers;
+            const rawJson = await response.json() as ItemDetailResponse;
+            const modifiersData = rawJson.modifiers;
 
             if (!modifiersData?.modifiers || modifiersData.modifiers.length === 0) {
                 console.log('  No modifiers found');
@@ -86,7 +109,7 @@ const run = async () => {
                 // Log ALL raw fields on the modifier object to see if we're missing something
                 console.log(`    ALL KEYS: ${Object.keys(modifier).join(', ')}`);
                 // Log the raw modifier without options for brevity
-                const { options, ...modifierWithoutOptions } = modifier;
+                const { options: _options, ...modifierWithoutOptions } = modifier;
                 console.log(`    RAW (without options):`, JSON.stringify(modifierWithoutOptions, null, 4));
 
                 if (modifier.options && modifier.options.length > 0) {

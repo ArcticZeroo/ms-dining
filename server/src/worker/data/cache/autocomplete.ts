@@ -53,11 +53,11 @@ interface IScoredSuggestion {
 	match: IAutocompleteMatch;
 }
 
-const compareSuggestions = (a: IScoredSuggestion, b: IScoredSuggestion): number => {
-    if (a.match.quality !== b.match.quality) {
-        return a.match.quality - b.match.quality;
+const compareSuggestions = (suggestionA: IScoredSuggestion, suggestionB: IScoredSuggestion): number => {
+    if (suggestionA.match.quality !== suggestionB.match.quality) {
+        return suggestionA.match.quality - suggestionB.match.quality;
     }
-    return a.match.distance - b.match.distance;
+    return suggestionA.match.distance - suggestionB.match.distance;
 };
 
 const searchEntityNames = (

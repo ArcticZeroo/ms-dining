@@ -4,10 +4,11 @@ import type {
     IUpdateGroupRequest,
 } from '@msdining/common/models/group';
 import type { SearchEntityType } from '@msdining/common/models/search';
+import { EmptyObject } from '../models/util.js';
 
 export interface IGroupsService {
-    getGroups(data: {}): Promise<IGroupData[]>;
-    getGroupCandidatesZeroContext(data: {}): Promise<IGroupData[]>;
+    getGroups(data: EmptyObject): Promise<IGroupData[]>;
+    getGroupCandidatesZeroContext(data: EmptyObject): Promise<IGroupData[]>;
     getCandidatesForGroup(data: { groupId: string }): Promise<IGroupMember[]>;
     getGroupMembers(data: { groupId: string }): Promise<IGroupMember[]>;
     createGroup(data: { name: string; entityType: SearchEntityType; initialMembers?: string[] }): Promise<{ id: string }>;

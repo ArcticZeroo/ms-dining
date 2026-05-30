@@ -13,14 +13,14 @@ import { PrismaLikeClient } from '../../../../../shared/models/prisma.js';
 const TOP_SEARCH_TAGS_COUNT = 50;
 
 type DehydratedMenuItem = MenuItem & {
-	modifiers: Array<{
-		modifier: MenuItemModifier & {
-			choices: Array<MenuItemModifierChoice>;
-		}
-	}>;
-	searchTags: Array<{
-		name: string;
-	}>;
+    modifiers: Array<{
+        modifier: MenuItemModifier & {
+            choices: Array<MenuItemModifierChoice>;
+        }
+    }>;
+    searchTags: Array<{
+        name: string;
+    }>;
 }
 
 const hydrateMenuItem = (menuItem: DehydratedMenuItem): IMenuItemBase => {
@@ -92,17 +92,17 @@ export abstract class MenuItemStorageClient {
 
     private static _doesExistingModifierMatchServer(existingModifier: MenuItemModifier, existingChoices: MenuItemModifierChoice[], serverModifier: IMenuItemModifier): boolean {
         return existingModifier.id === serverModifier.id
-			&& existingModifier.description === serverModifier.description
-			&& existingModifier.maximum === serverModifier.maximum
-			&& existingModifier.minimum === serverModifier.minimum
-			&& existingModifier.choiceType === serverModifier.choiceType
-			&& existingChoices.length === serverModifier.choices.length
-			&& existingChoices.every(existingChoice => {
-			    const serverChoice = serverModifier.choices.find(choice => choice.id === existingChoice.id);
-			    return serverChoice != null
-					&& existingChoice.description === serverChoice.description
-					&& existingChoice.price === serverChoice.price;
-			});
+            && existingModifier.description === serverModifier.description
+            && existingModifier.maximum === serverModifier.maximum
+            && existingModifier.minimum === serverModifier.minimum
+            && existingModifier.choiceType === serverModifier.choiceType
+            && existingChoices.length === serverModifier.choices.length
+            && existingChoices.every(existingChoice => {
+                const serverChoice = serverModifier.choices.find(choice => choice.id === existingChoice.id);
+                return serverChoice != null
+                    && existingChoice.description === serverChoice.description
+                    && existingChoice.price === serverChoice.price;
+            });
     }
 
     private static async _doCreateModifierChoiceAsync(prismaClient: PrismaLikeClient, modifier: IMenuItemModifier, choice: IMenuItemModifierChoice): Promise<void> {

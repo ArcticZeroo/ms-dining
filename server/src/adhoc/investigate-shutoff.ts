@@ -23,6 +23,26 @@ function baseUrl(cafe: SimpleCafe) {
 }
 
 interface AuthTokens { accessToken: string; csrfToken: string }
+interface ConfigResponse {
+    tenantID?: string;
+    contextID?: string;
+    enabledLocation?: unknown;
+    isConfigurationComplete?: unknown;
+    properties?: {
+        applicationShutOffConfig?: {
+            isShutOffEnabled?: boolean;
+            instructionText?: string;
+        };
+    } & Record<string, unknown>;
+    storeList?: Array<{ displayProfileId?: string[] }>;
+}
+interface ConceptSummary {
+    name?: string;
+    availableAt?: unknown;
+    availableNow?: unknown;
+}
+
+const getErrorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
 
 async function anonymousLogin(cafe: SimpleCafe): Promise<AuthTokens> {
     const res = await fetch(`${baseUrl(cafe)}/login/anonymous`, {
@@ -67,8 +87,8 @@ for (const cafe of CAFES) {
     try {
         auth = await anonymousLogin(cafe);
         console.log('✅ Anonymous login OK');
-    } catch (err: any) {
-        console.log(`❌ Login failed: ${err.message}`);
+    } catch (err: unknown) {
+        console.log(`❌ Login failed: ${getErrorMessage(err)}`);
         continue;
     }
 
@@ -81,7 +101,7 @@ for (const cafe of CAFES) {
         console.log(`  ❌ Error: ${configRes.status}`);
         continue;
     }
-    const config = await configRes.json() as any;
+    const config = await configRes.json() as ConfigResponse;
 
     console.log('  config.properties keys:', Object.keys(config.properties ?? {}).join(', '));
 
@@ -130,10 +150,10 @@ for (const cafe of CAFES) {
             const text = await conceptsRes.text();
             console.log(`    Body: ${text.substring(0, 100)}`);
         } else {
-            const body = await conceptsRes.json() as any[];
+            const body = await conceptsRes.json() as ConceptSummary[];
             console.log(`  📋 concepts (${label}): ${body.length} station(s)`);
-            for (const s of body.slice(0, 2)) {
-                console.log(`    - "${s.name}" availableAt=${JSON.stringify(s.availableAt)} availableNow=${s.availableNow}`);
+            for (const station of body.slice(0, 2)) {
+                console.log(`    - "${station.name}" availableAt=${JSON.stringify(station.availableAt)} availableNow=${station.availableNow}`);
             }
         }
     }

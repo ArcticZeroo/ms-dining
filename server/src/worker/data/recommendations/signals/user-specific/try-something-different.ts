@@ -77,11 +77,11 @@ export const getTrySomethingDifferent = async (
     let penaltiesById = new Map<string, number>();
     if (negativeEntities.length > 0) {
         const penaltyResults = await computeNegativePenalties(
-            candidates.map(c => c.id),
+            candidates.map(candidate => candidate.id),
             negativeEntities,
             SearchEntityType.menuItem,
         );
-        penaltiesById = new Map(penaltyResults.map(r => [r.id, r.penaltyMultiplier]));
+        penaltiesById = new Map(penaltyResults.map(penaltyResult => [penaltyResult.id, penaltyResult.penaltyMultiplier]));
     }
 
     const scored = candidates.map(({ item, distance, id }) => ({
@@ -91,7 +91,7 @@ export const getTrySomethingDifferent = async (
 
     // Only include items with decent community ratings, collect a larger pool for variety
     const qualityPoolSize = ITEMS_PER_SECTION * 3;
-    const topScored = scored.sort((a, b) => b.score - a.score).slice(0, qualityPoolSize);
+    const topScored = scored.sort((scoredItemA, scoredItemB) => scoredItemB.score - scoredItemA.score).slice(0, qualityPoolSize);
 
     const headerResults = await Promise.allSettled(
         topScored.map(async ({ item }) => retrieveReviewHeaderAsync(item.menuItem))

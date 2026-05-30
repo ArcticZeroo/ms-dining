@@ -2,6 +2,7 @@ import type { ICafe, ICafeStation } from '../models/cafe.js';
 import type { IEntityVisitData } from '@msdining/common/models/pattern';
 import { SearchEntityType } from '@msdining/common/models/search';
 import type { ICafeShutdownState } from '@msdining/common/models/cafe';
+import { EmptyObject } from '../models/util.js';
 
 export interface IPublishDailyMenuParams {
     cafe: ICafe;
@@ -71,7 +72,7 @@ export interface IDailyMenuService {
     isAnyMenuAvailableForDayAsync(data: { dateString: string }): Promise<boolean>;
     getCafesAvailableForDayAsync(data: { dateString: string }): Promise<string[]>;
     isAnyAllowedMenuAvailableForCafe(data: { cafeId: string }): Promise<boolean>;
-    getPendingMenusForEmbedding(data: {}): Promise<IPendingEmbeddingMenu[]>;
+    getPendingMenusForEmbedding(data: EmptyObject): Promise<IPendingEmbeddingMenu[]>;
     getMenusForSearch(data: { date: Date | null }): Promise<ISearchableDailyMenu[]>;
     retrieveCafeChildAvailability(data: { cafeId: string; startDate: Date; endDate: Date }): Promise<ICafeChildAvailability>;
     retrieveStationItemAvailability(data: { stationId: string; startDate: Date; endDate: Date }): Promise<Record<string, string[]>>;
@@ -79,7 +80,7 @@ export interface IDailyMenuService {
     retrieveFirstStationVisitsForCafe(data: { cafeId: string }): Promise<Record<string, string>>;
     retrieveFirstStationVisitDate(data: { stationId: string }): Promise<string | null>;
     retrieveFirstMenuItemVisitDate(data: { menuItemId: string }): Promise<string | null>;
-    retrieveAllFirstMenuItemAppearances(data: {}): Promise<Record<string, string>>;
+    retrieveAllFirstMenuItemAppearances(data: EmptyObject): Promise<Record<string, string>>;
     getCafeHoursForDate(data: { cafeId: string; dateString: string }): Promise<ICafeHours | null>;
     getStationHoursForDate(data: { stationId: string; dateString: string }): Promise<ICafeHours | null>;
     getAllCafeHoursForDate(data: { dateString: string }): Promise<Record<string, ICafeHours>>;

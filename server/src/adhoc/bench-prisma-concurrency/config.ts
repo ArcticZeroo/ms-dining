@@ -14,11 +14,11 @@ export interface BenchConfig {
     synchronous: SyncMode;
 }
 
-const parseList = <T>(raw: string | undefined, fallback: T[], map: (s: string) => T): T[] => {
+const parseList = <T>(raw: string | undefined, fallback: T[], map: (item: string) => T): T[] => {
     if (raw == null || raw.length === 0) {
         return fallback;
     }
-    return raw.split(',').map(s => map(s.trim())).filter(Boolean as unknown as <U>(v: U) => v is U);
+    return raw.split(',').map(item => map(item.trim())).filter(Boolean as unknown as <U>(value: U) => value is U);
 };
 
 const getFlag = (argv: string[], name: string): string | undefined => {
@@ -37,11 +37,11 @@ export const parseConfig = (argv: string[], defaults: { sourceDb: string; outDir
     const scenarioRaw = getFlag(argv, 'scenario');
     const scenarios: Array<'micro' | 'reads' | 'mixed'> = scenarioRaw == null || scenarioRaw === 'all'
         ? ['micro', 'reads', 'mixed']
-        : scenarioRaw.split(',').map(s => s.trim()).filter((s): s is 'micro' | 'reads' | 'mixed' =>
-            s === 'micro' || s === 'reads' || s === 'mixed');
+        : scenarioRaw.split(',').map(scenario => scenario.trim()).filter((scenario): scenario is 'micro' | 'reads' | 'mixed' =>
+            scenario === 'micro' || scenario === 'reads' || scenario === 'mixed');
 
-    const concurrencies = parseList(getFlag(argv, 'concurrency'), [1, 2, 4, 8, 16, 32], s => Number.parseInt(s, 10))
-        .filter(n => Number.isFinite(n) && n > 0);
+    const concurrencies = parseList(getFlag(argv, 'concurrency'), [1, 2, 4, 8, 16, 32], rawConcurrency => Number.parseInt(rawConcurrency, 10))
+        .filter(concurrency => Number.isFinite(concurrency) && concurrency > 0);
 
     const iterations = Number.parseInt(getFlag(argv, 'iterations') ?? '500', 10);
     const repeats = Number.parseInt(getFlag(argv, 'repeats') ?? '5', 10);
@@ -51,8 +51,8 @@ export const parseConfig = (argv: string[], defaults: { sourceDb: string; outDir
     const journalRaw = getFlag(argv, 'journal-mode');
     const journalModes: JournalMode[] = journalRaw == null
         ? ['inherit']
-        : journalRaw.split(',').map(s => s.trim().toLowerCase()).filter((s): s is JournalMode =>
-            (validJournal as string[]).includes(s));
+        : journalRaw.split(',').map(journalMode => journalMode.trim().toLowerCase()).filter((journalMode): journalMode is JournalMode =>
+            (validJournal as string[]).includes(journalMode));
     if (journalModes.length === 0) {
         throw new Error(`--journal-mode must be one or more of: ${validJournal.join(', ')}`);
     }

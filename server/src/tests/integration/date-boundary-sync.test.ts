@@ -56,7 +56,7 @@ before(async () => {
     // Skip weekly repair so the test only triggers our explicit populate.
     (ENVIRONMENT_SETTINGS as unknown as { skipWeeklyRepair: boolean }).skipWeeklyRepair = true;
 
-    const found = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const found = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(found, `${CAFE_ID} should exist in ALL_CAFES`);
     cafe = found;
 }, { timeout: 60_000 });
@@ -75,7 +75,7 @@ test('DailyCafeUpdateSession(daysInFuture=3).populateAsync writes rows under tod
 
     // Skip every cafe except ours so the test stays fast and assertions
     // are about exactly one cafe's data.
-    const skipCafeIds = new Set(ALL_CAFES.map(c => c.id).filter(id => id !== cafe.id));
+    const skipCafeIds = new Set(ALL_CAFES.map(availableCafe => availableCafe.id).filter(id => id !== cafe.id));
     await session.populateAsync(skipCafeIds);
 
     const counts = await usePrismaClient(async (client) => ({
@@ -136,7 +136,7 @@ test('no rows exist on any date OTHER than the futureDateString the session was 
             where: { cafeId: cafe.id },
             select: { dateString: true },
         });
-        return new Set([...cafes, ...stations].map(r => r.dateString));
+        return new Set([...cafes, ...stations].map(row => row.dateString));
     });
     assert.deepEqual([...allDistinct], [futureDateString]);
 });

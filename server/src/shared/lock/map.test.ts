@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { LockedMap, LockedExpiringMap } from './map.js';
 
-const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+const wait = (milliseconds: number) => new Promise<void>(resolve => setTimeout(resolve, milliseconds));
 
 test('concurrent update() calls for the same key serialize (no interleaving)', async () => {
     const map = new LockedMap<string, number>();
@@ -46,7 +46,7 @@ test('concurrent update() calls for the same key serialize (no interleaving)', a
     ]);
 
     // Three increments → final value is 3.
-    const final = await map.update('k', v => v);
+    const final = await map.update('k', value => value);
     assert.equal(final, 3);
 });
 
@@ -85,8 +85,8 @@ test('delete() clears the entry', async () => {
 
     // A subsequent update should start fresh (value === undefined in callback).
     let observedValue: string | undefined = 'NOT-CALLED' as string | undefined;
-    await map.update('k', (v) => {
-        observedValue = v;
+    await map.update('k', (value) => {
+        observedValue = value;
         return 'fresh';
     });
     assert.equal(observedValue, undefined);
@@ -109,9 +109,9 @@ test('update() that throws does not poison the lock', async () => {
     // Third update must still be able to acquire the lock and observe the
     // pre-throw value (the failed callback's result was never persisted).
     let observedValue: number | undefined;
-    const result = await map.update('k', (v) => {
-        observedValue = v;
-        return (v ?? 0) + 1;
+    const result = await map.update('k', (value) => {
+        observedValue = value;
+        return (value ?? 0) + 1;
     });
     assert.equal(observedValue, 42, 'The throw must not have mutated the cached value');
     assert.equal(result, 43);
@@ -122,10 +122,10 @@ test('delete() during contention waits for in-flight update to finish', async ()
     await map.update('k', () => 'initial');
 
     let updateFinished = false;
-    const updatePromise = map.update('k', async (v) => {
+    const updatePromise = map.update('k', async (value) => {
         await wait(40);
         updateFinished = true;
-        return v;
+        return value;
     });
 
     // Delete is dispatched while update is still in progress.
@@ -146,19 +146,19 @@ test('LockedExpiringMap: updateWithoutRefresh() keeps original expiration', asyn
 
         // Wait 100ms (half the TTL), then update without refreshing TTL
         await wait(100);
-        await map.updateWithoutRefresh('k', (v) => (v ?? 0) + 1);
+        await map.updateWithoutRefresh('k', (value) => (value ?? 0) + 1);
 
         // Value should be updated
         let observed: number | undefined;
-        await map.peek('k', (v) => {
-            observed = v; 
+        await map.peek('k', (value) => {
+            observed = value; 
         });
         assert.equal(observed, 2, 'Value should have been incremented');
 
         // Wait another 120ms — original TTL should have expired (200ms total)
         await wait(120);
-        await map.peek('k', (v) => {
-            observed = v; 
+        await map.peek('k', (value) => {
+            observed = value; 
         });
         assert.equal(observed, undefined, 'Entry should have expired based on original TTL');
     } finally {
@@ -174,20 +174,20 @@ test('LockedExpiringMap: update() resets expiration', async () => {
 
         // Wait 100ms, then update (default behavior resets TTL)
         await wait(100);
-        await map.update('k', (v) => (v ?? 0) + 1);
+        await map.update('k', (value) => (value ?? 0) + 1);
 
         // Wait another 120ms — original TTL would have expired, but we reset it
         await wait(120);
         let observed: number | undefined;
-        await map.peek('k', (v) => {
-            observed = v; 
+        await map.peek('k', (value) => {
+            observed = value; 
         });
         assert.equal(observed, 2, 'Entry should still be alive because TTL was reset');
 
         // Wait for the reset TTL to expire
         await wait(100);
-        await map.peek('k', (v) => {
-            observed = v; 
+        await map.peek('k', (value) => {
+            observed = value; 
         });
         assert.equal(observed, undefined, 'Entry should have expired after reset TTL');
     } finally {

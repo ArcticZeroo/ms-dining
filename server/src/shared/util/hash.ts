@@ -11,6 +11,6 @@ export const sha256 = (content: string) => {
 }
 
 export const getSortedStringsHash = (values: string[]): string => {
-    const sortedValues = [...values].sort((a, b) => a.localeCompare(b));
+    const sortedValues = [...values].sort((firstString, secondString) => firstString.localeCompare(secondString));
     return md5(sortedValues.join(';'));
 }

@@ -12,8 +12,6 @@
 
 import { CACHE_EVENTS } from '../storage/events.js';
 import { DailyMenuStorageClient } from '../storage/clients/daily-menu/daily-menu.js';
-import { LockedMap } from '../../../shared/lock/map.js';
-import { isDateStringWithinMenuWindow } from '../../../shared/util/date.js';
 import { MenuDateLockedMap } from '../../../shared/lock/menu-date-map.js';
 
 const availabilityByDate = new MenuDateLockedMap<Set<string /*menuItemId*/>>();

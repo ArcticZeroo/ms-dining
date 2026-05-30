@@ -18,7 +18,7 @@ import { getServices } from '../../../shared/services/registry.js';
 import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
-import { isDateStringWithinMenuWindow, canFetchMenuForDateString } from '../../../shared/util/date.js';
+import { canFetchMenuForDateString } from '../../../shared/util/date.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';

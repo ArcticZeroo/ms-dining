@@ -53,9 +53,9 @@ describe('getMenuWatermark', () => {
     });
 
     it('different cafe-days share the same fallback', () => {
-        const a = getMenuWatermark('fallback-a', '2099-01-01');
-        const b = getMenuWatermark('fallback-b', '2099-01-02');
-        assert.equal(a, b);
+        const firstFallbackWatermark = getMenuWatermark('fallback-a', '2099-01-01');
+        const secondFallbackWatermark = getMenuWatermark('fallback-b', '2099-01-02');
+        assert.equal(firstFallbackWatermark, secondFallbackWatermark);
     });
 
     it('returns the published timestamp once a real change fires', () => {

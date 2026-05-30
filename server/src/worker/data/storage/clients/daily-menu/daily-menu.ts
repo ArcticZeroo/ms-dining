@@ -1,9 +1,9 @@
 import { DateUtil } from '@msdining/common';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { ICafe, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
+import { ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 import { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import { isDateValid } from '../../../../../shared/util/date.js';
-import { getNamespaceLogger, logDebug, logError, logInfo } from '../../../../../shared/util/log.js';
+import { getNamespaceLogger, logError, logInfo } from '../../../../../shared/util/log.js';
 import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../client.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { SearchEntityType } from '@msdining/common/models/search';
@@ -42,11 +42,11 @@ const areMenuItemsByCategoryNameEqual = (left: Map<string, Array<string>>, right
 }
 
 interface IPreviousDailyStationMenu {
-	stationId: string;
-	categories: Array<{
-		name: string;
-		menuItems: Array<{ menuItemId: string }>;
-	}>;
+    stationId: string;
+    categories: Array<{
+        name: string;
+        menuItems: Array<{ menuItemId: string }>;
+    }>;
 }
 
 const computeMenuPublishDiff = (
@@ -67,7 +67,7 @@ const computeMenuPublishDiff = (
         if (publishEvent.removedStations.has(station.id)) {
             publishEvent.removedStations.delete(station.id);
 
-            const previousMenu = previousDailyStationMenus.find(s => s.stationId === station.id);
+            const previousMenu = previousDailyStationMenus.find(previousStationMenu => previousStationMenu.stationId === station.id);
             if (!previousMenu) {
                 throw new Error(`Missing previous menu for station ${station.id} on date ${dateString}`);
             }
@@ -107,10 +107,10 @@ const computeMenuPublishDiff = (
 }
 
 const writeMenuInTransaction = async (
-    tx: PrismaTransactionClient,
+    prisma: PrismaTransactionClient,
     { cafeId, dateString, stations }: { cafeId: string; dateString: string; stations: Array<ICafeStation> }
 ) => {
-    await tx.dailyStation.deleteMany({
+    await prisma.dailyStation.deleteMany({
         where: {
             dateString,
             cafeId
@@ -122,7 +122,7 @@ const writeMenuInTransaction = async (
     const allMenuItems: Array<{ menuItemId: string; categoryId: number }> = [];
 
     for (const station of stations) {
-        const dailyStation = await tx.dailyStation.create({
+        const dailyStation = await prisma.dailyStation.create({
             data: {
                 cafeId,
                 dateString,
@@ -133,7 +133,7 @@ const writeMenuInTransaction = async (
         });
 
         for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName) {
-            const dailyCategory = await tx.dailyCategory.create({
+            const dailyCategory = await prisma.dailyCategory.create({
                 data: {
                     name:      categoryName,
                     stationId: dailyStation.id
@@ -146,7 +146,7 @@ const writeMenuInTransaction = async (
         }
     }
 
-    await tx.dailyMenuItem.createMany({ data: allMenuItems });
+    await prisma.dailyMenuItem.createMany({ data: allMenuItems });
 }
 
 const MENU_PUBLISH_TRANSACTION_WARN_MS = 5_000;
@@ -156,11 +156,11 @@ const MENU_PUBLISH_TRANSACTION_WARN_MS = 5_000;
 //   the caching story across all of the storage clients?
 export abstract class DailyMenuStorageClient {
     public static async publishDailyStationMenuAsync({
-														 cafe,
-														 dateString,
-														 isAvailable,
-														 stations
-													 }: IPublishDailyMenuParams) {
+        cafe,
+        dateString,
+        isAvailable,
+        stations
+    }: IPublishDailyMenuParams) {
         const cafeId = cafe.id;
 
         const publishEvent: IMenuPublishEvent = {
@@ -199,9 +199,9 @@ export abstract class DailyMenuStorageClient {
         // Atomic write: delete old data + insert new data in a single transaction.
         // Goes through the write semaphore to avoid SQLite write-lock contention.
         let transactionStartMs = 0;
-        await usePrismaTransaction(async tx => {
+        await usePrismaTransaction(async prisma => {
             transactionStartMs = Date.now();
-            await writeMenuInTransaction(tx, { cafeId, dateString, stations });
+            await writeMenuInTransaction(prisma, { cafeId, dateString, stations });
         });
         const transactionElapsedMs = Date.now() - transactionStartMs;
         if (transactionElapsedMs > MENU_PUBLISH_TRANSACTION_WARN_MS) {
@@ -502,19 +502,19 @@ export abstract class DailyMenuStorageClient {
                 stationVisitsById.set(stationId, new Set());
             }
 
-			stationVisitsById.get(stationId)!.add(visitDate);
+            stationVisitsById.get(stationId)!.add(visitDate);
 
-			for (const category of stationVisit.categories) {
-			    for (const menuItem of category.menuItems) {
-			        const menuItemId = menuItem.menuItemId;
+            for (const category of stationVisit.categories) {
+                for (const menuItem of category.menuItems) {
+                    const menuItemId = menuItem.menuItemId;
 
-			        if (!itemVisitsById.has(menuItemId)) {
-			            itemVisitsById.set(menuItemId, new Set());
-			        }
+                    if (!itemVisitsById.has(menuItemId)) {
+                        itemVisitsById.set(menuItemId, new Set());
+                    }
 
-					itemVisitsById.get(menuItemId)!.add(visitDate);
-			    }
-			}
+                    itemVisitsById.get(menuItemId)!.add(visitDate);
+                }
+            }
         }
 
         return {
@@ -560,7 +560,7 @@ export abstract class DailyMenuStorageClient {
                         itemVisitsById.set(menuItemId, new Set());
                     }
 
-					itemVisitsById.get(menuItemId)!.add(visitDate);
+                    itemVisitsById.get(menuItemId)!.add(visitDate);
                 }
             }
         }
@@ -757,9 +757,9 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async getCafeHoursForDate(cafeId: string, dateString: string): Promise<{
-		opensAt: number;
-		closesAt: number
-	} | null> {
+        opensAt: number;
+        closesAt: number
+    } | null> {
         const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.aggregate({
             where:  { cafeId, dateString },
             _min:   { opensAt: true },
@@ -775,9 +775,9 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async getAllCafeHoursForDate(dateString: string): Promise<Map<string, {
-		opensAt: number;
-		closesAt: number
-	}>> {
+        opensAt: number;
+        closesAt: number
+    }>> {
         const results = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
             by:    ['cafeId'],
             where: { dateString },
@@ -797,9 +797,9 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async getStationHoursForDate(stationId: string, dateString: string): Promise<{
-		opensAt: number;
-		closesAt: number;
-	} | null> {
+        opensAt: number;
+        closesAt: number;
+    } | null> {
         const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
             where:  { stationId, dateString },
             select: { opensAt: true, closesAt: true },
@@ -809,9 +809,9 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async upsertDailyCafeAsync(cafeId: string, dateString: string, data: {
-		isAvailable: boolean;
-		shutdownMessageHash?: string | null;
-	}): Promise<void> {
+        isAvailable: boolean;
+        shutdownMessageHash?: string | null;
+    }): Promise<void> {
         const { isAvailable, shutdownMessageHash = null } = data;
         await usePrismaWrite(prismaClient => prismaClient.dailyCafe.upsert({
             where:  { dateString_cafeId: { dateString, cafeId } },

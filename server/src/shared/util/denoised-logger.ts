@@ -1,5 +1,4 @@
 import { type Logger } from './log.js';
-import { clearTimeout } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 
 const LOG_INTERVAL_MS = new Duration({ seconds: 5 }).inMilliseconds;

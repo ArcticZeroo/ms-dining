@@ -43,7 +43,7 @@ after(async () => {
 beforeEach(async () => {
     // MenuItem rows have a FK back to Cafe + Station; deleting Cafe cascades
     // everything we seed here.
-    await usePrismaWrite(c => c.cafe.deleteMany({}));
+    await usePrismaWrite(prisma => prisma.cafe.deleteMany({}));
 });
 
 test('updateThumbnailHash silently swallows P2025 when the menu item was deleted', async () => {

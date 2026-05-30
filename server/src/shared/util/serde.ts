@@ -1,4 +1,4 @@
-type NotPromise<T> = T extends Promise<any> ? never : T;
+type NotPromise<T> = T extends Promise<unknown> ? never : T;
 
 export const jsonStringifyWithoutNull = <T>(value: NotPromise<T>) => JSON.stringify(value, (_, value) => {
     if (value == null) {

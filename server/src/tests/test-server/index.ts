@@ -30,20 +30,6 @@ import { paymentRoutes } from './handlers/payment.js';
 import { translationRoutes } from './handlers/translation.js';
 import { getServices } from '../../shared/services/registry.js';
 
-function pathPatternToRegex(pattern: string): RegExp {
-    // Convert '/sites/:tenantId/:contextId/concepts/:displayProfileId'
-    // to a regex like /^\/sites\/([^/]+)\/([^/]+)\/concepts\/([^/]+)$/
-    const paramNames: string[] = [];
-    const regexStr = pattern
-        .replace(/:[a-zA-Z]+/g, (match) => {
-            paramNames.push(match.slice(1));
-            return '([^/]+)';
-        })
-        .replace(/\//g, '\\/');
-
-    return new RegExp(`^${regexStr}$`);
-}
-
 interface CompiledRoute {
     method: string;
     regex: RegExp;
@@ -264,10 +250,8 @@ export class TestBuyOnDemandServer {
             headers: options.headers ?? {},
             body: parsedBody,
             cafeId,
+            params: matched.params,
         };
-
-        // Attach parsed route params to the request
-        (req as any).params = matched.params;
 
         try {
             return await matched.handler(req, this._serverStateProxy());
@@ -327,7 +311,7 @@ export class TestBuyOnDemandServer {
     ];
 
     private _validateAuth(method: string, path: string, headers: Record<string, string>): TestResponse | null {
-        if (TestBuyOnDemandServer._PUBLIC_PATHS.some(rx => rx.test(path))) {
+        if (TestBuyOnDemandServer._PUBLIC_PATHS.some(publicPathPattern => publicPathPattern.test(path))) {
             return null;
         }
 

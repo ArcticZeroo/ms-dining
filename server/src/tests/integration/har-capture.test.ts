@@ -175,7 +175,7 @@ test('HAR capture stays intact across multiple sequential requests', async () =>
     assert.equal(menuBody.items[0]!.id, 'item-1');
 
     assert.equal(capture.size, 2, 'each request must produce exactly one HAR entry');
-    const urls = capture.toJSON().log.entries.map(e => e.request.url);
+    const urls = capture.toJSON().log.entries.map(entry => entry.request.url);
     assert.deepEqual(urls, [
         `${handle.baseUrl}/login/anonymous`,
         `${handle.baseUrl}/menu/items`,

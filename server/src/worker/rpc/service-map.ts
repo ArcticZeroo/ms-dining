@@ -9,8 +9,7 @@ import { ServiceError, SERVICE_ERROR_CODES } from './errors.js';
  * field) and trivially serializable. Callers who want multiple positional
  * arguments wrap them in an object literal at the call site.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ServiceMethod = (data: any) => Promise<unknown>;
+export type ServiceMethod = (data: unknown) => Promise<unknown>;
 
 /**
  * A single service exposed across the boundary. Each property is one
@@ -51,7 +50,7 @@ export type ResponseData<
     TServices extends ServiceMap,
     S extends keyof TServices,
     M extends keyof TServices[S],
-> = TServices[S][M] extends (...args: any[]) => Promise<infer TResult> ? TResult : never;
+> = TServices[S][M] extends (...args: infer _TArgs) => Promise<infer TResult> ? TResult : never;
 
 /**
  * Walk the service map and invoke the named method. Centralizes the

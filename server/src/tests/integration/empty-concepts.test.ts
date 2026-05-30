@@ -73,7 +73,7 @@ before(async () => {
 
     ctx = await createIntegrationTestContext();
 
-    const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
 
     const originalStations = ctx.server.state.getFixture<StationFixture[]>(CAFE_ID, 'stations');
@@ -83,7 +83,7 @@ before(async () => {
     const [firstStation, ...rest] = originalStations;
     assert.ok(firstStation, 'expected at least one station in the fixture');
     emptiedStationId = firstStation.id;
-    remainingStationIds = new Set(rest.map(s => s.id));
+    remainingStationIds = new Set(rest.map(station => station.id));
 
     // Deep-clone first station and zero out every category's items. The other
     // stations are passed through unchanged.
@@ -142,7 +142,7 @@ test('GET /api/dining/menu/:cafeId/menu omits stations with all-empty categories
 
     assert.equal(body.isAvailable, true);
 
-    const returnedStationIds = new Set(body.stations.map(s => s.id));
+    const returnedStationIds = new Set(body.stations.map(station => station.id));
     assert.ok(
         !returnedStationIds.has(emptiedStationId),
         `emptied station ${emptiedStationId} should be omitted (got stations: ${[...returnedStationIds].join(', ')})`,
@@ -165,7 +165,7 @@ test('every returned station has at least one category with at least one item', 
     for (const station of body.stations) {
         const categoryItemCounts = Object.values(station.menu).map(items => items.length);
         assert.ok(
-            categoryItemCounts.some(n => n > 0),
+            categoryItemCounts.some(itemCount => itemCount > 0),
             `station ${station.id} (${station.name}) was returned with only empty categories: ${JSON.stringify(station.menu)}`,
         );
     }

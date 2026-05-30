@@ -62,11 +62,11 @@ function hasValidScheduleTime(body: unknown): body is { scheduleTime: ScheduleTi
     if (candidate == null || typeof candidate !== 'object') {
         return false;
     }
-    const st = candidate as { startTime?: unknown; endTime?: unknown };
-    return typeof st.startTime === 'string'
-        && st.startTime.length > 0
-        && typeof st.endTime === 'string'
-        && st.endTime.length > 0;
+    const scheduleTimeCandidate = candidate as { startTime?: unknown; endTime?: unknown };
+    return typeof scheduleTimeCandidate.startTime === 'string'
+        && scheduleTimeCandidate.startTime.length > 0
+        && typeof scheduleTimeCandidate.endTime === 'string'
+        && scheduleTimeCandidate.endTime.length > 0;
 }
 
 test('pay-config POST body matches BoD wire shape: storeInfo present, scheduleTime absent', async () => {

@@ -483,11 +483,11 @@ class SeededRandom {
         return Math.floor(this.rng() * (max - min + 1)) + min;
     }
 
-    /** Pick n unique items from arr (Fisher-Yates shuffle, take n) */
-    pick<T>(arr: readonly T[], n: number): T[] {
+    /** Pick count unique items from arr (Fisher-Yates shuffle, take count) */
+    pick<T>(arr: readonly T[], count: number): T[] {
         const copy = [...arr];
         const result: T[] = [];
-        for (let i = 0; i < Math.min(n, copy.length); i++) {
+        for (let i = 0; i < Math.min(count, copy.length); i++) {
             const j = this.int(i, copy.length - 1);
             [copy[i], copy[j]] = [copy[j]!, copy[i]!];
             result.push(copy[i]!);
@@ -499,9 +499,9 @@ class SeededRandom {
         return arr[this.int(0, arr.length - 1)]!;
     }
 
-    /** Pick n items with replacement (allows duplicates) */
-    sample<T>(arr: readonly T[], n: number): T[] {
-        return Array.from({ length: n }, () => this.pickOne(arr));
+    /** Pick count items with replacement (allows duplicates) */
+    sample<T>(arr: readonly T[], count: number): T[] {
+        return Array.from({ length: count }, () => this.pickOne(arr));
     }
 }
 
@@ -569,15 +569,15 @@ function generateForCafe(cafeId: string): GeneratedFixtures {
         // station ends up with a realistic count of distinct items. Variants
         // inherit category placement and modifier behavior from their base.
         const VARIANT_PREFIXES = ['Classic', 'Premium', 'Mini', 'Family-Size', 'Spicy', 'Loaded', 'Lite', 'Deluxe'];
-        const selectedPrefixes = ['Classic', ...rng.pick(VARIANT_PREFIXES.filter(p => p !== 'Classic'), variantsPerItem - 1)];
+        const selectedPrefixes = ['Classic', ...rng.pick(VARIANT_PREFIXES.filter(prefix => prefix !== 'Classic'), variantsPerItem - 1)];
 
         type ExpandedItem = { templateIdx: number; variantIdx: number; tmpl: ItemTemplate; prefix: string; itemId: string };
         const expandedItems: ExpandedItem[] = [];
 
         for (let i = 0; i < template.items.length; i++) {
             const baseTmpl = template.items[i]!;
-            for (let v = 0; v < selectedPrefixes.length; v++) {
-                const prefix = selectedPrefixes[v]!;
+            for (let variantIndex = 0; variantIndex < selectedPrefixes.length; variantIndex++) {
+                const prefix = selectedPrefixes[variantIndex]!;
                 const variantName = prefix === 'Classic' ? baseTmpl.name : `${prefix} ${baseTmpl.name}`;
                 const variantReceipt = prefix === 'Classic'
                     ? baseTmpl.receiptText
@@ -585,7 +585,7 @@ function generateForCafe(cafeId: string): GeneratedFixtures {
                 const itemId = `${cafeId}-item-${++itemIdCounter}-${rng.int(1000, 9999)}`;
                 expandedItems.push({
                     templateIdx: i,
-                    variantIdx: v,
+                    variantIdx: variantIndex,
                     tmpl: { ...baseTmpl, name: variantName, receiptText: variantReceipt },
                     prefix,
                     itemId,
@@ -658,7 +658,7 @@ function generateForCafe(cafeId: string): GeneratedFixtures {
             }
 
             for (const tid of itemTagIds) {
-                const tagDef = TAG_POOL.find(t => t.tagId === tid);
+                const tagDef = TAG_POOL.find(tag => tag.tagId === tid);
                 if (tagDef && !stationLabels[tid]) {
                     stationLabels[tid] = { tagId: tagDef.tagId, tagName: tagDef.tagName };
                 }

@@ -70,8 +70,8 @@ export function loadFixtures(server: TestBuyOnDemandServer): void {
     let cafeIds: string[];
     try {
         cafeIds = fs.readdirSync(overridesDir, { withFileTypes: true })
-            .filter(d => d.isDirectory())
-            .map(d => d.name);
+            .filter(directoryEntry => directoryEntry.isDirectory())
+            .map(directoryEntry => directoryEntry.name);
     } catch (err) {
         if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
             return;

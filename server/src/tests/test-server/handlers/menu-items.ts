@@ -183,8 +183,7 @@ function handleGetItems(req: TestRequest, state: ITestServerState): TestResponse
  * Returns detail for a single item (including modifiers for ordering).
  */
 function handleGetItemDetail(req: TestRequest, state: ITestServerState): TestResponse {
-    const params = (req as any).params as Record<string, string>;
-    const itemId = params.itemId;
+    const itemId = req.params?.itemId;
 
     // Check for per-item detail fixtures first
     const detailFixtures = state.getFixture<Record<string, MenuItemDetailFixture>>(req.cafeId, 'menu-item-details');

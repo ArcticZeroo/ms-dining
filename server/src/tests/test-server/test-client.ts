@@ -5,7 +5,7 @@
  */
 
 import { Response } from 'node-fetch';
-import { BuyOnDemandClient, BuyOnDemandClientOptions } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient, BuyOnDemandClientOptions, BuyOnDemandRequestOptions } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
 import { getServices } from '../../shared/services/registry.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import { TestBuyOnDemandServer } from './index.js';
@@ -47,7 +47,7 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
      * headers (set after #performLoginAsync) are still attached — the test
      * server validates those just like the real BoD API does.
      */
-    public async requestAsync(path: string, options: any = {}, shouldValidateSuccess: boolean = true): Promise<Response> {
+    public async requestAsync(path: string, options: BuyOnDemandRequestOptions = {}, shouldValidateSuccess: boolean = true): Promise<Response> {
         const method = (options.method ?? 'GET').toUpperCase();
         const optionsWithToken = this._getRequestOptions(options);
 
@@ -64,7 +64,7 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
             path,
             {
                 headers,
-                body: optionsWithToken.body,
+                body: optionsWithToken.body ?? undefined,
             }
         );
 
@@ -84,7 +84,16 @@ export class TestBuyOnDemandClient extends BuyOnDemandClient {
      */
     async _initConfigFromTestServer(): Promise<void> {
         const response = await this.requestAsync('/config');
-        const json = await response.json() as any;
+        const json = await response.json() as {
+            tenantID: string;
+            contextID: string;
+            theme: { logoImage: string };
+            properties?: { applicationShutOffConfig?: { isShutOffEnabled?: boolean; instructionText?: string } };
+            storeList: Array<{
+                displayProfileId: string[];
+                storeInfo: { storeInfoId: string; storeName: string };
+            }>;
+        };
 
         const [store] = json.storeList;
         if (!store) {

@@ -25,7 +25,7 @@ export const backfillThumbnailHashesMigration: IRuntimeMigration = {
             return;
         }
 
-        const pngFiles = files.filter(f => f.endsWith('.png'));
+        const pngFiles = files.filter(fileName => fileName.endsWith('.png'));
         logger.info(`Found ${pngFiles.length} PNG thumbnails.`);
 
         if (pngFiles.length === 0) {

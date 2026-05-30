@@ -116,12 +116,6 @@ const DELETE_SEARCH_ENTITY_STATEMENT = createPreparedStatementFactory(`
 	WHERE id = ? AND entity_type = CAST(? AS INTEGER)
 `);
 
-const ALL_EMBEDDED_IDS_BY_TYPE_STATEMENT = createPreparedStatementFactory(`
-	SELECT id
-	FROM search_vec
-	WHERE entity_type = CAST(? AS INTEGER)
-`);
-
 const DELETE_ALL_BY_TYPE_STATEMENT = createPreparedStatementFactory(`
 	DELETE FROM search_vec
 	WHERE entity_type = CAST(? AS INTEGER)
@@ -315,8 +309,8 @@ export const computeNegativePenalties = (candidateIds: string[], negativeEntitie
         for (const negativeEmbedding of negativeEmbeddings) {
             let distance = 0;
             for (let i = 0; i < embedding.length; i++) {
-                const d = (embedding[i] ?? 0) - (negativeEmbedding[i] ?? 0);
-                distance += d * d;
+                const delta = (embedding[i] ?? 0) - (negativeEmbedding[i] ?? 0);
+                distance += delta * delta;
             }
             distance = Math.sqrt(distance);
             if (distance < 0.5) {
@@ -333,8 +327,8 @@ const VEC_DISTANCE_COSINE_STATEMENT = createPreparedStatementFactory(
 );
 
 // Uses sqlite-vec's optimized C implementation for cosine distance
-const cosineDistance = (a: Float32Array, b: Float32Array): number => {
-    const result = VEC_DISTANCE_COSINE_STATEMENT().get(a, b) as { distance: number } | undefined;
+const cosineDistance = (vectorA: Float32Array, vectorB: Float32Array): number => {
+    const result = VEC_DISTANCE_COSINE_STATEMENT().get(vectorA, vectorB) as { distance: number } | undefined;
     return result?.distance ?? 1;
 };
 
@@ -368,8 +362,8 @@ export const sortByEmbeddingDiversity = (
         });
     }
 
-    const withEmbeddings = candidates.filter(c => c.embedding != null);
-    const withoutEmbeddings = candidates.filter(c => c.embedding == null);
+    const withEmbeddings = candidates.filter(candidate => candidate.embedding != null);
+    const withoutEmbeddings = candidates.filter(candidate => candidate.embedding == null);
 
     const result: string[] = [];
     const selectedEmbeddings: Float32Array[] = [];
@@ -410,8 +404,8 @@ export const sortByEmbeddingDiversity = (
 
     // Append items without embeddings at the end, sorted by original score
     withoutEmbeddings
-        .sort((a, b) => b.normalizedScore - a.normalizedScore)
-        .forEach(c => result.push(c.id));
+        .sort((candidateA, candidateB) => candidateB.normalizedScore - candidateA.normalizedScore)
+        .forEach(candidate => result.push(candidate.id));
 
     return result;
 };

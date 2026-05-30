@@ -215,10 +215,10 @@ test('GET /api/dining/ returns exactly the available cafes', async () => {
     // the unreleased-cafes version tag (we don't, since fetch() sends none).
     const minimumDate = getMinimumDateForMenu();
     const expectedIds = new Set(
-        ALL_CAFES.filter(c => isCafeAvailable(c, minimumDate)).map(c => c.id),
+        ALL_CAFES.filter(cafe => isCafeAvailable(cafe, minimumDate)).map(cafe => cafe.id),
     );
 
-    const responseIds = new Set(body.groups.flatMap(g => g.members.map(m => m.id)));
+    const responseIds = new Set(body.groups.flatMap(group => group.members.map(member => member.id)));
     assert.deepEqual(responseIds, expectedIds);
 });
 
@@ -241,7 +241,7 @@ test('GET /api/dining/menu/cafe25/menu (legacy) returns stations + items', async
     // station (mirrors real BoD behavior like Typhoon), the response total
     // matches `menuItemAppearanceCount`, not `menuItemCount`.
     const totalAppearances = body.stations.reduce((sum, station) => {
-        return sum + Object.values(station.menu).reduce((s, items) => s + items.length, 0);
+        return sum + Object.values(station.menu).reduce((stationItemCount, items) => stationItemCount + items.length, 0);
     }, 0);
     assert.equal(totalAppearances, cafe25Summary.menuItemAppearanceCount);
 

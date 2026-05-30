@@ -93,7 +93,7 @@ const main = async (): Promise<void> => {
                     console.log(`\n  ${cellLabel}`);
 
                     const runs: RunResult[] = [];
-                    for (let r = 0; r < config.repeats; r++) {
+                    for (let repeatIndex = 0; repeatIndex < config.repeats; repeatIndex++) {
                         const copied = copyDatabase(config.sourceDb);
                         const adapter = new PrismaLibSQL(
                             { url: copied.url },
@@ -104,7 +104,7 @@ const main = async (): Promise<void> => {
                         try {
                             await applyPragmas(prisma, journalMode, config.synchronous);
 
-                            if (r === 0 && useLock && concurrency === 1 && pragmasByMode[journalMode] == null) {
+                            if (repeatIndex === 0 && useLock && concurrency === 1 && pragmasByMode[journalMode] == null) {
                                 pragmasByMode[journalMode] = await readPragmas(prisma);
                                 console.log(`  pragmas (${journalMode}):`, pragmasByMode[journalMode]);
                             }
@@ -112,7 +112,7 @@ const main = async (): Promise<void> => {
                             const samples = await sampleIds(prisma);
                             validateSamples(samples);
                             const ops = def.build(samples);
-                            const rng = makeRng(0xC0FFEE + r * 31);
+                            const rng = makeRng(0xC0FFEE + repeatIndex * 31);
                             const ctx = {
                                 rng,
                                 sample: <T,>(arr: readonly T[]): T => arr[Math.floor(rng() * arr.length)]!,
@@ -144,7 +144,7 @@ const main = async (): Promise<void> => {
                             });
 
                             const opsPerSec = (result.iterations - result.errorCount) / (result.wallTimeMs / 1000);
-                            console.log(`    repeat ${r + 1}/${config.repeats}: ${result.wallTimeMs.toFixed(0)}ms, ${opsPerSec.toFixed(1)} ops/s, errors=${result.errorCount} (busy=${result.busyErrorCount})`);
+                            console.log(`    repeat ${repeatIndex + 1}/${config.repeats}: ${result.wallTimeMs.toFixed(0)}ms, ${opsPerSec.toFixed(1)} ops/s, errors=${result.errorCount} (busy=${result.busyErrorCount})`);
 
                             runs.push(result);
                         } finally {

@@ -46,7 +46,7 @@ const ensureGlobalCacheForDateString = (dateString: string) => {
     return GLOBAL_RECOMMENDATION_SECTIONS_CACHE.get(dateString)!;
 }
 
-const ensureUserCacheForDateString = (dateString: string, userId: string) => {
+const ensureUserCacheForDateString = (dateString: string) => {
     if (!USER_RECOMMENDATION_SECTIONS_CACHE.has(dateString)) {
         const cache = new LockedExpiringMap<string, Map<RecommendationSectionType, Array<IRecommendationItem>>>(RECOMMENDATIONS_CACHE_EXPIRATION);
         USER_RECOMMENDATION_SECTIONS_CACHE.set(dateString, cache);
@@ -58,11 +58,11 @@ const ensureUserCacheForDateString = (dateString: string, userId: string) => {
 type BuildContextParams = Pick<IRecommendationContext, 'userId' | 'dateString' | 'homepageIds' | 'cafeId'>;
 
 const buildContext = ({
-						  userId = null,
-						  dateString,
-						  homepageIds,
-						  cafeId,
-					  }: BuildContextParams): IRecommendationContext => {
+    userId = null,
+    dateString,
+    homepageIds,
+    cafeId,
+}: BuildContextParams): IRecommendationContext => {
     const allMenuItems = lazyAsync(() => getAllAvailableItems(dateString, cafeId));
     return {
         userId,
@@ -112,7 +112,7 @@ const getRecommendationsForUser = async (userId: string | null, dateString: stri
         getAllMenuItems: () => allMenuItems.value,
     };
 
-    const cacheForDateString = ensureUserCacheForDateString(dateString, userId);
+    const cacheForDateString = ensureUserCacheForDateString(dateString);
     return cacheForDateString.getOrInsert(context.userId, async () => {
         const recommendations = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
 
@@ -134,20 +134,20 @@ const addToRecommendations = (existing: Map<RecommendationSectionType, Array<IRe
 }
 
 interface IGetRecommendationsParams {
-	userId: string | null;
-	dateString: string;
-	homepageIds: string[];
-	favoriteItemNames: string[];
-	cafeIdFilter?: Set<string>;
+    userId: string | null;
+    dateString: string;
+    homepageIds: string[];
+    favoriteItemNames: string[];
+    cafeIdFilter?: Set<string>;
 }
 
 export const getRecommendationsAsync = async ({
-												  userId,
-												  dateString,
-												  homepageIds,
-												  favoriteItemNames,
-												  cafeIdFilter,
-											  }: IGetRecommendationsParams): Promise<Array<IRecommendationSection>> => {
+    userId,
+    dateString,
+    homepageIds,
+    favoriteItemNames: _favoriteItemNames,
+    cafeIdFilter,
+}: IGetRecommendationsParams): Promise<Array<IRecommendationSection>> => {
     if (!canFetchMenuForDateString(dateString)) {
         return [];
     }

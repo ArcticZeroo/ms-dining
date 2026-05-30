@@ -1,5 +1,6 @@
 import type { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import type { IServerReview } from '../models/review.js';
+import { EmptyObject } from '../models/util.js';
 
 export interface ICreateMenuItemReviewInput {
     menuItemId: string;
@@ -58,13 +59,13 @@ export interface IReviewService {
     isOwnedByUser(data: { reviewId: string; userId: string }): Promise<boolean>;
 
     // Review header methods (used by cache layer)
-    getAllMenuItemReviewHeaders(data: {}): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
-    getAllMenuItemReviewHeadersByGroupId(data: {}): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
+    getAllMenuItemReviewHeaders(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
+    getAllMenuItemReviewHeadersByGroupId(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
     getMenuItemReviewHeaderByName(data: { normalizedName: string }): Promise<IMenuItemReviewHeader>;
     getReviewHeaderByGroupId(data: { groupId: string }): Promise<IMenuItemReviewHeader>;
 
-    getAllStationReviewHeaders(data: {}): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
-    getAllStationReviewHeadersByGroupId(data: {}): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
+    getAllStationReviewHeaders(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
+    getAllStationReviewHeadersByGroupId(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
     getStationReviewHeaderByName(data: { normalizedName: string }): Promise<IMenuItemReviewHeader>;
     getStationReviewHeaderByGroupId(data: { groupId: string }): Promise<IMenuItemReviewHeader>;
 }

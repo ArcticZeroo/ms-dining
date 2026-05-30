@@ -1,7 +1,6 @@
 import { IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
     IRecommendationSection,
-    RECOMMENDATION_SECTION_DISPLAY_NAMES,
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getEntityKey } from '@msdining/common/util/entity-key';
@@ -42,7 +41,7 @@ export const getPopularItems = async (
         scored.push({ item, score: computePopularityScore(header.overallRating, header.totalReviewCount), header });
     }
 
-    scored.sort((a, b) => b.score - a.score);
+    scored.sort((scoredItemA, scoredItemB) => scoredItemB.score - scoredItemA.score);
 
     // Deduplicate by entity key — the same item can appear at multiple cafes with
     // identical review data, inflating the pool with duplicates and crowding out

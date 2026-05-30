@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 
 export type EventMap = {
-	[key: string]: (...args: any[]) => void
+	[key: string]: (...args: never[]) => void
 }
 
 /**

@@ -22,52 +22,52 @@ import { getServices } from '../../../shared/services/registry.js';
 import { NON_ENTREE_FILTER } from '../../../shared/util/menu-item-filter.js';
 
 interface IMultiQuerySearchParams {
-	queries: Array<ISearchQuery>;
-	shouldUseExactMatch: boolean;
-	date: Date | null;
+    queries: Array<ISearchQuery>;
+    shouldUseExactMatch: boolean;
+    date: Date | null;
 }
 
 interface ICheapItemSearchParams {
-	minPrice: number;
-	maxPrice: number;
-	date: Date | null;
+    minPrice: number;
+    maxPrice: number;
+    date: Date | null;
 }
 
 interface IAddResultParamsBase {
-	groupId: Nullable<string>;
-	type: SearchEntityType;
-	matchReasons: Iterable<SearchMatchReason>;
-	name: string;
-	cafeId: string;
-	station: Nullable<string>;
-	price: Nullable<number>;
-	description: Nullable<string>;
-	imageUrl: Nullable<string> | (() => MaybePromise<Nullable<string>>);
-	tags: Nullable<Set<string>>;
-	searchTags: Nullable<Set<string>>;
-	matchedModifiers?: Map<string, Set<string>>;
-	vectorDistance?: number;
+    groupId: Nullable<string>;
+    type: SearchEntityType;
+    matchReasons: Iterable<SearchMatchReason>;
+    name: string;
+    cafeId: string;
+    station: Nullable<string>;
+    price: Nullable<number>;
+    description: Nullable<string>;
+    imageUrl: Nullable<string> | (() => MaybePromise<Nullable<string>>);
+    tags: Nullable<Set<string>>;
+    searchTags: Nullable<Set<string>>;
+    matchedModifiers?: Map<string, Set<string>>;
+    vectorDistance?: number;
 }
 
 interface IAddResultParamsWithoutAppearance extends IAddResultParamsBase {
-	dateString: undefined;
+    dateString: undefined;
 }
 
 interface IAddResultParamsWithAppearance extends IAddResultParamsBase {
-	dateString: string;
+    dateString: string;
 }
 
 interface IAddResultParamsForCafe extends IAddResultParamsBase {
-	type: SearchEntityType.cafe;
-	dateString: undefined;
+    type: SearchEntityType.cafe;
+    dateString: undefined;
 }
 
 type IAddResultParams = IAddResultParamsWithoutAppearance | IAddResultParamsWithAppearance | IAddResultParamsForCafe;
 
 interface ISimilarEntitySearchParams {
-	entityType: SearchEntityType;
-	entityName: string;
-	date: Date;
+    entityType: SearchEntityType;
+    entityName: string;
+    date: Date;
 }
 
 const createMenuItemImageUrlGetter = (menuItem: IMenuItemBase): (() => MaybePromise<Nullable<string>>) => {
@@ -113,21 +113,21 @@ class SearchResults {
     }
 
     addResult({
-				  type,
-				  name,
-				  groupId,
-				  description,
-				  imageUrl,
-				  dateString,
-				  cafeId,
-				  matchReasons,
-				  station,
-				  price,
-				  tags,
-				  searchTags,
-				  matchedModifiers,
-				  vectorDistance
-			  }: IAddResultParams) {
+        type,
+        name,
+        groupId,
+        description,
+        imageUrl,
+        dateString,
+        cafeId,
+        matchReasons,
+        station,
+        price,
+        tags,
+        searchTags,
+        matchedModifiers,
+        vectorDistance
+    }: IAddResultParams) {
         this.#ensureEntityTypeExists(type);
 
         const searchResultsById = this.searchResultsByNameByEntityType.get(type)!;
@@ -171,7 +171,7 @@ class SearchResults {
                     if (!searchResult.locationDatesByCafeId.has(cafeId)) {
                         searchResult.locationDatesByCafeId.set(cafeId, new Set());
                     }
-					searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
+                    searchResult.locationDatesByCafeId.get(cafeId)!.add(dateString);
                 }
 
                 if (price != null) {
@@ -462,10 +462,10 @@ class SearchSession {
 // which otherwise should not be interacting (to avoid circular dependencies).
 export abstract class SearchManager {
     private static async _performMultiQuerySearch({
-													  queries,
-													  shouldUseExactMatch,
-													  date
-												  }: IMultiQuerySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+        queries,
+        shouldUseExactMatch,
+        date
+    }: IMultiQuerySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         const session = new SearchSession({ queries, shouldUseExactMatch, date });
         const dailyStations = await session.getMenusAsync();
 
@@ -561,8 +561,8 @@ export abstract class SearchManager {
                 vectorFoundItemsWithoutAppearances.set(mapKey, new Set());
             }
 
-			vectorFoundItems.get(mapKey)!.set(result.id, result.distance);
-			vectorFoundItemsWithoutAppearances.get(mapKey)!.add(result.id);
+            vectorFoundItems.get(mapKey)!.set(result.id, result.distance);
+            vectorFoundItemsWithoutAppearances.get(mapKey)!.add(result.id);
         }
 
         const getVectorDistanceAndMarkSeen = (entityType: SearchEntityType, id: string) => {
@@ -578,7 +578,7 @@ export abstract class SearchManager {
             // Look up daily station distance using the composite stationId::dateString key
             const dailyStationCompositeId = vectorClient.makeDailyStationId(stationId, dateString);
             const stationDistance = getVectorDistanceAndMarkSeen(SearchEntityType.dailyStation, dailyStationCompositeId)
-				?? getVectorDistanceAndMarkSeen(SearchEntityType.station, stationId);
+                ?? getVectorDistanceAndMarkSeen(SearchEntityType.station, stationId);
             const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
 
             session.registerResult(
@@ -718,10 +718,10 @@ export abstract class SearchManager {
     }
 
     public static async searchForSimilarEntities({
-													 entityName,
-													 entityType,
-													 date
-												 }: ISimilarEntitySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+        entityName: _entityName,
+        entityType: _entityType,
+        date: _date,
+    }: ISimilarEntitySearchParams): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         // todo: find ids for all entities with the same name, then get embeddings for each entity
         return new Map();
         // return SearchManager._searchVectorInner('', date, () => vectorClient.searchSimilarEntities(entityType, entityName), false /*allowResultsWithoutAppearances*/);
@@ -796,8 +796,8 @@ export abstract class SearchManager {
                             // price, since those are presumably the same item? Not sure how to deal with this.
                             minCalories:           menuItem.calories,
                             maxCalories:           menuItem.maxCalories === 0
-													   ? menuItem.calories
-													   : menuItem.maxCalories,
+                                ? menuItem.calories
+                                : menuItem.maxCalories,
                             locationDatesByCafeId: new Map<string, Set<string>>()
                         });
                     }
@@ -811,7 +811,7 @@ export abstract class SearchManager {
                     result.minCalories = Math.max(result.minCalories, menuItem.calories);
                     result.maxCalories = Math.max(result.maxCalories, menuItem.maxCalories);
 
-					result.locationDatesByCafeId.get(dailyStation.cafeId)!.add(dailyStation.dateString);
+                    result.locationDatesByCafeId.get(dailyStation.cafeId)!.add(dailyStation.dateString);
                 }
             }
         }

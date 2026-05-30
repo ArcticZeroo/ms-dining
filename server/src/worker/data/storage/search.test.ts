@@ -212,10 +212,10 @@ describe('normalizeNameForSearch — "the X" / "X" parity (8948cc7)', () => {
     test('items differing only by leading "the" share a search key', () => {
         // This is the bucket-collision precondition that lets later-matched
         // items backfill earlier-matched items' empty description.
-        const a = normalizeNameForSearch('The Matcha Latte');
-        const b = normalizeNameForSearch('Matcha Latte');
-        assert.equal(a, b);
-        assert.equal(a, 'matchalatte');
+        const nameWithThe = normalizeNameForSearch('The Matcha Latte');
+        const nameWithoutThe = normalizeNameForSearch('Matcha Latte');
+        assert.equal(nameWithThe, nameWithoutThe);
+        assert.equal(nameWithThe, 'matchalatte');
     });
 });
 
@@ -332,7 +332,7 @@ describe('SearchManager.searchForCheapItems — exclude zero-calorie items (11bc
             date:     FAKE_NOW,
         });
 
-        const resultNames = results.map(r => r.name);
+        const resultNames = results.map(result => result.name);
         assert.ok(
             resultNames.includes('Cheeseburger Plate'),
             `expected "Cheeseburger Plate" in results, got: [${resultNames.join(', ')}]`,
@@ -365,10 +365,10 @@ describe('SearchManager.searchForCheapItems — exclude zero-calorie items (11bc
             date:     FAKE_NOW,
         });
 
-        const sandwich = results.find(r => r.name === 'Big Sandwich Combo');
+        const sandwich = results.find(result => result.name === 'Big Sandwich Combo');
         assert.ok(
             sandwich,
-            `item with maxCalories=800 must be retained; got: [${results.map(r => r.name).join(', ')}]`,
+            `item with maxCalories=800 must be retained; got: [${results.map(result => result.name).join(', ')}]`,
         );
     });
 
@@ -405,7 +405,7 @@ describe('SearchManager.searchForCheapItems — exclude zero-calorie items (11bc
             maxPrice: 100,
             date:     FAKE_NOW,
         });
-        const names = results.map(r => r.name);
+        const names = results.map(result => result.name);
         assert.ok(
             !names.includes('Matcha Latte'),
             `drink filter must still exclude "Matcha Latte", got: [${names.join(', ')}]`,
@@ -455,7 +455,7 @@ describe('SearchManager.searchForCheapItems — exclude zero-calorie items (11bc
             maxPrice: 10,
             date:     FAKE_NOW,
         });
-        const names = results.map(r => r.name);
+        const names = results.map(result => result.name);
         assert.ok(names.includes('Veggie Wrap'));
         assert.ok(!names.includes('Penny Wrap'),
             'item below minPrice must be excluded');

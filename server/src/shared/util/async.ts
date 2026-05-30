@@ -1,4 +1,4 @@
-export const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const pause = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 export const runPromiseWithRetries = async <T>(promise: (retryIndex: number) => Promise<T>, retries: number, delayMs?: number, cancellation?: ICancellationToken): Promise<T> => {
     for (let i = 0; i <= retries; i++) {

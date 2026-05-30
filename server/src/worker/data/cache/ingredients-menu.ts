@@ -1,6 +1,5 @@
 import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 import { ICafeStation } from '../../../shared/models/cafe.js';
-import { LockedMap } from '../../../shared/lock/map.js';
 import { computeMenuHash, IMenuRoleRow, getIngredientsMenuByHash, setRolesForMenuHash } from '../cafe/ingredients/cache.js';
 import { categorizeIngredientsMenu } from '../cafe/ingredients/ai-categorizer.js';
 import { CACHE_EVENTS } from '../storage/events.js';

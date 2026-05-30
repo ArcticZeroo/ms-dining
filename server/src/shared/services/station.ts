@@ -1,4 +1,5 @@
 import type { ICafeStation } from '../models/cafe.js';
+import { EmptyObject } from '../models/util.js';
 
 /** Wire-safe representation of a persisted station record (mirrors Prisma's `Station` model). */
 export interface IStationRecord {
@@ -19,8 +20,8 @@ export interface IStationService {
     retrieveStation(data: { stationId: string }): Promise<IStationRecord | null>;
 
     /** Get all stations that have no group assignment. */
-    retrieveAllStationsWithoutGroup(data: {}): Promise<IStationRecord[]>;
+    retrieveAllStationsWithoutGroup(data: EmptyObject): Promise<IStationRecord[]>;
 
     /** Get the names of all stations. */
-    retrieveAllStationNames(data: {}): Promise<string[]>;
+    retrieveAllStationNames(data: EmptyObject): Promise<string[]>;
 }

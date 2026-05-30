@@ -74,14 +74,14 @@ after(async () => {
 
 beforeEach(async () => {
     // Seeded cafe → cascades stations, menu items, reviews.
-    await usePrismaWrite(c => c.cafe.deleteMany({}));
-    await usePrismaWrite(c => c.user.deleteMany({}));
+    await usePrismaWrite(prisma => prisma.cafe.deleteMany({}));
+    await usePrismaWrite(prisma => prisma.user.deleteMany({}));
 });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const seedCafe = (id: string = TEST_CAFE_ID) =>
-    usePrismaWrite(c => c.cafe.create({
+    usePrismaWrite(prisma => prisma.cafe.create({
         data: {
             id,
             name:             id,
@@ -95,7 +95,7 @@ const seedCafe = (id: string = TEST_CAFE_ID) =>
     }));
 
 const seedStation = (cafeId: string, id: string = TEST_STATION_ID, name: string = 'Grill') =>
-    usePrismaWrite(c => c.station.create({
+    usePrismaWrite(prisma => prisma.station.create({
         data: {
             id,
             cafeId,
@@ -116,7 +116,7 @@ interface SeedItemArgs {
 }
 
 const seedMenuItem = async ({ id, name, cafeId = TEST_CAFE_ID, stationId = TEST_STATION_ID, price = 7.5 }: SeedItemArgs): Promise<IMenuItemBase> => {
-    await usePrismaWrite(c => c.menuItem.create({
+    await usePrismaWrite(prisma => prisma.menuItem.create({
         data: {
             id,
             cafeId,
@@ -147,7 +147,7 @@ const seedMenuItem = async ({ id, name, cafeId = TEST_CAFE_ID, stationId = TEST_
 };
 
 const seedUser = async (id: string = 'rec-test-user'): Promise<string> => {
-    await usePrismaWrite(c => c.user.create({
+    await usePrismaWrite(prisma => prisma.user.create({
         data: {
             id,
             externalId:  'ext-' + id,

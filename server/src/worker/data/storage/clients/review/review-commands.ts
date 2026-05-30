@@ -8,8 +8,8 @@ import type {
 import { ReviewStorageClient } from './review.js';
 import {
     retrieveReviewHeaderAsync,
-    retrieveStationReviewHeaderAsync,
     retrieveReviewHeaderByPartsAsync,
+    retrieveStationReviewHeaderAsync,
     retrieveStationReviewHeaderByPartsAsync,
 } from '../../../cache/reviews.js';
 
@@ -44,17 +44,17 @@ export const reviewServiceCommands = {
     },
     isOwnedByUser: async ({ reviewId, userId }: { reviewId: string; userId: string }) =>
         ReviewStorageClient.isOwnedByUser(reviewId, userId),
-    getAllMenuItemReviewHeaders: async (_data: {}) =>
+    getAllMenuItemReviewHeaders: async () =>
         ReviewStorageClient.getAllMenuItemReviewHeaders(),
-    getAllMenuItemReviewHeadersByGroupId: async (_data: {}) =>
+    getAllMenuItemReviewHeadersByGroupId: async () =>
         ReviewStorageClient.getAllMenuItemReviewHeadersByGroupId(),
     getMenuItemReviewHeaderByName: async ({ normalizedName }: { normalizedName: string }) =>
         ReviewStorageClient.getMenuItemReviewHeaderByName(normalizedName),
     getReviewHeaderByGroupId: async ({ groupId }: { groupId: string }) =>
         ReviewStorageClient.getReviewHeaderByGroupId(groupId),
-    getAllStationReviewHeaders: async (_data: {}) =>
+    getAllStationReviewHeaders: async () =>
         ReviewStorageClient.getAllStationReviewHeaders(),
-    getAllStationReviewHeadersByGroupId: async (_data: {}) =>
+    getAllStationReviewHeadersByGroupId: async () =>
         ReviewStorageClient.getAllStationReviewHeadersByGroupId(),
     getStationReviewHeaderByName: async ({ normalizedName }: { normalizedName: string }) =>
         ReviewStorageClient.getStationReviewHeaderByName(normalizedName),

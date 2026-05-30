@@ -8,8 +8,8 @@ export const backfillStationNames: IRuntimeMigration = {
     description: 'Backfill Station.normalizedName for stations where it is empty',
     runMode:     'blocking',
     async run() {
-        await usePrismaTransaction(async (tx) => {
-            const stations = await tx.station.findMany({
+        await usePrismaTransaction(async (prisma) => {
+            const stations = await prisma.station.findMany({
                 where:  { normalizedName: '' },
                 select: { id: true, name: true }
             });
@@ -17,7 +17,7 @@ export const backfillStationNames: IRuntimeMigration = {
             logInfo(`[Migrations] Found ${stations.length} stations to backfill normalizedName.`);
 
             for (const station of stations) {
-                await tx.station.update({
+                await prisma.station.update({
                     where: { id: station.id },
                     data:  { normalizedName: normalizeNameForSearch(station.name) }
                 });

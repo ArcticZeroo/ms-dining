@@ -4,11 +4,17 @@
  * `applySchemaToTempDb(dbPath)` runs `prisma db push` against the given path,
  * producing an empty, migrated SQLite database that can be opened by the
  * PrismaClient when DATABASE_URL points at it.
+ *
+ * `acquireTestLock` / `releaseTestLock` serialize service-level tests that
+ * share the same on-disk database so they don't clobber each other when
+ * node:test runs files in parallel.
  */
 
 import { spawn } from 'node:child_process';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pause } from '../../shared/util/async.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,4 +80,48 @@ export async function applySchemaToTempDb(dbPath: string): Promise<void> {
             }
         });
     });
+}
+
+// ── File-based test lock ────────────────────────────────────────────────
+// Serializes service-level integration tests that share one SQLite database
+// file.  The lock file lives next to the worker source so that every
+// service test (regardless of its own subdirectory depth) resolves the
+// same physical path.
+
+const TEST_LOCK_PATH = path.join(SERVER_ROOT, 'src', 'worker', '.service-test-db.lock');
+const STALE_LOCK_AGE_MS = 5 * 60 * 1000;
+
+/**
+ * Acquire an exclusive file-system lock, spinning until available.
+ *
+ * Stale locks (older than 5 minutes) are automatically reaped so a
+ * crashed test run doesn't permanently block future runs.
+ */
+export async function acquireTestLock(): Promise<void> {
+    for (;;) {
+        try {
+            const handle = await fs.open(TEST_LOCK_PATH, 'wx');
+            await handle.writeFile(String(process.pid));
+            await handle.close();
+            return;
+        } catch (err) {
+            const error = err as NodeJS.ErrnoException;
+            if (error.code !== 'EEXIST') {
+                throw err;
+            }
+
+            const stats = await fs.stat(TEST_LOCK_PATH).catch(() => null);
+            if (stats != null && Date.now() - stats.mtimeMs > STALE_LOCK_AGE_MS) {
+                await fs.rm(TEST_LOCK_PATH, { force: true });
+                continue;
+            }
+
+            await pause(50);
+        }
+    }
+}
+
+/** Release the file-system lock acquired by {@link acquireTestLock}. */
+export async function releaseTestLock(): Promise<void> {
+    await fs.rm(TEST_LOCK_PATH, { force: true });
 }

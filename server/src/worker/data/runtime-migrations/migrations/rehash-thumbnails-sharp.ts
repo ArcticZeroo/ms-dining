@@ -22,7 +22,7 @@ export const rehashThumbnailsSharpMigration: IRuntimeMigration = {
             return;
         }
 
-        const pngFiles = files.filter(f => f.endsWith('.png'));
+        const pngFiles = files.filter(fileName => fileName.endsWith('.png'));
         logger.info(`Rehashing ${pngFiles.length} thumbnails with sharp...`);
 
         if (pngFiles.length === 0) {

@@ -30,7 +30,7 @@ export const dailyMenuServiceCommands = {
         Array.from(await DailyMenuStorageClient.getCafesAvailableForDayAsync(dateString)),
     isAnyAllowedMenuAvailableForCafe: async ({ cafeId }: { cafeId: string }) =>
         DailyMenuStorageClient.isAnyAllowedMenuAvailableForCafe(cafeId),
-    getPendingMenusForEmbedding: async (_data: {}) =>
+    getPendingMenusForEmbedding: async () =>
         DailyMenuStorageClient.getPendingMenusForEmbedding(),
     getMenusForSearch: async ({ date }: { date: Date | null }) =>
         DailyMenuStorageClient.getMenusForSearch(date),
@@ -58,7 +58,7 @@ export const dailyMenuServiceCommands = {
     },
     retrieveFirstMenuItemVisitDate: async ({ menuItemId }: { menuItemId: string }) =>
         DailyMenuStorageClient.retrieveFirstMenuItemVisitDate(menuItemId),
-    retrieveAllFirstMenuItemAppearances: async (_data: {}) =>
+    retrieveAllFirstMenuItemAppearances: async () =>
         mapToRecord(await DailyMenuStorageClient.retrieveAllFirstMenuItemAppearances()),
     getCafeHoursForDate: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
         DailyMenuStorageClient.getCafeHoursForDate(cafeId, dateString),

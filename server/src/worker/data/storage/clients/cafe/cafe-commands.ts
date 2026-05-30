@@ -19,7 +19,7 @@ export const cafeServiceCommands = {
         const cafe = await CafeStorageClient.retrieveCafeAsync(id);
         return cafe ? toCafeRecord(cafe) : null;
     },
-    retrieveCafes: async (_data: {}) => {
+    retrieveCafes: async () => {
         const map = await CafeStorageClient.retrieveCafesAsync();
         const result: Record<string, ICafeRecord> = {};
         for (const [id, cafe] of map) {
@@ -31,6 +31,6 @@ export const cafeServiceCommands = {
         CafeStorageClient.doesCafeExistAsync(id),
     createCafe: async ({ cafe, config }: { cafe: ICafe; config: ICafeConfig }) =>
         CafeStorageClient.createCafeAsync(cafe, config),
-    resetCache: async (_data: {}) =>
+    resetCache: async () =>
         CafeStorageClient.resetCache(),
 } satisfies ICafeService;

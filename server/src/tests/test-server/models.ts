@@ -3,14 +3,13 @@
  * route matching, and failure injection.
  */
 
-import { Response } from 'node-fetch';
-
 export interface TestRequest {
     method: string;
     path: string;
     headers: Record<string, string>;
     body?: unknown;
     cafeId: string;
+    params?: RouteParams;
 }
 
 export interface TestResponse {

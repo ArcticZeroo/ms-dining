@@ -109,8 +109,7 @@ function handleConceptList(req: TestRequest, state: ITestServerState): TestRespo
  * Returns tag definitions for a station.
  */
 function handleStationTags(req: TestRequest, state: ITestServerState): TestResponse {
-    const params = (req as any).params as Record<string, string>;
-    const stationId = params.stationId;
+    const stationId = req.params?.stationId;
 
     const allTags = state.getFixture<TagsFixture>(req.cafeId, 'tags') ?? {};
     const stationTags = allTags[stationId!] ?? { customLabels: {} };

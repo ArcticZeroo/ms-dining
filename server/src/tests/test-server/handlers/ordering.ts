@@ -70,7 +70,7 @@ function handleAddToOrder(req: TestRequest, state: ITestServerState): TestRespon
 
     // Find or create order for this cafe
     let order = Array.from(state.orders.values())
-        .find(o => o.cafeId === req.cafeId && !o.closed);
+        .find(existingOrder => existingOrder.cafeId === req.cafeId && !existingOrder.closed);
 
     if (!order) {
         order = state.createOrder(req.cafeId);
@@ -126,8 +126,7 @@ function handleGetWaitTime(req: TestRequest, state: ITestServerState): TestRespo
  * Closes an order after payment.
  */
 function handleCloseOrder(req: TestRequest, state: ITestServerState): TestResponse {
-    const params = (req as any).params as Record<string, string>;
-    const orderId = params.orderId;
+    const orderId = req.params?.orderId;
 
     const order = orderId ? state.getOrderState(orderId) : undefined;
     if (!order) {
@@ -147,8 +146,7 @@ function handleCloseOrder(req: TestRequest, state: ITestServerState): TestRespon
  * Returns profit center name as plain text.
  */
 function handleGetProfitCenter(req: TestRequest, _state: ITestServerState): TestResponse {
-    const params = (req as any).params as Record<string, string>;
-    const profitCenterId = params.profitCenterId ?? 'unknown';
+    const profitCenterId = req.params?.profitCenterId ?? 'unknown';
 
     return {
         status: 200,

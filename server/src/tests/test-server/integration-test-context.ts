@@ -137,7 +137,7 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
         dbPath:       db.dbPath,
         searchDbPath: db.searchDbPath,
         startWebserver: webserver.start,
-        run: <T>(fn: () => Promise<T>) => runWithServices(services, fn),
+        run: <T>(callback: () => Promise<T>) => runWithServices(services, callback),
         createTestUser: (overrides) => createTestUser(overrides),
         fetchAs: (userId, url, init) => authManager.fetchAs(userId, url, init),
         cleanup,

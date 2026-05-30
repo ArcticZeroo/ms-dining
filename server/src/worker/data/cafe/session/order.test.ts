@@ -65,13 +65,13 @@ function findProfitCenterRequest(requestLog: ReturnType<typeof ctx.server.getReq
     // Real URL shape: /sites/<tenantId>/<contextId>/profitCenter/<profitCenterId>
     const match = /^\/sites\/([^/]+)\/([^/]+)\/profitCenter\/([^/]+)$/;
     for (const entry of requestLog) {
-        const m = match.exec(entry.path);
-        if (m && entry.method === 'GET') {
+        const pathMatch = match.exec(entry.path);
+        if (pathMatch && entry.method === 'GET') {
             return {
                 found:               true,
-                tenantIdInUrl:       m[1] ?? null,
-                contextIdInUrl:      m[2] ?? null,
-                profitCenterIdInUrl: m[3] ?? null,
+                tenantIdInUrl:       pathMatch[1] ?? null,
+                contextIdInUrl:      pathMatch[2] ?? null,
+                profitCenterIdInUrl: pathMatch[3] ?? null,
             };
         }
     }

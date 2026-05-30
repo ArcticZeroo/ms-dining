@@ -29,12 +29,12 @@ export const registerRecommendationsRoutes = (parent: Router) => {
             }
         }
 
-        allResults.sort(({ result: a }, { result: b }) => {
-            if (a.vectorDistance == null || b.vectorDistance == null) {
+        allResults.sort(({ result: resultA }, { result: resultB }) => {
+            if (resultA.vectorDistance == null || resultB.vectorDistance == null) {
                 throw new Error('Missing vector distance');
             }
 
-            return a.vectorDistance - b.vectorDistance;
+            return resultA.vectorDistance - resultB.vectorDistance;
         });
 
         const trimmedResultsList = allResults.slice(0, limit);

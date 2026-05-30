@@ -1,4 +1,4 @@
-import Router, { RouterContext } from '@koa/router';
+import { RouterContext } from '@koa/router';
 import { DateUtil } from '@msdining/common';
 import { isDateStringWithinMenuWindow } from '../../shared/util/date.js';
 import { getTrimmedQueryParam } from './koa.js';

@@ -156,7 +156,7 @@ test('updateItem rejects missing item', async () => {
             itemId: 'does-not-exist',
             update: { quantity: 2, modifiers: [], specialInstructions: null },
         }),
-        (err: any) => err.code === 'NOT_FOUND',
+        (err: unknown) => typeof err === 'object' && err != null && 'code' in err && err.code === 'NOT_FOUND',
     );
 });
 
@@ -176,7 +176,7 @@ test('removeItem rejects missing item', async () => {
 
     await assert.rejects(
         () => getServices().data.cart.removeItem({ userId: USER_ID, itemId: 'does-not-exist' }),
-        (err: any) => err.code === 'NOT_FOUND',
+        (err: unknown) => typeof err === 'object' && err != null && 'code' in err && err.code === 'NOT_FOUND',
     );
 });
 

@@ -3,8 +3,8 @@ import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 console.log('Backfilling Station.normalizedName...');
 
-await usePrismaTransaction(async tx => {
-    const stations = await tx.station.findMany({
+await usePrismaTransaction(async prisma => {
+    const stations = await prisma.station.findMany({
         where:  { normalizedName: '' },
         select: { id: true, name: true }
     });
@@ -12,7 +12,7 @@ await usePrismaTransaction(async tx => {
     console.log(`Found ${stations.length} stations to backfill.`);
 
     for (const station of stations) {
-        await tx.station.update({
+        await prisma.station.update({
             where: { id: station.id },
             data:  { normalizedName: normalizeNameForSearch(station.name) }
         });

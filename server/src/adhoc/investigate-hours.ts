@@ -28,6 +28,39 @@ function baseUrl(cafe: SimpleCafe) {
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 interface AuthTokens { accessToken: string; csrfToken: string }
+interface ApiErrorResponse { _error: true; _status: number; _statusText: string }
+interface ConfigResponse extends Record<string, unknown> {
+    tenantID?: string;
+    contextID?: string;
+    storeList?: Array<{
+        displayProfileId?: string[];
+        storeInfo?: { storeInfoId?: string };
+    }>;
+    properties?: Record<string, unknown> & {
+        scheduledOrdering?: unknown;
+        streamLinedHomepage?: unknown;
+    };
+}
+interface ConceptScheduleEntry {
+    scheduledExpression?: string;
+    '@c'?: string;
+    properties?: Record<string, string>;
+}
+interface ConceptResponse {
+    name?: string;
+    availableAt?: unknown;
+    openScheduleExpression?: unknown;
+    closeScheduleExpression?: unknown;
+    schedule?: ConceptScheduleEntry[];
+}
+
+type ApiResult<T> = T | ApiErrorResponse;
+
+const getErrorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
+const isApiErrorResponse = <T>(value: ApiResult<T>): value is ApiErrorResponse =>
+    typeof value === 'object' && value != null && '_error' in value;
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value != null;
 
 async function anonymousLogin(cafe: SimpleCafe): Promise<AuthTokens> {
     const res = await fetch(`${baseUrl(cafe)}/login/anonymous`, {
@@ -58,15 +91,15 @@ function makeHeaders(auth: AuthTokens): Record<string, string> {
     };
 }
 
-async function apiGet(cafe: SimpleCafe, auth: AuthTokens, path: string): Promise<any> {
+async function apiGet<T>(cafe: SimpleCafe, auth: AuthTokens, path: string): Promise<ApiResult<T>> {
     const res = await fetch(`${baseUrl(cafe)}${path}`, { headers: makeHeaders(auth) });
     if (!res.ok) {
         return { _error: true, _status: res.status, _statusText: res.statusText };
     }
-    return res.json();
+    return await res.json() as T;
 }
 
-async function apiPost(cafe: SimpleCafe, auth: AuthTokens, path: string, body: object): Promise<any> {
+async function apiPost<T>(cafe: SimpleCafe, auth: AuthTokens, path: string, body: object): Promise<ApiResult<T>> {
     const res = await fetch(`${baseUrl(cafe)}${path}`, {
         method: 'POST',
         headers: makeHeaders(auth),
@@ -75,13 +108,13 @@ async function apiPost(cafe: SimpleCafe, auth: AuthTokens, path: string, body: o
     if (!res.ok) {
         return { _error: true, _status: res.status, _statusText: res.statusText };
     }
-    return res.json();
+    return await res.json() as T;
 }
 
 // Recursively find keys whose names hint at schedule/hours data
-function findScheduleFields(obj: any, path = ''): Record<string, any> {
-    const results: Record<string, any> = {};
-    if (!obj || typeof obj !== 'object') {
+function findScheduleFields(obj: unknown, path = ''): Record<string, unknown> {
+    const results: Record<string, unknown> = {};
+    if (!isObjectRecord(obj)) {
         return results;
     }
 
@@ -91,17 +124,18 @@ function findScheduleFields(obj: any, path = ''): Record<string, any> {
     ];
 
     for (const key of Object.keys(obj)) {
-        const lk = key.toLowerCase();
+        const lowercaseKey = key.toLowerCase();
         const fullPath = path ? `${path}.${key}` : key;
-        if (KEYWORDS.some(kw => lk.includes(kw))) {
-            results[fullPath] = obj[key];
+        const child = obj[key];
+        if (KEYWORDS.some(keyword => lowercaseKey.includes(keyword))) {
+            results[fullPath] = child;
         }
-        if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-            Object.assign(results, findScheduleFields(obj[key], fullPath));
+        if (isObjectRecord(child) && !Array.isArray(child)) {
+            Object.assign(results, findScheduleFields(child, fullPath));
         }
         // For arrays, inspect only the first element to avoid huge output
-        if (Array.isArray(obj[key]) && obj[key].length > 0 && typeof obj[key][0] === 'object') {
-            Object.assign(results, findScheduleFields(obj[key][0], `${fullPath}[0]`));
+        if (Array.isArray(child) && child.length > 0 && isObjectRecord(child[0])) {
+            Object.assign(results, findScheduleFields(child[0], `${fullPath}[0]`));
         }
     }
     return results;
@@ -124,15 +158,15 @@ for (const cafe of CAFES) {
     try {
         auth = await anonymousLogin(cafe);
         console.log('✅ Anonymous login OK');
-    } catch (err: any) {
-        console.log(`❌ Login failed: ${err.message}`);
+    } catch (err: unknown) {
+        console.log(`❌ Login failed: ${getErrorMessage(err)}`);
         continue;
     }
 
     // ── 1. /config ──────────────────────────────────────────────────────────
     console.log('\n📋 GET /config');
-    const config = await apiGet(cafe, auth, '/config');
-    if (config._error) {
+    const config = await apiGet<ConfigResponse>(cafe, auth, '/config');
+    if (isApiErrorResponse(config)) {
         console.log(`  ❌ Error: ${config._status}`);
         continue;
     }
@@ -150,8 +184,8 @@ for (const cafe of CAFES) {
     const configScheduleFields = findScheduleFields(config);
     if (Object.keys(configScheduleFields).length > 0) {
         console.log('  Schedule-related fields in /config:');
-        for (const [k, v] of Object.entries(configScheduleFields)) {
-            console.log(`    ${k}:`, JSON.stringify(v).substring(0, 200));
+        for (const [k, value] of Object.entries(configScheduleFields)) {
+            console.log(`    ${k}:`, JSON.stringify(value).substring(0, 200));
         }
     }
 
@@ -173,8 +207,8 @@ for (const cafe of CAFES) {
 
     // ── 2. /sites/{tenantId} (site-level hours) ─────────────────────────────
     console.log(`\n📋 GET /sites/${tenantId}`);
-    const siteData = await apiGet(cafe, auth, `/sites/${tenantId}`);
-    if (siteData._error) {
+    const siteData = await apiGet<unknown>(cafe, auth, `/sites/${tenantId}`);
+    if (isApiErrorResponse(siteData)) {
         console.log(`  ❌ Error: ${siteData._status}`);
     } else {
         const site = Array.isArray(siteData) ? siteData[0] : siteData;
@@ -193,16 +227,16 @@ for (const cafe of CAFES) {
     // ── 3. /sites/{tenantId}/{contextId} (detailed site config) ──────────────
     if (contextId) {
         console.log(`\n📋 GET /sites/${tenantId}/${contextId}`);
-        const siteDetail = await apiGet(cafe, auth, `/sites/${tenantId}/${contextId}`);
-        if (siteDetail._error) {
+        const siteDetail = await apiGet<unknown>(cafe, auth, `/sites/${tenantId}/${contextId}`);
+        if (isApiErrorResponse(siteDetail)) {
             console.log(`  ❌ Error: ${siteDetail._status} ${siteDetail._statusText}`);
         } else {
             // Dump schedule-related fields
             const schedFields = findScheduleFields(siteDetail);
             if (Object.keys(schedFields).length > 0) {
                 console.log('  Schedule-related fields:');
-                for (const [k, v] of Object.entries(schedFields)) {
-                    console.log(`    ${k}:`, JSON.stringify(v).substring(0, 200));
+                for (const [k, value] of Object.entries(schedFields)) {
+                    console.log(`    ${k}:`, JSON.stringify(value).substring(0, 200));
                 }
             }
         }
@@ -210,26 +244,26 @@ for (const cafe of CAFES) {
 
     // ── 4. concepts endpoint (with scheduledDay=0) ──────────────────────────
     console.log(`\n📋 POST /sites/${tenantId}/${contextId}/concepts/${displayProfileId}  (scheduledDay=0)`);
-    const conceptsToday = await apiPost(
+    const conceptsToday = await apiPost<ConceptResponse[]>(
         cafe, auth,
         `/sites/${tenantId}/${contextId}/concepts/${displayProfileId}`,
         { scheduledDay: 0 },
     );
-    if (conceptsToday._error) {
+    if (isApiErrorResponse(conceptsToday)) {
         console.log(`  ❌ Error: ${conceptsToday._status} ${conceptsToday._statusText}`);
         console.log('  (This likely means the cafe is closed today)');
     } else if (Array.isArray(conceptsToday)) {
         console.log(`  ✅ Got ${conceptsToday.length} concepts`);
         for (let i = 0; i < Math.min(conceptsToday.length, 4); i++) {
-            const c = conceptsToday[i];
-            console.log(`  concept[${i}] name="${c.name}"`);
-            console.log(`    availableAt:`, JSON.stringify(c.availableAt));
-            console.log(`    openScheduleExpression:`, c.openScheduleExpression);
-            console.log(`    closeScheduleExpression:`, c.closeScheduleExpression);
-            if (c.schedule) {
-                console.log(`    schedule (${c.schedule.length} entries):`);
-                for (const s of c.schedule.slice(0, 5)) {
-                    console.log(`      ${s.scheduledExpression}  (${s['@c']})  meal-period=${s.properties?.['meal-period-id'] || 'N/A'}`);
+            const concept = conceptsToday[i]!;
+            console.log(`  concept[${i}] name="${concept.name}"`);
+            console.log(`    availableAt:`, JSON.stringify(concept.availableAt));
+            console.log(`    openScheduleExpression:`, concept.openScheduleExpression);
+            console.log(`    closeScheduleExpression:`, concept.closeScheduleExpression);
+            if (concept.schedule) {
+                console.log(`    schedule (${concept.schedule.length} entries):`);
+                for (const scheduleEntry of concept.schedule.slice(0, 5)) {
+                    console.log(`      ${scheduleEntry.scheduledExpression}  (${scheduleEntry['@c']})  meal-period=${scheduleEntry.properties?.['meal-period-id'] || 'N/A'}`);
                 }
             }
         }
@@ -237,7 +271,7 @@ for (const cafe of CAFES) {
 
     // ── 5. concepts with scheduleTime to see if it changes results ───────────
     console.log(`\n📋 POST concepts (with scheduleTime + scheduledDay=0)`);
-    const conceptsWithTime = await apiPost(
+    const conceptsWithTime = await apiPost<ConceptResponse[]>(
         cafe, auth,
         `/sites/${tenantId}/${contextId}/concepts/${displayProfileId}`,
         {
@@ -246,14 +280,14 @@ for (const cafe of CAFES) {
             scheduledDay: 0,
         },
     );
-    if (conceptsWithTime._error) {
+    if (isApiErrorResponse(conceptsWithTime)) {
         console.log(`  ❌ Error: ${conceptsWithTime._status} — same as without scheduleTime`);
     } else if (Array.isArray(conceptsWithTime)) {
         console.log(`  ✅ Got ${conceptsWithTime.length} concepts (same count? ${conceptsWithTime.length === (Array.isArray(conceptsToday) ? conceptsToday.length : -1)})`);
         // Compare availableAt
         if (Array.isArray(conceptsToday)) {
             for (let i = 0; i < Math.min(conceptsWithTime.length, 3); i++) {
-                const withTime = conceptsWithTime[i];
+                const withTime = conceptsWithTime[i]!;
                 const withoutTime = conceptsToday[i];
                 const same = JSON.stringify(withTime.availableAt) === JSON.stringify(withoutTime?.availableAt);
                 console.log(`    concept[${i}] "${withTime.name}" availableAt same as without scheduleTime? ${same}`);
@@ -267,21 +301,21 @@ for (const cafe of CAFES) {
 
     // ── 6. concepts for tomorrow (scheduledDay=1) to see schedule patterns ──
     console.log(`\n📋 POST concepts (scheduledDay=1, tomorrow)`);
-    const conceptsTomorrow = await apiPost(
+    const conceptsTomorrow = await apiPost<ConceptResponse[]>(
         cafe, auth,
         `/sites/${tenantId}/${contextId}/concepts/${displayProfileId}`,
         { scheduledDay: 1 },
     );
-    if (conceptsTomorrow._error) {
+    if (isApiErrorResponse(conceptsTomorrow)) {
         console.log(`  ❌ Error: ${conceptsTomorrow._status} — tomorrow might also be closed`);
     } else if (Array.isArray(conceptsTomorrow)) {
         console.log(`  ✅ Got ${conceptsTomorrow.length} concepts for tomorrow`);
         for (let i = 0; i < Math.min(conceptsTomorrow.length, 3); i++) {
-            const c = conceptsTomorrow[i];
-            console.log(`    concept[${i}] "${c.name}"`);
-            console.log(`      availableAt:`, JSON.stringify(c.availableAt));
-            console.log(`      openScheduleExpression:`, c.openScheduleExpression);
-            console.log(`      closeScheduleExpression:`, c.closeScheduleExpression);
+            const concept = conceptsTomorrow[i]!;
+            console.log(`    concept[${i}] "${concept.name}"`);
+            console.log(`      availableAt:`, JSON.stringify(concept.availableAt));
+            console.log(`      openScheduleExpression:`, concept.openScheduleExpression);
+            console.log(`      closeScheduleExpression:`, concept.closeScheduleExpression);
         }
     }
 
@@ -289,21 +323,21 @@ for (const cafe of CAFES) {
     const today = new Date().getDay(); // 0=Sun, 6=Sat
     const daysUntilMonday = today === 0 ? 1 : today === 6 ? 2 : (8 - today);
     console.log(`\n📋 POST concepts (scheduledDay=${daysUntilMonday}, next Monday)`);
-    const conceptsMonday = await apiPost(
+    const conceptsMonday = await apiPost<ConceptResponse[]>(
         cafe, auth,
         `/sites/${tenantId}/${contextId}/concepts/${displayProfileId}`,
         { scheduledDay: daysUntilMonday },
     );
-    if (conceptsMonday._error) {
+    if (isApiErrorResponse(conceptsMonday)) {
         console.log(`  ❌ Error: ${conceptsMonday._status}`);
     } else if (Array.isArray(conceptsMonday)) {
         console.log(`  ✅ Got ${conceptsMonday.length} concepts for Monday`);
         for (let i = 0; i < Math.min(conceptsMonday.length, 3); i++) {
-            const c = conceptsMonday[i];
-            console.log(`    concept[${i}] "${c.name}"`);
-            console.log(`      availableAt:`, JSON.stringify(c.availableAt));
-            console.log(`      openScheduleExpression:`, c.openScheduleExpression);
-            console.log(`      closeScheduleExpression:`, c.closeScheduleExpression);
+            const concept = conceptsMonday[i]!;
+            console.log(`    concept[${i}] "${concept.name}"`);
+            console.log(`      availableAt:`, JSON.stringify(concept.availableAt));
+            console.log(`      openScheduleExpression:`, concept.openScheduleExpression);
+            console.log(`      closeScheduleExpression:`, concept.closeScheduleExpression);
         }
     }
 

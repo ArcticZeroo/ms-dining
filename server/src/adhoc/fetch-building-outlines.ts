@@ -210,7 +210,7 @@ const computeCentroid = (coords: number[][]): { lat: number; long: number } => {
     };
 };
 
-const roundCoord = (n: number): number => parseFloat(n.toFixed(7));
+const roundCoord = (value: number): number => parseFloat(value.toFixed(7));
 
 async function main() {
     console.log('Fetching building data from Overpass API...');
@@ -230,9 +230,9 @@ async function main() {
 
     // Build node lookup
     const nodesById = new Map<number, { lat: number; lon: number }>();
-    for (const el of data.elements) {
-        if (el.type === 'node' && el.lat != null && el.lon != null) {
-            nodesById.set(el.id, { lat: el.lat, lon: el.lon });
+    for (const element of data.elements) {
+        if (element.type === 'node' && element.lat != null && element.lon != null) {
+            nodesById.set(element.id, { lat: element.lat, lon: element.lon });
         }
     }
 
@@ -240,18 +240,18 @@ async function main() {
     const buildings: IBuildingGeoEntry[] = [];
     const foundNames = new Set<string>();
 
-    for (const el of data.elements) {
-        if (el.type !== 'way' || !el.nodes) {
+    for (const element of data.elements) {
+        if (element.type !== 'way' || !element.nodes) {
             continue;
         }
 
         // Millennium buildings may not have a name tag, so check by ID first
-        const isMillennium = el.id in MILLENNIUM_WAY_IDS;
-        if (!isMillennium && !el.tags?.name) {
+        const isMillennium = element.id in MILLENNIUM_WAY_IDS;
+        if (!isMillennium && !element.tags?.name) {
             continue;
         }
 
-        const normalizedName = resolveBuilding(el.tags ?? {}, el.id);
+        const normalizedName = resolveBuilding(element.tags ?? {}, element.id);
 
         if (!normalizedName || foundNames.has(normalizedName)) {
             continue;
@@ -262,7 +262,7 @@ async function main() {
         const coords: number[][] = [];
         let missingNodes = false;
 
-        for (const nodeId of el.nodes) {
+        for (const nodeId of element.nodes) {
             const node = nodesById.get(nodeId);
             if (!node) {
                 missingNodes = true;
@@ -288,23 +288,23 @@ async function main() {
     }
 
     // Sort by building number (numbered first), then by name
-    buildings.sort((a, b) => {
-        if (a.number != null && b.number != null) {
-            return a.number - b.number;
+    buildings.sort((buildingA, buildingB) => {
+        if (buildingA.number != null && buildingB.number != null) {
+            return buildingA.number - buildingB.number;
         }
-        if (a.number != null) {
+        if (buildingA.number != null) {
             return -1;
         }
-        if (b.number != null) {
+        if (buildingB.number != null) {
             return 1;
         }
-        return a.name.localeCompare(b.name);
+        return buildingA.name.localeCompare(buildingB.name);
     });
 
     // Report missing buildings
-    const foundNormalized = new Set(buildings.map(b => b.name));
+    const foundNormalized = new Set(buildings.map(building => building.name));
     const allExpected = [...Object.keys(BUILDING_NAME_MAP), ...Object.values(MILLENNIUM_WAY_IDS)];
-    const missing = allExpected.filter(n => !foundNormalized.has(n));
+    const missing = allExpected.filter(name => !foundNormalized.has(name));
     if (missing.length > 0) {
         console.warn(`\nMissing ${missing.length} buildings (not found in OSM):`);
         for (const name of missing) {
@@ -321,8 +321,8 @@ async function main() {
 
     const infoData = buildings.map(({ name, number, centroid }) => ({ name, number, centroid }));
     const polygonData: Record<string, number[][][]> = {};
-    for (const b of buildings) {
-        polygonData[b.name] = b.polygon;
+    for (const building of buildings) {
+        polygonData[building.name] = building.polygon;
     }
 
     const infoLines = [

@@ -20,22 +20,22 @@ export interface CellSummary {
     totalBusyErrors: number;
 }
 
-const percentile = (sorted: number[], p: number): number => {
+const percentile = (sorted: number[], percentileValue: number): number => {
     if (sorted.length === 0) {
         return 0;
     }
-    const idx = Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length));
+    const idx = Math.min(sorted.length - 1, Math.floor((percentileValue / 100) * sorted.length));
     return sorted[idx]!;
 };
 
-const mean = (xs: number[]): number => xs.length === 0 ? 0 : xs.reduce((a, b) => a + b, 0) / xs.length;
+const mean = (values: number[]): number => values.length === 0 ? 0 : values.reduce((sum, value) => sum + value, 0) / values.length;
 
-const stddev = (xs: number[]): number => {
-    if (xs.length < 2) {
+const stddev = (values: number[]): number => {
+    if (values.length < 2) {
         return 0;
     }
-    const m = mean(xs);
-    return Math.sqrt(xs.reduce((acc, x) => acc + (x - m) ** 2, 0) / (xs.length - 1));
+    const average = mean(values);
+    return Math.sqrt(values.reduce((accumulator, value) => accumulator + (value - average) ** 2, 0) / (values.length - 1));
 };
 
 export const summarizeCell = (
@@ -47,15 +47,15 @@ export const summarizeCell = (
     runs: RunResult[],
 ): CellSummary => {
     const allLatencies: number[] = [];
-    for (const r of runs) {
-        for (const l of r.latenciesMs) {
-            allLatencies.push(l);
+    for (const run of runs) {
+        for (const latency of run.latenciesMs) {
+            allLatencies.push(latency);
         }
     }
-    allLatencies.sort((a, b) => a - b);
+    allLatencies.sort((leftLatency, rightLatency) => leftLatency - rightLatency);
 
-    const wallTimes = runs.map(r => r.wallTimeMs);
-    const throughputs = runs.map(r => (r.iterations - r.errorCount) / (r.wallTimeMs / 1000));
+    const wallTimes = runs.map(run => run.wallTimeMs);
+    const throughputs = runs.map(run => (run.iterations - run.errorCount) / (run.wallTimeMs / 1000));
 
     return {
         scenario,
@@ -71,12 +71,12 @@ export const summarizeCell = (
         p95:             percentile(allLatencies, 95),
         p99:             percentile(allLatencies, 99),
         meanLatency:     mean(allLatencies),
-        totalErrors:     runs.reduce((sum, r) => sum + r.errorCount, 0),
-        totalBusyErrors: runs.reduce((sum, r) => sum + r.busyErrorCount, 0),
+        totalErrors:     runs.reduce((sum, run) => sum + run.errorCount, 0),
+        totalBusyErrors: runs.reduce((sum, run) => sum + run.busyErrorCount, 0),
     };
 };
 
-const fmt = (n: number, digits = 2): string => Number.isFinite(n) ? n.toFixed(digits) : '—';
+const fmt = (value: number, digits = 2): string => Number.isFinite(value) ? value.toFixed(digits) : '—';
 
 export const renderMarkdown = (
     summaries: CellSummary[],
@@ -94,52 +94,52 @@ export const renderMarkdown = (
         lines.push('');
         lines.push('| Pragma | Value |');
         lines.push('|---|---|');
-        for (const [k, v] of Object.entries(pragmas)) {
-            const display = typeof v === 'bigint' ? v.toString() : JSON.stringify(v);
+        for (const [k, value] of Object.entries(pragmas)) {
+            const display = typeof value === 'bigint' ? value.toString() : JSON.stringify(value);
             lines.push(`| \`${k}\` | \`${display}\` |`);
         }
         lines.push('');
     }
 
-    const groupKeys = Array.from(new Set(summaries.map(s => `${s.scenario}@${s.journalMode}`)));
+    const groupKeys = Array.from(new Set(summaries.map(summary => `${summary.scenario}@${summary.journalMode}`)));
     for (const key of groupKeys) {
         const [scenario, journalMode] = key.split('@');
-        const rows = summaries.filter(s => s.scenario === scenario && s.journalMode === journalMode);
+        const rows = summaries.filter(summary => summary.scenario === scenario && summary.journalMode === journalMode);
         lines.push(`## Scenario: ${scenario} (journal_mode=${journalMode})`);
         lines.push('');
         lines.push('| Lock | Concurrency | Iter/run | Repeats | Wall ms (mean ± σ) | Throughput (ops/s) | p50 ms | p95 ms | p99 ms | Errors | SQLITE_BUSY |');
         lines.push('|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
 
-        rows.sort((a, b) => (Number(b.useLock) - Number(a.useLock)) || (a.concurrency - b.concurrency));
+        rows.sort((leftRow, rightRow) => (Number(rightRow.useLock) - Number(leftRow.useLock)) || (leftRow.concurrency - rightRow.concurrency));
 
-        const baseline = rows.find(r => r.useLock && r.concurrency === 1);
+        const baseline = rows.find(candidateRow => candidateRow.useLock && candidateRow.concurrency === 1);
         const baselineThroughput = baseline?.meanThroughput ?? 0;
 
-        for (const r of rows) {
+        for (const row of rows) {
             const speedup = baselineThroughput > 0
-                ? `${fmt(r.meanThroughput / baselineThroughput, 2)}×`
+                ? `${fmt(row.meanThroughput / baselineThroughput, 2)}×`
                 : '—';
             lines.push([
                 '',
-                r.useLock ? 'on' : 'off',
-                r.concurrency,
-                r.iterations,
-                r.repeats,
-                `${fmt(r.meanWallMs)} ± ${fmt(r.stddevWallMs)}`,
-                `${fmt(r.meanThroughput)} (${speedup} vs baseline)`,
-                fmt(r.p50, 3),
-                fmt(r.p95, 3),
-                fmt(r.p99, 3),
-                r.totalErrors,
-                r.totalBusyErrors,
+                row.useLock ? 'on' : 'off',
+                row.concurrency,
+                row.iterations,
+                row.repeats,
+                `${fmt(row.meanWallMs)} ± ${fmt(row.stddevWallMs)}`,
+                `${fmt(row.meanThroughput)} (${speedup} vs baseline)`,
+                fmt(row.p50, 3),
+                fmt(row.p95, 3),
+                fmt(row.p99, 3),
+                row.totalErrors,
+                row.totalBusyErrors,
                 '',
             ].join('|'));
         }
         lines.push('');
 
         const best = rows
-            .filter(r => !r.useLock)
-            .sort((a, b) => b.meanThroughput - a.meanThroughput)[0];
+            .filter(row => !row.useLock)
+            .sort((leftRow, rightRow) => rightRow.meanThroughput - leftRow.meanThroughput)[0];
         if (best && baselineThroughput > 0) {
             const ratio = best.meanThroughput / baselineThroughput;
             const verdict = ratio >= 1.05 ? 'FASTER'
@@ -151,18 +151,18 @@ export const renderMarkdown = (
     }
 
     // Cross-mode comparison: best unlocked throughput per (scenario, mode)
-    const scenarios = Array.from(new Set(summaries.map(s => s.scenario)));
-    const modes = Array.from(new Set(summaries.map(s => s.journalMode)));
+    const scenarios = Array.from(new Set(summaries.map(summary => summary.scenario)));
+    const modes = Array.from(new Set(summaries.map(summary => summary.journalMode)));
     if (modes.length > 1) {
         lines.push('## Cross-journal-mode comparison (best unlocked throughput per scenario)');
         lines.push('');
-        lines.push(`| Scenario | ${modes.map(m => `${m} ops/s (best c)`).join(' | ')} |`);
+        lines.push(`| Scenario | ${modes.map(mode => `${mode} ops/s (best c)`).join(' | ')} |`);
         lines.push(`|---|${modes.map(() => '---:').join('|')}|`);
         for (const scenario of scenarios) {
             const cells = modes.map(mode => {
                 const best = summaries
-                    .filter(s => s.scenario === scenario && s.journalMode === mode && !s.useLock)
-                    .sort((a, b) => b.meanThroughput - a.meanThroughput)[0];
+                    .filter(summary => summary.scenario === scenario && summary.journalMode === mode && !summary.useLock)
+                    .sort((leftSummary, rightSummary) => rightSummary.meanThroughput - leftSummary.meanThroughput)[0];
                 return best == null ? '—' : `${fmt(best.meanThroughput)} (c=${best.concurrency})`;
             });
             lines.push(`| ${scenario} | ${cells.join(' | ')} |`);
@@ -175,10 +175,10 @@ export const renderMarkdown = (
 
 export const renderCsv = (summaries: CellSummary[]): string => {
     const header = ['scenario', 'journal_mode', 'use_lock', 'concurrency', 'iterations', 'repeats', 'mean_wall_ms', 'stddev_wall_ms', 'mean_throughput_ops_s', 'p50_ms', 'p95_ms', 'p99_ms', 'mean_latency_ms', 'errors', 'busy_errors'];
-    const rows = summaries.map(s => [
-        s.scenario, s.journalMode, s.useLock, s.concurrency, s.iterations, s.repeats,
-        s.meanWallMs, s.stddevWallMs, s.meanThroughput,
-        s.p50, s.p95, s.p99, s.meanLatency, s.totalErrors, s.totalBusyErrors,
+    const rows = summaries.map(summary => [
+        summary.scenario, summary.journalMode, summary.useLock, summary.concurrency, summary.iterations, summary.repeats,
+        summary.meanWallMs, summary.stddevWallMs, summary.meanThroughput,
+        summary.p50, summary.p95, summary.p99, summary.meanLatency, summary.totalErrors, summary.totalBusyErrors,
     ].join(','));
     return [header.join(','), ...rows].join('\n');
 };

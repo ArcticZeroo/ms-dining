@@ -46,7 +46,7 @@ before(async () => {
     const testUser = await ctx.createTestUser();
     testUserId = testUser.id;
 
-    const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
 
     // Single-cafe sync — enough to satisfy /prepare/cart validation
@@ -86,7 +86,7 @@ beforeEach(() => {
 });
 
 const cafe = () => {
-    const found = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const found = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(found, `${CAFE_ID} should exist`);
     return found;
 };
@@ -145,12 +145,12 @@ test('translation persists across multiple requests on the same client (cache wo
         count:       2,
     });
 
-    const before = ctx.server.getRequestLog().filter(r => r.path.startsWith('/translation/')).length;
+    const before = ctx.server.getRequestLog().filter(requestLogEntry => requestLogEntry.path.startsWith('/translation/')).length;
 
     await assertRejects(() => client.requestAsync('/anything', { method: 'GET' }));
     await assertRejects(() => client.requestAsync('/anything', { method: 'GET' }));
 
-    const after = ctx.server.getRequestLog().filter(r => r.path.startsWith('/translation/')).length;
+    const after = ctx.server.getRequestLog().filter(requestLogEntry => requestLogEntry.path.startsWith('/translation/')).length;
     // Translation cache covers both `core` + `domain-<host>` namespaces, so a
     // single lazy fetch hits two endpoints. Hitting two errors should not
     // double that count.
@@ -304,9 +304,9 @@ test('webserver: order failure surfaces as 502 with translated message + code', 
  * the test if the promise resolves. Lets us inspect the actual error object
  * (instanceof, properties) without the assertion noise of node:assert.rejects.
  */
-async function assertRejects(fn: () => Promise<unknown>): Promise<Error & Record<string, unknown>> {
+async function assertRejects(callback: () => Promise<unknown>): Promise<Error & Record<string, unknown>> {
     try {
-        await fn();
+        await callback();
     } catch (err) {
         return err as Error & Record<string, unknown>;
     }

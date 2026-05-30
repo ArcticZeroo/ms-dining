@@ -18,12 +18,18 @@ const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentReques
 // Per-request timeout so a hanging upstream never blocks us forever.
 const REQUEST_TIMEOUT_MS = 30_000;
 
-const getHeaders = (token: string, csrfToken: string) => token ? ({
-    'Authorization': `Bearer ${token}`,
-    'User-Agent':    'PostmanRuntime/7.36.0',
-    'Csrf-Token':    csrfToken,
-    'Cookie':        `csrf-token=${csrfToken}`
-}) : {};
+const getHeaders = (token: string, csrfToken: string): Record<string, string> => {
+    if (!token) {
+        return {};
+    }
+
+    return {
+        'Authorization': `Bearer ${token}`,
+        'User-Agent':    'PostmanRuntime/7.36.0',
+        'Csrf-Token':    csrfToken,
+        'Cookie':        `csrf-token=${csrfToken}`,
+    };
+};
 
 export const JSON_HEADERS = {
     'Content-Type': 'application/json'
@@ -46,6 +52,12 @@ export interface BuyOnDemandClientOptions {
      * `"Response failed with status: X"`.
      */
     translateErrors?: boolean;
+}
+
+export interface BuyOnDemandRequestOptions {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
 }
 
 export class BuyOnDemandClient {
@@ -110,7 +122,7 @@ export class BuyOnDemandClient {
         return `${getBaseApiUrlWithoutTrailingSlash(this.cafe)}${path}`;
     }
 
-    protected _getRequestOptions(options: any = {}) {
+    protected _getRequestOptions(options: BuyOnDemandRequestOptions = {}): BuyOnDemandRequestOptions {
         return {
             ...options,
             headers: {
@@ -120,7 +132,7 @@ export class BuyOnDemandClient {
         };
     }
 
-    public async requestAsync(path: string, options: any = {}, shouldValidateSuccess: boolean = true) {
+    public async requestAsync(path: string, options: BuyOnDemandRequestOptions = {}, shouldValidateSuccess: boolean = true) {
         return REQUEST_SEMAPHORE.acquire(async () => {
             const id = hat();
 

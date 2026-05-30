@@ -11,4 +11,6 @@ const main = () => {
         logError('parentPort is missing in vector/thread.ts');
         return;
     }
-}
+};
+
+main();

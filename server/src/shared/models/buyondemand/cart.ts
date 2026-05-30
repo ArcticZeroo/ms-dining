@@ -1,5 +1,6 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { z } from 'zod';
+import { EmptyObject } from '../util.js';
 
 const waitTimeEntrySchema = z.object({
     minutes: z.number(),
@@ -315,7 +316,7 @@ export interface ICloseOrderRequest {
                 'openScheduleExpression': '0 0 0 * * *',
                 'useIgOrderApi': 'true'
             },
-            'internalProperties': {},
+            'internalProperties': EmptyObject,
             'configuredBuyFeatures': []
         },
         'showConceptNameInEmailReceipt': false,

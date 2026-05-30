@@ -86,7 +86,7 @@ before(async () => {
     // the file's after() hook (or at least doesn't hold open enough
     // handles to trip --test-force-exit on Windows).
     for (const cafeId of ALL_TEST_CAFE_IDS) {
-        const cafe = ALL_CAFES.find((c) => c.id === cafeId);
+        const cafe = ALL_CAFES.find((availableCafe) => availableCafe.id === cafeId);
         assert.ok(cafe, `${cafeId} should exist in ALL_CAFES`);
         await syncOneCafe(cafe, SHUTDOWN_CAFE_IDS.includes(cafeId as typeof SHUTDOWN_CAFE_IDS[number]));
     }

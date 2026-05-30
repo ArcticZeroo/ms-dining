@@ -24,7 +24,7 @@ type TopLevelWriteMethods =
  * never performs writes.
  */
 export type ReadOnlyPrismaClient = Omit<{
-    [K in keyof PrismaClient]: PrismaClient[K] extends { findMany: any }
+    [K in keyof PrismaClient]: PrismaClient[K] extends { findMany: unknown }
         ? Omit<PrismaClient[K], DelegateWriteMethods>
         : PrismaClient[K];
 }, TopLevelWriteMethods>;

@@ -4,9 +4,9 @@ import type { IGroupsService } from '../../../../../shared/services/groups.js';
 import { GroupStorageClient } from './groups.js';
 
 export const groupsServiceCommands = {
-    getGroups: async (_data: {}) =>
+    getGroups: async () =>
         GroupStorageClient.getGroups(),
-    getGroupCandidatesZeroContext: async (_data: {}) =>
+    getGroupCandidatesZeroContext: async () =>
         GroupStorageClient.getGroupCandidatesZeroContext(),
     getCandidatesForGroup: async ({ groupId }: { groupId: string }) =>
         GroupStorageClient.getCandidatesForGroup(groupId),

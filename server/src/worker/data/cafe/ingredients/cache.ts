@@ -59,12 +59,12 @@ export const getIngredientsMenuByHash = async (menuHash: string): Promise<IIngre
 };
 
 export const setRolesForMenuHash = async (menuHash: string, roles: IMenuRoleRow[], price: number): Promise<void> => {
-    await usePrismaTransaction(async (tx) => {
-        await tx.ingredientsMenuRole.deleteMany({ where: { menuHash } });
-        await tx.ingredientsMenuMetadata.deleteMany({ where: { menuHash } });
-        await tx.ingredientsMenuMetadata.create({ data: { menuHash, price } });
+    await usePrismaTransaction(async (prisma) => {
+        await prisma.ingredientsMenuRole.deleteMany({ where: { menuHash } });
+        await prisma.ingredientsMenuMetadata.deleteMany({ where: { menuHash } });
+        await prisma.ingredientsMenuMetadata.create({ data: { menuHash, price } });
         for (const role of roles) {
-            await tx.ingredientsMenuRole.create({
+            await prisma.ingredientsMenuRole.create({
                 data: {
                     menuItemId: role.menuItemId,
                     role:       role.role,

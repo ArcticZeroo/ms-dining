@@ -66,19 +66,19 @@ export const getServices = (): Services => {
 };
 
 /**
- * Runs `fn` inside an async scope where `getServices()` returns the current
+ * Runs `callback` inside an async scope where `getServices()` returns the current
  * services merged with `overrides`. Scope is propagated by AsyncLocalStorage:
- * any await chain started inside `fn` (including HTTP handlers, worker
+ * any await chain started inside `callback` (including HTTP handlers, worker
  * dispatches, etc.) sees the overridden services.
  *
  * Integration tests and Koa request middleware are the main callers.
  */
 export const runWithServices = <T>(
     overrides: Partial<Services>,
-    fn: () => Promise<T>,
+    callback: () => Promise<T>,
 ): Promise<T> => {
     const merged: Services = { ...getServices(), ...overrides };
-    return servicesStorage.run(merged, fn);
+    return servicesStorage.run(merged, callback);
 };
 
 /**

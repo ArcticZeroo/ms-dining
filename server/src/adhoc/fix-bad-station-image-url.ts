@@ -3,8 +3,8 @@ import { usePrismaTransaction } from '../worker/data/storage/client.js';
 
 console.log('Searching for menu items with bad image URLs...');
 
-await usePrismaTransaction(async tx => {
-    const stationsWithBadImageUrl = await tx.$queryRawTyped(getAllStationsWithBadImageUrl());
+await usePrismaTransaction(async prisma => {
+    const stationsWithBadImageUrl = await prisma.$queryRawTyped(getAllStationsWithBadImageUrl());
 
     console.log(`Found ${stationsWithBadImageUrl.length} stations with bad image URLs.`);
 
@@ -17,7 +17,7 @@ await usePrismaTransaction(async tx => {
         console.log(`Fixing station ${station.id} with image URL "${station.logoUrl}"...`);
 
         const url = new URL(station.logoUrl, `https://${station.cafeId}.buy-ondemand.com/`);
-        await tx.station.update({
+        await prisma.station.update({
             where: { id: station.id },
             data:  { logoUrl: url.href }
         });

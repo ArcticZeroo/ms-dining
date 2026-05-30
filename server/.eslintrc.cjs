@@ -15,7 +15,11 @@ module.exports = {
         'curly': ['error', 'all'],
         'brace-style': ['error', '1tbs', { allowSingleLine: false }],
         'prefer-const': 'error',
-        'id-length': ['error', { min: 3, exceptions: ['i', 'j', 'k', 'x', 'y', 'id', 'db'], properties: 'never' }],
+        '@typescript-eslint/no-unused-vars': ['error', {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+        }],
+        'id-length': ['error', { min: 3, exceptions: ['_', 'i', 'j', 'k', 'x', 'y', 'id', 'db', 'fs', 'os'], properties: 'never' }],
     },
     overrides: [
         {

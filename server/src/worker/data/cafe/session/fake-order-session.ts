@@ -78,13 +78,13 @@ export class FakeCafeOrderSession implements IOrderSession {
         fakeLog.info(`{${this.#cafe.name}} Fake session created — orderId: ${this.#orderId}, orderNumber: ${this.#orderNumber}`);
     }
 
-    async prepareForIframe(_iframeCssUrl: string): Promise<void> {
+    async prepareForIframe(): Promise<void> {
         this.#cardProcessorToken = `fake-token-${randomUUID().slice(0, 8)}`;
         this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
         fakeLog.info(`{${this.#cafe.name}} Fake iframe prepared — token: ${this.#cardProcessorToken}`);
     }
 
-    getCardProcessorUrl(_iframeCssUrl?: string): string {
+    getCardProcessorUrl(): string {
         return '/fake-payment.html';
     }
 

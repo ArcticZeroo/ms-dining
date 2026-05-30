@@ -36,11 +36,11 @@ export interface RunResult {
 const SQLITE_BUSY_PATTERN = /SQLITE_BUSY|database is locked/i;
 
 const pickOp = (ops: WorkloadOp[], rng: () => number, totalWeight: number): WorkloadOp => {
-    let r = rng() * totalWeight;
-    for (const op of ops) {
-        r -= op.weight;
-        if (r <= 0) {
-            return op;
+    let remainingWeight = rng() * totalWeight;
+    for (const operation of ops) {
+        remainingWeight -= operation.weight;
+        if (remainingWeight <= 0) {
+            return operation;
         }
     }
     return ops[ops.length - 1]!;
@@ -48,13 +48,13 @@ const pickOp = (ops: WorkloadOp[], rng: () => number, totalWeight: number): Work
 
 export const runWorkload = async (options: RunnerOptions): Promise<RunResult> => {
     const { prisma, ops, iterations, concurrency, useLock, ctx } = options;
-    const totalWeight = ops.reduce((sum, op) => sum + op.weight, 0);
+    const totalWeight = ops.reduce((sum, operation) => sum + operation.weight, 0);
 
     const lock = useLock ? new PrioritySemaphore(1) : null;
     const latenciesMs: number[] = [];
     const perOpStats = new Map<string, { count: number; errorCount: number; latencies: number[] }>();
-    for (const op of ops) {
-        perOpStats.set(op.name, { count: 0, errorCount: 0, latencies: [] });
+    for (const operation of ops) {
+        perOpStats.set(operation.name, { count: 0, errorCount: 0, latencies: [] });
     }
 
     let nextIndex = 0;
@@ -69,20 +69,20 @@ export const runWorkload = async (options: RunnerOptions): Promise<RunResult> =>
                 return;
             }
 
-            const op = pickOp(ops, ctx.rng, totalWeight);
-            const stats = perOpStats.get(op.name)!;
+            const operation = pickOp(ops, ctx.rng, totalWeight);
+            const stats = perOpStats.get(operation.name)!;
             stats.count++;
 
-            const exec = () => op.run(prisma, ctx, opIndex);
+            const exec = () => operation.run(prisma, ctx, opIndex);
 
-            const t0 = performance.now();
+            const startTime = performance.now();
             try {
                 if (lock != null) {
                     await lock.acquire('normal', exec);
                 } else {
                     await exec();
                 }
-                const elapsed = performance.now() - t0;
+                const elapsed = performance.now() - startTime;
                 latenciesMs.push(elapsed);
                 stats.latencies.push(elapsed);
             } catch (err) {

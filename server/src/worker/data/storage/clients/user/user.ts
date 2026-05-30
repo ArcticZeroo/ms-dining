@@ -8,7 +8,6 @@ import { logDebug } from '../../../../../shared/util/log.js';
 import { sendVisitFireAndForget } from '../../../../../main/tracking/visitors.js';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
 import { randomUUID } from 'node:crypto';
-import type { ICreateUserInput } from '../../../../../shared/services/user.js';
 
 const ID_DELIMITER = ';';
 

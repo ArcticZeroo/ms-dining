@@ -6,8 +6,8 @@ import { MIGRATION_REGISTRY } from './registry.js';
 export const runPendingMigrations = async () => {
     logInfo('[Migrations] Checking for pending runtime migrations...');
 
-    const blockingMigrations = MIGRATION_REGISTRY.filter(m => m.runMode === 'blocking');
-    const backgroundMigrations = MIGRATION_REGISTRY.filter(m => m.runMode === 'background');
+    const blockingMigrations = MIGRATION_REGISTRY.filter(migration => migration.runMode === 'blocking');
+    const backgroundMigrations = MIGRATION_REGISTRY.filter(migration => migration.runMode === 'background');
 
     // Run blocking migrations sequentially, awaiting each
     for (const migration of blockingMigrations) {

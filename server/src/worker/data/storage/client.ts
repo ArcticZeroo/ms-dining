@@ -142,8 +142,8 @@ export const usePrismaTransaction = async <T>(callback: (tx: PrismaTransactionCl
         const { startedAt, tags } = recordSemaphoreMetrics(writeSemaphore, 'transaction', priority, queuedAt);
 
         try {
-            return await PRISMA_CLIENT.value.$transaction(async (tx) => {
-                return callback(tx);
+            return await PRISMA_CLIENT.value.$transaction(async (prisma) => {
+                return callback(prisma);
             }, {
                 maxWait: PRISMA_TRANSACTION_MAX_WAIT_MS,
                 timeout: PRISMA_TRANSACTION_TIMEOUT_MS,

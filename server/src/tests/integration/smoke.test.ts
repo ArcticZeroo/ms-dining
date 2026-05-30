@@ -35,7 +35,7 @@ after(async () => {
 });
 
 test('sync a single cafe end-to-end', async () => {
-    const cafe = ALL_CAFES.find(c => c.id === 'cafe25');
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === 'cafe25');
     assert.ok(cafe, 'cafe25 should exist in ALL_CAFES');
 
     // Drive the real production sync code path. CafeMenuSession.retrieveMenuAsync
@@ -104,7 +104,7 @@ test('failure injection works through full stack', async () => {
         count: 1,
     });
 
-    const cafe = ALL_CAFES.find(c => c.id === 'foodhall4');
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === 'foodhall4');
     assert.ok(cafe);
 
     // The injected 503 propagates through retrieveMenuItemsAsync up through

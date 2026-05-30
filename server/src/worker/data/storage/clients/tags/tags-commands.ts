@@ -3,7 +3,7 @@ import type { ITagService } from '../../../../../shared/services/tag.js';
 import { TagStorageClient } from './tags.js';
 
 export const tagServiceCommands = {
-    retrieveTags: async (_data: {}) => {
+    retrieveTags: async () => {
         const map = await TagStorageClient.retrieveTagsAsync();
         return Object.fromEntries(map);
     },

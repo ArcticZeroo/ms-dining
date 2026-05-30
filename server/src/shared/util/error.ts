@@ -8,7 +8,7 @@ export const throwError = (message: string): never => {
 // Error so Koa defaults to 500.
 export const rethrowWithoutStatus = (err: unknown): never => {
     if (err instanceof Error && 'status' in err) {
-        const status = (err as any).status;
+        const { status } = err as Error & { status?: unknown };
         throw new Error(`${err.constructor.name} (${status}): ${err.message}`);
     }
     throw err;

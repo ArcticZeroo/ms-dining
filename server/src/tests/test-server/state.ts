@@ -107,20 +107,20 @@ export class ServerState {
     }
 
     setTranslation(namespace: string, code: string, message: string): void {
-        let ns = this._translations.get(namespace);
-        if (!ns) {
-            ns = new Map();
-            this._translations.set(namespace, ns);
+        let namespaceTranslations = this._translations.get(namespace);
+        if (!namespaceTranslations) {
+            namespaceTranslations = new Map();
+            this._translations.set(namespace, namespaceTranslations);
         }
-        ns.set(code, message);
+        namespaceTranslations.set(code, message);
     }
 
     getTranslations(namespace: string): Record<string, string> {
-        const ns = this._translations.get(namespace);
-        if (!ns) {
+        const namespaceTranslations = this._translations.get(namespace);
+        if (!namespaceTranslations) {
             return {};
         }
-        return Object.fromEntries(ns);
+        return Object.fromEntries(namespaceTranslations);
     }
 
     resetTranslations(): void {

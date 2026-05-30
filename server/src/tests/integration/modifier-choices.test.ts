@@ -135,7 +135,7 @@ before(async () => {
 
     ctx = await createIntegrationTestContext();
 
-    const found = ALL_CAFES.find((c) => c.id === CAFE_ID);
+    const found = ALL_CAFES.find((availableCafe) => availableCafe.id === CAFE_ID);
     assert.ok(found, `${CAFE_ID} should exist in ALL_CAFES`);
     cafe = found;
 
@@ -211,7 +211,7 @@ test('both modifiers were persisted with their full choice sets', async () => {
     assert.equal(modifiers.length, 2, `expected both modifiers persisted; got ${modifiers.length}`);
 
     for (const modifier of modifiers) {
-        const choiceIds = new Set(modifier.choices.map((c) => c.id));
+        const choiceIds = new Set(modifier.choices.map((choice) => choice.id));
         assert.equal(
             choiceIds.size,
             SHARED_CHOICE_IDS.length,
@@ -245,7 +245,7 @@ test('shared choice IDs are stored once per modifier (composite key)', async () 
     );
 
     // Sanity: every (id, modifierId) pair must be unique.
-    const pairs = new Set(rows.map((r) => `${r.id}|${r.modifierId}`));
+    const pairs = new Set(rows.map((row) => `${row.id}|${row.modifierId}`));
     assert.equal(pairs.size, rows.length, 'choice rows must be unique by [id, modifierId]');
 });
 
@@ -263,6 +263,6 @@ test('both injected menu items are linked to their respective modifiers', async 
     const itemB = items.find((i) => i.id === ITEM_B_ID);
     assert.ok(itemA, `item ${ITEM_A_ID} should exist`);
     assert.ok(itemB, `item ${ITEM_B_ID} should exist`);
-    assert.deepEqual(itemA.modifiers.map((m) => m.modifierId), [MODIFIER_A_ID]);
-    assert.deepEqual(itemB.modifiers.map((m) => m.modifierId), [MODIFIER_B_ID]);
+    assert.deepEqual(itemA.modifiers.map((itemModifier) => itemModifier.modifierId), [MODIFIER_A_ID]);
+    assert.deepEqual(itemB.modifiers.map((itemModifier) => itemModifier.modifierId), [MODIFIER_B_ID]);
 });

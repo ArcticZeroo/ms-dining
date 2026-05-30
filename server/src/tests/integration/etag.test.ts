@@ -97,7 +97,7 @@ before(async () => {
     ctx = await createIntegrationTestContext();
     baseUrl = await ctx.startWebserver();
 
-    const found = ALL_CAFES.find((c) => c.id === CAFE_ID);
+    const found = ALL_CAFES.find((availableCafe) => availableCafe.id === CAFE_ID);
     assert.ok(found, `${CAFE_ID} should exist in ALL_CAFES`);
     cafe = found;
 

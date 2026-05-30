@@ -15,7 +15,7 @@ try {
     process.exit(1);
 }
 
-const pngFiles = files.filter(f => f.endsWith('.png'));
+const pngFiles = files.filter(fileName => fileName.endsWith('.png'));
 console.log(`Found ${pngFiles.length} PNG thumbnails.`);
 
 const hashToIds = new Map<string, string[]>();
@@ -64,7 +64,7 @@ if (duplicateGroups.length > 0) {
 
     console.log('\nTop 10 duplicate groups:');
     duplicateGroups
-        .sort(([, a], [, b]) => b.length - a.length)
+        .sort(([, leftIds], [, rightIds]) => rightIds.length - leftIds.length)
         .slice(0, 10)
         .forEach(([hash, ids]) => {
             console.log(`  Hash ${hash}: ${ids.length} items (${ids.slice(0, 3).join(', ')}${ids.length > 3 ? '...' : ''})`);

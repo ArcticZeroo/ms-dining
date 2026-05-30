@@ -15,8 +15,7 @@
 import { RouteDefinition, TestRequest, TestResponse, ITestServerState } from '../models.js';
 
 function handleTranslation(req: TestRequest, state: ITestServerState): TestResponse {
-    const params = (req as any).params as Record<string, string>;
-    const namespace = params.namespace ?? '';
+    const namespace = req.params?.namespace ?? '';
 
     return {
         status: 200,

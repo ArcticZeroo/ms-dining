@@ -71,6 +71,16 @@ export const tryReemitDataWorkerEvent = (message: unknown): boolean => {
     }
 
     const emitter = getEventEmitter(parsed.data.source);
-    emitter.emit(parsed.data.eventName, parsed.data.event as any);
+    switch (parsed.data.eventName) {
+    case 'menuPublished':
+        emitter.emit(parsed.data.eventName, parsed.data.event as IMenuPublishEvent);
+        break;
+    case 'reviewDirty':
+        emitter.emit(parsed.data.eventName, parsed.data.event as IReviewDirtyEvent);
+        break;
+    case 'groupMembershipDirty':
+        emitter.emit(parsed.data.eventName, parsed.data.event as IGroupMembershipDirtyEvent);
+        break;
+    }
     return true;
 };

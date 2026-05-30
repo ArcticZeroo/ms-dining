@@ -51,9 +51,9 @@ const buildImage = async (width: number, height: number, seed: number): Promise<
 
 describe('computeDHash — perceptual stability', () => {
     it('returns the same hash for the same image content', async () => {
-        const a = await buildImage(64, 48, 1);
-        const b = await buildImage(64, 48, 1);
-        assert.equal(await computeDHash(a), await computeDHash(b),
+        const firstImage = await buildImage(64, 48, 1);
+        const secondImage = await buildImage(64, 48, 1);
+        assert.equal(await computeDHash(firstImage), await computeDHash(secondImage),
             'identical pixel content must produce identical hashes');
     });
 
@@ -65,9 +65,9 @@ describe('computeDHash — perceptual stability', () => {
     });
 
     it('returns different hashes for substantially different images', async () => {
-        const a = await buildImage(64, 48, 1);
-        const b = await buildImage(64, 48, 99);
-        assert.notEqual(await computeDHash(a), await computeDHash(b),
+        const firstImage = await buildImage(64, 48, 1);
+        const secondImage = await buildImage(64, 48, 99);
+        assert.notEqual(await computeDHash(firstImage), await computeDHash(secondImage),
             'a different gradient seed should perturb enough pixels to flip the dHash');
     });
 

@@ -8,10 +8,10 @@ export const stationServiceCommands = {
         StationStorageClient.createStationAsync(station, allowUpdateIfExisting),
     retrieveStation: async ({ stationId }: { stationId: string }) =>
         retrieveStation(stationId),
-    retrieveAllStationsWithoutGroup: async (_data: {}) => {
+    retrieveAllStationsWithoutGroup: async () => {
         const stations = await StationStorageClient.retrieveAllStationsWithoutGroup();
         return stations.map(toStationRecord);
     },
-    retrieveAllStationNames: async (_data: {}) =>
+    retrieveAllStationNames: async () =>
         StationStorageClient.retrieveAllStationNamesAsync(),
 } satisfies IStationService;

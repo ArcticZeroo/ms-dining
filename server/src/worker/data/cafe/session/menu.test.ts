@@ -107,8 +107,8 @@ function defaultModifiers(itemId: string): FixtureItem['_modifiers'] {
 }
 
 function findStation(stations: ICafeStation[], stationId: string): ICafeStation {
-    const station = stations.find(s => s.id === stationId);
-    assert.ok(station, `expected station ${stationId} to be present (got ${stations.map(s => s.id).join(', ')})`);
+    const station = stations.find(stationCandidate => stationCandidate.id === stationId);
+    assert.ok(station, `expected station ${stationId} to be present (got ${stations.map(stationCandidate => stationCandidate.id).join(', ')})`);
     return station;
 }
 
@@ -440,7 +440,7 @@ test('valid modifier fetch populates the returned item with the modifier data (1
     assert.equal(menuItem.modifiers[0]!.id, `${itemId}-mod-0`);
     assert.equal(menuItem.modifiers[0]!.choices.length, 2);
     assert.deepEqual(
-        menuItem.modifiers[0]!.choices.map(c => c.description).sort(),
+        menuItem.modifiers[0]!.choices.map(choice => choice.description).sort(),
         ['Ranch', 'Vinaigrette'],
     );
 });

@@ -44,7 +44,7 @@ before(async () => {
 
     ctx = await createIntegrationTestContext();
 
-    const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
 
     // Single-cafe sync — faster than performMenuBootTasks() and we only
@@ -147,7 +147,7 @@ test('canonical (with tag) and legacy route return equivalent station data for t
 
     // Station identity + count must match across the two routes — a
     // regression that diverged the two serialization paths would fail here.
-    const canonicalStationIds = canonicalObj.stations.map(s => s.id).sort();
-    const legacyStationIds = legacyObj.stations.map(s => s.id).sort();
+    const canonicalStationIds = canonicalObj.stations.map(station => station.id).sort();
+    const legacyStationIds = legacyObj.stations.map(station => station.id).sort();
     assert.deepEqual(canonicalStationIds, legacyStationIds);
 });

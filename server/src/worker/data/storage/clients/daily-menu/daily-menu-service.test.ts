@@ -7,51 +7,18 @@
 
 import { after, before, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import * as fs from 'node:fs/promises';
 import { getMondayForWeek, toDateString } from '@msdining/common/util/date-util';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
 } from '../../../../../tests/test-server/integration-test-context.js';
+import { acquireTestLock, releaseTestLock } from '../../../../../tests/test-server/db-test-helper.js';
 import { getServices } from '../../../../../shared/services/registry.js';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 
 let ctx: IntegrationTestContext;
-
-const TEST_LOCK_PATH = new URL('../../../../.service-test-db.lock', import.meta.url);
-const STALE_LOCK_AGE_MS = 5 * 60 * 1000;
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-const acquireTestLock = async () => {
-    while (true) {
-        try {
-            const handle = await fs.open(TEST_LOCK_PATH, 'wx');
-            await handle.writeFile(String(process.pid));
-            await handle.close();
-            return;
-        } catch (err) {
-            const error = err as NodeJS.ErrnoException;
-            if (error.code !== 'EEXIST') {
-                throw err;
-            }
-
-            const stats = await fs.stat(TEST_LOCK_PATH).catch(() => null);
-            if (stats != null && Date.now() - stats.mtimeMs > STALE_LOCK_AGE_MS) {
-                await fs.rm(TEST_LOCK_PATH, { force: true });
-                continue;
-            }
-
-            await sleep(50);
-        }
-    }
-};
-
-const releaseTestLock = async () => {
-    await fs.rm(TEST_LOCK_PATH, { force: true });
-};
 
 const CAFE: ICafe = {
     id:   'daily-menu-service-cafe',

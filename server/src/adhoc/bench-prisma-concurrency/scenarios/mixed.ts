@@ -6,13 +6,13 @@ import { buildReadOps } from './reads.js';
 // (SearchQuery), upsert-friendly (Review with synthetic users), and
 // hot-row (MenuItem lastUpdateTime) paths.
 export const buildMixedOps = (samples: SampledIds): WorkloadOp[] => {
-    const reads = buildReadOps(samples).map(op => ({ ...op, name: `mixed.${op.name.replace(/^reads\./, 'r.')}` }));
+    const reads = buildReadOps(samples).map(operation => ({ ...operation, name: `mixed.${operation.name.replace(/^reads\./, 'r.')}` }));
 
     const writes: WorkloadOp[] = [
         {
             name:   'mixed.w.searchQuery.upsert',
             weight: 4,
-            run:    async (prisma, ctx, opIndex) => {
+            run:    async (prisma, ctx) => {
                 // ~10k distinct query keys to mix inserts and updates.
                 const bucket = Math.floor(ctx.rng() * 10_000);
                 const query = `bench-q-${bucket}`;
@@ -56,7 +56,7 @@ export const buildMixedOps = (samples: SampledIds): WorkloadOp[] => {
 
     // Read weight total ~14, write weight total = 9 → ~60/40 read/write. Tweak read weights down a touch
     // by halving so we get closer to 70/30.
-    const downweightedReads = reads.map(op => ({ ...op, weight: op.weight * 1.5 }));
+    const downweightedReads = reads.map(operation => ({ ...operation, weight: operation.weight * 1.5 }));
 
     return [...downweightedReads, ...writes];
 };

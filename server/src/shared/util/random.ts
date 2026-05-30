@@ -72,7 +72,7 @@ export const weightedRandomSample = <T>(items: readonly IWeightedItem<T>[], coun
         key:   Math.pow(random(), 1 / Math.max(item.weight, 0.001)),
     }));
 
-    keyed.sort((a, b) => b.key - a.key);
+    keyed.sort((firstKeyedItem, secondKeyedItem) => secondKeyedItem.key - firstKeyedItem.key);
     return keyed.slice(0, count).map(item => item.value);
 };
 

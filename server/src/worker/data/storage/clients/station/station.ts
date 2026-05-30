@@ -6,14 +6,14 @@ import { PrismaLikeClient } from '../../../../../shared/models/prisma.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import type { IStationRecord } from '../../../../../shared/services/station.js';
 
-export const toStationRecord = (s: Station): IStationRecord => ({
-    id:             s.id,
-    name:           s.name,
-    normalizedName: s.normalizedName,
-    logoUrl:        s.logoUrl,
-    menuId:         s.menuId,
-    groupId:        s.groupId,
-    cafeId:         s.cafeId,
+export const toStationRecord = (station: Station): IStationRecord => ({
+    id:             station.id,
+    name:           station.name,
+    normalizedName: station.normalizedName,
+    logoUrl:        station.logoUrl,
+    menuId:         station.menuId,
+    groupId:        station.groupId,
+    cafeId:         station.cafeId,
 });
 
 export abstract class StationStorageClient {

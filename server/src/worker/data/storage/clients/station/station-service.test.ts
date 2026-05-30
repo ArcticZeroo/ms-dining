@@ -13,7 +13,7 @@ import {
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
 import { CafeStorageClient } from '../cafe/cafe.js';
-import type { ICafe, ICafeConfig, ICafeStation } from '../../../../../shared/models/cafe.js';
+import type { ICafeStation } from '../../../../../shared/models/cafe.js';
 
 let ctx: IntegrationTestContext;
 
@@ -69,7 +69,7 @@ test('createStation + retrieveStation round-trip', async () => {
 
 test('retrieveAllStationsWithoutGroup includes ungrouped stations', async () => {
     const ungrouped = await getServices().data.station.retrieveAllStationsWithoutGroup({});
-    assert.ok(ungrouped.some(s => s.id === STATION.id));
+    assert.ok(ungrouped.some(station => station.id === STATION.id));
 });
 
 test('retrieveAllStationNames includes station names', async () => {

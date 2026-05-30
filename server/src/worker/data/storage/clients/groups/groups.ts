@@ -306,8 +306,8 @@ export abstract class GroupStorageClient {
     public static async addToGroup(groupId: string, memberIds: Array<string>): Promise<void> {
         let memberNormalizedNames: string[] = [];
 
-        await usePrismaTransaction(async tx => {
-            const group = await tx.crossCafeGroup.findUnique({
+        await usePrismaTransaction(async prisma => {
+            const group = await prisma.crossCafeGroup.findUnique({
                 where:  {
                     id: groupId
                 },
@@ -321,7 +321,7 @@ export abstract class GroupStorageClient {
             }
 
             const entityType = searchEntityTypeFromString(group.entityType);
-            await this.#setGroupMembersInternal(tx, groupId, memberIds, entityType);
+            await this.#setGroupMembersInternal(prisma, groupId, memberIds, entityType);
 
             if (entityType === SearchEntityType.menuItem) {
                 memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
@@ -336,8 +336,8 @@ export abstract class GroupStorageClient {
     public static async createGroup(name: string, entityType: SearchEntityType, initialMembers: Array<string> = []): Promise<CrossCafeGroup> {
         let memberNormalizedNames: string[] = [];
 
-        const newGroup = await usePrismaTransaction(async tx => {
-            const group = await tx.crossCafeGroup.create({
+        const newGroup = await usePrismaTransaction(async prisma => {
+            const group = await prisma.crossCafeGroup.create({
                 data: {
                     name,
                     entityType
@@ -345,7 +345,7 @@ export abstract class GroupStorageClient {
             });
 
             if (initialMembers.length > 0) {
-                await this.#setGroupMembersInternal(tx, group.id, initialMembers, entityType);
+                await this.#setGroupMembersInternal(prisma, group.id, initialMembers, entityType);
 
                 if (entityType === SearchEntityType.menuItem) {
                     memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(initialMembers);
@@ -373,7 +373,7 @@ export abstract class GroupStorageClient {
             });
 
             if (group && searchEntityTypeFromString(group.entityType) === SearchEntityType.menuItem && group.menuItems.length > 0) {
-                const memberIds = group.menuItems.map(m => m.id);
+                const memberIds = group.menuItems.map(menuItem => menuItem.id);
                 const memberNormalizedNames = await this.#getNormalizedNamesForMenuItems(memberIds);
                 await prisma.crossCafeGroup.delete({ where: { id } });
                 STORAGE_EVENTS.emit('groupMembershipDirty', { groupId: id, memberNormalizedNames });

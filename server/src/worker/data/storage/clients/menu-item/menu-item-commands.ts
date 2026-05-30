@@ -12,20 +12,20 @@ export const menuItemServiceCommands = {
         MenuItemStorageClient.retrieveMenuItemAsync(id),
     retrieveFirstMenuItemAppearance: async ({ menuItemId }: { menuItemId: string }) =>
         retrieveFirstMenuItemAppearance(menuItemId),
-    retrieveMenuItemsForWeeklyMenu: async (_data: {}) =>
+    retrieveMenuItemsForWeeklyMenu: async () =>
         MenuItemStorageClient.retrieveMenuItemsForWeeklyMenuAsync(),
-    retrievePendingSearchTagQueueEntries: async (_data: {}) =>
+    retrievePendingSearchTagQueueEntries: async () =>
         MenuItemStorageClient.retrievePendingSearchTagQueueEntries(),
     getExistingSearchTagsForName: async ({ name }: { name: string }) => {
         const set = await MenuItemStorageClient.getExistingSearchTagsForName(name);
         return Array.from(set);
     },
-    retrieveAllMenuItemsWithoutGroup: async (_data: {}) =>
+    retrieveAllMenuItemsWithoutGroup: async () =>
         MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
     updateThumbnailHash: async ({ menuItemId, hash }: { menuItemId: string; hash: string }) =>
         MenuItemStorageClient.updateThumbnailHash(menuItemId, hash),
-    getCachedMenuItemNames: async (_data: {}) =>
+    getCachedMenuItemNames: async () =>
         Array.from(MenuItemStorageClient.cachedMenuItemNames),
-    getTopSearchTags: async (_data: {}) =>
+    getTopSearchTags: async () =>
         MenuItemStorageClient.topSearchTags,
 } satisfies IMenuItemService;

@@ -41,7 +41,7 @@ before(async () => {
     // driven by static CAFE_GROUP_LIST plus SearchQueryClient, so it should
     // render even without sync — but having real menu data exercised here
     // protects against future changes that start pulling from the DB.
-    const cafe = ALL_CAFES.find(c => c.id === CAFE_ID);
+    const cafe = ALL_CAFES.find(availableCafe => availableCafe.id === CAFE_ID);
     assert.ok(cafe, `${CAFE_ID} should exist in ALL_CAFES`);
 
     const todayString = DateUtil.toDateString(new Date());

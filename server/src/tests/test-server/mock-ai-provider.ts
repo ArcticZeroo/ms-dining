@@ -77,9 +77,9 @@ export const deterministicEmbedding = (input: string): number[] => {
     let normSq = 0;
     for (let i = 0; i < EMBEDDING_DIMENSIONS; i++) {
         // Map [0, 1) to [-1, 1) so the vector is centered around 0.
-        const v = rng() * 2 - 1;
-        values[i] = v;
-        normSq += v * v;
+        const value = rng() * 2 - 1;
+        values[i] = value;
+        normSq += value * value;
     }
     const norm = Math.sqrt(normSq) || 1;
     for (let i = 0; i < EMBEDDING_DIMENSIONS; i++) {
@@ -102,7 +102,7 @@ const defaultTextResponse = (req: IAiTextCompletionRequest): string => {
             .toLowerCase()
             .replace(/[^\w\s]/g, ' ')
             .split(/\s+/)
-            .filter(w => w.length > 3)
+            .filter(word => word.length > 3)
             .slice(0, 5);
         return words.length > 0 ? words.join(', ') : 'mock, tag';
     }
@@ -164,14 +164,14 @@ export class MockAiProvider implements IAiProvider {
 
     getTextCalls(): IAiTextCompletionRequest[] {
         return this.callLog
-            .filter(c => c.kind === 'text')
-            .map(c => c.payload as IAiTextCompletionRequest);
+            .filter(call => call.kind === 'text')
+            .map(call => call.payload as IAiTextCompletionRequest);
     }
 
     getEmbeddingCalls(): string[] {
         return this.callLog
-            .filter(c => c.kind === 'embedding')
-            .map(c => c.payload as string);
+            .filter(call => call.kind === 'embedding')
+            .map(call => call.payload as string);
     }
 
     clearCallLog(): void {
