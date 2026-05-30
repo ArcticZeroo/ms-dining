@@ -1,6 +1,16 @@
 import type { IOrderItem } from '@msdining/common/models/order';
 import { createHash } from 'node:crypto';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
+import { ISerializedModifier } from '@msdining/common/models/shared';
+
+const getModifierStringsForHash = (modifiers: ISerializedModifier[]) => {
+    const modifierStrings: string[] = [];
+    for (const modifier of modifiers) {
+        const choiceIds = [...modifier.choiceIds].sort().join(',');
+        modifierStrings.push(`${modifier.modifierId}:${choiceIds}`);
+    }
+    return modifierStrings.sort();
+}
 
 /**
  * Deterministic hash of order items for deduplication.
@@ -13,9 +23,7 @@ export const hashOrderItems = (items: IOrderItem[]): string => {
             menuItemId:          item.menuItemId,
             quantity:            item.quantity,
             specialInstructions: item.specialInstructions ?? '',
-            modifiers:           item.modifiers
-									 .map(mod => `${mod.modifierId}:${[...mod.choiceIds].sort().join(',')}`)
-									 .sort(),
+            modifiers:           getModifierStringsForHash(item.modifiers),
         }))
         .sort((left, right) => left.menuItemId.localeCompare(right.menuItemId));
 

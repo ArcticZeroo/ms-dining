@@ -1,14 +1,14 @@
 import { WorkerThreadHandler } from '../../rpc/handler.js';
-import { isMainThread } from 'node:worker_threads';
 import * as fs from 'node:fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../shared/constants/config.js';
-import { logDebug, logError, logInfo } from '../../../shared/util/log.js';
+import { logError, logInfo } from '../../../shared/util/log.js';
 import { retrieveImageMetadataAsync } from '../../../shared/util/image.js';
 import path from 'path';
 import { IThumbnailWorkerRequest } from '../../../shared/models/thumbnail.js';
 import { createAndSaveThumbnailForMenuItem, IThumbnailResult } from '../cafe/image/thumbnail.js';
 import { MultiLock } from '@frozor/lock';
 import { loadManifest, saveManifestDebounced, updateManifestEntry } from '../cafe/image/manifest.js';
+import { isWorkerEntryModule } from '../../rpc/worker-identity.js';
 
 const thumbnailDataByMenuItemId = new Map<string, IThumbnailResult>();
 const THUMBNAIL_SEMAPHORE_BY_ID = new MultiLock();
@@ -20,7 +20,7 @@ const loadExistingThumbnailsOnBoot = async () => {
 
     // Always scan the directory to find files missing from manifest
     const files = await fs.readdir(serverMenuItemThumbnailPath);
-    const pngFiles = files.filter(f => f.endsWith('.png'));
+    const pngFiles = files.filter(file => file.endsWith('.png'));
 
     let loadedFromManifest = 0;
     let loadedFromDisk = 0;
@@ -101,8 +101,6 @@ const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThum
         return result;
     });
 }
-
-import { isWorkerEntryModule } from '../../rpc/worker-identity.js';
 
 const loadThumbnailsPromise = isWorkerEntryModule(new URL(import.meta.url)) ? loadExistingThumbnailsOnBoot() : Promise.resolve();
 

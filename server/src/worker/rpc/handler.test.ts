@@ -172,7 +172,7 @@ const TEST_WORKER_SERVICES = {
             return { received: data };
         },
         sum: async (data: { numbers: number[] }) => {
-            return 0 as number;
+            return data.numbers.reduce((acc, value) => acc + value, 0);
         },
     },
     fail: {
@@ -234,14 +234,14 @@ describe('WorkerThreadHandler (cross-thread)', () => {
     });
 
     it('supports concurrent requests; responses match the right request id', async () => {
-        const [a, b, c] = await Promise.all([
+        const [requestA, requestB, requestC] = await Promise.all([
             handler.sendRequest('echo', 'sum', { numbers: [1, 1, 1] }),
             handler.sendRequest('echo', 'sum', { numbers: [10, 10] }),
             handler.sendRequest('echo', 'sum', { numbers: [100] }),
         ]);
-        assert.equal(a, 3);
-        assert.equal(b, 20);
-        assert.equal(c, 100);
+        assert.equal(requestA, 3);
+        assert.equal(requestB, 20);
+        assert.equal(requestC, 100);
     });
 
     it('works without providing the service map on the main thread', async () => {

@@ -15,7 +15,7 @@ module.exports = {
         'curly': ['error', 'all'],
         'brace-style': ['error', '1tbs', { allowSingleLine: false }],
         'prefer-const': 'error',
-        'id-length': ['error', { min: 3, exceptions: ['i', 'j', 'k', 'x', 'y', 'id'], properties: 'never' }],
+        'id-length': ['error', { min: 3, exceptions: ['i', 'j', 'k', 'x', 'y', 'id', 'db'], properties: 'never' }],
     },
     overrides: [
         {

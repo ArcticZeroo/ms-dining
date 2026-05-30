@@ -117,7 +117,7 @@ const getSearchTagsForItem = async (id: string): Promise<string[]> => {
         if (!item) {
             return [];
         }
-        return item.searchTags.map(t => t.name).sort();
+        return item.searchTags.map(tag => tag.name).sort();
     });
 };
 

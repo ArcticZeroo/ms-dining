@@ -45,9 +45,7 @@ export abstract class WorkerQueue<TKey, TValue> {
     }
 
     protected abstract getKey(entry: TValue): TKey;
-    protected isWorkNeeded(entry: TValue): boolean {
-        return true;
-    }
+
     abstract doWorkAsync(entry: TValue): Promise<void | Nullable<symbol>>;
 
     get remainingItems() {
@@ -56,10 +54,6 @@ export abstract class WorkerQueue<TKey, TValue> {
 
     public add(...entries: TValue[]) {
         for (const entry of entries) {
-            if (!this.isWorkNeeded(entry)) {
-                continue;
-            }
-
             const key = this.getKey(entry);
             if (this.#entriesByKey.has(key)) {
                 continue;

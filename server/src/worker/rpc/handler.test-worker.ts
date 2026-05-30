@@ -15,7 +15,7 @@ const TEST_SERVICES = {
             return { received: data };
         },
         sum: async (data: { numbers: number[] }) => {
-            return data.numbers.reduce((acc, n) => acc + n, 0);
+            return data.numbers.reduce((acc, value) => acc + value, 0);
         },
     },
     fail: {

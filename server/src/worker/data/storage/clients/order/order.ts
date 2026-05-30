@@ -112,8 +112,8 @@ export abstract class OrderStorageClient {
 
         const itemsHash = hashOrderItems(items);
 
-        return usePrismaTransaction(async tx => {
-            const existing = await tx.pendingCafeOrder.findFirst({
+        return usePrismaTransaction(async prisma => {
+            const existing = await prisma.pendingCafeOrder.findFirst({
                 where:  { userId, cafeId, itemsHash },
                 select: { id: true },
             });
@@ -122,7 +122,7 @@ export abstract class OrderStorageClient {
                 return existing.id;
             }
 
-            const created = await tx.pendingCafeOrder.create({
+            const created = await prisma.pendingCafeOrder.create({
                 data: {
                     userId,
                     cafeId,
@@ -176,8 +176,8 @@ export abstract class OrderStorageClient {
 			completedAt: Date;
 		},
     ): Promise<void> {
-        await usePrismaTransaction(async tx => {
-            const pendingOrder = await tx.pendingCafeOrder.findUnique({
+        await usePrismaTransaction(async prisma => {
+            const pendingOrder = await prisma.pendingCafeOrder.findUnique({
                 where:   { id: pendingOrderId },
                 include: ORDER_ITEMS_INCLUDE,
             });
@@ -191,13 +191,13 @@ export abstract class OrderStorageClient {
             }
 
             const menuItemIds = [...new Set(pendingOrder.items.map(item => item.menuItemId))];
-            const menuItems = await tx.menuItem.findMany({
+            const menuItems = await prisma.menuItem.findMany({
                 where:  { id: { in: menuItemIds } },
                 select: { id: true, name: true, price: true },
             });
             const menuItemsById = new Map(menuItems.map(item => [item.id, item]));
 
-            await tx.cafeOrder.create({
+            await prisma.cafeOrder.create({
                 data: {
                     userId:                 pendingOrder.userId,
                     cafeId:                 pendingOrder.cafeId,
@@ -239,18 +239,18 @@ export abstract class OrderStorageClient {
 
             // Deduct ordered items from cart
             const orderedItems = toOrderItems(pendingOrder.items);
-            await this.deductFromCartInTransaction(tx, pendingOrder.userId, orderedItems);
+            await this.deductFromCartInTransaction(prisma, pendingOrder.userId, orderedItems);
 
-            await tx.pendingCafeOrder.delete({ where: { id: pendingOrderId } });
+            await prisma.pendingCafeOrder.delete({ where: { id: pendingOrderId } });
         });
     }
 
     private static async deductFromCartInTransaction(
-        tx: PrismaTransactionClient,
+        prisma: PrismaTransactionClient,
         userId: string,
         items: IOrderItem[],
     ): Promise<void> {
-        const cartItems = await tx.cartItem.findMany({
+        const cartItems = await prisma.cartItem.findMany({
             where:   {
                 cartUserId: userId,
                 menuItemId: { in: [...new Set(items.map(item => item.menuItemId))] },
@@ -277,7 +277,7 @@ export abstract class OrderStorageClient {
             const cartItem = cartItems[matchIndex]!;
             if (cartItem.quantity > item.quantity) {
                 cartItem.quantity -= item.quantity;
-                await tx.cartItem.update({
+                await prisma.cartItem.update({
                     where: { id: cartItem.id },
                     data:  { quantity: cartItem.quantity },
                 });
@@ -285,7 +285,7 @@ export abstract class OrderStorageClient {
             }
 
             cartItems.splice(matchIndex, 1);
-            await tx.cartItem.delete({ where: { id: cartItem.id } });
+            await prisma.cartItem.delete({ where: { id: cartItem.id } });
         }
     }
 
