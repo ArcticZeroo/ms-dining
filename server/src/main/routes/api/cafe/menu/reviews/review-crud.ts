@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import { IUpdateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { isDuckType } from '@arcticzeroo/typeguard';
 import { attachRouter, getTrimmedQueryParam, getUserIdOrThrow, isAdminAsync } from '../../../../../util/koa.js';
@@ -12,7 +12,7 @@ export const registerReviewCrudRoutes = (parent: Router) => {
         prefix: '/reviews'
     });
 
-    const validateReviewOwnershipOrAdminAsync = async (ctx: Router.RouterContext) => {
+    const validateReviewOwnershipOrAdminAsync = async (ctx: RouterContext) => {
         const reviewId = ctx.params.reviewId;
         if (!reviewId) {
             ctx.throw(400, 'Missing review id');

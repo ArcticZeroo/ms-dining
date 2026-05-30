@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import Koa, { Middleware } from 'koa';
 import { VERSION_TAG, VERSION_TAG_HEADER } from '@msdining/common/constants/versions';
 import { IServerSearchResult } from '../../shared/models/search.js';
@@ -14,7 +14,10 @@ import { getDateStringForMenuRequest } from './date.js';
 import { getServices } from '../../shared/services/registry.js';
 import { setTelemetryProperties } from '../middleware/telemetry.js';
 
-export const attachRouter= (parent: Koa | Router, child: Router) => parent.use(child.routes(), child.allowedMethods());
+export const attachRouter = (parent: Koa | Router, child: Router) => {
+    // Have to cast parent to Router or else TS gets mad that they have different `use` definitions.
+    (parent as Router).use(child.routes()).use(child.allowedMethods());
+}
 
 export const getTrimmedQueryParam = (ctx: Koa.Context, key: string): string | undefined => {
     const value = ctx.query[key];
@@ -236,9 +239,9 @@ export const assignCacheControl = (ctx: Koa.Context, maxAge: DurationOrMilliseco
     ctx.set('Vary', VERSION_TAG_HEADER);
 }
 
-export const CATCH_ALL_PATH = '(.*)';
+export const CATCH_ALL_PATH = '{*path}';
 
-const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
+const getCafeIdFromRequest = (ctx: RouterContext): string => {
     const id = ctx.params.id?.toLowerCase();
     if (!id) {
         ctx.throw(400, 'Missing cafe id');
@@ -246,7 +249,7 @@ const getCafeIdFromRequest = (ctx: Router.RouterContext): string => {
     return id;
 }
 
-const getCafeFromRequest = async (ctx: Router.RouterContext) => {
+const getCafeFromRequest = async (ctx: RouterContext) => {
     const id = getCafeIdFromRequest(ctx);
     const cafe = await getServices().data.cafe.retrieveCafe({ id });
     if (!cafe) {
@@ -256,7 +259,7 @@ const getCafeFromRequest = async (ctx: Router.RouterContext) => {
     return cafe;
 }
 
-export const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
+export const validateCafeMenuAccessAsync = async (ctx: RouterContext, onReady: (cafe: ICafe, dateString: string) => Promise<void>) => {
     const cafe = await getCafeFromRequest(ctx);
 
     const dateString = getDateStringForMenuRequest(ctx);
@@ -268,7 +271,7 @@ export const validateCafeMenuAccessAsync = async (ctx: Router.RouterContext, onR
     return onReady(cafe, dateString);
 };
 
-export const validateViewMenuAccessAsync = async (ctx: Router.RouterContext, onReady: (cafes: ICafe[], dateString: string) => Promise<void>) => {
+export const validateViewMenuAccessAsync = async (ctx: RouterContext, onReady: (cafes: ICafe[], dateString: string) => Promise<void>) => {
     const id = getCafeIdFromRequest(ctx);
 
     const cafes = resolveViewToCafes(id);

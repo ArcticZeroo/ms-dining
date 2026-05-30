@@ -1,10 +1,14 @@
-import Router from '@koa/router';
+import Router, { RouterMiddleware } from '@koa/router';
 import { IMenuItemDTO, IMenuOverviewSummary, IStationUniquenessData } from '@msdining/common/models/cafe';
 import { ICafeMenuResponse, MenuResponse } from '@msdining/common/models/http';
 import { memoizeResponseBodyWithResetOnMenuUpdate } from '../../../../middleware/cache.js';
 import { menuEtagMiddleware } from '../../../../middleware/menu-etag.js';
 import { ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
-import { getDefaultUniquenessDataForStation, getStationLogoUrl, resolveViewToCafes } from '../../../../../shared/util/cafe.js';
+import {
+    getDefaultUniquenessDataForStation,
+    getStationLogoUrl,
+    resolveViewToCafes
+} from '../../../../../shared/util/cafe.js';
 import { getDateStringForMenuRequest } from '../../../../util/date.js';
 import { attachRouter, supportsVersionTag, validateCafeMenuAccessAsync } from '../../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../../shared/util/serde.js';
@@ -123,7 +127,7 @@ export const registerViewRoutes = (parent: Router) => {
         return menusByStation;
     };
 
-    const handleMenuRequest = (allowArrayFallback: boolean): Router.Middleware => async (ctx) => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
+    const handleMenuRequest = (allowArrayFallback: boolean): RouterMiddleware => async (ctx) => validateCafeMenuAccessAsync(ctx, async (cafe, dateString) => {
         const [menuStations, uniquenessData, dailyCafeState] = await Promise.all([
             getServices().data.dailyMenu.retrieveDailyCafeMenu({ cafeId: cafe.id, dateString }),
             getServices().data.menuAnalytics.retrieveUniquenessDataForCafe({ cafeId: cafe.id, targetDateString: dateString }),

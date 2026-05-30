@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { isDuckType } from '@arcticzeroo/typeguard';
@@ -13,7 +13,7 @@ export const registerStationReviewRoutes = (parent: Router) => {
         prefix: '/stations/:stationId'
     });
 
-    const getStationFromRequest = async (ctx: Router.RouterContext) => {
+    const getStationFromRequest = async (ctx: RouterContext) => {
         const stationId = ctx.params.stationId;
         if (!stationId) {
             ctx.throw(400, 'Missing station id');

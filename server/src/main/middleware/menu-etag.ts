@@ -13,14 +13,14 @@
  * subsequent requests will start getting ETags.
  */
 
-import Router from '@koa/router';
+import { RouterContext } from '@koa/router';
 import Koa from 'koa';
 import { getServices } from '../../shared/services/registry.js';
 import { getDateStringForMenuRequest } from '../util/date.js';
 
 const formatEtag = (timestamp: number): string => `W/"${timestamp}"`;
 
-export const menuEtagMiddleware = async (ctx: Router.RouterContext, next: Koa.Next) => {
+export const menuEtagMiddleware = async (ctx: RouterContext, next: Koa.Next) => {
     const cafeId = ctx.params.id?.toLowerCase();
     const dateString = getDateStringForMenuRequest(ctx);
     if (!cafeId || !dateString) {

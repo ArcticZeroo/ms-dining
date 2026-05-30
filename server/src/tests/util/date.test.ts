@@ -1,16 +1,16 @@
 import { ICafe } from '../../shared/models/cafe.js';
-import Router from '@koa/router';
 import { getDateForMenuRequest, getDateStringForMenuRequest } from '../../main/util/date.js';
 import { isCafeAvailable } from '../../shared/util/date.js';
 import { fromDateString, getMinimumDateForMenu, toDateString } from '@msdining/common/util/date-util';
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { RouterContext } from '@koa/router';
 
 // Build a minimal Koa RouterContext that satisfies getTrimmedQueryParam.
-// `as unknown as Router.RouterContext` is the narrowest cast that lets us
+// `as unknown as RouterContext` is the narrowest cast that lets us
 // drive only the surface area these helpers touch (ctx.query).
-const makeCtx = (query: Record<string, string | string[] | undefined>): Router.RouterContext =>
-    ({ query } as unknown as Router.RouterContext);
+const makeCtx = (query: Record<string, string | string[] | undefined>): RouterContext =>
+    ({ query } as unknown as RouterContext);
 
 // Pinned to a known weekday so window math is predictable.
 const PINNED_NOW = new Date('2024-06-19T12:00:00Z'); // Wednesday

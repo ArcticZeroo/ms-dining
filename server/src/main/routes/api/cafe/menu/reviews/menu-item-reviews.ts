@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import { ICreateReviewRequest, REVIEW_MAX_COMMENT_LENGTH_CHARS } from '@msdining/common/models/http';
 import { IReviewSummary, IReviewWithComment } from '@msdining/common/models/review';
 import { ANALYTICS_APPLICATION_NAMES } from '@msdining/common/constants/analytics';
@@ -16,7 +16,7 @@ export const registerMenuItemReviewRoutes = (parent: Router) => {
         prefix: '/menu-items/:menuItemId'
     });
 
-    const getMenuItemFromRequest = async (ctx: Router.RouterContext) => {
+    const getMenuItemFromRequest = async (ctx: RouterContext) => {
         const menuItemId = ctx.params.menuItemId;
         if (!menuItemId) {
             ctx.throw(400, 'Missing menu item id');

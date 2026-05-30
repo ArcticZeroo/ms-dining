@@ -1,9 +1,9 @@
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import { DateUtil } from '@msdining/common';
 import { isDateStringWithinMenuWindow } from '../../shared/util/date.js';
 import { getTrimmedQueryParam } from './koa.js';
 
-export const getDateForMenuRequest = (ctx: Router.RouterContext): Date | null => {
+export const getDateForMenuRequest = (ctx: RouterContext): Date | null => {
     const queryDateRaw = getTrimmedQueryParam(ctx, 'date');
     if (!queryDateRaw || !isDateStringWithinMenuWindow(queryDateRaw)) {
         return null;
@@ -13,7 +13,7 @@ export const getDateForMenuRequest = (ctx: Router.RouterContext): Date | null =>
     return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export const getDateStringForMenuRequest = (ctx: Router.RouterContext): string | null => {
+export const getDateStringForMenuRequest = (ctx: RouterContext): string | null => {
     const date = getDateForMenuRequest(ctx);
     return date ? DateUtil.toDateString(date) : null;
 };

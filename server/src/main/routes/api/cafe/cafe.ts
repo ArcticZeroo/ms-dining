@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { RouterContext } from '@koa/router';
 import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/models/http';
 import { toMaybeDateString } from '@msdining/common/util/date-util';
 import { getServices } from '../../../../shared/services/registry.js';
@@ -27,7 +27,7 @@ export const registerCafeRoutes = (parent: Router) => {
     registerGroupsRoutes(router);
     registerCartRoutes(router);
 
-    const populateCafesAsync = async (ctx: Router.RouterContext, response: IDiningCoreResponse) => {
+    const populateCafesAsync = async (ctx: RouterContext, response: IDiningCoreResponse) => {
         const cafeDataById = await getServices().data.cafe.retrieveCafes({});
 
         for (const group of diningConfig.CAFE_GROUP_LIST) {
