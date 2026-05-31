@@ -10,4 +10,10 @@ export const stationService: IStationService = {
         dataHandler.sendRequest('station', 'retrieveAllStationsWithoutGroup', data),
     retrieveAllStationNames: (data) =>
         dataHandler.sendRequest('station', 'retrieveAllStationNames', data),
+    getStationHours: (data) =>
+        dataHandler.sendRequest('station', 'getStationHours', data),
+    getCafeHoursForDate: (data) =>
+        dataHandler.sendRequest('station', 'getCafeHoursForDate', data),
+    getAllCafeHoursForDate: (data) =>
+        dataHandler.sendRequest('station', 'getAllCafeHoursForDate', data),
 };

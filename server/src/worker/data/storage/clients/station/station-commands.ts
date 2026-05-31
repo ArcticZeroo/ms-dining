@@ -14,4 +14,12 @@ export const stationServiceCommands = {
     },
     retrieveAllStationNames: async () =>
         StationStorageClient.retrieveAllStationNamesAsync(),
+    getStationHours: async ({ stationId }: { stationId: string }) =>
+        StationStorageClient.getStationHoursAsync(stationId),
+    getCafeHoursForDate: async ({ cafeId, dateString }: { cafeId: string; dateString: string }) =>
+        StationStorageClient.getCafeHoursAsync(cafeId, dateString),
+    getAllCafeHoursForDate: async ({ dateString }: { dateString: string }) => {
+        const map = await StationStorageClient.getAllCafeHoursAsync(dateString);
+        return Object.fromEntries(map);
+    },
 } satisfies IStationService;

@@ -1,7 +1,6 @@
 import type { ICafeStation } from '../models/cafe.js';
 import { EmptyObject } from '../models/util.js';
 
-/** Wire-safe representation of a persisted station record (mirrors Prisma's `Station` model). */
 export interface IStationRecord {
     id: string;
     name: string;
@@ -10,6 +9,13 @@ export interface IStationRecord {
     menuId: string;
     groupId: string | null;
     cafeId: string;
+    opensAt: number;
+    closesAt: number;
+}
+
+export interface ICafeHours {
+    opensAt: number;
+    closesAt: number;
 }
 
 export interface IStationService {
@@ -24,4 +30,13 @@ export interface IStationService {
 
     /** Get the names of all stations. */
     retrieveAllStationNames(data: EmptyObject): Promise<string[]>;
+
+    /** Get hours for a single station. */
+    getStationHours(data: { stationId: string }): Promise<ICafeHours | null>;
+
+    /** Get aggregate hours for a cafe on a given date (min opensAt, max closesAt across its active stations). */
+    getCafeHoursForDate(data: { cafeId: string; dateString: string }): Promise<ICafeHours | null>;
+
+    /** Get aggregate hours for all cafes on a given date, keyed by cafeId. */
+    getAllCafeHoursForDate(data: { dateString: string }): Promise<Record<string, ICafeHours>>;
 }

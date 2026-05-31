@@ -133,7 +133,7 @@ export class DailyCafeUpdateSession {
 
             // Skip cafes that are past their closing time for today
             if (this.daysInFuture === 0) {
-                const storedHours = await getServices().data.dailyMenu.getCafeHoursForDate({ cafeId: cafe.id, dateString: this.dateString });
+                const storedHours = await getServices().data.station.getCafeHoursForDate({ cafeId: cafe.id, dateString: this.dateString });
                 if (storedHours && isCurrentlyPastMinutes(storedHours.closesAt)) {
                     logInfo(`{${this.dateString}}`, `Skipping "${cafe.name}" @ ${cafe.id} because it is past closing time (closes at ${minutesToTimeString(storedHours.closesAt)}, opens at ${minutesToTimeString(storedHours.opensAt)})`);
                     continue;

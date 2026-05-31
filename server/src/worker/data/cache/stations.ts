@@ -53,6 +53,9 @@ STORAGE_EVENTS.on('menuPublished', async (event) => {
             menuId:         station.menuId,
             groupId:        station.groupId ?? null,
             cafeId:         station.cafeId,
+            opensAt:        station.opensAt,
+            closesAt:       station.closesAt,
+            externalMenuLastUpdateTime: station.menuLastUpdateTime ?? new Date(0),
         }));
     }
 });

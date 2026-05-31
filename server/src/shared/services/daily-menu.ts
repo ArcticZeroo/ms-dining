@@ -21,11 +21,6 @@ export interface ICafeDailyState {
     shutdownState?: ICafeShutdownState;
 }
 
-export interface ICafeHours {
-    opensAt: number;
-    closesAt: number;
-}
-
 export interface ICafeChildAvailability {
     stationVisitsById: Record<string, string[]>;
     itemVisitsById: Record<string, string[]>;
@@ -81,9 +76,6 @@ export interface IDailyMenuService {
     retrieveFirstStationVisitDate(data: { stationId: string }): Promise<string | null>;
     retrieveFirstMenuItemVisitDate(data: { menuItemId: string }): Promise<string | null>;
     retrieveAllFirstMenuItemAppearances(data: EmptyObject): Promise<Record<string, string>>;
-    getCafeHoursForDate(data: { cafeId: string; dateString: string }): Promise<ICafeHours | null>;
-    getStationHoursForDate(data: { stationId: string; dateString: string }): Promise<ICafeHours | null>;
-    getAllCafeHoursForDate(data: { dateString: string }): Promise<Record<string, ICafeHours>>;
     upsertDailyCafeAsync(data: { cafeId: string; dateString: string; data: { isAvailable: boolean; shutdownMessageHash?: string | null } }): Promise<void>;
     getShutDownCafesAsync(data: { dateString: string }): Promise<Record<string, ICafeShutdownState>>;
     retrieveDailyCafeStateAsync(data: { cafeId: string; dateString: string }): Promise<ICafeDailyState>;

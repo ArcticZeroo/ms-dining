@@ -36,12 +36,6 @@ export const dailyMenuService: IDailyMenuService = {
         dataHandler.sendRequest('dailyMenu', 'retrieveFirstMenuItemVisitDate', data),
     retrieveAllFirstMenuItemAppearances: (data) =>
         dataHandler.sendRequest('dailyMenu', 'retrieveAllFirstMenuItemAppearances', data),
-    getCafeHoursForDate: (data) =>
-        dataHandler.sendRequest('dailyMenu', 'getCafeHoursForDate', data),
-    getStationHoursForDate: (data) =>
-        dataHandler.sendRequest('dailyMenu', 'getStationHoursForDate', data),
-    getAllCafeHoursForDate: (data) =>
-        dataHandler.sendRequest('dailyMenu', 'getAllCafeHoursForDate', data),
     upsertDailyCafeAsync: (data) =>
         dataHandler.sendRequest('dailyMenu', 'upsertDailyCafeAsync', data),
     getShutDownCafesAsync: (data) =>

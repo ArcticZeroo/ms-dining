@@ -33,8 +33,6 @@ export const buildReadOps = (samples: SampledIds): WorkloadOp[] => {
                         id:        true,
                         stationId: true,
                         cafeId:    true,
-                        opensAt:   true,
-                        closesAt:  true,
                         categories: {
                             select: {
                                 name:      true,

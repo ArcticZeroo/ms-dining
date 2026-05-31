@@ -127,8 +127,6 @@ const writeMenuInTransaction = async (
                 cafeId,
                 dateString,
                 stationId: station.id,
-                opensAt:   station.opensAt,
-                closesAt:  station.closesAt,
             }
         });
 
@@ -231,15 +229,15 @@ export abstract class DailyMenuStorageClient {
             },
             select: {
                 stationId:              true,
-                externalLastUpdateTime: true,
-                opensAt:                true,
-                closesAt:               true,
                 station:                {
                     select: {
-                        name:    true,
-                        logoUrl: true,
-                        menuId:  true,
-                        groupId: true
+                        name:                      true,
+                        logoUrl:                   true,
+                        menuId:                    true,
+                        groupId:                   true,
+                        opensAt:                   true,
+                        closesAt:                  true,
+                        externalMenuLastUpdateTime: true,
                     }
                 },
                 categories:             {
@@ -289,14 +287,14 @@ export abstract class DailyMenuStorageClient {
                 logoUrl:            stationData.logoUrl || undefined,
                 name:               stationData.name,
                 groupId:            stationData.groupId,
-                menuLastUpdateTime: isDateValid(dailyStation.externalLastUpdateTime)
-                    ? dailyStation.externalLastUpdateTime
+                menuLastUpdateTime: isDateValid(stationData.externalMenuLastUpdateTime)
+                    ? stationData.externalMenuLastUpdateTime
                     : undefined,
                 cafeId,
                 menuItemsById,
                 menuItemIdsByCategoryName,
-                opensAt:            dailyStation.opensAt,
-                closesAt:           dailyStation.closesAt,
+                opensAt:            stationData.opensAt,
+                closesAt:           stationData.closesAt,
             });
         }
 
@@ -754,58 +752,6 @@ export abstract class DailyMenuStorageClient {
             }
         }
         return firstVisitDates;
-    }
-
-    public static async getCafeHoursForDate(cafeId: string, dateString: string): Promise<{
-        opensAt: number;
-        closesAt: number
-    } | null> {
-        const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.aggregate({
-            where:  { cafeId, dateString },
-            _min:   { opensAt: true },
-            _max:   { closesAt: true },
-            _count: true,
-        }));
-
-        if (result._count === 0) {
-            return null;
-        }
-
-        return { opensAt: result._min.opensAt!, closesAt: result._max.closesAt! };
-    }
-
-    public static async getAllCafeHoursForDate(dateString: string): Promise<Map<string, {
-        opensAt: number;
-        closesAt: number
-    }>> {
-        const results = await usePrismaClient(prismaClient => prismaClient.dailyStation.groupBy({
-            by:    ['cafeId'],
-            where: { dateString },
-            _min:  { opensAt: true },
-            _max:  { closesAt: true },
-        }));
-
-        const hoursByCafe = new Map<string, { opensAt: number; closesAt: number }>();
-        for (const result of results) {
-            hoursByCafe.set(result.cafeId, {
-                opensAt:  result._min.opensAt!,
-                closesAt: result._max.closesAt!,
-            });
-        }
-
-        return hoursByCafe;
-    }
-
-    public static async getStationHoursForDate(stationId: string, dateString: string): Promise<{
-        opensAt: number;
-        closesAt: number;
-    } | null> {
-        const result = await usePrismaClient(prismaClient => prismaClient.dailyStation.findFirst({
-            where:  { stationId, dateString },
-            select: { opensAt: true, closesAt: true },
-        }));
-
-        return result;
     }
 
     public static async upsertDailyCafeAsync(cafeId: string, dateString: string, data: {

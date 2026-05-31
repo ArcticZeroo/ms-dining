@@ -984,7 +984,7 @@ export class CafeOrderSession implements IOrderSession {
                 throw new Error(`Cannot synthesize schedule: station "${stationId}" not found in DB`);
             }
 
-            const hours = await getServices().data.dailyMenu.getStationHoursForDate({ stationId, dateString: todayDateString });
+            const hours = await getServices().data.station.getStationHours({ stationId });
             if (hours == null) {
                 throw new Error(`Cannot synthesize schedule: no hours found for station "${stationId}" (${station.name}) on ${todayDateString}`);
             }

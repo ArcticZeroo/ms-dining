@@ -14,6 +14,8 @@ export const toStationRecord = (station: Station): IStationRecord => ({
     menuId:         station.menuId,
     groupId:        station.groupId,
     cafeId:         station.cafeId,
+    opensAt:        station.opensAt,
+    closesAt:       station.closesAt,
 });
 
 export abstract class StationStorageClient {
@@ -23,7 +25,10 @@ export abstract class StationStorageClient {
             normalizedName: normalizeNameForSearch(station.name),
             menuId:         station.menuId,
             cafeId:         station.cafeId,
-            logoUrl:        station.logoUrl || null
+            logoUrl:        station.logoUrl || null,
+            opensAt:        station.opensAt,
+            closesAt:       station.closesAt,
+            externalMenuLastUpdateTime: station.menuLastUpdateTime ?? new Date(0),
         } satisfies Prisma.StationUpdateArgs['data'];
 
         if (station.groupId) {
@@ -86,5 +91,63 @@ export abstract class StationStorageClient {
             select: { name: true }
         }));
         return stations.map(station => station.name);
+    }
+
+    public static async getStationHoursAsync(stationId: string): Promise<{ opensAt: number; closesAt: number } | null> {
+        return usePrismaClient(prismaClient => prismaClient.station.findUnique({
+            where:  { id: stationId },
+            select: { opensAt: true, closesAt: true },
+        }));
+    }
+
+    public static async getCafeHoursAsync(cafeId: string, dateString: string): Promise<{ opensAt: number; closesAt: number } | null> {
+        const stations = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  { cafeId, dateString },
+            select: { station: { select: { opensAt: true, closesAt: true } } },
+        }));
+
+        if (stations.length === 0) {
+            return null;
+        }
+
+        let opensAt = Infinity;
+        let closesAt = -Infinity;
+        for (const { station } of stations) {
+            if (station.opensAt < opensAt) {
+                opensAt = station.opensAt;
+            }
+            if (station.closesAt > closesAt) {
+                closesAt = station.closesAt;
+            }
+        }
+
+        return { opensAt, closesAt };
+    }
+
+    public static async getAllCafeHoursAsync(dateString: string): Promise<Map<string, { opensAt: number; closesAt: number }>> {
+        const rows = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+            where:  { dateString },
+            select: {
+                cafeId:  true,
+                station: { select: { opensAt: true, closesAt: true } },
+            },
+        }));
+
+        const hoursByCafe = new Map<string, { opensAt: number; closesAt: number }>();
+        for (const { cafeId, station } of rows) {
+            const existing = hoursByCafe.get(cafeId);
+            if (existing == null) {
+                hoursByCafe.set(cafeId, { opensAt: station.opensAt, closesAt: station.closesAt });
+            } else {
+                if (station.opensAt < existing.opensAt) {
+                    existing.opensAt = station.opensAt;
+                }
+                if (station.closesAt > existing.closesAt) {
+                    existing.closesAt = station.closesAt;
+                }
+            }
+        }
+
+        return hoursByCafe;
     }
 }

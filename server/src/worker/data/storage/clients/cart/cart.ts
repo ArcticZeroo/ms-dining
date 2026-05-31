@@ -2,7 +2,7 @@ import { usePrismaTransaction } from '../../client.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../../../../shared/rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { getStationNamesByIds } from '../../../cache/stations.js';
-import { DailyMenuStorageClient } from '../daily-menu/daily-menu.js';
+import { StationStorageClient } from '../station/station.js';
 import { toDateString } from '@msdining/common/util/date-util';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
 import { getShutdownCafeStateAsync } from '../../../cache/daily-cafe-state.js';
@@ -110,7 +110,7 @@ export abstract class CartStorageClient {
         const cafeIds = [...itemsByCafeId.keys()];
         const [shutdownCafeStates, ...hoursByCafe] = await Promise.all([
             getShutdownCafeStateAsync(todayString),
-            ...cafeIds.map(cafeId => DailyMenuStorageClient.getCafeHoursForDate(cafeId, todayString)),
+            ...cafeIds.map(cafeId => StationStorageClient.getCafeHoursAsync(cafeId, todayString)),
         ]);
 
         return {

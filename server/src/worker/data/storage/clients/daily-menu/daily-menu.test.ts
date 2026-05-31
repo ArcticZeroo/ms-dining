@@ -67,7 +67,7 @@ const seedCafe = (id: string, name: string) =>
         },
     }));
 
-const seedStation = (id: string, cafeId: string, name: string, opts: { groupId?: string | null; logoUrl?: string | null } = {}) =>
+const seedStation = (id: string, cafeId: string, name: string, opts: { groupId?: string | null; logoUrl?: string | null; opensAt?: number; closesAt?: number } = {}) =>
     usePrismaWrite(prisma => prisma.station.create({
         data: {
             id,
@@ -77,6 +77,8 @@ const seedStation = (id: string, cafeId: string, name: string, opts: { groupId?:
             menuId:         'menu-' + id,
             logoUrl:        opts.logoUrl ?? null,
             groupId:        opts.groupId ?? null,
+            opensAt:        opts.opensAt ?? 660,
+            closesAt:       opts.closesAt ?? 840,
         },
     }));
 
@@ -103,18 +105,16 @@ interface SeedDailyStationParams {
     stationId: string;
     /** Map of category name → menuItemIds (order preserved). */
     itemsByCategory: Map<string, string[]>;
-    opensAt?: number;
-    closesAt?: number;
 }
 
-const seedDailyStation = async ({ cafeId, dateString, stationId, itemsByCategory, opensAt = 660, closesAt = 840 }: SeedDailyStationParams) => {
+const seedDailyStation = async ({ cafeId, dateString, stationId, itemsByCategory }: SeedDailyStationParams) => {
     await usePrismaWrite(prisma => prisma.dailyCafe.upsert({
         where:  { dateString_cafeId: { dateString, cafeId } },
         update: {},
         create: { dateString, cafeId, isAvailable: true },
     }));
     const dailyStation = await usePrismaWrite(prisma => prisma.dailyStation.create({
-        data: { cafeId, dateString, stationId, opensAt, closesAt },
+        data: { cafeId, dateString, stationId },
     }));
     for (const [categoryName, menuItemIds] of itemsByCategory) {
         const category = await usePrismaWrite(prisma => prisma.dailyCategory.create({
@@ -134,7 +134,7 @@ test('retrieveDailyMenuAsync returns stationId + categories with all fields popu
     const cafeId = 'test-cafe-shape';
     const stationId = 'test-station-shape';
     await seedCafe(cafeId, 'Shape Cafe');
-    await seedStation(stationId, cafeId, 'Grill Station', { logoUrl: 'http://example.com/logo.png' });
+    await seedStation(stationId, cafeId, 'Grill Station', { logoUrl: 'http://example.com/logo.png', opensAt: 600, closesAt: 900 });
     await seedMenuItem('m1', cafeId, stationId, 'Burger');
     await seedMenuItem('m2', cafeId, stationId, 'Hot Dog');
     await seedMenuItem('m3', cafeId, stationId, 'Fries');
@@ -148,8 +148,6 @@ test('retrieveDailyMenuAsync returns stationId + categories with all fields popu
             ['Entrees', ['m1', 'm2']],
             ['Sides', ['m3']],
         ]),
-        opensAt:  600,
-        closesAt: 900,
     });
 
     const stations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, dateString);

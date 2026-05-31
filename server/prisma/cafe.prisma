@@ -121,6 +121,11 @@ model Station {
   logoUrl        String?
   menuId         String
 
+  // Minutes since midnight. Most cafes open at 11 AM (660) and close around 2 PM (840).
+  opensAt                    Int       @default(660)
+  closesAt                   Int       @default(840)
+  externalMenuLastUpdateTime DateTime @default("1970-01-01T00:00:00.000Z")
+
   groupId String?
   group   CrossCafeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
@@ -135,11 +140,7 @@ model Station {
 model DailyStation {
   id Int @id @default(autoincrement())
 
-  dateString             String
-  externalLastUpdateTime DateTime?
-  // Minutes since midnight. Most cafes open at 11 AM (660) and close around 2 PM (840).
-  opensAt                Int    @default(660)
-  closesAt               Int    @default(840)
+  dateString String
 
   stationId String
   station   Station @relation(fields: [stationId], references: [id])
