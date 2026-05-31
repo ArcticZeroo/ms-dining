@@ -6,6 +6,7 @@ import { InProcessHandler, WorkerThreadHandler } from '../rpc/handler.js';
 import { DATA_SERVICES } from './data-services.js';
 import { runPendingMigrations } from './runtime-migrations/runner.js';
 import { createProductionAi } from './ai/index.js';
+import type { IAiProvider } from './ai/provider.js';
 import { BuyOnDemandClient } from './cafe/buy-ondemand/buy-ondemand-client.js';
 import { TranslationCache } from './cafe/buy-ondemand/i18n.js';
 import { performMenuBootTasks } from './cafe/job/boot.js';
@@ -15,14 +16,26 @@ import { createDataServices } from '../../shared/services/create-data-services.j
 import { setDefaultServices } from '../../shared/services/registry.js';
 import { getTelemetryClient } from '../../shared/telemetry/app-insights.js';
 import { logError, logInfo } from '../../shared/util/log.js';
-import { ENVIRONMENT_SETTINGS } from '../../shared/util/env.js';
+import { ENVIRONMENT_SETTINGS, isTestEnvironment } from '../../shared/util/env.js';
 
 await runPendingMigrations();
+
+const throwingAiProvider: IAiProvider = {
+    retrieveTextCompletion() {
+        throw new Error('AI provider not available in test worker — use MockAiProvider via services');
+    },
+    retrieveVisionCompletion() {
+        throw new Error('AI provider not available in test worker — use MockAiProvider via services');
+    },
+    retrieveEmbedding() {
+        throw new Error('AI provider not available in test worker — use MockAiProvider via services');
+    },
+};
 
 const workerDataHandler = new InProcessHandler(DATA_SERVICES, { cloneOverWire: false });
 setDefaultServices({
     data:               createDataServices(workerDataHandler),
-    ai:                 createProductionAi(),
+    ai:                 isTestEnvironment ? throwingAiProvider : createProductionAi(),
     translations:       new TranslationCache(),
     buyOnDemandFactory: BuyOnDemandClient.createAsync,
     telemetry:          getTelemetryClient(),

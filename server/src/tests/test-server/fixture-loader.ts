@@ -1,13 +1,12 @@
 /**
- * Fixture loader: reads JSON fixture files from the fixtures/ directory
- * and registers them with a TestBuyOnDemandServer instance.
- *
- * Directory structure:
- *   fixtures/default/         → fallback data for any cafe
- *   fixtures/overrides/{id}/  → per-cafe overrides
+ * Fixture loader: reads hand-authored default fixture files from the
+ * fixtures/ directory and registers them with a TestBuyOnDemandServer
+ * instance, then layers generated per-cafe fixtures on top.
  */
 
 import { TestBuyOnDemandServer } from './index.js';
+import { ALL_CAFES } from '../../shared/constants/cafes.js';
+import { generateForCafe } from './fixture-generator.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,8 +42,8 @@ function loadJsonFile(filePath: string): unknown | undefined {
 }
 
 /**
- * Load all fixture files from the default and override directories
- * into the given server instance.
+ * Load hand-authored default fixtures from disk and generated per-cafe
+ * fixtures into the given server instance.
  */
 export function loadFixtures(server: TestBuyOnDemandServer): void {
     // Load defaults
@@ -65,27 +64,10 @@ export function loadFixtures(server: TestBuyOnDemandServer): void {
         server.state.loadInitialTranslations('core', translationsData);
     }
 
-    // Load per-cafe overrides (if the overrides directory exists)
-    const overridesDir = path.join(FIXTURES_DIR, 'overrides');
-    let cafeIds: string[];
-    try {
-        cafeIds = fs.readdirSync(overridesDir, { withFileTypes: true })
-            .filter(directoryEntry => directoryEntry.isDirectory())
-            .map(directoryEntry => directoryEntry.name);
-    } catch (err) {
-        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-            return;
-        }
-        throw err;
-    }
-
-    for (const cafeId of cafeIds) {
+    for (const { id: cafeId } of ALL_CAFES) {
+        const fixtures = generateForCafe(cafeId);
         for (const fixture of FIXTURE_FILES) {
-            const filePath = path.join(overridesDir, cafeId, `${fixture}.json`);
-            const data = loadJsonFile(filePath);
-            if (data !== undefined) {
-                server.setFixture(cafeId, fixture, data);
-            }
+            server.setFixture(cafeId, fixture, fixtures[fixture]);
         }
     }
 }

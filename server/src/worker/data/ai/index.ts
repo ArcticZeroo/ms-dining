@@ -3,6 +3,7 @@ import { rethrowWithoutStatus } from '../../../shared/util/error.js';
 import { getServices } from '../../../shared/services/registry.js';
 import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../../shared/constants/env.js';
 import { logInfo } from '../../../shared/util/log.js';
+import { isTestEnvironment } from '../../../shared/util/env.js';
 import { anthropicProvider } from './providers/anthropic.js';
 import { openAiProvider } from './providers/openai.js';
 import type { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';
@@ -40,6 +41,12 @@ const pickTextVisionProvider = (): TextVisionProvider => {
  * provider selection or composition happen in this module.
  */
 export const createProductionAi = (): IAiProvider => {
+    if (isTestEnvironment) {
+        throw new Error(
+            'createProductionAi() must not be called in test mode — '
+            + 'use MockAiProvider instead to avoid hitting real AI services.',
+        );
+    }
     const textVision = pickTextVisionProvider();
     return {
         retrieveTextCompletion:   (request) => textVision.retrieveTextCompletion(request),

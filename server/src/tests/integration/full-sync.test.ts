@@ -23,7 +23,6 @@
 import { after, before, mock, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { getMinimumDateForMenu } from '@msdining/common/util/date-util';
 import { performMenuBootTasks } from '../../worker/data/cafe/job/boot.js';
 import { usePrismaClient } from '../../worker/data/storage/client.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
@@ -95,13 +94,32 @@ test('boot syncs all cafes with the expected entity counts', async () => {
     const unavailable = summary.perCafe.get(UNAVAILABLE_CAFE_ID);
     assert.ok(unavailable, `${UNAVAILABLE_CAFE_ID} should have a fixture`);
 
-    // The unavailable cafe gets a Cafe row (its /config succeeded) but no
-    // stations or items (the /concepts call failed with 410). Every other
-    // cafe — including the shutdown one — syncs fully because shutdown is
-    // an in-band signal, not a fetch failure.
-    const expectedStations = summary.totals.stations - unavailable.stationCount;
-    const expectedMenuItems = summary.totals.menuItems - unavailable.menuItemCount;
-    const expectedDailyMenuItems = summary.totals.menuItemAppearances - unavailable.menuItemAppearanceCount;
+    // Cafes that the boot sync skips entirely:
+    //  - the unavailable cafe (410 on concepts) gets a Cafe row but no stations/items
+    //  - cafes whose firstAvailable date is after the current date are skipped
+    // Subtract their fixture counts from the expected totals.
+    const skippedCafeIds = new Set<string>([UNAVAILABLE_CAFE_ID]);
+    for (const cafe of ALL_CAFES) {
+        if (!isCafeAvailable(cafe, new Date())) {
+            skippedCafeIds.add(cafe.id);
+        }
+    }
+
+    let skippedStations = 0;
+    let skippedMenuItems = 0;
+    let skippedAppearances = 0;
+    for (const cafeId of skippedCafeIds) {
+        const cafeSummary = summary.perCafe.get(cafeId);
+        if (cafeSummary) {
+            skippedStations += cafeSummary.stationCount;
+            skippedMenuItems += cafeSummary.menuItemCount;
+            skippedAppearances += cafeSummary.menuItemAppearanceCount;
+        }
+    }
+
+    const expectedStations = summary.totals.stations - skippedStations;
+    const expectedMenuItems = summary.totals.menuItems - skippedMenuItems;
+    const expectedDailyMenuItems = summary.totals.menuItemAppearances - skippedAppearances;
 
     const counts = await usePrismaClient(async (client) => ({
         cafes: await client.cafe.count(),
@@ -117,13 +135,17 @@ test('boot syncs all cafes with the expected entity counts', async () => {
         }),
     }));
 
+    // The number of DailyCafe rows equals the number of cafes that were
+    // actually synced (available + unavailable-410), NOT ALL_CAFES.
+    const syncedCafeCount = ALL_CAFES.filter(cafe => isCafeAvailable(cafe, new Date())).length;
+
     assert.equal(counts.cafes, summary.totals.cafes);
     assert.equal(counts.stations, expectedStations);
     assert.equal(counts.menuItems, expectedMenuItems);
     assert.equal(counts.dailyStations, expectedStations);
     assert.equal(counts.dailyMenuItems, expectedDailyMenuItems);
-    assert.equal(counts.dailyCafes, summary.totals.cafes);
-    assert.equal(counts.availableDailyCafes, summary.totals.cafes - 1);
+    assert.equal(counts.dailyCafes, syncedCafeCount);
+    assert.equal(counts.availableDailyCafes, syncedCafeCount - 1);
 });
 
 test('shutdown cafe is the only shut-down cafe', async () => {
@@ -207,16 +229,13 @@ test('menu items have tags and modifiers from fixtures', async () => {
     }
 });
 
-test('GET /api/dining/ returns exactly the available cafes', async () => {
+test('GET /api/dining/ returns exactly the synced cafes', async () => {
     const body = await fetchJson(`${baseUrl}/api/dining/`, DiningCoreResponseSchema);
 
-    // The route filters out cafes whose firstAvailableDate is past the
-    // minimum-menu cutoff (i.e. unreleased) for clients that don't pass
-    // the unreleased-cafes version tag (we don't, since fetch() sends none).
-    const minimumDate = getMinimumDateForMenu();
-    const expectedIds = new Set(
-        ALL_CAFES.filter(cafe => isCafeAvailable(cafe, minimumDate)).map(cafe => cafe.id),
-    );
+    // The route returns ALL cafes that have a Cafe row in the DB (i.e.
+    // every cafe boot synced, regardless of firstAvailableDate). Filtering
+    // by availability happens client-side using firstAvailableDate.
+    const expectedIds = new Set(ALL_CAFES.map(cafe => cafe.id));
 
     const responseIds = new Set(body.groups.flatMap(group => group.members.map(member => member.id)));
     assert.deepEqual(responseIds, expectedIds);

@@ -7,3 +7,4 @@ static/menu-items/thumbnail
 *.csv
 har-captures/
 profiles/
+src/tests/test-server/fixtures/overrides/

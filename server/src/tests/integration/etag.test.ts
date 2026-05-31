@@ -2,16 +2,17 @@
  * Integration test for the menu-watermark + menu-etag pipeline.
  *
  * Verifies:
- *   - First request emits an ETag derived from the watermark.
+ *   - First request emits an ETag header with Cache-Control: no-cache.
  *   - Second request with matching If-None-Match returns 304 + empty body.
  *   - A no-op re-sync (same fixture data) does NOT bump the watermark, so
  *     the prior ETag still produces 304.
  *   - A real menu change (fixture mutation that adds a new item) DOES bump
- *     the watermark, so the prior ETag now produces 200 + a new ETag.
+ *     the watermark, so the prior ETag now produces 200 + a strictly larger
+ *     (newer) ETag.
  *
- * The watermark reads Date.now() inside the menuPublished listener. We pin
- * the mock clock to a known instant before each resync so ETag values are
- * fully deterministic and we can assert exact equality.
+ * Tests assert behavior (ETag stability, 304 vs 200, monotonic increase)
+ * rather than exact timestamp values, because the watermark's Date.now()
+ * runs in the data-service worker thread where mock.timers cannot reach.
  *
  * Tests use a single cafe (cafe25) re-synced directly via
  * CafeMenuSession.retrieveMenuAsync + saveDailyMenuAsync rather than the
@@ -35,10 +36,8 @@ import {
 import { fetchExpectStatus } from '../test-server/test-helpers.js';
 import { CACHE_EVENTS } from '../../shared/util/events.js';
 
-const FAKE_NOW = new Date('2026-05-13T12:00:00Z'); // Wednesday — avoid weekend skip
-const INITIAL_SYNC_AT = FAKE_NOW.getTime();
-const SECOND_SYNC_AT = FAKE_NOW.getTime() + 60_000;
-const THIRD_SYNC_AT = FAKE_NOW.getTime() + 120_000;
+// Pin to a Wednesday so production weekend-skip logic doesn't short-circuit.
+const FAKE_NOW = new Date('2026-05-13T12:00:00Z');
 
 const CAFE_ID = 'cafe25';
 
@@ -46,13 +45,24 @@ let ctx: IntegrationTestContext;
 let baseUrl: string;
 let todayString: string;
 let cafe: ICafe;
+// Captured from the first successful GET — used as reference for later tests.
+let initialEtag: string;
+
+/**
+ * Extract the numeric timestamp embedded inside a weak ETag like `W/"1234"`.
+ * Returns NaN if the ETag doesn't match the expected format.
+ */
+const parseEtagTimestamp = (etag: string): number => {
+    const match = /^W\/"(\d+)"$/.exec(etag);
+    return match ? Number(match[1]) : NaN;
+};
 
 /**
  * Waits for the next CACHE_EVENTS.menuPublished emission. The cache-events
  * bridge runs as a microtask chain after STORAGE_EVENTS fires (see
- * api/cache/daily-menu.ts), so triggering work then awaiting this promise
- * guarantees the watermark listener has observed the event before we
- * inspect anything.
+ * worker/data/cache/daily-menu.ts), so triggering work then awaiting this
+ * promise guarantees the watermark listener has observed the event before
+ * we inspect anything.
  */
 const waitForCacheMenuPublished = (): Promise<IMenuPublishEvent> => {
     return new Promise((resolve) => {
@@ -86,23 +96,20 @@ const resyncCafe = async (): Promise<IMenuPublishEvent> => {
     return eventPromise;
 };
 
-const expectedEtagAt = (timestampMs: number): string => `W/"${timestampMs}"`;
-
 const menuUrl = `/api/dining/menu/${CAFE_ID}/menu`;
 
 before(async () => {
-    mock.timers.enable({ apis: ['Date'], now: INITIAL_SYNC_AT });
+    mock.timers.enable({ apis: ['Date'], now: FAKE_NOW });
     todayString = DateUtil.toDateString(new Date());
 
-    ctx = await createIntegrationTestContext();
+    ctx = await createIntegrationTestContext({ useWorkerThread: true });
     baseUrl = await ctx.startWebserver();
 
     const found = ALL_CAFES.find((availableCafe) => availableCafe.id === CAFE_ID);
     assert.ok(found, `${CAFE_ID} should exist in ALL_CAFES`);
     cafe = found;
 
-    // Initial sync so the cafe-day has data + an initial watermark equal
-    // to INITIAL_SYNC_AT.
+    // Initial sync so the cafe-day has data + a watermark.
     const initialEvent = await resyncCafe();
     assert.ok(initialEvent.dirtyStations.size > 0, 'initial sync should mark stations dirty');
     assert.ok(initialEvent.dirtyMenuItemIds.size > 0, 'initial sync should mark menu items dirty');
@@ -113,45 +120,41 @@ after(async () => {
     mock.timers.reset();
 });
 
-test('first menu request emits the deterministic ETag', async () => {
+test('first menu request emits an ETag', async () => {
     const res = await fetchExpectStatus(`${baseUrl}${menuUrl}?date=${todayString}`, 200);
-    assert.equal(res.headers.get('etag'), expectedEtagAt(INITIAL_SYNC_AT));
+    const etag = res.headers.get('etag');
+    assert.ok(etag, 'response should include an ETag header');
+    assert.match(etag, /^W\/"[0-9]+"$/, 'ETag should be a weak validator wrapping a numeric timestamp');
     assert.equal(res.headers.get('cache-control'), 'no-cache');
+    initialEtag = etag;
 });
 
 test('matching If-None-Match returns 304 + empty body', async () => {
-    const etag = expectedEtagAt(INITIAL_SYNC_AT);
-
     const revalidation = await fetchExpectStatus(
         `${baseUrl}${menuUrl}?date=${todayString}`,
         304,
-        { headers: { 'If-None-Match': etag } },
+        { headers: { 'If-None-Match': initialEtag } },
     );
     const body = await revalidation.text();
     assert.equal(body, '', '304 response should have an empty body');
-    assert.equal(revalidation.headers.get('etag'), etag);
+    assert.equal(revalidation.headers.get('etag'), initialEtag);
 });
 
 test('no-op resync preserves the watermark — prior ETag still revalidates as 304', async () => {
-    mock.timers.setTime(SECOND_SYNC_AT);
-
     const event = await resyncCafe();
     assert.equal(event.dirtyStations.size, 0, 'no-op resync should not produce dirty stations');
     assert.equal(event.dirtyMenuItemIds.size, 0, 'no-op resync should not produce dirty items');
 
-    // Watermark should still be the initial-sync timestamp, not the
-    // second-sync clock value.
+    // Watermark should be unchanged — the same ETag should still produce 304.
     const revalidation = await fetchExpectStatus(
         `${baseUrl}${menuUrl}?date=${todayString}`,
         304,
-        { headers: { 'If-None-Match': expectedEtagAt(INITIAL_SYNC_AT) } },
+        { headers: { 'If-None-Match': initialEtag } },
     );
-    assert.equal(revalidation.headers.get('etag'), expectedEtagAt(INITIAL_SYNC_AT));
+    assert.equal(revalidation.headers.get('etag'), initialEtag);
 });
 
-test('real menu change bumps the watermark to the resync clock value', async () => {
-    mock.timers.setTime(THIRD_SYNC_AT);
-
+test('real menu change bumps the watermark — new ETag is strictly larger', async () => {
     // Inject a brand-new menu item into cafe25's fixture so the resync
     // observes it as an addition. Added/removed items are the only thing
     // that populates dirtyMenuItemIds (see daily-menu.ts:computeMenuPublishDiff).
@@ -218,12 +221,20 @@ test('real menu change bumps the watermark to the resync clock value', async () 
         `resync after fixture mutation should mark ${newItemId} dirty (got: ${[...event.dirtyMenuItemIds].join(', ')})`,
     );
 
-    // Prior ETag should no longer match — server returns 200 with the new
-    // ETag derived from the third-sync clock.
+    // Prior ETag should no longer match — server returns 200 with a new ETag.
     const revalidation = await fetchExpectStatus(
         `${baseUrl}${menuUrl}?date=${todayString}`,
         200,
-        { headers: { 'If-None-Match': expectedEtagAt(INITIAL_SYNC_AT) } },
+        { headers: { 'If-None-Match': initialEtag } },
     );
-    assert.equal(revalidation.headers.get('etag'), expectedEtagAt(THIRD_SYNC_AT));
+    const newEtag = revalidation.headers.get('etag');
+    assert.ok(newEtag, 'response should include a new ETag');
+    assert.notEqual(newEtag, initialEtag, 'new ETag should differ from the initial one');
+
+    // The watermark is a Date.now() timestamp — new ETag must be strictly
+    // larger (more recent) than the initial one.
+    const initialTs = parseEtagTimestamp(initialEtag);
+    const newTs = parseEtagTimestamp(newEtag);
+    assert.ok(!Number.isNaN(initialTs) && !Number.isNaN(newTs), 'both ETags should contain valid timestamps');
+    assert.ok(newTs > initialTs, `new watermark (${newTs}) should be strictly larger than initial (${initialTs})`);
 });

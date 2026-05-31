@@ -35,7 +35,7 @@ const __dirname = path.dirname(__filename);
 // compiled app via a file:// URL — required on Windows where bare absolute
 // paths like `I:\…\app.js` aren't valid ESM specifiers.
 const APP_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'main', 'app.js')).href;
-const REGISTRY_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'main', 'services', 'registry.js')).href;
+const REGISTRY_DIST_URL = pathToFileURL(path.resolve(__dirname, '..', '..', 'shared', 'services', 'registry.js')).href;
 const SERVER_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 
 const AUTH_VAR_NAMES: ReadonlyArray<keyof typeof WELL_KNOWN_ENVIRONMENT_VARIABLES> = [
@@ -117,9 +117,8 @@ test('createApp throws when SESSION_SECRET is unset', () => {
     // rejects with a recognisable message + non-zero exit.
     const script = `
         const appModule = await import('${APP_DIST_URL}');
-        const { getServices } = await import('${REGISTRY_DIST_URL}');
         try {
-            appModule.createApp(getServices());
+            appModule.createApp({});
             process.exit(0);
         } catch (err) {
             process.stderr.write(String(err && err.message ? err.message : err));
@@ -157,9 +156,13 @@ test('auth routes are NOT registered when auth env vars are missing', () => {
 
     const script = `
         const appModule = await import('${APP_DIST_URL}');
-        const { getServices } = await import('${REGISTRY_DIST_URL}');
+        const { setDefaultServices } = await import('${REGISTRY_DIST_URL}');
         const http = await import('node:http');
-        const app = appModule.createApp(getServices());
+        const noop = async () => {};
+        const noopSession = { get: noop, set: noop, destroy: noop };
+        const stubServices = { data: { session: noopSession } };
+        setDefaultServices(stubServices);
+        const app = appModule.createApp(stubServices);
         const server = http.createServer(app.callback());
         await new Promise((resolve, reject) => {
             server.once('error', reject);

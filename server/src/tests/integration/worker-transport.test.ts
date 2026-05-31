@@ -139,9 +139,8 @@ describe('cross-thread worker transport', () => {
     test('ServiceError propagates across the boundary', async () => {
         // Calling sendRequest with an unknown service name triggers
         // a BAD_REQUEST ServiceError in the worker's dispatch function.
-        const sendRequestUnchecked = handler.sendRequest as unknown as (serviceName: string, methodName: string, data: undefined) => Promise<unknown>;
         await assert.rejects(
-            () => sendRequestUnchecked('nonexistent', 'method', undefined),
+            () => handler.sendRequest('nonexistent' as never, 'method' as never, undefined as never),
             (err: unknown) => {
                 if (typeof err !== 'object' || err == null) {
                     return false;

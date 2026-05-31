@@ -77,7 +77,16 @@ export const runWithServices = <T>(
     overrides: Partial<Services>,
     callback: () => Promise<T>,
 ): Promise<T> => {
-    const merged: Services = { ...getServices(), ...overrides };
+    let base: Services;
+    try {
+        base = getServices();
+    } catch {
+        throw new Error(
+            'runWithServices() could not resolve base services to merge overrides into. '
+            + 'Call setDefaultServices() before the first runWithServices() call.',
+        );
+    }
+    const merged: Services = { ...base, ...overrides };
     return servicesStorage.run(merged, callback);
 };
 

@@ -34,7 +34,9 @@ import {
     setDefaultServices,
 } from '../../shared/services/registry.js';
 import type { Services } from '../../shared/services/types.js';
-import { defaultDataServices } from '../../main/services/data/index.js';
+import { InProcessHandler } from '../../worker/rpc/handler.js';
+import { DATA_SERVICES } from '../../worker/data/data-services.js';
+import { createDataServices } from '../../shared/services/create-data-services.js';
 import { createTestServerWithFixtures } from './fixture-loader.js';
 import { TestBuyOnDemandServer } from './index.js';
 import { TestBuyOnDemandClient } from './test-client.js';
@@ -92,7 +94,22 @@ export interface IntegrationTestContext {
     cleanup: () => Promise<void>;
 }
 
-export async function createIntegrationTestContext(): Promise<IntegrationTestContext> {
+export interface IntegrationTestContextOptions {
+    /**
+     * When true, data-service calls go through a real WorkerThreadHandler
+     * (separate thread). Use this for tests that rely on cross-thread
+     * behaviour such as STORAGE_EVENTS → watermark updates.
+     *
+     * When false (default), an InProcessHandler is used so that
+     * `getServices().ai` resolves to the mock AI provider in the same
+     * thread.
+     */
+    useWorkerThread?: boolean;
+}
+
+export async function createIntegrationTestContext(
+    options?: IntegrationTestContextOptions,
+): Promise<IntegrationTestContext> {
     // ── 1. Database ─────────────────────────────────────────────────────
     const db = await createTestDatabase();
 
@@ -101,13 +118,21 @@ export async function createIntegrationTestContext(): Promise<IntegrationTestCon
     const server = createTestServerWithFixtures();
     const translationCache = new TranslationCache();
 
+    // Default to in-process so `getServices().ai` resolves to `mockAi`
+    // instead of the throwing stub the real worker thread installs.
+    // Tests that need cross-thread behaviour (e.g. watermark/etag) opt
+    // into the real worker thread.
+    const dataServices = options?.useWorkerThread
+        ? (await import('../../main/services/data/index.js')).defaultDataServices
+        : createDataServices(new InProcessHandler(DATA_SERVICES, { cloneOverWire: false }));
+
     const services: Services = {
         ai:                 mockAi,
         translations:       translationCache,
         buyOnDemandFactory: (cafe, options) =>
             TestBuyOnDemandClient.createTestAsync(cafe, server, options),
         telemetry:          null,
-        data:               defaultDataServices,
+        data:               dataServices,
     };
 
     // Belt-and-suspenders: set the test fallback so getServices() works
