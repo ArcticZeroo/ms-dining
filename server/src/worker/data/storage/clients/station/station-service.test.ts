@@ -30,6 +30,9 @@ before(async () => {
             storeId: 's', externalName: 'e', isShutDown: false,
         },
     });
+
+    // Create the station before any retrieveStation call initializes the cache.
+    await getServices().data.station.createStation({ station: STATION });
 });
 
 after(async () => {
@@ -55,8 +58,6 @@ test('retrieveStation returns null for nonexistent id', async () => {
 });
 
 test('createStation + retrieveStation round-trip', async () => {
-
-    await getServices().data.station.createStation({ station: STATION });
 
     const record = await getServices().data.station.retrieveStation({ stationId: STATION.id });
     assert.ok(record);
