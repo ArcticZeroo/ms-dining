@@ -10,7 +10,7 @@ import { getTodayDateString } from '@msdining/common/util/date-util';
 import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { ICompleteOrderResultDTO, IOrderItem } from '@msdining/common/models/order';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
-import { trackOrderEvent } from './order-telemetry.js';
+import { trackOrderEvent } from '../../../shared/ordering/order-telemetry.js';
 
 export const ORDER_SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;

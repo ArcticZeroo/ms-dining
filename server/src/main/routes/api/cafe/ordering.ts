@@ -8,7 +8,7 @@ import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 import { setTelemetryProperties } from '../../../middleware/telemetry.js';
-import { executeTrackedOrderStep } from '../../../../worker/data/ordering/order-telemetry.js';
+import { executeTrackedOrderStep } from '../../../../shared/ordering/order-telemetry.js';
 import type { ISynthesisFlags } from '../../../../shared/services/order.js';
 
 const SynthesisFlagsSchema = z.object({

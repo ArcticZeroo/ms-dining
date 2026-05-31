@@ -2,6 +2,7 @@ import type { Cafe } from '@prisma/client';
 import type { ICafe, ICafeConfig } from '../../../../../shared/models/cafe.js';
 import type { ICafeRecord, ICafeService } from '../../../../../shared/services/cafe.js';
 import { CafeStorageClient } from './cafe.js';
+import { updateWeeklyCafeMenus } from '../../../cafe/job/weekly.js';
 
 const toCafeRecord = (cafe: Cafe): ICafeRecord => ({
     id:               cafe.id,
@@ -33,4 +34,7 @@ export const cafeServiceCommands = {
         CafeStorageClient.createCafeAsync(cafe, config),
     resetCache: async () =>
         CafeStorageClient.resetCache(),
+    refreshWeeklyMenus: async ({ forceUseNextWeek }: { forceUseNextWeek: boolean }) => {
+        updateWeeklyCafeMenus(forceUseNextWeek);
+    },
 } satisfies ICafeService;

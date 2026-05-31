@@ -12,4 +12,6 @@ export const cafeService: ICafeService = {
         dataHandler.sendRequest('cafe', 'createCafe', data),
     resetCache: (data) =>
         dataHandler.sendRequest('cafe', 'resetCache', data),
+    refreshWeeklyMenus: (data) =>
+        dataHandler.sendRequest('cafe', 'refreshWeeklyMenus', data),
 };

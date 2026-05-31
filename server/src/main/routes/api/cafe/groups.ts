@@ -1,8 +1,4 @@
 import Router from '@koa/router';
-import {
-    menuItemToGroupMember,
-    stationToGroupMember
-} from '../../../../worker/data/storage/clients/groups/groups.js';
 import { attachRouter, requireAdmin } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import {
@@ -107,15 +103,8 @@ export const registerGroupsRoutes = (parent: Router) => {
         requireAdmin,
         doNotCacheMiddleware,
         async ctx => {
-            const [menuItems, stations] = await Promise.all([
-                getServices().data.menuItem.retrieveAllMenuItemsWithoutGroup({}),
-                getServices().data.station.retrieveAllStationsWithoutGroup({})
-            ]);
-
-            ctx.body = jsonStringifyWithoutNull([
-                ...await Promise.all(menuItems.map(menuItemToGroupMember)),
-                ...stations.map(stationToGroupMember)
-            ] satisfies IGroupMember[]);
+            const members = await getServices().data.groups.getAllItemsWithoutGroup({});
+            ctx.body = jsonStringifyWithoutNull(members satisfies IGroupMember[]);
         });
 
     router.delete('/:id/members/:memberId',

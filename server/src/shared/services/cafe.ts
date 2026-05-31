@@ -28,4 +28,7 @@ export interface ICafeService {
 
     /** Clear the in-memory café cache, forcing a re-fetch from the DB on next access. */
     resetCache(data: EmptyObject): Promise<void>;
+
+    /** Trigger a refresh of weekly café menus. Fire-and-forget on the worker side. */
+    refreshWeeklyMenus(data: { forceUseNextWeek: boolean }): Promise<void>;
 }

@@ -11,6 +11,7 @@ export interface IGroupsService {
     getGroupCandidatesZeroContext(data: EmptyObject): Promise<IGroupData[]>;
     getCandidatesForGroup(data: { groupId: string }): Promise<IGroupMember[]>;
     getGroupMembers(data: { groupId: string }): Promise<IGroupMember[]>;
+    getAllItemsWithoutGroup(data: EmptyObject): Promise<IGroupMember[]>;
     createGroup(data: { name: string; entityType: SearchEntityType; initialMembers?: string[] }): Promise<{ id: string }>;
     updateGroup(data: { id: string; update: IUpdateGroupRequest }): Promise<void>;
     deleteGroup(data: { id: string }): Promise<void>;

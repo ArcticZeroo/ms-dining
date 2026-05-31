@@ -17,7 +17,7 @@ import { phone } from 'phone';
 import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
 import { completeOrder, getPaymentSession, ORDER_SESSION_TTL_MS } from './order-session-manager.js';
 import type { ISynthesisFlags } from '../../../shared/services/order.js';
-import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from './order-telemetry.js';
+import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from '../../../shared/ordering/order-telemetry.js';
 
 const orderLog = getNamespaceLogger('Order');
 

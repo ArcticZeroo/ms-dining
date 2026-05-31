@@ -5,7 +5,7 @@ import { cafeServiceCommands } from './storage/clients/cafe/cafe-commands.js';
 import { stationServiceCommands } from './storage/clients/station/station-commands.js';
 import { userServiceCommands } from './storage/clients/user/user-commands.js';
 import { stationThemeServiceCommands } from './storage/clients/station/station-theme-commands.js';
-import { sessionServiceCommands } from '../../main/util/session-store.js';
+import { sessionServiceCommands } from './storage/clients/session/session.js';
 import { reviewServiceCommands } from './storage/clients/review/review-commands.js';
 import { groupsServiceCommands } from './storage/clients/groups/groups-commands.js';
 import { menuItemServiceCommands } from './storage/clients/menu-item/menu-item-commands.js';

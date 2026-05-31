@@ -10,6 +10,8 @@ export const groupsService: IGroupsService = {
         dataHandler.sendRequest('groups', 'getCandidatesForGroup', data),
     getGroupMembers: (data) =>
         dataHandler.sendRequest('groups', 'getGroupMembers', data),
+    getAllItemsWithoutGroup: (data) =>
+        dataHandler.sendRequest('groups', 'getAllItemsWithoutGroup', data),
     createGroup: (data) =>
         dataHandler.sendRequest('groups', 'createGroup', data),
     updateGroup: (data) =>

@@ -1,7 +1,9 @@
 import { SearchEntityType } from '@msdining/common/models/search';
 import { IUpdateGroupRequest } from '@msdining/common/models/group';
 import type { IGroupsService } from '../../../../../shared/services/groups.js';
-import { GroupStorageClient } from './groups.js';
+import { GroupStorageClient, menuItemToGroupMember, stationToGroupMember } from './groups.js';
+import { MenuItemStorageClient } from '../menu-item/menu-item.js';
+import { StationStorageClient } from '../station/station.js';
 
 export const groupsServiceCommands = {
     getGroups: async () =>
@@ -12,6 +14,16 @@ export const groupsServiceCommands = {
         GroupStorageClient.getCandidatesForGroup(groupId),
     getGroupMembers: async ({ groupId }: { groupId: string }) =>
         GroupStorageClient.getGroupMembers(groupId),
+    getAllItemsWithoutGroup: async () => {
+        const [menuItems, stations] = await Promise.all([
+            MenuItemStorageClient.retrieveAllMenuItemsWithoutGroup(),
+            StationStorageClient.retrieveAllStationsWithoutGroup(),
+        ]);
+        return [
+            ...await Promise.all(menuItems.map(menuItemToGroupMember)),
+            ...stations.map(stationToGroupMember),
+        ];
+    },
     createGroup: async ({ name, entityType, initialMembers }: { name: string; entityType: SearchEntityType; initialMembers?: string[] }) => {
         const group = await GroupStorageClient.createGroup(name, entityType, initialMembers);
         return { id: group.id };
