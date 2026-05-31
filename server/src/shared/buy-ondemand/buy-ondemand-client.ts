@@ -1,15 +1,15 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import fetch, { Response } from 'node-fetch';
-import { getBaseApiUrlWithoutTrailingSlash } from '../../../../shared/constants/cafes.js';
-import { ICafe, ICafeConfig } from '../../../../shared/models/cafe.js';
-import { ICafeConfigResponse } from '../../../../shared/models/buyondemand/responses.js';
-import { ENVIRONMENT_SETTINGS } from '../../../../shared/util/env.js';
-import { logDebug, logError } from '../../../../shared/util/log.js';
-import { buildHarEntry, HarCapture } from '../../../../shared/util/har.js';
-import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../../../../shared/util/request.js';
+import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
+import { ICafe, ICafeConfig } from '../models/cafe.js';
+import { ICafeConfigResponse } from '../models/buyondemand/responses.js';
+import { ENVIRONMENT_SETTINGS } from '../util/env.js';
+import { logDebug, logError } from '../util/log.js';
+import { buildHarEntry, HarCapture } from '../util/har.js';
+import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../util/request.js';
 import { Semaphore } from '@frozor/lock';
-import { getServices } from '../../../../shared/services/registry.js';
-import { StringUtil } from '../../../../shared/util/string.js';
+import { getServices } from '../services/registry.js';
+import { StringUtil } from '../util/string.js';
 import hat from 'hat';
 import { maybeThrowBuyOnDemandError } from './buy-ondemand-error.js';
 

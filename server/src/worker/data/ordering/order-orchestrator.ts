@@ -1,6 +1,6 @@
 import { SERVICE_ERROR_CODES, ServiceError } from '../../../shared/rpc/errors.js';
 import type { IOrderSession } from '../cafe/session/order-session.js';
-import type { BuyOnDemandClient } from '../cafe/buy-ondemand/buy-ondemand-client.js';
+import type { BuyOnDemandClient } from '../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../cafe/buy-ondemand/wait-time.js';
 import { OrderStorageClient } from '../storage/clients/order/order.js';
 import { getNamespaceLogger } from '../../../shared/util/log.js';

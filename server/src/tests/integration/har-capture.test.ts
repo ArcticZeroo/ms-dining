@@ -29,7 +29,7 @@ import { after, before, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import * as http from 'node:http';
 import { AddressInfo } from 'node:net';
-import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient } from '../../shared/buy-ondemand/buy-ondemand-client.js';
 import { HarCapture } from '../../shared/util/har.js';
 import { ICafe } from '../../shared/models/cafe.js';
 import {

@@ -25,7 +25,7 @@ import {
     IAiProvider,
     IAiTextCompletionRequest,
     IAiVisionRequest,
-} from '../../worker/data/ai/provider.js';
+} from '../../shared/ai/provider.js';
 
 const EMBEDDING_DIMENSIONS = 1536;
 

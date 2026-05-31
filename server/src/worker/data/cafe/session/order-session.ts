@@ -2,7 +2,7 @@ import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { PhoneValidResult } from 'phone';
 import type { SubmitOrderStage } from '@msdining/common/models/cart';
-import type { BuyOnDemandClient } from '../buy-ondemand/buy-ondemand-client.js';
+import type { BuyOnDemandClient } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 
 /**
  * The subset of CafeOrderSession that the orchestrator depends on.

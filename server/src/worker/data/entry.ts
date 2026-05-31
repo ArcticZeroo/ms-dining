@@ -5,10 +5,10 @@
 import { InProcessHandler, WorkerThreadHandler } from '../rpc/handler.js';
 import { DATA_SERVICES } from './data-services.js';
 import { runPendingMigrations } from './runtime-migrations/runner.js';
-import { createProductionAi } from './ai/index.js';
-import type { IAiProvider } from './ai/provider.js';
-import { BuyOnDemandClient } from './cafe/buy-ondemand/buy-ondemand-client.js';
-import { TranslationCache } from './cafe/buy-ondemand/i18n.js';
+import { createProductionAi } from '../../shared/ai/index.js';
+import type { IAiProvider } from '../../shared/ai/provider.js';
+import { BuyOnDemandClient } from '../../shared/buy-ondemand/buy-ondemand-client.js';
+import { TranslationCache } from '../../shared/buy-ondemand/i18n.js';
 import { performMenuBootTasks } from './cafe/job/boot.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../queues/embeddings.js';
 import { startSearchTagWorkerQueue } from '../queues/search-tags.js';

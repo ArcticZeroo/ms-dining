@@ -16,13 +16,13 @@
 import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { IOrderItem } from '@msdining/common/models/order';
-import { CafeMenuSession } from '../session/menu.js';
-import { CafeOrderSession } from '../session/order.js';
-import { ICafe } from '../../../../shared/models/cafe.js';
+import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
+import { CafeOrderSession } from '../../worker/data/cafe/session/order.js';
+import { ICafe } from '../models/cafe.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
-} from '../../../../tests/test-server/integration-test-context.js';
+} from '../../tests/test-server/integration-test-context.js';
 
 let ctx: IntegrationTestContext;
 

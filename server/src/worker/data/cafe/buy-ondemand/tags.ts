@@ -1,4 +1,4 @@
-import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { ICafeStationDetailsResponseItem } from '../../../../shared/models/buyondemand/responses.js';
 import { normalizeTagName } from '../../../../shared/util/cafe.js';
 

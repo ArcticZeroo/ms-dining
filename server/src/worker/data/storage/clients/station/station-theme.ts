@@ -4,7 +4,7 @@ import { isDev } from '../../../../../shared/util/env.js';
 import { md5 } from '../../../../../shared/util/hash.js';
 import { logDebug, logError } from '../../../../../shared/util/log.js';
 import { localeCompareSortAsc } from '../../../../../shared/util/sort.js';
-import { retrieveTextCompletion } from '../../../ai/index.js';
+import { retrieveTextCompletion } from '../../../../../shared/ai/index.js';
 import { usePrismaClient, usePrismaWrite } from '../../client.js';
 
 const STATION_THEME_SYSTEM_PROMPT = 'You are an expert writer who summarizes rotating cafeteria menus.';

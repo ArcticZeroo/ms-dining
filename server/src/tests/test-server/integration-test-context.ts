@@ -26,7 +26,7 @@
  *   }));
  */
 
-import { TranslationCache } from '../../worker/data/cafe/buy-ondemand/i18n.js';
+import { TranslationCache } from '../../shared/buy-ondemand/i18n.js';
 import { EMBEDDINGS_WORKER_QUEUE } from '../../worker/queues/embeddings.js';
 import {
     enterWithServices,

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { retrieveTextCompletion } from '../ai/index.js';
+import { retrieveTextCompletion } from '../../../shared/ai/index.js';
 import { LockedMap } from '../../../shared/lock/map.js';
 import { logDebug, logError } from '../../../shared/util/log.js';
 import { sha256 } from '../../../shared/util/hash.js';

@@ -1,6 +1,6 @@
 import { Response } from 'node-fetch';
-import { getBaseApiUrlWithoutTrailingSlash } from '../../../../shared/constants/cafes.js';
-import { logInfo } from '../../../../shared/util/log.js';
+import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
+import { logInfo } from '../util/log.js';
 import type { BuyOnDemandClient } from './buy-ondemand-client.js';
 
 const BUY_ONDEMAND_PROJECT_ID = '838d5fce-27b5-4368-8c54-8fcb33577f9a';

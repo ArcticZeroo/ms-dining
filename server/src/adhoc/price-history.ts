@@ -2,7 +2,7 @@ import { ICafe } from '../shared/models/cafe.js';
 import { usePrismaClient } from '../worker/data/storage/client.js';
 import { ALL_CAFES } from '../shared/constants/cafes.js';
 import * as fs from 'node:fs/promises';
-import { BuyOnDemandClient, JSON_HEADERS } from '../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../shared/buy-ondemand/buy-ondemand-client.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { ICafeMenuItemListResponseItem } from '../shared/models/buyondemand/responses.js';
 import { retrieveStationListAsync } from '../worker/data/cafe/buy-ondemand/stations.js';

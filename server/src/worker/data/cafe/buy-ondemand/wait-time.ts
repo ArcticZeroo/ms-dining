@@ -1,4 +1,4 @@
-import { BuyOnDemandClient, JSON_HEADERS } from './buy-ondemand-client.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { createBuyOnDemandClient } from '../../../../shared/services/registry.js';
 import { IWaitTimeResponse } from '@msdining/common/models/http';
 import { ICafe } from '../../../../shared/models/cafe.js';

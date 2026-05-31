@@ -4,7 +4,7 @@ import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 
 const orderLog = getNamespaceLogger('Order');
-import { BuyOnDemandClient, JSON_HEADERS } from '../buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { createBuyOnDemandClient, getServices } from '../../../../shared/services/registry.js';
 import {
     IOrderLineItem,

@@ -1,7 +1,7 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { CafeGroup, ICafe, ICafeStation } from '../../shared/models/cafe.js';
 import { rethrowWithoutStatus } from '../../shared/util/error.js';
-import { retrieveEmbedding as retrieveEmbeddingFromAi } from './ai/index.js';
+import { retrieveEmbedding as retrieveEmbeddingFromAi } from '../../shared/ai/index.js';
 
 export const retrieveEmbeddings = async (text: string) => {
     return retrieveEmbeddingFromAi(text).catch(rethrowWithoutStatus);

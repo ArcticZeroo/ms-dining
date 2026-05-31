@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { logError } from '../../../../shared/util/log.js';
-import { getServices } from '../../../../shared/services/registry.js';
-import { ServiceError, SERVICE_ERROR_CODES } from '../../../../shared/rpc/errors.js';
+import { logError } from '../util/log.js';
+import { getServices } from '../services/registry.js';
+import { ServiceError, SERVICE_ERROR_CODES } from '../rpc/errors.js';
 import type { BuyOnDemandClient } from './buy-ondemand-client.js';
 
 const bodErrorBodySchema = z.object({

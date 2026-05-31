@@ -1,4 +1,4 @@
-import { BuyOnDemandClient, DEFAULT_SCHEDULE_TIME, JSON_HEADERS } from './buy-ondemand-client.js';
+import { BuyOnDemandClient, DEFAULT_SCHEDULE_TIME, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { ICafeStation } from '../../../../shared/models/cafe.js';
 import { ICafeStationListItem } from '../../../../shared/models/buyondemand/responses.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';

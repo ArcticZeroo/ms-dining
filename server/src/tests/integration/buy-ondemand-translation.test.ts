@@ -19,7 +19,7 @@ import { DateUtil } from '@msdining/common';
 import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
 import { saveDailyMenuAsync } from '../../worker/data/cafe/job/storage.js';
 import { DailyMenuStorageClient } from '../../worker/data/storage/clients/daily-menu/daily-menu.js';
-import { BuyOnDemandClient } from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+import { BuyOnDemandClient } from '../../shared/buy-ondemand/buy-ondemand-client.js';
 import { ALL_CAFES } from '../../shared/constants/cafes.js';
 import { ServiceError, SERVICE_ERROR_CODES } from '../../shared/rpc/errors.js';
 import { createBuyOnDemandClient } from '../../shared/services/registry.js';

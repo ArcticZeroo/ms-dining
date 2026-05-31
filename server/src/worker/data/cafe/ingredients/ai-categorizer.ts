@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ICafeStation } from '../../../../shared/models/cafe.js';
-import { retrieveTextCompletion } from '../../ai/index.js';
+import { retrieveTextCompletion } from '../../../../shared/ai/index.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { IMenuRoleRow } from './cache.js';
 

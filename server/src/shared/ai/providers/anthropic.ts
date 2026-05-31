@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getAnthropicKey } from '../../../../shared/constants/env.js';
-import { lazy } from '../../../../shared/util/lazy.js';
+import { getAnthropicKey } from '../../constants/env.js';
+import { lazy } from '../../util/lazy.js';
 import { IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
 
 const DEFAULT_MAX_TOKENS = 1024;

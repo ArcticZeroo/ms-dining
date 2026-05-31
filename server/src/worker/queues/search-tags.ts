@@ -1,6 +1,6 @@
 import Duration from '@arcticzeroo/duration';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { retrieveTextCompletion } from '../data/ai/index.js';
+import { retrieveTextCompletion } from '../../shared/ai/index.js';
 import { getServices } from '../../shared/services/registry.js';
 import { IMenuItemForAi } from '../../shared/models/openai.js';
 import { Nullable } from '../../shared/models/util.js';

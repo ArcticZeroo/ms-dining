@@ -5,7 +5,7 @@ import type { ICafe } from '../models/cafe.js';
 import type {
     BuyOnDemandClient,
     BuyOnDemandClientOptions,
-} from '../../worker/data/cafe/buy-ondemand/buy-ondemand-client.js';
+} from '../buy-ondemand/buy-ondemand-client.js';
 
 /**
  * Process-wide production services bag, constructed lazily on first read.
