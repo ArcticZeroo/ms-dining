@@ -10,7 +10,6 @@ model Cafe {
   externalName     String  @default("")
 
   dailyCafes            DailyCafe[]
-  dailyOrderingContexts DailyCafeOrderingContext[]
   menuItems             MenuItem[]
   stations              Station[]
 }
@@ -162,6 +161,11 @@ model DailyStation {
 
   cafeId String
   dailyCafe DailyCafe @relation(fields: [dateString, cafeId], references: [dateString, cafeId], onDelete: Cascade)
+
+  @@index([cafeId, dateString])
+  @@index([stationId, dateString])
+  @@index([snapshotId])
+  @@index([dateString])
 }
 
 model DailyCategory {
@@ -173,6 +177,8 @@ model DailyCategory {
   snapshot   StationMenuSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   menuItems DailyMenuItem[]
+
+  @@index([snapshotId])
 }
 
 model DailyMenuItem {
@@ -183,21 +189,9 @@ model DailyMenuItem {
 
   categoryId Int
   category   DailyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-}
 
-model DailyCafeOrderingContext {
-  dateString         String
-  onDemandEmployeeId String
-  onDemandTerminalId String
-  profitCenterId     String
-  profitCenterName   String
-  storePriceLevel    String
-  payClientId        String
-
-  cafeId String
-  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
-
-  @@id([dateString, cafeId])
+  @@index([categoryId])
+  @@index([menuItemId])
 }
 
 model CafeShutdown {
