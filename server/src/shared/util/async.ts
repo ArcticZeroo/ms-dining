@@ -1,3 +1,5 @@
+import { RetryAfterError } from './error.js';
+
 export const pause = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 export const runPromiseWithRetries = async <T>(promise: (retryIndex: number) => Promise<T>, retries: number, delayMs?: number, cancellation?: ICancellationToken): Promise<T> => {
@@ -9,6 +11,10 @@ export const runPromiseWithRetries = async <T>(promise: (retryIndex: number) => 
         try {
             return await promise(i);
         } catch (err) {
+            if (err instanceof RetryAfterError) {
+                throw err;
+            }
+
             if (cancellation?.isCancelled) {
                 throw err;
             }

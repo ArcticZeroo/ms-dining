@@ -1,11 +1,13 @@
-import { AzureOpenAI } from 'openai';
+import { AzureOpenAI, RateLimitError } from 'openai';
 import { getOpenAiKey } from '../../constants/env.js';
 import { lazy } from '../../util/lazy.js';
 import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
+import { RetryAfterError } from '../../util/error.js';
 import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
 
 const DEFAULT_MAX_TOKENS = 1024;
 const DEFAULT_API_VERSION = '2025-04-01-preview';
+const DEFAULT_RATE_LIMIT_RETRY_MS = 60_000;
 
 const getAzureConfig = () => ({
     endpoint:   process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.azureOpenAiEndpoint]!,
@@ -25,6 +27,17 @@ const CLIENT = lazy(() => {
 
 const CONFIG = lazy(getAzureConfig);
 
+const rethrowRateLimit = (err: unknown): never => {
+    if (err instanceof RateLimitError) {
+        const retryAfterSec = Number(err.headers?.['retry-after']);
+        const retryAfterMs = (!isNaN(retryAfterSec) && retryAfterSec > 0)
+            ? retryAfterSec * 1000
+            : DEFAULT_RATE_LIMIT_RETRY_MS;
+        throw new RetryAfterError(retryAfterMs, err.message);
+    }
+    throw err;
+};
+
 export const openAiProvider: IAiProvider = {
     async retrieveTextCompletion(request: IAiTextCompletionRequest): Promise<string> {
         const response = await CLIENT.value.chat.completions.create({
@@ -40,7 +53,7 @@ export const openAiProvider: IAiProvider = {
                     content: request.userMessage
                 }
             ]
-        });
+        }).catch(rethrowRateLimit);
 
         const choice = response.choices[0];
         if (!choice) {
@@ -80,7 +93,7 @@ export const openAiProvider: IAiProvider = {
                     ]
                 }
             ]
-        });
+        }).catch(rethrowRateLimit);
 
         const choice = response.choices[0];
         if (!choice) {
@@ -99,7 +112,7 @@ export const openAiProvider: IAiProvider = {
         const response = await CLIENT.value.embeddings.create({
             model: CONFIG.value.embeddingDeployment,
             input: text
-        });
+        }).catch(rethrowRateLimit);
 
         const data = response.data[0];
         if (!data) {

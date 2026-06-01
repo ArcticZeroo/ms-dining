@@ -1,5 +1,6 @@
 import Duration from '@arcticzeroo/duration';
 import { getNamespaceLogger, Logger } from '../../shared/util/log.js';
+import { RetryAfterError } from '../../shared/util/error.js';
 import { Nullable } from '../../shared/models/util.js';
 
 const LOG_STATUS_INTERVAL = new Duration({ minutes: 1 });
@@ -27,7 +28,7 @@ export abstract class WorkerQueue<TKey, TValue> {
         this.#emptyPollInterval = emptyPollInterval;
         this.#logger = getNamespaceLogger(this.constructor.name);
 
-        setInterval(() => this.#logStatus(), LOG_STATUS_INTERVAL.inMilliseconds);
+        setInterval(() => this.#logStatus(), LOG_STATUS_INTERVAL.inMilliseconds).unref();
     }
 
     #logStatus() {
@@ -64,6 +65,10 @@ export abstract class WorkerQueue<TKey, TValue> {
         }
     }
 
+    public stop() {
+        this.#runningSymbol = undefined;
+    }
+
     public start() {
         if (this.#runningSymbol) {
             return;
@@ -97,19 +102,26 @@ export abstract class WorkerQueue<TKey, TValue> {
             // this.#logger.debug('Processing queue entry', key, ', remaining entries:', this.#keysInOrder.length);
 
             this.doWorkAsync(entry)
-                .catch((err) => {
-                    this.#logger.debug('Failed to process queue entry', key, err);
-                    setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds);
-                })
                 .then((result) => {
+                    this.#entriesByKey.delete(key);
                     if (result === WorkerQueue.QUEUE_SKIP_ENTRY) {
-                        // Immediately poke to next queue entry if we skipped this one
                         setTimeout(doQueueIteration, 0);
                     } else {
                         setTimeout(doQueueIteration, this.#successPollInterval.inMilliseconds);
                     }
+                })
+                .catch((err) => {
+                    if (err instanceof RetryAfterError) {
+                        this.#keysInOrder.unshift(key);
+                        this.#logger.info(`Rate limited, pausing queue for ${Math.ceil(err.retryAfterMs / 1000)}s`);
+                        setTimeout(doQueueIteration, err.retryAfterMs);
+                    } else {
+                        this.#logger.debug('Failed to process queue entry', key, err);
+                        this.#entriesByKey.delete(key);
+                        setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds);
+                    }
                 });
-        }
+        };
 
         doQueueIteration();
     }
