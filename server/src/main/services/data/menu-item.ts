@@ -24,4 +24,6 @@ export const menuItemService: IMenuItemService = {
         dataHandler.sendRequest('menuItem', 'getCachedMenuItemNames', data),
     getTopSearchTags: (data) =>
         dataHandler.sendRequest('menuItem', 'getTopSearchTags', data),
+    retrieveThumbnailData: (data) =>
+        dataHandler.sendRequest('menuItem', 'retrieveThumbnailData', data),
 };

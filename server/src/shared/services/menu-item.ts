@@ -1,5 +1,6 @@
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import type { ISearchTagQueueEntry } from '../../worker/queues/search-tags.js';
+import type { IThumbnailExistenceData } from '../models/thumbnail.js';
 import { EmptyObject } from '../models/util.js';
 
 export interface IMenuItemService {
@@ -14,4 +15,5 @@ export interface IMenuItemService {
     updateThumbnailHash(data: { menuItemId: string; hash: string }): Promise<void>;
     getCachedMenuItemNames(data: EmptyObject): Promise<string[]>;
     getTopSearchTags(data: EmptyObject): Promise<string[]>;
+    retrieveThumbnailData(data: { id: string; imageUrl: string; lastUpdateTime?: Date | null }): Promise<IThumbnailExistenceData>;
 }
