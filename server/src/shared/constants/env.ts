@@ -12,6 +12,10 @@ export const hasEnvironmentVariable = (key: string): boolean => {
 
 export const WELL_KNOWN_ENVIRONMENT_VARIABLES = {
     openAi: 'OPENAI_API_KEY',
+    azureOpenAiEndpoint: 'AZURE_OPENAI_ENDPOINT',
+    azureOpenAiApiVersion: 'AZURE_OPENAI_API_VERSION',
+    azureOpenAiChatDeployment: 'AZURE_OPENAI_CHAT_DEPLOYMENT',
+    azureOpenAiEmbeddingDeployment: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT',
     anthropicApiKey: 'ANTHROPIC_API_KEY',
     devKey: 'DEV_KEY',
     sessionSecret: 'SESSION_SECRET',

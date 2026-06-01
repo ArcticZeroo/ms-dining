@@ -1,18 +1,34 @@
-import OpenAI from 'openai';
+import { AzureOpenAI } from 'openai';
 import { getOpenAiKey } from '../../constants/env.js';
 import { lazy } from '../../util/lazy.js';
+import { WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../../constants/env.js';
 import { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from '../provider.js';
 
 const DEFAULT_MAX_TOKENS = 1024;
+const DEFAULT_API_VERSION = '2025-04-01-preview';
 
-const CLIENT = lazy(() => new OpenAI({
-    apiKey: getOpenAiKey()
-}));
+const getAzureConfig = () => ({
+    endpoint:   process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.azureOpenAiEndpoint]!,
+    apiVersion: process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.azureOpenAiApiVersion] || DEFAULT_API_VERSION,
+    chatDeployment:      process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.azureOpenAiChatDeployment] || 'gpt-5.4',
+    embeddingDeployment: process.env[WELL_KNOWN_ENVIRONMENT_VARIABLES.azureOpenAiEmbeddingDeployment] || 'text-embedding-3-small',
+});
+
+const CLIENT = lazy(() => {
+    const config = getAzureConfig();
+    return new AzureOpenAI({
+        endpoint:   config.endpoint,
+        apiKey:     getOpenAiKey(),
+        apiVersion: config.apiVersion,
+    });
+});
+
+const CONFIG = lazy(getAzureConfig);
 
 export const openAiProvider: IAiProvider = {
     async retrieveTextCompletion(request: IAiTextCompletionRequest): Promise<string> {
         const response = await CLIENT.value.chat.completions.create({
-            model:                'gpt-5.2',
+            model:                CONFIG.value.chatDeployment,
             max_completion_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             messages:             [
                 {
@@ -41,7 +57,7 @@ export const openAiProvider: IAiProvider = {
 
     async retrieveVisionCompletion(request: IAiVisionRequest): Promise<string> {
         const response = await CLIENT.value.chat.completions.create({
-            model:                'gpt-5.2',
+            model:                CONFIG.value.chatDeployment,
             max_completion_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             messages:             [
                 {
@@ -81,7 +97,7 @@ export const openAiProvider: IAiProvider = {
 
     async retrieveEmbedding(text: string): Promise<number[]> {
         const response = await CLIENT.value.embeddings.create({
-            model: 'text-embedding-3-small',
+            model: CONFIG.value.embeddingDeployment,
             input: text
         });
 
