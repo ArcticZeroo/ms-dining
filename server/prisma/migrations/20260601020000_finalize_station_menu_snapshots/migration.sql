@@ -7,15 +7,20 @@
 
   If this migration fails with "NOT NULL constraint failed: new_DailyStation.snapshotId",
   the backfill script has not been run. To recover:
-    1. npx prisma migrate resolve --rolled-back 20260601020000_finalize_station_menu_snapshots
-    2. npx tsx src/adhoc/backfill-snapshots.ts
-    3. npx prisma migrate deploy
+    1. sqlite3 dining.db "DROP TABLE IF EXISTS new_DailyStation; DROP TABLE IF EXISTS new_DailyCategory;"
+    2. npx prisma migrate resolve --rolled-back 20260601020000_finalize_station_menu_snapshots
+    3. npx tsx src/adhoc/backfill-snapshots.ts
+    4. npx prisma migrate deploy
 
   This migration:
   1. Makes DailyStation.snapshotId NOT NULL
   2. Drops old DailyCategory.stationId column (was FK to DailyStation)
   3. Makes DailyCategory.snapshotId NOT NULL
 */
+
+-- Clean up leftover temp tables from a previous failed attempt
+DROP TABLE IF EXISTS "new_DailyStation";
+DROP TABLE IF EXISTS "new_DailyCategory";
 
 -- Recreate tables with NOT NULL constraints and without old columns
 PRAGMA defer_foreign_keys=ON;
