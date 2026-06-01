@@ -19,7 +19,7 @@ module.exports = {
             argsIgnorePattern: '^_',
             varsIgnorePattern: '^_',
         }],
-        'id-length': ['error', { min: 3, exceptions: ['_', 'i', 'j', 'k', 'x', 'y', 'id', 'db', 'fs', 'os'], properties: 'never' }],
+        'id-length': ['error', { min: 3, exceptions: ['_', 'i', 'j', 'k', 'x', 'y', 'z', 'id', 'db', 'fs', 'os'], properties: 'never' }],
     },
     overrides: [
         {

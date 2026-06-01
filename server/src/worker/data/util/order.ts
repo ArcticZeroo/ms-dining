@@ -2,6 +2,7 @@ import type { IOrderItem } from '@msdining/common/models/order';
 import { createHash } from 'node:crypto';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
 import { ISerializedModifier } from '@msdining/common/models/shared';
+import { asRecord } from '../../../shared/util/typeguard.js';
 
 const getModifierStringsForHash = (modifiers: ISerializedModifier[]) => {
     const modifierStrings: string[] = [];
@@ -47,3 +48,29 @@ export const toOrderItem = (item: IOrderItemFromDatabase): IOrderItem => ({
 });
 
 export const toOrderItems = (items: Array<IOrderItemFromDatabase>): IOrderItem[] => items.map(toOrderItem);
+
+const DEFAULT_BIR_CONFIG = {
+    displayText:                         'OR#',
+    acknowledgementReceiptDisplayText:  'AR#',
+    acknowledgementReceiptIndicator:    'Acknowledgement Receipt#',
+    officialReceiptIndicator:           'Official Receipt#',
+};
+const DEFAULT_CALORIE_CONFIG = {
+    abbreviation: 'Cal',
+    fullName:     'Calories',
+};
+const DEFAULT_STORE_ADDRESS = [' ', '  '];
+
+export const buildStoreInfo = (storeInfo: Record<string, unknown>): Record<string, unknown> => {
+    const storeInfoOptions = asRecord(storeInfo.storeInfoOptions) ?? {};
+
+    return {
+        ...storeInfo,
+        storeInfoOptions: {
+            ...storeInfoOptions,
+            birConfig: storeInfoOptions.birConfig ?? DEFAULT_BIR_CONFIG,
+            calories:  storeInfoOptions.calories ?? DEFAULT_CALORIE_CONFIG,
+        },
+        address: storeInfo.address ?? DEFAULT_STORE_ADDRESS,
+    };
+};

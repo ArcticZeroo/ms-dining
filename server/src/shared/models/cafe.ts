@@ -55,17 +55,6 @@ export interface ICafeConfig {
     logoName?: Nullable<string>;
     isShutDown: boolean;
     shutDownMessage?: string | null;
-    /**
-     * The full storeInfo block as returned by GET /config (`storeList[0].storeInfo`).
-     * The BoD UI echoes this object verbatim in POSTs to the pay-config endpoint
-     * — the server uses fields like `timezone` to scope schedule resolution, so
-     * omitting it (or sending a stripped-down version) can cause the server to
-     * decide the store is closed and return CONCEPTS_NOT_AVAILABLE.
-     *
-     * Optional because the DB-fallback path doesn't have it (we never persisted
-     * it). Callers that need it should treat absence as "missing storeInfo" and
-     * fail closed rather than substituting an empty object.
-     */
     storeInfo?: Record<string, unknown>;
 }
 
