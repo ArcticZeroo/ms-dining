@@ -114,21 +114,39 @@ const seedSearchableMenu = async (items: ISeedMenuItem[]): Promise<void> => {
         await client.dailyStation.deleteMany({
             where: { cafeId: CAFE_ID, dateString: TODAY },
         });
+        await client.stationMenuSnapshot.deleteMany({
+            where: { stationId: STATION_ID },
+        });
 
-        const dailyStation = await client.dailyStation.create({
+        const snapshot = await client.stationMenuSnapshot.create({
+            data: {
+                id:        `snapshot-${STATION_ID}-${TODAY}`,
+                stationId: STATION_ID,
+                categories: {
+                    create: {
+                        name: 'Test Category',
+                    },
+                },
+            },
+            select: {
+                categories: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+
+        await client.dailyStation.create({
             data: {
                 cafeId:     CAFE_ID,
                 dateString: TODAY,
                 stationId:  STATION_ID,
+                snapshotId: `snapshot-${STATION_ID}-${TODAY}`,
             },
         });
 
-        const dailyCategory = await client.dailyCategory.create({
-            data: {
-                name:      'Test Category',
-                stationId: dailyStation.id,
-            },
-        });
+        const dailyCategory = snapshot.categories[0]!;
 
         for (const item of items) {
             await client.menuItem.upsert({

@@ -112,11 +112,17 @@ test('getCafeHoursForDate aggregates hours from stations present on that date', 
     await usePrismaWrite(prisma => prisma.dailyCafe.create({
         data: { dateString, cafeId: STATION.cafeId, isAvailable: true },
     }));
-    await usePrismaWrite(prisma => prisma.dailyStation.create({
-        data: { dateString, cafeId: STATION.cafeId, stationId: STATION.id },
+    await usePrismaWrite(prisma => prisma.stationMenuSnapshot.create({
+        data: { id: `snapshot-${STATION.id}-${dateString}`, stationId: STATION.id },
+    }));
+    await usePrismaWrite(prisma => prisma.stationMenuSnapshot.create({
+        data: { id: `snapshot-${earlyStation.id}-${dateString}`, stationId: earlyStation.id },
     }));
     await usePrismaWrite(prisma => prisma.dailyStation.create({
-        data: { dateString, cafeId: STATION.cafeId, stationId: earlyStation.id },
+        data: { dateString, cafeId: STATION.cafeId, stationId: STATION.id, snapshotId: `snapshot-${STATION.id}-${dateString}` },
+    }));
+    await usePrismaWrite(prisma => prisma.dailyStation.create({
+        data: { dateString, cafeId: STATION.cafeId, stationId: earlyStation.id, snapshotId: `snapshot-${earlyStation.id}-${dateString}` },
     }));
 
     const hours = await getServices().data.station.getCafeHoursForDate({

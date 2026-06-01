@@ -132,9 +132,21 @@ model Station {
   cafeId String
   cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
 
+  dailyStations    DailyStation[]
+  menuItems        MenuItem[]
+  reviews          Review[]
+  menuSnapshots    StationMenuSnapshot[]
+}
+
+model StationMenuSnapshot {
+  // SHA-256 hash of (stationId + sorted category→menuItem content)
+  id        String @id
+
+  stationId String
+  station   Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  categories    DailyCategory[]
   dailyStations DailyStation[]
-  menuItems     MenuItem[]
-  reviews       Review[]
 }
 
 model DailyStation {
@@ -145,10 +157,11 @@ model DailyStation {
   stationId String
   station   Station @relation(fields: [stationId], references: [id])
 
+  snapshotId String
+  snapshot   StationMenuSnapshot @relation(fields: [snapshotId], references: [id])
+
   cafeId String
   dailyCafe DailyCafe @relation(fields: [dateString, cafeId], references: [dateString, cafeId], onDelete: Cascade)
-
-  categories DailyCategory[]
 }
 
 model DailyCategory {
@@ -156,8 +169,8 @@ model DailyCategory {
 
   name String
 
-  stationId Int
-  station   DailyStation @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  snapshotId String
+  snapshot   StationMenuSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   menuItems DailyMenuItem[]
 }

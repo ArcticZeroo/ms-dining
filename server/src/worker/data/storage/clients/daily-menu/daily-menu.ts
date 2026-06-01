@@ -19,6 +19,7 @@ import type {
 } from '../../../../../shared/services/daily-menu.js';
 import { createDenoisedCafeLogger } from '../../../../../shared/util/denoised-logger.js';
 import { STORAGE_EVENTS } from '../../../../../shared/util/events.js';
+import { computeSnapshotHash } from '../../../../../shared/util/snapshot-hash.js';
 
 const menuPublishLogger = createDenoisedCafeLogger(getNamespaceLogger('DailyMenu'), 'Daily menu published');
 
@@ -117,34 +118,41 @@ const writeMenuInTransaction = async (
         }
     });
 
-    // Create stations and categories individually (need autoincrement IDs),
-    // then batch-create all menu items with a single createMany.
-    const allMenuItems: Array<{ menuItemId: string; categoryId: number }> = [];
-
     for (const station of stations) {
-        const dailyStation = await prisma.dailyStation.create({
+        const snapshotId = computeSnapshotHash(station.id, station.menuItemIdsByCategoryName);
+        const existingSnapshot = await prisma.stationMenuSnapshot.findUnique({
+            where:  { id: snapshotId },
+            select: { id: true }
+        });
+
+        if (existingSnapshot == null) {
+            await prisma.stationMenuSnapshot.create({
+                data: {
+                    id:        snapshotId,
+                    stationId: station.id,
+                    categories: {
+                        create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([categoryName, menuItemIds]) => ({
+                            name:      categoryName,
+                            menuItems: {
+                                create: menuItemIds.map(menuItemId => ({
+                                    menuItemId
+                                }))
+                            }
+                        }))
+                    }
+                }
+            });
+        }
+
+        await prisma.dailyStation.create({
             data: {
                 cafeId,
                 dateString,
                 stationId: station.id,
+                snapshotId,
             }
         });
-
-        for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName) {
-            const dailyCategory = await prisma.dailyCategory.create({
-                data: {
-                    name:      categoryName,
-                    stationId: dailyStation.id
-                }
-            });
-
-            for (const menuItemId of menuItemIds) {
-                allMenuItems.push({ menuItemId, categoryId: dailyCategory.id });
-            }
-        }
     }
-
-    await prisma.dailyMenuItem.createMany({ data: allMenuItems });
 }
 
 const MENU_PUBLISH_TRANSACTION_WARN_MS = 5_000;
@@ -178,18 +186,27 @@ export abstract class DailyMenuStorageClient {
 
         await usePrismaClient(async (prismaClient) => {
             // Read previous menu + compute diffs outside the write transaction.
-            const previousDailyStationMenus = await prismaClient.dailyStation.findMany({
+            const previousDailyStationMenuRows = await prismaClient.dailyStation.findMany({
                 where:  { cafeId, dateString },
                 select: {
-                    stationId:  true,
-                    categories: {
+                    stationId: true,
+                    snapshot:  {
                         select: {
-                            name:      true,
-                            menuItems: { select: { menuItemId: true } }
+                            categories: {
+                                select: {
+                                    name:      true,
+                                    menuItems: { select: { menuItemId: true } }
+                                }
+                            }
                         }
                     }
                 }
             });
+
+            const previousDailyStationMenus = previousDailyStationMenuRows.map(({ stationId, snapshot }) => ({
+                stationId,
+                categories: snapshot.categories,
+            }));
 
             computeMenuPublishDiff(publishEvent, stations, previousDailyStationMenus, dateString);
         });
@@ -228,24 +245,28 @@ export abstract class DailyMenuStorageClient {
                 dateString
             },
             select: {
-                stationId:              true,
-                station:                {
+                stationId: true,
+                station:   {
                     select: {
-                        name:                      true,
-                        logoUrl:                   true,
-                        menuId:                    true,
-                        groupId:                   true,
-                        opensAt:                   true,
-                        closesAt:                  true,
+                        name:                       true,
+                        logoUrl:                    true,
+                        menuId:                     true,
+                        groupId:                    true,
+                        opensAt:                    true,
+                        closesAt:                   true,
                         externalMenuLastUpdateTime: true,
                     }
                 },
-                categories:             {
+                snapshot:  {
                     select: {
-                        name:      true,
-                        menuItems: {
+                        categories: {
                             select: {
-                                menuItemId: true
+                                name:      true,
+                                menuItems: {
+                                    select: {
+                                        menuItemId: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -261,7 +282,7 @@ export abstract class DailyMenuStorageClient {
             const menuItemIdsByCategoryName = new Map<string, Array<string>>();
             const menuItemsById = new Map<string, IMenuItemBase>();
 
-            for (const category of dailyStation.categories) {
+            for (const category of dailyStation.snapshot.categories) {
                 const menuItemIds: string[] = [];
 
                 for (const dailyMenuItem of category.menuItems) {
@@ -345,9 +366,13 @@ export abstract class DailyMenuStorageClient {
         const rows = await usePrismaClient(prisma => prisma.dailyMenuItem.findMany({
             where: {
                 category: {
-                    station: {
-                        dailyCafe: { dateString },
-                    },
+                    snapshot: {
+                        dailyStations: {
+                            some: {
+                                dailyCafe: { dateString },
+                            }
+                        }
+                    }
                 },
             },
             select:   { menuItemId: true },
@@ -383,7 +408,7 @@ export abstract class DailyMenuStorageClient {
     public static async getPendingMenusForEmbedding() {
         const dateStrings = DateUtil.getDateStringsForWeek();
 
-        return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+        const rows = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 dateString: {
                     in: dateStrings
@@ -398,26 +423,35 @@ export abstract class DailyMenuStorageClient {
                         name: true
                     }
                 },
-                categories: {
+                snapshot:   {
                     select: {
-                        name:      true,
-                        menuItems: {
+                        categories: {
                             select: {
-                                menuItemId: true
+                                name:      true,
+                                menuItems: {
+                                    select: {
+                                        menuItemId: true
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }));
+
+        return rows.map(({ snapshot, ...row }) => ({
+            ...row,
+            categories: snapshot.categories,
+        }));
     }
 
-    public static getMenusForSearch(date: Date | null) {
+    public static async getMenusForSearch(date: Date | null) {
         const dateStrings = date != null
             ? [DateUtil.toDateString(date)]
             : DateUtil.getDateStringsForWeek();
 
-        return usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
+        const rows = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
                 dateString: {
                     in: dateStrings
@@ -437,27 +471,36 @@ export abstract class DailyMenuStorageClient {
                         groupId: true,
                     }
                 },
-                categories: {
+                snapshot:   {
                     select: {
-                        name:      true,
-                        menuItems: {
+                        categories: {
                             select: {
-                                menuItemId: true,
-                                menuItem:   {
+                                name:      true,
+                                menuItems: {
                                     select: {
-                                        tags:       true,
-                                        searchTags: {
+                                        menuItemId: true,
+                                        menuItem:   {
                                             select: {
-                                                name: true
+                                                tags:       true,
+                                                searchTags: {
+                                                    select: {
+                                                        name: true
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
+                                    },
                                 }
-                            },
+                            }
                         }
                     }
                 },
             }
+        }));
+
+        return rows.map(({ snapshot, ...row }) => ({
+            ...row,
+            categories: snapshot.categories,
         }));
     }
 
@@ -477,11 +520,15 @@ export abstract class DailyMenuStorageClient {
             select: {
                 dateString: true,
                 stationId:  true,
-                categories: {
+                snapshot:   {
                     select: {
-                        menuItems: {
+                        categories: {
                             select: {
-                                menuItemId: true
+                                menuItems: {
+                                    select: {
+                                        menuItemId: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -502,7 +549,7 @@ export abstract class DailyMenuStorageClient {
 
             stationVisitsById.get(stationId)!.add(visitDate);
 
-            for (const category of stationVisit.categories) {
+            for (const category of stationVisit.snapshot.categories) {
                 for (const menuItem of category.menuItems) {
                     const menuItemId = menuItem.menuItemId;
 
@@ -535,11 +582,15 @@ export abstract class DailyMenuStorageClient {
             },
             select: {
                 dateString: true,
-                categories: {
+                snapshot:   {
                     select: {
-                        menuItems: {
+                        categories: {
                             select: {
-                                menuItemId: true
+                                menuItems: {
+                                    select: {
+                                        menuItemId: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -551,7 +602,7 @@ export abstract class DailyMenuStorageClient {
         for (const stationVisit of visits) {
             const visitDate = stationVisit.dateString;
 
-            for (const category of stationVisit.categories) {
+            for (const category of stationVisit.snapshot.categories) {
                 for (const menuItem of category.menuItems) {
                     const menuItemId = menuItem.menuItemId;
                     if (!itemVisitsById.has(menuItemId)) {
@@ -570,39 +621,37 @@ export abstract class DailyMenuStorageClient {
         const startString = DateUtil.toDateString(startDate);
         const endString = DateUtil.toDateString(endDate);
 
-        const visits = await usePrismaClient(prismaClient => prismaClient.dailyMenuItem.findMany({
+        const visits = await usePrismaClient(prismaClient => prismaClient.dailyStation.findMany({
             where:  {
-                menuItem: {
-                    normalizedName: {
-                        equals: normalizeNameForSearch(menuItemName)
-                    }
+                dateString: {
+                    gte: startString,
+                    lte: endString
                 },
-                category: {
-                    station: {
-                        dateString: {
-                            gte: startString,
-                            lte: endString
+                snapshot:   {
+                    categories: {
+                        some: {
+                            menuItems: {
+                                some: {
+                                    menuItem: {
+                                        normalizedName: {
+                                            equals: normalizeNameForSearch(menuItemName)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             },
             select: {
-                category: {
-                    select: {
-                        station: {
-                            select: {
-                                dateString: true,
-                                cafeId:     true,
-                            }
-                        }
-                    }
-                }
+                dateString: true,
+                cafeId:     true,
             }
         }));
 
         return visits.map(visit => ({
-            dateString: visit.category.station.dateString,
-            cafeId:     visit.category.station.cafeId
+            dateString: visit.dateString,
+            cafeId:     visit.cafeId
         }));
     }
 
@@ -712,27 +761,25 @@ export abstract class DailyMenuStorageClient {
     }
 
     public static async retrieveFirstMenuItemVisitDate(menuItemId: string): Promise<string | null> {
-        const visit = await usePrismaClient(client => client.dailyMenuItem.findFirst({
+        const visit = await usePrismaClient(client => client.dailyStation.findFirst({
             where:   {
-                menuItemId
-            },
-            orderBy: {
-                category: {
-                    station: {
-                        dateString: 'asc'
-                    }
-                }
-            },
-            select:  {
-                category: {
-                    select: {
-                        station: {
-                            select: {
-                                dateString: true
+                snapshot: {
+                    categories: {
+                        some: {
+                            menuItems: {
+                                some: {
+                                    menuItemId
+                                }
                             }
                         }
                     }
                 }
+            },
+            orderBy: {
+                dateString: 'asc'
+            },
+            select:  {
+                dateString: true
             }
         }));
 
@@ -740,7 +787,7 @@ export abstract class DailyMenuStorageClient {
             return null;
         }
 
-        return visit.category.station.dateString;
+        return visit.dateString;
     }
 
     public static async retrieveAllFirstMenuItemAppearances(): Promise<Map<string /*menuItemId*/, string /*dateString*/>> {

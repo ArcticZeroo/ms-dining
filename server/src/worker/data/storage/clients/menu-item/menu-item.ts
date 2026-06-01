@@ -422,42 +422,47 @@ export abstract class MenuItemStorageClient {
                 }
             },
             select: {
-                categories: {
+                snapshot: {
                     select: {
-                        menuItems: {
+                        categories: {
                             select: {
-                                menuItem: {
-                                    include: {
-                                        modifiers:  {
+                                menuItems: {
+                                    select: {
+                                        menuItem: {
                                             include: {
-                                                modifier: {
+                                                modifiers:  {
                                                     include: {
-                                                        choices: true
+                                                        modifier: {
+                                                            include: {
+                                                                choices: true
+                                                            }
+                                                        }
+                                                    },
+                                                    orderBy: {
+                                                        index: 'asc'
+                                                    }
+                                                },
+                                                searchTags: {
+                                                    select: {
+                                                        name: true
                                                     }
                                                 }
-                                            },
-                                            orderBy: {
-                                                index: 'asc'
-                                            }
-                                        },
-                                        searchTags: {
-                                            select: {
-                                                name: true
                                             }
                                         }
-                                    }
+                                    },
                                 }
-                            },
-                        }
+                            }
+                        },
                     }
                 },
             }
         }));
 
+
         let menuItemCount = 0;
 
-        for (const { categories } of menuResults) {
-            for (const { menuItems } of categories) {
+        for (const { snapshot } of menuResults) {
+            for (const { menuItems } of snapshot.categories) {
                 for (const { menuItem } of menuItems) {
                     const hydratedItem = hydrateMenuItem(menuItem);
                     this._saveMenuItemIntoCache(hydratedItem);

@@ -45,24 +45,28 @@ const retrieveAllMenuItemIdsAsync = async (cafeId: string): Promise<AllCafeItems
                     menuId:  true
                 }
             },
-            categories: {
+            snapshot:   {
                 select: {
-                    name:      true,
-                    menuItems: {
+                    categories: {
                         select: {
-                            menuItemId: true,
-                            menuItem:   {
+                            name:      true,
+                            menuItems: {
                                 select: {
-                                    tags:       true,
-                                    searchTags: {
+                                    menuItemId: true,
+                                    menuItem:   {
                                         select: {
-                                            name: true
+                                            tags:       true,
+                                            searchTags: {
+                                                select: {
+                                                    name: true
+                                                }
+                                            }
                                         }
                                     }
-                                }
+                                },
                             }
-                        },
-                    }
+                        }
+                    },
                 }
             },
         }
@@ -82,7 +86,7 @@ const retrieveAllMenuItemIdsAsync = async (cafeId: string): Promise<AllCafeItems
 
         const stationItems = cafeItems.get(menu.stationId)!;
 
-        for (const category of menu.categories) {
+        for (const category of menu.snapshot.categories) {
             for (const item of category.menuItems) {
                 stationItems.add(item.menuItemId);
             }

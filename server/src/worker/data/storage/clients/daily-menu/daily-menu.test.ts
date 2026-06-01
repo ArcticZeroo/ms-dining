@@ -113,19 +113,28 @@ const seedDailyStation = async ({ cafeId, dateString, stationId, itemsByCategory
         update: {},
         create: { dateString, cafeId, isAvailable: true },
     }));
-    const dailyStation = await usePrismaWrite(prisma => prisma.dailyStation.create({
-        data: { cafeId, dateString, stationId },
+
+    const snapshotId = `snapshot-${stationId}-${dateString}`;
+    await usePrismaWrite(prisma => prisma.stationMenuSnapshot.create({
+        data: {
+            id:        snapshotId,
+            stationId,
+            categories: {
+                create: Array.from(itemsByCategory.entries()).map(([categoryName, menuItemIds]) => ({
+                    name:      categoryName,
+                    menuItems: {
+                        create: menuItemIds.map(menuItemId => ({
+                            menuItemId,
+                        })),
+                    },
+                })),
+            },
+        },
     }));
-    for (const [categoryName, menuItemIds] of itemsByCategory) {
-        const category = await usePrismaWrite(prisma => prisma.dailyCategory.create({
-            data: { name: categoryName, stationId: dailyStation.id },
-        }));
-        for (const menuItemId of menuItemIds) {
-            await usePrismaWrite(prisma => prisma.dailyMenuItem.create({
-                data: { menuItemId, categoryId: category.id },
-            }));
-        }
-    }
+
+    await usePrismaWrite(prisma => prisma.dailyStation.create({
+        data: { cafeId, dateString, stationId, snapshotId },
+    }));
 };
 
 // ─── e60c31c — retrieveDailyMenuAsync shape ────────────────────────────────

@@ -131,7 +131,15 @@ test('boot syncs all cafes with the expected entity counts', async () => {
         }),
         dailyStations: await client.dailyStation.count({ where: { dateString: todayString } }),
         dailyMenuItems: await client.dailyMenuItem.count({
-            where: { category: { station: { dateString: todayString } } },
+            where: {
+                category: {
+                    snapshot: {
+                        dailyStations: {
+                            some: { dateString: todayString },
+                        },
+                    },
+                },
+            },
         }),
     }));
 

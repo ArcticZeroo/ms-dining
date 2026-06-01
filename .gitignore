@@ -6,4 +6,4 @@ server/src/adhoc/bench-prisma-concurrency/results
 *.har
 *.db
 *.db.bak
-**/node_modules
+**/node_modulesserver/dining.db.pre-snapshot-backup

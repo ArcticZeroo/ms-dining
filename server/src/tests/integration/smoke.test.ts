@@ -70,7 +70,15 @@ test('sync a single cafe end-to-end', async () => {
             where: { cafeId: 'cafe25', dateString: today },
         });
         const dailyMenuItemCount = await client.dailyMenuItem.count({
-            where: { category: { station: { cafeId: 'cafe25', dateString: today } } },
+            where: {
+                category: {
+                    snapshot: {
+                        dailyStations: {
+                            some: { cafeId: 'cafe25', dateString: today },
+                        },
+                    },
+                },
+            },
         });
         return { cafeRow, stationCount, menuItemCount, dailyStationCount, dailyMenuItemCount };
     });

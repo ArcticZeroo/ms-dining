@@ -36,10 +36,13 @@ LEFT JOIN (
     SELECT ds."stationId", ds."opensAt", ds."closesAt"
     FROM "DailyStation" ds
     INNER JOIN (
-        SELECT "stationId", MAX("dateString") AS maxDate
+        SELECT "stationId", MAX("id") AS maxId
         FROM "DailyStation"
+        WHERE ("stationId", "dateString") IN (
+            SELECT "stationId", MAX("dateString") FROM "DailyStation" GROUP BY "stationId"
+        )
         GROUP BY "stationId"
-    ) mx ON ds."stationId" = mx."stationId" AND ds."dateString" = mx.maxDate
+    ) mx ON ds."id" = mx.maxId
 ) latest ON s."id" = latest."stationId";
 DROP TABLE "Station";
 ALTER TABLE "new_Station" RENAME TO "Station";

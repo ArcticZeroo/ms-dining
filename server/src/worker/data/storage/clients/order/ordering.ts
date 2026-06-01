@@ -6,6 +6,29 @@ import { Nullable } from '../../../../../shared/models/util.js';
 
 const orderingContextLock = new Lock();
 
+type IPersistedOrderingContext = Pick<IOrderingContext,
+    'onDemandTerminalId' |
+    'onDemandEmployeeId' |
+    'profitCenterId' |
+    'storePriceLevel' |
+    'profitCenterName' |
+    'payClientId'>;
+
+const toPersistedOrderingContext = (context: IOrderingContext): IPersistedOrderingContext => ({
+    onDemandTerminalId: context.onDemandTerminalId,
+    onDemandEmployeeId: context.onDemandEmployeeId,
+    profitCenterId: context.profitCenterId,
+    storePriceLevel: context.storePriceLevel,
+    profitCenterName: context.profitCenterName,
+    payClientId: context.payClientId,
+});
+
+const hydrateOrderingContext = (context: IPersistedOrderingContext): IOrderingContext => ({
+    ...context,
+    fullSiteStoreInfo: {},
+    fullPickupConfig: {},
+});
+
 interface IOrderingContextEntry {
     context: IOrderingContext;
     lastRetrievedDate: Date;
@@ -46,7 +69,7 @@ export abstract class OrderingClient {
                 if (context != null) {
                     this.#orderingContextByCafeIdForToday.set(cafeId, {
                         lastRetrievedDate: new Date(),
-                        context
+                        context: hydrateOrderingContext(context)
                     });
                 }
             }
@@ -59,6 +82,8 @@ export abstract class OrderingClient {
         return orderingContextLock.acquire(async () => {
             const dateString = toDateString(new Date());
 
+            const persistedContext = toPersistedOrderingContext(context);
+
             await usePrismaWrite(
                 async prismaClient => {
                     await prismaClient.dailyCafeOrderingContext.upsert({
@@ -68,9 +93,9 @@ export abstract class OrderingClient {
                                 cafeId
                             }
                         },
-                        update: context,
+                        update: persistedContext,
                         create: {
-                            ...context,
+                            ...persistedContext,
                             dateString,
                             cafeId
                         }

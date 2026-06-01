@@ -70,6 +70,8 @@ const makeContext = (label: string): IOrderingContext => ({
     storePriceLevel:    'price-' + label,
     profitCenterName:   'Profit ' + label,
     payClientId:        'pay-' + label,
+    fullSiteStoreInfo:  {},
+    fullPickupConfig:   {},
 });
 
 const assertContextsEqual = (actual: IOrderingContext | null | undefined, expected: IOrderingContext) => {

@@ -33,10 +33,14 @@ export const buildReadOps = (samples: SampledIds): WorkloadOp[] => {
                         id:        true,
                         stationId: true,
                         cafeId:    true,
-                        categories: {
+                        snapshot:  {
                             select: {
-                                name:      true,
-                                menuItems: { select: { menuItemId: true } },
+                                categories: {
+                                    select: {
+                                        name:      true,
+                                        menuItems: { select: { menuItemId: true } },
+                                    },
+                                },
                             },
                         },
                     },

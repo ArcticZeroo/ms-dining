@@ -92,10 +92,26 @@ test('DailyCafeUpdateSession(daysInFuture=3).populateAsync writes rows under tod
             where: { cafeId: cafe.id, dateString: todayString },
         }),
         futureMenuItems: await client.dailyMenuItem.count({
-            where: { category: { station: { cafeId: cafe.id, dateString: futureDateString } } },
+            where: {
+                category: {
+                    snapshot: {
+                        dailyStations: {
+                            some: { cafeId: cafe.id, dateString: futureDateString },
+                        },
+                    },
+                },
+            },
         }),
         todayMenuItems: await client.dailyMenuItem.count({
-            where: { category: { station: { cafeId: cafe.id, dateString: todayString } } },
+            where: {
+                category: {
+                    snapshot: {
+                        dailyStations: {
+                            some: { cafeId: cafe.id, dateString: todayString },
+                        },
+                    },
+                },
+            },
         }),
     }));
 
