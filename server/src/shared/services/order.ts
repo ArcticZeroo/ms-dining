@@ -1,3 +1,4 @@
+import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrderDTO,
@@ -54,4 +55,9 @@ export interface IOrderService {
     getOrderCount(data: {
         userId: string;
     }): Promise<number>;
+
+    getWaitTime(data: {
+        cafeId: string;
+        userId: string;
+    }): Promise<IWaitTimeResponse>;
 }

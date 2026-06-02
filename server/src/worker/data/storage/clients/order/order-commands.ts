@@ -15,4 +15,6 @@ export const orderServiceCommands = {
         OrderStorageClient.getOrderHistory(userId, since),
     getOrderCount: ({ userId }) =>
         OrderStorageClient.getOrderCount(userId),
+    getWaitTime: ({ cafeId, userId }) =>
+        OrderOrchestrator.getWaitTime(cafeId, userId),
 } satisfies IOrderService;

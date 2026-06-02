@@ -119,7 +119,14 @@ export const registerOrderingRoutes = (parent: Router) => {
     router.get('/count', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const count = await getServices().data.order.getOrderCount({ userId });
-        ctx.body = JSON.stringify({ count });
+        ctx.body = jsonStringifyWithoutNull({ count });
+    });
+
+    router.get('/wait/:cafeId', async ctx => {
+        const userId = getUserIdOrThrow(ctx);
+        const cafeId = ctx.params.cafeId!;
+        const result = await getServices().data.order.getWaitTime({ cafeId, userId });
+        ctx.body = jsonStringifyWithoutNull(result);
     });
 
     attachRouter(parent, router);

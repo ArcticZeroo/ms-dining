@@ -1,20 +1,30 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 import { useCartStatus } from '../../../../hooks/cart-status.ts';
 import { useClickTracker } from '../../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
+import { useAggregatedWaitTime } from '../../../../store/queries/ordering.ts';
+import { useServerCartItemsByCafe } from '../../../../store/zustand/server-cart.ts';
 import { classNames } from '../../../../util/react.ts';
 import { CartContentsTable } from './cart-contents-table.tsx';
 import { CartUnavailableItemsView } from './cart-unavailable-items-view.tsx';
+import { WaitTimeEstimateBanner } from '../payment/wait-time-estimate.tsx';
 
 import './cart-popup.css';
+
+const useCartWaitTime = () => {
+    const cartItemsByCafe = useServerCartItemsByCafe();
+    const cafeIds = useMemo(() => cartItemsByCafe.map(group => group.cafeId), [cartItemsByCafe]);
+    return useAggregatedWaitTime(cafeIds);
+}
 
 const CartPopupBody = () => {
     const cart = useCartStatus();
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
+    const waitTime = useCartWaitTime();
 
     const toggleExpanded = useCallback(() => setIsExpanded(prev => !prev), []);
 
@@ -78,6 +88,7 @@ const CartPopupBody = () => {
                     !cart.hasUnavailableItems && (
                         <>
                             <CartContentsTable/>
+                            <WaitTimeEstimateBanner waitTime={waitTime}/>
                             <Link to="/order" className="checkout-button">
                                 Checkout
                             </Link>

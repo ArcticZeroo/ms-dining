@@ -63,7 +63,7 @@ export const DiningCoreResponseSchema = z.object({
 
 export type IDiningCoreResponse = z.infer<typeof DiningCoreResponseSchema>;
 
-// GET /api/dining/order/wait/:cafeId?items=$number
+// GET /api/dining/order/wait/:cafeId
 export interface IWaitTimeResponse {
 	minTime: number;
 	maxTime: number;

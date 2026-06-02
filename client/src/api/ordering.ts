@@ -20,6 +20,10 @@ const OrderCountSchema = z.object({ count: z.number() });
 const RecentOrdersResponseSchema = z.object({
     orders: z.array(RecentOrderSummarySchema),
 });
+const WaitTimeResponseSchema = z.object({
+    minTime: z.number(),
+    maxTime: z.number(),
+});
 
 export type OrderHistorySince = 'today' | '7d' | '30d' | 'all';
 
@@ -92,6 +96,13 @@ export abstract class OrderClient {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/count`,
             schema: OrderCountSchema,
+        });
+    }
+
+    static async getWaitTime(cafeId: string): Promise<{ minTime: number; maxTime: number }> {
+        return makeJsonRequestWithSchema({
+            path:   `${ORDER_BASE}/wait/${cafeId}`,
+            schema: WaitTimeResponseSchema,
         });
     }
 }

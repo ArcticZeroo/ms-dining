@@ -35,6 +35,8 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 hasMigratedToDiningSite:      'true',
                 lastRoamingSettingsUpdateTime: '',
                 mapBottomSheetHeightFraction: InternalSettings.mapBottomSheetHeightFraction.value.toString(),
+                lastOrderPrepDismissCreatedTime: InternalSettings.lastOrderPrepDismissCreatedTime.value.toString(),
+                suppressOrderPrivacyPolicy: InternalSettings.suppressOrderPrivacyPolicy.value.toString(),
             },
             applicationSettings: {
                 shouldUseGroups: ApplicationSettings.shouldUseGroups.value.toString(),

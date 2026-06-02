@@ -12,6 +12,8 @@ import { OrderCafeItemsTable } from './order-cafe-items-table.tsx';
 import { OrderCafeFooter } from './order-cafe-footer/order-cafe-footer.tsx';
 import { CafeAvailabilityWarning } from './cafe-availability-warning.tsx';
 import { classNames } from '../../../../util/react.js';
+import { CurrentCafeContext } from '../../../../context/menu-item.js';
+import { CafeViewType } from '../../../../models/cafe.js';
 
 interface IOrderCafeCardProps {
     cafeId: string;
@@ -37,9 +39,11 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     });
 
     const view = viewsById.get(cafeId);
-    const cafeName = view != null
-        ? getViewName({ view, showGroupName: true })
-        : cafeId;
+    if (view == null || view.type === CafeViewType.group) {
+        throw new Error(`Missing cafe view for cafeId: ${cafeId}`);
+    }
+
+    const cafeName = getViewName({ view, showGroupName: true });
 
     const totalPrice = useMemo(
         () => items.reduce((sum, item) => sum + calculatePrice(
@@ -63,31 +67,29 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
     const isReadOnly = paymentState.status !== 'ready-to-pay';
 
     return (
-        <div className={classNames('card order-cafe-card', hasUnavailableItems && 'error')}>
-            <div className="flex-col">
-                <div className="title text-center">
-                    {
-                        view != null
-                            ? <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
-                            : cafeName
-                    }
+        <CurrentCafeContext.Provider value={view.value}>
+            <div className={classNames('card order-cafe-card', hasUnavailableItems && 'error')}>
+                <div className="flex-col">
+                    <div className="title text-center">
+                        <Link to={getViewMenuUrlDirect(view)}>{cafeName}</Link>
+                    </div>
+                    <CafeAvailabilityWarning availability={availability}/>
+                    <OrderCafeItemsTable
+                        items={items}
+                        readOnly={isReadOnly}
+                        onRemove={onRemove}
+                        onEdit={onEdit}
+                        onChangeQuantity={onChangeQuantity}
+                    />
                 </div>
-                <CafeAvailabilityWarning availability={availability}/>
-                <OrderCafeItemsTable
-                    items={items}
-                    readOnly={isReadOnly}
-                    onRemove={onRemove}
-                    onEdit={onEdit}
-                    onChangeQuantity={onChangeQuantity}
+                <OrderCafeFooter
+                    paymentState={paymentState}
+                    totalQuantity={totalQuantity}
+                    totalPrice={totalPrice}
+                    hasUnavailableItems={hasUnavailableItems}
+                    onPay={handlePay}
                 />
             </div>
-            <OrderCafeFooter
-                paymentState={paymentState}
-                totalQuantity={totalQuantity}
-                totalPrice={totalPrice}
-                hasUnavailableItems={hasUnavailableItems}
-                onPay={handlePay}
-            />
-        </div>
+        </CurrentCafeContext.Provider>
     );
 };

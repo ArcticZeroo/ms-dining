@@ -7,6 +7,7 @@ export const queryKeys = {
     },
     ordering: {
         cartSession: ['ordering', 'cart-session'] as const,
+        waitTime:    (cafeId: string) => ['ordering', 'wait-time', cafeId] as const,
     },
     groups: {
         list:              ['groups', 'list'] as const,

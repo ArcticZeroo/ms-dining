@@ -2,6 +2,7 @@ import { SERVICE_ERROR_CODES, ServiceError } from '../../../shared/rpc/errors.js
 import type { IOrderSession } from '../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../cafe/buy-ondemand/wait-time.js';
+import { synthesizeCartItemsForWaitTime } from '../cafe/buy-ondemand/wait-time-synthesis.js';
 import { OrderStorageClient } from '../storage/clients/order/order.js';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
@@ -18,6 +19,8 @@ import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
 import { completeOrder, getPaymentSession, ORDER_SESSION_TTL_MS } from './order-session-manager.js';
 import type { ISynthesisFlags } from '../../../shared/services/order.js';
 import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from '../../../shared/ordering/order-telemetry.js';
+import { createBuyOnDemandClient, getServices } from '../../../shared/services/registry.js';
+import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
 
 const orderLog = getNamespaceLogger('Order');
 
@@ -150,5 +153,34 @@ export abstract class OrderOrchestrator {
 
     static async getCompletedOrdersToday(userId: string): Promise<ICafeOrderDTO[]> {
         return OrderStorageClient.getCompletedOrdersToday(userId);
+    }
+
+    static async getWaitTime(cafeId: string, userId: string): Promise<IWaitTimeResponse> {
+        const cart = await getServices().data.cart.getCart({ userId });
+        const cafeGroup = cart.cafes.find(group => group.cafeId === cafeId);
+        if (!cafeGroup || cafeGroup.items.length === 0) {
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, `No cart items for cafe ${cafeId}`);
+        }
+
+        // Convert cart records to IOrderItem for synthesis
+        const orderItems: IOrderItem[] = cafeGroup.items.map(item => ({
+            menuItemId:          item.menuItemId,
+            quantity:            item.quantity,
+            specialInstructions: item.specialInstructions ?? undefined,
+            modifiers:           item.modifiers,
+        }));
+
+        const cafe = CAFES_BY_ID.get(cafeId);
+        if (!cafe) {
+            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
+        }
+
+        if (isFakeOrderingEnabled) {
+            return { minTime: 5, maxTime: 10 };
+        }
+
+        const client = await createBuyOnDemandClient(cafe);
+        const cartItems = await synthesizeCartItemsForWaitTime(client, orderItems);
+        return fetchWaitTimeWithCartItems(client, cartItems);
     }
 }

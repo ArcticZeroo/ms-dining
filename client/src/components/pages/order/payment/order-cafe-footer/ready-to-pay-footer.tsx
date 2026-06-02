@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { formatPrice } from '../../../../../util/cart.ts';
 import { usePaymentIdentityContext } from '../../../../../context/payment-identity.ts';
 import { pluralize } from '../../../../../util/string.ts';
+import { WaitTimeEstimate } from '../wait-time-estimate.js';
+import { CurrentCafeContext } from '../../../../../context/menu-item.js';
 
 interface IReadyToPayFooterProps {
     notice?: string;
@@ -24,12 +26,14 @@ const getPayButtonTitle = (isIdentityValid: boolean, hasUnavailableItems: boolea
 }
 
 export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, totalQuantity, totalPrice, hasUnavailableItems, onPay }) => {
+    const cafe = useContext(CurrentCafeContext);
     const { isValid: isIdentityValid } = usePaymentIdentityContext();
 
     return (
         <div className="flex-col">
             <div className="flex flex-between">
                 <span>{totalQuantity} {pluralize('item', totalQuantity)}</span>
+                <WaitTimeEstimate cafeId={cafe.id}/>
                 <button
                     className="default-container default-button"
                     disabled={!isIdentityValid || hasUnavailableItems}

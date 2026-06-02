@@ -24,6 +24,10 @@ const useSyncOnSuccess = () => {
     return (response: ICartResponse) => {
         syncStoreFromResponse(response);
         queryClient.setQueryData(CART_QUERY_KEY, response);
+        // Invalidate all active wait-time queries so estimates refresh
+        // after any cart change. Per-cafe query keys mean only cafes with
+        // an active query actually refetch.
+        queryClient.invalidateQueries({ queryKey: ['ordering', 'wait-time'] });
     };
 };
 

@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IOrderItem, ICafeOrder } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { OrderHistorySince } from '../../api/ordering.ts';
@@ -6,6 +6,7 @@ import { OrderClient } from '../../api/ordering.ts';
 import type { ISynthesisFlags } from '../../api/ordering.ts';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
+import { queryKeys } from './keys.ts';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
 const RECENT_ORDERS_QUERY_KEY = ['order', 'recent'] as const;
@@ -116,3 +117,49 @@ export const useOrderCountQuery = () => useQuery({
     queryKey: ORDER_COUNT_QUERY_KEY,
     queryFn:  () => OrderClient.getOrderCount(),
 });
+
+const WAIT_TIME_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
+const WAIT_TIME_STALE_TIME_MS = 60 * 1000;
+
+export const useWaitTimeQuery = (cafeId: string) => {
+    const isLoggedIn = useIsLoggedIn();
+
+    return useQuery({
+        queryKey:        queryKeys.ordering.waitTime(cafeId),
+        queryFn:         () => OrderClient.getWaitTime(cafeId),
+        enabled:         isLoggedIn,
+        refetchInterval: WAIT_TIME_REFETCH_INTERVAL_MS,
+        staleTime:       WAIT_TIME_STALE_TIME_MS,
+        placeholderData: keepPreviousData,
+    });
+};
+
+/**
+ * Fetches wait times for all cafes in the cart in parallel and aggregates
+ * to the worst-case (max) range — the longest cafe determines actual wait.
+ */
+export const useAggregatedWaitTime = (cafeIds: string[]) => {
+    const isLoggedIn = useIsLoggedIn();
+
+    const results = useQueries({
+        queries: cafeIds.map(cafeId => ({
+            queryKey:        queryKeys.ordering.waitTime(cafeId),
+            queryFn:         () => OrderClient.getWaitTime(cafeId),
+            enabled:         isLoggedIn,
+            refetchInterval: WAIT_TIME_REFETCH_INTERVAL_MS,
+            staleTime:       WAIT_TIME_STALE_TIME_MS,
+            placeholderData: keepPreviousData,
+        })),
+    });
+
+    const loaded = results.filter(result => result.data != null).map(result => result.data!);
+
+    if (loaded.length === 0) {
+        return undefined;
+    }
+
+    return {
+        minTime: Math.min(...loaded.map(entry => entry.minTime)),
+        maxTime: Math.max(...loaded.map(entry => entry.maxTime)),
+    };
+};
