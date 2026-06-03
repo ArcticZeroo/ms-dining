@@ -5,7 +5,7 @@ import { fetchWaitTimeWithCartItems } from '../cafe/buy-ondemand/wait-time.js';
 import { synthesizeCartItemsForWaitTime } from '../cafe/buy-ondemand/wait-time-synthesis.js';
 import { OrderStorageClient } from '../storage/clients/order/order.js';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
-import type { IPaymentCardInfo } from '@msdining/common/models/cart';
+import type { ICartItemRecord, IPaymentCardInfo } from '@msdining/common/models/cart';
 import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICafeOrderDTO,
@@ -16,7 +16,7 @@ import type {
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { phone } from 'phone';
 import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
-import { completeOrder, getPaymentSession, ORDER_SESSION_TTL_MS } from './order-session-manager.js';
+import { completeOrder, getPaymentSession, keepalivePrewarm, ORDER_SESSION_TTL_MS, prewarmSession } from './order-session-manager.js';
 import type { ISynthesisFlags } from '../../../shared/services/order.js';
 import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from '../../../shared/ordering/order-telemetry.js';
 import { createBuyOnDemandClient, getServices } from '../../../shared/services/registry.js';
@@ -64,6 +64,13 @@ const wasOrderSentToKitchen = (session: IOrderSession) =>
     session.lastCompletedStage === SubmitOrderStage.closeOrder
 	|| session.lastCompletedStage === SubmitOrderStage.sendTextReceipt
 	|| session.lastCompletedStage === SubmitOrderStage.complete;
+
+const cartItemToOrderItem = (item: ICartItemRecord): IOrderItem => ({
+    menuItemId:          item.menuItemId,
+    quantity:            item.quantity,
+    specialInstructions: item.specialInstructions ?? undefined,
+    modifiers:           item.modifiers,
+});
 
 export abstract class OrderOrchestrator {
     static async preparePayment(
@@ -162,13 +169,7 @@ export abstract class OrderOrchestrator {
             throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, `No cart items for cafe ${cafeId}`);
         }
 
-        // Convert cart records to IOrderItem for synthesis
-        const orderItems: IOrderItem[] = cafeGroup.items.map(item => ({
-            menuItemId:          item.menuItemId,
-            quantity:            item.quantity,
-            specialInstructions: item.specialInstructions ?? undefined,
-            modifiers:           item.modifiers,
-        }));
+        const orderItems = cafeGroup.items.map(cartItemToOrderItem);
 
         const cafe = CAFES_BY_ID.get(cafeId);
         if (!cafe) {
@@ -182,5 +183,24 @@ export abstract class OrderOrchestrator {
         const client = await createBuyOnDemandClient(cafe);
         const cartItems = await synthesizeCartItemsForWaitTime(client, orderItems);
         return fetchWaitTimeWithCartItems(client, cartItems);
+    }
+
+    /**
+     * Fire-and-forget prewarm for all cafes in the user's cart.
+     * Called after cart mutations so payment sessions are ready ahead of time.
+     */
+    static prewarmFromCart(userId: string, cafes: Array<{ cafeId: string; items: ICartItemRecord[] }>): void {
+        for (const cafeGroup of cafes) {
+            if (cafeGroup.items.length === 0) {
+                continue;
+            }
+            const orderItems = cafeGroup.items.map(cartItemToOrderItem);
+            prewarmSession(userId, cafeGroup.cafeId, orderItems)
+                .catch(err => orderLog.error(`Prewarm failed for ${userId}:${cafeGroup.cafeId}:`, err));
+        }
+    }
+
+    static async keepalivePrewarm(userId: string): Promise<number> {
+        return keepalivePrewarm(userId);
     }
 }

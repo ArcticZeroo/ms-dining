@@ -20,7 +20,7 @@ import { IOrderSession } from './order-session.js';
 import { IPickUpConfig, ISiteStoreInfo } from '../../../models/ordering.js';
 import { retrieveDailyOrderingContext } from '../../ordering/daily-order-context.js';
 import { asRecord } from '../../../../shared/util/typeguard.js';
-import { buildStoreInfo } from '../../util/order.js';
+import { buildStoreInfo, hashOrderItems } from '../../util/order.js';
 import { createStationSchedule } from '../../../util/schedule.js';
 
 const orderLog = getNamespaceLogger('Order');
@@ -226,6 +226,7 @@ export class CafeOrderSession implements IOrderSession {
     #sitePickUpConfig: IPickUpConfig | null = null;
 
     readonly #orderItems: IOrderItem[];
+    readonly #itemsHash: string;
     readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #rawCartItemsForWaitTime: unknown[] = [];
     readonly #conceptIds = new Set<string>();
@@ -240,6 +241,7 @@ export class CafeOrderSession implements IOrderSession {
 
     constructor(public client: BuyOnDemandClient, orderItems: IOrderItem[], synthesisFlags: ISynthesisFlags = DEFAULT_SYNTHESIS_FLAGS) {
         this.#orderItems = orderItems;
+        this.#itemsHash = hashOrderItems(orderItems);
         this.#synthesisFlags = synthesisFlags;
     }
 
@@ -257,6 +259,10 @@ export class CafeOrderSession implements IOrderSession {
     get isReadyForPayment() {
         return this.createdDateString===getTodayDateString()
                 && this.#lastCompletedStage===SubmitOrderStage.initializeCardProcessor;
+    }
+
+    get itemsHash() {
+        return this.#itemsHash;
     }
 
     public get orderNumber() {

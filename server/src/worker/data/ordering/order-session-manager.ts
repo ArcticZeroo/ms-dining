@@ -11,14 +11,19 @@ import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { ICompleteOrderResultDTO, IOrderItem } from '@msdining/common/models/order';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
 import { trackOrderEvent } from '../../../shared/ordering/order-telemetry.js';
+import { hashOrderItems } from '../util/order.js';
 
 export const ORDER_SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 const ORPHAN_CLEANUP_INTERVAL_MS = 30 * 60 * 1000;
+const PREWARM_TTL_MS = 5 * 60 * 1000;
 
 const ACTIVE_ORDER_SESSIONS = new LockedExpiringMap<string, IOrderSession>(ORDER_SESSION_TTL_MS);
+const PREWARMED_SESSIONS = new LockedExpiringMap<string, IOrderSession>(PREWARM_TTL_MS);
 
 const orderLog = getNamespaceLogger('OrderSessions');
+
+const prewarmKey = (userId: string, cafeId: string) => `${userId}:${cafeId}`;
 
 const refreshSessionToken = (pendingOrderId: string, liveSession: IOrderSession) => {
     const todayDateString = getTodayDateString();
@@ -113,6 +118,15 @@ export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl, s
             if (session) {
                 orderLog.info(`Discarding stale session for ${pendingOrderId} (stage=${session.lastCompletedStage}, created=${session.createdDateString})`);
             }
+
+            // Try to promote a prewarmed session (already through addToCart)
+            const prewarmed = await promotePrewarmedSession(userId, cafeId, items);
+            if (prewarmed) {
+                orderLog.info(`Using prewarmed session for ${pendingOrderId} — only iframe step needed`);
+                await prewarmed.prepareForIframe(iframeCssUrl);
+                return prewarmed;
+            }
+
             session = await createOrderSession(cafeId, items, synthesisFlags);
             await session.prepareForIframe(iframeCssUrl);
         }
@@ -156,3 +170,84 @@ export const completeOrder = async (pendingOrderId: string, doCompletion: (sessi
 
     return result;
 }
+
+// ── Prewarm ──────────────────────────────────────────────────────────────
+
+/**
+ * Fire-and-forget: creates a BoD session through the addToCart stage
+ * so that a subsequent getPaymentSession can skip the expensive steps.
+ * If a prewarm for the same user+cafe with the same items hash already
+ * exists, this is a no-op.
+ */
+export const prewarmSession = async (userId: string, cafeId: string, items: IOrderItem[]): Promise<void> => {
+    if (isFakeOrderingEnabled) {
+        return;
+    }
+
+    const key = prewarmKey(userId, cafeId);
+    const newHash = hashOrderItems(items);
+
+    // If an existing prewarm has the same hash, no work needed
+    const existingSession = await PREWARMED_SESSIONS.get(key);
+    if (existingSession && existingSession.itemsHash === newHash) {
+        orderLog.info(`Prewarm cache hit for ${key} — items unchanged`);
+        return;
+    }
+
+    // Discard stale prewarm if any, then build a fresh one
+    if (existingSession) {
+        orderLog.info(`Prewarm stale for ${key} — rebuilding`);
+        await PREWARMED_SESSIONS.delete(key);
+    }
+
+    orderLog.info(`Prewarming session for ${key} (${items.length} item(s))`);
+    const session = await createOrderSession(cafeId, items);
+
+    await PREWARMED_SESSIONS.update(key, () => session);
+    orderLog.info(`Prewarm ready for ${key}`);
+};
+
+/**
+ * Try to promote a prewarmed session for use in payment.
+ * Returns the session if the items hash matches, otherwise undefined.
+ * The session is removed from the prewarm map on promotion.
+ */
+export const promotePrewarmedSession = async (userId: string, cafeId: string, items: IOrderItem[]): Promise<IOrderSession | undefined> => {
+    const key = prewarmKey(userId, cafeId);
+    const targetHash = hashOrderItems(items);
+
+    let promoted: IOrderSession | undefined;
+    await PREWARMED_SESSIONS.update(key, (session) => {
+        if (session && session.itemsHash === targetHash && session.createdDateString === getTodayDateString()) {
+            promoted = session;
+            orderLog.info(`Promoting prewarmed session for ${key}`);
+            return undefined; // remove from prewarm map
+        }
+
+        if (session) {
+            orderLog.info(`Prewarm hash mismatch for ${key} — discarding`);
+        }
+        return undefined; // discard stale
+    });
+
+    return promoted;
+};
+
+/**
+ * Extend TTL for all prewarmed sessions belonging to a user.
+ * Called from the keepalive endpoint while the user is on the checkout page.
+ */
+export const keepalivePrewarm = async (userId: string): Promise<number> => {
+    const prefix = `${userId}:`;
+    let touchedCount = 0;
+
+    for (const [key] of PREWARMED_SESSIONS.entries()) {
+        if (key.startsWith(prefix)) {
+            // update() with identity callback refreshes TTL
+            await PREWARMED_SESSIONS.update(key, (session) => session);
+            touchedCount++;
+        }
+    }
+
+    return touchedCount;
+};

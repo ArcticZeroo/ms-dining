@@ -6,6 +6,7 @@ import type { IOrderSession } from './order-session.js';
 import type { ICafe } from '../../../../shared/models/cafe.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { getTodayDateString } from '@msdining/common/util/date-util';
+import { hashOrderItems } from '../../util/order.js';
 
 const fakeLog = getNamespaceLogger('FakeOrder');
 
@@ -20,6 +21,7 @@ export class FakeCafeOrderSession implements IOrderSession {
     #cardProcessorToken = '';
     readonly #cafe: ICafe;
     readonly #orderItems: IOrderItem[];
+    readonly #itemsHash: string;
     readonly createdDateString = getTodayDateString();
 
     readonly client = {
@@ -31,6 +33,7 @@ export class FakeCafeOrderSession implements IOrderSession {
     constructor(cafe: ICafe, orderItems: IOrderItem[]) {
         this.#cafe = cafe;
         this.#orderItems = orderItems;
+        this.#itemsHash = hashOrderItems(orderItems);
     }
 
     get orderId() {
@@ -59,6 +62,10 @@ export class FakeCafeOrderSession implements IOrderSession {
 
     get isReadyForPayment() {
         return true;
+    }
+
+    get itemsHash() {
+        return this.#itemsHash;
     }
 
     get cardProcessorToken() {

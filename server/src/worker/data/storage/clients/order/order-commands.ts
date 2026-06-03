@@ -17,4 +17,6 @@ export const orderServiceCommands = {
         OrderStorageClient.getOrderCount(userId),
     getWaitTime: ({ cafeId, userId }) =>
         OrderOrchestrator.getWaitTime(cafeId, userId),
+    keepalivePrewarm: ({ userId }) =>
+        OrderOrchestrator.keepalivePrewarm(userId),
 } satisfies IOrderService;

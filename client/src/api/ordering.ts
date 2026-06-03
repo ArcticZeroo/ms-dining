@@ -105,4 +105,12 @@ export abstract class OrderClient {
             schema: WaitTimeResponseSchema,
         });
     }
+
+    static async keepalivePrewarm(): Promise<void> {
+        await makeJsonRequestWithSchema({
+            path:    `${ORDER_BASE}/prewarm/keepalive`,
+            schema:  z.object({ touched: z.number() }),
+            options: { method: 'POST' },
+        });
+    }
 }

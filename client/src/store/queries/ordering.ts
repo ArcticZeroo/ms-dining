@@ -7,6 +7,7 @@ import type { ISynthesisFlags } from '../../api/ordering.ts';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 import { queryKeys } from './keys.ts';
+import { useEffect } from 'react';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
 const RECENT_ORDERS_QUERY_KEY = ['order', 'recent'] as const;
@@ -162,4 +163,29 @@ export const useAggregatedWaitTime = (cafeIds: string[]) => {
         minTime: Math.min(...loaded.map(entry => entry.minTime)),
         maxTime: Math.max(...loaded.map(entry => entry.maxTime)),
     };
+};
+
+const PREWARM_KEEPALIVE_INTERVAL_MS = 2 * 60 * 1000;
+
+/**
+ * While mounted, sends periodic keepalive pings to extend prewarmed
+ * session TTLs on the server. Use on the checkout page.
+ */
+export const usePrewarmKeepalive = () => {
+    const isLoggedIn = useIsLoggedIn();
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            return;
+        }
+
+        // Send an immediate keepalive on mount
+        OrderClient.keepalivePrewarm().catch(() => {});
+
+        const intervalId = setInterval(() => {
+            OrderClient.keepalivePrewarm().catch(() => {});
+        }, PREWARM_KEEPALIVE_INTERVAL_MS);
+
+        return () => clearInterval(intervalId);
+    }, [isLoggedIn]);
 };

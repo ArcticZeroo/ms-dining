@@ -129,5 +129,11 @@ export const registerOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
+    router.post('/prewarm/keepalive', async ctx => {
+        const userId = getUserIdOrThrow(ctx);
+        const touched = await getServices().data.order.keepalivePrewarm({ userId });
+        ctx.body = jsonStringifyWithoutNull({ touched });
+    });
+
     attachRouter(parent, router);
 };

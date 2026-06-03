@@ -16,4 +16,6 @@ export const orderService: IOrderService = {
         dataHandler.sendRequest('order', 'getOrderCount', data),
     getWaitTime: (data) =>
         dataHandler.sendRequest('order', 'getWaitTime', data),
+    keepalivePrewarm: (data) =>
+        dataHandler.sendRequest('order', 'keepalivePrewarm', data),
 };

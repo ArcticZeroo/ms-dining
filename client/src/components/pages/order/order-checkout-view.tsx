@@ -12,6 +12,7 @@ import { TodayOrdersView } from './history/today-orders-view.js';
 import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 import { SynthesisFlagsPanel } from './synthesis-flags-panel.tsx';
 import { useSynthesisFlags } from '../../../hooks/synthesis-flags.ts';
+import { usePrewarmKeepalive } from '../../../store/queries/ordering.ts';
 
 import './order-page.css';
 import { usePageData } from '../../../hooks/location.js';
@@ -22,6 +23,7 @@ export const OrderCheckoutView = () => {
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
     const synthesisFlags = useSynthesisFlags();
 
+    usePrewarmKeepalive();
     usePageData('Order', 'Online ordering checkout');
 
     const snapshotCallbacks = useMemo(() => ({

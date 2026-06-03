@@ -52,5 +52,5 @@ export const DATA_SERVICE_KEYS = {
     search: ['search', 'searchVector', 'searchForSimilarEntities', 'searchFavorites', 'searchForCheapItems', 'autocomplete', 'getSimilarQueries', 'getRecommendations'] as const,
     menuAnalytics: ['retrieveUniquenessDataForCafe', 'resolveIngredientsMenu', 'getShutdownCafeState', 'retrieveVisitData'] as const,
     cart: ['getCart', 'addItems', 'updateItem', 'removeItem', 'clearCart'] as const,
-    order: ['preparePayment', 'completeOrder', 'getRecentOrders', 'getCompletedOrdersToday', 'getOrderHistory', 'getOrderCount', 'getWaitTime'] as const,
+    order: ['preparePayment', 'completeOrder', 'getRecentOrders', 'getCompletedOrdersToday', 'getOrderHistory', 'getOrderCount', 'getWaitTime', 'keepalivePrewarm'] as const,
 } as const satisfies { [K in keyof DataServiceMap]: ReadonlyArray<keyof DataServiceMap[K]> };

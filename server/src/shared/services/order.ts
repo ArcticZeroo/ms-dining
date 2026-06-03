@@ -60,4 +60,8 @@ export interface IOrderService {
         cafeId: string;
         userId: string;
     }): Promise<IWaitTimeResponse>;
+
+    keepalivePrewarm(data: {
+        userId: string;
+    }): Promise<number>;
 }
