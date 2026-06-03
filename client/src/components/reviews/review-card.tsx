@@ -2,7 +2,7 @@ import { IReview } from '@msdining/common/models/review';
 import React, { useContext, useState } from 'react';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewName } from '../../util/cafe.ts';
-import { useValueNotifierContext, useValueNotifier } from '../../hooks/events.ts';
+import { useValueNotifier, useValueNotifierContext } from '../../hooks/events.ts';
 import { UserContext } from '../../context/auth.ts';
 import { classNames } from '../../util/react.ts';
 import { Link } from 'react-router-dom';
@@ -31,6 +31,7 @@ interface IReviewCardProps {
     showName?: boolean;
     showMyself: boolean;
     stretchSelf?: boolean;
+    showCommentInline?: boolean;
 }
 
 export const ReviewCard: React.FC<IReviewCardProps> = ({
@@ -38,7 +39,8 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
     showMyself,
     showName = true,
     isSkeleton = false,
-    stretchSelf = false
+    stretchSelf = false,
+    showCommentInline = true
 }) => {
     const userId = useValueNotifierContext(UserContext)?.id;
     const isAdmin = useIsAdmin();
@@ -156,7 +158,7 @@ export const ReviewCard: React.FC<IReviewCardProps> = ({
                 </span>
             </div>
             {
-                review.comment && (
+                showCommentInline && review.comment && (
                     <div className="flex">
                         <span className="material-symbols-outlined">
                             comment

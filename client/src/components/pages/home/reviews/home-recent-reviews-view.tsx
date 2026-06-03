@@ -27,6 +27,7 @@ export const HomeRecentReviewsView = () => {
                             review={review}
                             showMyself={true}
                             stretchSelf={true}
+                            showCommentInline={false}
                         />
                     ))
                 }
@@ -44,6 +45,7 @@ export const HomeRecentReviewsView = () => {
                     rating: 5,
                     createdDate: toDateString(new Date())
                 }}
+                showCommentInline={false}
                 showMyself={true}
                 isSkeleton={true}
             />
