@@ -24,6 +24,12 @@ const WaitTimeResponseSchema = z.object({
     minTime: z.number(),
     maxTime: z.number(),
 });
+const CartEstimateResponseSchema = z.object({
+    waitTime: WaitTimeResponseSchema,
+    subtotal: z.number(),
+    tax:      z.number(),
+    total:    z.number(),
+});
 
 export type OrderHistorySince = 'today' | '7d' | '30d' | 'all';
 
@@ -99,10 +105,10 @@ export abstract class OrderClient {
         });
     }
 
-    static async getWaitTime(cafeId: string): Promise<{ minTime: number; maxTime: number }> {
+    static async getCartEstimate(cafeId: string) {
         return makeJsonRequestWithSchema({
-            path:   `${ORDER_BASE}/wait/${cafeId}`,
-            schema: WaitTimeResponseSchema,
+            path:   `${ORDER_BASE}/estimate/${cafeId}`,
+            schema: CartEstimateResponseSchema,
         });
     }
 

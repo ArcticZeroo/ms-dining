@@ -27,7 +27,7 @@ const useSyncOnSuccess = () => {
         // Invalidate all active wait-time queries so estimates refresh
         // after any cart change. Per-cafe query keys mean only cafes with
         // an active query actually refetch.
-        queryClient.invalidateQueries({ queryKey: ['ordering', 'wait-time'] });
+        queryClient.invalidateQueries({ queryKey: ['ordering', 'cart-estimate'] });
     };
 };
 

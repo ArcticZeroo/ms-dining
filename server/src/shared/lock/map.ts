@@ -237,4 +237,9 @@ export class LockedExpiringMap<K, V> implements ILockedMap<K, V> {
             return entry != null;
         });
     }
+
+    async resetExpiration(key: K): Promise<void> {
+        // Identity update to refresh the expiration time without modifying the value
+        await this.#map.update(key, (entry) => entry);
+    }
 }

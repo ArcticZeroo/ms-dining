@@ -69,6 +69,14 @@ export interface IWaitTimeResponse {
 	maxTime: number;
 }
 
+// GET /api/dining/order/estimate/:cafeId
+export interface ICartEstimateResponse {
+	waitTime: IWaitTimeResponse;
+	subtotal: number;
+	tax: number;
+	total: number;
+}
+
 export interface IPriceResponse {
 	totalPriceWithTax: number;
 	totalPriceWithoutTax: number;

@@ -2,7 +2,8 @@ import React, { useContext } from 'react';
 import { formatPrice } from '../../../../../util/cart.ts';
 import { usePaymentIdentityContext } from '../../../../../context/payment-identity.ts';
 import { pluralize } from '../../../../../util/string.ts';
-import { WaitTimeEstimate } from '../wait-time-estimate.js';
+import { useCartEstimateQuery } from '../../../../../store/queries/ordering.ts';
+import { WaitTimeEstimateBanner } from '../wait-time-estimate.js';
 import { CurrentCafeContext } from '../../../../../context/menu-item.js';
 
 interface IReadyToPayFooterProps {
@@ -28,19 +29,24 @@ const getPayButtonTitle = (isIdentityValid: boolean, hasUnavailableItems: boolea
 export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, totalQuantity, totalPrice, hasUnavailableItems, onPay }) => {
     const cafe = useContext(CurrentCafeContext);
     const { isValid: isIdentityValid } = usePaymentIdentityContext();
+    const { data: estimate } = useCartEstimateQuery(cafe.id);
+
+    const displayPrice = estimate && estimate.total > 0
+        ? estimate.total
+        : totalPrice;
 
     return (
         <div className="flex-col">
             <div className="flex flex-between">
                 <span>{totalQuantity} {pluralize('item', totalQuantity)}</span>
-                <WaitTimeEstimate cafeId={cafe.id}/>
+                <WaitTimeEstimateBanner waitTime={estimate?.waitTime}/>
                 <button
                     className="default-container default-button"
                     disabled={!isIdentityValid || hasUnavailableItems}
                     onClick={onPay}
                     title={getPayButtonTitle(isIdentityValid, hasUnavailableItems)}
                 >
-                    Pay {formatPrice(totalPrice)}
+                    Pay {formatPrice(displayPrice)}
                 </button>
             </div>
             {

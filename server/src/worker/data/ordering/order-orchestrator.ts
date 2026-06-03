@@ -2,7 +2,6 @@ import { SERVICE_ERROR_CODES, ServiceError } from '../../../shared/rpc/errors.js
 import type { IOrderSession } from '../cafe/session/order-session.js';
 import type { BuyOnDemandClient } from '../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { fetchWaitTimeWithCartItems } from '../cafe/buy-ondemand/wait-time.js';
-import { synthesizeCartItemsForWaitTime } from '../cafe/buy-ondemand/wait-time-synthesis.js';
 import { OrderStorageClient } from '../storage/clients/order/order.js';
 import { getNamespaceLogger } from '../../../shared/util/log.js';
 import type { ICartItemRecord, IPaymentCardInfo } from '@msdining/common/models/cart';
@@ -13,13 +12,13 @@ import type {
     IOrderItem,
     IPreparePaymentResult,
 } from '@msdining/common/models/order';
-import type { IWaitTimeResponse } from '@msdining/common/models/http';
+import type { ICartEstimateResponse, IWaitTimeResponse } from '@msdining/common/models/http';
 import { phone } from 'phone';
 import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
-import { completeOrder, getPaymentSession, keepalivePrewarm, ORDER_SESSION_TTL_MS, prewarmSession } from './order-session-manager.js';
+import { completeOrder, getPaymentSession, keepalivePrewarm, ORDER_SESSION_TTL_MS, getOrCreatePrewarmedSession } from './order-session-manager.js';
 import type { ISynthesisFlags } from '../../../shared/services/order.js';
 import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from '../../../shared/ordering/order-telemetry.js';
-import { createBuyOnDemandClient, getServices } from '../../../shared/services/registry.js';
+import { getServices } from '../../../shared/services/registry.js';
 import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
 
 const orderLog = getNamespaceLogger('Order');
@@ -162,7 +161,11 @@ export abstract class OrderOrchestrator {
         return OrderStorageClient.getCompletedOrdersToday(userId);
     }
 
-    static async getWaitTime(cafeId: string, userId: string): Promise<IWaitTimeResponse> {
+    static async getCartEstimate(cafeId: string, userId: string): Promise<ICartEstimateResponse> {
+        if (!CAFES_BY_ID.has(cafeId)) {
+            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
+        }
+
         const cart = await getServices().data.cart.getCart({ userId });
         const cafeGroup = cart.cafes.find(group => group.cafeId === cafeId);
         if (!cafeGroup || cafeGroup.items.length === 0) {
@@ -170,19 +173,16 @@ export abstract class OrderOrchestrator {
         }
 
         const orderItems = cafeGroup.items.map(cartItemToOrderItem);
+        // By constructing the session with order items, we get order totals 'for free'
+        const session = await getOrCreatePrewarmedSession(userId, cafeId, orderItems);
+        const waitTime = await getWaitTimeForSession(session);
 
-        const cafe = CAFES_BY_ID.get(cafeId);
-        if (!cafe) {
-            throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `Cafe ${cafeId} not found`);
-        }
-
-        if (isFakeOrderingEnabled) {
-            return { minTime: 5, maxTime: 10 };
-        }
-
-        const client = await createBuyOnDemandClient(cafe);
-        const cartItems = await synthesizeCartItemsForWaitTime(client, orderItems);
-        return fetchWaitTimeWithCartItems(client, cartItems);
+        return {
+            waitTime,
+            subtotal: session.orderTotalWithoutTax,
+            tax:      session.orderTotalTax,
+            total:    session.orderTotalWithTax,
+        };
     }
 
     /**
@@ -195,7 +195,7 @@ export abstract class OrderOrchestrator {
                 continue;
             }
             const orderItems = cafeGroup.items.map(cartItemToOrderItem);
-            prewarmSession(userId, cafeGroup.cafeId, orderItems)
+            getOrCreatePrewarmedSession(userId, cafeGroup.cafeId, orderItems)
                 .catch(err => orderLog.error(`Prewarm failed for ${userId}:${cafeGroup.cafeId}:`, err));
         }
     }

@@ -4,7 +4,7 @@ import { useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 import { useCartStatus } from '../../../../hooks/cart-status.ts';
 import { useClickTracker } from '../../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
-import { useAggregatedWaitTime } from '../../../../store/queries/ordering.ts';
+import { useAggregatedCartEstimate } from '../../../../store/queries/ordering.ts';
 import { useServerCartItemsByCafe } from '../../../../store/zustand/server-cart.ts';
 import { classNames } from '../../../../util/react.ts';
 import { CartContentsTable } from './cart-contents-table.tsx';
@@ -13,10 +13,10 @@ import { WaitTimeEstimateBanner } from '../payment/wait-time-estimate.tsx';
 
 import './cart-popup.css';
 
-const useCartWaitTime = () => {
+const useCartEstimate = () => {
     const cartItemsByCafe = useServerCartItemsByCafe();
     const cafeIds = useMemo(() => cartItemsByCafe.map(group => group.cafeId), [cartItemsByCafe]);
-    return useAggregatedWaitTime(cafeIds);
+    return useAggregatedCartEstimate(cafeIds);
 }
 
 const CartPopupBody = () => {
@@ -24,7 +24,7 @@ const CartPopupBody = () => {
     const scrollbarWidth = useScrollbarWidth();
     const [isExpanded, setIsExpanded] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
-    const waitTime = useCartWaitTime();
+    const estimate = useCartEstimate();
 
     const toggleExpanded = useCallback(() => setIsExpanded(prev => !prev), []);
 
@@ -87,8 +87,8 @@ const CartPopupBody = () => {
                 {
                     !cart.hasUnavailableItems && (
                         <>
-                            <CartContentsTable/>
-                            <WaitTimeEstimateBanner waitTime={waitTime}/>
+                            <CartContentsTable showTotalPrice/>
+                            <WaitTimeEstimateBanner waitTime={estimate?.waitTime}/>
                             <Link to="/order" className="checkout-button">
                                 Checkout
                             </Link>

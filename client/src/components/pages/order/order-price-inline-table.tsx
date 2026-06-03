@@ -1,9 +1,14 @@
 import React, { useMemo } from 'react';
-import { useServerCartAvailableItems } from '../../../store/zustand/server-cart.ts';
+import { useServerCartAvailableItems, useServerCartItemsByCafe } from '../../../store/zustand/server-cart.ts';
 import { calculatePrice, formatPrice } from '../../../util/cart.ts';
+import { useAggregatedCartEstimate } from '../../../store/queries/ordering.ts';
 
 export const OrderPriceInlineTable: React.FC = () => {
     const availableItems = useServerCartAvailableItems();
+    const cartItemsByCafe = useServerCartItemsByCafe();
+
+    const cafeIds = useMemo(() => cartItemsByCafe.map(group => group.cafeId), [cartItemsByCafe]);
+    const estimate = useAggregatedCartEstimate(cafeIds);
 
     const localTotalWithoutTax = useMemo(
         () => availableItems.reduce((total, item) => {
@@ -16,6 +21,8 @@ export const OrderPriceInlineTable: React.FC = () => {
         [availableItems]
     );
 
+    const hasServerPricing = estimate != null && estimate.total > 0;
+
     return (
         <>
             <tr>
@@ -24,7 +31,7 @@ export const OrderPriceInlineTable: React.FC = () => {
                     Subtotal
                 </td>
                 <td className="price">
-                    {formatPrice(localTotalWithoutTax)}
+                    {formatPrice(hasServerPricing ? estimate.subtotal : localTotalWithoutTax)}
                 </td>
             </tr>
             <tr>
@@ -33,16 +40,16 @@ export const OrderPriceInlineTable: React.FC = () => {
                     Tax
                 </td>
                 <td className="price">
-                    Calculated at checkout
+                    {hasServerPricing ? formatPrice(estimate.tax) : '—'}
                 </td>
             </tr>
             <tr>
                 <td colSpan={2}></td>
                 <td>
-                    Total (est.)
+                    Total{!hasServerPricing && ' (est.)'}
                 </td>
                 <td className="price">
-                    {formatPrice(localTotalWithoutTax)}
+                    {formatPrice(hasServerPricing ? estimate.total : localTotalWithoutTax)}
                 </td>
             </tr>
         </>

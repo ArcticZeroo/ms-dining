@@ -119,36 +119,36 @@ export const useOrderCountQuery = () => useQuery({
     queryFn:  () => OrderClient.getOrderCount(),
 });
 
-const WAIT_TIME_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
-const WAIT_TIME_STALE_TIME_MS = 60 * 1000;
+const ESTIMATE_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
+const ESTIMATE_STALE_TIME_MS = 60 * 1000;
 
-export const useWaitTimeQuery = (cafeId: string) => {
+export const useCartEstimateQuery = (cafeId: string) => {
     const isLoggedIn = useIsLoggedIn();
 
     return useQuery({
-        queryKey:        queryKeys.ordering.waitTime(cafeId),
-        queryFn:         () => OrderClient.getWaitTime(cafeId),
+        queryKey:        queryKeys.ordering.cartEstimate(cafeId),
+        queryFn:         () => OrderClient.getCartEstimate(cafeId),
         enabled:         isLoggedIn,
-        refetchInterval: WAIT_TIME_REFETCH_INTERVAL_MS,
-        staleTime:       WAIT_TIME_STALE_TIME_MS,
+        refetchInterval: ESTIMATE_REFETCH_INTERVAL_MS,
+        staleTime:       ESTIMATE_STALE_TIME_MS,
         placeholderData: keepPreviousData,
     });
 };
 
 /**
- * Fetches wait times for all cafes in the cart in parallel and aggregates
- * to the worst-case (max) range — the longest cafe determines actual wait.
+ * Fetches cart estimates for all cafes in the cart in parallel and aggregates
+ * wait time to the worst-case (max) range and sums pricing.
  */
-export const useAggregatedWaitTime = (cafeIds: string[]) => {
+export const useAggregatedCartEstimate = (cafeIds: string[]) => {
     const isLoggedIn = useIsLoggedIn();
 
     const results = useQueries({
         queries: cafeIds.map(cafeId => ({
-            queryKey:        queryKeys.ordering.waitTime(cafeId),
-            queryFn:         () => OrderClient.getWaitTime(cafeId),
+            queryKey:        queryKeys.ordering.cartEstimate(cafeId),
+            queryFn:         () => OrderClient.getCartEstimate(cafeId),
             enabled:         isLoggedIn,
-            refetchInterval: WAIT_TIME_REFETCH_INTERVAL_MS,
-            staleTime:       WAIT_TIME_STALE_TIME_MS,
+            refetchInterval: ESTIMATE_REFETCH_INTERVAL_MS,
+            staleTime:       ESTIMATE_STALE_TIME_MS,
             placeholderData: keepPreviousData,
         })),
     });
@@ -160,8 +160,13 @@ export const useAggregatedWaitTime = (cafeIds: string[]) => {
     }
 
     return {
-        minTime: Math.min(...loaded.map(entry => entry.minTime)),
-        maxTime: Math.max(...loaded.map(entry => entry.maxTime)),
+        waitTime: {
+            minTime: Math.max(...loaded.map(entry => entry.waitTime.minTime)),
+            maxTime: Math.max(...loaded.map(entry => entry.waitTime.maxTime)),
+        },
+        subtotal: loaded.reduce((sum, entry) => sum + entry.subtotal, 0),
+        tax:      loaded.reduce((sum, entry) => sum + entry.tax, 0),
+        total:    loaded.reduce((sum, entry) => sum + entry.total, 0),
     };
 };
 

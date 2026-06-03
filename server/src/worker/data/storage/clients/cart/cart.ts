@@ -153,11 +153,11 @@ export abstract class CartStorageClient {
 
     private static async useCartTransaction(
         userId: string,
-        callback: (prisma: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
+        callback?: (prisma: PrismaTransactionClient, cart: Awaited<ReturnType<typeof CartStorageClient.getOrCreateCart>>) => Promise<void>,
     ) {
         const rawData = await usePrismaTransaction(async prisma => {
             const cart = await this.getOrCreateCart(prisma, userId);
-            await callback(prisma, cart);
+            await callback?.(prisma, cart);
             return this.readRawCartData(prisma, userId);
         });
         return this.enrichCartResponse(rawData.items);
@@ -181,7 +181,7 @@ export abstract class CartStorageClient {
     }
 
     static async getCart(userId: string) {
-        return this.useCartTransaction(userId, async () => {});
+        return this.useCartTransaction(userId);
     }
 
     static async addItems(userId: string, items: ICartItemData[]) {

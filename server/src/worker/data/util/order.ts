@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { groupModifierRows } from '@msdining/common/util/modifier-util';
 import { ISerializedModifier } from '@msdining/common/models/shared';
 import { asRecord } from '../../../shared/util/typeguard.js';
+import { ICartItemRecord } from '@msdining/common/models/cart';
 
 const getModifierStringsForHash = (modifiers: ISerializedModifier[]) => {
     const modifierStrings: string[] = [];
@@ -18,7 +19,7 @@ const getModifierStringsForHash = (modifiers: ISerializedModifier[]) => {
  * Sorts by menuItemId, then by modifiers, to ensure identical item sets
  * produce the same hash regardless of array order.
  */
-export const hashOrderItems = (items: IOrderItem[]): string => {
+export const hashOrderItems = (items: Array<IOrderItem> | Array<ICartItemRecord>): string => {
     const normalized = items
         .map(item => ({
             menuItemId:          item.menuItemId,

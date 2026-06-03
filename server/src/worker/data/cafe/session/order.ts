@@ -1,4 +1,4 @@
-import { IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import { ICartItemRecord, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IOrderItem } from '@msdining/common/models/order';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
@@ -289,6 +289,18 @@ export class CafeOrderSession implements IOrderSession {
 
     public get rawCartItemsForWaitTime(): readonly unknown[] {
         return this.#rawCartItemsForWaitTime;
+    }
+
+    isUsableForPaymentWithItems(items: Array<IOrderItem> | Array<ICartItemRecord> | string): boolean {
+        if (!this.isReadyForPayment) {
+            return false;
+        }
+
+        if (typeof items === 'string') {
+            return this.#itemsHash === items;
+        }
+
+        return this.#itemsHash === hashOrderItems(items);
     }
 
     /**

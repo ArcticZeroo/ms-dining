@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWaitTimeQuery } from '../../../../store/queries/ordering.ts';
+import { useCartEstimateQuery } from '../../../../store/queries/ordering.ts';
 
 interface IWaitTimeEstimateProps {
     cafeId: string;
@@ -29,7 +29,7 @@ export const WaitTimeEstimateBanner: React.FC<IWaitTimeEstimateBannerProps> = ({
 };
 
 export const WaitTimeEstimate: React.FC<IWaitTimeEstimateProps> = ({ cafeId }) => {
-    const { data } = useWaitTimeQuery(cafeId);
+    const { data } = useCartEstimateQuery(cafeId);
 
-    return <WaitTimeEstimateBanner waitTime={data}/>;
+    return <WaitTimeEstimateBanner waitTime={data?.waitTime}/>;
 };

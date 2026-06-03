@@ -1,4 +1,4 @@
-import type { IWaitTimeResponse } from '@msdining/common/models/http';
+import type { ICartEstimateResponse } from '@msdining/common/models/http';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrderDTO,
@@ -56,10 +56,10 @@ export interface IOrderService {
         userId: string;
     }): Promise<number>;
 
-    getWaitTime(data: {
+    getCartEstimate(data: {
         cafeId: string;
         userId: string;
-    }): Promise<IWaitTimeResponse>;
+    }): Promise<ICartEstimateResponse>;
 
     keepalivePrewarm(data: {
         userId: string;

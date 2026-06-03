@@ -1,14 +1,24 @@
 import { randomUUID } from 'node:crypto';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
-import { SubmitOrderStage } from '@msdining/common/models/cart';
+import { ICartItemRecord, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IOrderItem } from '@msdining/common/models/order';
 import type { IOrderSession } from './order-session.js';
 import type { ICafe } from '../../../../shared/models/cafe.js';
 import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { getTodayDateString } from '@msdining/common/util/date-util';
 import { hashOrderItems } from '../../util/order.js';
+import { getServices } from '../../../../shared/services/registry.js';
 
 const fakeLog = getNamespaceLogger('FakeOrder');
+
+const FAKE_TAX_RATE = 0.10;
+
+const computeSubtotal = async (orderItems: IOrderItem[]): Promise<number> => {
+    const menuItems = await Promise.all(orderItems.map(async (orderItem) => {
+        return await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
+    }));
+    return menuItems.reduce((subtotal, menuItem) => subtotal + (menuItem?.price ?? 0), 0);
+};
 
 /**
  * A fake CafeOrderSession that skips all Buy On Demand HTTP calls.
@@ -19,16 +29,22 @@ export class FakeCafeOrderSession implements IOrderSession {
     #orderNumber: string | null = null;
     #lastCompletedStage: string = SubmitOrderStage.notStarted;
     #cardProcessorToken = '';
+    #subtotal = 0;
     readonly #cafe: ICafe;
     readonly #orderItems: IOrderItem[];
     readonly #itemsHash: string;
     readonly createdDateString = getTodayDateString();
 
-    readonly client = {
-        async refreshLogin() {
-            // no-op
-        },
-    };
+    get client() {
+        return {
+            cafe: {
+                id: this.#cafe.id,
+            },
+            async refreshLogin() {
+                // no-op
+            },
+        };
+    }
 
     constructor(cafe: ICafe, orderItems: IOrderItem[]) {
         this.#cafe = cafe;
@@ -45,15 +61,15 @@ export class FakeCafeOrderSession implements IOrderSession {
     }
 
     get orderTotalWithoutTax() {
-        return 9.99;
+        return this.#subtotal;
     }
 
     get orderTotalTax() {
-        return 1.01;
+        return Math.round(this.#subtotal * FAKE_TAX_RATE * 100) / 100;
     }
 
     get orderTotalWithTax() {
-        return 11.00;
+        return Math.round((this.#subtotal + this.orderTotalTax) * 100) / 100;
     }
 
     get lastCompletedStage() {
@@ -79,10 +95,19 @@ export class FakeCafeOrderSession implements IOrderSession {
         }));
     }
 
+    isUsableForPaymentWithItems(items: Array<IOrderItem> | Array<ICartItemRecord> | string): boolean {
+        if (typeof items === 'string') {
+            return items === this.#itemsHash;
+        }
+
+        return this.#itemsHash === hashOrderItems(items);
+    }
+
     async populateCart(): Promise<void> {
         this.#orderId = `fake-${randomUUID().slice(0, 8)}`;
         this.#orderNumber = `F${Math.floor(Math.random() * 9000) + 1000}`;
-        fakeLog.info(`{${this.#cafe.name}} Fake session created — orderId: ${this.#orderId}, orderNumber: ${this.#orderNumber}`);
+        this.#subtotal = await computeSubtotal(this.#orderItems);
+        fakeLog.info(`{${this.#cafe.name}} Fake session created — orderId: ${this.#orderId}, orderNumber: ${this.#orderNumber}, subtotal: ${this.#subtotal}`);
     }
 
     async prepareForIframe(): Promise<void> {

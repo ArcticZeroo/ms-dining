@@ -14,8 +14,8 @@ export const orderService: IOrderService = {
         dataHandler.sendRequest('order', 'getOrderHistory', data),
     getOrderCount: (data) =>
         dataHandler.sendRequest('order', 'getOrderCount', data),
-    getWaitTime: (data) =>
-        dataHandler.sendRequest('order', 'getWaitTime', data),
+    getCartEstimate: (data) =>
+        dataHandler.sendRequest('order', 'getCartEstimate', data),
     keepalivePrewarm: (data) =>
         dataHandler.sendRequest('order', 'keepalivePrewarm', data),
 };
