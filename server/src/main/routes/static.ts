@@ -6,7 +6,7 @@ import Duration from '@arcticzeroo/duration';
 import Router from '@koa/router';
 import { attachRouter, CATCH_ALL_PATH } from '../util/koa.js';
 
-export const createStaticRoutingApp= () => {
+export const createStaticRoutingApp = () => {
     const app = new Koa();
 
     const router = new Router();

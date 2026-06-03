@@ -19,6 +19,7 @@ module.exports = {
             argsIgnorePattern: '^_',
             varsIgnorePattern: '^_',
         }],
+        'space-infix-ops': 'error',
         'id-length': ['error', { min: 3, exceptions: ['_', 'i', 'j', 'k', 'x', 'y', 'z', 'id', 'db', 'fs', 'os'], properties: 'never' }],
     },
     overrides: [

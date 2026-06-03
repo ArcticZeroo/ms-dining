@@ -16,7 +16,7 @@ const retrieveSiteData = async (client: BuyOnDemandClient): Promise<ISiteData> =
     const json = await response.json();
 
     const siteDataArray = z.array(SiteDataItemSchema).parse(json);
-    if (siteDataArray.length===0) {
+    if (siteDataArray.length === 0) {
         throw new Error(`No site data found for tenant ${client.config.tenantId}`);
     }
 
@@ -30,7 +30,7 @@ const retrievePayConfig = async (client: BuyOnDemandClient): Promise<IPayConfig>
     // window) can cause subsequent /concepts and /orders calls to behave as
     // if the cafe is closed, returning CONCEPTS_NOT_AVAILABLE.
     const storeInfo = client.config.storeInfo;
-    if (storeInfo==null) {
+    if (storeInfo == null) {
         throw new Error(`retrievePayConfig: storeInfo missing on client.config for ${client.cafe.id}.`);
     }
 

@@ -28,7 +28,7 @@ const DataWorkerEventMessageSchema = z.object({
 export type DataWorkerEventMessage = z.infer<typeof DataWorkerEventMessageSchema>;
 
 const getEventEmitter = (source: EventSource) => {
-    return source==='storage' ? STORAGE_EVENTS:CACHE_EVENTS;
+    return source === 'storage' ? STORAGE_EVENTS : CACHE_EVENTS;
 };
 
 const postWorkerEvent = (source: EventSource, eventName: StorageEventName, event: DataWorkerEvent) => {
@@ -43,7 +43,7 @@ const postWorkerEvent = (source: EventSource, eventName: StorageEventName, event
 let dataWorkerEventBridgeRegistered = false;
 
 export const registerDataWorkerEventBridge = () => {
-    if (isMainThread || parentPort==null || dataWorkerEventBridgeRegistered) {
+    if (isMainThread || parentPort == null || dataWorkerEventBridgeRegistered) {
         return;
     }
     dataWorkerEventBridgeRegistered = true;

@@ -47,14 +47,14 @@ const toLocalIsoOffset = (date: Date, timeZone: string = ORDER_TIMEZONE): string
     }).formatToParts(date);
 
     const find = (type: Intl.DateTimeFormatPartTypes) =>
-        parts.find(part => part.type===type)?.value ?? '';
+        parts.find(part => part.type === type)?.value ?? '';
 
     // Intl's longOffset is `GMT-07:00` (or `GMT` for UTC). Strip the `GMT`
     // prefix; treat bare `GMT` as `+00:00`.
     const tzPart = find('timeZoneName');
-    const offset = tzPart==='GMT' ? '+00:00':tzPart.slice(3);
+    const offset = tzPart === 'GMT' ? '+00:00' : tzPart.slice(3);
     // Intl renders midnight as hour=24; normalize back to 00.
-    const hour = find('hour')==='24' ? '00':find('hour');
+    const hour = find('hour') === '24' ? '00' : find('hour');
 
     return `${find('year')}-${find('month')}-${find('day')}T${hour}:${find('minute')}:${find('second')}.${find('fractionalSecond')}${offset}`;
 };
@@ -74,9 +74,9 @@ const formatReceiptDateTime = (date: Date) => {
     }).format(date);
     const dateTimeInReceipt = toLocalIsoOffset(date).replace(/\.\d{3}(?=[+-]\d{2}:\d{2}$)/, '');
     const offsetMatch = dateTimeInReceipt.match(/([+-])(\d{2}):(\d{2})$/);
-    const timezoneOffsetMinutes = offsetMatch==null
+    const timezoneOffsetMinutes = offsetMatch == null
         ? 0
-        :(offsetMatch[1]==='-' ? 1:-1) * ((Number(offsetMatch[2]) * 60) + Number(offsetMatch[3]));
+        : (offsetMatch[1] === '-' ? 1 : -1) * ((Number(offsetMatch[2]) * 60) + Number(offsetMatch[3]));
 
     return {
         receiptDate,
@@ -251,8 +251,8 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     get isReadyForPayment() {
-        return this.createdDateString===getTodayDateString()
-                && this.#lastCompletedStage===SubmitOrderStage.initializeCardProcessor;
+        return this.createdDateString === getTodayDateString()
+                && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
     }
 
     get itemsHash() {
@@ -371,14 +371,14 @@ export class CafeOrderSession implements IOrderSession {
         for (const [modifierId, choiceIds] of choicesByModifierId) {
             const modifier = modifiersById.get(modifierId);
 
-            if (modifier==null) {
+            if (modifier == null) {
                 throw new Error(`Failed to find modifier with id "${modifierId}"`);
             }
 
             for (const choiceId of choiceIds) {
-                const choice = modifier.choices.find(choice => choice.id===choiceId);
+                const choice = modifier.choices.find(choice => choice.id === choiceId);
 
-                if (choice==null) {
+                if (choice == null) {
                     throw new Error(`Failed to find choice with id "${choiceId}" for modifier "${modifierId}"`);
                 }
 
@@ -537,13 +537,13 @@ export class CafeOrderSession implements IOrderSession {
 
         const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
 
-        if (menuItem==null) {
+        if (menuItem == null) {
             throw new Error(`Failed to find menu item with id "${orderItem.menuItemId}"`);
         }
 
         const station = await getServices().data.station.retrieveStation({ stationId: menuItem.stationId });
 
-        if (station==null) {
+        if (station == null) {
             throw new Error(`Failed to find station for menu item "${orderItem.menuItemId}"`);
         }
 
@@ -565,12 +565,12 @@ export class CafeOrderSession implements IOrderSession {
 
         const rawItemDetail = this.#synthesisFlags.kioskItems
             ? this._synthesizeItemDetail(menuItem, station)
-            :await this._fetchRawItemDetail(orderItem.menuItemId, station);
+            : await this._fetchRawItemDetail(orderItem.menuItemId, station);
 
         this.#conceptIds.add(station.id);
 
         const conceptData = this.#conceptDataById.get(station.id);
-        if (conceptData==null) {
+        if (conceptData == null) {
             throw new Error(`No concept schedule data found for concept "${station.id}" (${station.name}). Available: ${[...this.#conceptDataById.keys()].join(', ')}`);
         }
 
@@ -580,7 +580,7 @@ export class CafeOrderSession implements IOrderSession {
 
         const instructions = orderItem.specialInstructions ? [
             { label: '', text: orderItem.specialInstructions }
-        ]:[];
+        ] : [];
 
         const modifierTotal = serializedModifiers.reduce((sum, mod) => sum + Number(mod.amount), 0);
 
@@ -604,7 +604,7 @@ export class CafeOrderSession implements IOrderSession {
                 // modifiers. Always-present `[]` is most likely benign, but
                 // matching the wire shape removes one more delta from the
                 // request body the server validates against.
-                ...(serializedModifiers.length > 0 ? { selectedModifiers: serializedModifiers }:{}),
+                ...(serializedModifiers.length > 0 ? { selectedModifiers: serializedModifiers } : {}),
                 lineItemInstructions: instructions,
                 conceptId:            station.id,
                 conceptName:          station.name,
@@ -713,14 +713,14 @@ export class CafeOrderSession implements IOrderSession {
         const stationIds = new Set<string>();
         for (const orderItem of this.#orderItems) {
             const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
-            if (menuItem!=null) {
+            if (menuItem != null) {
                 stationIds.add(menuItem.stationId);
             }
         }
 
         for (const stationId of stationIds) {
             const station = await getServices().data.station.retrieveStation({ stationId });
-            if (station==null) {
+            if (station == null) {
                 throw new Error(`Cannot synthesize schedule: station "${stationId}" not found in DB`);
             }
 
@@ -779,7 +779,7 @@ export class CafeOrderSession implements IOrderSession {
 
         const concepts = z.array(conceptSchema).parse(json);
 
-        if (concepts.length===0) {
+        if (concepts.length === 0) {
             throw new Error('No concepts returned from API');
         }
 
@@ -805,7 +805,7 @@ export class CafeOrderSession implements IOrderSession {
             throw new Error('Order number is not set');
         }
 
-        if (this.#orderTotalWithoutTax===0 || this.#orderTotalWithTax===0) {
+        if (this.#orderTotalWithoutTax === 0 || this.#orderTotalWithTax === 0) {
             throw new Error('Order totals cannot be zero');
         }
 
@@ -931,11 +931,11 @@ export class CafeOrderSession implements IOrderSession {
         { alias, phoneData, paymentToken, cardInfo }: IIframeCloseOrderParams,
         readyTime: IWaitTimeResponse,
     ) {
-        if (this.#orderId==null) {
+        if (this.#orderId == null) {
             throw new Error('Order ID is not set!');
         }
 
-        if (this.#lastOrderDetails==null) {
+        if (this.#lastOrderDetails == null) {
             throw new Error('Order details are not set!');
         }
 
@@ -995,10 +995,10 @@ export class CafeOrderSession implements IOrderSession {
         const taxAmountValue = fixed(this.orderTotalTax, 2).toFixed(2);
         const taxClassList = this.orderTotalTax > 0
             ? [{ amount: `$${taxAmountValue}`, amountValue: taxAmountValue }]
-            :[];
-        const selectedSMSCountry = phoneData.countryCode==='+1'
+            : [];
+        const selectedSMSCountry = phoneData.countryCode === '+1'
             ? { value: 'US', label: 'United States', phoneCode: '1' }
-            :undefined;
+            : undefined;
         const orderMessage = `Your order will be ready for pickup at ${this.client.config.externalName} in about ${readyTime.minTime} to ${readyTime.maxTime} minutes\n\n`;
         const closeOrderDetails = {
             ...this.#lastOrderDetails,
@@ -1018,7 +1018,7 @@ export class CafeOrderSession implements IOrderSession {
                 additionalGuestData:       '{}',
                 useIgOrderApi:             'true',
             },
-            ...(additionalSpecialInstructions.length > 0 ? { additionalSpecialInstructions }:{}),
+            ...(additionalSpecialInstructions.length > 0 ? { additionalSpecialInstructions } : {}),
         };
         const receiptItems = this.#rawCartItemsForWaitTime.map((cartItem, index) => ({
             ...(cartItem as Record<string, unknown>),
@@ -1230,7 +1230,7 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     private async _runStages(requiredStage: SubmitOrderStage, callback: () => Promise<void>): Promise<void> {
-        if (this.#lastCompletedStage!==requiredStage) {
+        if (this.#lastCompletedStage !== requiredStage) {
             throw new Error(`Order is in the wrong stage! Expected: ${requiredStage}, actual: ${this.#lastCompletedStage}`);
         }
 
