@@ -70,7 +70,7 @@ async function main() {
             menu.categoriesByName.set(row.categoryName, categoryInfos);
         }
 
-        let categoryInfo = categoryInfos.find(c => c.categoryId === row.categoryId);
+        let categoryInfo = categoryInfos.find(cat => cat.categoryId === row.categoryId);
         if (!categoryInfo) {
             categoryInfo = { categoryId: row.categoryId, menuItemIds: [] };
             categoryInfos.push(categoryInfo);
@@ -107,7 +107,7 @@ async function main() {
         // Build the Map<categoryName, menuItemIds[]> for hashing
         const menuItemIdsByCategoryName = new Map<string, string[]>();
         for (const [categoryName, categoryInfos] of menu.categoriesByName) {
-            const allItemIds = categoryInfos.flatMap(c => c.menuItemIds);
+            const allItemIds = categoryInfos.flatMap(cat => cat.menuItemIds);
             menuItemIdsByCategoryName.set(categoryName, allItemIds);
         }
 

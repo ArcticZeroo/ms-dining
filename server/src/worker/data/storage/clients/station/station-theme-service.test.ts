@@ -19,7 +19,6 @@ after(async () => {
 
 test('retrieveTheme returns undefined for empty itemsByCategory', async () => {
     const theme = await getServices().data.stationTheme.retrieveTheme({
-        stationName: 'Empty Station',
         itemsByCategory: new Map<string, IMenuItemBase[]>(),
     });
 

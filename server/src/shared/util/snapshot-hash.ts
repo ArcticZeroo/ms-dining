@@ -14,7 +14,7 @@ export const computeSnapshotHash = (
     menuItemIdsByCategoryName: Map<string, Array<string>>,
 ): string => {
     const sortedCategories = [...menuItemIdsByCategoryName.entries()]
-        .sort(([a], [b]) => a.localeCompare(b));
+        .sort(([nameA], [nameB]) => nameA.localeCompare(nameB));
 
     const parts: string[] = [stationId];
     for (const [categoryName, menuItemIds] of sortedCategories) {

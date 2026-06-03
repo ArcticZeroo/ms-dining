@@ -7,7 +7,6 @@ export interface IStationThemeService {
      * Results are cached by content hash.
      */
     retrieveTheme(data: {
-        stationName: string;
         itemsByCategory: Map<string, IMenuItemBase[]>;
     }): Promise<string | undefined>;
 }

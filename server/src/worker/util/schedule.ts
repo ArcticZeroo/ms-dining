@@ -1,4 +1,3 @@
-import type { ISynthesisFlags } from '../../shared/services/order.js';
 import { MEAL_PERIOD } from '../../shared/constants/enum.js';
 
 const DAY_ABBREVIATIONS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;

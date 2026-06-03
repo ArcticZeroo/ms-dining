@@ -18,6 +18,7 @@ import { retrieveDailyCafeMenuAsync } from './daily-menu.js';
 import { retrieveFirstStationAppearance } from './station-first-appearance.js';
 import { retrieveFirstMenuItemAppearance } from './menu-item-first-appearance.js';
 import { canFetchMenuForDateString } from '../../../shared/util/date.js';
+import { STATION_THEME_WORKER_QUEUE } from '../../queues/station-theme.js';
 import { setInterval } from 'node:timers';
 import Duration from '@arcticzeroo/duration';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
@@ -222,7 +223,8 @@ const calculateWeeklyUniquenessDataForCafe = async (cafeId: string, targetDateSt
             }
 
             stationUniquenessData.themeItemIds = Array.from(new Set(Array.from(themeItemsByCategory.values()).flatMap(items => items.map(item => item.id))));
-            stationUniquenessData.theme = await getServices().data.stationTheme.retrieveTheme({ stationName: station.name, itemsByCategory: themeItemsByCategory });
+            STATION_THEME_WORKER_QUEUE.enqueueTheme(station.name, themeItemsByCategory);
+            stationUniquenessData.theme = await getServices().data.stationTheme.retrieveTheme({ itemsByCategory: themeItemsByCategory });
         }
     };
 

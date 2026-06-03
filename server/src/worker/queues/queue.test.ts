@@ -70,7 +70,7 @@ describe('WorkerQueue — RetryAfterError handling', () => {
     it('does not drop the rate-limited item from the map', async () => {
         let callCount = 0;
 
-        queue.workFn = async (entry) => {
+        queue.workFn = async (_entry) => {
             callCount++;
             if (callCount <= 2) {
                 throw new RetryAfterError(5);

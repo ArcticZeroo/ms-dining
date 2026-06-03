@@ -93,12 +93,6 @@ const formatReceiptDateTime = (date: Date) => {
 // live /concepts fetch.
 
 
-interface ISynthesizedConceptData {
-    schedule: unknown[];
-    openScheduleExpression: string;
-    closeScheduleExpression: string;
-}
-
 /**
  * Build a minimal DisplayProfileTask schedule array for a single concept.
  * The real schedule contains every time-slot transition for the day across
