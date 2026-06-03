@@ -3,7 +3,7 @@ import { useMap } from 'react-leaflet';
 import { useMapPageOverviewSelectedView, useMapSearchFilterViews, useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { CafeMarker } from './popup/cafe-marker.tsx';
-import { GenericMapView } from './generic-map-view.js';
+import { GenericCafeMapView } from './generic-cafe-map-view.js';
 import { ApplicationContext } from '../../context/app.ts';
 import { getViewLocation } from '../../util/view.ts';
 import { calculateCenter, toLeafletLocation } from '../../util/coordinates.ts';
@@ -103,10 +103,10 @@ interface IFullMapViewProps {
 
 const FullMapView: React.FC<IFullMapViewProps> = (props) => {
     return (
-        <GenericMapView isMapHeight={false}>
+        <GenericCafeMapView isMapHeight={false}>
             <MapBuildings/>
             <FullMapMarkers {...props}/>
-        </GenericMapView>
+        </GenericCafeMapView>
     );
 };
 

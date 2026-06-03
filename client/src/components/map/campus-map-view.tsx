@@ -3,7 +3,7 @@ import { useMarkerLabelModes } from '../../hooks/map.ts';
 import { CafeView } from '../../models/cafe.ts';
 import { CafeMarker } from './popup/cafe-marker.tsx';
 import { MapCafeViewPopup } from './popup/map-cafe-view-popup.tsx';
-import { GenericMapView } from './generic-map-view.js';
+import { GenericCafeMapView } from './generic-cafe-map-view.js';
 
 interface ICampusMapMarkersProps {
     onMarkerClick(view: CafeView): void;
@@ -62,7 +62,7 @@ const CampusMapView = () => {
     );
 
     return (
-        <GenericMapView
+        <GenericCafeMapView
             isMapHeight={true}
             popupContent={selectedView != null && (
                 <MapCafeViewPopup
@@ -72,7 +72,7 @@ const CampusMapView = () => {
             )}
         >
             <CampusMapMarkers onMarkerClick={onMarkerClick}/>
-        </GenericMapView>
+        </GenericCafeMapView>
     )
 };
 

@@ -1,0 +1,26 @@
+.connector-stops-disclaimer {
+    font-size: 0.8em;
+}
+
+.connector-stops-panel-search {
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
+    border: 1px solid var(--color-background-raised-2);
+    background: var(--color-background-raised);
+    color: var(--color-foreground);
+}
+
+.connector-stops-area-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--constant-padding);
+}
+
+.connector-stops-area-name {
+    font-weight: 500;
+}
+
+.connector-stop-marker {
+    --color-icon-background: #0a5e0a;
+    --color-icon-border: #107C10;
+}

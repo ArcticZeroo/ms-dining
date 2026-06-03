@@ -169,7 +169,7 @@ export const MapPage = () => {
     return (
         <MapSearchContext.Provider value={searchContextValue}>
             <MapHighlightContext.Provider value={highlight}>
-                <div className={classNames('map-page', highlight.selectedSearchResult && 'has-detail-card')}>
+                <div className={classNames('map-page full-page-map', highlight.selectedSearchResult && 'has-detail-card')}>
                     <MapSidePanel/>
                     <MapPageViewContent/>
                 </div>

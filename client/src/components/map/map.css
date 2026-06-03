@@ -4,6 +4,127 @@
     position: relative;
 }
 
+.full-page-map {
+    display: flex;
+    height: 100%;
+    position: relative;
+}
+
+.full-page-map .campus-map-container {
+    height: 100%;
+    flex-grow: 1;
+}
+
+.full-page-map .campus-map {
+    height: 100%;
+}
+
+.full-page-map .map-area {
+    flex-grow: 1;
+    height: 100%;
+    position: relative;
+}
+
+/* --- Shared sidebar panel --- */
+
+.map-side-panel {
+    position: absolute;
+    top: var(--default-padding);
+    left: var(--map-panel-offset, 50px);
+    width: var(--map-panel-width, 400px);
+    max-height: calc(100% - 2 * var(--default-padding));
+    gap: 0;
+    background: var(--color-background);
+    border-radius: var(--default-padding);
+    overflow: hidden;
+    z-index: var(--z-index-above-content);
+}
+
+.map-side-panel .panel-header {
+    padding: var(--default-padding);
+    gap: var(--constant-padding);
+    flex-shrink: 0;
+}
+
+.map-side-panel .panel-header .panel-title {
+    font-size: 1.1em;
+    font-weight: 500;
+    flex-grow: 1;
+}
+
+.map-side-panel .panel-content {
+    overflow-y: auto;
+    padding: 0 var(--default-padding) var(--default-padding);
+    gap: var(--constant-padding);
+}
+
+.map-side-panel .panel-footer {
+    padding: var(--constant-padding) var(--default-padding) var(--default-padding);
+    flex-shrink: 0;
+}
+
+.map-side-panel .panel-footer > * {
+    flex-grow: 1;
+}
+
+/* --- Shared search results --- */
+
+.map-search-result-count {
+    text-align: center;
+}
+
+.map-search-results-list {
+    gap: var(--constant-padding);
+}
+
+.map-search-result {
+    padding: var(--constant-padding);
+    border-radius: var(--constant-padding);
+    background: var(--color-background-raised);
+    cursor: pointer;
+    gap: 0.25rem;
+    transition: background 0.15s ease;
+}
+
+.map-search-result:hover {
+    background: var(--color-background-raised-2);
+}
+
+.map-search-result .result-header {
+    gap: var(--constant-padding);
+}
+
+.map-search-result .result-name {
+    font-weight: 500;
+    flex-grow: 1;
+}
+
+.map-search-result .result-description {
+    font-size: 0.85em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.map-search-result .result-cafes {
+    font-size: 0.85em;
+}
+
+.map-search-result.selected {
+    outline: 2px solid var(--color-theme);
+}
+
+@media (max-width: 800px) {
+    .map-side-panel {
+        top: unset;
+        bottom: var(--default-padding);
+        left: var(--default-padding);
+        right: var(--default-padding);
+        width: auto;
+        max-height: 50%;
+    }
+}
+
 .campus-map {
     --color-button-background: #163650;
     height: var(--map-height);
