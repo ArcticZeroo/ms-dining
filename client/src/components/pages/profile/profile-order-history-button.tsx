@@ -6,7 +6,7 @@ export const ProfileOrderHistoryButton = () => {
     const orderCountQuery = useOrderCountQuery();
 
     return (
-        <Link to="/order/history" className="default-button default-container flex flex-center">
+        <Link to="/order/history?range=30d" className="default-button default-container flex flex-center">
             <span className="material-symbols-outlined">
                 history
             </span>

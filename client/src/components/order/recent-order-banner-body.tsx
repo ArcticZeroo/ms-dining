@@ -81,7 +81,7 @@ export const RecentOrderBannerBody = () => {
                 <span>{bannerMessage}</span>
             </div>
             <div className="flex">
-                <Link to="/order/done" className="default-button default-container">
+                <Link to="/order/history?range=today" className="default-button default-container">
                     See details
                 </Link>
                 <button

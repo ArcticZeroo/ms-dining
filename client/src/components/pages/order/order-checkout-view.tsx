@@ -8,15 +8,30 @@ import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from './payment/order-cafe-card.tsx';
 import { PaymentInfoForm } from './payment/payment-info-form.tsx';
-import { TodayOrdersView } from './history/today-orders-view.js';
+import { OrderHistoryBody } from './history/order-history-body.tsx';
 import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 import { SynthesisFlagsPanel } from './synthesis-flags-panel.tsx';
 import { useSynthesisFlags } from '../../../hooks/synthesis-flags.ts';
-import { usePrewarmKeepalive } from '../../../store/queries/ordering.ts';
-
-import './order-page.css';
+import { useOrderHistoryQuery, usePrewarmKeepalive } from '../../../store/queries/ordering.ts';
 import { usePageData } from '../../../hooks/location.js';
 import { OnlineOrderingPrivacy } from '../../notice/online-ordering-privacy.js';
+
+import './order-page.css';
+
+const InlineTodayOrders = () => {
+    const historyQuery = useOrderHistoryQuery('today');
+
+    return (
+        <OrderHistoryBody
+            orders={historyQuery.data ?? []}
+            isLoading={historyQuery.isPending}
+            isFetching={historyQuery.isFetching}
+            isError={historyQuery.isError}
+            error={historyQuery.error}
+            onRetry={() => historyQuery.refetch()}
+        />
+    );
+};
 
 export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
@@ -66,7 +81,7 @@ export const OrderCheckoutView = () => {
                         Order History
                     </Link>
                 </div>
-                <TodayOrdersView/>
+                <InlineTodayOrders/>
             </div>
         );
     }
@@ -103,10 +118,7 @@ export const OrderCheckoutView = () => {
                 </div>
             </PaymentIdentityContext.Provider>
             <div className="flex flex-center">
-                <Link to="/order/done" className="default-container default-button">
-                    Orders From Today
-                </Link>
-                <Link to="/order/history" className="default-container default-button">
+                <Link to="/order/history?range=today" className="default-container default-button">
                     Order History
                 </Link>
             </div>

@@ -1,16 +1,17 @@
-import type { OrderHistorySince } from '../../../../api/ordering.ts';
+import type { OrderHistoryRange } from '../../../../api/ordering.ts';
 import { classNames } from '../../../../util/react.ts';
 import { HomepageCafesFilterButton } from '../../../button/homepage-cafes-filter-button.tsx';
 
 interface IOrderHistoryFiltersProps {
-    selectedSince: OrderHistorySince;
-    onSinceChanged: (since: OrderHistorySince) => void;
+    selectedSince: OrderHistoryRange;
+    onSinceChanged: (since: OrderHistoryRange) => void;
     isHomepageOnly: boolean;
     onHomepageOnlyChanged: (isHomepageOnly: boolean) => void;
     hasHomepageViews: boolean;
 }
 
-const ORDER_HISTORY_RANGE_OPTIONS: Array<{ label: string; since: OrderHistorySince }> = [
+const ORDER_HISTORY_RANGE_OPTIONS: Array<{ label: string; since: OrderHistoryRange }> = [
+    { label: 'Today', since: 'today' },
     { label: '7 Days', since: '7d' },
     { label: '30 Days', since: '30d' },
     { label: 'All Time', since: 'all' },

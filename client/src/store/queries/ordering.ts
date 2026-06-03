@@ -1,9 +1,8 @@
 import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { IOrderItem, ICafeOrder } from '@msdining/common/models/order';
+import type { ICafeOrder, IOrderItem } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
-import type { OrderHistorySince } from '../../api/ordering.ts';
+import type { ISynthesisFlags, OrderHistoryRange } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
-import type { ISynthesisFlags } from '../../api/ordering.ts';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 import { queryKeys } from './keys.ts';
@@ -11,8 +10,8 @@ import { useEffect } from 'react';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
 const RECENT_ORDERS_QUERY_KEY = ['order', 'recent'] as const;
-const ORDER_HISTORY_QUERY_KEY = (since: OrderHistorySince) => ['order', 'history', since] as const;
-const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistorySince, number> = {
+const ORDER_HISTORY_QUERY_KEY = (since: OrderHistoryRange) => ['order', 'history', since] as const;
+const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistoryRange, number> = {
     today: 0,
     '7d':  1,
     '30d': 2,
@@ -20,7 +19,7 @@ const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistorySince, number> = {
 };
 const ORDER_COUNT_QUERY_KEY = ['order', 'count'] as const;
 
-const filterOrdersBySince = (orders: ICafeOrder[], since: OrderHistorySince) => {
+const filterOrdersBySince = (orders: ICafeOrder[], since: OrderHistoryRange) => {
     if (since === 'all') {
         return orders;
     }
@@ -36,10 +35,10 @@ const filterOrdersBySince = (orders: ICafeOrder[], since: OrderHistorySince) => 
     return orders.filter((orderData) => orderData.completedAt.getTime() >= minimumCompletedAtMs);
 };
 
-const ORDER_HISTORY_RANGES_BY_SIZE = (Object.keys(ORDER_HISTORY_RANGE_ORDER) as OrderHistorySince[])
+const ORDER_HISTORY_RANGES_BY_SIZE = (Object.keys(ORDER_HISTORY_RANGE_ORDER) as OrderHistoryRange[])
     .sort((rangeA, rangeB) => ORDER_HISTORY_RANGE_ORDER[rangeA] - ORDER_HISTORY_RANGE_ORDER[rangeB]);
 
-const getBestCachedOrderHistory = (queryClient: ReturnType<typeof useQueryClient>, since: OrderHistorySince) => {
+const getBestCachedOrderHistory = (queryClient: ReturnType<typeof useQueryClient>, since: OrderHistoryRange) => {
     const minimumRangeIndex = ORDER_HISTORY_RANGE_ORDER[since];
     for (const rangeOption of ORDER_HISTORY_RANGES_BY_SIZE.slice(minimumRangeIndex)) {
         const cachedOrders = queryClient.getQueryData<ICafeOrder[]>(ORDER_HISTORY_QUERY_KEY(rangeOption));
@@ -95,20 +94,20 @@ export const useCompletedOrdersTodayQuery = () => useQuery({
     queryFn:  () => OrderClient.getCompletedOrdersToday(),
 });
 
-export const useOrderHistoryQuery = (since: OrderHistorySince) => {
+export const useOrderHistoryQuery = (range: OrderHistoryRange) => {
     const queryClient = useQueryClient();
-    const cachedResult = getBestCachedOrderHistory(queryClient, since);
-    const hasCachedSuperset = cachedResult != null && cachedResult.since !== since;
+    const cachedResult = getBestCachedOrderHistory(queryClient, range);
+    const hasCachedSuperset = cachedResult != null && cachedResult.since !== range;
 
     // If a larger range is already cached, seed this range's cache from it
     // so we don't refetch. Otherwise fetch normally.
     // keepPreviousData keeps the old list visible while fetching a new range.
     return useQuery({
-        queryKey:        ORDER_HISTORY_QUERY_KEY(since),
-        queryFn:         () => OrderClient.getOrderHistory(since),
+        queryKey:        ORDER_HISTORY_QUERY_KEY(range),
+        queryFn:         () => OrderClient.getOrderHistory(range),
         enabled:         !hasCachedSuperset,
         initialData:     hasCachedSuperset
-            ? () => filterOrdersBySince(cachedResult.orders, since)
+            ? () => filterOrdersBySince(cachedResult.orders, range)
             : undefined,
         placeholderData: keepPreviousData,
     });

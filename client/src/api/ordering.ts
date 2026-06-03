@@ -31,7 +31,7 @@ const CartEstimateResponseSchema = z.object({
     total:    z.number(),
 });
 
-export type OrderHistorySince = 'today' | '7d' | '30d' | 'all';
+export type OrderHistoryRange = 'today' | '7d' | '30d' | 'all';
 
 export interface ISynthesisFlags {
     conceptSchedule: boolean;
@@ -91,9 +91,9 @@ export abstract class OrderClient {
         });
     }
 
-    static async getOrderHistory(since: OrderHistorySince): Promise<ICafeOrder[]> {
+    static async getOrderHistory(range: OrderHistoryRange): Promise<ICafeOrder[]> {
         return makeJsonRequestWithSchema({
-            path:   `${ORDER_BASE}/history?since=${since}`,
+            path:   `${ORDER_BASE}/history?since=${range}`,
             schema: z.array(CafeOrderSchema),
         });
     }
