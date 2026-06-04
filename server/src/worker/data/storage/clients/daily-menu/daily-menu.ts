@@ -126,12 +126,15 @@ const writeMenuInTransaction = async (
         });
 
         if (existingSnapshot == null) {
+            const nonEmptyCategories = Array.from(station.menuItemIdsByCategoryName.entries())
+                .filter(([, menuItemIds]) => menuItemIds.length > 0);
+
             await prisma.stationMenuSnapshot.create({
                 data: {
                     id:        snapshotId,
                     stationId: station.id,
                     categories: {
-                        create: Array.from(station.menuItemIdsByCategoryName.entries()).map(([categoryName, menuItemIds]) => ({
+                        create: nonEmptyCategories.map(([categoryName, menuItemIds]) => ({
                             name:      categoryName,
                             menuItems: {
                                 create: menuItemIds.map(menuItemId => ({
@@ -297,7 +300,7 @@ export abstract class DailyMenuStorageClient {
                     menuItemsById.set(menuItem.id, menuItem);
                 }
 
-                if (menuItemsById.size > 0) {
+                if (menuItemIds.length > 0) {
                     menuItemIdsByCategoryName.set(category.name, menuItemIds);
                 }
             }

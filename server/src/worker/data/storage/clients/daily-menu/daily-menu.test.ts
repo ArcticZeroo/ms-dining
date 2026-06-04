@@ -290,6 +290,34 @@ test('duplicate item names at the same station count once in the appearance calc
     );
 });
 
+// ─── Empty categories are excluded from retrieveDailyMenuAsync ──────────────
+
+test('retrieveDailyMenuAsync omits empty categories from the result', async () => {
+    const cafeId = 'test-cafe-empty-cat';
+    const stationId = 'test-station-empty-cat';
+    await seedCafe(cafeId, 'Empty Cat Cafe');
+    await seedStation(stationId, cafeId, 'Mixed Station');
+    await seedMenuItem('m-real', cafeId, stationId, 'Real Item');
+
+    await seedDailyStation({
+        cafeId,
+        dateString: TODAY_DATE_STRING,
+        stationId,
+        itemsByCategory: new Map([
+            ['Has Items', ['m-real']],
+            ['Empty Category', []],
+        ]),
+    });
+
+    const stations = await DailyMenuStorageClient.retrieveDailyMenuAsync(cafeId, TODAY_DATE_STRING);
+    assert.equal(stations.length, 1);
+    const station = stations[0]!;
+
+    assert.equal(station.menuItemIdsByCategoryName.size, 1, 'empty category should be filtered out');
+    assert.ok(station.menuItemIdsByCategoryName.has('Has Items'));
+    assert.ok(!station.menuItemIdsByCategoryName.has('Empty Category'), 'empty category must not appear');
+});
+
 // Ensure no other test in this file leaks the MenuItemStorageClient's
 // in-process cache across tests. The static class caches by id so a fresh id
 // per test is sufficient — we already use distinct ids above.
