@@ -11,6 +11,8 @@ import { IIngredientsMenuDTO } from '@msdining/common/models/ingredients';
 import { resolveIngredientsMenu } from '../../../util/in-gredients.js';
 import { ICafeShutdownState } from '@msdining/common/models/cafe';
 
+const MAX_MESSAGE_LENGTH_FOR_RESUME_INFO = 120;
+
 const useFilteredStationData = (stations: ICafeStation[], ingredientsMenu?: IIngredientsMenuDTO): Array<[ICafeStation, MenuItemsByCategoryName]> => {
     const cafe = useContext(CurrentCafeContext);
     const enableBetterIngredientsMenu = useValueNotifier(DebugSettings.ingredientsMenuExperience);
@@ -65,7 +67,7 @@ interface IStationListProps {
 
 const getShutDownDisplayMessage = ({ message, isTemporary, resumeInfo }: ICafeShutdownState): string => {
     const base = message || 'This cafe is temporarily closed.';
-    if (isTemporary && resumeInfo && base.length <= 120) {
+    if (isTemporary && resumeInfo && base.length <= MAX_MESSAGE_LENGTH_FOR_RESUME_INFO) {
         return `${base} (${resumeInfo})`;
     }
     return base;
