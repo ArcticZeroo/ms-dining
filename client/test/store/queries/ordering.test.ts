@@ -2,7 +2,7 @@ import * as assert from 'node:assert';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 import { IPrepareCartResponse, OrderingClient } from '../../../src/api/order.ts';
 import { CartItemsByCafeId } from '../../../src/models/cart.ts';
-import { queryClient } from '../../../src/store/query-client.ts';
+import { QUERY_CLIENT } from '../../../src/store/query-client.ts';
 import {
     cartHashForKey,
     getFreshOrCachedCartSession,
@@ -132,19 +132,19 @@ describe('getFreshOrCachedCartSession', () => {
     };
 
     beforeEach(() => {
-        queryClient.clear();
+        QUERY_CLIENT.clear();
         vi.useFakeTimers();
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
         vi.useRealTimers();
-        queryClient.clear();
+        QUERY_CLIENT.clear();
     });
 
     const seedCache = (dataUpdatedAt: number) => {
         const queryKey = [...queryKeys.ordering.cartSession, cartHashForKey(fakeCart)] as const;
-        queryClient.setQueryData(queryKey, fakeResponse, { updatedAt: dataUpdatedAt });
+        QUERY_CLIENT.setQueryData(queryKey, fakeResponse, { updatedAt: dataUpdatedAt });
     };
 
     it('returns cached data when it was fetched within the freshness window', async () => {

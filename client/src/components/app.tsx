@@ -1,6 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { queryClient } from '../store/query-client.ts';
+import { QUERY_CLIENT } from '../store/query-client.ts';
 import { useCoreDataQuery } from '../store/queries/app.ts';
 import AppWithData from './app-with-data.tsx';
 import { RetryButton } from './button/retry-button.tsx';
@@ -50,7 +50,7 @@ const AppInner = () => {
 
 export const App = () => {
     return (
-        <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={QUERY_CLIENT}>
             <AppInner/>
             {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false}/>}
         </QueryClientProvider>

@@ -12,6 +12,7 @@ import { CartUnavailableItemsView } from './cart-unavailable-items-view.tsx';
 import { WaitTimeEstimateBanner } from '../payment/wait-time-estimate.tsx';
 
 import './cart-popup.css';
+import { getErrorMessage } from '../../../../util/mutation.js';
 
 const useCartEstimate = () => {
     const cartItemsByCafe = useServerCartItemsByCafe();
@@ -72,7 +73,9 @@ const CartPopupBody = () => {
                 {
                     cart.isError && (
                         <div className="cart-hydration-error">
-                            <span>Failed to load your cart.</span>
+                            <span>
+                                {getErrorMessage(cart.error, 'Failed to load your cart')}
+                            </span>
                             <div className="cart-hydration-actions flex">
                                 <button
                                     className="default-container default-button"
@@ -85,7 +88,7 @@ const CartPopupBody = () => {
                     )
                 }
                 {
-                    !cart.hasUnavailableItems && (
+                    cart.totalItemCount > 0 && !cart.hasUnavailableItems && (
                         <>
                             <CartContentsTable showTotalPrice/>
                             <WaitTimeEstimateBanner waitTime={estimate?.waitTime}/>

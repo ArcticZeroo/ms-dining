@@ -58,7 +58,7 @@ export const GroupList = () => {
 };
 ```
 
-Mutations follow the same module convention; they patch affected caches in `onSuccess` via `queryClient.setQueryData`. **Always `await queryClient.cancelQueries({ queryKey })` before `setQueryData`** so an in-flight refetch can't clobber the post-mutation state. See `client/src/store/queries/groups.ts` (`patchQueryData` helper) for the pattern.
+Mutations follow the same module convention; they patch affected caches in `onSuccess` via `QUERY_CLIENT.setQueryData`. **Always `await QUERY_CLIENT.cancelQueries({ queryKey })` before `setQueryData`** so an in-flight refetch can't clobber the post-mutation state. See `client/src/store/queries/groups.ts` (`patchQueryData` helper) for the pattern.
 
 Extract pure projection / patch helpers to module scope and unit-test them under `client/test/store/queries/`. The mutation hooks themselves are not unit-tested (would require RTL); the cache patches are.
 

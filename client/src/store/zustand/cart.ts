@@ -1,9 +1,14 @@
 import { create } from 'zustand';
 import { mutative } from 'zustand-mutative';
 import { InternalSettings } from '../../constants/settings.ts';
-import { CartItemsByCafeId, ICartItemWithMetadata, ISerializedCartItemsByCafeId, ISerializedCartItemWithName } from '../../models/cart.ts';
+import {
+    CartItemsByCafeId,
+    ICartItemWithMetadata,
+    ISerializedCartItemsByCafeId,
+    ISerializedCartItemWithName
+} from '../../models/cart.ts';
 import { queryKeys } from '../queries/keys.ts';
-import { queryClient } from '../query-client.ts';
+import { QUERY_CLIENT } from '../query-client.ts';
 
 type MissingItemsByCafeId = Map<string, Array<ISerializedCartItemWithName>>;
 
@@ -128,7 +133,7 @@ useCartStore.subscribe((state, prev) => {
         return;
     }
 
-    const hydrationStatus = queryClient.getQueryState(queryKeys.cart.hydration)?.status;
+    const hydrationStatus = QUERY_CLIENT.getQueryState(queryKeys.cart.hydration)?.status;
     if (hydrationStatus === 'pending') {
         return;
     }

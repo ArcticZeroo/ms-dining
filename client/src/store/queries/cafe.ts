@@ -4,7 +4,7 @@ import { DiningClient } from '../../api/client/dining.ts';
 import { CafeView, ICafe } from '../../models/cafe.ts';
 import { ICancellationToken, pause } from '../../util/async.ts';
 import { sortCafesInPriorityOrder } from '../../util/sorting.ts';
-import { queryClient } from '../query-client.ts';
+import { QUERY_CLIENT } from '../query-client.ts';
 import { queryKeys } from './keys.ts';
 import { etagRevalidatingQueryOptions } from './options.ts';
 
@@ -60,7 +60,7 @@ export const prefetchRecentMenusInOrder = async (
             break;
         }
 
-        await queryClient.prefetchQuery({
+        await QUERY_CLIENT.prefetchQuery({
             queryKey: queryKeys.cafe.menu(cafe.id, dateString),
             queryFn:  () => DiningClient.retrieveCafeMenu(cafe.id, today),
             ...etagRevalidatingQueryOptions,
