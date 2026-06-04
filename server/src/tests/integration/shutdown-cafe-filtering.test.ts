@@ -54,7 +54,10 @@ const syncOneCafe = async (cafe: ICafe, isShutdown: boolean): Promise<void> => {
 
     let shutdownMessageHash: string | null = null;
     if (isShutdown && result.isShutDown && result.shutDownMessage) {
-        const classification = await classifyShutdownMessageAsync(result.shutDownMessage);
+        const classification = await classifyShutdownMessageAsync(result.shutDownMessage, {
+            cafeId:   cafe.id,
+            cafeName: cafe.name,
+        });
         shutdownMessageHash = classification.messageHash;
     }
 

@@ -83,7 +83,10 @@ export class DailyCafeUpdateSession {
 
             let shutdownMessageHash: string | null = null;
             if (result.isShutDown && result.shutDownMessage) {
-                const classification = await classifyShutdownMessageAsync(result.shutDownMessage);
+                const classification = await classifyShutdownMessageAsync(result.shutDownMessage, {
+                    cafeId:   cafe.id,
+                    cafeName: cafe.name,
+                });
                 shutdownMessageHash = classification.messageHash;
             }
 

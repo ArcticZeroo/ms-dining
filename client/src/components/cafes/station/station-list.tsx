@@ -65,7 +65,7 @@ interface IStationListProps {
 
 const getShutDownDisplayMessage = ({ message, isTemporary, resumeInfo }: ICafeShutdownState): string => {
     const base = message || 'This cafe is temporarily closed.';
-    if (isTemporary && resumeInfo) {
+    if (isTemporary && resumeInfo && base.length <= 120) {
         return `${base} (${resumeInfo})`;
     }
     return base;

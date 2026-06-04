@@ -14,6 +14,13 @@ describe('hashShutdownMessage', () => {
             hashShutdownMessage('Closed tomorrow')
         );
     });
+
+    it('returns different hashes for the same message across different cafes', () => {
+        assert.notEqual(
+            hashShutdownMessage('Closed today', 'cafe34'),
+            hashShutdownMessage('Closed today', 'in-gredients')
+        );
+    });
 });
 
 describe('parseClassificationResponse', () => {

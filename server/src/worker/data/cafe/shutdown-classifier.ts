@@ -13,6 +13,11 @@ export interface IShutdownClassification {
 	resumeInfo: string | null;
 }
 
+interface IShutdownClassificationContext {
+    cafeId: string;
+    cafeName: string;
+}
+
 const CLASSIFICATION_SCHEMA = z.object({
     shutdownType: z.enum(['full', 'online_ordering_only']),
     isTemporary:  z.boolean(),
@@ -31,13 +36,17 @@ Rules:
 - "isTemporary" should ONLY be true when the message specifies a concrete time, date, or event for resumption (e.g. "Reopens Monday", "Back after Labor Day", "Returns at 2 PM"). Vague words like "temporarily" without a specific resumption time do NOT make it temporary — set isTemporary to false. It must be explicit that the shutdown is temporary.
 - "resumeInfo" must be null when isTemporary is false.
 - "resumeInfo" should be a short phrase (under 60 characters) when isTemporary is true.
+- If the message references multiple locations/cafes, classify ONLY for the target cafe passed in the user message.
+- "resumeInfo" must only describe the target cafe's reopening (not another cafe at the same campus/building).
+- If no target-cafe-specific reopening time is stated, set isTemporary to false and resumeInfo to null.
 
 Respond with your classification inside XML tags. You may include reasoning before the tags, but the tags must contain valid JSON:
 <shutdown-classification>
 {"shutdownType":"full","isTemporary":false,"resumeInfo":null}
 </shutdown-classification>`;
 
-export const hashShutdownMessage = (message: string): string => sha256(message);
+export const hashShutdownMessage = (message: string, cafeId?: string): string =>
+    sha256(cafeId ? `${cafeId}\n${message}` : message);
 
 export const parseClassificationResponse = (responseText: string): z.infer<typeof CLASSIFICATION_SCHEMA> => {
     const xmlMatch = responseText.match(/<shutdown-classification>(?<json>[\s\S]*?)<\/shutdown-classification>/);
@@ -61,10 +70,14 @@ export const parseClassificationResponse = (responseText: string): z.infer<typeo
 };
 
 // Calls AI to classify and persists the result to DB. Throws on failure.
-const classifyAndPersistAsync = async (messageHash: string, message: string): Promise<IShutdownClassification> => {
+const classifyAndPersistAsync = async (
+    messageHash: string,
+    message: string,
+    context: IShutdownClassificationContext
+): Promise<IShutdownClassification> => {
     const response = await retrieveTextCompletion({
         systemPrompt: SYSTEM_PROMPT,
-        userMessage:  `Classify this café shutdown message:\n\n"${message}"`,
+        userMessage:  `Classify this café shutdown message for target cafe "${context.cafeName}" (${context.cafeId}):\n\n"${message}"`,
         maxTokens:    256,
     });
 
@@ -93,8 +106,11 @@ const classifyAndPersistAsync = async (messageHash: string, message: string): Pr
 // Ensures only one AI call per unique message hash, even under concurrent discovery
 const CLASSIFICATION_CACHE = new LockedMap<string /*messageHash*/, IShutdownClassification>();
 
-export const classifyShutdownMessageAsync = async (message: string): Promise<IShutdownClassification> => {
-    const messageHash = hashShutdownMessage(message);
+export const classifyShutdownMessageAsync = async (
+    message: string,
+    context: IShutdownClassificationContext
+): Promise<IShutdownClassification> => {
+    const messageHash = hashShutdownMessage(message, context.cafeId);
 
     return CLASSIFICATION_CACHE.getOrInsert(messageHash, async () => {
         // Check DB first
@@ -116,7 +132,7 @@ export const classifyShutdownMessageAsync = async (message: string): Promise<ISh
         logDebug(`Classifying shutdown message (hash=${messageHash}): "${message.substring(0, 80)}..."`);
 
         try {
-            return await classifyAndPersistAsync(messageHash, message);
+            return await classifyAndPersistAsync(messageHash, message, context);
         } catch (err) {
             logError(`Failed to classify shutdown message, defaulting to "full":`, err);
             return { messageHash, message, shutdownType: 'full', isTemporary: false, resumeInfo: null };
