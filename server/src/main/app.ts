@@ -22,6 +22,7 @@ import { appInsightsMiddleware } from './middleware/telemetry.js';
 import { runWithServices } from '../shared/services/registry.js';
 import type { Services } from '../shared/services/types.js';
 import { SessionStoreAdapter } from './util/session-store.js';
+import { isDev } from '../shared/util/env.js';
 import { logError } from '../shared/util/log.js';
 
 /**
@@ -91,15 +92,20 @@ export const createApp = (services: Services, { sessionSigned = true }: CreateAp
     spaRouter.get(CATCH_ALL_PATH, serveSpaHtmlRoute(clientIndexHtmlPath));
     attachRouter(app, spaRouter);
 
-    // Suppress noisy ERR_STREAM_PREMATURE_CLOSE errors — these fire when the
-    // client disconnects before the response finishes (e.g. navigation, prefetch
-    // abort, mobile backgrounding). Harmless, but log at debug level with the
-    // URL so we can investigate if they spike unexpectedly.
-    app.on('error', (err, ctx) => {
+    // Override Koa's default error handler.
+    // - ERR_STREAM_PREMATURE_CLOSE: always suppressed (bots/browsers disconnecting).
+    // - Client errors (4xx): suppressed in prod (not actionable), shown in dev.
+    // - Server errors (5xx): always logged (App Insights also captures via trackException).
+    app.on('error', (err) => {
         if (err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
-            logError(`[PrematureClose] ${ctx?.method ?? '?'} ${ctx?.url ?? '?'} UA: ${ctx?.get?.('user-agent') ?? '?'}`);
             return;
         }
+
+        const status = err.status ?? err.statusCode ?? 500;
+        if (status < 500 && !isDev) {
+            return;
+        }
+
         logError(err);
     });
 
