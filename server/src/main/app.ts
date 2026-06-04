@@ -22,7 +22,7 @@ import { appInsightsMiddleware } from './middleware/telemetry.js';
 import { runWithServices } from '../shared/services/registry.js';
 import type { Services } from '../shared/services/types.js';
 import { SessionStoreAdapter } from './util/session-store.js';
-import { logError, logInfo } from '../shared/util/log.js';
+import { logError } from '../shared/util/log.js';
 
 /**
  * Builds the Koa app, scoping every request inside an AsyncLocalStorage
@@ -97,7 +97,7 @@ export const createApp = (services: Services, { sessionSigned = true }: CreateAp
     // URL so we can investigate if they spike unexpectedly.
     app.on('error', (err, ctx) => {
         if (err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
-            logInfo(`[PrematureClose] ${ctx?.method ?? '?'} ${ctx?.url ?? '?'}`);
+            logError(`[PrematureClose] ${ctx?.method ?? '?'} ${ctx?.url ?? '?'} UA: ${ctx?.get?.('user-agent') ?? '?'}`);
             return;
         }
         logError(err);
