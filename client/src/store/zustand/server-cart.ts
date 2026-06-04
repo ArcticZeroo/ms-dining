@@ -97,3 +97,11 @@ export const useServerCartUnavailableItems = () => {
 };
 
 export const useServerCartItemsByCafe = () => useServerCartStore(state => state.cafes);
+
+export const useServerAvailableCartItemsByCafe = (): Array<IDisplayCafeCartGroup> => {
+    const cafes = useServerCartStore(state => state.cafes);
+    return useMemo(() => cafes.map(cafe => ({
+        ...cafe,
+        items: cafe.items.filter(item => item.isAvailable),
+    })).filter(cafe => cafe.items.length > 0), [cafes]);
+}

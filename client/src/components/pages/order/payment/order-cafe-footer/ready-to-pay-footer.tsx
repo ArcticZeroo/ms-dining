@@ -29,7 +29,7 @@ const getPayButtonTitle = (isIdentityValid: boolean, hasUnavailableItems: boolea
 export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, totalQuantity, totalPrice, hasUnavailableItems, onPay }) => {
     const cafe = useContext(CurrentCafeContext);
     const { isValid: isIdentityValid } = usePaymentIdentityContext();
-    const { data: estimate } = useCartEstimateQuery(cafe.id);
+    const { data: estimate } = useCartEstimateQuery(cafe.id, hasUnavailableItems);
 
     const displayPrice = estimate && estimate.total > 0
         ? estimate.total

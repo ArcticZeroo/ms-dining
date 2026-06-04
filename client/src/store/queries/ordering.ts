@@ -121,13 +121,13 @@ export const useOrderCountQuery = () => useQuery({
 const ESTIMATE_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
 const ESTIMATE_STALE_TIME_MS = 60 * 1000;
 
-export const useCartEstimateQuery = (cafeId: string) => {
+export const useCartEstimateQuery = (cafeId: string, hasUnavailableItems: boolean) => {
     const isLoggedIn = useIsLoggedIn();
 
     return useQuery({
         queryKey:        queryKeys.ordering.cartEstimate(cafeId),
         queryFn:         () => OrderClient.getCartEstimate(cafeId),
-        enabled:         isLoggedIn,
+        enabled:         isLoggedIn && !hasUnavailableItems,
         refetchInterval: ESTIMATE_REFETCH_INTERVAL_MS,
         staleTime:       ESTIMATE_STALE_TIME_MS,
         placeholderData: keepPreviousData,

@@ -5,7 +5,7 @@ import { useCartStatus } from '../../../../hooks/cart-status.ts';
 import { useClickTracker } from '../../../../hooks/pointer.ts';
 import { useScrollbarWidth } from '../../../../hooks/scrollbar-size.ts';
 import { useAggregatedCartEstimate } from '../../../../store/queries/ordering.ts';
-import { useServerCartItemsByCafe } from '../../../../store/zustand/server-cart.ts';
+import { useServerAvailableCartItemsByCafe } from '../../../../store/zustand/server-cart.ts';
 import { classNames } from '../../../../util/react.ts';
 import { CartContentsTable } from './cart-contents-table.tsx';
 import { CartUnavailableItemsView } from './cart-unavailable-items-view.tsx';
@@ -15,7 +15,7 @@ import './cart-popup.css';
 import { getErrorMessage } from '../../../../util/mutation.js';
 
 const useCartEstimate = () => {
-    const cartItemsByCafe = useServerCartItemsByCafe();
+    const cartItemsByCafe = useServerAvailableCartItemsByCafe();
     const cafeIds = useMemo(() => cartItemsByCafe.map(group => group.cafeId), [cartItemsByCafe]);
     return useAggregatedCartEstimate(cafeIds);
 }

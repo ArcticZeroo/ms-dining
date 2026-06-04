@@ -8,16 +8,18 @@ import { CurrentCafeContext } from '../../../../context/menu-item.ts';
 import '../cart/cart-contents-table.css';
 
 interface IOrderCafeItemsTableProps {
-    items: ICartItemRecord[];
     readOnly: boolean;
+    hasUnavailableItems: boolean;
+    items: ICartItemRecord[];
     onRemove: (item: ICartItemRecord) => void;
     onEdit: (item: ICartItemRecord) => void;
     onChangeQuantity: (item: ICartItemRecord, quantity: number) => void;
 }
 
 export const OrderCafeItemsTable: React.FC<IOrderCafeItemsTableProps> = ({
-    items,
     readOnly,
+    hasUnavailableItems,
+    items,
     onRemove,
     onEdit,
     onChangeQuantity,
@@ -25,7 +27,7 @@ export const OrderCafeItemsTable: React.FC<IOrderCafeItemsTableProps> = ({
     const cafe = useContext(CurrentCafeContext);
     const cafeId = items[0]?.menuItem.cafeId;
     const stationGroups = useMemo(() => groupByStation(items), [items]);
-    const { data: estimate } = useCartEstimateQuery(cafe.id);
+    const { data: estimate } = useCartEstimateQuery(cafe.id, hasUnavailableItems);
 
     return (
         <table className="cart-contents">

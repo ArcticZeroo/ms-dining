@@ -1,9 +1,4 @@
 import React from 'react';
-import { useCartEstimateQuery } from '../../../../store/queries/ordering.ts';
-
-interface IWaitTimeEstimateProps {
-    cafeId: string;
-}
 
 const formatWaitTime = (minutes: number) => {
     return `${Math.round(minutes)} min`;
@@ -26,10 +21,4 @@ export const WaitTimeEstimateBanner: React.FC<IWaitTimeEstimateBannerProps> = ({
             Estimated wait: {formatWaitTimeRange(waitTime.minTime, waitTime.maxTime)}
         </div>
     );
-};
-
-export const WaitTimeEstimate: React.FC<IWaitTimeEstimateProps> = ({ cafeId }) => {
-    const { data } = useCartEstimateQuery(cafeId);
-
-    return <WaitTimeEstimateBanner waitTime={data?.waitTime}/>;
 };

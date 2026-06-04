@@ -75,8 +75,9 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                     </div>
                     <CafeAvailabilityWarning availability={availability}/>
                     <OrderCafeItemsTable
-                        items={items}
                         readOnly={isReadOnly}
+                        hasUnavailableItems={hasUnavailableItems}
+                        items={items}
                         onRemove={onRemove}
                         onEdit={onEdit}
                         onChangeQuantity={onChangeQuantity}
