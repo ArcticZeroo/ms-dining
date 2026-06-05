@@ -16,7 +16,7 @@ const RECENT_ORDER_WINDOW = new Duration({ minutes: 30 });
 const isOrderWithinRecentWindow = (orderData: IRecentOrderSummary) => Date.now() - orderData.completedAt.getTime() <= RECENT_ORDER_WINDOW.inMilliseconds;
 
 const getBannerMessage = (orders: Array<IRecentOrderSummary>, viewsById: Map<string, CafeView>, shouldUseGroups: boolean) => {
-    const orderViewsByParentView = new Map<CafeView, Set<CafeView>>();
+    const ordersByView = new Map<CafeView, Array<string>>();
     for (const order of orders) {
         const view = viewsById.get(order.cafeId);
         if (!view) {
@@ -25,29 +25,16 @@ const getBannerMessage = (orders: Array<IRecentOrderSummary>, viewsById: Map<str
         }
 
         const parentView = getParentView(viewsById, view, shouldUseGroups);
-        const orderViewsForParent = orderViewsByParentView.get(parentView) ?? new Set<CafeView>();
-        orderViewsForParent.add(view);
-        orderViewsByParentView.set(parentView, orderViewsForParent);
+        const ordersForView = ordersByView.get(parentView) ?? [];
+        ordersForView.push(order.orderNumber);
     }
 
-    const baseMessage = `You have ${orders.length} ${pluralize('order', orders.length)} being prepared`;
-
-    if (orderViewsByParentView.size === 0) {
-        return baseMessage;
+    const parts: string[] = [];
+    for (const [cafeView, orderNumbers] of ordersByView) {
+        parts.push(`${getViewName({ view: cafeView, showGroupName: false })} (${orderNumbers.map(orderNumber => `#${orderNumber}`).join(', ')})`)
     }
 
-    if (orderViewsByParentView.size === 1) {
-        const [parentView, childViews] = [...orderViewsByParentView.entries()][0]!;
-
-        if (childViews.size === 1) {
-            const childView = [...childViews][0]!;
-            return `${baseMessage} at ${getViewName( { view: childView, showGroupName: true })}`;
-        }
-
-        return `${baseMessage} in ${getViewName({ view: parentView, showGroupName: false })}`;
-    }
-
-    return `${baseMessage} across ${orderViewsByParentView.size} ${pluralize('location', orderViewsByParentView.size)}`;
+    return `You have ${orders.length} ${pluralize('order', orders.length)} being prepared: ${parts.join(', ')}`;
 }
 
 export const RecentOrderBannerBody = () => {
