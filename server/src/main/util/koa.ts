@@ -96,7 +96,7 @@ const serializeSearchResult = async (id: string, searchResult: IServerSearchResu
             overallRating = reviewHeader.overallRating;
             totalReviewCount = reviewHeader.totalReviewCount;
         }
-    } else if (searchResult.type === SearchEntityType.station || searchResult.type === SearchEntityType.dailyStation) {
+    } else if (searchResult.type === SearchEntityType.station) {
         const reviewHeader = await getServices().data.review.retrieveStationReviewHeaderByParts({
             groupId: searchResult.groupId,
             name: searchResult.name,

@@ -10,12 +10,12 @@ import type { IAiProvider } from '../../shared/ai/provider.js';
 import { BuyOnDemandClient } from '../../shared/buy-ondemand/buy-ondemand-client.js';
 import { TranslationCache } from '../../shared/buy-ondemand/i18n.js';
 import { performMenuBootTasks } from './cafe/job/boot.js';
-import { EMBEDDINGS_WORKER_QUEUE } from '../queues/embeddings.js';
+import '../queues/embeddings.js';
 import { startSearchTagWorkerQueue } from '../queues/search-tags.js';
 import { createDataServices } from '../../shared/services/create-data-services.js';
 import { setDefaultServices } from '../../shared/services/registry.js';
 import { getTelemetryClient } from '../../shared/telemetry/app-insights.js';
-import { logError, logInfo } from '../../shared/util/log.js';
+import { logError } from '../../shared/util/log.js';
 import { ENVIRONMENT_SETTINGS, isTestEnvironment } from '../../shared/util/env.js';
 
 await runPendingMigrations();
@@ -60,7 +60,4 @@ if (!ENVIRONMENT_SETTINGS.skipBootTasks) {
         .catch(err => logError('Could not perform boot tasks:', err));
 
     startSearchTagWorkerQueue();
-
-    logInfo('Adding cafe embeddings to queue...');
-    EMBEDDINGS_WORKER_QUEUE.addFromCafeGroups();
 }

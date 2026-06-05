@@ -1,5 +1,4 @@
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import { CafeGroup, ICafe, ICafeStation } from '../../shared/models/cafe.js';
 import { rethrowWithoutStatus } from '../../shared/util/error.js';
 import { retrieveEmbedding as retrieveEmbeddingFromAi } from '../../shared/ai/index.js';
 
@@ -41,54 +40,4 @@ export const retrieveMenuItemEmbeddings = async (menuItem: IMenuItemBase, catego
         Category Name: ${categoryName}
         ${serializeMenuItemForEmbeddings(menuItem)}
     `);
-}
-
-export const retrieveStationEmbeddings = async (station: ICafeStation) => {
-    const categoryStrings: string[] = [];
-    for (const [categoryName, menuItemIds] of station.menuItemIdsByCategoryName.entries()) {
-        const categoryStringParts = [`- Category Name: ${categoryName} [`];
-        for (const menuItemId of menuItemIds) {
-            const menuItem = station.menuItemsById.get(menuItemId);
-            if (menuItem) {
-                categoryStringParts.push(`-- { ${serializeMenuItemForEmbeddings(menuItem)} }`);
-            }
-        }
-        categoryStringParts.push(']');
-        categoryStrings.push(categoryStringParts.join('\n'));
-    }
-
-    return retrieveEmbeddings(`
-        Station Name: ${station.name}
-        Station Categories: ${categoryStrings.join('\n')}
-    `);
-}
-
-export const retrieveCafeEmbeddings = async (cafe: ICafe, group?: CafeGroup) => {
-    const parts = [`Cafe Name: ${cafe.name}`, `Cafe ID: ${cafe.id}`];
-
-    if (cafe.shortName) {
-        parts.push(`Cafe Short Name: ${cafe.shortName}`);
-    }
-
-    if (group) {
-        parts.push(`Cafe Group: ${group.name}`);
-
-        if (group.shortName) {
-            parts.push(`Cafe Group Short Name: ${group.shortName}`);
-        }
-
-        for (const member of group.members) {
-            if (member.id === cafe.id) {
-                continue; // Skip the current cafe
-            }
-
-            parts.push(`Cafe Group Member: ${member.name} (${member.id})`);
-        }
-    }
-
-    if (cafe.emoji) {
-        parts.push(`Cafe Type Indicator: ${cafe.emoji}`);
-    }
-
-    return retrieveEmbeddings(parts.join('\n'));
 }

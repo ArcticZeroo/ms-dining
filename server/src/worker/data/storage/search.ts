@@ -20,6 +20,7 @@ import { ICafe } from '../../../shared/models/cafe.js';
 import { getServices } from '../../../shared/services/registry.js';
 
 import { NON_ENTREE_FILTER } from '../../../shared/util/menu-item-filter.js';
+import { shouldPromoteByHitRate, getAverageDistance, type IStationHitStats } from './search-hit-rate.js';
 
 interface IMultiQuerySearchParams {
     queries: Array<ISearchQuery>;
@@ -331,6 +332,18 @@ class SearchSession {
         }
     }
 
+    promoteResult(type: SearchEntityType, name: string, overrides?: Partial<Pick<IAddResultParams, 'vectorDistance'>>) {
+        const pending = this.#pendingSearchResults.get(type, name);
+        if (pending) {
+            this.#searchResults.set(type, name, pending);
+            this.#pendingSearchResults.delete(type, name);
+            pending.matchReasons.add(SearchMatchReason.childItemMatch);
+            if (overrides?.vectorDistance != null) {
+                pending.vectorDistance = overrides.vectorDistance;
+            }
+        }
+    }
+
     getMenuItemMatch(menuItem: IMenuItemBase) {
         const matchReasons = new Set<SearchMatchReason>();
         const matchedModifiers = new Map<string, Set<string>>();
@@ -481,13 +494,14 @@ export abstract class SearchManager {
                 name:         stationData.name,
                 imageUrl:     stationData.logoUrl,
                 groupId:      stationData.groupId,
-                // No data for stations
                 price:       undefined,
                 searchTags:  undefined,
                 tags:        undefined,
                 description: undefined,
                 station:     undefined
             });
+
+            const stationStats: IStationHitStats = { matchedCount: 0, totalCount: 0, distanceCount: 0, totalDistance: 0 };
 
             for (const category of dailyStation.categories) {
                 for (const dailyMenuItem of category.menuItems) {
@@ -497,8 +511,16 @@ export abstract class SearchManager {
                         continue;
                     }
 
+                    stationStats.totalCount++;
+
                     const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
-                    session.registerResult(matchReasons.size > 0, {
+                    const isItemMatch = matchReasons.size > 0;
+
+                    if (isItemMatch) {
+                        stationStats.matchedCount++;
+                    }
+
+                    session.registerResult(isItemMatch, {
                         type:        SearchEntityType.menuItem,
                         dateString:  dailyStation.dateString,
                         cafeId:      dailyStation.cafeId,
@@ -514,6 +536,10 @@ export abstract class SearchManager {
                         matchedModifiers
                     });
                 }
+            }
+
+            if (stationMatchReasons.size === 0 && shouldPromoteByHitRate(stationStats)) {
+                session.promoteResult(SearchEntityType.station, stationData.name);
             }
         }
 
@@ -548,21 +574,16 @@ export abstract class SearchManager {
                 throw new Error(`Invalid entity type: ${result.entity_type}`);
             }
 
-            // Normalize dailyStation into the station maps using its composite ID
-            const mapKey = entityType === SearchEntityType.dailyStation
-                ? SearchEntityType.dailyStation
-                : entityType;
-
-            if (!vectorFoundItems.has(mapKey)) {
-                vectorFoundItems.set(mapKey, new Map());
+            if (!vectorFoundItems.has(entityType)) {
+                vectorFoundItems.set(entityType, new Map());
             }
 
-            if (!vectorFoundItemsWithoutAppearances.has(mapKey)) {
-                vectorFoundItemsWithoutAppearances.set(mapKey, new Set());
+            if (!vectorFoundItemsWithoutAppearances.has(entityType)) {
+                vectorFoundItemsWithoutAppearances.set(entityType, new Set());
             }
 
-            vectorFoundItems.get(mapKey)!.set(result.id, result.distance);
-            vectorFoundItemsWithoutAppearances.get(mapKey)!.add(result.id);
+            vectorFoundItems.get(entityType)!.set(result.id, result.distance);
+            vectorFoundItemsWithoutAppearances.get(entityType)!.add(result.id);
         }
 
         const getVectorDistanceAndMarkSeen = (entityType: SearchEntityType, id: string) => {
@@ -574,15 +595,13 @@ export abstract class SearchManager {
             return vectorFoundItems.get(entityType)?.get(id);
         };
 
-        for (const { dateString, cafeId, station, stationId, categories } of menus) {
-            // Look up daily station distance using the composite stationId::dateString key
-            const dailyStationCompositeId = vectorClient.makeDailyStationId(stationId, dateString);
-            const stationDistance = getVectorDistanceAndMarkSeen(SearchEntityType.dailyStation, dailyStationCompositeId)
-                ?? getVectorDistanceAndMarkSeen(SearchEntityType.station, stationId);
+        const cafeHitStats = new Map<string /*cafeId*/, IStationHitStats>();
+
+        for (const { dateString, cafeId, station, categories } of menus) {
             const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
 
             session.registerResult(
-                session.isVectorMatch(stationDistance, SearchEntityType.station, [station.name]),
+                stationMatchReasons.size > 0,
                 {
                     type:           SearchEntityType.station,
                     matchReasons:   stationMatchReasons,
@@ -590,7 +609,7 @@ export abstract class SearchManager {
                     cafeId:         cafeId,
                     name:           station.name,
                     imageUrl:       getStationLogoUrl(station.name, station.logoUrl),
-                    vectorDistance: stationDistance,
+                    vectorDistance: undefined,
                     groupId:        station.groupId,
                     // No data for stations
                     price:       undefined,
@@ -600,12 +619,16 @@ export abstract class SearchManager {
                     station:     undefined
                 });
 
+            const stationStats: IStationHitStats = { matchedCount: 0, totalCount: 0, distanceCount: 0, totalDistance: 0 };
+
             for (const category of categories) {
                 for (const dailyMenuItem of category.menuItems) {
                     const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: dailyMenuItem.menuItemId });
                     if (menuItem == null) {
                         continue;
                     }
+
+                    stationStats.totalCount++;
 
                     const menuItemDistance = getVectorDistanceAndMarkSeen(SearchEntityType.menuItem, menuItem.id);
 
@@ -619,8 +642,18 @@ export abstract class SearchManager {
                         ...menuItem.modifiers.flatMap(modifier => [modifier.description, ...modifier.choices.map(choice => choice.description)])
                     ];
 
+                    const isItemMatch = session.isVectorMatch(menuItemDistance, SearchEntityType.menuItem, exactMatchCandidates);
+
+                    if (isItemMatch) {
+                        stationStats.matchedCount++;
+                        if (menuItemDistance != null) {
+                            stationStats.distanceCount++;
+                            stationStats.totalDistance += menuItemDistance;
+                        }
+                    }
+
                     session.registerResult(
-                        session.isVectorMatch(menuItemDistance, SearchEntityType.menuItem, exactMatchCandidates),
+                        isItemMatch,
                         {
                             type:             SearchEntityType.menuItem,
                             dateString:       dateString,
@@ -639,42 +672,32 @@ export abstract class SearchManager {
                         });
                 }
             }
+
+            // Promote station if enough items matched
+            if (stationMatchReasons.size === 0 && shouldPromoteByHitRate(stationStats)) {
+                session.promoteResult(SearchEntityType.station, station.name, {
+                    vectorDistance: getAverageDistance(stationStats),
+                });
+            }
+
+            // Accumulate cafe-level stats
+            const cafeStats = cafeHitStats.get(cafeId) ?? { matchedCount: 0, totalCount: 0, distanceCount: 0, totalDistance: 0 };
+            cafeStats.matchedCount += stationStats.matchedCount;
+            cafeStats.totalCount += stationStats.totalCount;
+            cafeStats.distanceCount += stationStats.distanceCount;
+            cafeStats.totalDistance += stationStats.totalDistance;
+            cafeHitStats.set(cafeId, cafeStats);
         }
 
         for (const cafe of ALL_CAFES) {
-            await session.registerCafe(false /*isMatch*/, cafe);
+            const stats = cafeHitStats.get(cafe.id);
+            await session.registerCafe(stats != null && shouldPromoteByHitRate(stats), cafe);
         }
 
         if (allowResultsWithoutAppearances) {
             for (const [entityType, ids] of vectorFoundItemsWithoutAppearances) {
                 for (const id of ids) {
-                    if (entityType === SearchEntityType.station || entityType === SearchEntityType.dailyStation) {
-                        const stationId = entityType === SearchEntityType.dailyStation
-                            ? vectorClient.parseDailyStationId(id).stationId
-                            : id;
-                        const station = await getServices().data.station.retrieveStation({ stationId });
-                        if (station != null) {
-                            logDebug('Adding vector station result without appearance', station.name);
-                            const { matchReasons: stationMatchReasons } = session.getStationMatch(station.name);
-                            session.registerResult(true /*isMatch*/, {
-                                type:         SearchEntityType.station,
-                                matchReasons: stationMatchReasons,
-                                dateString:   undefined,
-                                cafeId:       station.cafeId,
-                                groupId:      station.groupId,
-                                name:         station.name,
-                                imageUrl:     getStationLogoUrl(station.name, station.logoUrl),
-                                // No data for stations
-                                price:       undefined,
-                                searchTags:  undefined,
-                                tags:        undefined,
-                                description: undefined,
-                                station:     undefined
-                            });
-                        } else {
-                            logDebug('Station not found for vector result', stationId);
-                        }
-                    } else if (entityType === SearchEntityType.menuItem) {
+                    if (entityType === SearchEntityType.menuItem) {
                         // todo: find the last appearance maybe? would be nice to have cafe/station data.
                         const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id });
                         if (menuItem != null) {

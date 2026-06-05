@@ -73,7 +73,7 @@ async function main() {
             menu.categoriesByName.set(row.categoryName, categoryInfos);
         }
 
-        let categoryInfo = categoryInfos.find(c => c.categoryId === row.categoryId);
+        let categoryInfo = categoryInfos.find(cat => cat.categoryId === row.categoryId);
         if (!categoryInfo) {
             categoryInfo = { categoryId: row.categoryId, menuItemIds: [] };
             categoryInfos.push(categoryInfo);
@@ -104,7 +104,7 @@ async function main() {
     for (const [dsId, menu] of dailyStationMenus) {
         const menuItemIdsByCategoryName = new Map<string, string[]>();
         for (const [categoryName, categoryInfos] of menu.categoriesByName) {
-            menuItemIdsByCategoryName.set(categoryName, categoryInfos.flatMap(c => c.menuItemIds));
+            menuItemIdsByCategoryName.set(categoryName, categoryInfos.flatMap(cat => cat.menuItemIds));
         }
 
         const hash = computeSnapshotHash(menu.stationId, menuItemIdsByCategoryName);
@@ -160,8 +160,9 @@ async function main() {
     // 4. Delete duplicate DailyMenuItem rows (batched)
     console.log('[Backfill] Deleting duplicate DailyMenuItem rows...');
     let totalDeletedItems = 0;
-    while (true) {
-        const deleted = await prisma.$executeRawUnsafe(`
+    let deleted = 1;
+    while (deleted > 0) {
+        deleted = await prisma.$executeRawUnsafe(`
             DELETE FROM DailyMenuItem WHERE id IN (
                 SELECT dm.id FROM DailyMenuItem dm
                 JOIN DailyCategory dc ON dm.categoryId = dc.id
@@ -170,7 +171,9 @@ async function main() {
             )
         `);
         totalDeletedItems += deleted;
-        if (deleted === 0) break;
+        if (deleted === 0) {
+            break; 
+        }
         console.log(`[Backfill] Deleted ${totalDeletedItems} duplicate DailyMenuItem rows so far...`);
     }
     console.log(`[Backfill] Deleted ${totalDeletedItems} duplicate DailyMenuItem rows total.`);
@@ -178,14 +181,17 @@ async function main() {
     // 5. Delete duplicate DailyCategory rows (batched)
     console.log('[Backfill] Deleting duplicate DailyCategory rows...');
     let totalDeletedCategories = 0;
-    while (true) {
-        const deleted = await prisma.$executeRawUnsafe(`
+    deleted = 1;
+    while (deleted > 0) {
+        deleted = await prisma.$executeRawUnsafe(`
             DELETE FROM DailyCategory WHERE id IN (
                 SELECT id FROM DailyCategory WHERE snapshotId IS NULL LIMIT 50000
             )
         `);
         totalDeletedCategories += deleted;
-        if (deleted === 0) break;
+        if (deleted === 0) {
+            break; 
+        }
         console.log(`[Backfill] Deleted ${totalDeletedCategories} duplicate DailyCategory rows so far...`);
     }
     console.log(`[Backfill] Deleted ${totalDeletedCategories} duplicate DailyCategory rows total.`);

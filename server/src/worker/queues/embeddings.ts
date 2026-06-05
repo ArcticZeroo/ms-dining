@@ -2,43 +2,25 @@ import Duration from '@arcticzeroo/duration';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { SearchEntityType } from '@msdining/common/models/search';
 import {
-    embedCafe,
-    embedDailyStation,
     embedMenuItem,
     isEmbeddedEntity,
-    makeDailyStationId
 } from '../data/storage/vector/client.js';
-import { ICafe, ICafeStation } from '../../shared/models/cafe.js';
+import { ICafeStation } from '../../shared/models/cafe.js';
 import { Nullable } from '../../shared/models/util.js';
 import { WorkerQueue } from './queue.js';
-import { CAFE_GROUP_LIST } from '../../shared/constants/cafes.js';
 
 const QUEUE_SUCCESS_POLL_INTERVAL = new Duration({ seconds: 1 });
 const QUEUE_EMPTY_POLL_INTERVAL = new Duration({ seconds: 15 });
 const QUEUE_FAILED_POLL_INTERVAL = new Duration({ seconds: 5 });
 
-interface IEmbeddingsMenuItemWork {
+interface IEmbeddingsWorkItem {
     entityType: SearchEntityType.menuItem;
     item: IMenuItemBase;
     stationName: string;
     categoryName: string;
 }
 
-interface IEmbeddingsDailyStationWork {
-    entityType: SearchEntityType.dailyStation;
-    item: ICafeStation;
-    dateString: string;
-}
-
-interface IEmbeddingsCafeWork {
-    entityType: SearchEntityType.cafe;
-    item: ICafe;
-    groupId: string;
-}
-
-type EmbeddingsWorkItem = IEmbeddingsMenuItemWork | IEmbeddingsDailyStationWork | IEmbeddingsCafeWork;
-
-class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
+class EmbeddingsWorkerQueue extends WorkerQueue<string, IEmbeddingsWorkItem> {
     constructor() {
         super({
             successPollInterval: QUEUE_SUCCESS_POLL_INTERVAL,
@@ -49,14 +31,11 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
         this.start();
     }
 
-    protected getKey(entry: EmbeddingsWorkItem): string {
-        if (entry.entityType === SearchEntityType.dailyStation) {
-            return makeDailyStationId(entry.item.id, entry.dateString);
-        }
+    protected getKey(entry: IEmbeddingsWorkItem): string {
         return entry.item.id;
     }
 
-    async doWorkAsync(entry: EmbeddingsWorkItem): Promise<void | Nullable<symbol>> {
+    async doWorkAsync(entry: IEmbeddingsWorkItem): Promise<void | Nullable<symbol>> {
         const id = this.getKey(entry);
         const isEmbedded = await isEmbeddedEntity(entry.entityType, id);
 
@@ -64,23 +43,11 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
             return WorkerQueue.QUEUE_SKIP_ENTRY;
         }
 
-        if (entry.entityType === SearchEntityType.menuItem) {
-            await embedMenuItem(entry.item, entry.categoryName, entry.stationName);
-        } else if (entry.entityType === SearchEntityType.dailyStation) {
-            await embedDailyStation(entry.item, entry.dateString);
-        } else if (entry.entityType === SearchEntityType.cafe) {
-            await embedCafe(entry.item, entry.groupId);
-        }
+        await embedMenuItem(entry.item, entry.categoryName, entry.stationName);
     }
 
-    public addFromMenu(stations: ICafeStation[], dateString: string) {
+    public addFromMenu(stations: ICafeStation[]) {
         for (const station of stations) {
-            this.add({
-                entityType: SearchEntityType.dailyStation,
-                item:       station,
-                dateString,
-            });
-
             for (const [category, menuItemIds] of station.menuItemIdsByCategoryName) {
                 for (const menuItemId of menuItemIds) {
                     const menuItem = station.menuItemsById.get(menuItemId);
@@ -93,18 +60,6 @@ class EmbeddingsWorkerQueue extends WorkerQueue<string, EmbeddingsWorkItem> {
                         });
                     }
                 }
-            }
-        }
-    }
-
-    public addFromCafeGroups() {
-        for (const group of CAFE_GROUP_LIST) {
-            for (const cafe of group.members) {
-                this.add({
-                    entityType: SearchEntityType.cafe,
-                    item:       cafe,
-                    groupId:    group.id,
-                });
             }
         }
     }

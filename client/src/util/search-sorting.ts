@@ -182,7 +182,8 @@ const MATCH_REASON_MULTIPLIERS: Record<SearchMatchReason, number> = {
     [SearchMatchReason.tags]:        0.8,
     [SearchMatchReason.description]: 0.7,
     [SearchMatchReason.searchTags]:  0.5,
-    [SearchMatchReason.modifier]:    0.6
+    [SearchMatchReason.modifier]:    0.6,
+    [SearchMatchReason.childItemMatch]: 0.4
 };
 
 const getSubstringScoreForTags = (queryText: string, searchResult: ISearchResult) => {
@@ -350,6 +351,8 @@ const getTargetTextForMatchType = (searchResult: ISearchResult, matchReason: Sea
         return Array.from(searchResult.searchTags || []);
     case SearchMatchReason.modifier:
         return []; // todo. maybe never anyway since perfect matches don't need to matter for mods?
+    case SearchMatchReason.childItemMatch:
+        return [];
     default:
         throw new Error(`Unexpected match reason: ${matchReason}`);
     }

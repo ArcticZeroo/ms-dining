@@ -46,7 +46,9 @@ export enum SearchMatchReason {
     // Tags like "vegan"
     tags = 'tags',
     // Modifiers like "Decaf" on a latte
-    modifier = 'modifier'
+    modifier = 'modifier',
+    // Station/cafe promoted because its menu items matched
+    childItemMatch = 'childItemMatch'
 }
 
 export const allSearchEntityTypes = [

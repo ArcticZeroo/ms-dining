@@ -39,7 +39,7 @@ export const saveDailyMenuAsync = async ({
     stations,
     shouldUpdateExistingItems
 }: ISaveSessionParams) => {
-    EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations, dateString);
+    EMBEDDINGS_WORKER_QUEUE.addFromMenu(stations);
 
     for (const station of stations) {
         await saveStaticStationDataAsync({
