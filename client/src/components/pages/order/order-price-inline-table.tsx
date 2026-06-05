@@ -3,6 +3,15 @@ import { useServerCartAvailableItems, useServerCartItemsByCafe } from '../../../
 import { calculatePrice, formatPrice } from '../../../util/cart.ts';
 import { useAggregatedCartEstimate } from '../../../store/queries/ordering.ts';
 
+const OrderPriceInlineTableRow: React.FC<{ label: string; price?: number }> = ({ label, price }) => (
+    <tr>
+        <td colSpan={1}/>
+        <td>{label}</td>
+        <td className="price">{price ? formatPrice(price) : 'Unavailable'}</td>
+        <td colSpan={1}/>
+    </tr>
+);
+
 export const OrderPriceInlineTable: React.FC = () => {
     const availableItems = useServerCartAvailableItems();
     const cartItemsByCafe = useServerCartItemsByCafe();
@@ -25,33 +34,18 @@ export const OrderPriceInlineTable: React.FC = () => {
 
     return (
         <>
-            <tr>
-                <td colSpan={2}></td>
-                <td>
-                    Subtotal
-                </td>
-                <td className="price">
-                    {formatPrice(hasServerPricing ? estimate.subtotal : localTotalWithoutTax)}
-                </td>
-            </tr>
-            <tr>
-                <td colSpan={2}></td>
-                <td>
-                    Tax
-                </td>
-                <td className="price">
-                    {hasServerPricing ? formatPrice(estimate.tax) : '—'}
-                </td>
-            </tr>
-            <tr>
-                <td colSpan={2}></td>
-                <td>
-                    Total{!hasServerPricing && ' (est.)'}
-                </td>
-                <td className="price">
-                    {formatPrice(hasServerPricing ? estimate.total : localTotalWithoutTax)}
-                </td>
-            </tr>
+            <OrderPriceInlineTableRow
+                label="Subtotal"
+                price={hasServerPricing ? estimate!.subtotal : localTotalWithoutTax}
+            />
+            <OrderPriceInlineTableRow
+                label="Tax"
+                price={estimate?.tax}
+            />
+            <OrderPriceInlineTableRow
+                label="Total"
+                price={hasServerPricing ? estimate!.total : localTotalWithoutTax}
+            />
         </>
     );
 };

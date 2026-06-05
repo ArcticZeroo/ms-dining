@@ -51,9 +51,6 @@ export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item 
 
     return (
         <>
-            <td className="quantity">
-                {item.quantity}x
-            </td>
             <td className="name">
                 <div className="full-details">
                     {
@@ -64,6 +61,9 @@ export const CartItemDetailCells: React.FC<ICartItemDetailCellsProps> = ({ item 
                     {item.isAvailable === false && <span className="cart-item-unavailable">Unavailable</span>}
                     <CartItemModifiers item={item}/>
                 </div>
+            </td>
+            <td className="quantity">
+                {item.quantity}x
             </td>
             <td className="price">
                 {formatPrice(price)}

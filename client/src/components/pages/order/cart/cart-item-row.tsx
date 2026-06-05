@@ -68,16 +68,19 @@ const CartItemRow: React.FC<ICartItemProps> = ({
 
     return (
         <tr className={classNames('cart-item', !item.isAvailable && 'unavailable', isPending && 'pending')} title={isPending ? 'Adding this item to your cart...' : ''}>
-            <td>
-                {
-                    isPending && (
+            {
+                isPending && (
+                    <td>
                         <div className="cart-item-buttons">
                             <HourglassLoadingSpinner/>
                         </div>
-                    )
-                }
-                {
-                    !isPending && (
+                    </td>
+                )
+            }
+            <CartItemDetailCells item={item}/>
+            {
+                !isPending && (
+                    <td>
                         <div className="cart-item-buttons">
                             <button
                                 className="material-symbols-outlined"
@@ -112,10 +115,9 @@ const CartItemRow: React.FC<ICartItemProps> = ({
                                 edit
                             </button>
                         </div>
-                    )
-                }
-            </td>
-            <CartItemDetailCells item={item}/>
+                    </td>
+                )
+            }
         </tr>
     );
 };
