@@ -1,3 +1,4 @@
+import { isOfflineModeEnabled } from '../shared/constants/env.js';
 import { createApp } from './app.js';
 import { webserverPort } from '../shared/constants/config.js';
 import { logDebug, logError, logInfo } from '../shared/util/log.js';
@@ -49,3 +50,7 @@ createAnalyticsApplications()
 
         logError('Could not create analytics applications:', err);
     });
+
+if (isOfflineModeEnabled) {
+    logInfo('Offline mode is enabled. No non-localhost web requests will be made (probably)')
+}

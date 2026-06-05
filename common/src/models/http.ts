@@ -59,6 +59,7 @@ export type IDiningCoreGroup = IDiningCoreGroupWithLocationOnMembers | IDiningCo
 export const DiningCoreResponseSchema = z.object({
 	isTrackingEnabled: z.boolean(),
 	groups: z.array(z.custom<IDiningCoreGroup>()),
+	isDevMode: z.boolean().default(false)
 });
 
 export type IDiningCoreResponse = z.infer<typeof DiningCoreResponseSchema>;

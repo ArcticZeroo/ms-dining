@@ -1,9 +1,10 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
 import fetch, { Response } from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
+import { isOfflineModeEnabled } from '../constants/env.js';
 import { ICafe, ICafeConfig } from '../models/cafe.js';
 import { ICafeConfigResponse } from '../models/buyondemand/responses.js';
-import { ENVIRONMENT_SETTINGS } from '../util/env.js';
+import { assertIsNotOfflineMode, ENVIRONMENT_SETTINGS } from '../util/env.js';
 import { logDebug, logError } from '../util/log.js';
 import { buildHarEntry, HarCapture } from '../util/har.js';
 import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../util/request.js';
@@ -133,6 +134,8 @@ export class BuyOnDemandClient {
     }
 
     public async requestAsync(path: string, options: BuyOnDemandRequestOptions = {}, shouldValidateSuccess: boolean = true) {
+        assertIsNotOfflineMode();
+
         return REQUEST_SEMAPHORE.acquire(async () => {
             const id = hat();
 

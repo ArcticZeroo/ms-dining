@@ -40,3 +40,4 @@ export const hasAuthEnvironmentVariables = () => {
 }
 
 export const isFakeOrderingEnabled = process.env.FAKE_ORDERING === 'true';
+export const isOfflineModeEnabled = process.env.OFFLINE_MODE === 'true';

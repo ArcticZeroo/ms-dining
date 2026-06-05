@@ -1,3 +1,5 @@
+import { isOfflineModeEnabled } from '../constants/env.js';
+
 export interface EnvironmentSettings {
 	shouldFetchOnlyOneCafe: boolean;
 	shouldFetchOnlyOneStation: boolean;
@@ -67,3 +69,9 @@ const getEnvironmentSettings = (): Readonly<EnvironmentSettings> => {
 }
 
 export const ENVIRONMENT_SETTINGS = getEnvironmentSettings();
+
+export const assertIsNotOfflineMode = () => {
+    if (isOfflineModeEnabled) {
+        throw new Error('Offline mode is enabled');
+    }
+}

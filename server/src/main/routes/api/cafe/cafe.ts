@@ -5,6 +5,7 @@ import { getServices } from '../../../../shared/services/registry.js';
 import * as diningConfig from '../../../../shared/constants/cafes.js';
 import { ApplicationContext } from '../../../../shared/constants/context.js';
 import { getLogoUrl } from '../../../../shared/util/cafe.js';
+import { isDev } from '../../../../shared/util/env.js';
 import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
 import { registerMenuRoutes } from './menu.js';
@@ -67,7 +68,7 @@ export const registerCafeRoutes = (parent: Router) => {
 
             response.groups.push(responseGroup);
         }
-    }
+    };
 
     router.get('/',
         memoizeResponseBody(),

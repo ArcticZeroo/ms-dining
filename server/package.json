@@ -66,6 +66,7 @@
     "start": "npx tsc && node dist/preflight.js && node dist/main/main.js",
     "start-dev": "npx tsc && node dist/preflight.js --allow-empty && node --trace-warnings dist/main/main.js",
     "dev": "npx cross-env NODE_ENV=dev FAKE_ORDERING=true npm run start-dev",
+    "dev-offline": "npx cross-env OFFLINE_MODE=true npm run dev",
     "build": "npx tsc --project ../common/tsconfig.json && npx tsc",
     "preflight": "node dist/preflight.js",
     "predeploy": "npx tsc --project ../common/tsconfig.json && npx prisma migrate deploy && npx prisma generate",

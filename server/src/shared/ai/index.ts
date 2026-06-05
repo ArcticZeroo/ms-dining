@@ -1,12 +1,12 @@
-import { runPromiseWithRetries } from '../util/async.js';
-import { rethrowWithoutStatus } from '../util/error.js';
-import { getServices } from '../services/registry.js';
 import { hasEnvironmentVariable, WELL_KNOWN_ENVIRONMENT_VARIABLES } from '../constants/env.js';
+import { getServices } from '../services/registry.js';
+import { runPromiseWithRetries } from '../util/async.js';
+import { assertIsNotOfflineMode, isTestEnvironment } from '../util/env.js';
+import { rethrowWithoutStatus } from '../util/error.js';
 import { logInfo } from '../util/log.js';
-import { isTestEnvironment } from '../util/env.js';
+import type { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';
 import { anthropicProvider } from './providers/anthropic.js';
 import { openAiProvider } from './providers/openai.js';
-import type { IAiProvider, IAiTextCompletionRequest, IAiVisionRequest } from './provider.js';
 
 const AI_RETRY_COUNT = 3;
 const AI_PROVIDER_ENV_VAR = 'AI_PROVIDER';
@@ -55,12 +55,9 @@ export const createProductionAi = (): IAiProvider => {
     };
 };
 
-/**
- * Thin retry wrappers over the active AI provider. The provider is resolved
- * per-call via `getServices().ai`, so tests' scoped overrides take effect
- * without any module-level state mutation.
- */
 export const retrieveTextCompletion = async (request: IAiTextCompletionRequest): Promise<string> => {
+    assertIsNotOfflineMode();
+
     return runPromiseWithRetries(
         () => getServices().ai.retrieveTextCompletion(request),
         AI_RETRY_COUNT
@@ -75,6 +72,8 @@ export const retrieveVisionCompletion = async (request: IAiVisionRequest): Promi
 };
 
 export const retrieveEmbedding = async (text: string): Promise<number[]> => {
+    assertIsNotOfflineMode();
+
     return runPromiseWithRetries(
         () => getServices().ai.retrieveEmbedding(text),
         AI_RETRY_COUNT
