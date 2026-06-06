@@ -155,6 +155,22 @@ export const retrieveStationReviewHeaderByPartsAsync = async (groupId: string | 
         });
 }
 
+/**
+ * Snapshot of the in-memory menu-item review header cache, keyed by entityKey.
+ *
+ * Cheap to call — the cache is fully populated once at startup from a single
+ * SQL aggregate and kept up-to-date by reviewDirty / groupMembershipDirty
+ * events. Used by the recommendation pipeline so review-popularity can be
+ * applied as a final weight in applyWeights without doing per-item lookups.
+ *
+ * The returned Map is a fresh copy; cache-miss entries that get filled in
+ * after this call (via single-item fetches) are not reflected.
+ */
+export const snapshotMenuItemReviewHeadersAsync = async (): Promise<Map<string /*entityKey*/, IMenuItemReviewHeader>> => {
+    await INITIALIZED.value;
+    return new Map(MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.entries());
+}
+
 // Station weight factor for weighted score computation
 const STATION_REVIEW_WEIGHT = 2;
 

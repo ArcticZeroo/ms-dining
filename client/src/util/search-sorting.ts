@@ -1,6 +1,6 @@
 import { ISearchResult, SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
 import { ILocationCoordinates } from '@msdining/common/models/util';
-import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/order-ranking';
+import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/recommendation-ranking';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import {
     findLongestNonSequentialSubstringLength,

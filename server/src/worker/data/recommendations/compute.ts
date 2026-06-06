@@ -1,17 +1,25 @@
+import type { IMenuItemReviewHeader } from '@msdining/common/models/cafe';
 import {
     IRecommendationItem,
     IRecommendationSection,
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/order-ranking';
+import { getOrderHistoryBoostMultiplier, getReviewPopularityMultiplier } from '@msdining/common/util/recommendation-ranking';
 import { sortByEmbeddingDiversity } from '../storage/vector/client.js';
 import { ITEMS_PER_SECTION } from './shared.js';
 
 const VARIETY_POOL_MULTIPLIER = 3;
 
+/**
+ * Only `favorites` is fully exempt from weighting — items there are explicitly
+ * user-curated, so any reordering on top of the user's own list would feel
+ * arbitrary. `newAtFavorites` (rendered as "At Your Cafes") is intentionally
+ * NOT exempt: it benefits from the order-history boost the same as the other
+ * sections, and the drink/traveling-item itemWeights apply uniformly across
+ * the homepage cafes the section already filters down to.
+ */
 const WEIGHTING_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
-    RecommendationSectionType.newAtFavorites,
     RecommendationSectionType.favorites,
 ]);
 
@@ -34,15 +42,22 @@ export interface IApplyWeightsOptions {
      * section so the user is shown things they actually haven't tried.
      */
     familiarEntityKeys?: Set<string> | null;
+    /**
+     * Snapshot of the menu-item review header cache, keyed by entityKey.
+     * When present, items with reviews are boosted/demoted via
+     * {@link getReviewPopularityMultiplier} — well-reviewed items lift,
+     * poorly-reviewed items sink, items with no reviews stay neutral.
+     */
+    reviewHeadersByEntityKey?: Map<string /*entityKey*/, IMenuItemReviewHeader> | null;
 }
 
 /**
  * Multiplies each item's score by per-cafe proximity weight, per-item weight
- * (drinks down, novelty up), and the user's order-history boost
- * (see {@link getOrderHistoryBoostMultiplier}). Items with proximity weight 0
- * are dropped entirely (out-of-range cafes). Sections in
- * WEIGHTING_EXEMPT_SECTION_TYPES are passed through unmodified because they
- * exist specifically to surface new/favorite items.
+ * (drinks down, novelty up), the user's order-history boost
+ * (see {@link getOrderHistoryBoostMultiplier}), and a community
+ * review-popularity multiplier (see {@link getReviewPopularityMultiplier}).
+ * Items with proximity weight 0 are dropped entirely (out-of-range cafes).
+ * Sections in WEIGHTING_EXEMPT_SECTION_TYPES are passed through unmodified.
  *
  * The `trySomethingDifferent` section uses an inverted boost: items in
  * `familiarEntityKeys` are heavily demoted instead of being skipped, so the
@@ -56,6 +71,7 @@ export const applyWeights = (
         itemWeights,
         orderCountsByEntityKey = null,
         familiarEntityKeys = null,
+        reviewHeadersByEntityKey = null,
     }: IApplyWeightsOptions,
 ): IRecommendationItem[] => {
     if (WEIGHTING_EXEMPT_SECTION_TYPES.has(sectionType)) {
@@ -64,7 +80,7 @@ export const applyWeights = (
 
     const isTrySomethingDifferent = sectionType === RecommendationSectionType.trySomethingDifferent;
 
-    if (!proximityWeights && !itemWeights
+    if (!proximityWeights && !itemWeights && !reviewHeadersByEntityKey
         && (isTrySomethingDifferent ? !familiarEntityKeys : !orderCountsByEntityKey)) {
         return items as IRecommendationItem[];
     }
@@ -91,7 +107,16 @@ export const applyWeights = (
                 ? getOrderHistoryBoostMultiplier(orderCountsByEntityKey.get(item.entityKey) ?? 0)
                 : 1;
         }
-        const combinedWeight = proximityWeight * itemWeight * historyWeight;
+
+        let reviewWeight = 1;
+        if (reviewHeadersByEntityKey) {
+            const header = reviewHeadersByEntityKey.get(item.entityKey);
+            if (header) {
+                reviewWeight = getReviewPopularityMultiplier(header.overallRating, header.totalReviewCount);
+            }
+        }
+
+        const combinedWeight = proximityWeight * itemWeight * historyWeight * reviewWeight;
 
         if (combinedWeight !== 1) {
             isAnyWeightNotDefault = true;
@@ -172,6 +197,7 @@ interface IAssembleSectionsParams {
     itemWeights: Map<string, number> | null;
     orderCountsByEntityKey?: Map<string /*entityKey*/, number> | null;
     familiarEntityKeys?: Set<string> | null;
+    reviewHeadersByEntityKey?: Map<string /*entityKey*/, IMenuItemReviewHeader> | null;
     seed: string;
     lambda?: number;
 }
@@ -190,6 +216,7 @@ export const assembleSections = async ({
     itemWeights,
     orderCountsByEntityKey = null,
     familiarEntityKeys = null,
+    reviewHeadersByEntityKey = null,
     seed,
     lambda = 0.5,
 }: IAssembleSectionsParams): Promise<IRecommendationSection[]> => {
@@ -214,6 +241,7 @@ export const assembleSections = async ({
             itemWeights,
             orderCountsByEntityKey,
             familiarEntityKeys,
+            reviewHeadersByEntityKey,
         });
         const selectedItems = await selectWithEmbeddingDiversity(
             adjustedItems,

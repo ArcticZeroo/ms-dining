@@ -21,6 +21,7 @@ import { buildProximityWeightMap } from '../../../shared/util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
 import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
 import { OrderStorageClient } from '../storage/clients/order/order.js';
+import { snapshotMenuItemReviewHeadersAsync } from './reviews.js';
 import { IServerReview } from '../../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
@@ -215,9 +216,10 @@ export const getRecommendationsAsync = async ({
     // Resolve user-history-derived inputs once. Both reads are user-bound,
     // safe to do in parallel, and feed into the trySomethingDifferent demotion
     // as well as the order-history boost for other sections.
-    const [resolvedReviews, resolvedOrderCounts] = await Promise.all([
+    const [resolvedReviews, resolvedOrderCounts, reviewHeadersByEntityKey] = await Promise.all([
         getAllUserReviews(),
         orderCountsByEntityKey.value,
+        snapshotMenuItemReviewHeadersAsync(),
     ]);
 
     let familiarEntityKeys: Set<string> | null = null;
@@ -244,6 +246,7 @@ export const getRecommendationsAsync = async ({
         itemWeights:            itemWeights.size > 0 ? itemWeights : null,
         orderCountsByEntityKey: resolvedOrderCounts,
         familiarEntityKeys,
+        reviewHeadersByEntityKey,
     });
 };
 

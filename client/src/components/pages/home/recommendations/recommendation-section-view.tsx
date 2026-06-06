@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { IRecommendationSection } from '@msdining/common/models/recommendation';
-import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/order-ranking';
+import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/recommendation-ranking';
 import { RecommendationSearchResult } from './recommendation-search-result.tsx';
 import { useOrderHistorySummaryQuery } from '../../../../store/queries/ordering.ts';
 

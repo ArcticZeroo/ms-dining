@@ -26,22 +26,31 @@ describe('applyWeights', () => {
         assert.equal(result, items);
     });
 
-    it('skips weighting for newAtFavorites (exempt)', () => {
-        const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10 })];
-        const result = applyWeights(items, RecommendationSectionType.newAtFavorites, {
-            proximityWeights: new Map([['cafe-1', 0.5]]),
-            itemWeights:      new Map([['a', 0.25]]),
-        });
-        assert.equal(result, items);
-    });
-
-    it('skips weighting for favorites (exempt)', () => {
+    it('skips weighting for favorites (exempt — explicitly user-curated)', () => {
         const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10 })];
         const result = applyWeights(items, RecommendationSectionType.favorites, {
             proximityWeights: null,
             itemWeights:      new Map([['a', 0.25]]),
         });
         assert.equal(result, items);
+    });
+
+    it('newAtFavorites is NOT exempt — applies item + order-history weights', () => {
+        const items = [
+            makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 1, entityKey: 'name:burger' }),
+            makeItem({ menuItemId: 'b', cafeId: 'cafe-1', score: 1, entityKey: 'name:salad' }),
+        ];
+        const result = applyWeights(items, RecommendationSectionType.newAtFavorites, {
+            proximityWeights:       null,
+            itemWeights:            new Map([['a', 0.75]]),               // a is a drink
+            orderCountsByEntityKey: new Map([['name:salad', 3]]),         // user has ordered salad 3×
+        });
+        // a: 1 * 0.75 * 1 = 0.75; b: 1 * 1 * (1 + log(4)*0.3) ≈ 1.4159
+        assert.equal(result.length, 2);
+        assert.equal(result[0]!.menuItemId, 'b');
+        assert.ok(Math.abs(result[0]!.score - (1 + Math.log(4) * 0.3)) < 1e-9);
+        assert.equal(result[1]!.menuItemId, 'a');
+        assert.equal(result[1]!.score, 0.75);
     });
 
     it('multiplies proximity weight into score', () => {
@@ -224,5 +233,54 @@ describe('applyWeights', () => {
         // popular section ignores familiarEntityKeys; with no other weights provided
         // the function short-circuits to a pass-through.
         assert.equal(result, items);
+    });
+
+    it('applies review-popularity multiplier across non-exempt sections', () => {
+        const items = [
+            makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:loved' }),
+            makeItem({ menuItemId: 'b', cafeId: 'cafe-1', score: 10, entityKey: 'name:hated' }),
+            makeItem({ menuItemId: 'c', cafeId: 'cafe-1', score: 10, entityKey: 'name:unreviewed' }),
+        ];
+        const reviewHeadersByEntityKey = new Map([
+            ['name:loved', { overallRating: 10, totalReviewCount: 100 }],
+            ['name:hated', { overallRating: 0, totalReviewCount: 100 }],
+        ]);
+        const result = applyWeights(items, popular, {
+            proximityWeights: null,
+            itemWeights:      null,
+            reviewHeadersByEntityKey,
+        });
+        // loved: 10 * 1.5 = 15; hated: 10 * 0.5 = 5; unreviewed: 10 * 1 = 10.
+        // After sort: loved, unreviewed, hated.
+        assert.equal(result.length, 3);
+        assert.equal(result[0]!.menuItemId, 'a');
+        assert.equal(result[0]!.score, 15);
+        assert.equal(result[1]!.menuItemId, 'c');
+        assert.equal(result[1]!.score, 10);
+        assert.equal(result[2]!.menuItemId, 'b');
+        assert.equal(result[2]!.score, 5);
+    });
+
+    it('review-popularity multiplier is exempt from favorites', () => {
+        const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:loved' })];
+        const result = applyWeights(items, RecommendationSectionType.favorites, {
+            proximityWeights:         null,
+            itemWeights:              null,
+            reviewHeadersByEntityKey: new Map([['name:loved', { overallRating: 10, totalReviewCount: 100 }]]),
+        });
+        assert.equal(result, items);
+    });
+
+    it('review-popularity stacks multiplicatively with order-history boost', () => {
+        const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:loved' })];
+        const result = applyWeights(items, popular, {
+            proximityWeights:         null,
+            itemWeights:              null,
+            orderCountsByEntityKey:   new Map([['name:loved', 3]]),
+            reviewHeadersByEntityKey: new Map([['name:loved', { overallRating: 10, totalReviewCount: 100 }]]),
+        });
+        const reviewBoost = 1.5; // perfect rating, max confidence
+        const historyBoost = 1 + Math.log(4) * 0.3;
+        assert.ok(Math.abs(result[0]!.score - 10 * reviewBoost * historyBoost) < 1e-9);
     });
 });
