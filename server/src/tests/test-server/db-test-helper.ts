@@ -28,14 +28,15 @@ const PRISMA_SCHEMA_DIR = path.join(SERVER_ROOT, 'prisma');
 /**
  * Apply the production Prisma schema to a fresh SQLite database file.
  *
- * Uses `prisma db push` (rather than `prisma migrate deploy`) because:
- *   - We start from an empty file every time, so the migration history isn't
- *     useful.
- *   - `db push` is faster — it diffs schema vs DB once instead of replaying
- *     each migration sequentially.
+ * Uses `prisma migrate deploy` (not `prisma db push`) because the production
+ * schema relies on hand-edited migrations — most importantly, SQLite
+ * `GENERATED ALWAYS AS … STORED` columns (e.g. MenuItem.entityKey,
+ * Station.entityKey) that Prisma's schema language cannot express. `db push`
+ * regenerates those columns as plain `TEXT NOT NULL` with no default,
+ * silently breaking inserts in tests. `migrate deploy` replays the real
+ * migration history so the test DB is byte-identical to production.
  *
- * The file is created if it doesn't exist. If it does exist, its schema is
- * synced to match the production schema.
+ * The file is created if it doesn't exist.
  */
 export async function applySchemaToTempDb(dbPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -43,7 +44,7 @@ export async function applySchemaToTempDb(dbPath: string): Promise<void> {
         const npxCmd = isWindows ? 'npx.cmd' : 'npx';
         const child = spawn(
             npxCmd,
-            ['prisma', 'db', 'push', '--skip-generate', '--accept-data-loss', '--schema', PRISMA_SCHEMA_DIR],
+            ['prisma', 'migrate', 'deploy', '--schema', PRISMA_SCHEMA_DIR],
             {
                 cwd: SERVER_ROOT,
                 env: {
@@ -66,7 +67,7 @@ export async function applySchemaToTempDb(dbPath: string): Promise<void> {
         });
 
         child.on('error', err => {
-            reject(new Error(`Failed to spawn prisma db push: ${err.message}`));
+            reject(new Error(`Failed to spawn prisma migrate deploy: ${err.message}`));
         });
 
         child.on('close', code => {
@@ -74,7 +75,7 @@ export async function applySchemaToTempDb(dbPath: string): Promise<void> {
                 resolve();
             } else {
                 reject(new Error(
-                    `prisma db push exited with code ${code}\n` +
+                    `prisma migrate deploy exited with code ${code}\n` +
                     `stdout: ${stdout}\nstderr: ${stderr}`,
                 ));
             }

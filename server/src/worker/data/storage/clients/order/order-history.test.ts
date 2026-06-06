@@ -10,15 +10,19 @@ import {
 } from '../../../../../tests/test-server/integration-test-context.js';
 import { getServices } from '../../../../../shared/services/registry.js';
 import { usePrismaTransaction, usePrismaWrite } from '../../client.js';
+import { OrderStorageClient } from './order.js';
 
 let ctx: IntegrationTestContext;
 
 const USER_ID = 'order-history-user';
 const RECENT_USER_ID = 'recent-order-user';
+const METRICS_USER_ID = 'order-metrics-user';
 const CAFE_ID = 'order-history-cafe';
 const MENU_ITEM_ID = 'order-history-item';
+const GROUPED_MENU_ITEM_ID = 'order-history-grouped-item';
+const GROUPED_MENU_ITEM_GROUP_ID = 'order-history-group';
 
-const createOrderAt = (userId: string, completedAt: Date, orderNumber: string) => {
+const createOrderAt = (userId: string, completedAt: Date, orderNumber: string, menuItemId: string = MENU_ITEM_ID) => {
     return usePrismaWrite(prisma => prisma.cafeOrder.create({
         data: {
             userId,
@@ -33,7 +37,7 @@ const createOrderAt = (userId: string, completedAt: Date, orderNumber: string) =
             completedAt,
             items: {
                 create: [{
-                    menuItemId:          MENU_ITEM_ID,
+                    menuItemId,
                     name:                'Test Burger',
                     quantity:            1,
                     price:               10.00,
@@ -68,6 +72,9 @@ before(async () => {
         await prisma.user.create({
             data: { id: RECENT_USER_ID, externalId: 'recent-ext', provider: 'test', displayName: 'Recent Tester' },
         });
+        await prisma.user.create({
+            data: { id: METRICS_USER_ID, externalId: 'metrics-ext', provider: 'test', displayName: 'Metrics Tester' },
+        });
         await prisma.cafe.create({
             data: {
                 id: CAFE_ID, name: 'History Café', tenantId: 't', contextId: 'c',
@@ -87,6 +94,17 @@ before(async () => {
                 cafeId: CAFE_ID, stationId: 'order-history-station',
             },
         });
+        await prisma.crossCafeGroup.create({
+            data: { id: GROUPED_MENU_ITEM_GROUP_ID, name: 'Grouped Burger', entityType: 'menuItem' },
+        });
+        await prisma.menuItem.create({
+            data: {
+                id: GROUPED_MENU_ITEM_ID, name: 'Grouped Burger', normalizedName: 'grouped burger',
+                calories: 500, maxCalories: 500, price: 10.00,
+                cafeId: CAFE_ID, stationId: 'order-history-station',
+                groupId: GROUPED_MENU_ITEM_GROUP_ID,
+            },
+        });
     });
 
     // Create orders at different ages
@@ -98,6 +116,13 @@ before(async () => {
     await createRecentOrder(10, '101');
     await createRecentOrder(29, '102');
     await createRecentOrder(31, '103');
+
+    // Metrics user: 3 orders of the ungrouped item, 2 of the grouped item
+    await createOrderAt(METRICS_USER_ID, new Date(), 'm001');
+    await createOrderAt(METRICS_USER_ID, new Date(), 'm002');
+    await createOrderAt(METRICS_USER_ID, new Date(), 'm003');
+    await createOrderAt(METRICS_USER_ID, new Date(), 'm004', GROUPED_MENU_ITEM_ID);
+    await createOrderAt(METRICS_USER_ID, new Date(), 'm005', GROUPED_MENU_ITEM_ID);
 });
 
 after(async () => {
@@ -175,4 +200,16 @@ test('getOrderHistory enriches items with stationName', async () => {
 test('getOrderHistory returns empty for unknown user', async () => {
     const orders = await getServices().data.order.getOrderHistory({ userId: 'nobody', since: 'all' });
     assert.equal(orders.length, 0);
+});
+
+test('getOrderMetrics counts orders keyed by menu item entityKey', async () => {
+    const metrics = await OrderStorageClient.getOrderMetrics(METRICS_USER_ID);
+    assert.equal(metrics.size, 2, 'should have one entry per distinct entityKey');
+    assert.equal(metrics.get('name:test burger'), 3, 'ungrouped item keyed by name');
+    assert.equal(metrics.get(`group:${GROUPED_MENU_ITEM_GROUP_ID}`), 2, 'grouped item keyed by group');
+});
+
+test('getOrderMetrics returns empty map for unknown user', async () => {
+    const metrics = await OrderStorageClient.getOrderMetrics('nobody');
+    assert.equal(metrics.size, 0);
 });

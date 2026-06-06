@@ -14,6 +14,7 @@
     "@types/sharp": "^0.31.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260606.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.1",
     "prisma": "^6.19.3",
@@ -73,7 +74,7 @@
     "deploy": "npm run predeploy && npm run start",
     "deploy-dev": "npm run predeploy && npm run start-dev",
     "gen:service-contract": "npx tsx scripts/gen-service-contract.ts",
-    "test": "npx tsc && node --test --test-force-exit dist/**/*.test.js",
+    "test": "npx tsc && node --test --test-force-exit --test-timeout=60000 dist/**/*.test.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   }
