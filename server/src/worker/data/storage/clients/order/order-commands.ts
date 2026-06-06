@@ -13,8 +13,8 @@ export const orderServiceCommands = {
         OrderOrchestrator.getCompletedOrdersToday(userId),
     getOrderHistory: ({ userId, since }) =>
         OrderStorageClient.getOrderHistory(userId, since),
-    getOrderCount: ({ userId }) =>
-        OrderStorageClient.getOrderCount(userId),
+    getOrderHistorySummary: ({ userId }) =>
+        OrderStorageClient.getOrderHistorySummary(userId),
     getCartEstimate: ({ cafeId, userId }) =>
         OrderOrchestrator.getCartEstimate(cafeId, userId),
     keepalivePrewarm: ({ userId }) =>

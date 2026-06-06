@@ -10,15 +10,10 @@ const MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, 
 const STATION_REVIEW_DATA_BY_ENTITY_KEY = new LockedMap<string /*entityKey*/, IMenuItemReviewHeader>();
 
 const INITIALIZED = lazyAsync(async () => {
-    const [nameHeaders, groupHeaders, stationNameHeaders, stationGroupHeaders] = await Promise.all([
+    const [menuItemHeaders, stationHeaders] = await Promise.all([
         ReviewStorageClient.getAllMenuItemReviewHeaders(),
-        ReviewStorageClient.getAllMenuItemReviewHeadersByGroupId(),
         ReviewStorageClient.getAllStationReviewHeaders(),
-        ReviewStorageClient.getAllStationReviewHeadersByGroupId(),
     ]);
-
-    const menuItemHeaders = [...nameHeaders, ...groupHeaders];
-    const stationHeaders = [...stationNameHeaders, ...stationGroupHeaders];
 
     await Promise.all([
         ...menuItemHeaders.map(header => MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.update(

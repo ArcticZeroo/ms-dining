@@ -46,16 +46,12 @@ export const reviewServiceCommands = {
         ReviewStorageClient.isOwnedByUser(reviewId, userId),
     getAllMenuItemReviewHeaders: async () =>
         ReviewStorageClient.getAllMenuItemReviewHeaders(),
-    getAllMenuItemReviewHeadersByGroupId: async () =>
-        ReviewStorageClient.getAllMenuItemReviewHeadersByGroupId(),
     getMenuItemReviewHeaderByName: async ({ normalizedName }: { normalizedName: string }) =>
         ReviewStorageClient.getMenuItemReviewHeaderByName(normalizedName),
     getReviewHeaderByGroupId: async ({ groupId }: { groupId: string }) =>
         ReviewStorageClient.getReviewHeaderByGroupId(groupId),
     getAllStationReviewHeaders: async () =>
         ReviewStorageClient.getAllStationReviewHeaders(),
-    getAllStationReviewHeadersByGroupId: async () =>
-        ReviewStorageClient.getAllStationReviewHeadersByGroupId(),
     getStationReviewHeaderByName: async ({ normalizedName }: { normalizedName: string }) =>
         ReviewStorageClient.getStationReviewHeaderByName(normalizedName),
     getStationReviewHeaderByGroupId: async ({ groupId }: { groupId: string }) =>

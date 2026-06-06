@@ -1,20 +1,19 @@
 import Router, { RouterContext } from '@koa/router';
 import { IDiningCoreGroup, IDiningCoreGroupMember, IDiningCoreResponse } from '@msdining/common/models/http';
 import { toMaybeDateString } from '@msdining/common/util/date-util';
-import { getServices } from '../../../../shared/services/registry.js';
 import * as diningConfig from '../../../../shared/constants/cafes.js';
 import { ApplicationContext } from '../../../../shared/constants/context.js';
+import { getServices } from '../../../../shared/services/registry.js';
 import { getLogoUrl } from '../../../../shared/util/cafe.js';
-import { isDev } from '../../../../shared/util/env.js';
-import { attachRouter } from '../../../util/koa.js';
 import { jsonStringifyWithoutNull } from '../../../../shared/util/serde.js';
+import { memoizeResponseBody } from '../../../middleware/cache.js';
+import { attachRouter } from '../../../util/koa.js';
+import { registerCartRoutes } from './cart.js';
+import { registerGroupsRoutes } from './groups.js';
 import { registerMenuRoutes } from './menu.js';
 import { registerOrderingRoutes } from './ordering.js';
-import { registerSearchRoutes } from './search.js';
 import { registerRecommendationsRoutes } from './recommendations.js';
-import { registerGroupsRoutes } from './groups.js';
-import { registerCartRoutes } from './cart.js';
-import { memoizeResponseBody } from '../../../middleware/cache.js';
+import { registerSearchRoutes } from './search.js';
 
 export const registerCafeRoutes = (parent: Router) => {
     const router = new Router({

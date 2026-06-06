@@ -18,6 +18,7 @@ const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistoryRange, number> = {
     all:   3,
 };
 const ORDER_COUNT_QUERY_KEY = ['order', 'count'] as const;
+// const ORDER_METRICS_QUERY_KEY = ['order', 'metrics'] as const;
 
 const filterOrdersBySince = (orders: ICafeOrder[], since: OrderHistoryRange) => {
     if (since === 'all') {

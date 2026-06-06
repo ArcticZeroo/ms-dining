@@ -13,6 +13,11 @@
  *   - Schema not pushed yet (`no such table: main.RuntimeMigration`).
  *   - DB exists but is empty (potential sign of pointing at a fresh file
  *     instead of the populated prod DB).
+ *   - A STORED generated column (e.g. MenuItem.entityKey) lost its generation.
+ *     Prisma cannot model generated columns, so `prisma migrate dev` scaffolds
+ *     spurious table rebuilds that silently replace them with plain columns.
+ *     If that ships, new rows get empty/stale entityKey and break dedupe and
+ *     aggregation — this check hard-fails before the server starts.
  *
  * Exit codes:
  *   0  All checks passed.
@@ -75,6 +80,39 @@ async function readEachTable(prisma: PrismaClient): Promise<Record<string, numbe
     return counts;
 }
 
+/**
+ * Columns that MUST remain SQLite `STORED` generated columns. Prisma cannot
+ * represent generated columns, so a stray `migrate dev` can scaffold a table
+ * rebuild that drops the generation — see the header comment.
+ */
+const GENERATED_STORED_COLUMNS: ReadonlyArray<{ table: string; column: string }> = [
+    { table: 'MenuItem', column: 'entityKey' },
+    { table: 'Station', column: 'entityKey' },
+];
+
+/**
+ * Verifies each expected column is still defined as `GENERATED ALWAYS AS (...)
+ * STORED` by inspecting the table's CREATE statement in sqlite_master. Returns
+ * a list of `Table.column` identifiers that have lost their generation (empty
+ * when all are healthy).
+ */
+async function findDroppedGeneratedColumns(prisma: PrismaClient): Promise<string[]> {
+    const violations: string[] = [];
+    for (const { table, column } of GENERATED_STORED_COLUMNS) {
+        const rows = await prisma.$queryRawUnsafe<Array<{ sql: string | null }>>(
+            `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = '${table}'`
+        );
+        const tableSql = rows[0]?.sql ?? '';
+        // The generated expression contains no commas, so [^,] safely scopes the
+        // match to this single column definition.
+        const pattern = new RegExp(`"${column}"[^,]*GENERATED ALWAYS AS[^,]*STORED`, 'i');
+        if (!pattern.test(tableSql)) {
+            violations.push(`${table}.${column}`);
+        }
+    }
+    return violations;
+}
+
 async function main(): Promise<void> {
     const allowEmpty = process.argv.includes(ALLOW_EMPTY_FLAG)
         || process.env[ALLOW_EMPTY_ENV] === '1';
@@ -104,9 +142,11 @@ async function main(): Promise<void> {
     const prisma = new PrismaClient({ datasourceUrl: resolvedUrl });
 
     let counts: Record<string, number> = {};
+    let droppedGeneratedColumns: string[] = [];
     let readErr: unknown;
     try {
         counts = await readEachTable(prisma);
+        droppedGeneratedColumns = await findDroppedGeneratedColumns(prisma);
     } catch (err) {
         readErr = err;
     }
@@ -116,6 +156,17 @@ async function main(): Promise<void> {
     if (readErr != null) {
         const errorMessage = readErr instanceof Error ? readErr.message : String(readErr);
         fail(`Read-only sanity query failed: ${errorMessage}`, 1);
+    }
+
+    if (droppedGeneratedColumns.length > 0) {
+        fail(
+            `${droppedGeneratedColumns.length} STORED generated column(s) lost their generation: `
+            + `${droppedGeneratedColumns.join(', ')}. A migration likely dropped the `
+            + `GENERATED ALWAYS AS (...) STORED definition (Prisma cannot model generated `
+            + `columns, so 'migrate dev' scaffolds a table rebuild that removes it). Restore `
+            + `the generated column definition in the migration before deploying.`,
+            1,
+        );
     }
 
     log('Table counts:');

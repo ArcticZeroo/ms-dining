@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { z } from 'zod';
-import { OrderItemSchema } from '@msdining/common/models/order';
+import { IOrderHistorySummaryResponse, OrderItemSchema } from '@msdining/common/models/order';
 import { attachRouter, getUserIdOrThrow, isAdminAsync } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { getServices } from '../../../../shared/services/registry.js';
@@ -116,10 +116,10 @@ export const registerOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    router.get('/count', async ctx => {
+    router.get('/history/summary`', async ctx => {
         const userId = getUserIdOrThrow(ctx);
-        const count = await getServices().data.order.getOrderCount({ userId });
-        ctx.body = jsonStringifyWithoutNull({ count });
+        const summary = await getServices().data.order.getOrderHistorySummary({ userId });
+        ctx.body = jsonStringifyWithoutNull(summary satisfies IOrderHistorySummaryResponse);
     });
 
     router.get('/estimate/:cafeId', async ctx => {

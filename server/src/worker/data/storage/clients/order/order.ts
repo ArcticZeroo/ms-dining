@@ -2,7 +2,12 @@ import { usePrismaClient, usePrismaTransaction, usePrismaWrite } from '../../cli
 import { SERVICE_ERROR_CODES, ServiceError } from '../../../../../shared/rpc/errors.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import { getStationNamesByIds } from '../../../cache/stations.js';
-import type { ICafeOrderDTO, IOrderItem, IRecentOrderSummary } from '@msdining/common/models/order';
+import type {
+    ICafeOrderDTO,
+    IOrderHistorySummaryResponse,
+    IOrderItem,
+    IRecentOrderSummary
+} from '@msdining/common/models/order';
 import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
 import { flattenModifiers, groupModifierRows, modifiersEqual } from '@msdining/common/util/modifier-util';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
@@ -10,6 +15,7 @@ import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { hashOrderItems, toOrderItems } from '../../../util/order.js';
 import type { OrderHistorySince } from '../../../../../shared/services/order.js';
 import type { CafeOrder, CafeOrderItem, CafeOrderItemModifier } from '@prisma/client';
+import { ReviewStorageClient } from '../review/review.js';
 
 const ORDER_ITEMS_INCLUDE = {
     items: {
@@ -27,7 +33,18 @@ type OrderWithItems = CafeOrder & {
 	}>;
 };
 
-const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> => {
+const retrieveStationNamesById = (menuItemsById: Map<string, IMenuItemBase>) => {
+    const stationIds = [...new Set(
+        Array.from(menuItemsById.values()).map(item => item.stationId),
+    )];
+    return getStationNamesByIds(stationIds);
+}
+
+const retrieveOrderMenuItemReviewHeaders = (userId: string, menuItemsById: Map<string, IMenuItemBase>) => {
+    return ReviewStorageClient.getUserReviewsForItems(userId, Array.from(menuItemsById.keys()));
+}
+
+const enrichOrders = async (userId: string, orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> => {
     const allMenuItemIds = [...new Set(orders.flatMap(order => order.items.map(item => item.menuItemId)))];
     const menuItemResults = await Promise.all(
         allMenuItemIds.map(id => MenuItemStorageClient.retrieveMenuItemAsync(id)),
@@ -40,11 +57,10 @@ const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> 
         }
     }
 
-    // Bulk-fetch station names for all referenced stations
-    const stationIds = [...new Set(
-        Array.from(menuItemsById.values()).map(item => item.stationId),
-    )];
-    const stationNamesById = await getStationNamesByIds(stationIds);
+    const [stationNamesById, reviewInfoById] = await Promise.all([
+        retrieveStationNamesById(menuItemsById),
+        retrieveOrderMenuItemReviewHeaders(userId, menuItemsById)
+    ]);
 
     return orders.map(order => ({
         id:                     order.id,
@@ -76,6 +92,7 @@ const enrichOrders = async (orders: OrderWithItems[]): Promise<ICafeOrderDTO[]> 
                     overallRating:    0,
                     firstAppearance:  '',
                 },
+                review: reviewInfoById.get(item.menuItemId)
             }];
         }),
     }));
@@ -330,7 +347,7 @@ export abstract class OrderStorageClient {
             orderBy: { completedAt: 'desc' },
         }));
 
-        return enrichOrders(orders);
+        return enrichOrders(userId, orders);
     }
 
     static async getOrderHistory(userId: string, since: OrderHistorySince): Promise<ICafeOrderDTO[]> {
@@ -345,13 +362,18 @@ export abstract class OrderStorageClient {
             orderBy: { completedAt: 'desc' },
         }));
 
-        return enrichOrders(orders);
+        return enrichOrders(userId, orders);
     }
 
-    static async getOrderCount(userId: string): Promise<number> {
-        return usePrismaClient(prisma => prisma.cafeOrder.count({
+    static async getOrderHistorySummary(userId: string): Promise<IOrderHistorySummaryResponse> {
+        const totalCount = await usePrismaClient(prisma => prisma.cafeOrder.count({
             where: { userId },
         }));
+
+        return {
+            count: totalCount,
+            countsById: new Map()
+        };
     }
 
     static async removeOrphanedPendingOrders(activeIds: string[]): Promise<number> {
@@ -366,5 +388,30 @@ export abstract class OrderStorageClient {
 
             return orphanedOrders.count;
         });
+    }
+
+    static async getOrderMetrics(userId: string): Promise<Map<string /*entityKey*/, number>> {
+        const result = await usePrismaClient(async prisma => prisma.cafeOrderItem.findMany({
+            where: {
+                cafeOrder: {
+                    userId
+                },
+            },
+            select: {
+                menuItem: {
+                    select: {
+                        entityKey: true
+                    }
+                }
+            }
+        }));
+
+        const metrics = new Map<string, number>();
+        for (const { menuItem } of result) {
+            const entityKey = menuItem.entityKey;
+            const counts = metrics.get(entityKey) ?? 0;
+            metrics.set(entityKey, counts + 1);
+        }
+        return metrics;
     }
 }

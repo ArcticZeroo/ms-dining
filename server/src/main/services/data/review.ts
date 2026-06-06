@@ -32,16 +32,12 @@ export const reviewService: IReviewService = {
         dataHandler.sendRequest('review', 'isOwnedByUser', data),
     getAllMenuItemReviewHeaders: (data) =>
         dataHandler.sendRequest('review', 'getAllMenuItemReviewHeaders', data),
-    getAllMenuItemReviewHeadersByGroupId: (data) =>
-        dataHandler.sendRequest('review', 'getAllMenuItemReviewHeadersByGroupId', data),
     getMenuItemReviewHeaderByName: (data) =>
         dataHandler.sendRequest('review', 'getMenuItemReviewHeaderByName', data),
     getReviewHeaderByGroupId: (data) =>
         dataHandler.sendRequest('review', 'getReviewHeaderByGroupId', data),
     getAllStationReviewHeaders: (data) =>
         dataHandler.sendRequest('review', 'getAllStationReviewHeaders', data),
-    getAllStationReviewHeadersByGroupId: (data) =>
-        dataHandler.sendRequest('review', 'getAllStationReviewHeadersByGroupId', data),
     getStationReviewHeaderByName: (data) =>
         dataHandler.sendRequest('review', 'getStationReviewHeaderByName', data),
     getStationReviewHeaderByGroupId: (data) =>

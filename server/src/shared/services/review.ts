@@ -60,12 +60,10 @@ export interface IReviewService {
 
     // Review header methods (used by cache layer)
     getAllMenuItemReviewHeaders(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
-    getAllMenuItemReviewHeadersByGroupId(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
     getMenuItemReviewHeaderByName(data: { normalizedName: string }): Promise<IMenuItemReviewHeader>;
     getReviewHeaderByGroupId(data: { groupId: string }): Promise<IMenuItemReviewHeader>;
 
     getAllStationReviewHeaders(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
-    getAllStationReviewHeadersByGroupId(data: EmptyObject): Promise<IMenuItemReviewHeaderWithEntityKey[]>;
     getStationReviewHeaderByName(data: { normalizedName: string }): Promise<IMenuItemReviewHeader>;
     getStationReviewHeaderByGroupId(data: { groupId: string }): Promise<IMenuItemReviewHeader>;
 }

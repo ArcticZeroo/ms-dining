@@ -9,6 +9,7 @@
 import { StationStorageClient, toStationRecord } from '../storage/clients/station/station.js';
 import { lazyAsync } from '../../../shared/util/lazy.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import type { IStationRecord } from '../../../shared/services/station.js';
 import { STORAGE_EVENTS } from '../../../shared/util/events.js';
 
@@ -45,13 +46,16 @@ STORAGE_EVENTS.on('menuPublished', async (event) => {
 
     const cache = await STATION_CACHE.value;
     for (const station of event.menu) {
+        const normalizedName = normalizeNameForSearch(station.name);
+        const groupId = station.groupId ?? null;
         cache.set(station.id, toStationRecord({
             id:             station.id,
             name:           station.name,
-            normalizedName: normalizeNameForSearch(station.name),
+            normalizedName,
             logoUrl:        station.logoUrl ?? null,
             menuId:         station.menuId,
-            groupId:        station.groupId ?? null,
+            groupId,
+            entityKey:      getEntityKeyFromParts(groupId, normalizedName),
             cafeId:         station.cafeId,
             opensAt:        station.opensAt,
             closesAt:       station.closesAt,

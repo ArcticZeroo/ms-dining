@@ -2,7 +2,7 @@ import type { ICartEstimateResponse } from '@msdining/common/models/http';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrderDTO,
-    ICompleteOrderResultDTO,
+    ICompleteOrderResultDTO, IOrderHistorySummaryResponse,
     IOrderItem,
     IPreparePaymentResult,
     IRecentOrderSummary,
@@ -52,9 +52,9 @@ export interface IOrderService {
         since: OrderHistorySince;
     }): Promise<ICafeOrderDTO[]>;
 
-    getOrderCount(data: {
+    getOrderHistorySummary(data: {
         userId: string;
-    }): Promise<number>;
+    }): Promise<IOrderHistorySummaryResponse>;
 
     getCartEstimate(data: {
         cafeId: string;

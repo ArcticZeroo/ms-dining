@@ -1,17 +1,16 @@
 import { isDuckType } from '@arcticzeroo/typeguard';
+import { Semaphore } from '@frozor/lock';
+import hat from 'hat';
 import fetch, { Response } from 'node-fetch';
 import { getBaseApiUrlWithoutTrailingSlash } from '../constants/cafes.js';
-import { isOfflineModeEnabled } from '../constants/env.js';
-import { ICafe, ICafeConfig } from '../models/cafe.js';
 import { ICafeConfigResponse } from '../models/buyondemand/responses.js';
-import { assertIsNotOfflineMode, ENVIRONMENT_SETTINGS } from '../util/env.js';
-import { logDebug, logError } from '../util/log.js';
-import { buildHarEntry, HarCapture } from '../util/har.js';
-import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../util/request.js';
-import { Semaphore } from '@frozor/lock';
+import { ICafe, ICafeConfig } from '../models/cafe.js';
 import { getServices } from '../services/registry.js';
+import { assertIsNotOfflineMode, ENVIRONMENT_SETTINGS } from '../util/env.js';
+import { buildHarEntry, HarCapture } from '../util/har.js';
+import { logDebug, logError } from '../util/log.js';
+import { isResponseServerError, makeRequestWithRetries, validateSuccessResponse } from '../util/request.js';
 import { StringUtil } from '../util/string.js';
-import hat from 'hat';
 import { maybeThrowBuyOnDemandError } from './buy-ondemand-error.js';
 
 const REQUEST_SEMAPHORE = new Semaphore(ENVIRONMENT_SETTINGS.maxConcurrentRequests);

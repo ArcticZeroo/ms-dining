@@ -119,4 +119,8 @@ export abstract class OrderClient {
             options: { method: 'POST' },
         });
     }
+
+    static async getOrderMetrics(): Promise<Map<string /*entityKey*/, number /*count*/>> {
+        return makeJsonRequestWithSchema();
+    }
 }
