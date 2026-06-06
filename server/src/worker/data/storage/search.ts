@@ -7,6 +7,7 @@ import {
 } from '@msdining/common/models/search';
 import { fuzzySearch, normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { getCafeNumber } from '@msdining/common/util/cafe-util';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import { ICheapItemSearchResult, IServerSearchResult } from '../../../shared/models/search.js';
 import { Nullable } from '../../../shared/models/util.js';
 import { getLogoUrl, getStationLogoUrl, getThumbnailUrl } from '../../../shared/util/cafe.js';
@@ -148,7 +149,8 @@ class SearchResults {
                 priceByCafeId:         new Map<string, number>(),
                 stationByCafeId:       new Map<string, string>(),
                 matchReasons:          new Set<SearchMatchReason>(),
-                matchedModifiers:      new Map<string, Set<string>>()
+                matchedModifiers:      new Map<string, Set<string>>(),
+                entityKey:             getEntityKeyFromParts(groupId, normalizeNameForSearch(name)),
             });
         }
 

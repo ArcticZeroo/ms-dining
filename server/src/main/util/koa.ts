@@ -124,6 +124,7 @@ const serializeSearchResult = async (id: string, searchResult: IServerSearchResu
         cafeId:           searchResult.cafeId || undefined,
         overallRating,
         totalReviewCount,
+        entityKey:        searchResult.entityKey,
     });
 };
 

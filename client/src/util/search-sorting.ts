@@ -21,6 +21,11 @@ export interface ISearchResultSortingContext {
     isUsingGroups: boolean;
     favoriteItemNames: Set<string>;
     favoriteStationNames: Set<string>;
+    /**
+     * Per-entityKey order counts for the current user. Empty map when not
+     * logged in or when ordering is disabled.
+     */
+    orderCountsByEntityKey: Map<string, number>;
 }
 
 interface ISubstringScoreParams {
@@ -267,8 +272,30 @@ const getFavoriteItemMultiplier = (context: ISearchResultSortingContext, searchR
         : 1;
 };
 
+/**
+ * Boost results the user has ordered before. log(1 + count) keeps the boost
+ * flat near 1× for never-ordered items and grows slowly so a single recent
+ * order doesn't dominate. Empirically:
+ *   count=0  → 1×
+ *   count=1  → ~1.21×
+ *   count=3  → ~1.42×
+ *   count=10 → ~1.72×
+ */
+const ORDER_HISTORY_BOOST_FACTOR = 0.3;
+
+const getOrderHistoryMultiplier = (context: ISearchResultSortingContext, searchResult: IQuerySearchResult) => {
+    if (context.orderCountsByEntityKey.size === 0) {
+        return 1;
+    }
+    const count = context.orderCountsByEntityKey.get(searchResult.entityKey) ?? 0;
+    if (count <= 0) {
+        return 1;
+    }
+    return 1 + Math.log(1 + count) * ORDER_HISTORY_BOOST_FACTOR;
+};
+
 interface IComputeScoreParams {
-    searchResult: ISearchResult;
+    searchResult: IQuerySearchResult;
     doSubstringScore: boolean;
     bestDistance: number;
     context: ISearchResultSortingContext;
@@ -314,6 +341,7 @@ const computeScore = ({ searchResult, doSubstringScore, bestDistance, context }:
     return baseScore
            * ENTITY_TYPE_MULTIPLIERS[searchResult.entityType]
            * getFavoriteItemMultiplier(context, searchResult)
+           * getOrderHistoryMultiplier(context, searchResult)
            * getDistanceMultiplier(searchResult, bestDistance);
 };
 
@@ -409,7 +437,7 @@ const getMatchType = (searchResult: ISearchResult, queryText: string, perfectMat
 interface ISearchSortMetadata {
     matchType: MatchType;
     score: number;
-    result: ISearchResult;
+    result: IQuerySearchResult;
 }
 
 const getBestDistance = (searchResults: IQuerySearchResult[]) => {
@@ -434,7 +462,7 @@ export const sortSearchResultsInPlace = (searchResults: IQuerySearchResult[], co
 
     const bestDistance = getBestDistance(searchResults);
 
-    const getMetadata = (searchResult: ISearchResult) => {
+    const getMetadata = (searchResult: IQuerySearchResult) => {
         if (!searchResultMetadataByEntityType.has(searchResult.entityType)) {
             searchResultMetadataByEntityType.set(searchResult.entityType, new Map());
         }

@@ -153,6 +153,7 @@ export const SearchResultsList: React.FC<ISearchResultsListProps> = ({
                         cafeId={searchResult.cafeId}
                         overallRating={searchResult.overallRating}
                         totalReviewCount={searchResult.totalReviewCount}
+                        entityKey={searchResult.entityKey}
                     />
                 );
             });

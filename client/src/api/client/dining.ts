@@ -171,6 +171,7 @@ export abstract class DiningClient {
                 cafeId:                serverResult.cafeId || undefined,
                 overallRating:         serverResult.overallRating,
                 totalReviewCount:      serverResult.totalReviewCount,
+                entityKey:             serverResult.entityKey,
             });
         }
 

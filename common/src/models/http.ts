@@ -142,6 +142,7 @@ export const SearchResponseResultSchema = z.object({
 	cafeId: z.string().optional(),
 	overallRating: z.number().optional(),
 	totalReviewCount: z.number().optional(),
+	entityKey: z.string(),
 });
 
 export type ISearchResponseResult = z.infer<typeof SearchResponseResultSchema>;

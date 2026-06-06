@@ -44,6 +44,7 @@ export interface IQuerySearchResult {
     cafeId?: string;
     overallRating?: number;
     totalReviewCount?: number;
+    entityKey: string;
 }
 
 export interface ICheapItemSearchResult {

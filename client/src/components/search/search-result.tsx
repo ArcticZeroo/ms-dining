@@ -7,6 +7,7 @@ import { ApplicationSettings } from '../../constants/settings.ts';
 import { ApplicationContext } from '../../context/app.ts';
 import { useIsFavoriteItem } from '../../hooks/cafe.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
+import { useMenuItemOrderCount } from '../../store/queries/ordering.ts';
 import { useSelectedDate } from '../../store/zustand/selected-date.ts';
 import { CafeView, CafeViewType } from '../../models/cafe.ts';
 import { classNames } from '../../util/react';
@@ -25,6 +26,7 @@ import { getParentView } from '../../util/view.ts';
 import { normalizeCafeId } from '@msdining/common/util/cafe-util';
 import { entityDisplayDataByType } from '../../constants/search.js';
 import { formatReviewScore } from '../../util/reviews.js';
+import { formatOrderCount } from '../../util/order.js';
 import { navigateToSearch } from '../../util/search.js';
 
 const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
@@ -155,6 +157,8 @@ export interface ISearchResultProps {
     cafeId?: string; // Should only be set for entity type cafe
     overallRating?: number;
     totalReviewCount?: number;
+    /** When provided, displays an "ordered N times" badge for the current user. */
+    entityKey?: string;
 }
 
 export const SearchResult: React.FC<ISearchResultProps> = ({
@@ -182,6 +186,7 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     cafeId,
     overallRating,
     totalReviewCount,
+    entityKey,
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const showImages = useValueNotifier(ApplicationSettings.showImages);
@@ -264,6 +269,9 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
 
     const isFavoriteItem = useIsFavoriteItem(targetFavoriteId, entityType);
 
+    const orderCount = useMenuItemOrderCount(entityKey);
+    const orderCountDisplay = formatOrderCount(orderCount);
+
     if (entityType == SearchTypes.SearchEntityType.cafe) {
         if (!entityView) {
             console.error('SearchResult component requires entityView for entityType cafe');
@@ -334,6 +342,13 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                                 showReviews && overallRating != null && totalReviewCount != null && totalReviewCount > 0 && (
                                     <div className="search-result-review-score">
                                         {formatReviewScore(overallRating, totalReviewCount)}
+                                    </div>
+                                )
+                            }
+                            {
+                                orderCountDisplay && (
+                                    <div className="search-result-review-score">
+                                        {orderCountDisplay}
                                     </div>
                                 )
                             }

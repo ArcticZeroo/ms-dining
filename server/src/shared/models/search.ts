@@ -18,6 +18,8 @@ export interface IServerSearchResult {
     vectorDistance?: number;
     cafeId?: Nullable<string>;
     groupId?: Nullable<string>;
+    /** See {@link IMenuItemBase.entityKey}. Used for cross-cafe dedup / lookup. */
+    entityKey: string;
 }
 
 export interface ICheapItemSearchResult {
