@@ -10,6 +10,7 @@ import { IQuerySearchResult } from '../models/search.ts';
 import { getCafeLocation } from './cafe.ts';
 import { getDistanceBetweenCoordinates } from './coordinates.ts';
 import { verboseLog } from './logging.ts';
+import { getOrderHistoryBoostMultiplier } from './order.ts';
 import { getParentView } from './view.ts';
 
 export interface ISearchResultSortingContext {
@@ -273,25 +274,15 @@ const getFavoriteItemMultiplier = (context: ISearchResultSortingContext, searchR
 };
 
 /**
- * Boost results the user has ordered before. log(1 + count) keeps the boost
- * flat near 1× for never-ordered items and grows slowly so a single recent
- * order doesn't dominate. Empirically:
- *   count=0  → 1×
- *   count=1  → ~1.21×
- *   count=3  → ~1.42×
- *   count=10 → ~1.72×
+ * Boost results the user has ordered before. See getOrderHistoryBoostMultiplier
+ * for the formula. Returns 1 when the user has no order history or the
+ * specific item has never been ordered.
  */
-const ORDER_HISTORY_BOOST_FACTOR = 0.3;
-
 const getOrderHistoryMultiplier = (context: ISearchResultSortingContext, searchResult: IQuerySearchResult) => {
     if (context.orderCountsByEntityKey.size === 0) {
         return 1;
     }
-    const count = context.orderCountsByEntityKey.get(searchResult.entityKey) ?? 0;
-    if (count <= 0) {
-        return 1;
-    }
-    return 1 + Math.log(1 + count) * ORDER_HISTORY_BOOST_FACTOR;
+    return getOrderHistoryBoostMultiplier(context.orderCountsByEntityKey.get(searchResult.entityKey) ?? 0);
 };
 
 interface IComputeScoreParams {

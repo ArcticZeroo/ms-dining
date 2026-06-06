@@ -58,6 +58,7 @@ export const RecommendationSearchResult: React.FC<IRecommendationSearchResultPro
             showOnlyCafeNames={true}
             overallRating={item.overallRating}
             totalReviewCount={item.totalReviewCount}
+            entityKey={item.entityKey}
             extraFields={extraFields}
         />
     );

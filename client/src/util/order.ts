@@ -52,3 +52,21 @@ export const formatOrderCount = (count: number): string | null => {
     }
     return `🛍️ Ordered ${count} ${count === 1 ? 'time' : 'times'}`;
 };
+
+/**
+ * Gentle log-shaped multiplier used to boost ranking for items the user has
+ * ordered before. Returns 1 when count <= 0 so callers don't need to guard.
+ * Empirically tuned so a single past order doesn't dominate fresh signals:
+ *   count=0  → 1×
+ *   count=1  → ~1.21×
+ *   count=3  → ~1.42×
+ *   count=10 → ~1.72×
+ */
+const ORDER_HISTORY_BOOST_FACTOR = 0.3;
+
+export const getOrderHistoryBoostMultiplier = (count: number): number => {
+    if (count <= 0) {
+        return 1;
+    }
+    return 1 + Math.log(1 + count) * ORDER_HISTORY_BOOST_FACTOR;
+};
