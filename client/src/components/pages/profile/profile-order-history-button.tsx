@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useOrderCountQuery } from '../../../store/queries/ordering.js';
+import { useOrderHistorySummaryQuery } from '../../../store/queries/ordering.js';
 import { pluralize } from '../../../util/string.js';
 
 export const ProfileOrderHistoryButton = () => {
-    const orderCountQuery = useOrderCountQuery();
+    const summaryQuery = useOrderHistorySummaryQuery();
 
     return (
         <Link to="/order/history?range=30d" className="default-button default-container flex flex-center">
@@ -14,9 +14,9 @@ export const ProfileOrderHistoryButton = () => {
                 Order History
             </span>
             {
-                orderCountQuery.data != null && (
+                summaryQuery.data != null && (
                     <span>
-                        ({orderCountQuery.data.count} {pluralize('order', orderCountQuery.data.count)})
+                        ({summaryQuery.data.count} {pluralize('order', summaryQuery.data.count)})
                     </span>
                 )
             }

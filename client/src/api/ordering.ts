@@ -2,6 +2,7 @@ import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrder,
     ICompleteOrderResult,
+    IOrderHistorySummaryResponse,
     IOrderItem,
     IPreparePaymentResult,
     IRecentOrderSummary,
@@ -9,6 +10,7 @@ import type {
 import {
     CafeOrderSchema,
     CompleteOrderResultSchema,
+    OrderHistoryResponse,
     PreparePaymentResultSchema,
     RecentOrderSummarySchema,
 } from '@msdining/common/models/order';
@@ -16,7 +18,6 @@ import z from 'zod';
 import { JSON_HEADERS, makeJsonRequestWithSchema } from './request.ts';
 
 const ORDER_BASE = '/api/dining/order';
-const OrderCountSchema = z.object({ count: z.number() });
 const RecentOrdersResponseSchema = z.object({
     orders: z.array(RecentOrderSummarySchema),
 });
@@ -98,10 +99,10 @@ export abstract class OrderClient {
         });
     }
 
-    static async getOrderCount(): Promise<{ count: number }> {
+    static async getOrderHistorySummary(): Promise<IOrderHistorySummaryResponse> {
         return makeJsonRequestWithSchema({
-            path:   `${ORDER_BASE}/count`,
-            schema: OrderCountSchema,
+            path:   `${ORDER_BASE}/history/summary`,
+            schema: OrderHistoryResponse,
         });
     }
 
@@ -118,9 +119,5 @@ export abstract class OrderClient {
             schema:  z.object({ touched: z.number() }),
             options: { method: 'POST' },
         });
-    }
-
-    static async getOrderMetrics(): Promise<Map<string /*entityKey*/, number /*count*/>> {
-        return makeJsonRequestWithSchema();
     }
 }

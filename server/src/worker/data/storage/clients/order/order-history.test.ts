@@ -202,14 +202,16 @@ test('getOrderHistory returns empty for unknown user', async () => {
     assert.equal(orders.length, 0);
 });
 
-test('getOrderMetrics counts orders keyed by menu item entityKey', async () => {
-    const metrics = await OrderStorageClient.getOrderMetrics(METRICS_USER_ID);
-    assert.equal(metrics.size, 2, 'should have one entry per distinct entityKey');
-    assert.equal(metrics.get('name:test burger'), 3, 'ungrouped item keyed by name');
-    assert.equal(metrics.get(`group:${GROUPED_MENU_ITEM_GROUP_ID}`), 2, 'grouped item keyed by group');
+test('getOrderHistorySummary returns total count and per-entityKey counts', async () => {
+    const summary = await OrderStorageClient.getOrderHistorySummary(METRICS_USER_ID);
+    assert.equal(summary.count, 5, 'total order count across all entityKeys');
+    assert.equal(summary.countsById.size, 2, 'one entry per distinct entityKey');
+    assert.equal(summary.countsById.get('name:test burger'), 3, 'ungrouped item keyed by name');
+    assert.equal(summary.countsById.get(`group:${GROUPED_MENU_ITEM_GROUP_ID}`), 2, 'grouped item keyed by group');
 });
 
-test('getOrderMetrics returns empty map for unknown user', async () => {
-    const metrics = await OrderStorageClient.getOrderMetrics('nobody');
-    assert.equal(metrics.size, 0);
+test('getOrderHistorySummary returns zeros for unknown user', async () => {
+    const summary = await OrderStorageClient.getOrderHistorySummary('nobody');
+    assert.equal(summary.count, 0);
+    assert.equal(summary.countsById.size, 0);
 });

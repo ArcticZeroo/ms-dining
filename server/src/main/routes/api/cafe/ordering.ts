@@ -116,7 +116,7 @@ export const registerOrderingRoutes = (parent: Router) => {
         ctx.body = jsonStringifyWithoutNull(result);
     });
 
-    router.get('/history/summary`', async ctx => {
+    router.get('/history/summary', async ctx => {
         const userId = getUserIdOrThrow(ctx);
         const summary = await getServices().data.order.getOrderHistorySummary({ userId });
         ctx.body = jsonStringifyWithoutNull(summary satisfies IOrderHistorySummaryResponse);

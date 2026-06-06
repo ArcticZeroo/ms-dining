@@ -4,6 +4,7 @@ import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { ISynthesisFlags, OrderHistoryRange } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
+import { useIsOnlineOrderingEnabled } from '../../hooks/cafe.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 import { queryKeys } from './keys.ts';
 import { useEffect } from 'react';
@@ -17,8 +18,6 @@ const ORDER_HISTORY_RANGE_ORDER: Record<OrderHistoryRange, number> = {
     '30d': 2,
     all:   3,
 };
-const ORDER_COUNT_QUERY_KEY = ['order', 'count'] as const;
-// const ORDER_METRICS_QUERY_KEY = ['order', 'metrics'] as const;
 
 const filterOrdersBySince = (orders: ICafeOrder[], since: OrderHistoryRange) => {
     if (since === 'all') {
@@ -74,7 +73,7 @@ export const useCompleteOrderMutation = () => {
             queryClient.invalidateQueries({ queryKey: COMPLETED_ORDERS_TODAY_KEY });
             queryClient.invalidateQueries({ queryKey: RECENT_ORDERS_QUERY_KEY });
             queryClient.removeQueries({ queryKey: ['order', 'history'] });
-            queryClient.removeQueries({ queryKey: ORDER_COUNT_QUERY_KEY });
+            queryClient.removeQueries({ queryKey: queryKeys.ordering.orderHistorySummary });
         },
     });
 };
@@ -114,10 +113,17 @@ export const useOrderHistoryQuery = (range: OrderHistoryRange) => {
     });
 };
 
-export const useOrderCountQuery = () => useQuery({
-    queryKey: ORDER_COUNT_QUERY_KEY,
-    queryFn:  () => OrderClient.getOrderCount(),
-});
+export const useOrderHistorySummaryQuery = () => {
+    const isLoggedIn = useIsLoggedIn();
+    const isOnlineOrderingEnabled = useIsOnlineOrderingEnabled();
+
+    return useQuery({
+        queryKey:  queryKeys.ordering.orderHistorySummary,
+        queryFn:   () => OrderClient.getOrderHistorySummary(),
+        enabled:   isLoggedIn && isOnlineOrderingEnabled,
+        staleTime: Infinity,
+    });
+};
 
 const ESTIMATE_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
 const ESTIMATE_STALE_TIME_MS = 60 * 1000;

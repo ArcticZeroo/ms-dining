@@ -103,8 +103,8 @@ export type IOnlineOrderingState =
     | { allowed: false; reason: OnlineOrderingBlockedReason };
 
 export const useOnlineOrderingStatus = (): IOnlineOrderingState => {
-    const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
     const isOnlineOrderingForceEnabled = useValueNotifier(DebugSettings.forceAllowOnlineOrdering);
+    const isOnlineOrderingEnabled = useIsOnlineOrderingEnabled();
     const isTodaySelected = useIsTodaySelected();
     const isLoggedIn = useIsLoggedIn();
 
@@ -129,6 +129,12 @@ export const useOnlineOrderingStatus = (): IOnlineOrderingState => {
     }
 
     return { allowed: true };
+};
+
+export const useIsOnlineOrderingEnabled = (): boolean => {
+    const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
+    const isOnlineOrderingForceEnabled = useValueNotifier(DebugSettings.forceAllowOnlineOrdering);
+    return isOnlineOrderingForceEnabled || isOnlineOrderingEnabled;
 };
 
 export const useIsOnlineOrderingAllowed = (): boolean => useOnlineOrderingStatus().allowed;

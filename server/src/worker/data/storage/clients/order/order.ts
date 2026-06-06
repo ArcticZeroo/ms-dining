@@ -15,6 +15,7 @@ import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { hashOrderItems, toOrderItems } from '../../../util/order.js';
 import type { OrderHistorySince } from '../../../../../shared/services/order.js';
 import type { CafeOrder, CafeOrderItem, CafeOrderItemModifier } from '@prisma/client';
+import { getOrderMetricsByEntityKey } from '@prisma/client/sql';
 import { ReviewStorageClient } from '../review/review.js';
 
 const ORDER_ITEMS_INCLUDE = {
@@ -366,13 +367,24 @@ export abstract class OrderStorageClient {
     }
 
     static async getOrderHistorySummary(userId: string): Promise<IOrderHistorySummaryResponse> {
-        const totalCount = await usePrismaClient(prisma => prisma.cafeOrder.count({
-            where: { userId },
-        }));
+        const [totalCount, metricRows] = await Promise.all([
+            usePrismaClient(prisma => prisma.cafeOrder.count({
+                where: { userId },
+            })),
+            usePrismaClient(prisma => prisma.$queryRawTyped(getOrderMetricsByEntityKey(userId))),
+        ]);
+
+        const countsByEntityKey = new Map<string, number>();
+        for (const row of metricRows) {
+            // entityKey is NOT NULL in the schema (STORED generated column),
+            // but TypedSQL widens to string | null. The JOIN to MenuItem can't
+            // produce nulls here.
+            countsByEntityKey.set(row.entityKey!, Number(row.orderCount));
+        }
 
         return {
-            count: totalCount,
-            countsById: new Map()
+            count:      totalCount,
+            countsById: countsByEntityKey,
         };
     }
 
@@ -388,30 +400,5 @@ export abstract class OrderStorageClient {
 
             return orphanedOrders.count;
         });
-    }
-
-    static async getOrderMetrics(userId: string): Promise<Map<string /*entityKey*/, number>> {
-        const result = await usePrismaClient(async prisma => prisma.cafeOrderItem.findMany({
-            where: {
-                cafeOrder: {
-                    userId
-                },
-            },
-            select: {
-                menuItem: {
-                    select: {
-                        entityKey: true
-                    }
-                }
-            }
-        }));
-
-        const metrics = new Map<string, number>();
-        for (const { menuItem } of result) {
-            const entityKey = menuItem.entityKey;
-            const counts = metrics.get(entityKey) ?? 0;
-            metrics.set(entityKey, counts + 1);
-        }
-        return metrics;
     }
 }
