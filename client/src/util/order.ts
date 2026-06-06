@@ -41,3 +41,14 @@ export const formatEstimatedReadyTime = (
 };
 
 export const getTotalCostForOrders = (orders: ICafeOrder[]) => orders.reduce((total, order) => total + order.total, 0);
+
+/**
+ * Format an order count for display next to a menu item ("Ordered 3 times").
+ * Returns null when count <= 0 so callers can short-circuit rendering.
+ */
+export const formatOrderCount = (count: number): string | null => {
+    if (count <= 0) {
+        return null;
+    }
+    return `🛍️ Ordered ${count} ${count === 1 ? 'time' : 'times'}`;
+};

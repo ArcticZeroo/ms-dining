@@ -8,7 +8,9 @@ import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../..
 import { CurrentCafeContext, StationInfoContext } from '../../../../context/menu-item.ts';
 import { useIsFavoriteItem, useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
 import { useValueNotifier } from '../../../../hooks/events.ts';
+import { useMenuItemOrderCount } from '../../../../store/queries/ordering.ts';
 import { formatPrice, getMinRequiredPrice, hasModifierPriceBeyondMinimum } from '../../../../util/cart.ts';
+import { formatOrderCount } from '../../../../util/order.ts';
 import { getSearchAnchorId } from '../../../../util/link.ts';
 import { classNames } from '../../../../util/react.ts';
 import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
@@ -108,6 +110,9 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
         [menuItem.firstAppearance]
     );
 
+    const orderCount = useMenuItemOrderCount(menuItem.entityKey);
+    const orderCountDisplay = formatOrderCount(orderCount);
+
     return (
         <div
             className={classNames('flex-col menu-item pointer', isFavoriteItem && 'is-favorite')}
@@ -167,6 +172,13 @@ export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
                 showReviews && menuItem.totalReviewCount > 0 && (
                     <span>
                         {formatReviewScore(menuItem.overallRating, menuItem.totalReviewCount)}
+                    </span>
+                )
+            }
+            {
+                orderCountDisplay && (
+                    <span>
+                        {orderCountDisplay}
                     </span>
                 )
             }

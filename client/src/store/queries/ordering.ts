@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ICafeOrder, IOrderItem } from '@msdining/common/models/order';
+import type { ICafeOrder, IOrderHistorySummaryResponse, IOrderItem } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { ISynthesisFlags, OrderHistoryRange } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
@@ -7,7 +7,7 @@ import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { useIsOnlineOrderingEnabled } from '../../hooks/cafe.ts';
 import { CART_QUERY_KEY } from './server-cart.ts';
 import { queryKeys } from './keys.ts';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 const COMPLETED_ORDERS_TODAY_KEY = ['orders', 'today'] as const;
 const RECENT_ORDERS_QUERY_KEY = ['order', 'recent'] as const;
@@ -123,6 +123,36 @@ export const useOrderHistorySummaryQuery = () => {
         enabled:   isLoggedIn && isOnlineOrderingEnabled,
         staleTime: Infinity,
     });
+};
+
+/**
+ * Returns the number of times the current user has ordered the given menu item
+ * (matched by entityKey so the same item across multiple cafes shares a count),
+ * or 0 if never ordered / not logged in / ordering disabled.
+ *
+ * Uses TanStack Query's `select` so consumers only re-render when THEIR count
+ * changes — when one item's count updates, other menu items don't re-render
+ * even though they subscribe to the same underlying summary query.
+ */
+export const useMenuItemOrderCount = (entityKey: string | undefined): number => {
+    const isLoggedIn = useIsLoggedIn();
+    const isOnlineOrderingEnabled = useIsOnlineOrderingEnabled();
+
+    const select = useCallback(
+        (data: IOrderHistorySummaryResponse): number =>
+            entityKey == null ? 0 : (data.countsById.get(entityKey) ?? 0),
+        [entityKey],
+    );
+
+    const { data } = useQuery({
+        queryKey:  queryKeys.ordering.orderHistorySummary,
+        queryFn:   () => OrderClient.getOrderHistorySummary(),
+        enabled:   isLoggedIn && isOnlineOrderingEnabled,
+        staleTime: Infinity,
+        select,
+    });
+
+    return data ?? 0;
 };
 
 const ESTIMATE_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
