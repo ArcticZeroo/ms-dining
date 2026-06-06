@@ -212,13 +212,38 @@ export const getRecommendationsAsync = async ({
 
     const proximityWeights = buildProximityWeightMap(homepageIds, cafeIdFilter);
 
+    // Resolve user-history-derived inputs once. Both reads are user-bound,
+    // safe to do in parallel, and feed into the trySomethingDifferent demotion
+    // as well as the order-history boost for other sections.
+    const [resolvedReviews, resolvedOrderCounts] = await Promise.all([
+        getAllUserReviews(),
+        orderCountsByEntityKey.value,
+    ]);
+
+    let familiarEntityKeys: Set<string> | null = null;
+    if (userId) {
+        familiarEntityKeys = new Set<string>();
+        for (const review of resolvedReviews) {
+            const entityKey = review.menuItem?.entityKey;
+            if (entityKey) {
+                familiarEntityKeys.add(entityKey);
+            }
+        }
+        if (resolvedOrderCounts) {
+            for (const entityKey of resolvedOrderCounts.keys()) {
+                familiarEntityKeys.add(entityKey);
+            }
+        }
+    }
+
     return assembleSections({
         claimedKeys: new Set<string>(),
         sectionsByType,
         seed,
         proximityWeights,
-        itemWeights:           itemWeights.size > 0 ? itemWeights : null,
-        orderCountsByEntityKey: await orderCountsByEntityKey.value,
+        itemWeights:            itemWeights.size > 0 ? itemWeights : null,
+        orderCountsByEntityKey: resolvedOrderCounts,
+        familiarEntityKeys,
     });
 };
 

@@ -28,6 +28,13 @@ import { IServerReview } from '../../../../../shared/models/review.js';
  * 5. Quality-filter: only include items with no reviews or a rating ≥ 5
  * 6. Apply variety selection on the remaining pool
  *
+ * Note: items the user has *personally* reviewed or ordered before are NOT
+ * filtered out here — they're left in the candidate pool and demoted later
+ * in {@link applyWeights} via the trySomethingDifferent-specific
+ * familiar-item penalty. Keeping them in the pool means the penalty can be
+ * tuned (and eventually relaxed back into a hard filter) without rewriting
+ * the signal.
+ *
  * Only shown to authenticated users who have at least one review.
  */
 export const getTrySomethingDifferent = async (
@@ -48,22 +55,13 @@ export const getTrySomethingDifferent = async (
         return null;
     }
 
-    const reviewedItemIds = new Set(reviews.map(review => review.menuItemId!));
-    const reviewedEntityKeys = new Set(reviews.map(review => review.menuItem!.entityKey));
     const availableItems = await context.getAllMenuItems();
     const availableById = new Map(availableItems.map(item => [item.menuItem.id, item]));
 
-    // Filter to available, unreviewed items
     const candidates: Array<{ item: IMenuItemCandidate; distance: number; id: string }> = [];
     for (const result of results) {
         const item = availableById.get(result.id);
         if (!item) {
-            continue;
-        }
-        if (reviewedItemIds.has(result.id)) {
-            continue;
-        }
-        if (reviewedEntityKeys.has(item.menuItem.entityKey)) {
             continue;
         }
         candidates.push({ item, distance: result.distance, id: result.id });

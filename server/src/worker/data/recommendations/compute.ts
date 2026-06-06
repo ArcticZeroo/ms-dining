@@ -16,25 +16,56 @@ const WEIGHTING_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
 ]);
 
 /**
+ * Multiplier applied in the `trySomethingDifferent` section to items the
+ * user has already personally interacted with (ordered or reviewed).
+ * 0.1 ⇒ 10× demotion — strong enough that familiar items rarely surface
+ * but they remain in the pool so a sparse pool doesn't end up empty.
+ */
+const TRY_SOMETHING_DIFFERENT_FAMILIAR_PENALTY = 0.1;
+
+export interface IApplyWeightsOptions {
+    proximityWeights: Map<string, number> | null;
+    itemWeights: Map<string, number> | null;
+    /** Per-entityKey count of past orders for the current user. */
+    orderCountsByEntityKey?: Map<string /*entityKey*/, number> | null;
+    /**
+     * Set of entityKeys the user has personally interacted with (ordered or
+     * reviewed). Used to demote items inside the `trySomethingDifferent`
+     * section so the user is shown things they actually haven't tried.
+     */
+    familiarEntityKeys?: Set<string> | null;
+}
+
+/**
  * Multiplies each item's score by per-cafe proximity weight, per-item weight
  * (drinks down, novelty up), and the user's order-history boost
  * (see {@link getOrderHistoryBoostMultiplier}). Items with proximity weight 0
  * are dropped entirely (out-of-range cafes). Sections in
  * WEIGHTING_EXEMPT_SECTION_TYPES are passed through unmodified because they
  * exist specifically to surface new/favorite items.
+ *
+ * The `trySomethingDifferent` section uses an inverted boost: items in
+ * `familiarEntityKeys` are heavily demoted instead of being skipped, so the
+ * pool never empties out for users with lots of history.
  */
 export const applyWeights = (
     items: readonly IRecommendationItem[],
     sectionType: RecommendationSectionType,
-    proximityWeights: Map<string, number> | null,
-    itemWeights: Map<string, number> | null,
-    orderCountsByEntityKey: Map<string /*entityKey*/, number> | null = null,
+    {
+        proximityWeights,
+        itemWeights,
+        orderCountsByEntityKey = null,
+        familiarEntityKeys = null,
+    }: IApplyWeightsOptions,
 ): IRecommendationItem[] => {
     if (WEIGHTING_EXEMPT_SECTION_TYPES.has(sectionType)) {
         return items as IRecommendationItem[];
     }
 
-    if (!proximityWeights && !itemWeights && !orderCountsByEntityKey) {
+    const isTrySomethingDifferent = sectionType === RecommendationSectionType.trySomethingDifferent;
+
+    if (!proximityWeights && !itemWeights
+        && (isTrySomethingDifferent ? !familiarEntityKeys : !orderCountsByEntityKey)) {
         return items as IRecommendationItem[];
     }
 
@@ -48,10 +79,19 @@ export const applyWeights = (
         }
 
         const itemWeight = itemWeights?.get(item.menuItemId) ?? 1;
-        const orderHistoryWeight = orderCountsByEntityKey
-            ? getOrderHistoryBoostMultiplier(orderCountsByEntityKey.get(item.entityKey) ?? 0)
-            : 1;
-        const combinedWeight = proximityWeight * itemWeight * orderHistoryWeight;
+
+        let historyWeight: number;
+        if (isTrySomethingDifferent) {
+            // Demote — don't boost — items the user has tried before.
+            historyWeight = familiarEntityKeys?.has(item.entityKey)
+                ? TRY_SOMETHING_DIFFERENT_FAMILIAR_PENALTY
+                : 1;
+        } else {
+            historyWeight = orderCountsByEntityKey
+                ? getOrderHistoryBoostMultiplier(orderCountsByEntityKey.get(item.entityKey) ?? 0)
+                : 1;
+        }
+        const combinedWeight = proximityWeight * itemWeight * historyWeight;
 
         if (combinedWeight !== 1) {
             isAnyWeightNotDefault = true;
@@ -131,6 +171,7 @@ interface IAssembleSectionsParams {
     proximityWeights: Map<string, number> | null;
     itemWeights: Map<string, number> | null;
     orderCountsByEntityKey?: Map<string /*entityKey*/, number> | null;
+    familiarEntityKeys?: Set<string> | null;
     seed: string;
     lambda?: number;
 }
@@ -148,6 +189,7 @@ export const assembleSections = async ({
     proximityWeights,
     itemWeights,
     orderCountsByEntityKey = null,
+    familiarEntityKeys = null,
     seed,
     lambda = 0.5,
 }: IAssembleSectionsParams): Promise<IRecommendationSection[]> => {
@@ -167,7 +209,12 @@ export const assembleSections = async ({
             continue;
         }
 
-        const adjustedItems = applyWeights(items, sectionType, proximityWeights, itemWeights, orderCountsByEntityKey);
+        const adjustedItems = applyWeights(items, sectionType, {
+            proximityWeights,
+            itemWeights,
+            orderCountsByEntityKey,
+            familiarEntityKeys,
+        });
         const selectedItems = await selectWithEmbeddingDiversity(
             adjustedItems,
             ITEMS_PER_SECTION,
