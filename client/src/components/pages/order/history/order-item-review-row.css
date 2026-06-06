@@ -1,0 +1,26 @@
+.order-item-review-row {
+    display: flex;
+    align-items: center;
+    gap: var(--default-padding);
+    width: 100%;
+    padding: var(--constant-padding) var(--default-padding);
+    border: none;
+    border-radius: 0.5rem;
+    background: var(--color-background-raised);
+    color: var(--color-foreground);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.order-item-review-row:hover {
+    background: var(--color-background-raised-2);
+}
+
+.order-item-review-row.leave {
+    color: var(--color-theme);
+}
+
+.order-item-review-row .material-symbols-outlined {
+    font-size: 1.1rem;
+}

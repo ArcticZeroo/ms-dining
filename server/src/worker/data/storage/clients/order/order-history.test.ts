@@ -215,3 +215,55 @@ test('getOrderHistorySummary returns zeros for unknown user', async () => {
     assert.equal(summary.count, 0);
     assert.equal(summary.countsById.size, 0);
 });
+
+test('getOrderHistory enriches items with the user\'s own review when present', async () => {
+    // METRICS_USER has 3 orders of the ungrouped burger and 2 of the grouped burger.
+    // Leave a review only on the ungrouped burger and verify the per-item review
+    // wiring lights up just for those items.
+    await getServices().data.review.createMenuItemReview({
+        review: {
+            menuItemId:     MENU_ITEM_ID,
+            normalizedName: 'test burger',
+            groupId:        null,
+            userId:         METRICS_USER_ID,
+            displayName:    'Metrics Tester',
+            rating:         8,
+            comment:        'Solid burger',
+        },
+    });
+
+    const orders = await getServices().data.order.getOrderHistory({ userId: METRICS_USER_ID, since: 'all' });
+    assert.ok(orders.length > 0);
+
+    let reviewedItemCount = 0;
+    let unreviewedItemCount = 0;
+    for (const order of orders) {
+        for (const item of order.items) {
+            if (item.menuItemId === MENU_ITEM_ID) {
+                assert.ok(item.review, 'reviewed item should carry review');
+                assert.equal(item.review.rating, 8);
+                assert.equal(item.review.comment, 'Solid burger');
+                assert.ok(item.review.createdAt instanceof Date);
+                reviewedItemCount++;
+            } else if (item.menuItemId === GROUPED_MENU_ITEM_ID) {
+                assert.equal(item.review, undefined, 'unreviewed item should have review === undefined');
+                unreviewedItemCount++;
+            }
+        }
+    }
+
+    assert.equal(reviewedItemCount, 3, 'expected 3 reviewed burger items');
+    assert.equal(unreviewedItemCount, 2, 'expected 2 unreviewed grouped-burger items');
+});
+
+test('getOrderHistory does not leak another user\'s review into this user\'s items', async () => {
+    // USER_ID also has orders of MENU_ITEM_ID but never left a review for it.
+    // The METRICS_USER review created above must not be visible here.
+    const orders = await getServices().data.order.getOrderHistory({ userId: USER_ID, since: 'all' });
+    assert.ok(orders.length > 0);
+    for (const order of orders) {
+        for (const item of order.items) {
+            assert.equal(item.review, undefined, `USER_ID should not see METRICS_USER's review on ${item.menuItemId}`);
+        }
+    }
+});

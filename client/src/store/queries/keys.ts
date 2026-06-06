@@ -6,9 +6,11 @@ export const queryKeys = {
         hydration: ['cart', 'hydration'] as const,
     },
     ordering: {
-        cartSession:        ['ordering', 'cart-session'] as const,
-        cartEstimate:       (cafeId: string) => ['ordering', 'cart-estimate', cafeId] as const,
+        cartSession:         ['ordering', 'cart-session'] as const,
+        cartEstimate:        (cafeId: string) => ['ordering', 'cart-estimate', cafeId] as const,
         orderHistorySummary: ['ordering', 'order-history-summary'] as const,
+        /** Invalidate this prefix to refresh every range of the order history list. */
+        orderHistoryAll:     ['order', 'history'] as const,
     },
     groups: {
         list:              ['groups', 'list'] as const,

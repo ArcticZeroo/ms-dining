@@ -3,16 +3,27 @@ import React from 'react';
 import { formatPrice, groupByStation } from '../../../../util/cart.ts';
 import { CartItemDetailCells } from '../cart/cart-item-detail-cells.tsx';
 import { StationItemGroup } from '../cart/station-item-group.tsx';
+import { OrderItemReviewRow } from '../history/order-item-review-row.tsx';
 import '../cart/cart-contents-table.css';
+
+const COLUMN_COUNT = 4;
 
 interface ICompletedOrderItemsTableProps {
     items: ICafeOrderItem[];
     subtotal: number;
     tax: number;
     total: number;
+    /** When true, show an inline review badge/CTA beneath each item. */
+    showReviewRow?: boolean;
 }
 
-export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> = ({ items, subtotal, tax, total }) => {
+export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> = ({
+    items,
+    subtotal,
+    tax,
+    total,
+    showReviewRow = false,
+}) => {
     const cafeId = items[0]?.menuItem.cafeId;
     const stationGroups = groupByStation(items);
 
@@ -26,9 +37,16 @@ export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> 
                         cafeId={cafeId}
                     >
                         {stationItems.map((item, index) => (
-                            <tr key={`${item.menuItemId}-${index}`} className="cart-item">
-                                <CartItemDetailCells item={item}/>
-                            </tr>
+                            <React.Fragment key={`${item.menuItemId}-${index}`}>
+                                <tr className="cart-item">
+                                    <CartItemDetailCells item={item}/>
+                                </tr>
+                                {
+                                    showReviewRow && (
+                                        <OrderItemReviewRow item={item} columnCount={COLUMN_COUNT}/>
+                                    )
+                                }
+                            </React.Fragment>
                         ))}
                     </StationItemGroup>
                 ))}

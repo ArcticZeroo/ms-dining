@@ -347,6 +347,11 @@ export const useCreateReview = () => {
 
             if (isStation) {
                 await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+            } else {
+                // Order-history rows show the user's own menu-item review
+                // inline; invalidate every range so the badge flips from
+                // "Leave a review" to the new rating.
+                await queryClient.invalidateQueries({ queryKey: queryKeys.ordering.orderHistoryAll });
             }
 
             await patchRecent(queryClient, (recent) => {
@@ -382,6 +387,8 @@ export const useUpdateReview = () => {
 
             if (isStationReview(lookup)) {
                 await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+            } else {
+                await queryClient.invalidateQueries({ queryKey: queryKeys.ordering.orderHistoryAll });
             }
 
             const patchReview = (review: IReview): IReview =>
@@ -410,6 +417,8 @@ export const useDeleteReview = () => {
 
             if (isStationReview(lookup)) {
                 await patchMenuItemSummariesForStation(queryClient, entityId, summaryUpdater);
+            } else {
+                await queryClient.invalidateQueries({ queryKey: queryKeys.ordering.orderHistoryAll });
             }
 
             await patchRecent(queryClient, (recent) => recent.filter((review) => review.id !== reviewId));

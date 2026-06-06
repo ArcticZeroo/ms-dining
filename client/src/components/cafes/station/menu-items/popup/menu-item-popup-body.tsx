@@ -11,6 +11,8 @@ interface IMenuItemPopupBodyProps {
     onSelectedChoiceIdsChanged: (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => void;
     onNotesChanged: (notes: string) => void;
     isOnlineOrderingAllowed: boolean;
+    /** When true, hide the modifier picker section entirely. */
+    hideOrdering?: boolean;
     showReviews: boolean;
     stationId?: string;
     stationName?: string;
@@ -23,6 +25,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     onSelectedChoiceIdsChanged,
     onNotesChanged,
     isOnlineOrderingAllowed,
+    hideOrdering = false,
     showReviews,
     stationId,
     stationName,
@@ -46,7 +49,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                 }
             </div>
             {
-                menuItem.modifiers.length > 0 && (
+                !hideOrdering && menuItem.modifiers.length > 0 && (
                     <div className="menu-item-configuration">
                         <div className="menu-item-modifiers">
                             {

@@ -43,6 +43,7 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
                     subtotal={order.subtotal}
                     tax={order.tax}
                     total={order.total}
+                    showReviewRow={true}
                 />
             </div>
             <div className="flex flex-between">

@@ -56,9 +56,17 @@ interface IMenuItemPopupProps {
     stationName?: string;
     fromCartItem?: ICartItemRecord;
     onUpdated?: (update: ICartItemUpdate) => void;
+    /**
+     * When true, hide the ordering UI (modifier picker, special-requests
+     * notes, quantity controls, add-to-cart footer) and show only the menu
+     * item details + reviews section. Used by the order-history page so
+     * users can leave a review for something they've ordered without being
+     * offered the option to order it again from a non-orderable surface.
+     */
+    hideOrdering?: boolean;
 }
 
-export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, stationId, stationName, fromCartItem, onUpdated }) => {
+export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSymbol, cafeId, stationId, stationName, fromCartItem, onUpdated, hideOrdering = false }) => {
     const isUpdate = fromCartItem != null;
 
     const [selectedChoiceIdsByModifierId, setSelectedChoiceIdsByModifierId] = useState(() => {
@@ -77,8 +85,9 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
     const isOnlineOrderingAllowedNow = useIsOnlineOrderingAllowed();
     // Editing an existing cart item is always allowed (the user clearly
     // already had ordering on when they put it there); only block new
-    // adds when ordering isn't allowed right now.
-    const isOnlineOrderingAllowed = fromCartItem != null || isOnlineOrderingAllowedNow;
+    // adds when ordering isn't allowed right now. `hideOrdering` forces
+    // off regardless — this surface deliberately doesn't show cart UI.
+    const isOnlineOrderingAllowed = !hideOrdering && (fromCartItem != null || isOnlineOrderingAllowedNow);
 
     const getSelectedChoiceIdsForModifier = useCallback((modifier: CafeTypes.IMenuItemModifier) => {
         return selectedChoiceIdsByModifierId.get(modifier.id) ?? new Set<string>();
@@ -154,12 +163,13 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
                     onNotesChanged={setNotes}
                     isOnlineOrderingAllowed={isOnlineOrderingAllowed}
-                    showReviews={!isUpdate}
+                    hideOrdering={hideOrdering}
+                    showReviews={hideOrdering || !isUpdate}
                     stationId={stationId}
                     stationName={stationName}
                 />
             )}
-            footer={(
+            footer={hideOrdering ? undefined : (
                 <MenuItemPopupFooter
                     isUpdate={isUpdate}
                     totalPrice={totalPrice}
