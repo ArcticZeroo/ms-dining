@@ -3,19 +3,23 @@
 // userId is the PK (one cart per user, no separate surrogate id).
 
 model Cart {
-  userId    String   @id
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   updatedAt DateTime @updatedAt
 
   items CartItem[]
 }
 
 model CartItem {
-  id                  String  @id @default(uuid())
-  cartUserId          String
-  cart                Cart    @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
-  menuItemId          String
-  menuItem            MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
+
+  cartUserId String
+  cart       Cart   @relation(fields: [cartUserId], references: [userId], onDelete: Cascade)
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
   quantity            Int     @default(1)
   specialInstructions String?
 
@@ -26,11 +30,16 @@ model CartItem {
 }
 
 model CartItemModifierChoice {
-  id         Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
   cartItemId String
   cartItem   CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+
   modifierId String
-  choiceId   String
+  modifier   MenuItemModifier @relation(fields: [modifierId], references: [id], onDelete: Cascade)
+
+  choiceId String
+  choice   MenuItemModifierChoice @relation(fields: [modifierId, choiceId], references: [modifierId, id], onDelete: Cascade)
 
   @@unique([cartItemId, modifierId, choiceId])
 }
@@ -41,10 +50,14 @@ model CartItemModifierChoice {
 // Deleted on completion (promoted to CafeOrder) or TTL expiry.
 
 model PendingCafeOrder {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cafeId    String
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id])
+
   itemsHash String
   createdAt DateTime @default(now())
 
@@ -54,10 +67,13 @@ model PendingCafeOrder {
 }
 
 model PendingCafeOrderItem {
-  id                  String  @id @default(uuid())
-  pendingCafeOrderId  String
-  pendingCafeOrder    PendingCafeOrder @relation(fields: [pendingCafeOrderId], references: [id], onDelete: Cascade)
-  menuItemId          String
+  id                 String           @id @default(uuid())
+  pendingCafeOrderId String
+  pendingCafeOrder   PendingCafeOrder @relation(fields: [pendingCafeOrderId], references: [id], onDelete: Cascade)
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
   quantity            Int
   specialInstructions String?
 
@@ -68,8 +84,12 @@ model PendingCafeOrderItemModifier {
   id                     Int                  @id @default(autoincrement())
   pendingCafeOrderItemId String
   pendingCafeOrderItem   PendingCafeOrderItem @relation(fields: [pendingCafeOrderItemId], references: [id], onDelete: Cascade)
-  modifierId             String
-  choiceId               String
+
+  modifierId String
+  modifier   MenuItemModifier @relation(fields: [modifierId], references: [id], onDelete: Cascade)
+
+  choiceId String
+  choice   MenuItemModifierChoice @relation(fields: [modifierId, choiceId], references: [modifierId, id], onDelete: Cascade)
 
   @@unique([pendingCafeOrderItemId, modifierId, choiceId])
 }
@@ -78,10 +98,14 @@ model PendingCafeOrderItemModifier {
 // A CafeOrder is created after payment succeeds. Permanent record.
 
 model CafeOrder {
-  id                     String   @id @default(uuid())
-  userId                 String
-  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cafeId                 String
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  cafeId String
+  cafe   Cafe   @relation(fields: [cafeId], references: [id])
+
   buyOnDemandOrderId     String
   buyOnDemandOrderNumber String
   subtotal               Float
@@ -96,10 +120,14 @@ model CafeOrder {
 }
 
 model CafeOrderItem {
-  id                  String    @id @default(uuid())
-  cafeOrderId         String
-  cafeOrder           CafeOrder @relation(fields: [cafeOrderId], references: [id], onDelete: Cascade)
-  menuItemId          String
+  id String @id @default(uuid())
+
+  cafeOrderId String
+  cafeOrder   CafeOrder @relation(fields: [cafeOrderId], references: [id], onDelete: Cascade)
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
   name                String
   quantity            Int
   price               Float
@@ -109,11 +137,16 @@ model CafeOrderItem {
 }
 
 model CafeOrderItemModifier {
-  id              Int           @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
   cafeOrderItemId String
   cafeOrderItem   CafeOrderItem @relation(fields: [cafeOrderItemId], references: [id], onDelete: Cascade)
-  modifierId      String
-  choiceId        String
+
+  modifierId String
+  modifier   MenuItemModifier @relation(fields: [modifierId], references: [id], onDelete: Cascade)
+
+  choiceId String
+  choice   MenuItemModifierChoice @relation(fields: [modifierId, choiceId], references: [modifierId, id], onDelete: Cascade)
 
   @@unique([cafeOrderItemId, modifierId, choiceId])
 }
