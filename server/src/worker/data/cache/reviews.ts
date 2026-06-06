@@ -1,5 +1,5 @@
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
-import { getReviewEntityKey, getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review/review.js';
+import { getReviewEntityKeyFromParts, ReviewStorageClient } from '../storage/clients/review/review.js';
 import { StationStorageClient } from '../storage/clients/station/station.js';
 import { LockedMap } from '../../../shared/lock/map.js';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
@@ -68,7 +68,7 @@ const combineHeaders = (menuItemHeader: IMenuItemReviewHeader, stationHeader: IM
 
 const retrieveMenuItemOnlyReviewHeaderAsync = async (menuItem: IMenuItemBase): Promise<IMenuItemReviewHeader> => {
     await INITIALIZED.value;
-    const entityKey = getReviewEntityKey(menuItem);
+    const entityKey = menuItem.entityKey;
     return MENU_ITEM_REVIEW_DATA_BY_ENTITY_KEY.update(
         entityKey,
         async (header) => {

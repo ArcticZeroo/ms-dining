@@ -4,7 +4,6 @@ import {
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
@@ -79,14 +78,14 @@ export const getHiddenGems = async (
     const topSeeds = seeds.filter(seed => selectedSeedIdSet.has(seed.item.menuItem.id));
 
     // Build gem candidates from header results
-    const seedEntityKeys = new Set(topSeeds.map(seed => getEntityKey(seed.item.menuItem)));
+    const seedEntityKeys = new Set(topSeeds.map(seed => seed.item.menuItem.entityKey));
     for (const result of headerResults) {
         if (result.status !== 'fulfilled') {
             // No review data = hidden gem candidate
             continue;
         }
         const { item, header } = result.value;
-        const entityKey = getEntityKey(item.menuItem);
+        const entityKey = item.menuItem.entityKey;
         if (seedEntityKeys.has(entityKey) || gemCandidatesByEntityKey.has(entityKey)) {
             continue;
         }
@@ -123,7 +122,7 @@ export const getHiddenGems = async (
                 continue;
             }
 
-            const entityKey = getEntityKey(candidate.menuItem);
+            const entityKey = candidate.menuItem.entityKey;
             const existing = candidates.get(entityKey);
             if (!existing || result.distance < existing.distance) {
                 candidates.set(entityKey, {

@@ -8,21 +8,28 @@ import {
 } from '../../shared/util/recommendation.js';
 import { RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
-const makeMenuItem = (overrides: Partial<IMenuItemBase> = {}): IMenuItemBase => ({
-    id:          'item-1',
-    name:        'Test Item',
-    cafeId:      'cafe-1',
-    stationId:   'station-1',
-    price:       5.99,
-    calories:    300,
-    maxCalories: 300,
-    hasThumbnail: false,
-    modifiers:   [],
-    tags:        new Set(),
-    searchTags:  new Set(),
-    ...overrides,
-});
+const makeMenuItem = (overrides: Partial<IMenuItemBase> = {}): IMenuItemBase => {
+    const groupId = overrides.groupId;
+    const name = overrides.name ?? 'Test Item';
+    return {
+        id:          'item-1',
+        name,
+        cafeId:      'cafe-1',
+        stationId:   'station-1',
+        price:       5.99,
+        calories:    300,
+        maxCalories: 300,
+        hasThumbnail: false,
+        modifiers:   [],
+        tags:        new Set(),
+        searchTags:  new Set(),
+        ...overrides,
+        entityKey:   overrides.entityKey ?? getEntityKeyFromParts(groupId, normalizeNameForSearch(name)),
+    };
+};
 
 const makeAvailable = (overrides: Partial<IMenuItemCandidate> = {}): IMenuItemCandidate => ({
     menuItem:    makeMenuItem(),

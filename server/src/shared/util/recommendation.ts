@@ -4,7 +4,6 @@ import {
     IRecommendationSection,
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { Nullable } from '@msdining/common/models/util';
 
 export interface IMenuItemCandidate {
@@ -33,6 +32,7 @@ export const toRecommendationItem = (
     tags:             item.menuItem.tags.size > 0 ? Array.from(item.menuItem.tags) : undefined,
     overallRating:    reviewHeader?.overallRating,
     totalReviewCount: reviewHeader?.totalReviewCount,
+    entityKey:        item.menuItem.entityKey,
     reason,
     score,
 });
@@ -44,7 +44,7 @@ export const deduplicateItems = (
     return sections.map(section => ({
         ...section,
         items: section.items.filter(item => {
-            const entityKey = getEntityKey(item);
+            const entityKey = item.entityKey;
             if (seenEntityKeys.has(entityKey)) {
                 return false;
             }

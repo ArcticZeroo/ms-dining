@@ -54,6 +54,7 @@ const hydrateMenuItem = (menuItem: DehydratedMenuItem): IMenuItemBase => {
         lastUpdateTime: menuItem.externalLastUpdateTime,
         receiptText:    menuItem.externalReceiptText,
         groupId:        menuItem.groupId,
+        entityKey:      menuItem.entityKey,
         tags:           deserializeMenuItemTags(menuItem.tags),
         searchTags:     new Set(menuItem.searchTags.map(tag => tag.name)),
         hasThumbnail:   false,

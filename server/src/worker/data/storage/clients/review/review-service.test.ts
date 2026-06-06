@@ -1,7 +1,7 @@
 import { after, before, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import { getEntityKey } from '@msdining/common/util/entity-key';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
@@ -57,6 +57,7 @@ const MENU_ITEM: IMenuItemBase = {
     modifiers: [],
     tags: new Set(['featured']),
     searchTags: new Set(['burger']),
+    entityKey: getEntityKeyFromParts(null, normalizeNameForSearch('Review Test Burger')),
 };
 
 const MENU_ITEM_NORMALIZED_NAME = normalizeNameForSearch(MENU_ITEM.name);
@@ -171,7 +172,7 @@ test('getRecentReviews returns reviews ordered by recency', async () => {
 
 test('getAllMenuItemReviewHeaders returns aggregate data after creating reviews', async () => {
 
-    const entityKey = getEntityKey(MENU_ITEM);
+    const entityKey = MENU_ITEM.entityKey;
     const headersBefore = await getServices().data.review.getAllMenuItemReviewHeaders({});
     const before = headersBefore.find(header => header.entityKey === entityKey);
     const beforeCount = before?.totalReviewCount ?? 0;

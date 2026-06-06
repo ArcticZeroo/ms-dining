@@ -17,6 +17,8 @@ import { getServices } from '../../../../../shared/services/registry.js';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import { MenuItemStorageClient } from '../menu-item/menu-item.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 let ctx: IntegrationTestContext;
 
@@ -77,6 +79,7 @@ const createMenuItem = (id: string, name: string): IMenuItemBase => ({
     lastUpdateTime: new Date('2026-01-15T12:00:00Z'),
     tags:           new Set(['featured']),
     searchTags:     new Set(),
+    entityKey:      getEntityKeyFromParts(null, normalizeNameForSearch(name)),
 });
 
 const BASE_MENU_ITEM = createMenuItem('daily-menu-service-item', 'Roasted Vegetable Pasta');

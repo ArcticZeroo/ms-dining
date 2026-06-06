@@ -197,7 +197,7 @@ Use the `.card` class and its variants from `index.css` for card-like containers
   - `formatPrice()` in `util/cart.ts` — don't create local `formatPrice` functions
   - `normalizeNameForSearch()` — for name normalization
   - `classNames()` — for conditional CSS classes
-  - `getEntityKey()` — for cross-cafe entity deduplication
+  - `menuItem.entityKey` (from API responses) — for cross-cafe entity deduplication. Use `getEntityKeyFromParts(groupId, normalizedName)` only when you don't have a full row (e.g. cache invalidation).
 - When writing `.map()`, `.filter()`, or similar callbacks that appear more than once with the same transformation, extract a named helper function.
 
 If you find yourself copying a function/component and changing one word, stop and refactor instead.

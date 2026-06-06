@@ -39,6 +39,7 @@ import * as assert from 'node:assert/strict';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { RecommendationSectionType } from '@msdining/common/models/recommendation';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import { usePrismaWrite } from '../storage/client.js';
 import { ReviewStorageClient } from '../storage/clients/review/review.js';
 import { SEARCH_THREAD_HANDLER } from '../threads/search.js';
@@ -143,6 +144,7 @@ const seedMenuItem = async ({ id, name, cafeId = TEST_CAFE_ID, stationId = TEST_
         modifiers:    [],
         tags:         new Set(),
         searchTags:   new Set(),
+        entityKey:    getEntityKeyFromParts(undefined, normalizeNameForSearch(name)),
     };
 };
 

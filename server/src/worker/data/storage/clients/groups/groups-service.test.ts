@@ -8,6 +8,8 @@ import {
 import { getServices } from '../../../../../shared/services/registry.js';
 import type { ICafe, ICafeConfig, ICafeStation } from '../../../../../shared/models/cafe.js';
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 let ctx: IntegrationTestContext;
 let uniqueId = 0;
@@ -69,6 +71,7 @@ const MENU_ITEM_A: IMenuItemBase = {
     modifiers: [],
     tags: new Set(['vegan']),
     searchTags: new Set(['bowl']),
+    entityKey: getEntityKeyFromParts(null, normalizeNameForSearch('Groups Test Bowl A')),
 };
 
 const MENU_ITEM_B: IMenuItemBase = {
@@ -86,6 +89,7 @@ const MENU_ITEM_B: IMenuItemBase = {
     modifiers: [],
     tags: new Set(['protein']),
     searchTags: new Set(['bowl']),
+    entityKey: getEntityKeyFromParts(null, normalizeNameForSearch('Groups Test Bowl B')),
 };
 
 const MENU_ITEM_C: IMenuItemBase = {
@@ -103,6 +107,7 @@ const MENU_ITEM_C: IMenuItemBase = {
     modifiers: [],
     tags: new Set(['spicy']),
     searchTags: new Set(['bowl']),
+    entityKey: getEntityKeyFromParts(null, normalizeNameForSearch('Groups Test Bowl C')),
 };
 
 before(async () => {

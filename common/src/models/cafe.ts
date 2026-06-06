@@ -62,6 +62,16 @@ export interface IMenuItemBase {
     tags: Set<string>;
     searchTags: Set<string>;
 	hasRetrievedThumbnailData?: boolean;
+	/**
+	 * Stable cross-cafe identity for this menu item.
+	 *
+	 * - `group:<groupId>` when the item belongs to a cross-cafe group, or
+	 * - `name:<normalizedName>` otherwise.
+	 *
+	 * Materialized as a SQLite STORED generated column on `MenuItem`; read
+	 * from the row instead of recomputing it on the fly.
+	 */
+	entityKey: string;
 }
 
 export type IMenuItem = IMenuItemBase & IMenuItemReviewHeader & {
@@ -90,6 +100,8 @@ export interface IMenuItemDTO extends IMenuItemReviewHeader {
     searchTags: string[];
 	pattern?: string;
     groupId?: Nullable<string>;
+    /** See {@link IMenuItemBase.entityKey}. */
+    entityKey: string;
 }
 
 export type StationMenuByCategoryName = Record<string, Array<IMenuItemBase>>;

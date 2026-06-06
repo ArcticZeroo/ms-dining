@@ -14,6 +14,7 @@ export interface IServerReview {
 		name: string;
 		normalizedName: string;
 		groupId: string | null;
+		entityKey: string;
 		cafe: {
 			id: string;
 		};
@@ -22,6 +23,7 @@ export interface IServerReview {
 		name: string;
 		normalizedName: string;
 		groupId: string | null;
+		entityKey: string;
 		cafe: {
 			id: string;
 		};

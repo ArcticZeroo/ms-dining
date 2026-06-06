@@ -2,10 +2,7 @@ import { ICafeOrderReviewData } from '@msdining/common/models/order';
 import { logError } from '../../../../../shared/util/log.js';
 import { usePrismaClient, usePrismaWrite } from '../../client.js';
 import { IMenuItemBase, IMenuItemReviewHeader } from '@msdining/common/models/cafe';
-import {
-    getEntityKey,
-    getEntityKeyFromParts
-} from '@msdining/common/util/entity-key';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { Prisma } from '@prisma/client';
 import {
@@ -23,11 +20,10 @@ import type {
 } from '../../../../../shared/services/review.js';
 import { STORAGE_EVENTS } from '../../../../../shared/util/events.js';
 
-// Local types replaced by shared service types (ICreateMenuItemReviewInput, etc.)
-// Re-export for callers that still need the old names during migration.
-
-export const getReviewEntityKey = (menuItem: IMenuItemBase): string => getEntityKey(menuItem);
-
+// Helper for callers that have parts (groupId + normalizedName) but no
+// full row — e.g. the reviewDirty event handler and search-result review
+// lookups. Production reads should prefer `<row>.entityKey` from a DB
+// select wherever a full record is available.
 export const getReviewEntityKeyFromParts = getEntityKeyFromParts;
 
 const REVIEW_ENTITY_SELECT = {
@@ -41,6 +37,7 @@ const REVIEW_ENTITY_SELECT = {
             name:           true,
             normalizedName: true,
             groupId:        true,
+            entityKey:      true,
             cafe:           {
                 select: {
                     id: true
@@ -53,6 +50,7 @@ const REVIEW_ENTITY_SELECT = {
             name:           true,
             normalizedName: true,
             groupId:        true,
+            entityKey:      true,
             cafe:           {
                 select: {
                     id: true

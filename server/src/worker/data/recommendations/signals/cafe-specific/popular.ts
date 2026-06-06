@@ -3,7 +3,6 @@ import {
     IRecommendationSection,
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { computePopularityScore, IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { IRecommendationContext } from '../../shared.js';
@@ -48,7 +47,7 @@ export const getPopularItems = async (
     // other unique items. Keep the highest-scored (first) occurrence.
     const seenEntityKeys = new Set<string>();
     const uniqueScored = scored.filter(entry => {
-        const key = getEntityKey(entry.item.menuItem);
+        const key = entry.item.menuItem.entityKey;
         if (seenEntityKeys.has(key)) {
             return false;
         }

@@ -4,7 +4,6 @@ import {
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { diverseWeightedSample, searchSimilarEntitiesByType, } from '../../../storage/vector/client.js';
@@ -41,13 +40,13 @@ export const getBasedOnReviews = async (
     }
 
     const reviewedItemIds = new Set(reviews.map(review => review.menuItemId!));
-    const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem!)));
+    const reviewedEntityKeys = new Set(reviews.map(review => review.menuItem!.entityKey));
 
     const allMenuItems = await context.getAllMenuItems();
     const unreviewedMenuItemsByEntityKey = new Map<string, IMenuItemCandidate>();
     const unreviewedMenuItemsById = new Map<string, IMenuItemCandidate>();
     for (const item of allMenuItems) {
-        const entityKey = getEntityKey(item.menuItem);
+        const entityKey = item.menuItem.entityKey;
         if (!reviewedItemIds.has(item.menuItem.id) && !reviewedEntityKeys.has(entityKey)) {
             unreviewedMenuItemsByEntityKey.set(entityKey, item);
             unreviewedMenuItemsById.set(item.menuItem.id, item);
@@ -95,7 +94,7 @@ export const getBasedOnReviews = async (
                 continue;
             }
 
-            const entityKey = getEntityKey(menuItem.menuItem);
+            const entityKey = menuItem.menuItem.entityKey;
             const existing = candidates.get(entityKey);
             if (!existing || result.distance < existing.distance) {
                 candidates.set(entityKey, {
@@ -113,7 +112,7 @@ export const getBasedOnReviews = async (
     const items = await Promise.all(
         Array.from(candidates.values()).map(async ({ item }) => {
             try {
-                const entityKey = getEntityKey(item);
+                const entityKey = item.entityKey;
                 const candidate = unreviewedMenuItemsByEntityKey.get(entityKey);
                 const header = candidate
                     ? await retrieveReviewHeaderAsync(candidate.menuItem).catch(() => null)

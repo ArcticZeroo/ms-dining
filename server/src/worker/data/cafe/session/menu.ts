@@ -11,6 +11,8 @@ import { retrieveMenuItemsAsync } from '../buy-ondemand/menu-items.js';
 import { retrieveModifiersForMenuItemAsync } from '../buy-ondemand/modifiers.js';
 import { IMenuItemModifier } from '@msdining/common/models/cafe';
 import { normalizeTagName } from '@msdining/common/constants/tags';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 const tagLock = new Lock();
 
@@ -171,6 +173,9 @@ export class CafeMenuSession {
             tags:           new Set(tags),
             searchTags:     localItem?.searchTags ?? new Set<string>(),
             modifiers,
+            // Mirrors the SQLite generated column on MenuItem; recomputed here
+            // because this object hasn't been persisted yet.
+            entityKey:      getEntityKeyFromParts(localItem?.groupId, normalizeNameForSearch(jsonItem.displayText)),
         };
     }
 

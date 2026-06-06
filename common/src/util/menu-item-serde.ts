@@ -44,6 +44,7 @@ export const MenuItemDTOSchema = z.object({
     groupId:          z.string().nullish(),
     totalReviewCount: z.number(),
     overallRating:    z.number(),
+    entityKey:        z.string(),
 });
 
 /**

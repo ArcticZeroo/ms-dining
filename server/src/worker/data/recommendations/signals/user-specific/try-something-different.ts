@@ -4,7 +4,6 @@ import {
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/util/recommendation.js';
 import { retrieveReviewHeaderAsync } from '../../../cache/reviews.js';
 import { computeCentroidSearch, computeNegativePenalties } from '../../../storage/vector/client.js';
@@ -50,7 +49,7 @@ export const getTrySomethingDifferent = async (
     }
 
     const reviewedItemIds = new Set(reviews.map(review => review.menuItemId!));
-    const reviewedEntityKeys = new Set(reviews.map(review => getEntityKey(review.menuItem!)));
+    const reviewedEntityKeys = new Set(reviews.map(review => review.menuItem!.entityKey));
     const availableItems = await context.getAllMenuItems();
     const availableById = new Map(availableItems.map(item => [item.menuItem.id, item]));
 
@@ -64,7 +63,7 @@ export const getTrySomethingDifferent = async (
         if (reviewedItemIds.has(result.id)) {
             continue;
         }
-        if (reviewedEntityKeys.has(getEntityKey(item.menuItem))) {
+        if (reviewedEntityKeys.has(item.menuItem.entityKey)) {
             continue;
         }
         candidates.push({ item, distance: result.distance, id: result.id });

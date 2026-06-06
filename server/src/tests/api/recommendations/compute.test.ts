@@ -12,6 +12,7 @@ const makeItem = (overrides: Partial<IRecommendationItem> & Pick<IRecommendation
     stationName: 'Test Station',
     price:       0,
     calories:    0,
+    entityKey:   `name:${overrides.menuItemId}`,
     ...overrides,
 });
 

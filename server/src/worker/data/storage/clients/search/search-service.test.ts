@@ -16,6 +16,8 @@ import { acquireTestLock, releaseTestLock } from '../../../../../tests/test-serv
 import { getServices } from '../../../../../shared/services/registry.js';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
+import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 
 let ctx: IntegrationTestContext;
 
@@ -71,6 +73,7 @@ const MENU_ITEM: IMenuItemBase = {
     lastUpdateTime: new Date('2026-01-15T12:00:00Z'),
     tags:           new Set(['featured']),
     searchTags:     new Set(['sandwich']),
+    entityKey:      getEntityKeyFromParts(null, normalizeNameForSearch('Search Service Sandwich')),
 };
 
 const DATE_STRING = toDateString(getMondayForWeek(new Date()));

@@ -36,6 +36,8 @@ export interface IRecommendationItem {
     reason?: string;
     // Used for sorting within the section
     score: number;
+    /** See {@link IMenuItemBase.entityKey}. Used for cross-cafe dedup. */
+    entityKey: string;
 }
 
 export interface IRecommendationSection {
@@ -65,6 +67,7 @@ export const RecommendationItemSchema = z.object({
     totalReviewCount: z.number().optional(),
     reason: z.string().optional(),
     score: z.number(),
+    entityKey: z.string(),
 });
 
 export const RecommendationSectionSchema = z.object({

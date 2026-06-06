@@ -4,7 +4,6 @@ import {
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import { IMenuItemCandidate, toRecommendationItem } from '../../../../../shared/util/recommendation.js';
 import { retrieveDailyCafeMenuAsync } from '../../../cache/daily-menu.js';
@@ -49,7 +48,7 @@ export const getNewItemsForCafe = async (cafeId: string, dateString: string): Pr
         const themeItemIdSet = new Set(uniqueness?.themeItemIds ?? []);
 
         for (const menuItem of station.menuItemsById.values()) {
-            const entityKey = getEntityKey(menuItem);
+            const entityKey = menuItem.entityKey;
             if (seenEntityKeys.has(entityKey)) {
                 continue;
             }
@@ -105,7 +104,7 @@ export const getNewAtCafe = async (
     const seenEntityKeys = new Set<string>();
     const items: IRecommendationItem[] = [];
     for (const item of newItemsForCafe) {
-        const entityKey = getEntityKey(item);
+        const entityKey = item.entityKey;
         if (seenEntityKeys.has(entityKey)) {
             continue;
         }

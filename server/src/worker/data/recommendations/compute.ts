@@ -4,7 +4,6 @@ import {
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
-import { getEntityKey } from '@msdining/common/util/entity-key';
 import { sortByEmbeddingDiversity } from '../storage/vector/client.js';
 import { ITEMS_PER_SECTION } from './shared.js';
 
@@ -145,11 +144,11 @@ export const assembleSections = async ({
 }: IAssembleSectionsParams): Promise<IRecommendationSection[]> => {
     const result: IRecommendationSection[] = [];
     const tryClaim = (item: IRecommendationItem) => {
-        if (claimedKeys.has(getEntityKey(item))) {
+        if (claimedKeys.has(item.entityKey)) {
             return false;
         }
 
-        claimedKeys.add(getEntityKey(item));
+        claimedKeys.add(item.entityKey);
         return true;
     }
 
