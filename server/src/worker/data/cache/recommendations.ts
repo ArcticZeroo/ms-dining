@@ -20,6 +20,7 @@ import { getTrySomethingDifferent } from '../recommendations/signals/user-specif
 import { buildProximityWeightMap } from '../../../shared/util/proximity.js';
 import { assembleSections } from '../recommendations/compute.js';
 import { buildItemWeightsForCafe } from '../recommendations/item-weights.js';
+import { OrderStorageClient } from '../storage/clients/order/order.js';
 import { IServerReview } from '../../../shared/models/review.js';
 import { Semaphore } from '@frozor/lock';
 import { MenuDateMap } from '../../../shared/lock/menu-date-map.js';
@@ -168,6 +169,13 @@ export const getRecommendationsAsync = async ({
     const sectionsByType = new Map<RecommendationSectionType, Array<IRecommendationItem>>();
     const itemWeights = new Map<string, number>();
 
+    const orderCountsByEntityKey = lazyAsync(async () => {
+        if (!userId) {
+            return null;
+        }
+        return OrderStorageClient.getOrderCountsByEntityKey(userId);
+    });
+
     const recommendations = await Promise.allSettled([
         ...cafeIds.map(async (cafeId) => {
             const context = buildContext({
@@ -209,7 +217,8 @@ export const getRecommendationsAsync = async ({
         sectionsByType,
         seed,
         proximityWeights,
-        itemWeights: itemWeights.size > 0 ? itemWeights : null,
+        itemWeights:           itemWeights.size > 0 ? itemWeights : null,
+        orderCountsByEntityKey: await orderCountsByEntityKey.value,
     });
 };
 

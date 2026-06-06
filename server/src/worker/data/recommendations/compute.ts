@@ -4,6 +4,7 @@ import {
     RecommendationSectionType,
 } from '@msdining/common/models/recommendation';
 import { SearchEntityType } from '@msdining/common/models/search';
+import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/order-ranking';
 import { sortByEmbeddingDiversity } from '../storage/vector/client.js';
 import { ITEMS_PER_SECTION } from './shared.js';
 
@@ -15,22 +16,25 @@ const WEIGHTING_EXEMPT_SECTION_TYPES = new Set<RecommendationSectionType>([
 ]);
 
 /**
- * Multiplies each item's score by per-cafe proximity weight and per-item weight
- * (drinks down, novelty up). Items with proximity weight 0 are dropped entirely
- * (out-of-range cafes). Sections in WEIGHTING_EXEMPT_SECTION_TYPES are passed
- * through unmodified because they exist specifically to surface new/favorite items.
+ * Multiplies each item's score by per-cafe proximity weight, per-item weight
+ * (drinks down, novelty up), and the user's order-history boost
+ * (see {@link getOrderHistoryBoostMultiplier}). Items with proximity weight 0
+ * are dropped entirely (out-of-range cafes). Sections in
+ * WEIGHTING_EXEMPT_SECTION_TYPES are passed through unmodified because they
+ * exist specifically to surface new/favorite items.
  */
 export const applyWeights = (
     items: readonly IRecommendationItem[],
     sectionType: RecommendationSectionType,
     proximityWeights: Map<string, number> | null,
     itemWeights: Map<string, number> | null,
+    orderCountsByEntityKey: Map<string /*entityKey*/, number> | null = null,
 ): IRecommendationItem[] => {
     if (WEIGHTING_EXEMPT_SECTION_TYPES.has(sectionType)) {
         return items as IRecommendationItem[];
     }
 
-    if (!proximityWeights && !itemWeights) {
+    if (!proximityWeights && !itemWeights && !orderCountsByEntityKey) {
         return items as IRecommendationItem[];
     }
 
@@ -44,7 +48,10 @@ export const applyWeights = (
         }
 
         const itemWeight = itemWeights?.get(item.menuItemId) ?? 1;
-        const combinedWeight = proximityWeight * itemWeight;
+        const orderHistoryWeight = orderCountsByEntityKey
+            ? getOrderHistoryBoostMultiplier(orderCountsByEntityKey.get(item.entityKey) ?? 0)
+            : 1;
+        const combinedWeight = proximityWeight * itemWeight * orderHistoryWeight;
 
         if (combinedWeight !== 1) {
             isAnyWeightNotDefault = true;
@@ -123,6 +130,7 @@ interface IAssembleSectionsParams {
     claimedKeys: Set<string>;
     proximityWeights: Map<string, number> | null;
     itemWeights: Map<string, number> | null;
+    orderCountsByEntityKey?: Map<string /*entityKey*/, number> | null;
     seed: string;
     lambda?: number;
 }
@@ -139,6 +147,7 @@ export const assembleSections = async ({
     claimedKeys,
     proximityWeights,
     itemWeights,
+    orderCountsByEntityKey = null,
     seed,
     lambda = 0.5,
 }: IAssembleSectionsParams): Promise<IRecommendationSection[]> => {
@@ -158,7 +167,7 @@ export const assembleSections = async ({
             continue;
         }
 
-        const adjustedItems = applyWeights(items, sectionType, proximityWeights, itemWeights);
+        const adjustedItems = applyWeights(items, sectionType, proximityWeights, itemWeights, orderCountsByEntityKey);
         const selectedItems = await selectWithEmbeddingDiversity(
             adjustedItems,
             ITEMS_PER_SECTION,
@@ -175,4 +184,4 @@ export const assembleSections = async ({
     }
 
     return result;
-};
+}

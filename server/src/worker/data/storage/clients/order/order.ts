@@ -367,25 +367,34 @@ export abstract class OrderStorageClient {
     }
 
     static async getOrderHistorySummary(userId: string): Promise<IOrderHistorySummaryResponse> {
-        const [totalCount, metricRows] = await Promise.all([
+        const [totalCount, countsByEntityKey] = await Promise.all([
             usePrismaClient(prisma => prisma.cafeOrder.count({
                 where: { userId },
             })),
-            usePrismaClient(prisma => prisma.$queryRawTyped(getOrderMetricsByEntityKey(userId))),
+            OrderStorageClient.getOrderCountsByEntityKey(userId),
         ]);
-
-        const countsByEntityKey = new Map<string, number>();
-        for (const row of metricRows) {
-            // entityKey is NOT NULL in the schema (STORED generated column),
-            // but TypedSQL widens to string | null. The JOIN to MenuItem can't
-            // produce nulls here.
-            countsByEntityKey.set(row.entityKey!, Number(row.orderCount));
-        }
 
         return {
             count:      totalCount,
             countsById: countsByEntityKey,
         };
+    }
+
+    /**
+     * Returns per-MenuItem.entityKey order counts for the given user, used
+     * both by getOrderHistorySummary and by the recommendation pipeline to
+     * boost ranking for items the user has ordered before.
+     */
+    static async getOrderCountsByEntityKey(userId: string): Promise<Map<string /*entityKey*/, number>> {
+        const rows = await usePrismaClient(prisma => prisma.$queryRawTyped(getOrderMetricsByEntityKey(userId)));
+        const countsByEntityKey = new Map<string, number>();
+        for (const row of rows) {
+            // entityKey is NOT NULL in the schema (STORED generated column),
+            // but TypedSQL widens to string | null. The JOIN to MenuItem can't
+            // produce nulls here.
+            countsByEntityKey.set(row.entityKey!, Number(row.orderCount));
+        }
+        return countsByEntityKey;
     }
 
     static async removeOrphanedPendingOrders(activeIds: string[]): Promise<number> {

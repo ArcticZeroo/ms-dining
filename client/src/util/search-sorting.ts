@@ -1,5 +1,6 @@
 import { ISearchResult, SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
 import { ILocationCoordinates } from '@msdining/common/models/util';
+import { getOrderHistoryBoostMultiplier } from '@msdining/common/util/order-ranking';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import {
     findLongestNonSequentialSubstringLength,
@@ -10,7 +11,6 @@ import { IQuerySearchResult } from '../models/search.ts';
 import { getCafeLocation } from './cafe.ts';
 import { getDistanceBetweenCoordinates } from './coordinates.ts';
 import { verboseLog } from './logging.ts';
-import { getOrderHistoryBoostMultiplier } from './order.ts';
 import { getParentView } from './view.ts';
 
 export interface ISearchResultSortingContext {

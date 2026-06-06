@@ -104,4 +104,52 @@ describe('applyWeights', () => {
         assert.equal(result[0]!.menuItemId, 'a');
         assert.equal(result[1]!.menuItemId, 'b');
     });
+
+    it('boosts items the user has ordered before via orderCountsByEntityKey', () => {
+        const items = [
+            makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:burger' }),
+            makeItem({ menuItemId: 'b', cafeId: 'cafe-2', score: 10, entityKey: 'name:salad' }),
+        ];
+        // count=3 ⇒ 1 + log(4)*0.3 ≈ 1.4159; count=0 ⇒ 1
+        const result = applyWeights(items, popular, null, null, new Map([['name:burger', 3]]));
+        assert.equal(result.length, 2);
+        assert.equal(result[0]!.menuItemId, 'a', 'previously-ordered item should sort first');
+        assert.ok(Math.abs(result[0]!.score - 10 * (1 + Math.log(4) * 0.3)) < 1e-9);
+        assert.equal(result[1]!.menuItemId, 'b');
+        assert.equal(result[1]!.score, 10);
+    });
+
+    it('combines order-history boost with proximity and item weights', () => {
+        const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:burger' })];
+        const result = applyWeights(
+            items,
+            popular,
+            new Map([['cafe-1', 0.5]]),
+            new Map([['a', 0.5]]),
+            new Map([['name:burger', 3]]),
+        );
+        const expectedBoost = 1 + Math.log(4) * 0.3;
+        assert.ok(Math.abs(result[0]!.score - 10 * 0.5 * 0.5 * expectedBoost) < 1e-9);
+    });
+
+    it('does not apply order-history boost to exempt section types', () => {
+        const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:burger' })];
+        const result = applyWeights(
+            items,
+            RecommendationSectionType.favorites,
+            null,
+            null,
+            new Map([['name:burger', 5]]),
+        );
+        // Same array passed through, score untouched.
+        assert.equal(result, items);
+    });
+
+    it('order-history boost is 1× for items the user has never ordered', () => {
+        const items = [makeItem({ menuItemId: 'a', cafeId: 'cafe-1', score: 10, entityKey: 'name:burger' })];
+        const result = applyWeights(items, popular, null, null, new Map([['name:other', 3]]));
+        // No matching entityKey ⇒ multiplier 1 ⇒ score unchanged.
+        assert.equal(result.length, 1);
+        assert.equal(result[0]!.score, 10);
+    });
 });
