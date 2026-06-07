@@ -31,7 +31,7 @@ export const OrderItemReviewRow: React.FC<IOrderItemReviewRowProps> = ({ item, c
                 modalSymbol={modalSymbol}
                 stationId={item.menuItem.stationId}
                 stationName={item.stationName}
-                hideOrdering={true}
+                mode="orderReview"
             />,
         });
     };

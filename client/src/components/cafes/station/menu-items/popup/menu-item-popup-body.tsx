@@ -3,6 +3,7 @@ import { IMenuItemBase } from '@msdining/common/models/cafe';
 import React from 'react';
 import { MenuItemModifierPicker } from '../../../../pages/order/menu-item-modifier-picker.tsx';
 import { MenuItemReviewsView } from '../../../../reviews/menu-item-reviews-view.tsx';
+import type { MenuItemPopupMode } from './menu-item-popup.tsx';
 
 interface IMenuItemPopupBodyProps {
     menuItem: IMenuItemBase;
@@ -11,8 +12,8 @@ interface IMenuItemPopupBodyProps {
     onSelectedChoiceIdsChanged: (modifier: CafeTypes.IMenuItemModifier, selection: Set<string>) => void;
     onNotesChanged: (notes: string) => void;
     isOnlineOrderingAllowed: boolean;
-    /** When true, hide the modifier picker section entirely. */
-    hideOrdering?: boolean;
+    /** Drives whether the modifier picker block is shown. See {@link MenuItemPopupMode}. */
+    mode?: MenuItemPopupMode;
     showReviews: boolean;
     stationId?: string;
     stationName?: string;
@@ -25,11 +26,13 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     onSelectedChoiceIdsChanged,
     onNotesChanged,
     isOnlineOrderingAllowed,
-    hideOrdering = false,
+    mode = 'default',
     showReviews,
     stationId,
     stationName,
 }) => {
+    const isOrderReview = mode === 'orderReview';
+
     return (
         <div className="menu-item-popup-body">
             <div className="flex-col flex-center">
@@ -49,7 +52,7 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
                 }
             </div>
             {
-                !hideOrdering && menuItem.modifiers.length > 0 && (
+                !isOrderReview && menuItem.modifiers.length > 0 && (
                     <div className="menu-item-configuration">
                         <div className="menu-item-modifiers">
                             {
