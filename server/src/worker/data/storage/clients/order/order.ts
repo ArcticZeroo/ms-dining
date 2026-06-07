@@ -8,7 +8,7 @@ import type {
     IOrderItem,
     IRecentOrderSummary
 } from '@msdining/common/models/order';
-import type { PrismaTransactionClient } from '../../../../../shared/models/prisma.js';
+import type { PrismaTransactionClient, ReadOnlyPrismaClient } from '../../../../../shared/models/prisma.js';
 import { flattenModifiers, groupModifierRows, modifiersEqual } from '@msdining/common/util/modifier-util';
 import { menuItemBaseToDTO } from '@msdining/common/util/menu-item-serde';
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
@@ -367,12 +367,14 @@ export abstract class OrderStorageClient {
     }
 
     static async getOrderHistorySummary(userId: string): Promise<IOrderHistorySummaryResponse> {
-        const [totalCount, countsByEntityKey] = await Promise.all([
-            usePrismaClient(prisma => prisma.cafeOrder.count({
-                where: { userId },
-            })),
-            OrderStorageClient.getOrderCountsByEntityKey(userId),
-        ]);
+        // Single semaphore acquisition for both reads — the queries are
+        // independent so we can run them in parallel inside it.
+        const [totalCount, countsByEntityKey] = await usePrismaClient(async prisma => {
+            return Promise.all([
+                prisma.cafeOrder.count({ where: { userId } }),
+                OrderStorageClient.#queryOrderCountsByEntityKey(prisma, userId),
+            ]);
+        });
 
         return {
             count:      totalCount,
@@ -381,12 +383,16 @@ export abstract class OrderStorageClient {
     }
 
     /**
-     * Returns per-MenuItem.entityKey order counts for the given user, used
-     * both by getOrderHistorySummary and by the recommendation pipeline to
-     * boost ranking for items the user has ordered before.
+     * Returns per-MenuItem.entityKey order-item-row counts for the given
+     * user. Used by getOrderHistorySummary and by the recommendation
+     * pipeline to boost ranking for items the user has ordered before.
      */
     static async getOrderCountsByEntityKey(userId: string): Promise<Map<string /*entityKey*/, number>> {
-        const rows = await usePrismaClient(prisma => prisma.$queryRawTyped(getOrderMetricsByEntityKey(userId)));
+        return usePrismaClient(prisma => OrderStorageClient.#queryOrderCountsByEntityKey(prisma, userId));
+    }
+
+    static async #queryOrderCountsByEntityKey(prisma: ReadOnlyPrismaClient, userId: string): Promise<Map<string /*entityKey*/, number>> {
+        const rows = await prisma.$queryRawTyped(getOrderMetricsByEntityKey(userId));
         const countsByEntityKey = new Map<string, number>();
         for (const row of rows) {
             // entityKey is NOT NULL in the schema (STORED generated column),
