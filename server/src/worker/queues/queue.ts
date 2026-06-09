@@ -1,4 +1,5 @@
 import Duration from '@arcticzeroo/duration';
+import { isOfflineModeEnabled } from '../../shared/constants/env.js';
 import { getNamespaceLogger, Logger } from '../../shared/util/log.js';
 import { RetryAfterError } from '../../shared/util/error.js';
 import { Nullable } from '../../shared/models/util.js';
@@ -28,7 +29,9 @@ export abstract class WorkerQueue<TKey, TValue> {
         this.#emptyPollInterval = emptyPollInterval;
         this.#logger = getNamespaceLogger(this.constructor.name);
 
-        setInterval(() => this.#logStatus(), LOG_STATUS_INTERVAL.inMilliseconds).unref();
+        if (!isOfflineModeEnabled) {
+            setInterval(() => this.#logStatus(), LOG_STATUS_INTERVAL.inMilliseconds).unref();
+        }
     }
 
     #logStatus() {
@@ -71,6 +74,11 @@ export abstract class WorkerQueue<TKey, TValue> {
 
     public start() {
         if (this.#runningSymbol) {
+            return;
+        }
+
+        if (isOfflineModeEnabled) {
+            this.#logger.info('Not starting worker queue because offline mode is enabled.');
             return;
         }
 

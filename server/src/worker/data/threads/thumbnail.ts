@@ -1,3 +1,4 @@
+import { isOfflineModeEnabled } from '../../../shared/constants/env.js';
 import { WorkerThreadHandler } from '../../rpc/handler.js';
 import * as fs from 'node:fs/promises';
 import { serverMenuItemThumbnailPath } from '../../../shared/constants/config.js';
@@ -77,6 +78,10 @@ export const isThumbnailUpToDate = (cachedLastUpdateTime: Date, requestLastUpdat
 };
 
 const getThumbnailData = async (request: IThumbnailWorkerRequest): Promise<IThumbnailResult | null> => {
+    if (isOfflineModeEnabled) {
+        return null;
+    }
+
     await loadThumbnailsPromise;
     return THUMBNAIL_SEMAPHORE_BY_ID.acquire(request.id, async () => {
         if (thumbnailDataByMenuItemId.has(request.id)) {
