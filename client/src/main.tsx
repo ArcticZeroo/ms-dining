@@ -21,9 +21,9 @@ import { LazyDevPage } from './components/pages/dev/lazy-dev-page.js';
 import { LazyMapPage } from './components/pages/map/lazy-map-page.js';
 import { LazyConnectorStopsPage } from './components/pages/connector-stops/lazy-connector-stops-page.js';
 import { initializeSelectedDate } from './store/zustand/selected-date.ts';
-
 import { registerChunkLoadErrorHandler } from './util/chunk-reload.ts';
 
+import '@material-symbols/font-400';
 import './index.css';
 
 registerChunkLoadErrorHandler();
