@@ -76,15 +76,13 @@ export abstract class OrderOrchestrator {
         userId: string,
         cafeId: string,
         items: IOrderItem[],
-        iframeCssUrl: string,
-        synthesisFlags?: ISynthesisFlags,
+        iframeCssUrl: string
     ): Promise<IPreparePaymentResult> {
         const [pendingOrderId, session] = await getPaymentSession({
             userId,
             cafeId,
             items,
-            iframeCssUrl,
-            synthesisFlags,
+            iframeCssUrl
         });
 
         const siteToken = session.cardProcessorToken;

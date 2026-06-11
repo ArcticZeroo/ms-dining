@@ -6,7 +6,7 @@
  * _runStages(notStarted, cb) which:
  *   1. Awaits _retrieveOrderingContextAsync() (where the profit-center
  *      lookup happens) — the path under test.
- *   2. Then runs cb, which eventually calls _addItemToCart and is
+ *   2. Then runs cb, which eventually calls #addItemToCart and is
  *      expected to throw here because we don't seed the DB with the
  *      cart item. The throw is caught with assert.rejects, and we then
  *      inspect ctx.server.getRequestLog() to verify the profit-center
@@ -100,7 +100,7 @@ test('profit center lookup uses the profit-center ID from site data, not the ten
 
     const session = await CafeOrderSession.createAsync(CAFE, [NONEXISTENT_CART_ITEM]);
 
-    // populateCart will reject when _addItemToCart can't find the local
+    // populateCart will reject when #addItemToCart can't find the local
     // menu item — but by then the ordering-context fetch (the thing under
     // test) is already in the request log.
     await assert.rejects(

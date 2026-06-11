@@ -1,8 +1,8 @@
 /**
  * Synthesize BuyOnDemand cart items from our DB for the getWaitTimeForItems API.
  *
- * This mirrors the item-building logic in CafeOrderSession._addItemToCart() +
- * _synthesizeItemDetail() but produces only the `item` objects needed for the
+ * This mirrors the item-building logic in CafeOrderSession.#addItemToCart() +
+ * #buildItemForCartAdd() but produces only the `item` objects needed for the
  * wait time endpoint — no ordering context, schedule, or currency fields.
  */
 import type { BuyOnDemandClient } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
@@ -11,7 +11,7 @@ import { getServices } from '../../../../shared/services/registry.js';
 
 /**
  * Synthesize a BoD-shaped cart item from DB data for the wait time API.
- * Returns the `item` object (same shape as requestBody.item in _addItemToCart).
+ * Returns the `item` object (same shape as requestBody.item in #addItemToCart).
  */
 const synthesizeCartItemForWaitTime = async (
     orderItem: IOrderItem,

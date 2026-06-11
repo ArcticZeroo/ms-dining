@@ -8,14 +8,14 @@ const minutesToCron = (minutesSinceMidnight: number, dayOfWeek: number): string 
     return `0 ${min} ${hour} * * ${DAY_ABBREVIATIONS[dayOfWeek]}`;
 };
 
-interface IConceptScheduleTaskItem {
+export interface IConceptScheduleTaskItem {
     '@c': '.DisplayProfileTask' | '.TransitionTask';
     scheduledExpression: string;
     properties?: Record<string, unknown>;
     displayProfileState?: Record<string, unknown>;
 }
 
-interface IConceptSchedule {
+export interface IConceptSchedule {
     openScheduleExpression: string;
     closeScheduleExpression: string;
     schedule: Array<IConceptScheduleTaskItem>;

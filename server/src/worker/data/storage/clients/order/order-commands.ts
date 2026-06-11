@@ -3,8 +3,8 @@ import { OrderOrchestrator } from '../../../ordering/order-orchestrator.js';
 import { OrderStorageClient } from './order.js';
 
 export const orderServiceCommands = {
-    preparePayment: ({ userId, cafeId, items, iframeCssUrl, synthesisFlags }) =>
-        OrderOrchestrator.preparePayment(userId, cafeId, items, iframeCssUrl, synthesisFlags),
+    preparePayment: ({ userId, cafeId, items, iframeCssUrl }) =>
+        OrderOrchestrator.preparePayment(userId, cafeId, items, iframeCssUrl),
     completeOrder: ({ userId, pendingOrderId, paymentToken, cardInfo, alias, phoneNumberWithCountryCode }) =>
         OrderOrchestrator.completeOrder(userId, pendingOrderId, paymentToken, cardInfo, alias, phoneNumberWithCountryCode),
     getRecentOrders: ({ userId }) =>

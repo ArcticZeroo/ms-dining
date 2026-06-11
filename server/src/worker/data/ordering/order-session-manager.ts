@@ -1,18 +1,17 @@
-import type { IOrderSession } from '../cafe/session/order-session.js';
-import { FakeCafeOrderSession } from '../cafe/session/fake-order-session.js';
-import { CafeOrderSession } from '../cafe/session/order.js';
-import type { ISynthesisFlags } from '../../../shared/services/order.js';
-import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
-import { SERVICE_ERROR_CODES, ServiceError } from '../../rpc/index.js';
-import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
-import { OrderStorageClient } from '../storage/clients/order/order.js';
-import { getTodayDateString } from '@msdining/common/util/date-util';
-import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { ICompleteOrderResultDTO, IOrderItem } from '@msdining/common/models/order';
-import { getNamespaceLogger } from '../../../shared/util/log.js';
+import { getTodayDateString } from '@msdining/common/util/date-util';
+import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
+import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
+import { LockedExpiringMap } from '../../../shared/lock/map.js';
 import { trackOrderEvent } from '../../../shared/ordering/order-telemetry.js';
-import { hashOrderItems } from '../util/order.js';
+import { getNamespaceLogger } from '../../../shared/util/log.js';
+import { SERVICE_ERROR_CODES, ServiceError } from '../../rpc/index.js';
+import { FakeCafeOrderSession } from '../cafe/session/fake-order-session.js';
+import type { IOrderSession } from '../cafe/session/order-session.js';
+import { CafeOrderSession } from '../cafe/session/order.js';
 import { CartStorageClient } from '../storage/clients/cart/cart.js';
+import { OrderStorageClient } from '../storage/clients/order/order.js';
+import { hashOrderItems } from '../util/order.js';
 
 export const ORDER_SESSION_TTL_MS = 30 * 60 * 1000;
 const TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
@@ -78,7 +77,7 @@ const getCafeOrThrow = (cafeId: string) => {
     return cafe;
 };
 
-export const createOrderSession = async (cafeId: string, items: IOrderItem[], synthesisFlags?: ISynthesisFlags): Promise<IOrderSession> => {
+export const createOrderSession = async (cafeId: string, items: IOrderItem[]): Promise<IOrderSession> => {
     const cafe = getCafeOrThrow(cafeId);
 
     if (isFakeOrderingEnabled) {
@@ -87,7 +86,7 @@ export const createOrderSession = async (cafeId: string, items: IOrderItem[], sy
         return session;
     }
 
-    const session = await CafeOrderSession.createAsync(cafe, items, synthesisFlags);
+    const session = await CafeOrderSession.createAsync(cafe, items);
     await session.populateCart();
 
     if (!session.orderId || !session.orderNumber) {
@@ -102,10 +101,9 @@ interface IGetPaymentSessionParams {
 	cafeId: string;
 	items: IOrderItem[];
 	iframeCssUrl: string;
-	synthesisFlags?: ISynthesisFlags;
 }
 
-export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl, synthesisFlags }: IGetPaymentSessionParams): Promise<[string /*pendingOrderId*/, IOrderSession]> => {
+export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl }: IGetPaymentSessionParams): Promise<[string /*pendingOrderId*/, IOrderSession]> => {
     const pendingOrderId = await OrderStorageClient.getOrCreatePendingOrder(
         userId,
         cafeId,
@@ -114,7 +112,7 @@ export const getPaymentSession = async ({ userId, cafeId, items, iframeCssUrl, s
 
     const session = await ACTIVE_ORDER_SESSIONS.update(pendingOrderId, async (session) => {
         if (!session || !session.isUsableForPaymentWithItems(items)) {
-            session = await promotePrewarmedSession(userId, cafeId, items) ?? await createOrderSession(cafeId, items, synthesisFlags);
+            session = await promotePrewarmedSession(userId, cafeId, items) ?? await createOrderSession(cafeId, items);
         }
 
         await session.prepareForIframe(iframeCssUrl);

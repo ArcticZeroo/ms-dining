@@ -1,27 +1,28 @@
 import { ICartItemRecord, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
-import type { IOrderItem } from '@msdining/common/models/order';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
-import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
-import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
-import { createBuyOnDemandClient, getServices } from '../../../../shared/services/registry.js';
-import { IOrderLineItem, } from '../../../../shared/models/buyondemand/cart.js';
-import hat from 'hat';
-import { IOrderingContext } from '../../../../shared/models/cart.js';
-import type { ISynthesisFlags } from '../../../../shared/services/order.js';
-import { StringUtil } from '../../../../shared/util/string.js';
-import { z } from 'zod';
-import { fixed } from '../../../../shared/util/math.js';
-import { ICafe, IMenuItemBase } from '../../../../shared/models/cafe.js';
-import { PhoneValidResult } from 'phone';
-import { MEAL_PERIOD } from '../../../../shared/constants/enum.js';
-import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
+import type { IOrderItem } from '@msdining/common/models/order';
 import { getTodayDateString } from '@msdining/common/util/date-util';
-import { IOrderSession } from './order-session.js';
-import { IPickUpConfig, ISiteStoreInfo } from '../../../models/ordering.js';
-import { retrieveDailyOrderingContext } from '../../ordering/daily-order-context.js';
+import hat from 'hat';
+import { PhoneValidResult } from 'phone';
+import { z } from 'zod';
+import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
+import { MEAL_PERIOD } from '../../../../shared/constants/enum.js';
+import { IOrderLineItem, } from '../../../../shared/models/buyondemand/cart.js';
+import { ICafe, IMenuItemBase } from '../../../../shared/models/cafe.js';
+import { IOrderingContext } from '../../../../shared/models/cart.js';
+import { SERVICE_ERROR_CODES, ServiceError } from '../../../../shared/rpc/errors.js';
+import { createBuyOnDemandClient, getServices } from '../../../../shared/services/registry.js';
+import { IStationRecord } from '../../../../shared/services/station.js';
+import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
+import { fixed } from '../../../../shared/util/math.js';
+import { StringUtil } from '../../../../shared/util/string.js';
 import { asRecord } from '../../../../shared/util/typeguard.js';
+import { IPickUpConfig, ISiteStoreInfo } from '../../../models/ordering.js';
+import { createStationSchedule, IConceptSchedule, IConceptScheduleTaskItem } from '../../../util/schedule.js';
+import { retrieveDailyOrderingContext } from '../../ordering/daily-order-context.js';
 import { buildStoreInfo, hashOrderItems } from '../../util/order.js';
-import { createStationSchedule } from '../../../util/schedule.js';
+import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
+import { IOrderSession } from './order-session.js';
 
 const orderLog = getNamespaceLogger('Order');
 const ORDER_TIMEZONE = 'PST8PDT';
@@ -87,37 +88,10 @@ const formatReceiptDateTime = (date: Date) => {
     };
 };
 
-// ── Schedule synthesis ───────────────────────────────────────────────
-// Converts minutes-since-midnight (as stored in DailyStation) to BoD cron
-// expressions and DisplayProfileTask schedule arrays, so we can skip the
-// live /concepts fetch.
-
-
-/**
- * Build a minimal DisplayProfileTask schedule array for a single concept.
- * The real schedule contains every time-slot transition for the day across
- * all concepts; the cart endpoint appears to only care about whether the
- * given concept is currently open, so a single open→close pair suffices.
- */
-
-/**
- * Feature flags controlling which parts of the ordering flow are
- * synthesized from our DB vs fetched live from Buy On Demand.
- *
- * Set individual flags to `false` to fall back to the real API call.
- * This makes it easy to toggle each synthesis independently during testing.
- */
-const DEFAULT_SYNTHESIS_FLAGS: ISynthesisFlags = {
-    conceptSchedule: false,
-    orderingContext: false,
-    payConfig:       false,
-    kioskItems:      false,
-};
-
 // Validates the POST /orders response. Uses passthrough() so the full object
 // (including lineItems, financial totals, taxBreakdown, etc.) is preserved
 // for echoing back in the close order request.
-const orderDetailsSchema = z.object({
+const BuyOnDemandOrderDetailsSchema = z.object({
     orderId:                z.string(),
     orderNumber:            z.string(),
     created:                z.string().optional(),
@@ -128,41 +102,11 @@ const orderDetailsSchema = z.object({
     properties:             z.record(z.unknown()).optional(),
 }).passthrough();
 
-const addToOrderResponseSchema = z.object({
-    orderDetails: orderDetailsSchema,
+const BuyOnDemandAddToOrderResponseSchema = z.object({
+    orderDetails: BuyOnDemandOrderDetailsSchema,
 });
 
-type OrderDetails = z.infer<typeof orderDetailsSchema>;
-
-
-// are preserved when we spread the response into the cart request body.
-const kioskItemDetailSchema = z.object({
-    id:                    z.string(),
-    contextId:             z.string(),
-    tenantId:              z.union([z.string(), z.number()]).transform(String),
-    itemId:                z.union([z.string(), z.number()]).transform(String),
-    name:                  z.string(),
-    displayText:           z.string(),
-    amount:                z.union([z.string(), z.number()]).transform(String),
-    price:                 z.object({
-        currencyUnit: z.string(),
-        amount:       z.string(),
-    }),
-    menuId:                z.string(),
-    menuPriceLevelId:      z.union([z.string(), z.number()]).transform(String),
-    menuPriceLevelApplied: z.boolean(),
-    receiptText:           z.string(),
-    kpText:                z.string(),
-    kitchenDisplayText:    z.string(),
-    // These are stripped before sending to the cart endpoint
-    childGroups: z.unknown().optional(),
-    modifiers:   z.unknown().optional(),
-    // Preserved and merged with cart-specific fields (e.g. calories)
-    properties: z.record(z.unknown()).optional(),
-}).passthrough();
-
-const toChoicesByModifierId = (modifiers: IOrderItem['modifiers']): Map<string, Set<string>> =>
-    new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
+type IBuyOnDemandOrderDetails = z.infer<typeof BuyOnDemandOrderDetailsSchema>;
 
 interface ISerializedModifier {
     // ID of selected option
@@ -187,11 +131,121 @@ interface ISerializedModifier {
     };
 }
 
-interface IIframeCloseOrderParams {
+interface IBuyOnDemandKioskItem {
+    id: string,
+    contextId: string,
+    tenantId: string,
+    itemId: string,
+    name: string,
+    displayText: string,
+    amount: string,
+    price: {
+        currencyUnit: string,
+        amount: string,
+    },
+    menuId: string,
+    menuPriceLevelId: string,
+    menuPriceLevelApplied: boolean,
+    receiptText: string,
+    kpText: string,
+    kitchenDisplayText: string,
+    count: number,
+    quantity: number,
+    conceptId: string,
+    conceptName: string,
+    holdAndFire: false,
+    hasModifiers: boolean,
+    modifierTotal: number,
+    mealPeriodId: null,
+    uniqueId: string,
+    cartItemId: string,
+    selectedModifiers?: Array<ISerializedModifier>,
+    properties: {
+        cartGuid: string,
+        scannedItem: false,
+        priceLevelId: string,
+    },
+    isDeleted: false,
+    isActive: false,
+    isSoldByWeight: false,
+    tareWeight: 0,
+    isDiscountable: true,
+    allowPriceOverride: true,
+    isTaxIncluded: false,
+    taxClasses: [],
+    kitchenVideoCategoryId: 0,
+    kitchenCookTimeSeconds: 0,
+    skus: [],
+    itemType: 'ITEM',
+    itemImages: [],
+    isAvailableToGuests: true,
+    isPreselectedToGuests: false,
+    tagNames: [],
+    tagIds: [],
+    substituteItemId: string,
+    isSubstituteItem: false,
+    sequence: 0,
+    description: string,
+    longDescription: string,
+    options: [],
+    attributes: [],
+    choiceGroupsUnavailable: false,
+    lineItemInstructions: Array<{
+        label: '',
+        text: string,
+    }>
+}
+
+interface IBuyOnDemandAddToCartRequest {
+    item: IBuyOnDemandKioskItem,
+    currencyDetails: {
+        currencyDecimalDigits: '2',
+        currencyCultureName: 'en-US',
+        currencyCode: 'USD',
+        currencySymbol: '$',
+    },
+    orderTimeZone: string,
+    storePriceLevel: string,
+    scheduledDay: 0,
+    useIgOrderApi: true,
+    onDemandTerminalId: string,
+    schedule: Array<IConceptScheduleTaskItem>,
+    properties: {
+        checkTypeId?: string,
+        employeeId: string,
+        profitCenterId: string,
+        orderSourceSystem: 'onDemand',
+        orderNumberSequenceLength: 4,
+        orderNumberNameSpace: string,
+        displayProfileId: string,
+        voidReasonId: '11',
+        priceLevelId: string,
+    },
+    conceptSchedule: {
+        openScheduleExpression: string,
+        closeScheduleExpression: string,
+    },
+    isMultiItem: false,
+    scannedOrder: false,
+}
+
+const toChoicesByModifierId = (modifiers: IOrderItem['modifiers']): Map<string, Set<string>> =>
+    new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
+
+interface IClosePaymentPopupParams {
     alias: string;
     phoneData: PhoneValidResult;
     paymentToken: string;
     cardInfo: IPaymentCardInfo;
+}
+
+interface IBuildItemForCartAddParams {
+    menuItem: IMenuItemBase;
+    count: number;
+    station: IStationRecord;
+    modifiers: Array<ISerializedModifier>;
+    cartGuid: string;
+    cartItemId: string;
 }
 
 export class CafeOrderSession implements IOrderSession {
@@ -214,7 +268,7 @@ export class CafeOrderSession implements IOrderSession {
     #cardProcessorToken: string = '';
     // The full orderDetails from the last POST /orders response,
     // echoed back to the close order endpoint as-is.
-    #lastOrderDetails: OrderDetails | null = null;
+    #lastOrderDetails: IBuyOnDemandOrderDetails | null = null;
 
     #siteStoreInfo: ISiteStoreInfo = {};
     #sitePickUpConfig: IPickUpConfig | null = null;
@@ -225,25 +279,19 @@ export class CafeOrderSession implements IOrderSession {
     readonly #rawCartItemsForWaitTime: unknown[] = [];
     readonly #conceptIds = new Set<string>();
     // Per-concept schedule data, keyed by concept ID
-    readonly #conceptDataById = new Map<string, {
-        schedule: unknown[];
-        openScheduleExpression: string;
-        closeScheduleExpression: string
-    }>();
+    readonly #conceptDataById = new Map<string, IConceptSchedule>();
     public readonly createdDateString = getTodayDateString();
-    readonly #synthesisFlags: ISynthesisFlags;
 
-    constructor(public client: BuyOnDemandClient, orderItems: IOrderItem[], synthesisFlags: ISynthesisFlags = DEFAULT_SYNTHESIS_FLAGS) {
+    constructor(public client: BuyOnDemandClient, orderItems: IOrderItem[]) {
         this.#orderItems = orderItems;
         this.#itemsHash = hashOrderItems(orderItems);
-        this.#synthesisFlags = synthesisFlags;
     }
 
-    public static async createAsync(cafe: ICafe, orderItems: IOrderItem[], synthesisFlags?: ISynthesisFlags): Promise<CafeOrderSession> {
+    public static async createAsync(cafe: ICafe, orderItems: IOrderItem[]): Promise<CafeOrderSession> {
         orderLog.info(`{${cafe.name}} Creating order session with ${orderItems.length} item(s)`);
         const client = await createBuyOnDemandClient(cafe, { enableHar: true, translateErrors: true });
         orderLog.info(`{${cafe.name}} BuyOnDemand client created (login + config complete)`);
-        return new CafeOrderSession(client, orderItems, synthesisFlags);
+        return new CafeOrderSession(client, orderItems);
     }
 
     get lastCompletedStage() {
@@ -252,7 +300,7 @@ export class CafeOrderSession implements IOrderSession {
 
     get isReadyForPayment() {
         return this.createdDateString === getTodayDateString()
-                && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
+               && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
     }
 
     get itemsHash() {
@@ -408,90 +456,35 @@ export class CafeOrderSession implements IOrderSession {
         return modifiers;
     }
 
-    private async _fetchRawItemDetail(itemId: string, station: { menuId: string }) {
-        const requestBody = {
-            storePriceLevel:            this.#orderingContext.storePriceLevel,
-            currencyUnit:               'USD',
-            show86edModifiers:          false,
-            terminalId:                 this.#orderingContext.onDemandTerminalId,
-            profitCenterId:             this.#orderingContext.profitCenterId,
-            useIgPosApi:                false,
-            menuPriceLevelId:           this.#orderingContext.storePriceLevel,
-            menuId:                     station.menuId,
-            menuPriceLevelApplied:      false,
-            modifierCountEnabled:       false,
-            modifiersPriceLevelEnabled: false,
-        };
-
-        logOrderingDebugJson(this.client.cafe.name, 'Kiosk item detail request', {
-            path: `/sites/${this.client.config.tenantId}/${this.client.config.contextId}/kiosk-items/${itemId}`,
-            body: requestBody,
-        });
-
-        const response = await this.client.requestAsync(
-            `/sites/${this.client.config.tenantId}/${this.client.config.contextId}/kiosk-items/${itemId}`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify(requestBody)
-            }
-        );
-
-        const rawItemDetail = kioskItemDetailSchema.parse(await response.json());
-
-        logOrderingDebugJson(this.client.cafe.name, 'Kiosk item detail response summary', {
-            id:                    rawItemDetail.id,
-            itemId:                rawItemDetail.itemId,
-            menuId:                rawItemDetail.menuId,
-            tenantId:              rawItemDetail.tenantId,
-            contextId:             rawItemDetail.contextId,
-            menuPriceLevelId:      rawItemDetail.menuPriceLevelId,
-            menuPriceLevelApplied: rawItemDetail.menuPriceLevelApplied,
-            amount:                rawItemDetail.amount,
-            displayText:           rawItemDetail.displayText,
-        });
-
-        return rawItemDetail;
-    }
-
-    /**
-     * Synthesize kiosk-item detail from our DB instead of fetching from
-     * POST /kiosk-items/{itemId}. Builds the same shape that
-     * kioskItemDetailSchema.parse() would return.
-     *
-     * Fields come from:
-     * - MenuItem: id, name, price, receiptText, description
-     * - Station: menuId
-     * - Cafe config: contextId, tenantId
-     * - Ordering context: storePriceLevel
-     * - Constants: currency, booleans, empty arrays
-     */
-    private _synthesizeItemDetail(
-        menuItem: IMenuItemBase,
-        station: { menuId: string },
-    ): z.infer<typeof kioskItemDetailSchema> {
+    #buildItemForCartAdd({ menuItem, count, station, modifiers, cartItemId, cartGuid }: IBuildItemForCartAddParams): IBuyOnDemandKioskItem {
         const amount = menuItem.price.toFixed(2);
         const receiptText = menuItem.receiptText ?? menuItem.name;
-
-        const synthesized = {
+        const modifierTotal = modifiers.reduce((sum, mod) => sum + Number(mod.amount), 0);
+        return {
             id:                    menuItem.id,
             contextId:             this.client.config.contextId,
             tenantId:              this.client.config.tenantId,
             itemId:                menuItem.id,
             name:                  menuItem.name,
             displayText:           menuItem.name,
+            count,
+            quantity: count,
             amount,
             price:                 { currencyUnit: 'USD', amount },
-            menuId:                station.menuId,
+            menuId: station.menuId,
+            conceptId: station.id,
+            conceptName: station.name,
+            holdAndFire: false,
+            hasModifiers: modifiers.length > 0,
+            modifierTotal,
+            mealPeriodId: null,
+            uniqueId: cartGuid,
+            cartItemId,
             menuPriceLevelId:      this.#orderingContext.storePriceLevel,
             menuPriceLevelApplied: false,
             receiptText,
             kpText:                receiptText,
             kitchenDisplayText:    receiptText,
-            // Stripped before cart-add, but included for shape consistency
-            childGroups: [],
-            modifiers:   {},
-            properties:  {},
             // Constants from observed HAR responses
             isDeleted:               false,
             isActive:                false,
@@ -518,33 +511,22 @@ export class CafeOrderSession implements IOrderSession {
             options:                 [],
             attributes:              [],
             choiceGroupsUnavailable: false,
+            selectedModifiers: modifiers.length > 0 ? modifiers : undefined,
         };
-
-        logOrderingDebugJson(this.client.cafe.name, 'Synthesized kiosk item detail', {
-            id:               synthesized.id,
-            itemId:           synthesized.itemId,
-            menuId:           synthesized.menuId,
-            menuPriceLevelId: synthesized.menuPriceLevelId,
-            amount:           synthesized.amount,
-            displayText:      synthesized.displayText,
-        });
-
-        return synthesized;
     }
 
-    private async _addItemToCart(orderItem: IOrderItem) {
+    async #addItemToCart(orderItem: IOrderItem) {
         const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
 
         const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
-
         if (menuItem == null) {
-            throw new Error(`Failed to find menu item with id "${orderItem.menuItemId}"`);
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, `Failed to find menu item with id "${orderItem.menuItemId}"`);
         }
 
+        // We could probably consider having a retrieveStationForMenuItem but retrieveMenuItem is usually instant so probably not an issue
         const station = await getServices().data.station.retrieveStation({ stationId: menuItem.stationId });
-
         if (station == null) {
-            throw new Error(`Failed to find station for menu item "${orderItem.menuItemId}"`);
+            throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, `Failed to find station for menu item "${orderItem.menuItemId}"`);
         }
 
         orderLog.info(`{${this.client.cafe.name}} Adding item "${menuItem.name}" (id: ${orderItem.menuItemId}, qty: ${orderItem.quantity}, modifiers: ${orderItem.modifiers.length}, specialInstructions: ${orderItem.specialInstructions ?? 'none'}) to cart`);
@@ -563,10 +545,6 @@ export class CafeOrderSession implements IOrderSession {
             })),
         });
 
-        const rawItemDetail = this.#synthesisFlags.kioskItems
-            ? this._synthesizeItemDetail(menuItem, station)
-            : await this._fetchRawItemDetail(orderItem.menuItemId, station);
-
         this.#conceptIds.add(station.id);
 
         const conceptData = this.#conceptDataById.get(station.id);
@@ -579,21 +557,14 @@ export class CafeOrderSession implements IOrderSession {
         const cartGuid = `${menuItem.id}-${Date.now()}`;
 
         const instructions = orderItem.specialInstructions ? [
-            { label: '', text: orderItem.specialInstructions }
+            { label: '', text: orderItem.specialInstructions } as const
         ] : [];
 
-        const modifierTotal = serializedModifiers.reduce((sum, mod) => sum + Number(mod.amount), 0);
-
-        // Build item by spreading the raw API response and adding/overriding cart-specific fields.
-        // Remove childGroups and modifiers since the cart request uses selectedModifiers instead.
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { childGroups: _cg, modifiers: _mod, ...rawItemFields } = rawItemDetail;
-
+        const rawItemFields = this.#buildItemForCartAdd(menuItem, station);
         const requestBody = {
-            item:               {
+            item:            {
                 ...rawItemFields,
                 properties: {
-                    ...rawItemFields.properties,
                     cartGuid,
                     scannedItem:  false,
                     priceLevelId: this.#orderingContext.storePriceLevel,
@@ -610,12 +581,12 @@ export class CafeOrderSession implements IOrderSession {
                 conceptName:          station.name,
                 holdAndFire:          false,
                 hasModifiers:         serializedModifiers.length > 0,
-                modifierTotal,
+                modifierTotal: 0,
                 mealPeriodId:         null,
                 uniqueId:             cartGuid,
                 cartItemId,
             },
-            currencyDetails:    {
+            currencyDetails: {
                 currencyDecimalDigits: '2',
                 currencyCultureName:   'en-US',
                 currencyCode:          'USD',
@@ -638,13 +609,13 @@ export class CafeOrderSession implements IOrderSession {
                 voidReasonId:              '11',
                 priceLevelId:              this.#orderingContext.storePriceLevel,
             },
-            conceptSchedule:    {
+            conceptSchedule: {
                 openScheduleExpression:  conceptData.openScheduleExpression,
                 closeScheduleExpression: conceptData.closeScheduleExpression,
             },
-            isMultiItem:        false,
-            scannedOrder:       false,
-        };
+            isMultiItem:     false,
+            scannedOrder:    false,
+        } satisfies IBuyOnDemandAddToCartRequest;
 
         logOrderingDebugJson(this.client.cafe.name, 'Add-to-cart request body', requestBody);
 
@@ -661,7 +632,7 @@ export class CafeOrderSession implements IOrderSession {
         );
 
         const json = await response.json();
-        const { orderDetails } = addToOrderResponseSchema.parse(json);
+        const { orderDetails } = BuyOnDemandAddToOrderResponseSchema.parse(json);
         logOrderingDebugJson(this.client.cafe.name, 'Add-to-cart response orderDetails', orderDetails);
 
         // Seems like the cart might be fake. We appear to get a new order number every time we add an item?
@@ -684,15 +655,11 @@ export class CafeOrderSession implements IOrderSession {
     private async _populateCart() {
         orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#orderItems.length} item(s))`);
 
-        if (this.#synthesisFlags.conceptSchedule) {
-            await this._synthesizeConceptSchedule();
-        } else {
-            await this._fetchConceptSchedule();
-        }
+        await this._synthesizeConceptSchedule();
 
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
         for (const orderItem of this.#orderItems) {
-            await this._addItemToCart(orderItem);
+            await this.#addItemToCart(orderItem);
         }
         orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#orderTotalWithTax.toFixed(2)}`);
     }
@@ -730,11 +697,11 @@ export class CafeOrderSession implements IOrderSession {
             }
 
             const data = createStationSchedule({
-                conceptId: stationId,
-                menuId: station.menuId,
+                conceptId:        stationId,
+                menuId:           station.menuId,
                 displayProfileId: this.client.config.displayProfileId,
-                opensAtMinutes: hours.opensAt,
-                closesAtMinutes: hours.closesAt,
+                opensAtMinutes:   hours.opensAt,
+                closesAtMinutes:  hours.closesAt,
                 dayOfWeek,
             });
             this.#conceptDataById.set(stationId, data);
@@ -746,57 +713,6 @@ export class CafeOrderSession implements IOrderSession {
             scheduleEntryCount:      data.schedule.length,
             openScheduleExpression:  data.openScheduleExpression,
             closeScheduleExpression: data.closeScheduleExpression,
-        })));
-    }
-
-    private async _fetchConceptSchedule() {
-        orderLog.info(`{${this.client.cafe.name}} Fetching concept schedule`);
-        const response = await this.client.requestAsync(
-            `/sites/${this.client.config.tenantId}/${this.client.config.contextId}/concepts/${this.client.config.displayProfileId}`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                // BoD UI sends only { scheduledDay }. Adding a fixed scheduleTime
-                // window asks the server "show me concepts available 11am-11:15pm"
-                // which can legitimately return none (e.g. a cafe that closes at
-                // 2pm), surfacing as CONCEPTS_NOT_AVAILABLE downstream. The menu
-                // sync path in stations.ts still needs scheduleTime because it
-                // fetches menus at non-now times (e.g. 11am menu at 9am).
-                body: JSON.stringify({
-                    scheduledDay: 0,
-                })
-            }
-        );
-
-        const json = await response.json();
-
-        const conceptSchema = z.object({
-            id:                      z.string(),
-            schedule:                z.array(z.unknown()),
-            openScheduleExpression:  z.string(),
-            closeScheduleExpression: z.string(),
-        }).passthrough();
-
-        const concepts = z.array(conceptSchema).parse(json);
-
-        if (concepts.length === 0) {
-            throw new Error('No concepts returned from API');
-        }
-
-        for (const concept of concepts) {
-            this.#conceptDataById.set(concept.id, {
-                schedule:                concept.schedule,
-                openScheduleExpression:  concept.openScheduleExpression,
-                closeScheduleExpression: concept.closeScheduleExpression,
-            });
-        }
-
-        orderLog.info(`{${this.client.cafe.name}} Concept schedule fetched (${concepts.length} concept(s))`);
-        logOrderingDebugJson(this.client.cafe.name, 'Concept schedule identities', concepts.map(concept => ({
-            conceptId:               concept.id,
-            scheduleEntryCount:      concept.schedule.length,
-            openScheduleExpression:  concept.openScheduleExpression,
-            closeScheduleExpression: concept.closeScheduleExpression,
         })));
     }
 
@@ -891,15 +807,6 @@ export class CafeOrderSession implements IOrderSession {
             });
     }
 
-    private async _retrieveProfitCenterName(profitCenterId: string): Promise<string> {
-        const response = await this.client.requestAsync(`/sites/${this.client.config.tenantId}/${this.client.config.contextId}/profitCenter/${profitCenterId}`,
-            {
-                method: 'GET'
-            });
-
-        return response.text();
-    }
-
     private async _logIframeData(paymentToken: string, cardInfo: IPaymentCardInfo) {
         await this.client.requestAsync(
             `/order/logIframeData`,
@@ -928,7 +835,7 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     private async _closeOrderWithIframeTokenAsync(
-        { alias, phoneData, paymentToken, cardInfo }: IIframeCloseOrderParams,
+        { alias, phoneData, paymentToken, cardInfo }: IClosePaymentPopupParams,
         readyTime: IWaitTimeResponse,
     ) {
         if (this.#orderId == null) {
@@ -1292,7 +1199,7 @@ export class CafeOrderSession implements IOrderSession {
         phoneData,
         paymentToken,
         cardInfo,
-    }: IIframeCloseOrderParams): Promise<IWaitTimeResponse> {
+    }: IClosePaymentPopupParams): Promise<IWaitTimeResponse> {
         orderLog.info(`{${this.client.cafe.name}} Completing order ${this.#orderId} with iframe token`);
         let waitTime: IWaitTimeResponse = { minTime: 0, maxTime: 0 };
         try {

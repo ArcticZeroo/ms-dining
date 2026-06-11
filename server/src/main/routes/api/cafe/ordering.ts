@@ -47,20 +47,12 @@ export const registerOrderingRoutes = (parent: Router) => {
         const body = PreparePaymentSchema.parse(ctx.request.body);
         const iframeCssUrl = `${isDev ? ctx.origin : webserverHost}/iframe.css`;
 
-        // Only admins may override synthesis flags
-        let synthesisFlags: ISynthesisFlags | undefined;
-        if (body.synthesisFlags) {
-            if (await isAdminAsync(ctx)) {
-                synthesisFlags = body.synthesisFlags;
-            }
-        }
-
         setTelemetryProperties(ctx, { cafeId, itemCount: String(body.items.length) });
 
         const result = await executeTrackedOrderStep({
             name:       'prepare',
             properties: { cafeId, userId, itemCount: String(body.items.length) },
-            execute:    () => getServices().data.order.preparePayment({ userId, cafeId, items: body.items, iframeCssUrl, synthesisFlags }),
+            execute:    () => getServices().data.order.preparePayment({ userId, cafeId, items: body.items, iframeCssUrl }),
             completedProperties: (result) => ({ pendingOrderId: result.pendingOrderId }),
             durationMetric:           'prepare.durationMs',
             durationMetricProperties: { cafeId },
