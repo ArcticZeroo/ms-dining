@@ -578,7 +578,7 @@ useEffect(() => {
 ## 8. Proposed Backend Changes
 
 ### Keep
-- `_populateCart()` — still need to build the order server-side
+- `#populateCart()` — still need to build the order server-side
 - `_getCardProcessorSiteToken()` — still need the site token to construct iframe URL
 - `_getCardProcessorUrl()` — still need to construct the URL for the frontend
 - `_closeOrderAsync()` — still need to close the order with the payment token
@@ -613,7 +613,7 @@ useEffect(() => {
 ```
 
 This endpoint:
-1. Populates the cart (`_populateCart()`)
+1. Populates the cart (`#populateCart()`)
 2. Gets the site token (`_getCardProcessorSiteToken()`)
 3. Constructs the iframe URL (`_getCardProcessorUrl()`)
 4. Returns the URL and token to the frontend

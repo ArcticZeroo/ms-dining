@@ -45,7 +45,7 @@ const CAFE_ID = 'cafe25';
 const CAFE: ICafe = { id: CAFE_ID, name: 'Test Cafe 25' };
 
 // An order item whose menuItemId doesn't exist in the local DB. This makes
-// _populateCart throw with "Failed to find menu item ..." once the
+// #populateCart throw with "Failed to find menu item ..." once the
 // ordering context (the thing under test) has already been fetched.
 const NONEXISTENT_CART_ITEM: IOrderItem = {
     menuItemId:          'nonexistent-item-for-order-test',

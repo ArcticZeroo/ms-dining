@@ -1,6 +1,7 @@
 import { isDuckType, isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { IUpdateUserSettingsInput } from '@msdining/common/models/http';
 import { IFetchEmbeddingQueryResult, IVectorSearchResult } from '../models/vector.js';
+import { NonEmptyArray } from '../models/util.js';
 
 export const isDuckTypeJsonObject = (data: unknown): data is Record<string, unknown> => {
     return data != null && typeof data === 'object' && !Array.isArray(data);
@@ -74,3 +75,7 @@ export const asRecord = (value: unknown): Record<string, unknown> | undefined =>
         ? value as Record<string, unknown>
         : undefined;
 };
+
+export const isNonEmptyArray = <T>(value: T[]): value is NonEmptyArray<T> => {
+    return Array.isArray(value) && value.length > 0;
+}

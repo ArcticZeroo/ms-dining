@@ -1,4 +1,4 @@
-import { ICartItemRecord, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
+import { ICartItemRecord, IPaymentCardInfo, ISerializedModifier, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import type { IOrderItem } from '@msdining/common/models/order';
 import { getTodayDateString } from '@msdining/common/util/date-util';
@@ -16,13 +16,15 @@ import { IStationRecord } from '../../../../shared/services/station.js';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 import { fixed } from '../../../../shared/util/math.js';
 import { StringUtil } from '../../../../shared/util/string.js';
-import { asRecord } from '../../../../shared/util/typeguard.js';
+import { asRecord, isNonEmptyArray } from '../../../../shared/util/typeguard.js';
 import { IPickUpConfig, ISiteStoreInfo } from '../../../models/ordering.js';
 import { createStationSchedule, IConceptSchedule, IConceptScheduleTaskItem } from '../../../util/schedule.js';
 import { retrieveDailyOrderingContext } from '../../ordering/daily-order-context.js';
 import { buildStoreInfo, hashOrderItems } from '../../util/order.js';
 import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
 import { IOrderSession } from './order-session.js';
+import { Nullable } from '@msdining/common/models/util';
+import { NonEmptyArray } from '../../../../shared/models/util.js';
 
 const orderLog = getNamespaceLogger('Order');
 const ORDER_TIMEZONE = 'PST8PDT';
@@ -108,7 +110,7 @@ const BuyOnDemandAddToOrderResponseSchema = z.object({
 
 type IBuyOnDemandOrderDetails = z.infer<typeof BuyOnDemandOrderDetailsSchema>;
 
-interface ISerializedModifier {
+interface IBuyOnDemandModifier {
     // ID of selected option
     id: string;
     // ID of the modifier
@@ -130,6 +132,14 @@ interface ISerializedModifier {
         applicableTargetMenuFilter: 'All'
     };
 }
+
+interface BuyOnDemandLineItemInstructionItem {
+    label: '';
+    text: string;
+}
+
+type BuyOnDemandSpecialInstructionsOrEmpty = [] | [BuyOnDemandLineItemInstructionItem];
+type BuyOnDemandAtLeastOneModifier = NonEmptyArray<IBuyOnDemandModifier>;
 
 interface IBuyOnDemandKioskItem {
     id: string,
@@ -159,7 +169,7 @@ interface IBuyOnDemandKioskItem {
     mealPeriodId: null,
     uniqueId: string,
     cartItemId: string,
-    selectedModifiers?: Array<ISerializedModifier>,
+    selectedModifiers?: BuyOnDemandAtLeastOneModifier,
     properties: {
         cartGuid: string,
         scannedItem: false,
@@ -190,10 +200,7 @@ interface IBuyOnDemandKioskItem {
     options: [],
     attributes: [],
     choiceGroupsUnavailable: false,
-    lineItemInstructions: Array<{
-        label: '',
-        text: string,
-    }>
+    lineItemInstructions: BuyOnDemandSpecialInstructionsOrEmpty,
 }
 
 interface IBuyOnDemandAddToCartRequest {
@@ -229,7 +236,7 @@ interface IBuyOnDemandAddToCartRequest {
     scannedOrder: false,
 }
 
-const toChoicesByModifierId = (modifiers: IOrderItem['modifiers']): Map<string, Set<string>> =>
+const toChoicesByModifierId = (modifiers: Array<ISerializedModifier>): Map<string, Set<string>> =>
     new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
 
 interface IClosePaymentPopupParams {
@@ -240,12 +247,9 @@ interface IClosePaymentPopupParams {
 }
 
 interface IBuildItemForCartAddParams {
+    orderItem: IOrderItem;
     menuItem: IMenuItemBase;
-    count: number;
     station: IStationRecord;
-    modifiers: Array<ISerializedModifier>;
-    cartGuid: string;
-    cartItemId: string;
 }
 
 export class CafeOrderSession implements IOrderSession {
@@ -300,7 +304,7 @@ export class CafeOrderSession implements IOrderSession {
 
     get isReadyForPayment() {
         return this.createdDateString === getTodayDateString()
-               && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
+                && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
     }
 
     get itemsHash() {
@@ -411,10 +415,10 @@ export class CafeOrderSession implements IOrderSession {
         };
     }
 
-    private _serializeModifiers(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<ISerializedModifier> {
+    #convertModifierChoicesToBuyOnDemand(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<IBuyOnDemandModifier> {
         const modifiersById = new Map(localMenuItem.modifiers.map(modifier => [modifier.id, modifier]));
 
-        const modifiers: ISerializedModifier[] = [];
+        const modifiers: IBuyOnDemandModifier[] = [];
 
         for (const [modifierId, choiceIds] of choicesByModifierId) {
             const modifier = modifiersById.get(modifierId);
@@ -456,10 +460,21 @@ export class CafeOrderSession implements IOrderSession {
         return modifiers;
     }
 
-    #buildItemForCartAdd({ menuItem, count, station, modifiers, cartItemId, cartGuid }: IBuildItemForCartAddParams): IBuyOnDemandKioskItem {
+    #buildItemForCartAdd({
+        orderItem,
+        menuItem,
+        station,
+    }: IBuildItemForCartAddParams): IBuyOnDemandKioskItem {
         const amount = menuItem.price.toFixed(2);
         const receiptText = menuItem.receiptText ?? menuItem.name;
-        const modifierTotal = modifiers.reduce((sum, mod) => sum + Number(mod.amount), 0);
+
+        const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
+        const modifiers = this.#convertModifierChoicesToBuyOnDemand(choicesByModifierId, menuItem);
+        const modifierTotal = modifiers.reduce((sum, modifier) => sum + Number(modifier.amount), 0);
+
+        const cartItemId = hat();
+        const cartGuid = `${menuItem.id}-${Date.now()}`;
+
         return {
             id:                    menuItem.id,
             contextId:             this.client.config.contextId,
@@ -467,18 +482,18 @@ export class CafeOrderSession implements IOrderSession {
             itemId:                menuItem.id,
             name:                  menuItem.name,
             displayText:           menuItem.name,
-            count,
-            quantity: count,
+            count:                 orderItem.quantity,
+            quantity:              orderItem.quantity,
             amount,
             price:                 { currencyUnit: 'USD', amount },
-            menuId: station.menuId,
-            conceptId: station.id,
-            conceptName: station.name,
-            holdAndFire: false,
-            hasModifiers: modifiers.length > 0,
+            menuId:                station.menuId,
+            conceptId:             station.id,
+            conceptName:           station.name,
+            holdAndFire:           false,
+            hasModifiers:          modifiers.length > 0,
             modifierTotal,
-            mealPeriodId: null,
-            uniqueId: cartGuid,
+            mealPeriodId:          null,
+            uniqueId:              cartGuid,
             cartItemId,
             menuPriceLevelId:      this.#orderingContext.storePriceLevel,
             menuPriceLevelApplied: false,
@@ -511,8 +526,33 @@ export class CafeOrderSession implements IOrderSession {
             options:                 [],
             attributes:              [],
             choiceGroupsUnavailable: false,
-            selectedModifiers: modifiers.length > 0 ? modifiers : undefined,
+            selectedModifiers:       this.#getModifiersForCartItem(modifiers),
+            lineItemInstructions:    this.#getSpecialInstructionsForCartItem(orderItem.specialInstructions),
+            properties:              {
+                cartGuid,
+                scannedItem:  false,
+                priceLevelId: this.#orderingContext.storePriceLevel
+            }
         };
+    }
+
+    #getModifiersForCartItem(modifiers: IBuyOnDemandModifier[]): BuyOnDemandAtLeastOneModifier | undefined {
+        if (isNonEmptyArray(modifiers)) {
+            return modifiers;
+        }
+
+        return undefined;
+    }
+
+    #getSpecialInstructionsForCartItem(specialInstructions: Nullable<string>): BuyOnDemandSpecialInstructionsOrEmpty {
+        if (!specialInstructions) {
+            return [];
+        }
+
+        return [{
+            label: '',
+            text:  specialInstructions
+        }];
     }
 
     async #addItemToCart(orderItem: IOrderItem) {
@@ -552,41 +592,15 @@ export class CafeOrderSession implements IOrderSession {
             throw new Error(`No concept schedule data found for concept "${station.id}" (${station.name}). Available: ${[...this.#conceptDataById.keys()].join(', ')}`);
         }
 
-        const serializedModifiers = this._serializeModifiers(choicesByModifierId, menuItem);
-        const cartItemId = hat();
-        const cartGuid = `${menuItem.id}-${Date.now()}`;
+        const cartItem = this.#buildItemForCartAdd({
+            menuItem,
+            station,
+            orderItem
+        });
 
-        const instructions = orderItem.specialInstructions ? [
-            { label: '', text: orderItem.specialInstructions } as const
-        ] : [];
-
-        const rawItemFields = this.#buildItemForCartAdd(menuItem, station);
         const requestBody = {
-            item:            {
-                ...rawItemFields,
-                properties: {
-                    cartGuid,
-                    scannedItem:  false,
-                    priceLevelId: this.#orderingContext.storePriceLevel,
-                },
-                count:      orderItem.quantity,
-                quantity:   orderItem.quantity,
-                // BoD UI omits selectedModifiers entirely for items with no
-                // modifiers. Always-present `[]` is most likely benign, but
-                // matching the wire shape removes one more delta from the
-                // request body the server validates against.
-                ...(serializedModifiers.length > 0 ? { selectedModifiers: serializedModifiers } : {}),
-                lineItemInstructions: instructions,
-                conceptId:            station.id,
-                conceptName:          station.name,
-                holdAndFire:          false,
-                hasModifiers:         serializedModifiers.length > 0,
-                modifierTotal: 0,
-                mealPeriodId:         null,
-                uniqueId:             cartGuid,
-                cartItemId,
-            },
-            currencyDetails: {
+            item:               cartItem,
+            currencyDetails:    {
                 currencyDecimalDigits: '2',
                 currencyCultureName:   'en-US',
                 currencyCode:          'USD',
@@ -609,12 +623,12 @@ export class CafeOrderSession implements IOrderSession {
                 voidReasonId:              '11',
                 priceLevelId:              this.#orderingContext.storePriceLevel,
             },
-            conceptSchedule: {
+            conceptSchedule:    {
                 openScheduleExpression:  conceptData.openScheduleExpression,
                 closeScheduleExpression: conceptData.closeScheduleExpression,
             },
-            isMultiItem:     false,
-            scannedOrder:    false,
+            isMultiItem:        false,
+            scannedOrder:       false,
         } satisfies IBuyOnDemandAddToCartRequest;
 
         logOrderingDebugJson(this.client.cafe.name, 'Add-to-cart request body', requestBody);
@@ -652,7 +666,7 @@ export class CafeOrderSession implements IOrderSession {
         }
     }
 
-    private async _populateCart() {
+    async #populateCart() {
         orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#orderItems.length} item(s))`);
 
         await this._synthesizeConceptSchedule();
@@ -1156,7 +1170,7 @@ export class CafeOrderSession implements IOrderSession {
 
     public async populateCart(): Promise<void> {
         await this._runStages(SubmitOrderStage.notStarted, async () => {
-            await this._populateCart();
+            await this.#populateCart();
             this.#lastCompletedStage = SubmitOrderStage.addToCart;
         });
     }
