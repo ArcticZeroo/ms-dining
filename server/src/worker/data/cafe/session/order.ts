@@ -6,7 +6,6 @@ import hat from 'hat';
 import { PhoneValidResult } from 'phone';
 import { z } from 'zod';
 import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
-import { MEAL_PERIOD } from '../../../../shared/constants/enum.js';
 import { IOrderLineItem, } from '../../../../shared/models/buyondemand/cart.js';
 import { ICafe, IMenuItemBase } from '../../../../shared/models/cafe.js';
 import { IOrderingContext } from '../../../../shared/models/cart.js';
@@ -16,11 +15,17 @@ import { IStationRecord } from '../../../../shared/services/station.js';
 import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
 import { fixed } from '../../../../shared/util/math.js';
 import { StringUtil } from '../../../../shared/util/string.js';
-import { asRecord, isNonEmptyArray } from '../../../../shared/util/typeguard.js';
-import { IPickUpConfig, ISiteStoreInfo } from '../../../models/ordering.js';
+import { isNonEmptyArray } from '../../../../shared/util/typeguard.js';
+import {
+    IOrderTotalPrice,
+    IPayConfig,
+    IPickupConfig,
+    ISiteStoreInfo,
+    ORDER_TIMEZONE
+} from '../../../models/ordering.js';
 import { createStationSchedule, IBuyOnDemandStationSchedule } from '../../../util/schedule.js';
 import { retrieveDailyOrderingContext } from '../../ordering/daily-order-context.js';
-import { buildStoreInfo, hashOrderItems } from '../../util/order.js';
+import { hashOrderItems, toLocalIsoOffset } from '../../util/order.js';
 import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
 import { IOrderSession } from './order-session.js';
 import { Nullable } from '@msdining/common/models/util';
@@ -33,69 +38,13 @@ import {
     IBuyOnDemandModifier,
     IBuyOnDemandOrderDetails, IBuyOnDemandReceiptItem
 } from '../../../models/buy-ondemand.js';
+import { completeOrderAfterIframePaymentAsync } from '../buy-ondemand/ordering/complete-order.js';
+import { throwError } from '../../../../shared/util/error.js';
 
 const orderLog = getNamespaceLogger('Order');
-const ORDER_TIMEZONE = 'PST8PDT';
 
 const logOrderingDebugJson = (cafeName: string, label: string, data: unknown) => {
     orderLog.info(`{${cafeName}} ${label}: ${JSON.stringify(data, null, 2)}`);
-};
-
-/**
- * Formats `date` as a local ISO-8601 string with offset (e.g.
- * `"2026-04-23T11:51:56.923-07:00"`), matching the wire format the BoD UI
- * sends for billDate / userCurrentDate. `Date.toISOString()` would emit UTC
- * `Z` form, which the server appears to accept but differs from what the
- * official client sends — keeping the shape identical is cheap insurance.
- */
-const toLocalIsoOffset = (date: Date, timeZone: string = ORDER_TIMEZONE): string => {
-    const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone,
-        year:         'numeric', month: '2-digit', day: '2-digit',
-        hour:         '2-digit', minute: '2-digit', second: '2-digit',
-        hour12:       false, fractionalSecondDigits: 3,
-        timeZoneName: 'longOffset',
-    }).formatToParts(date);
-
-    const find = (type: Intl.DateTimeFormatPartTypes) =>
-        parts.find(part => part.type === type)?.value ?? '';
-
-    // Intl's longOffset is `GMT-07:00` (or `GMT` for UTC). Strip the `GMT`
-    // prefix; treat bare `GMT` as `+00:00`.
-    const tzPart = find('timeZoneName');
-    const offset = tzPart === 'GMT' ? '+00:00' : tzPart.slice(3);
-    // Intl renders midnight as hour=24; normalize back to 00.
-    const hour = find('hour') === '24' ? '00' : find('hour');
-
-    return `${find('year')}-${find('month')}-${find('day')}T${hour}:${find('minute')}:${find('second')}.${find('fractionalSecond')}${offset}`;
-};
-
-const formatReceiptDateTime = (date: Date) => {
-    const receiptDate = new Intl.DateTimeFormat('en-US', {
-        timeZone: ORDER_TIMEZONE,
-        month:    'short',
-        day:      'numeric',
-        year:     'numeric',
-    }).format(date);
-    const receiptTime = new Intl.DateTimeFormat('en-US', {
-        timeZone: ORDER_TIMEZONE,
-        hour:     'numeric',
-        minute:   '2-digit',
-        hour12:   true,
-    }).format(date);
-    const dateTimeInReceipt = toLocalIsoOffset(date).replace(/\.\d{3}(?=[+-]\d{2}:\d{2}$)/, '');
-    const offsetMatch = dateTimeInReceipt.match(/([+-])(\d{2}):(\d{2})$/);
-    const timezoneOffsetMinutes = offsetMatch == null
-        ? 0
-        : (offsetMatch[1] === '-' ? 1 : -1) * ((Number(offsetMatch[2]) * 60) + Number(offsetMatch[3]));
-
-    return {
-        receiptDate,
-        receiptTime,
-        dateTimeInReceipt,
-        timezoneOffsetMinutes,
-        printDateTime: `${receiptDate} ${receiptTime} `,
-    };
 };
 
 const toChoicesByModifierId = (modifiers: Array<ISerializedModifier>): Map<string, Set<string>> =>
@@ -133,6 +82,64 @@ const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhan
     }));
 }
 
+/**
+ * Build a pay config from known constants and ordering context data,
+ * avoiding the POST /sites/{contextId}/{displayProfileId} call.
+ *
+ * Constants are sourced from observed HAR responses across multiple cafes.
+ * Dynamic values (terminalId, employeeId, etc.) come from the ordering
+ * context which is already populated at this point.
+ */
+const buildPayConfig = (orderingContext: IOrderingContext): IPayConfig => ({
+    pay:                 { clientId: orderingContext.payClientId },
+    displayOptions:      {
+        'timezone':                       ORDER_TIMEZONE,
+        'currency/currencyCode':          'USD',
+        'currency/currencySymbol':        '$',
+        'currency/currencyDecimalDigits': '2',
+        'currency/currencyCultureName':   'en-US',
+        'useIgOrderApi':                  'true',
+        'useIgPosApi':                    'false',
+        'voidReasonId':                   '11',
+        'onDemandTerminalId':             orderingContext.onDemandTerminalId,
+        'onDemandEmployeeId':             orderingContext.onDemandEmployeeId,
+        'profit-center-id':               orderingContext.profitCenterId,
+        'check-type':                     orderingContext.checkTypeId ?? '1',
+        'isSmsEnabled':                   'true',
+        'isMobileNumberRequired':         'true',
+        'isProfileValid':                 'true',
+        'name-capture/isOptional':        'false',
+        'name-capture/lastInitialOnly':   'true',
+    },
+    pickUpConfig:        {
+        featureEnabled: true,
+        kitchenText:    'PICK-UP',
+        buttonText:     'PICK-UP',
+    },
+    emailReceipt:        {
+        featureEnabled:          true,
+        overrideFromStoreConfig: false,
+    },
+    checkTypeId:         orderingContext.checkTypeId ?? '1',
+    taxBreakupEnabled:   false,
+    hideVATInReceipts:   false,
+    hideAllPrices:       false,
+    hideZeroPrice:       false,
+    specialInstructions: {
+        headerText:                    'Special instructions',
+        characterLimit:                250,
+        featureEnabled:                true,
+        instructionText:               'Any allergies or requests?',
+        additionalSpecialInstructions: [
+            {
+                characterLimit:  250,
+                instructionText: 'Any allergies or requests?',
+                kitchenText:     '',
+            }
+        ],
+    },
+});
+
 export class CafeOrderSession implements IOrderSession {
     #orderingContext: IOrderingContext = {
         onDemandTerminalId: '',
@@ -146,9 +153,11 @@ export class CafeOrderSession implements IOrderSession {
     };
     #orderId: string | null = null;
     #orderNumber: string | null = null;
-    #orderTotalWithoutTax: number = 0;
-    #orderTotalTax: number = 0;
-    #orderTotalWithTax: number = 0;
+    readonly #price: IOrderTotalPrice = {
+        total: 0,
+        subtotal: 0,
+        tax: 0
+    };
     #lastCompletedStage: SubmitOrderStage = SubmitOrderStage.notStarted;
     #cardProcessorToken: string = '';
     // The full orderDetails from the last POST /orders response,
@@ -156,7 +165,7 @@ export class CafeOrderSession implements IOrderSession {
     #lastOrderDetails: IBuyOnDemandOrderDetails | null = null;
 
     #siteStoreInfo: ISiteStoreInfo = {};
-    #sitePickUpConfig: IPickUpConfig | null = null;
+    #sitePickUpConfig: IPickupConfig | null = null;
 
     readonly #orderItems: IEnhancedOrderItem[];
     readonly #itemsHash: string;
@@ -197,16 +206,8 @@ export class CafeOrderSession implements IOrderSession {
         return this.#orderNumber;
     }
 
-    public get orderTotalWithoutTax() {
-        return this.#orderTotalWithoutTax;
-    }
-
-    public get orderTotalTax() {
-        return this.#orderTotalTax;
-    }
-
-    public get orderTotalWithTax() {
-        return this.#orderTotalWithTax;
+    public get price(): Readonly<IOrderTotalPrice> {
+        return this.#price;
     }
 
     public get orderId() {
@@ -231,66 +232,6 @@ export class CafeOrderSession implements IOrderSession {
         }
 
         return this.#itemsHash === hashOrderItems(items);
-    }
-
-    /**
-     * Build a pay config from known constants and ordering context data,
-     * avoiding the POST /sites/{contextId}/{displayProfileId} call.
-     *
-     * Constants are sourced from observed HAR responses across multiple cafes.
-     * Dynamic values (terminalId, employeeId, etc.) come from the ordering
-     * context which is already populated at this point.
-     */
-    #getPayConfig() {
-        return {
-            pay:                 { clientId: this.#orderingContext.payClientId },
-            displayOptions:      {
-                'timezone':                       ORDER_TIMEZONE,
-                'currency/currencyCode':          'USD',
-                'currency/currencySymbol':        '$',
-                'currency/currencyDecimalDigits': '2',
-                'currency/currencyCultureName':   'en-US',
-                'useIgOrderApi':                  'true',
-                'useIgPosApi':                    'false',
-                'voidReasonId':                   '11',
-                'onDemandTerminalId':             this.#orderingContext.onDemandTerminalId,
-                'onDemandEmployeeId':             this.#orderingContext.onDemandEmployeeId,
-                'profit-center-id':               this.#orderingContext.profitCenterId,
-                'check-type':                     this.#orderingContext.checkTypeId ?? '1',
-                'isSmsEnabled':                   'true',
-                'isMobileNumberRequired':         'true',
-                'isProfileValid':                 'true',
-                'name-capture/isOptional':        'false',
-                'name-capture/lastInitialOnly':   'true',
-            },
-            pickUpConfig:        {
-                featureEnabled: true,
-                kitchenText:    'PICK-UP',
-                buttonText:     'PICK-UP',
-            },
-            emailReceipt:        {
-                featureEnabled:          true,
-                overrideFromStoreConfig: false,
-            },
-            checkTypeId:         this.#orderingContext.checkTypeId ?? '1',
-            taxBreakupEnabled:   false,
-            hideVATInReceipts:   false,
-            hideAllPrices:       false,
-            hideZeroPrice:       false,
-            specialInstructions: {
-                headerText:                    'Special instructions',
-                characterLimit:                250,
-                featureEnabled:                true,
-                instructionText:               'Any allergies or requests?',
-                additionalSpecialInstructions: [
-                    {
-                        characterLimit:  250,
-                        instructionText: 'Any allergies or requests?',
-                        kitchenText:     '',
-                    }
-                ],
-            },
-        };
     }
 
     #convertModifierChoicesToBuyOnDemand(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<IBuyOnDemandModifier> {
@@ -508,11 +449,11 @@ export class CafeOrderSession implements IOrderSession {
         this.#lastOrderDetails = orderDetails;
 
         // These seem to be incremental for some reason, despite the naming and structure of the response. /shrug
-        this.#orderTotalTax += Number(orderDetails.taxTotalAmount.amount);
-        this.#orderTotalWithoutTax += Number(orderDetails.taxExcludedTotalAmount.amount);
-        this.#orderTotalWithTax += Number(orderDetails.totalDueAmount.amount);
+        this.#price.tax += Number(orderDetails.taxTotalAmount.amount);
+        this.#price.subtotal += Number(orderDetails.taxExcludedTotalAmount.amount);
+        this.#price.total += Number(orderDetails.totalDueAmount.amount);
 
-        orderLog.info(`{${this.client.cafe.name}} Item ${orderItem.menuItemId} added — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#orderTotalWithTax.toFixed(2)}`);
+        orderLog.info(`{${this.client.cafe.name}} Item ${orderItem.menuItemId} added — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#price.total.toFixed(2)}`);
 
         for (const lineItem of orderDetails.lineItems) {
             this.#lineItemsById.set(lineItem.lineItemId, lineItem);
@@ -528,7 +469,7 @@ export class CafeOrderSession implements IOrderSession {
         for (const orderItem of this.#orderItems) {
             await this.#addItemToCart(orderItem);
         }
-        orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#orderTotalWithTax.toFixed(2)}`);
+        orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#price.total.toFixed(2)}`);
     }
 
     async #retrieveScheduleForStation(stationId: string, dayOfWeek: number) {
@@ -587,7 +528,7 @@ export class CafeOrderSession implements IOrderSession {
             throw new Error('Order number is not set');
         }
 
-        if (this.#orderTotalWithoutTax === 0 || this.#orderTotalWithTax === 0) {
+        if (this.#price.subtotal === 0 || this.#price.total === 0) {
             throw new Error('Order totals cannot be zero');
         }
 
@@ -599,17 +540,17 @@ export class CafeOrderSession implements IOrderSession {
                 method:  'POST',
                 headers: JSON_HEADERS,
                 body:    JSON.stringify({
-                    taxAmount:             this.#orderTotalTax.toFixed(2),
+                    taxAmount:             this.#price.tax.toFixed(2),
                     invoiceId:             this.#orderNumber,
                     billDate,
                     userCurrentDate:       nowString,
                     currencyUnit:          'USD',
                     description:           `Order ${this.#orderNumber}`,
-                    transactionAmount:     this.#orderTotalWithTax.toFixed(2),
+                    transactionAmount:     this.#price.total.toFixed(2),
                     remainingTipAmount:    '0.00',
                     tipAmount:             '0.00',
                     style:                 iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
-                    multiPaymentAmount:    fixed(this.#orderTotalWithTax, 2),
+                    multiPaymentAmount:    fixed(this.#price.total, 2),
                     isWindCave:            false,
                     isCyberSource:         false,
                     isCyberSourceWallets:  false,
@@ -640,7 +581,7 @@ export class CafeOrderSession implements IOrderSession {
         return `https://pay.rguest.com/pay-iframe-service/iFrame/tenants/${this.client.config.tenantId}/${this.#orderingContext.payClientId}?apiToken=${token}&submit=PROCESS&style=${encodeURIComponent(styleUrl)}&language=en&doVerify=true&version=3`;
     }
 
-    private async _sendPhoneConfirmation(phoneData: PhoneValidResult) {
+    async #sendPhoneConfirmation(phoneData: PhoneValidResult) {
         await this.client.requestAsync(`/communication/sendSMSReceipt`,
             {
                 method:  'POST',
@@ -701,7 +642,7 @@ export class CafeOrderSession implements IOrderSession {
         );
     }
 
-    private async _closeOrderWithIframeTokenAsync(
+    async #sendOrderToKitchenAsync(
         { alias, phoneData, paymentToken, cardInfo }: IClosePaymentPopupParams,
         readyTime: IWaitTimeResponse,
     ) {
@@ -713,87 +654,7 @@ export class CafeOrderSession implements IOrderSession {
             throw new Error('Order details are not set!');
         }
 
-        const payConfig = this.#getPayConfig();
-
-        const now = new Date();
-        const nowString = toLocalIsoOffset(now);
-        const closedTime = now.toISOString();
-        const receiptDateTime = formatReceiptDateTime(now);
-        const additionalSpecialInstructions = payConfig.specialInstructions?.additionalSpecialInstructions || [];
-        const currencyDetails = {
-            currencyDecimalDigits: '2',
-            currencyCultureName:   'en-US',
-            currencyCode:          'USD',
-            currencySymbol:        '$'
-        };
-        const deliveryProperties = {
-            deliveryOption:     {
-                id:                      'pickup',
-                kitchenText:             this.#sitePickUpConfig?.kitchenText ?? 'PICKUP',
-                displayText:             this.#sitePickUpConfig?.buttonText ?? 'PICKUP',
-                defaultConfirmationText: this.#sitePickUpConfig?.defaultConfirmationText ?? 'Thank you!',
-                conceptEntries:          {},
-                isEnabled:               true,
-                orderSequence:           1,
-            },
-            fulfillmentDetails: {
-                fulfillmentType: 'pickupFormFields',
-            },
-            isCutleryEnabled:   false,
-            nameCapture:        {
-                firstName:   alias,
-                lastInitial: ''
-            },
-            nameString:         `${alias} `
-        };
-        const readyTimeDetails = {
-            minTime: {
-                minutes:    readyTime.minTime,
-                fieldType:  { name: 'minutes' },
-                periodType: { name: 'Minutes' }
-            },
-            maxTime: {
-                minutes:    readyTime.maxTime,
-                fieldType:  { name: 'minutes' },
-                periodType: { name: 'Minutes' }
-            }
-        };
-        const browserStoreInfo = buildStoreInfo({
-            ...this.#siteStoreInfo,
-            businessContextId: this.client.config.contextId,
-            tenantId:          this.client.config.tenantId,
-            storeInfoId:       this.client.config.storeId,
-            storeName:         this.client.config.externalName,
-        });
-        const browserStoreInfoOptions = asRecord(browserStoreInfo.storeInfoOptions) ?? {};
-        const taxAmountValue = this.orderTotalTax.toFixed(2);
-        const taxClassList = this.orderTotalTax > 0
-            ? [{ amount: `$${taxAmountValue}`, amountValue: taxAmountValue }]
-            : [];
-        const selectedSMSCountry = phoneData.countryCode === '+1'
-            ? { value: 'US', label: 'United States', phoneCode: '1' }
-            : undefined;
-        const orderMessage = `Your order will be ready for pickup at ${this.client.config.externalName} in about ${readyTime.minTime} to ${readyTime.maxTime} minutes\n\n`;
-        const closeOrderDetails = {
-            ...this.#lastOrderDetails,
-            properties: {
-                ...this.#lastOrderDetails.properties,
-                orderNumberSequenceLength: '4',
-                profitCenterId:            this.#orderingContext.profitCenterId,
-                displayProfileId:          this.client.config.displayProfileId,
-                orderNumberNameSpace:      this.#orderingContext.onDemandTerminalId,
-                openTerminalId:            this.#orderingContext.onDemandTerminalId,
-                priceLevelId:              this.#orderingContext.storePriceLevel,
-                employeeId:                this.#orderingContext.onDemandEmployeeId,
-                mealPeriodId:              String(MEAL_PERIOD.lunch),
-                closedTerminalId:          this.#orderingContext.onDemandTerminalId,
-                voidReasonId:              '11',
-                orderSourceSystem:         'onDemand',
-                additionalGuestData:       '{}',
-                useIgOrderApi:             'true',
-            },
-            ...(additionalSpecialInstructions.length > 0 ? { additionalSpecialInstructions } : {}),
-        };
+        const payConfig = buildPayConfig(this.#orderingContext);
 
         const receiptItems = this.#orderItems.map((cartItem, index) => ({
             ...this.#buildItemForCartAdd(cartItem),
@@ -801,207 +662,25 @@ export class CafeOrderSession implements IOrderSession {
             lineItemId:   this.#lastOrderDetails?.lineItems[index]?.lineItemId,
         } satisfies IBuyOnDemandReceiptItem));
 
-        logOrderingDebugJson(this.client.cafe.name, 'Close-order identity summary', {
-            tenantId:          this.client.config.tenantId,
-            contextId:         this.client.config.contextId,
-            displayProfileId:  this.client.config.displayProfileId,
-            orderId:           this.#orderId,
-            orderNumber:       this.#orderNumber,
-            conceptIds:        [...this.#stationScheduleById.keys()],
-            storePriceLevel:   this.#orderingContext.storePriceLevel,
-            terminalId:        this.#orderingContext.onDemandTerminalId,
-            employeeId:        this.#orderingContext.onDemandEmployeeId,
-            profitCenterId:    this.#orderingContext.profitCenterId,
-            profitCenterName:  this.#orderingContext.profitCenterName,
-            payClientId:       this.#orderingContext.payClientId,
-            lineItemIds:       [...this.#lineItemsById.keys()],
-            orderTotalWithTax: this.orderTotalWithTax,
+        await completeOrderAfterIframePaymentAsync({
+            client: this.client,
+            alias,
             readyTime,
+            payConfig,
+            orderId: this.#orderId,
+            orderNumber: this.#orderNumber ?? throwError('Order number is not set'),
+            phoneData,
+            orderingContext: this.#orderingContext,
+            cardInfo,
+            pickupConfig: this.#sitePickUpConfig ?? throwError('Pickup config is not set'),
+            siteStoreInfo: this.#siteStoreInfo,
+            price: this.price,
+            receiptItems,
+            firstStationId: this.#stationScheduleById.keys().next().value ?? throwError('No station schedule data found'),
+            lastOrderDetails: this.#lastOrderDetails,
+            cardProcessorToken: this.#cardProcessorToken,
+            paymentToken
         });
-
-        await this.client.requestAsync(
-            `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orderId/${this.#orderId}/processPaymentAndClosedOrder`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify({
-                    amHereConfig:                     {
-                        isCurbsidePickup: false,
-                        lateTolerance:    5,
-                        origin:           `https://${this.client.cafe.id}.buy-ondemand.com`
-                    },
-                    authorizedAmount:                 this.orderTotalWithTax.toString(),
-                    calorieTotal:                     {
-                        baseCalorie: 0,
-                        maxCalorie:  0
-                    },
-                    capacitySuggestionPerformed:      false,
-                    conceptId:                        this.#stationScheduleById.keys().next().value,
-                    contextId:                        this.client.config.contextId,
-                    currencyDetails,
-                    currencyUnit:                     'USD',
-                    customCardCodeMapping:            false,
-                    customerAddress:                  [],
-                    cyberSourcePaymentData:           null,
-                    cyberSourceTransactionData:       null,
-                    deliveryProperties,
-                    discountInfo:                     [],
-                    displayProfileId:                 this.client.config.displayProfileId,
-                    emailInfo:                        {
-                        ...(payConfig.emailReceipt || {}),
-                        customerAddress: [],
-                    },
-                    engageAccrualEnabled:             false,
-                    engagePromotionAppliedPromotions: [],
-                    engagePromotionCardNumber:        null,
-                    engagePromotionLastName:          '',
-                    firstName:                        alias,
-                    giftCardSaleDataMap:              {},
-                    graceCompletionTime:              false,
-                    gratuityBreakupConfigEnabled:     false,
-                    igOrderStatusConfig:              {},
-                    igSettings:                       payConfig.displayOptions || {},
-                    isGaPaymentAvailable:             false,
-                    itemCountdown:                    {},
-                    kitchenContextId:                 null,
-                    lastName:                         '',
-                    locizeConfig:                     {
-                        currentLanguage:     'en',
-                        shouldUseLocizeText: false,
-                        domain:              `${this.client.cafe.id}.buy-ondemand.com`,
-                        storeInfo:           browserStoreInfo,
-                        scheduledDay:        0,
-                        dateTime:            'en',
-                        readyTime:           readyTimeDetails,
-                        deliveryProperties,
-                        multiLanguageConfig: {},
-                        locizeVersion:       'production',
-                    },
-                    loyaltyGuestInfo:                 {},
-                    loyaltyPayment:                   false,
-                    mealPeriodId:                     String(MEAL_PERIOD.lunch),
-                    mobileNumber:                     phoneData.phoneNumber,
-                    mobileNumberCountryCode:          phoneData.countryCode,
-                    multiPassEnabled:                 false,
-                    notifyGuestOnFailure:             false,
-                    order:                            closeOrderDetails,
-                    orderGuid:                        null,
-                    orderVersion:                     1,
-                    paymentType:                      null,
-                    processPaymentAsExternalPayment:  false,
-                    profileId:                        this.client.config.displayProfileId,
-                    profitCenterId:                   this.#orderingContext.profitCenterId,
-                    profitCenterName:                 this.#orderingContext.profitCenterName,
-                    recallCheck:                      false,
-                    receiptInfo:                      {
-                        orderData:                           closeOrderDetails,
-                        showConceptNameInEmailReceipt:       false,
-                        showConceptNameInTextReceipt:        false,
-                        showConceptNameInPrintReceipt:       false,
-                        taxBreakupEnabled:                   payConfig.taxBreakupEnabled,
-                        taxClassList,
-                        hideVATInReceipts:                   payConfig.hideVATInReceipts,
-                        items:                               receiptItems,
-                        tip:                                 0,
-                        tipAmount:                           0,
-                        etfEnabled:                          true,
-                        dateTime:                            'en',
-                        storePriceLevel:                     this.#orderingContext.storePriceLevel,
-                        currencyDetails,
-                        deliveryEnabled:                     false,
-                        readyTime:                           readyTimeDetails,
-                        deliveryProperties,
-                        vatEntries:                          [],
-                        taxIdentificationNumber:             '',
-                        accountNumberLabelText:              'GA account number',
-                        engageLoyaltyAccountNumberLabelText: 'Account number',
-                        engageMemberAccountNumberLabelText:  'Account number',
-                        gaAccountInfoList:                   [],
-                        deliveryConfirmationText:            this.#sitePickUpConfig?.defaultConfirmationText ?? 'Thank you!',
-                        orderPlacedTime:                     closedTime,
-                        receiptDate:                         receiptDateTime.receiptDate,
-                        receiptTime:                         receiptDateTime.receiptTime,
-                        timeZone:                            ORDER_TIMEZONE,
-                        terminalId:                          this.#orderingContext.onDemandTerminalId,
-                        checkNumber:                         this.#orderNumber,
-                        selectedSMSCountry,
-                        mobileNumber:                        phoneData.phoneNumber,
-                        scheduledDay:                        0,
-                        hideAllPrices:                       payConfig.hideAllPrices,
-                        hideZeroPrice:                       payConfig.hideZeroPrice,
-                        complimentaryPayment:                false,
-                        isPayLater:                          false,
-                        payLaterConfig:                      {},
-                        discountValues:                      [],
-                        franceFiscalConfig:                  { isEnabled: false },
-                        birConfig:                           browserStoreInfoOptions.birConfig,
-                        multiPassEnabled:                    false,
-                        // Intentional typo.
-                        receipientName:              `${alias} `,
-                        orderMessage,
-                        dateTimeInReceipt:           receiptDateTime.dateTimeInReceipt,
-                        timezoneOffsetMinutes:       receiptDateTime.timezoneOffsetMinutes,
-                        printDateTime:               receiptDateTime.printDateTime,
-                        closedTime,
-                        gratuityWithLabelArray:      false,
-                        serviceAmountWithLabelArray: false,
-                        displayProfileId:            this.client.config.displayProfileId,
-                        engagePayment:               { engageAccountInfoList: [] },
-                        engageLoyaltyPayment:        { engageLoyaltyAccountInfoList: [] },
-                    },
-                    saleTransactionData:              null,
-                    scannedItemOrder:                 false,
-                    scheduledDay:                     0,
-                    shouldRefundOnFailure:            false,
-                    siteId:                           this.client.config.contextId,
-                    storePriceLevel:                  this.#orderingContext.storePriceLevel,
-                    stripeTransactionData:            null,
-                    subtotal:                         this.orderTotalWithTax.toString(),
-                    tenantId:                         this.client.config.tenantId,
-                    terminalId:                       this.#orderingContext.onDemandTerminalId,
-                    textReceiptConfig:                {
-                        textMessageWithReceiptLink: false
-                    },
-                    tipAmount:                        0,
-                    tipPercent:                       0,
-                    tokenizedData:                    {
-                        paymentDetails: {
-                            taxAmount:             this.orderTotalTax.toString(),
-                            invoiceId:             this.#orderNumber,
-                            billDate:              this.#lastOrderDetails.created ?? nowString,
-                            userCurrentDate:       nowString,
-                            currencyUnit:          'USD',
-                            description:           `Order ${this.#orderNumber}`,
-                            transactionAmount:     this.orderTotalWithTax.toString(),
-                            remainingTipAmount:    '0.00',
-                            tipAmount:             '0.00',
-                            style:                 `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
-                            multiPaymentAmount:    fixed(this.orderTotalWithTax, 2),
-                            isWindCave:            false,
-                            isCyberSource:         false,
-                            isCyberSourceWallets:  false,
-                            language:              'en',
-                            apiToken:              this.#cardProcessorToken,
-                            payTenantId:           this.client.config.tenantId,
-                            previousTransactionId: null,
-                            accountNumberMasked:   cardInfo.accountNumberMasked,
-                            cardIssuer:            cardInfo.cardIssuer,
-                            expirationYearMonth:   cardInfo.expirationYearMonth,
-                            cardHolderName:        cardInfo.cardHolderName,
-                            postalCode:            cardInfo.postalCode,
-                        },
-                        saveCardFlag:   false,
-                        token:          paymentToken
-                    },
-                    previousTransactionId:            null,
-                    previousTransactionTokenInfo:     null,
-                    use24HrTimeFormat:                false,
-                    useIgPosApi:                      false,
-                    walletPaymentData:                null,
-                    walletSaleTransactionData:        null
-                })
-            },
-        );
     }
 
     async #requireStage(requiredStage: SubmitOrderStage, callback: () => Promise<void>): Promise<void> {
@@ -1065,11 +744,7 @@ export class CafeOrderSession implements IOrderSession {
         );
     }
 
-    /**
-     * Completes an order using a payment token received from the rguest iframe.
-     * Closes the order and sends phone confirmation.
-     */
-    public async completeOrderAfterIframePayment({
+    public async completeOrderAfterPaymentAsync({
         alias,
         phoneData,
         paymentToken,
@@ -1092,7 +767,7 @@ export class CafeOrderSession implements IOrderSession {
                 orderLog.info(`{${this.client.cafe.name}} Refreshed close-order wait time: ${readyTime.minTime}-${readyTime.maxTime} min`);
 
                 orderLog.info(`{${this.client.cafe.name}} Closing order ${this.#orderId}`);
-                await this._closeOrderWithIframeTokenAsync({
+                await this.#sendOrderToKitchenAsync({
                     alias,
                     phoneData,
                     paymentToken,
@@ -1102,7 +777,7 @@ export class CafeOrderSession implements IOrderSession {
                 this.#lastCompletedStage = SubmitOrderStage.closeOrder;
                 orderLog.info(`{${this.client.cafe.name}} Order closed, sending phone confirmation`);
 
-                await this._sendPhoneConfirmation(phoneData);
+                await this.#sendPhoneConfirmation(phoneData);
 
                 this.#lastCompletedStage = SubmitOrderStage.complete;
                 orderLog.info(`{${this.client.cafe.name}} Order ${this.#orderNumber} complete`);

@@ -107,7 +107,7 @@ export abstract class OrderOrchestrator {
         return completeOrder(pendingOrderId, async (session) => {
             let waitTime: IWaitTimeResponse;
             try {
-                waitTime = await session.completeOrderAfterIframePayment({
+                waitTime = await session.completeOrderAfterPaymentAsync({
                     alias,
                     phoneData,
                     paymentToken,

@@ -19,9 +19,6 @@ export interface IOrderSession {
     readonly client: BuyOnDemandClient | IFakeBuyOnDemandClient;
     readonly orderId: string | null;
     readonly orderNumber: string | null;
-    readonly orderTotalWithoutTax: number;
-    readonly orderTotalTax: number;
-    readonly orderTotalWithTax: number;
     readonly lastCompletedStage: SubmitOrderStage | string;
     readonly cardProcessorToken: string;
     readonly createdDateString: string;
@@ -33,7 +30,7 @@ export interface IOrderSession {
     populateCart(): Promise<void>;
     prepareForIframe(iframeCssUrl: string): Promise<unknown>;
     getCardProcessorUrl(iframeCssUrl?: string): string;
-    completeOrderAfterIframePayment(params: {
+    completeOrderAfterPaymentAsync(params: {
         alias: string;
         phoneData: PhoneValidResult;
         paymentToken: string;

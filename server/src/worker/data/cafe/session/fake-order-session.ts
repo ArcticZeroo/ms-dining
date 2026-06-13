@@ -120,7 +120,7 @@ export class FakeCafeOrderSession implements IOrderSession {
         return '/fake-payment.html';
     }
 
-    async completeOrderAfterIframePayment(): Promise<IWaitTimeResponse> {
+    async completeOrderAfterPaymentAsync(): Promise<IWaitTimeResponse> {
         this.#lastCompletedStage = SubmitOrderStage.complete;
         fakeLog.info(`{${this.#cafe.name}} Fake order ${this.#orderNumber} completed`);
         return { minTime: 5, maxTime: 10 };

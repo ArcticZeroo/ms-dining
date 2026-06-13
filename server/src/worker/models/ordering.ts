@@ -6,7 +6,7 @@ const PickUpConfigSchema = z.object({
     defaultConfirmationText: z.string().optional(),
 }).passthrough();
 
-export type IPickUpConfig = z.infer<typeof PickUpConfigSchema>;
+export type IPickupConfig = z.infer<typeof PickUpConfigSchema>;
 
 export const PayConfigSchema = z.object({
     pay:                 z.object({ clientId: z.string() }),
@@ -46,3 +46,11 @@ export const SiteDataItemSchema = z.object({
 }).passthrough();
 
 export type ISiteData = z.infer<typeof SiteDataItemSchema>;
+
+export interface IOrderTotalPrice {
+    subtotal: number;
+    tax: number;
+    total: number;
+}
+
+export const ORDER_TIMEZONE = 'PST8PDT';

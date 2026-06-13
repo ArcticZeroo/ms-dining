@@ -84,7 +84,7 @@ notStarted → addToCart → initializeCardProcessor → payment → closeOrder 
 │     │         saveCardFlag: false                               │
 │     │       }                                                  │
 │     │                                                         │
-│     └─> _sendPhoneConfirmation()                              │
+│     └─> #sendPhoneConfirmation()                              │
 │         └─> POST /communication/sendSMSReceipt                 │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -582,7 +582,7 @@ useEffect(() => {
 - `_getCardProcessorSiteToken()` — still need the site token to construct iframe URL
 - `_getCardProcessorUrl()` — still need to construct the URL for the frontend
 - `_closeOrderAsync()` — still need to close the order with the payment token
-- `_sendPhoneConfirmation()` — still need SMS receipts
+- `#sendPhoneConfirmation()` — still need SMS receipts
 - All the ordering context, menu item, and cart logic
 
 ### Remove
