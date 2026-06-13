@@ -88,11 +88,11 @@ export class FakeCafeOrderSession implements IOrderSession {
         return this.#cardProcessorToken;
     }
 
-    get rawCartItemsForWaitTime(): readonly unknown[] {
-        return this.#orderItems.map(item => ({
-            kitchenVideoId: item.menuItemId,
-            quantity:        item.quantity,
-        }));
+    async retrieveWaitTime(): Promise<IWaitTimeResponse> {
+        return {
+            minTime: 5,
+            maxTime: 10
+        };
     }
 
     isUsableForPaymentWithItems(items: Array<IOrderItem> | Array<ICartItemRecord> | string): boolean {

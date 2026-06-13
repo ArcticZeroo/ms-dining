@@ -15,7 +15,7 @@ export interface IConceptScheduleTaskItem {
     displayProfileState?: Record<string, unknown>;
 }
 
-export interface IConceptSchedule {
+export interface IBuyOnDemandStationSchedule {
     openScheduleExpression: string;
     closeScheduleExpression: string;
     schedule: Array<IConceptScheduleTaskItem>;
@@ -37,7 +37,7 @@ export const createStationSchedule = ({
     opensAtMinutes,
     closesAtMinutes,
     dayOfWeek
-}: IGetConceptScheduleOptions): IConceptSchedule => {
+}: IGetConceptScheduleOptions): IBuyOnDemandStationSchedule => {
     const openCron = minutesToCron(opensAtMinutes, dayOfWeek);
     const closeCron = minutesToCron(closesAtMinutes, dayOfWeek);
 

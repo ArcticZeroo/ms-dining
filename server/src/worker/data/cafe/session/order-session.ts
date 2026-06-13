@@ -24,11 +24,11 @@ export interface IOrderSession {
     readonly orderTotalWithTax: number;
     readonly lastCompletedStage: SubmitOrderStage | string;
     readonly cardProcessorToken: string;
-    readonly rawCartItemsForWaitTime: readonly unknown[];
     readonly createdDateString: string;
     readonly isReadyForPayment: boolean;
     readonly itemsHash: string;
 
+    retrieveWaitTime(): Promise<IWaitTimeResponse>;
     isUsableForPaymentWithItems(items: Array<IOrderItem> | Array<ICartItemRecord> | string /*hash*/): boolean;
     populateCart(): Promise<void>;
     prepareForIframe(iframeCssUrl: string): Promise<unknown>;

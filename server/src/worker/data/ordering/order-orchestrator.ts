@@ -27,17 +27,6 @@ if (isFakeOrderingEnabled) {
     orderLog.info('⚠️  FAKE_ORDERING is enabled — no real charges will be made');
 }
 
-const getWaitTimeForSession = async (session: IOrderSession): Promise<IWaitTimeResponse> => {
-    if (isFakeOrderingEnabled) {
-        return { minTime: 5, maxTime: 10 };
-    }
-
-    return fetchWaitTimeWithCartItems(
-		session.client as BuyOnDemandClient,
-		[...session.rawCartItemsForWaitTime],
-    );
-};
-
 const toCompletionFinancials = (
     session: IOrderSession,
     waitTime: IWaitTimeResponse,
@@ -131,7 +120,7 @@ export abstract class OrderOrchestrator {
                 }
 
                 trackPostCloseRecovery(pendingOrderId, session.lastCompletedStage, err);
-                waitTime = await getWaitTimeForSession(session).catch(waitErr => {
+                waitTime = await session.retrieveWaitTime().catch(waitErr => {
                     orderLog.error(`Failed to fetch fallback wait time for pending order ${pendingOrderId}:`, waitErr);
                     return { minTime: 0, maxTime: 0 };
                 });
@@ -173,7 +162,7 @@ export abstract class OrderOrchestrator {
         const orderItems = cafeGroup.items.map(cartItemToOrderItem);
         // By constructing the session with order items, we get order totals 'for free'
         const session = await getOrCreatePrewarmedSession(userId, cafeId, orderItems);
-        const waitTime = await getWaitTimeForSession(session);
+        const waitTime = await session.retrieveWaitTime();
 
         return {
             waitTime,

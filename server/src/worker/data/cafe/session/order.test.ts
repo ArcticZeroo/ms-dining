@@ -3,7 +3,7 @@
  *
  * The relevant code is private, so we drive it through the public
  * populateCart() entry point. populateCart calls
- * _runStages(notStarted, cb) which:
+ * #requireStage(notStarted, cb) which:
  *   1. Awaits _retrieveOrderingContextAsync() (where the profit-center
  *      lookup happens) — the path under test.
  *   2. Then runs cb, which eventually calls #addItemToCart and is
