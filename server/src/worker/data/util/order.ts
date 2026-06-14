@@ -132,3 +132,5 @@ export const formatReceiptDateTime = (date: Date) => {
         printDateTime: `${receiptDate} ${receiptTime} `,
     };
 };
+
+export const toChoicesByModifierId = (modifiers: Array<ISerializedModifier>): Map<string, Set<string>> => new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));

@@ -49,7 +49,7 @@ const toCompletionFinancials = (
 };
 
 const wasOrderSentToKitchen = (session: IOrderSession) =>
-    session.lastCompletedStage === SubmitOrderStage.closeOrder
+    session.lastCompletedStage === SubmitOrderStage.sentToKitchen
 	|| session.lastCompletedStage === SubmitOrderStage.sendTextReceipt
 	|| session.lastCompletedStage === SubmitOrderStage.complete;
 

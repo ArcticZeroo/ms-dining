@@ -1,4 +1,7 @@
 import z from 'zod';
+import type { IOrderItem } from '@msdining/common/models/order';
+import { IMenuItemBase } from '@msdining/common/models/cafe';
+import { IStationRecord } from '../../shared/services/station.js';
 
 const PickUpConfigSchema = z.object({
     kitchenText:             z.string().optional(),
@@ -54,3 +57,8 @@ export interface IOrderTotalPrice {
 }
 
 export const ORDER_TIMEZONE = 'PST8PDT';
+
+export interface IEnhancedOrderItem extends IOrderItem {
+    menuItem: IMenuItemBase;
+    station: IStationRecord;
+}

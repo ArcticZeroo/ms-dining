@@ -1,45 +1,40 @@
-import { ICartItemRecord, IPaymentCardInfo, ISerializedModifier, SubmitOrderStage } from '@msdining/common/models/cart';
+import { ICartItemRecord, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
 import type { IOrderItem } from '@msdining/common/models/order';
 import { getTodayDateString } from '@msdining/common/util/date-util';
-import hat from 'hat';
 import { PhoneValidResult } from 'phone';
-import { z } from 'zod';
 import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { IOrderLineItem, } from '../../../../shared/models/buyondemand/cart.js';
-import { ICafe, IMenuItemBase } from '../../../../shared/models/cafe.js';
+import { ICafe } from '../../../../shared/models/cafe.js';
 import { IOrderingContext } from '../../../../shared/models/cart.js';
 import { SERVICE_ERROR_CODES, ServiceError } from '../../../../shared/rpc/errors.js';
 import { createBuyOnDemandClient, getServices } from '../../../../shared/services/registry.js';
-import { IStationRecord } from '../../../../shared/services/station.js';
-import { getNamespaceLogger, logError } from '../../../../shared/util/log.js';
-import { fixed } from '../../../../shared/util/math.js';
-import { StringUtil } from '../../../../shared/util/string.js';
-import { isNonEmptyArray } from '../../../../shared/util/typeguard.js';
+import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import {
+    IEnhancedOrderItem,
     IOrderTotalPrice,
-    IPayConfig,
     IPickupConfig,
     ISiteStoreInfo,
     ORDER_TIMEZONE
 } from '../../../models/ordering.js';
 import { createStationSchedule, IBuyOnDemandStationSchedule } from '../../../util/schedule.js';
 import { retrieveDailyOrderingContext } from '../../ordering/daily-order-context.js';
-import { hashOrderItems, toLocalIsoOffset } from '../../util/order.js';
+import { hashOrderItems, toChoicesByModifierId } from '../../util/order.js';
 import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
 import { IOrderSession } from './order-session.js';
-import { Nullable } from '@msdining/common/models/util';
 import {
     BuyOnDemandAddToOrderResponseSchema,
-    BuyOnDemandAtLeastOneModifier,
-    BuyOnDemandSpecialInstructionsOrEmpty,
     IBuyOnDemandAddToCartRequest,
-    IBuyOnDemandCartItem,
-    IBuyOnDemandModifier,
-    IBuyOnDemandOrderDetails, IBuyOnDemandReceiptItem
+    IBuyOnDemandOrderDetails,
+    IBuyOnDemandReceiptItem
 } from '../../../models/buy-ondemand.js';
 import { completeOrderAfterIframePaymentAsync } from '../buy-ondemand/ordering/complete-order.js';
 import { throwError } from '../../../../shared/util/error.js';
+import { buildPayConfig } from '../buy-ondemand/ordering/pay-config.js';
+import { buildItemForCartAdd } from '../buy-ondemand/ordering/cart-item.js';
+import { retrieveIframeToken } from '../buy-ondemand/ordering/iframe-token.js';
+import { sendPhoneConfirmationAfterOrderCompletion } from '../buy-ondemand/ordering/phone-confirmation.js';
+import { logIframeData } from '../buy-ondemand/ordering/log-iframe-data.js';
 
 const orderLog = getNamespaceLogger('Order');
 
@@ -47,19 +42,11 @@ const logOrderingDebugJson = (cafeName: string, label: string, data: unknown) =>
     orderLog.info(`{${cafeName}} ${label}: ${JSON.stringify(data, null, 2)}`);
 };
 
-const toChoicesByModifierId = (modifiers: Array<ISerializedModifier>): Map<string, Set<string>> =>
-    new Map(modifiers.map(modifier => [modifier.modifierId, new Set(modifier.choiceIds)]));
-
 interface IClosePaymentPopupParams {
     alias: string;
     phoneData: PhoneValidResult;
     paymentToken: string;
     cardInfo: IPaymentCardInfo;
-}
-
-interface IEnhancedOrderItem extends IOrderItem {
-    menuItem: IMenuItemBase;
-    station: IStationRecord;
 }
 
 const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhancedOrderItem>> => {
@@ -81,64 +68,6 @@ const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhan
         } satisfies IEnhancedOrderItem;
     }));
 }
-
-/**
- * Build a pay config from known constants and ordering context data,
- * avoiding the POST /sites/{contextId}/{displayProfileId} call.
- *
- * Constants are sourced from observed HAR responses across multiple cafes.
- * Dynamic values (terminalId, employeeId, etc.) come from the ordering
- * context which is already populated at this point.
- */
-const buildPayConfig = (orderingContext: IOrderingContext): IPayConfig => ({
-    pay:                 { clientId: orderingContext.payClientId },
-    displayOptions:      {
-        'timezone':                       ORDER_TIMEZONE,
-        'currency/currencyCode':          'USD',
-        'currency/currencySymbol':        '$',
-        'currency/currencyDecimalDigits': '2',
-        'currency/currencyCultureName':   'en-US',
-        'useIgOrderApi':                  'true',
-        'useIgPosApi':                    'false',
-        'voidReasonId':                   '11',
-        'onDemandTerminalId':             orderingContext.onDemandTerminalId,
-        'onDemandEmployeeId':             orderingContext.onDemandEmployeeId,
-        'profit-center-id':               orderingContext.profitCenterId,
-        'check-type':                     orderingContext.checkTypeId ?? '1',
-        'isSmsEnabled':                   'true',
-        'isMobileNumberRequired':         'true',
-        'isProfileValid':                 'true',
-        'name-capture/isOptional':        'false',
-        'name-capture/lastInitialOnly':   'true',
-    },
-    pickUpConfig:        {
-        featureEnabled: true,
-        kitchenText:    'PICK-UP',
-        buttonText:     'PICK-UP',
-    },
-    emailReceipt:        {
-        featureEnabled:          true,
-        overrideFromStoreConfig: false,
-    },
-    checkTypeId:         orderingContext.checkTypeId ?? '1',
-    taxBreakupEnabled:   false,
-    hideVATInReceipts:   false,
-    hideAllPrices:       false,
-    hideZeroPrice:       false,
-    specialInstructions: {
-        headerText:                    'Special instructions',
-        characterLimit:                250,
-        featureEnabled:                true,
-        instructionText:               'Any allergies or requests?',
-        additionalSpecialInstructions: [
-            {
-                characterLimit:  250,
-                instructionText: 'Any allergies or requests?',
-                kitchenText:     '',
-            }
-        ],
-    },
-});
 
 export class CafeOrderSession implements IOrderSession {
     readonly #orderingContext;
@@ -215,7 +144,7 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     public getCardProcessorUrl(iframeCssUrl?: string) {
-        return this._getCardProcessorUrl(this.#cardProcessorToken, iframeCssUrl);
+        return this.#getCardProcessorUrl(this.#cardProcessorToken, iframeCssUrl);
     }
 
     isUsableForPaymentWithItems(items: Array<IOrderItem> | Array<ICartItemRecord> | string): boolean {
@@ -230,140 +159,12 @@ export class CafeOrderSession implements IOrderSession {
         return this.#itemsHash === hashOrderItems(items);
     }
 
-    #convertModifierChoicesToBuyOnDemand(choicesByModifierId: Map<string, Set<string>>, localMenuItem: IMenuItemBase): Array<IBuyOnDemandModifier> {
-        const modifiersById = new Map(localMenuItem.modifiers.map(modifier => [modifier.id, modifier]));
-
-        const modifiers: IBuyOnDemandModifier[] = [];
-
-        for (const [modifierId, choiceIds] of choicesByModifierId) {
-            const modifier = modifiersById.get(modifierId);
-
-            if (modifier == null) {
-                throw new Error(`Failed to find modifier with id "${modifierId}"`);
-            }
-
-            for (const choiceId of choiceIds) {
-                const choice = modifier.choices.find(choice => choice.id === choiceId);
-
-                if (choice == null) {
-                    throw new Error(`Failed to find choice with id "${choiceId}" for modifier "${modifierId}"`);
-                }
-
-                const price = choice.price.toFixed(2);
-
-                modifiers.push({
-                    id:                          choiceId,
-                    parentGroupId:               modifierId,
-                    description:                 choice.description,
-                    selected:                    true,
-                    baseAmount:                  price,
-                    amount:                      price,
-                    childPriceLevelId:           this.#orderingContext.storePriceLevel,
-                    currencyUnit:                'USD',
-                    tagNames:                    [],
-                    tagIds:                      [],
-                    isModifierAvailableToGuests: true,
-                    quantity:                    1,
-                    count:                       1,
-                    properties:                  {
-                        applicableTargetMenuFilter: 'All'
-                    }
-                });
-            }
-        }
-
-        return modifiers;
-    }
-
-    #buildItemForCartAdd({ quantity, menuItem, station, modifiers: orderItemModifiers, specialInstructions }: IEnhancedOrderItem): IBuyOnDemandCartItem {
-        const amount = menuItem.price.toFixed(2);
-        const receiptText = menuItem.receiptText ?? menuItem.name;
-
-        const choicesByModifierId = toChoicesByModifierId(orderItemModifiers);
-        const modifiers = this.#convertModifierChoicesToBuyOnDemand(choicesByModifierId, menuItem);
-        const modifierTotal = modifiers.reduce((sum, modifier) => sum + Number(modifier.amount), 0);
-
-        const cartItemId = hat();
-        const cartGuid = `${menuItem.id}-${Date.now()}`;
-
-        return {
-            id:                    menuItem.id,
-            contextId:             this.client.config.contextId,
-            tenantId:              this.client.config.tenantId,
-            itemId:                menuItem.id,
-            name:                  menuItem.name,
-            displayText:           menuItem.name,
-            count:                 quantity,
-            quantity:              quantity,
-            amount,
-            price:                 { currencyUnit: 'USD', amount },
-            menuId:                station.menuId,
-            conceptId:             station.id,
-            conceptName:           station.name,
-            holdAndFire:           false,
-            hasModifiers:          modifiers.length > 0,
-            modifierTotal,
-            mealPeriodId:          null,
-            uniqueId:              cartGuid,
-            cartItemId,
-            menuPriceLevelId:      this.#orderingContext.storePriceLevel,
-            menuPriceLevelApplied: false,
-            receiptText,
-            kpText:                receiptText,
-            kitchenDisplayText:    receiptText,
-            // Constants from observed HAR responses
-            isDeleted:               false,
-            isActive:                false,
-            isSoldByWeight:          false,
-            tareWeight:              0,
-            isDiscountable:          true,
-            allowPriceOverride:      true,
-            isTaxIncluded:           false,
-            taxClasses:              [],
-            kitchenVideoCategoryId:  0,
-            kitchenCookTimeSeconds:  0,
-            skus:                    [],
-            itemType:                'ITEM',
-            itemImages:              [],
-            isAvailableToGuests:     true,
-            isPreselectedToGuests:   false,
-            tagNames:                [],
-            tagIds:                  [],
-            substituteItemId:        '',
-            isSubstituteItem:        false,
-            sequence:                0,
-            description:             menuItem.description ?? '',
-            longDescription:         menuItem.description ?? '',
-            options:                 [],
-            attributes:              [],
-            choiceGroupsUnavailable: false,
-            selectedModifiers:       this.#getModifiersForCartItem(modifiers),
-            lineItemInstructions:    this.#getSpecialInstructionsForCartItem(specialInstructions),
-            properties:              {
-                cartGuid,
-                scannedItem:  false,
-                priceLevelId: this.#orderingContext.storePriceLevel
-            }
-        };
-    }
-
-    #getModifiersForCartItem(modifiers: IBuyOnDemandModifier[]): BuyOnDemandAtLeastOneModifier | undefined {
-        if (isNonEmptyArray(modifiers)) {
-            return modifiers;
-        }
-
-        return undefined;
-    }
-
-    #getSpecialInstructionsForCartItem(specialInstructions: Nullable<string>): BuyOnDemandSpecialInstructionsOrEmpty {
-        if (!specialInstructions) {
-            return [];
-        }
-
-        return [{
-            label: '',
-            text:  specialInstructions
-        }];
+    #buildItemForCartAdd(orderItem: IEnhancedOrderItem) {
+        return buildItemForCartAdd({
+            orderItem,
+            orderingContext: this.#orderingContext,
+            cafeConfig: this.client.config
+        });
     }
 
     async #addItemToCart(orderItem: IEnhancedOrderItem) {
@@ -373,33 +174,26 @@ export class CafeOrderSession implements IOrderSession {
         logOrderingDebugJson(this.client.cafe.name, 'Local cart item lookup', {
             cartItemId:        orderItem.menuItemId,
             quantity:          orderItem.quantity,
-            stationId:         orderItem.station.id,
-            stationName:       orderItem.station.name,
-            stationMenuId:     orderItem.station.menuId,
-            localMenuItemId:   orderItem.menuItem.id,
-            localMenuItemName: orderItem.menuItem.name,
             selectedModifiers: [...choicesByModifierId].map(([modifierId, choiceIds]) => ({
                 modifierId,
                 choiceIds: [...choiceIds],
             })),
         });
 
-        const conceptData = this.#stationScheduleById.get(orderItem.station.id);
-        if (conceptData == null) {
+        const stationScheduleData = this.#stationScheduleById.get(orderItem.station.id);
+        if (stationScheduleData == null) {
             throw new Error(`No concept schedule data found for concept "${orderItem.station.id}" (${orderItem.station.name}). Available: ${[...this.#stationScheduleById.keys()].join(', ')}`);
         }
 
-        const cartItem = this.#buildItemForCartAdd(orderItem);
-
         const requestBody = {
-            item:               cartItem,
+            item:               this.#buildItemForCartAdd(orderItem),
             currencyDetails:    {
                 currencyDecimalDigits: '2',
                 currencyCultureName:   'en-US',
                 currencyCode:          'USD',
                 currencySymbol:        '$',
             },
-            schedule:           conceptData.schedule,
+            schedule:           stationScheduleData.schedule,
             orderTimeZone:      ORDER_TIMEZONE,
             storePriceLevel:    this.#orderingContext.storePriceLevel,
             scheduledDay:       0,
@@ -417,8 +211,8 @@ export class CafeOrderSession implements IOrderSession {
                 priceLevelId:              this.#orderingContext.storePriceLevel,
             },
             conceptSchedule:    {
-                openScheduleExpression:  conceptData.openScheduleExpression,
-                closeScheduleExpression: conceptData.closeScheduleExpression,
+                openScheduleExpression:  stationScheduleData.openScheduleExpression,
+                closeScheduleExpression: stationScheduleData.closeScheduleExpression,
             },
             isMultiItem:        false,
             scannedOrder:       false,
@@ -519,8 +313,8 @@ export class CafeOrderSession implements IOrderSession {
         })));
     }
 
-    private async _getCardProcessorSiteToken(iframeCssUrl?: string) {
-        if (StringUtil.isNullOrWhitespace(this.#orderNumber)) {
+    async #getCardProcessorSiteToken(iframeCssUrl?: string) {
+        if (!this.#orderNumber) {
             throw new Error('Order number is not set');
         }
 
@@ -528,47 +322,18 @@ export class CafeOrderSession implements IOrderSession {
             throw new Error('Order totals cannot be zero');
         }
 
-        const billDate = this.#lastOrderDetails?.created ?? toLocalIsoOffset(new Date());
-        const nowString = toLocalIsoOffset(new Date());
-
-        const response = await this.client.requestAsync(`/iFrame/token/${this.client.config.tenantId}`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify({
-                    taxAmount:             this.#price.tax.toFixed(2),
-                    invoiceId:             this.#orderNumber,
-                    billDate,
-                    userCurrentDate:       nowString,
-                    currencyUnit:          'USD',
-                    description:           `Order ${this.#orderNumber}`,
-                    transactionAmount:     this.#price.total.toFixed(2),
-                    remainingTipAmount:    '0.00',
-                    tipAmount:             '0.00',
-                    style:                 iframeCssUrl ?? `https://${this.client.cafe.id}.buy-ondemand.com/api/payOptions/getIFrameCss/en/${this.client.cafe.id}.buy-ondemand.com/false/false/false`,
-                    multiPaymentAmount:    fixed(this.#price.total, 2),
-                    isWindCave:            false,
-                    isCyberSource:         false,
-                    isCyberSourceWallets:  false,
-                    language:              'en',
-                    previousTransactionId: null,
-                    contextId:             this.client.config.contextId,
-                    profileId:             this.client.config.displayProfileId,
-                    // Not sure if the specific conceptId matters here, picking the first one seems to work though
-                    conceptId:             this.#stationScheduleById.keys().next().value,
-                    profitCenterId:        this.#orderingContext.profitCenterId,
-                    processButtonText:     'PROCESS',
-                    terminalId:            this.#orderingContext.onDemandTerminalId
-                })
-            });
-
-        const json = await response.json();
-        const { token } = z.object({ token: z.string() }).parse(json);
-
-        return token;
+        return retrieveIframeToken({
+            price: this.#price,
+            client: this.client,
+            orderingContext: this.#orderingContext,
+            firstStationId: this.#stationScheduleById.keys().next().value,
+            orderNumber: this.#orderNumber,
+            lastOrderDetails: this.#lastOrderDetails,
+            iframeCssUrl,
+        });
     }
 
-    private _getCardProcessorUrl(token: string, iframeCssUrl?: string) {
+    #getCardProcessorUrl(token: string, iframeCssUrl?: string) {
         if (!this.client.config) {
             throw new Error('Config is required to get card processor url!');
         }
@@ -578,64 +343,23 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     async #sendPhoneConfirmation(phoneData: PhoneValidResult) {
-        await this.client.requestAsync(`/communication/sendSMSReceipt`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify({
-                    contextId:         this.client.config.contextId,
-                    orderId:           this.#orderId,
-                    sendOrderTo:       phoneData.phoneNumber,
-                    smsConfig:         {
-                        overrideFromStoreConfig: true,
-                        introText:               '🐧 Thank you for placing your order with {{N}}',
-                        isItemizedListEnabled:   true,
-                        isTotalsEnabled:         true,
-                        isIntroEnabled:          true,
-                        showCompleteCheckNumber: true,
-                        appReceipt:              {
-                            introText:      '🐧 Thank you for placing your order with {{N}}. Your order number is {{O}}',
-                            enableFallback: false,
-                        },
-                        linkIntroText:           '🐧 Thank you for placing your order with {{N}}. Please find your receipt here {{L}}'
-                    },
-                    isCateringEnabled: false,
-                    textReceiptConfig: {
-                        featureEnabled:  true,
-                        headerText:      'Text receipt',
-                        instructionText: 'Enter your phone number. Message & data rates may apply.',
-                        autoSendEnabled: true
-                    },
-                    displayProfileId:  this.client.config.displayProfileId,
-                })
-            });
+        return sendPhoneConfirmationAfterOrderCompletion({
+            client: this.client,
+            orderId: this.#orderId ?? throwError('Order number is required to send phone confirmation'),
+            phoneData,
+        });
     }
 
-    private async _logIframeData(paymentToken: string, cardInfo: IPaymentCardInfo) {
-        await this.client.requestAsync(
-            `/order/logIframeData`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify({
-                    type:        'success',
-                    data:        {
-                        token:    paymentToken,
-                        cardInfo: {
-                            cardIssuer:          cardInfo.cardIssuer,
-                            accountNumberMasked: cardInfo.accountNumberMasked,
-                            expirationYearMonth: cardInfo.expirationYearMonth,
-                            cardholderName:      cardInfo.cardHolderName,
-                            postalCode:          cardInfo.postalCode,
-                        }
-                    },
-                    orderId:     this.#orderId,
-                    orderNumber: this.#orderNumber,
-                    paymentType: 'rGuestIframe'
-                })
-            },
-            false /*shouldValidateSuccess*/
-        );
+    #logIframeDataInBackground(paymentToken: string, cardInfo: IPaymentCardInfo) {
+        logIframeData({
+            client: this.client,
+            paymentToken,
+            cardInfo,
+            orderId: this.orderId ?? throwError('Order ID is required to log iframe data'),
+            orderNumber: this.orderNumber ?? throwError('Order number is required to log iframe data'),
+        }).catch(err => {
+            orderLog.error(`Failed to log iFrame data for order ${this.#orderId}: ${err}`);
+        });
     }
 
     async #sendOrderToKitchenAsync(
@@ -704,7 +428,7 @@ export class CafeOrderSession implements IOrderSession {
     }> {
         orderLog.info(`{${this.client.cafe.name}} Preparing for iframe payment`);
         this.#requireStage(SubmitOrderStage.addToCart);
-        this.#cardProcessorToken = await this._getCardProcessorSiteToken(iframeCssUrl);
+        this.#cardProcessorToken = await this.#getCardProcessorSiteToken(iframeCssUrl);
         this.#lastCompletedStage = SubmitOrderStage.initializeCardProcessor;
 
         if (!this.#orderId || !this.#orderNumber) {
@@ -713,7 +437,7 @@ export class CafeOrderSession implements IOrderSession {
 
         return {
             siteToken:   this.#cardProcessorToken,
-            iframeUrl:   this._getCardProcessorUrl(this.#cardProcessorToken, iframeCssUrl),
+            iframeUrl:   this.#getCardProcessorUrl(this.#cardProcessorToken, iframeCssUrl),
             orderId:     this.#orderId,
             orderNumber: this.#orderNumber,
         };
@@ -738,11 +462,7 @@ export class CafeOrderSession implements IOrderSession {
             this.#requireStage(SubmitOrderStage.initializeCardProcessor);
             this.#lastCompletedStage = SubmitOrderStage.payment;
 
-            try {
-                await this._logIframeData(paymentToken, cardInfo);
-            } catch (err) {
-                logError('Unable to report iframe data (non-fatal, continuing anyway):', err);
-            }
+            this.#logIframeDataInBackground(paymentToken, cardInfo)
 
             const readyTime = await this.retrieveWaitTime();
             waitTime = readyTime;
@@ -756,7 +476,7 @@ export class CafeOrderSession implements IOrderSession {
                 cardInfo,
             }, readyTime);
 
-            this.#lastCompletedStage = SubmitOrderStage.closeOrder;
+            this.#lastCompletedStage = SubmitOrderStage.sentToKitchen;
             orderLog.info(`{${this.client.cafe.name}} Order closed, sending phone confirmation`);
 
             await this.#sendPhoneConfirmation(phoneData);

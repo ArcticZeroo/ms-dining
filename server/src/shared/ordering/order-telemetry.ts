@@ -101,7 +101,7 @@ export const executeTrackedOrderStep = async <T>(options: ITrackedOrderStepOptio
 
 /**
  * Tracks a pre-kitchen failure: the order failed before it was sent
- * to the kitchen (before closeOrder stage). Logs + emits telemetry.
+ * to the kitchen (before sentToKitchen stage). Logs + emits telemetry.
  * The error is still re-thrown by the caller — this just records it.
  */
 export const trackPreKitchenFailure = (

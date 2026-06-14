@@ -25,7 +25,7 @@ The solution is to load the rguest iframe on the **frontend** (where the captcha
 
 ### Stage Progression
 ```
-notStarted → addToCart → initializeCardProcessor → payment → closeOrder → complete
+notStarted → addToCart → initializeCardProcessor → payment → sentToKitchen → complete
 ```
 
 ### Detailed Flow
@@ -38,7 +38,7 @@ notStarted → addToCart → initializeCardProcessor → payment → closeOrder 
 │         Returns: orderNumber, orderId, lineItems, totals      │
 │                                                              │
 │  2. prepareBeforeOrder()                                      │
-│     ├─> _getCardProcessorSiteToken()                          │
+│     ├─> #getCardProcessorSiteToken()                          │
 │     │   └─> POST /iFrame/token/{tenantId}                     │
 │     │       Body: taxAmount, invoiceId, transactionAmount,     │
 │     │             contextId, profileId, profitCenterId,        │
@@ -579,8 +579,8 @@ useEffect(() => {
 
 ### Keep
 - `#populateCart()` — still need to build the order server-side
-- `_getCardProcessorSiteToken()` — still need the site token to construct iframe URL
-- `_getCardProcessorUrl()` — still need to construct the URL for the frontend
+- `#getCardProcessorSiteToken()` — still need the site token to construct iframe URL
+- `#getCardProcessorUrl()` — still need to construct the URL for the frontend
 - `_closeOrderAsync()` — still need to close the order with the payment token
 - `#sendPhoneConfirmation()` — still need SMS receipts
 - All the ordering context, menu item, and cart logic
@@ -614,8 +614,8 @@ useEffect(() => {
 
 This endpoint:
 1. Populates the cart (`#populateCart()`)
-2. Gets the site token (`_getCardProcessorSiteToken()`)
-3. Constructs the iframe URL (`_getCardProcessorUrl()`)
+2. Gets the site token (`#getCardProcessorSiteToken()`)
+3. Constructs the iframe URL (`#getCardProcessorUrl()`)
 4. Returns the URL and token to the frontend
 
 #### New endpoint: `POST /api/dining/order/complete`

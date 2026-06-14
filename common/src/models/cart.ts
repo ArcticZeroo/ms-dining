@@ -10,7 +10,7 @@ export enum SubmitOrderStage {
     addToCart = 'addToCart',
     initializeCardProcessor = 'initializeCardProcessor',
     payment = 'payment',
-    closeOrder = 'closeOrder',
+    sentToKitchen = 'sentToKitchen',
     sendTextReceipt = 'sendTextReceipt',
     complete = 'complete'
 }
@@ -19,7 +19,7 @@ export const SUBMIT_ORDER_STAGES_IN_ORDER = [
     SubmitOrderStage.addToCart,
     SubmitOrderStage.initializeCardProcessor,
     SubmitOrderStage.payment,
-    SubmitOrderStage.closeOrder,
+    SubmitOrderStage.sentToKitchen,
     SubmitOrderStage.sendTextReceipt,
     SubmitOrderStage.complete
 ];
