@@ -12,8 +12,6 @@ import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import {
     IEnhancedOrderItem,
     IOrderTotalPrice,
-    IPickupConfig,
-    ISiteStoreInfo,
     ORDER_TIMEZONE
 } from '../../../models/ordering.js';
 import { createStationSchedule, IBuyOnDemandStationSchedule } from '../../../util/schedule.js';
@@ -99,9 +97,6 @@ export class CafeOrderSession implements IOrderSession {
     // echoed back to the close order endpoint as-is.
     #lastOrderDetails: IBuyOnDemandOrderDetails | null = null;
 
-    #siteStoreInfo: ISiteStoreInfo = {};
-    #sitePickUpConfig: IPickupConfig | null = null;
-
     readonly #orderItems: IEnhancedOrderItem[];
     readonly #itemsHash: string;
     readonly #stationScheduleById = new Map<string, IBuyOnDemandStationSchedule>();
@@ -134,7 +129,7 @@ export class CafeOrderSession implements IOrderSession {
 
     get isReadyForPayment() {
         return this.createdDateString === getTodayDateString()
-                && this.#lastCompletedStage === SubmitOrderStage.initializeCardProcessor;
+                && this.#lastCompletedStage === SubmitOrderStage.addToCart;
     }
 
     get itemsHash() {
@@ -241,8 +236,6 @@ export class CafeOrderSession implements IOrderSession {
             scheduledDay:    0,
         } satisfies IBuyOnDemandAddItemToOrderRequest;
 
-        logOrderingDebugJson(this.client.cafe.name, 'Add-to-existing-order request body (PUT)', requestBody);
-
         return this.client.requestAsync(`${this.#ordersUrl}/${this.#orderId}`, {
             method:  'PUT',
             headers: JSON_HEADERS,
@@ -251,12 +244,10 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     async #addItemToCart(orderItem: IEnhancedOrderItem) {
-        const isNewOrder = this.#orderId == null;
         const response = await this.#sendAddItemRequest(orderItem);
 
         const json = await response.json();
         const { orderDetails } = BuyOnDemandAddToOrderResponseSchema.parse(json);
-        logOrderingDebugJson(this.client.cafe.name, 'Add-to-cart response orderDetails', orderDetails);
 
         if (!orderDetails.orderId) {
             throw new Error(`Add-to-cart response did not include an order id for cafe ${this.client.cafe.name}`);
@@ -271,18 +262,10 @@ export class CafeOrderSession implements IOrderSession {
         this.#price.tax = Number(orderDetails.taxTotalAmount.amount);
         this.#price.subtotal = Number(orderDetails.taxExcludedTotalAmount.amount);
         this.#price.total = Number(orderDetails.totalDueAmount.amount);
-
-        let orderAction = 'appended to order';
-        if (isNewOrder) {
-            orderAction = 'created order';
-        }
-
-        orderLog.info(`{${this.client.cafe.name}} Item ${orderItem.menuItemId} ${orderAction} — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#price.total.toFixed(2)}`);
     }
 
     async #sendAddItemRequest(orderItem: IEnhancedOrderItem) {
         const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
-        orderLog.info(`{${this.client.cafe.name}} Adding item "${orderItem.menuItem.name}" (id: ${orderItem.menuItemId}, qty: ${orderItem.quantity}, modifiers: ${orderItem.modifiers.length}, specialInstructions: ${orderItem.specialInstructions ?? 'none'}) to cart`);
 
         logOrderingDebugJson(this.client.cafe.name, 'Local cart item lookup', {
             cartItemId:        orderItem.menuItemId,
@@ -308,14 +291,13 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     async #populateCart() {
-        orderLog.info(`{${this.client.cafe.name}} Populating cart (${this.#orderItems.length} item(s))`);
-
         await this.#populateStationScheduleData();
 
         // Don't  parallelize, not sure what happens on the server if we do multiple concurrent adds
         for (const orderItem of this.#orderItems) {
             await this.#addItemToCart(orderItem);
         }
+
         orderLog.info(`{${this.client.cafe.name}} Cart population complete — total: $${this.#price.total.toFixed(2)}`);
     }
 
@@ -361,7 +343,6 @@ export class CafeOrderSession implements IOrderSession {
             this.#stationScheduleById.set(stationId, schedule);
         }
 
-        orderLog.info(`{${this.client.cafe.name}} Concept schedule synthesized (${stationSchedulePromisesById.size} concept(s))`);
         logOrderingDebugJson(this.client.cafe.name, 'Synthesized concept schedule', [...this.#stationScheduleById].map(([conceptId, data]) => ({
             conceptId,
             scheduleEntryCount:      data.schedule.length,
@@ -446,8 +427,8 @@ export class CafeOrderSession implements IOrderSession {
             phoneData,
             orderingContext: this.#orderingContext,
             cardInfo,
-            pickupConfig: this.#sitePickUpConfig ?? throwError('Pickup config is not set'),
-            siteStoreInfo: this.#siteStoreInfo,
+            pickupConfig: this.#orderingContext.fullPickupConfig ?? {},
+            siteStoreInfo: this.#orderingContext.fullSiteStoreInfo ?? {},
             price: this.price,
             receiptItems,
             firstStationId: this.#stationScheduleById.keys().next().value ?? throwError('No station schedule data found'),
