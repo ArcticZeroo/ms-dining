@@ -39,9 +39,9 @@ const toCompletionFinancials = (
     return {
         buyOnDemandOrderId:     session.orderId,
         buyOnDemandOrderNumber: session.orderNumber,
-        subtotal:               session.orderTotalWithoutTax,
-        tax:                    session.orderTotalTax,
-        total:                  session.orderTotalWithTax,
+        subtotal:               session.price.subtotal,
+        tax:                    session.price.tax,
+        total:                  session.price.total,
         waitTimeMin:            waitTime.minTime,
         waitTimeMax:            waitTime.maxTime,
         completedAt,
@@ -166,9 +166,9 @@ export abstract class OrderOrchestrator {
 
         return {
             waitTime,
-            subtotal: session.orderTotalWithoutTax,
-            tax:      session.orderTotalTax,
-            total:    session.orderTotalWithTax,
+            subtotal: session.price.subtotal,
+            tax:      session.price.tax,
+            total:    session.price.total,
         };
     }
 

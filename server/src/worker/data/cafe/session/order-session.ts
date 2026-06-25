@@ -4,6 +4,7 @@ import type { PhoneValidResult } from 'phone';
 import type { SubmitOrderStage } from '@msdining/common/models/cart';
 import type { BuyOnDemandClient } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
 import { IOrderItem } from '@msdining/common/models/order';
+import { IOrderTotalPrice } from '../../../models/ordering.js';
 
 interface IFakeBuyOnDemandClient {
     cafe: {
@@ -24,6 +25,7 @@ export interface IOrderSession {
     readonly createdDateString: string;
     readonly isReadyForPayment: boolean;
     readonly itemsHash: string;
+    readonly price: IOrderTotalPrice;
 
     retrieveWaitTime(): Promise<IWaitTimeResponse>;
     isUsableForPaymentWithItems(items: Array<IOrderItem> | Array<ICartItemRecord> | string /*hash*/): boolean;

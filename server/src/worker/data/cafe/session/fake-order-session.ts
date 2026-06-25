@@ -8,6 +8,8 @@ import { getNamespaceLogger } from '../../../../shared/util/log.js';
 import { getTodayDateString } from '@msdining/common/util/date-util';
 import { hashOrderItems } from '../../util/order.js';
 import { getServices } from '../../../../shared/services/registry.js';
+import { IOrderTotalPrice } from '../../../models/ordering.js';
+import { fixed } from '../../../../shared/util/math.js';
 
 const fakeLog = getNamespaceLogger('FakeOrder');
 
@@ -60,16 +62,12 @@ export class FakeCafeOrderSession implements IOrderSession {
         return this.#orderNumber;
     }
 
-    get orderTotalWithoutTax() {
-        return this.#subtotal;
-    }
-
-    get orderTotalTax() {
-        return Math.round(this.#subtotal * FAKE_TAX_RATE * 100) / 100;
-    }
-
-    get orderTotalWithTax() {
-        return Math.round((this.#subtotal + this.orderTotalTax) * 100) / 100;
+    get price(): IOrderTotalPrice {
+        return {
+            subtotal: this.#subtotal,
+            tax: fixed(this.#subtotal * FAKE_TAX_RATE, 2),
+            total: fixed(this.#subtotal * (1 + FAKE_TAX_RATE), 2),
+        }
     }
 
     get lastCompletedStage() {
