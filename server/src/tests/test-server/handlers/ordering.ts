@@ -3,7 +3,7 @@
  * wait time, and profit center lookup.
  */
 
-import { RouteDefinition, TestRequest, TestResponse, ITestServerState } from '../models.js';
+import { RouteDefinition, TestRequest, TestResponse, ITestServerState, OrderState } from '../models.js';
 
 /**
  * GET /sites/:contextId
@@ -62,27 +62,30 @@ function handleGetPayConfig(req: TestRequest, state: ITestServerState): TestResp
 }
 
 /**
- * POST /order/:tenantId/:contextId/orders
- * Adds items to cart / creates an order.
+ * An item from an add-to-cart (POST `item`) or append (PUT `itemList`) body.
  */
-function handleAddToOrder(req: TestRequest, state: ITestServerState): TestResponse {
-    const body = req.body as { item?: { amount?: string; quantity?: number } } | undefined;
+interface IAddedItem {
+    amount?: string;
+    quantity?: number;
+    itemId?: string;
+}
 
-    // Find or create order for this cafe
-    let order = Array.from(state.orders.values())
-        .find(existingOrder => existingOrder.cafeId === req.cafeId && !existingOrder.closed);
-
-    if (!order) {
-        order = state.createOrder(req.cafeId);
-    }
-
-    const itemAmount = Number(body?.item?.amount ?? '0');
-    const quantity = body?.item?.quantity ?? 1;
+/**
+ * Appends a line item to an order, accumulates the order totals, and returns the
+ * cumulative orderDetails response shared by the POST (create) and PUT (append)
+ * handlers. Totals are cumulative because the real BoD response grows with the
+ * order, and the server assigns (not accumulates) from them.
+ */
+function applyItemToOrder(order: OrderState, item: IAddedItem | undefined): TestResponse {
+    const itemAmount = Number(item?.amount ?? '0');
+    const quantity = item?.quantity ?? 1;
     const lineTotal = itemAmount * quantity;
     const tax = Math.round(lineTotal * 0.101 * 100) / 100; // ~10.1% tax
 
-    const lineItemId = `line-item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    order.lineItems.push({ lineItemId });
+    // Identity-bearing lineItemId (itemId + position) so receipt-mapping tests can
+    // prove which line maps to which add rather than only counting lines.
+    const lineItemId = `${item?.itemId ?? 'item'}-${order.lineItems.length}`;
+    order.lineItems.push({ lineItemId, itemId: item?.itemId });
     order.taxExcludedTotal += lineTotal;
     order.taxTotal += tax;
     order.totalDue += lineTotal + tax;
@@ -94,13 +97,39 @@ function handleAddToOrder(req: TestRequest, state: ITestServerState): TestRespon
                 orderId: order.orderId,
                 orderNumber: order.orderNumber,
                 created: new Date().toISOString(),
-                taxExcludedTotalAmount: { amount: lineTotal.toFixed(2) },
-                taxTotalAmount: { amount: tax.toFixed(2) },
-                totalDueAmount: { amount: (lineTotal + tax).toFixed(2) },
+                taxExcludedTotalAmount: { amount: order.taxExcludedTotal.toFixed(2) },
+                taxTotalAmount: { amount: order.taxTotal.toFixed(2) },
+                totalDueAmount: { amount: order.totalDue.toFixed(2) },
                 lineItems: order.lineItems,
             },
         },
     };
+}
+
+/**
+ * POST /order/:tenantId/:contextId/orders
+ * Creates a new order with its first item. Mirrors real BoD, which mints a fresh
+ * order on every POST — so a duplicate-POST regression surfaces as two order ids.
+ */
+function handleAddToOrder(req: TestRequest, state: ITestServerState): TestResponse {
+    const body = req.body as { item?: IAddedItem } | undefined;
+    const order = state.createOrder(req.cafeId);
+    return applyItemToOrder(order, body?.item);
+}
+
+/**
+ * PUT /order/:tenantId/:contextId/orders/:orderId
+ * Appends an item to an existing order (the official multi-item flow).
+ */
+function handleAddToExistingOrder(req: TestRequest, state: ITestServerState): TestResponse {
+    const orderId = req.params?.orderId;
+    const order = orderId ? state.getOrderState(orderId) : undefined;
+    if (!order) {
+        return { status: 404, body: { error: `Order ${orderId} not found` } };
+    }
+
+    const body = req.body as { itemList?: IAddedItem } | undefined;
+    return applyItemToOrder(order, body?.itemList);
 }
 
 /**
@@ -169,6 +198,11 @@ export const orderingRoutes: RouteDefinition[] = [
         method: 'POST',
         pattern: '/order/:tenantId/:contextId/orders',
         handler: handleAddToOrder,
+    },
+    {
+        method: 'PUT',
+        pattern: '/order/:tenantId/:contextId/orders/:orderId',
+        handler: handleAddToExistingOrder,
     },
     {
         method: 'POST',

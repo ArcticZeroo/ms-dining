@@ -4,7 +4,6 @@ import type { IOrderItem } from '@msdining/common/models/order';
 import { getTodayDateString } from '@msdining/common/util/date-util';
 import { PhoneValidResult } from 'phone';
 import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
-import { IOrderLineItem, } from '../../../../shared/models/buyondemand/cart.js';
 import { ICafe } from '../../../../shared/models/cafe.js';
 import { IOrderingContext } from '../../../../shared/models/cart.js';
 import { SERVICE_ERROR_CODES, ServiceError } from '../../../../shared/rpc/errors.js';
@@ -24,14 +23,15 @@ import { fetchWaitTimeWithCartItems } from '../buy-ondemand/wait-time.js';
 import { IOrderSession } from './order-session.js';
 import {
     BuyOnDemandAddToOrderResponseSchema,
+    IBuyOnDemandAddItemToOrderRequest,
     IBuyOnDemandAddToCartRequest,
-    IBuyOnDemandOrderDetails,
-    IBuyOnDemandReceiptItem
+    IBuyOnDemandCartItem,
+    IBuyOnDemandOrderDetails
 } from '../../../models/buy-ondemand.js';
 import { completeOrderAfterIframePaymentAsync } from '../buy-ondemand/ordering/complete-order.js';
 import { throwError } from '../../../../shared/util/error.js';
 import { buildPayConfig } from '../buy-ondemand/ordering/pay-config.js';
-import { buildItemForCartAdd } from '../buy-ondemand/ordering/cart-item.js';
+import { buildItemForCartAdd, buildReceiptItems } from '../buy-ondemand/ordering/cart-item.js';
 import { retrieveIframeToken } from '../buy-ondemand/ordering/iframe-token.js';
 import { sendPhoneConfirmationAfterOrderCompletion } from '../buy-ondemand/ordering/phone-confirmation.js';
 import { logIframeData } from '../buy-ondemand/ordering/log-iframe-data.js';
@@ -42,6 +42,13 @@ const logOrderingDebugJson = (cafeName: string, label: string, data: unknown) =>
     orderLog.info(`{${cafeName}} ${label}: ${JSON.stringify(data, null, 2)}`);
 };
 
+const CURRENCY_DETAILS = {
+    currencyDecimalDigits: '2',
+    currencyCultureName:   'en-US',
+    currencyCode:          'USD',
+    currencySymbol:        '$',
+} as const;
+
 interface IClosePaymentPopupParams {
     alias: string;
     phoneData: PhoneValidResult;
@@ -50,7 +57,13 @@ interface IClosePaymentPopupParams {
 }
 
 const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhancedOrderItem>> => {
-    return Promise.all(orderItems.map(async orderItem => {
+    // The cart is immutable once the session starts, so derive the wire ids here,
+    // once. cartGuid is shared (uses the first item's id); each uniqueId is
+    // distinct per line. The +1 keeps item 0's uniqueId distinct from cartGuid.
+    const sessionStartTimeMs = Date.now();
+    const cartGuid = `${orderItems[0]?.menuItemId}-${sessionStartTimeMs}`;
+
+    return Promise.all(orderItems.map(async (orderItem, index) => {
         const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: orderItem.menuItemId });
         if (menuItem == null) {
             throw new ServiceError(SERVICE_ERROR_CODES.NOT_FOUND, `MenuItem not found for id ${orderItem.menuItemId}`);
@@ -64,7 +77,9 @@ const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhan
         return {
             ...orderItem,
             menuItem,
-            station
+            station,
+            cartGuid,
+            uniqueId: `${orderItem.menuItemId}-${sessionStartTimeMs + index + 1}`,
         } satisfies IEnhancedOrderItem;
     }));
 }
@@ -89,7 +104,6 @@ export class CafeOrderSession implements IOrderSession {
 
     readonly #orderItems: IEnhancedOrderItem[];
     readonly #itemsHash: string;
-    readonly #lineItemsById = new Map<string, IOrderLineItem>();
     readonly #stationScheduleById = new Map<string, IBuyOnDemandStationSchedule>();
     public readonly createdDateString = getTodayDateString();
 
@@ -163,36 +177,21 @@ export class CafeOrderSession implements IOrderSession {
         return buildItemForCartAdd({
             orderItem,
             orderingContext: this.#orderingContext,
-            cafeConfig: this.client.config
+            cafeConfig:      this.client.config,
+            cartGuid:        orderItem.cartGuid,
+            uniqueId:        orderItem.uniqueId,
         });
     }
 
-    async #addItemToCart(orderItem: IEnhancedOrderItem) {
-        const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
-        orderLog.info(`{${this.client.cafe.name}} Adding item "${orderItem.menuItem.name}" (id: ${orderItem.menuItemId}, qty: ${orderItem.quantity}, modifiers: ${orderItem.modifiers.length}, specialInstructions: ${orderItem.specialInstructions ?? 'none'}) to cart`);
+    get #ordersUrl() {
+        return `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orders`;
+    }
 
-        logOrderingDebugJson(this.client.cafe.name, 'Local cart item lookup', {
-            cartItemId:        orderItem.menuItemId,
-            quantity:          orderItem.quantity,
-            selectedModifiers: [...choicesByModifierId].map(([modifierId, choiceIds]) => ({
-                modifierId,
-                choiceIds: [...choiceIds],
-            })),
-        });
-
-        const stationScheduleData = this.#stationScheduleById.get(orderItem.station.id);
-        if (stationScheduleData == null) {
-            throw new Error(`No concept schedule data found for concept "${orderItem.station.id}" (${orderItem.station.name}). Available: ${[...this.#stationScheduleById.keys()].join(', ')}`);
-        }
-
+    // POST the first item, which creates the order.
+    async #createOrderWithFirstItem(item: IBuyOnDemandCartItem, stationScheduleData: IBuyOnDemandStationSchedule) {
         const requestBody = {
-            item:               this.#buildItemForCartAdd(orderItem),
-            currencyDetails:    {
-                currencyDecimalDigits: '2',
-                currencyCultureName:   'en-US',
-                currencyCode:          'USD',
-                currencySymbol:        '$',
-            },
+            item,
+            currencyDetails:    CURRENCY_DETAILS,
             schedule:           stationScheduleData.schedule,
             orderTimeZone:      ORDER_TIMEZONE,
             storePriceLevel:    this.#orderingContext.storePriceLevel,
@@ -214,40 +213,98 @@ export class CafeOrderSession implements IOrderSession {
                 openScheduleExpression:  stationScheduleData.openScheduleExpression,
                 closeScheduleExpression: stationScheduleData.closeScheduleExpression,
             },
+            // The official site sends isMultiItem: false even for multi-item orders.
             isMultiItem:        false,
             scannedOrder:       false,
         } satisfies IBuyOnDemandAddToCartRequest;
 
-        logOrderingDebugJson(this.client.cafe.name, 'Add-to-cart request body', requestBody);
+        logOrderingDebugJson(this.client.cafe.name, 'Create-order request body (POST)', requestBody);
 
-        const response = await this.client.requestAsync(
-            `/order/${this.client.config.tenantId}/${this.client.config.contextId}/orders`,
-            {
-                method:  'POST',
-                headers: JSON_HEADERS,
-                body:    JSON.stringify(requestBody),
-            }
-        );
+        return this.client.requestAsync(this.#ordersUrl, {
+            method:  'POST',
+            headers: JSON_HEADERS,
+            body:    JSON.stringify(requestBody),
+        });
+    }
+
+    async #addItemToExistingOrder(item: IBuyOnDemandCartItem, stationScheduleData: IBuyOnDemandStationSchedule) {
+        if (!this.#orderId) {
+            throw new Error('Order does not exist yet');
+        }
+
+        const requestBody = {
+            // Yes, itemList is just one item.
+            itemList:        item,
+            currencyDetails: CURRENCY_DETAILS,
+            schedule:        stationScheduleData.schedule,
+            storePriceLevel: this.#orderingContext.storePriceLevel,
+            scheduledDay:    0,
+        } satisfies IBuyOnDemandAddItemToOrderRequest;
+
+        logOrderingDebugJson(this.client.cafe.name, 'Add-to-existing-order request body (PUT)', requestBody);
+
+        return this.client.requestAsync(`${this.#ordersUrl}/${this.#orderId}`, {
+            method:  'PUT',
+            headers: JSON_HEADERS,
+            body:    JSON.stringify(requestBody),
+        });
+    }
+
+    async #addItemToCart(orderItem: IEnhancedOrderItem) {
+        const isNewOrder = this.#orderId == null;
+        const response = await this.#sendAddItemRequest(orderItem);
 
         const json = await response.json();
         const { orderDetails } = BuyOnDemandAddToOrderResponseSchema.parse(json);
         logOrderingDebugJson(this.client.cafe.name, 'Add-to-cart response orderDetails', orderDetails);
 
-        // Seems like the cart might be fake. We appear to get a new order number every time we add an item?
+        if (!orderDetails.orderId) {
+            throw new Error(`Add-to-cart response did not include an order id for cafe ${this.client.cafe.name}`);
+        }
+
         this.#orderNumber = orderDetails.orderNumber;
         this.#orderId = orderDetails.orderId;
         this.#lastOrderDetails = orderDetails;
 
-        // These seem to be incremental for some reason, despite the naming and structure of the response. /shrug
-        this.#price.tax += Number(orderDetails.taxTotalAmount.amount);
-        this.#price.subtotal += Number(orderDetails.taxExcludedTotalAmount.amount);
-        this.#price.total += Number(orderDetails.totalDueAmount.amount);
+        // The response totals are cumulative (the order grows with each POST/PUT),
+        // so assign the latest values rather than accumulating.
+        this.#price.tax = Number(orderDetails.taxTotalAmount.amount);
+        this.#price.subtotal = Number(orderDetails.taxExcludedTotalAmount.amount);
+        this.#price.total = Number(orderDetails.totalDueAmount.amount);
 
-        orderLog.info(`{${this.client.cafe.name}} Item ${orderItem.menuItemId} added — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#price.total.toFixed(2)}`);
-
-        for (const lineItem of orderDetails.lineItems) {
-            this.#lineItemsById.set(lineItem.lineItemId, lineItem);
+        let orderAction = 'appended to order';
+        if (isNewOrder) {
+            orderAction = 'created order';
         }
+
+        orderLog.info(`{${this.client.cafe.name}} Item ${orderItem.menuItemId} ${orderAction} — orderId: ${orderDetails.orderId}, orderNumber: ${orderDetails.orderNumber}, runningTotal: $${this.#price.total.toFixed(2)}`);
+    }
+
+    async #sendAddItemRequest(orderItem: IEnhancedOrderItem) {
+        const choicesByModifierId = toChoicesByModifierId(orderItem.modifiers);
+        orderLog.info(`{${this.client.cafe.name}} Adding item "${orderItem.menuItem.name}" (id: ${orderItem.menuItemId}, qty: ${orderItem.quantity}, modifiers: ${orderItem.modifiers.length}, specialInstructions: ${orderItem.specialInstructions ?? 'none'}) to cart`);
+
+        logOrderingDebugJson(this.client.cafe.name, 'Local cart item lookup', {
+            cartItemId:        orderItem.menuItemId,
+            quantity:          orderItem.quantity,
+            selectedModifiers: [...choicesByModifierId].map(([modifierId, choiceIds]) => ({
+                modifierId,
+                choiceIds: [...choiceIds],
+            })),
+        });
+
+        const stationScheduleData = this.#stationScheduleById.get(orderItem.station.id);
+        if (stationScheduleData == null) {
+            throw new Error(`No concept schedule data found for concept "${orderItem.station.id}" (${orderItem.station.name}). Available: ${[...this.#stationScheduleById.keys()].join(', ')}`);
+        }
+
+        const item = this.#buildItemForCartAdd(orderItem);
+
+        if (this.#orderId == null) {
+            return this.#createOrderWithFirstItem(item, stationScheduleData);
+        }
+
+        return this.#addItemToExistingOrder(item, stationScheduleData);
     }
 
     async #populateCart() {
@@ -376,11 +433,8 @@ export class CafeOrderSession implements IOrderSession {
 
         const payConfig = buildPayConfig(this.#orderingContext);
 
-        const receiptItems = this.#orderItems.map((cartItem, index) => ({
-            ...this.#buildItemForCartAdd(cartItem),
-            languageCode: 'en',
-            lineItemId:   this.#lastOrderDetails?.lineItems[index]?.lineItemId,
-        } satisfies IBuyOnDemandReceiptItem));
+        const builtCartItems = this.#orderItems.map(orderItem => this.#buildItemForCartAdd(orderItem));
+        const receiptItems = buildReceiptItems(builtCartItems, this.#lastOrderDetails.lineItems);
 
         await completeOrderAfterIframePaymentAsync({
             client: this.client,

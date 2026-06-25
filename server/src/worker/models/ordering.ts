@@ -61,4 +61,9 @@ export const ORDER_TIMEZONE = 'PST8PDT';
 export interface IEnhancedOrderItem extends IOrderItem {
     menuItem: IMenuItemBase;
     station: IStationRecord;
+    // BoD wire identifiers, derived once when the (immutable) cart is enhanced so
+    // every rebuild — add, wait-time, receipt — reuses the same values.
+    // cartGuid is shared across the cart; uniqueId is distinct per line.
+    cartGuid: string;
+    uniqueId: string;
 }

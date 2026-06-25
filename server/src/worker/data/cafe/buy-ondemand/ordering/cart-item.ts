@@ -2,7 +2,8 @@ import { IMenuItemBase } from '@msdining/common/models/cafe';
 import {
     BuyOnDemandAtLeastOneModifier,
     BuyOnDemandSpecialInstructionsOrEmpty, IBuyOnDemandCartItem,
-    IBuyOnDemandModifier
+    IBuyOnDemandModifier,
+    IBuyOnDemandReceiptItem
 } from '../../../../models/buy-ondemand.js';
 import { isNonEmptyArray } from '../../../../../shared/util/typeguard.js';
 import { Nullable } from '@msdining/common/models/util';
@@ -81,9 +82,13 @@ interface IBuildItemForCartAddParams {
     orderItem: IEnhancedOrderItem;
     orderingContext: IOrderingContext;
     cafeConfig: ICafeConfig;
+    // Shared across every item in the cart (shape: {firstItemId}-{sessionStartMs}).
+    cartGuid: string;
+    // Distinct per line (shape: {itemId}-{ts}); must differ from cartGuid.
+    uniqueId: string;
 }
 
-export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig }: IBuildItemForCartAddParams): IBuyOnDemandCartItem => {
+export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig, cartGuid, uniqueId }: IBuildItemForCartAddParams): IBuyOnDemandCartItem => {
     const { quantity, menuItem, station, modifiers: orderItemModifiers, specialInstructions } = orderItem;
     const amount = menuItem.price.toFixed(2);
     const receiptText = menuItem.receiptText ?? menuItem.name;
@@ -93,7 +98,6 @@ export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig }: 
     const modifierTotal = modifiers.reduce((sum, modifier) => sum + Number(modifier.amount), 0);
 
     const cartItemId = hat();
-    const cartGuid = `${menuItem.id}-${Date.now()}`;
 
     return {
         id:                    menuItem.id,
@@ -113,7 +117,7 @@ export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig }: 
         hasModifiers:          modifiers.length > 0,
         modifierTotal,
         mealPeriodId:          null,
-        uniqueId:              cartGuid,
+        uniqueId,
         cartItemId,
         menuPriceLevelId:      orderingContext.storePriceLevel,
         menuPriceLevelApplied: false,
@@ -155,3 +159,18 @@ export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig }: 
         }
     };
 }
+
+/**
+ * Builds the receipt items sent to the close-order endpoint by pairing each
+ * built cart item with the server-assigned lineItemId from the order details.
+ * The order-details lineItems carry no uniqueId/cartItemId, so the pairing is
+ * positional — the BoD response returns lineItems in the order they were added.
+ */
+export const buildReceiptItems = (
+    cartItems: ReadonlyArray<IBuyOnDemandCartItem>,
+    lineItems: ReadonlyArray<{ lineItemId: string }>
+): Array<IBuyOnDemandReceiptItem> => cartItems.map((cartItem, index) => ({
+    ...cartItem,
+    languageCode: 'en' as const,
+    lineItemId:   lineItems[index]?.lineItemId,
+}));

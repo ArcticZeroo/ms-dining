@@ -149,3 +149,11 @@ export interface IBuyOnDemandReceiptItem extends IBuyOnDemandCartItem {
     languageCode: 'en',
     lineItemId?: string
 }
+
+export interface IBuyOnDemandAddItemToOrderRequest {
+    itemList: IBuyOnDemandCartItem,
+    currencyDetails: IBuyOnDemandAddToCartRequest['currencyDetails'],
+    schedule: Array<IConceptScheduleTaskItem>,
+    storePriceLevel: string,
+    scheduledDay: 0,
+}

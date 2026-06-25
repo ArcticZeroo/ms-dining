@@ -2,15 +2,13 @@
  * Tests for CafeOrderSession ordering-context retrieval.
  *
  * The relevant code is private, so we drive it through the public
- * populateCart() entry point. populateCart calls
- * #requireStage(notStarted, cb) which:
- *   1. Awaits _retrieveOrderingContextAsync() (where the profit-center
- *      lookup happens) — the path under test.
- *   2. Then runs cb, which eventually calls #addItemToCart and is
- *      expected to throw here because we don't seed the DB with the
- *      cart item. The throw is caught with assert.rejects, and we then
- *      inspect ctx.server.getRequestLog() to verify the profit-center
- *      request was issued correctly BEFORE the failure.
+ * populateCart() entry point. populateCart():
+ *   1. Retrieves the ordering context (where the profit-center lookup
+ *      happens) — the path under test.
+ *   2. Then adds items to the cart, which throws here because we don't seed
+ *      the DB with the cart item. The throw is caught with assert.rejects,
+ *      and we then inspect ctx.server.getRequestLog() to verify the
+ *      profit-center request was issued correctly BEFORE the failure.
  *
  * Regression target: 22eeffc — profit center name 404 (lookup used the
  * wrong identifier).
