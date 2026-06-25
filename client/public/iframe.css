@@ -18,6 +18,8 @@
     --color-theme: #3488E0;
     --color-theme-dark: #2A6AA6;
     --color-error-light: #FFBBBB;
+    --default-padding: 0.5rem;
+    --constant-padding: 0.5rem;
 }
 
 /* Reset & base */
@@ -28,7 +30,7 @@
 body {
     margin: 0;
     padding: 0;
-    background: var(--color-background);
+    background: var(--color-background-raised);
     color: var(--color-foreground);
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 14px;
@@ -37,8 +39,9 @@ body {
 
 #agisFrame {
     display: flex;
-    justify-content: center;
-    padding: 0.75rem;
+    flex-direction: column;
+    align-content: center;
+    gap: var(--default-padding);
 }
 
 /* Main form container */
@@ -46,25 +49,19 @@ body {
     width: 100%;
     max-width: 480px;
     background: var(--color-background-raised);
-    border-radius: 8px;
-    padding: 1.25rem;
     box-sizing: border-box;
 }
 
 /* "Payment Details" header */
 .paymentText {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-foreground);
-    margin-bottom: 1rem;
-    text-align: center;
+    display: none;
 }
 
 /* Form layout */
 .formFlex {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--default-padding);
 }
 
 /* Labels */
@@ -77,11 +74,8 @@ body {
 .addressText,
 .statelabel {
     display: block;
-    font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-foreground-raised);
-    margin-top: 0.5rem;
-    margin-bottom: 0.25rem;
 }
 
 /* Text inputs */
@@ -89,14 +83,11 @@ body {
 .sosoInput,
 input.inputs {
     width: 100%;
-    padding: 0.6rem 0.75rem;
+    padding: var(--default-padding);
     background: var(--color-background-raised-2);
-    border: 1px solid var(--color-background-raised-3);
-    border-radius: 6px;
+    border-radius: var(--default-padding);
     color: var(--color-foreground);
-    font-size: 0.95rem;
     font-family: inherit;
-    box-sizing: border-box;
     outline: none;
     transition: border-color 0.15s ease;
 }
@@ -115,12 +106,11 @@ input.inputs:focus {
 /* Select dropdowns */
 select,
 .inputTextSize {
-    padding: 0.6rem 0.75rem;
+    padding: var(--default-padding);
     background: var(--color-background-raised-2);
     border: 1px solid var(--color-background-raised-3);
-    border-radius: 6px;
+    border-radius: var(--default-padding);
     color: var(--color-foreground);
-    font-size: 0.95rem;
     font-family: inherit;
     outline: none;
     cursor: pointer;
@@ -141,7 +131,7 @@ select option {
 .cardFlex {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--default-padding);
 }
 
 .cardBlock {
@@ -152,7 +142,7 @@ select option {
 .expDateBlockDiv {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--default-padding);
     padding: 0 !important;
 }
 
@@ -165,7 +155,7 @@ select option {
 .cvvFlexRow {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--default-padding);
 }
 
 .cvvTextWidth {
@@ -193,7 +183,6 @@ select option {
     color: var(--color-error-light);
     font-size: 0.8rem;
     min-height: 0;
-    margin-top: 0.15rem;
 }
 
 .transactionHeader {
@@ -206,15 +195,12 @@ select option {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.7rem 1.5rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    padding: var(--default-padding);
+    border-radius: var(--default-padding);
     font-family: inherit;
     cursor: pointer;
     border: none;
     transition: background-color 0.15s ease, opacity 0.15s ease;
-    margin-top: 1rem;
 }
 
 .submitBtn,
@@ -243,7 +229,6 @@ button.submitBtn:disabled {
     color: var(--color-foreground-raised);
     border: 1px solid var(--color-background-raised-3);
     width: 100%;
-    margin-top: 0.5rem;
 }
 
 .cancelBtn:hover {
@@ -253,27 +238,23 @@ button.submitBtn:disabled {
 /* Service charge label */
 .serviceChargeClass {
     color: var(--color-foreground-raised);
-    font-size: 0.85rem;
 }
 
 /* reCAPTCHA badge - hide visual clutter, it still works */
 .grecaptcha-badge {
-    visibility: hidden !important;
+    /*visibility: hidden !important;*/
 }
 
 /* Billing address section */
 .billingAddress {
-    margin-top: 0.5rem;
 }
 
 .addressInput {
     width: 100%;
-    margin-top: 0.25rem;
 }
 
 /* State selector */
 .state-container {
-    margin-top: 0.25rem;
 }
 
 .states {
@@ -301,7 +282,7 @@ button.submitBtn:disabled {
 
 .modal-content {
     background: var(--color-background-raised);
-    border-radius: 8px;
+    border-radius: var(--default-padding);
     padding: 1rem;
     max-width: 90%;
     max-height: 90%;
@@ -312,7 +293,6 @@ button.submitBtn:disabled {
 .close {
     color: var(--color-foreground-raised);
     cursor: pointer;
-    font-size: 1.5rem;
 }
 
 .close:hover {
@@ -332,22 +312,4 @@ button.submitBtn:disabled {
 /* Card number text width */
 .cardNumberText {
     width: 100%;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--color-background);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--color-background-raised-3);
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-background-raised-4);
 }

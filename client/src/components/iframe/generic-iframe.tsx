@@ -4,6 +4,7 @@ interface IGenericIFrameProps {
     src: string;
     title: string;
     sandbox: string;
+    isVisible?: boolean;
     loadTimeoutMs?: number;
     onMessage?: (event: MessageEvent) => void;
     onLoadTimeout?: () => void;
@@ -49,7 +50,7 @@ const useLoadHandler = (loadTimeoutMs: number | undefined, onLoadTimeout: (() =>
     }
 }
 
-export const GenericIFrame: React.FC<IGenericIFrameProps> = ({ src, title, sandbox, onMessage, loadTimeoutMs, onLoadTimeout, onLoadComplete, onError }) => {
+export const GenericIFrame: React.FC<IGenericIFrameProps> = ({ src, title, sandbox, isVisible = true, onMessage, loadTimeoutMs, onLoadTimeout, onLoadComplete, onError }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const { onFrameLoad, hasTimedOut, clearLoadTimeout } = useLoadHandler(loadTimeoutMs, onLoadTimeout, onLoadComplete);
 
@@ -79,6 +80,7 @@ export const GenericIFrame: React.FC<IGenericIFrameProps> = ({ src, title, sandb
             onError={onFrameError}
             title={title}
             sandbox={sandbox}
+            style={{ display: isVisible ? undefined : 'none' }}
         />
     );
 }

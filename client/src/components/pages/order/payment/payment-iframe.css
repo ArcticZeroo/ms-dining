@@ -3,8 +3,9 @@
 .modal .iframe-container {
     position: relative;
     flex: 1;
-    min-width: 450px;
-    min-height: 500px;
+    width: 450px;
+    max-width: 100%;
+    height: min(600px, 85vh);
     background: var(--color-background);
 }
 
@@ -15,27 +16,6 @@
     position: absolute;
     top: 0;
     left: 0;
-}
-
-@media screen and (max-width: 800px) {
-    .modal .iframe-container {
-        min-width: unset;
-        min-height: unset;
-    }
-}
-
-.modal .iframe-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    gap: 0.5rem;
-    color: var(--color-text-secondary);
 }
 
 .modal .payment-error {

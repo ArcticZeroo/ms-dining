@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { GenericIFrame } from '../../../iframe/generic-iframe.js';
 import { type IPaymentSuccessResult, parseFrameMessage } from '../../../../util/payment-iframe.js';
+import { PaymentDetailsSkeleton } from './payment-details-skeleton.js';
 
 const FRAME_LOAD_TIMEOUT_MS = 15_000;
 
@@ -68,13 +68,8 @@ export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
                     </button>
                 </div>
             )}
-            {!error && isLoading && (
-                <div className="flex flex-center">
-                    <HourglassLoadingSpinner/>
-                    <span>Loading payment form...</span>
-                </div>
-            )}
             <div className="iframe-container default-container">
+                {!error && isLoading && <PaymentDetailsSkeleton/>}
                 <GenericIFrame
                     src={iframeUrl}
                     title="Payment Form"
@@ -84,6 +79,7 @@ export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
                     onLoadTimeout={() => setError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.')}
                     onMessage={onFrameMessage}
                     onLoadComplete={() => setIsLoading(false)}
+                    isVisible={!isLoading}
                 />
             </div>
         </>
