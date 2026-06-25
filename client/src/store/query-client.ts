@@ -1,5 +1,4 @@
 import { QueryClient } from '@tanstack/react-query';
-import { HttpException } from '../exception/http.js';
 
 export const QUERY_CLIENT = new QueryClient({
     defaultOptions: {
@@ -8,7 +7,7 @@ export const QUERY_CLIENT = new QueryClient({
             gcTime:               10 * 60 * 1000,
             refetchOnWindowFocus: false,
             retry:                (failureCount, error) => {
-                if (error instanceof HttpException && [401, 403].includes(error.statusCode)) {
+                if ('statusCode' in error && typeof error.statusCode === 'number' && [401, 403].includes(error.statusCode)) {
                     return false;
                 }
 

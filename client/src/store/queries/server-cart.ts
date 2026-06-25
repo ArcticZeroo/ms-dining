@@ -5,6 +5,7 @@ import type { ICartItemData, ICartItemUpdate, ICartResponse } from '@msdining/co
 import type { IMenuItemBase } from '@msdining/common/models/cafe';
 import { useCallback } from 'react';
 import { useDebouncedCallback } from '../../hooks/debounce.ts';
+import { useIsOnlineOrderingAllowed } from '../../hooks/cafe.js';
 
 export const CART_QUERY_KEY = ['cart', 'server'] as const;
 
@@ -42,15 +43,18 @@ const CART_REFETCH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
  * comes back Wednesday).
  */
 export const useCartQuery = () => {
+    const isAllowed = useIsOnlineOrderingAllowed();
+
     return useQuery({
-        queryKey:                  CART_QUERY_KEY,
-        queryFn:                   async () => {
+        queryKey:                    CART_QUERY_KEY,
+        queryFn:                     async () => {
             const response = await CartClient.getCart();
             syncStoreFromResponse(response);
             return response;
         },
-        refetchInterval:           CART_REFETCH_INTERVAL_MS,
+        refetchInterval:             CART_REFETCH_INTERVAL_MS,
         refetchIntervalInBackground: false,
+        enabled:                     isAllowed,
     });
 };
 
@@ -64,7 +68,7 @@ export const useAddToCartMutation = () => {
     return useMutation({
         mutationFn: ({ item }: { item: ICartItemData; menuItem: IMenuItemBase }) =>
             CartClient.addItems([item]),
-        onMutate: ({ item, menuItem }) => {
+        onMutate:   ({ item, menuItem }) => {
             const now = new Date().toISOString();
             useServerCartStore.getState().optimisticAddItem({
                 id:                  `pending-${Date.now()}`,

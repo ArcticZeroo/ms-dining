@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useCartQuery } from '../store/queries/server-cart.ts';
 import { useServerCartHasUnavailableItems, useServerCartItemCount } from '../store/zustand/server-cart.ts';
+import { useIsOnlineOrderingAllowed } from './cafe.js';
+import { useLocation } from 'react-router-dom';
 
 export interface CartStatusInput {
     isPending: boolean;
@@ -73,3 +75,9 @@ export const useCartStatus = (): ICartStatus=> {
         [status, cartQuery.refetch],
     );
 };
+
+export const useIsCartPopupAllowed = () => {
+    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
+    const location = useLocation();
+    return isOnlineOrderingAllowed && location.pathname !== '/order';
+}
