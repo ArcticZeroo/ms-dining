@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { MapSelectedViewContext } from '../../../../context/map.ts';
 import { useSelectedDate } from '../../../../store/zustand/selected-date.ts';
 import { ICafe } from '../../../../models/cafe.ts';
-import { getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
+import { getSearchAnchorId, getSearchAnchorJumpUrlOnAnotherPage } from '../../../../util/link.ts';
 import { pluralize } from '../../../../util/string.ts';
 import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { classNames } from '../../../../util/react.js';
@@ -126,27 +126,29 @@ export const CafePopupOverviewStation: React.FC<ICafePopupOverviewStationProps> 
         </>
     );
 
-    if (!popupView) {
-        return (
-            <div
-                className="card overview-station default-container flex-col"
-                title={getStationTitle(station, didOpenRecently)}
-            >
-                {children}
-            </div>
-        );
-    }
+    // Both overview popups share this row. The map popup provides a selected view
+    // via MapSelectedViewContext, so it links to the station on the cafe's menu
+    // page. The menu-view popup has no such context but is already on the cafe
+    // page, so it links to the station anchor on the current page — which also
+    // closes the popup, since the URL hash moves off "#popup".
+    const linkTo = popupView
+        ? getSearchAnchorJumpUrlOnAnotherPage({
+            cafeId:     cafe.id,
+            view:       popupView,
+            entityType: SearchEntityType.station,
+            name:       station.name,
+            date:       selectedDate
+        })
+        : `#${getSearchAnchorId({
+            cafeId:     cafe.id,
+            entityType: SearchEntityType.station,
+            name:       station.name
+        })}`;
 
     return (
         <Link
-            className={"card overview-station default-container flex-col"}
-            to={getSearchAnchorJumpUrlOnAnotherPage({
-                cafeId:     cafe.id,
-                view:       popupView,
-                entityType: SearchEntityType.station,
-                name:       station.name,
-                date:       selectedDate
-            })}
+            className="card overview-station default-container flex-col"
+            to={linkTo}
             title={getStationTitle(station, didOpenRecently)}
         >
             {children}
