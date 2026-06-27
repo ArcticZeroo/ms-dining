@@ -81,10 +81,6 @@ export const doMigrationAndRedirectToDiningSite = () => {
                 enableMapPageSearch: DebugSettings.enableMapPageSearch.value.toString(),
                 showAdminReviewControls: DebugSettings.showAdminReviewControls.value.toString(),
                 showCafeHours: DebugSettings.showCafeHours.value.toString(),
-                synthesizeConceptSchedule: DebugSettings.synthesizeConceptSchedule.value.toString(),
-                synthesizeOrderingContext: DebugSettings.synthesizeOrderingContext.value.toString(),
-                synthesizePayConfig: DebugSettings.synthesizePayConfig.value.toString(),
-                synthesizeKioskItems: DebugSettings.synthesizeKioskItems.value.toString(),
             },
             homeSettings: {
                 showExploreOnHome: HomeSettings.showExploreOnHome.value.toString(),

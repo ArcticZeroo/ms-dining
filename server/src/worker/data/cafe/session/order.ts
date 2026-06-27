@@ -33,6 +33,7 @@ import { buildItemForCartAdd, buildReceiptItems } from '../buy-ondemand/ordering
 import { retrieveIframeToken } from '../buy-ondemand/ordering/iframe-token.js';
 import { sendPhoneConfirmationAfterOrderCompletion } from '../buy-ondemand/ordering/phone-confirmation.js';
 import { logIframeData } from '../buy-ondemand/ordering/log-iframe-data.js';
+import hat from 'hat';
 
 const orderLog = getNamespaceLogger('Order');
 
@@ -78,6 +79,7 @@ const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhan
             station,
             cartGuid,
             uniqueId: `${orderItem.menuItemId}-${sessionStartTimeMs + index + 1}`,
+            cartItemId: hat(),
         } satisfies IEnhancedOrderItem;
     }));
 }
@@ -175,6 +177,7 @@ export class CafeOrderSession implements IOrderSession {
             cafeConfig:      this.client.config,
             cartGuid:        orderItem.cartGuid,
             uniqueId:        orderItem.uniqueId,
+            cartItemId:      orderItem.cartItemId,
         });
     }
 
@@ -228,6 +231,12 @@ export class CafeOrderSession implements IOrderSession {
         }
 
         const requestBody = {
+            // Appending to an existing order intentionally sends FEWER fields than the
+            // create body (#createOrderWithFirstItem) — no orderTimeZone, useIgOrderApi,
+            // onDemandTerminalId, properties, conceptSchedule, isMultiItem, or scannedOrder.
+            // Verified against the real BoD site ("bobae add things to cart.har"): its PUT
+            // append body carries exactly itemList/currencyDetails/schedule/storePriceLevel/
+            // scheduledDay; those create-only fields are set once when the order is created.
             // Yes, itemList is just one item.
             itemList:        item,
             currencyDetails: CURRENCY_DETAILS,

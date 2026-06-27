@@ -111,7 +111,7 @@ export const completeOrderAfterIframePaymentAsync = async ({
     const taxClassList: Array<{ amount: string, amountValue: string }> = [];
     if (price.tax > 0) {
         const taxAmountValue = price.tax.toFixed(2);
-        taxClassList.push({ amount: `${taxAmountValue}`, amountValue: taxAmountValue });
+        taxClassList.push({ amount: `$${taxAmountValue}`, amountValue: taxAmountValue });
     }
 
     const selectedSMSCountry = phoneData.countryCode === '+1'
@@ -275,7 +275,9 @@ export const completeOrderAfterIframePaymentAsync = async ({
                 siteId:                           client.config.contextId,
                 storePriceLevel:                  orderingContext.storePriceLevel,
                 stripeTransactionData:            null,
-                subtotal:                         price.subtotal.toFixed(2),
+                // BoD expects the order total *including* tax in this field (matches
+                // authorizedAmount / transactionAmount), not the tax-excluded subtotal.
+                subtotal:                         price.total.toFixed(2),
                 tenantId:                         client.config.tenantId,
                 terminalId:                       orderingContext.onDemandTerminalId,
                 textReceiptConfig:                {

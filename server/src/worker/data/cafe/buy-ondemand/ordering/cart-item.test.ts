@@ -73,6 +73,7 @@ const makeOrderItem = (id: string, name: string): IEnhancedOrderItem => {
         station:             STATION,
         cartGuid:            'cart-guid-shared',
         uniqueId:            `unique-${id}`,
+        cartItemId:          `cart-item-${id}`,
     };
 };
 
@@ -83,6 +84,7 @@ const buildCartItems = (count: number) =>
         cafeConfig:      CAFE_CONFIG,
         cartGuid:        'cart-guid-shared',
         uniqueId:        `unique-${index}`,
+        cartItemId:      `cart-item-${index}`,
     }));
 
 test('buildReceiptItems pairs each cart item with the lineItemId at the same index', () => {

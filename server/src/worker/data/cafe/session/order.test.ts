@@ -1,14 +1,13 @@
 /**
- * Tests for CafeOrderSession ordering-context retrieval.
+ * Tests for ordering-context retrieval (site data + profit-center lookup).
  *
- * The relevant code is private, so we drive it through the public
- * populateCart() entry point. populateCart():
- *   1. Retrieves the ordering context (where the profit-center lookup
- *      happens) — the path under test.
- *   2. Then adds items to the cart, which throws here because we don't seed
- *      the DB with the cart item. The throw is caught with assert.rejects,
- *      and we then inspect ctx.server.getRequestLog() to verify the
- *      profit-center request was issued correctly BEFORE the failure.
+ * We drive requestDailyOrderingContextAsync() directly — it is the function
+ * that issues the site-data GET, pay-config POST, and profit-center GET that
+ * the ordering flow depends on. Driving it directly (rather than through
+ * CafeOrderSession.createAsync/populateCart) keeps the test focused on the
+ * profit-center resolution under test, avoids coupling to menu-item seeding,
+ * and sidesteps the per-cafe ordering-context cache (retrieveDailyOrderingContext)
+ * so each test re-issues the requests it inspects.
  *
  * Regression target: 22eeffc — profit center name 404 (lookup used the
  * wrong identifier).
@@ -16,9 +15,9 @@
 
 import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { IOrderItem } from '@msdining/common/models/order';
-import { CafeOrderSession } from './order.js';
 import { ICafe } from '../../../../shared/models/cafe.js';
+import { createBuyOnDemandClient } from '../../../../shared/services/registry.js';
+import { requestDailyOrderingContextAsync } from '../buy-ondemand/ordering/ordering-context.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
@@ -42,15 +41,8 @@ beforeEach(() => {
 const CAFE_ID = 'cafe25';
 const CAFE: ICafe = { id: CAFE_ID, name: 'Test Cafe 25' };
 
-// An order item whose menuItemId doesn't exist in the local DB. This makes
-// #populateCart throw with "Failed to find menu item ..." once the
-// ordering context (the thing under test) has already been fetched.
-const NONEXISTENT_CART_ITEM: IOrderItem = {
-    menuItemId:          'nonexistent-item-for-order-test',
-    quantity:            1,
-    modifiers:           [],
-    specialInstructions: '',
-};
+const createClient = () =>
+    createBuyOnDemandClient(CAFE, { enableHar: true, translateErrors: true });
 
 interface ProfitCenterRequestLookup {
     found: boolean;
@@ -96,16 +88,7 @@ test('profit center lookup uses the profit-center ID from site data, not the ten
         },
     ]);
 
-    const session = await CafeOrderSession.createAsync(CAFE, [NONEXISTENT_CART_ITEM]);
-
-    // populateCart will reject when #addItemToCart can't find the local
-    // menu item — but by then the ordering-context fetch (the thing under
-    // test) is already in the request log.
-    await assert.rejects(
-        () => session.populateCart(),
-        /Failed to find menu item|No concept schedule data|No concepts returned/,
-        'populateCart should reject downstream of the ordering-context fetch',
-    );
+    await requestDailyOrderingContextAsync(await createClient());
 
     const lookup = findProfitCenterRequest(ctx.server.getRequestLog());
     assert.ok(lookup.found, 'expected a GET request to /sites/.../profitCenter/<id>');
@@ -138,12 +121,7 @@ test('ordering context still resolves when profit-center ID differs from tenant/
         },
     ]);
 
-    const session = await CafeOrderSession.createAsync(CAFE, [NONEXISTENT_CART_ITEM]);
-
-    await assert.rejects(
-        () => session.populateCart(),
-        /Failed to find menu item|No concept schedule data|No concepts returned/,
-    );
+    await requestDailyOrderingContextAsync(await createClient());
 
     const lookup = findProfitCenterRequest(ctx.server.getRequestLog());
     assert.ok(lookup.found, 'profit-center request should have been issued');
@@ -152,17 +130,16 @@ test('ordering context still resolves when profit-center ID differs from tenant/
     assert.notEqual(lookup.contextIdInUrl, profitCenterId);
 });
 
-test('populateCart surfaces a clear error when site data is missing', async () => {
-    // Empty array -> _fetchSiteData throws "Site data is empty!" before
-    // the profit-center lookup is even attempted.
+test('ordering-context fetch surfaces a clear error when site data is missing', async () => {
+    // Empty array -> retrieveSiteData throws "No site data found for tenant ..."
+    // before the profit-center lookup is even attempted.
     ctx.server.setFixture(CAFE_ID, 'site-data', []);
 
-    const session = await CafeOrderSession.createAsync(CAFE, [NONEXISTENT_CART_ITEM]);
-
+    const client = await createClient();
     await assert.rejects(
-        () => session.populateCart(),
-        /Site data is empty/,
-        'expected the "Site data is empty!" error to bubble up',
+        () => requestDailyOrderingContextAsync(client),
+        /No site data found for tenant/,
+        'expected the empty-site-data error to bubble up',
     );
 
     // Sanity check: with no site data, the profit-center request must NOT

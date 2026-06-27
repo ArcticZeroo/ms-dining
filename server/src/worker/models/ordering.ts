@@ -63,7 +63,8 @@ export interface IEnhancedOrderItem extends IOrderItem {
     station: IStationRecord;
     // BoD wire identifiers, derived once when the (immutable) cart is enhanced so
     // every rebuild — add, wait-time, receipt — reuses the same values.
-    // cartGuid is shared across the cart; uniqueId is distinct per line.
+    // cartGuid is shared across the cart; uniqueId and cartItemId are distinct per line.
     cartGuid: string;
     uniqueId: string;
+    cartItemId: string;
 }

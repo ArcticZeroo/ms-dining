@@ -25,32 +25,45 @@ const orderLog = getNamespaceLogger('OrderSessions');
 
 const prewarmKey = (userId: string, cafeId: string) => `${userId}:${cafeId}`;
 
-const refreshSessionToken = (pendingOrderId: string, liveSession: IOrderSession) => {
+const refreshSessionToken = (map: LockedExpiringMap<string, IOrderSession>, sessionKey: string, liveSession: IOrderSession) => {
     const todayDateString = getTodayDateString();
     if (liveSession.createdDateString !== todayDateString) {
         trackOrderEvent('session.evicted', {
-            pendingOrderId,
-            reason:      'staleDate',
-            createdDate: liveSession.createdDateString,
-            today:       todayDateString,
+            pendingOrderId: sessionKey,
+            reason:         'staleDate',
+            createdDate:    liveSession.createdDateString,
+            today:          todayDateString,
         });
-        orderLog.info(`Evicting stale session ${pendingOrderId} (created ${liveSession.createdDateString}, today is ${todayDateString})`);
-        return ACTIVE_ORDER_SESSIONS.delete(pendingOrderId);
+        orderLog.info(`Evicting stale session ${sessionKey} (created ${liveSession.createdDateString}, today is ${todayDateString})`);
+        return map.delete(sessionKey);
     }
 
-    return ACTIVE_ORDER_SESSIONS.peek(pendingOrderId, async (liveSession) => {
-        if (!liveSession) {
+    // peek() does not refresh the entry's TTL — we only want to keep the upstream
+    // token alive here, not extend the session's lifetime in the map.
+    return map.peek(sessionKey, async (lockedSession) => {
+        if (!lockedSession) {
             return;
         }
 
-        await liveSession.client.refreshLogin();
+        await lockedSession.client.refreshLogin();
     });
 }
 
+const refreshSessionTokensForMap = (map: LockedExpiringMap<string, IOrderSession>) => {
+    const refreshPromises = Array.from(map.entries())
+        .map(([sessionKey, liveSession]) => refreshSessionToken(map, sessionKey, liveSession));
+    return Promise.all(refreshPromises);
+};
+
 setInterval(() => {
-    const refreshPromises = Array.from(ACTIVE_ORDER_SESSIONS.entries())
-        .map(([pendingOrderId, liveSession]) => refreshSessionToken(pendingOrderId, liveSession));
-    Promise.all(refreshPromises).catch(err => orderLog.error('Token refresh sweep failed:', err));
+    // Both active and prewarmed sessions hold upstream BoD tokens that expire, so
+    // both maps need their tokens refreshed on the same cadence. Keepalive only
+    // extends a prewarmed session's in-memory TTL — without this sweep its upstream
+    // token expires, causing "Expired token" failures when getCartEstimate reuses it.
+    Promise.all([
+        refreshSessionTokensForMap(ACTIVE_ORDER_SESSIONS),
+        refreshSessionTokensForMap(PREWARMED_SESSIONS),
+    ]).catch(err => orderLog.error('Token refresh sweep failed:', err));
 }, TOKEN_REFRESH_INTERVAL_MS);
 
 setInterval(() => {

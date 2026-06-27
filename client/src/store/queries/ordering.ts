@@ -1,7 +1,7 @@
 import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ICafeOrder, IOrderHistorySummaryResponse, IOrderItem } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
-import type { ISynthesisFlags, OrderHistoryRange } from '../../api/ordering.ts';
+import type { OrderHistoryRange } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
 import { useIsLoggedIn } from '../../hooks/auth.ts';
 import { useIsOnlineOrderingEnabled } from '../../hooks/cafe.ts';
@@ -54,8 +54,8 @@ const getBestCachedOrderHistory = (queryClient: ReturnType<typeof useQueryClient
 };
 
 export const usePreparePaymentMutation = () => useMutation({
-    mutationFn: (data: { cafeId: string; items: IOrderItem[]; synthesisFlags?: ISynthesisFlags }) =>
-        OrderClient.preparePayment(data.cafeId, data.items, data.synthesisFlags),
+    mutationFn: (data: { cafeId: string; items: IOrderItem[] }) =>
+        OrderClient.preparePayment(data.cafeId, data.items),
 });
 
 export const useCompleteOrderMutation = () => {

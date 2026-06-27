@@ -10,8 +10,6 @@ import { OrderCafeCard } from './payment/order-cafe-card.tsx';
 import { PaymentInfoForm } from './payment/payment-info-form.tsx';
 import { OrderHistoryBody } from './history/order-history-body.tsx';
 import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
-import { SynthesisFlagsPanel } from './synthesis-flags-panel.tsx';
-import { useSynthesisFlags } from '../../../hooks/synthesis-flags.ts';
 import { useOrderHistoryQuery, usePrewarmKeepalive } from '../../../store/queries/ordering.ts';
 import { usePageData } from '../../../hooks/location.js';
 import { OnlineOrderingPrivacy } from '../../notice/online-ordering-privacy.js';
@@ -36,7 +34,6 @@ const InlineTodayOrders = () => {
 export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
-    const synthesisFlags = useSynthesisFlags();
 
     usePrewarmKeepalive();
     usePageData('Order', 'Online ordering checkout');
@@ -90,7 +87,6 @@ export const OrderCheckoutView = () => {
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
-            <SynthesisFlagsPanel/>
             <PaymentInfoForm
                 alias={alias}
                 phoneValidation={phoneValidation}
@@ -112,7 +108,6 @@ export const OrderCheckoutView = () => {
                             items={group.items}
                             availability={group.availability}
                             snapshotCallbacks={snapshotCallbacks}
-                            synthesisFlags={synthesisFlags}
                         />
                     ))}
                 </div>

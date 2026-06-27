@@ -15,10 +15,10 @@
 
 import { after, before, beforeEach, test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { IOrderItem } from '@msdining/common/models/order';
 import { CafeMenuSession } from '../../worker/data/cafe/session/menu.js';
-import { CafeOrderSession } from '../../worker/data/cafe/session/order.js';
 import { ICafe } from '../models/cafe.js';
+import { createBuyOnDemandClient } from '../services/registry.js';
+import { requestDailyOrderingContextAsync } from '../../worker/data/cafe/buy-ondemand/ordering/ordering-context.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
@@ -42,12 +42,8 @@ beforeEach(() => {
 const CAFE_ID = 'cafe25';
 const CAFE: ICafe = { id: CAFE_ID, name: 'Test Cafe 25' };
 
-const NONEXISTENT_CART_ITEM: IOrderItem = {
-    menuItemId:          'nonexistent-bod-client-item',
-    quantity:            1,
-    modifiers:           [],
-    specialInstructions: '',
-};
+const createClient = () =>
+    createBuyOnDemandClient(CAFE, { enableHar: true, translateErrors: true });
 
 interface ScheduleTimeShape {
     startTime: string;
@@ -76,11 +72,9 @@ test('pay-config POST body matches BoD wire shape: storeInfo present, scheduleTi
     // appears to cause the server to scope subsequent /concepts calls to that
     // window — which on a cafe that closes before 11:15pm legitimately
     // returns no concepts and surfaces as CONCEPTS_NOT_AVAILABLE.
-    const session = await CafeOrderSession.createAsync(CAFE, [NONEXISTENT_CART_ITEM]);
-    await assert.rejects(
-        () => session.populateCart(),
-        /Failed to find menu item|No concept schedule data|No concepts returned|Site data is empty/,
-    );
+    // The pay-config POST is issued by requestDailyOrderingContextAsync; drive
+    // it directly so we inspect the request without coupling to menu-item seeding.
+    await requestDailyOrderingContextAsync(await createClient());
 
     // Pay-config endpoint: POST /sites/<contextId>/<displayProfileId> — two
     // segments after /sites/, distinct from the 3-segment profitCenter route.
@@ -105,10 +99,10 @@ test('pay-config POST body matches BoD wire shape: storeInfo present, scheduleTi
 });
 
 test('menu-sync concepts POST body STILL includes scheduleTime (86a9d6c)', async () => {
-    // Menu sync (stations.ts) hits the same concepts endpoint but for
-    // non-now menus (e.g. fetching today's 11am menu at 9am). Keeping
-    // scheduleTime here is correct — only the ordering-path call at
-    // order.ts:_fetchConceptSchedule should omit it.
+    // Menu sync (stations.ts) hits the concepts endpoint for non-now menus
+    // (e.g. fetching today's 11am menu at 9am), and must include scheduleTime.
+    // The ordering path no longer calls /concepts at all — it synthesizes the
+    // station schedule locally from DB hours (order.ts #populateStationScheduleData).
     await CafeMenuSession.retrieveMenuAsync(CAFE, 0);
 
     const conceptsPath = /\/concepts\/[^/]+$/;
@@ -125,32 +119,6 @@ test('menu-sync concepts POST body STILL includes scheduleTime (86a9d6c)', async
     // both were added together and both are required by the upstream.
     const body = conceptsRequest.body as { scheduledDay?: unknown };
     assert.equal(typeof body.scheduledDay, 'number', 'scheduledDay should be a number');
-});
-
-test('ordering concepts POST body OMITS scheduleTime (ordering wants now())', async () => {
-    // Companion to the menu-sync test above. The ordering flow always wants
-    // "concepts available right now", which is what the server returns when
-    // we omit scheduleTime — so we should not be sending one here.
-    ctx.server.clearRequestLog();
-    const session = await CafeOrderSession.createAsync(CAFE, [NONEXISTENT_CART_ITEM]);
-    await assert.rejects(
-        () => session.populateCart(),
-        /Failed to find menu item|No concept schedule data|No concepts returned|Site data is empty/,
-    );
-
-    const conceptsPath = /\/concepts\/[^/]+$/;
-    const conceptsRequest = ctx.server.getRequestLog().find(entry =>
-        entry.method === 'POST' && conceptsPath.test(entry.path),
-    );
-    assert.ok(conceptsRequest, 'expected a POST to the concepts endpoint via the order flow');
-
-    const body = conceptsRequest.body as Record<string, unknown> | undefined;
-    assert.ok(body != null && typeof body === 'object');
-    assert.equal(
-        'scheduleTime' in body, false,
-        `ordering /concepts body must NOT include scheduleTime (got ${JSON.stringify(body)})`,
-    );
-    assert.equal(body.scheduledDay, 0, 'ordering /concepts body must include scheduledDay: 0');
 });
 
 test('test server injectDelay does delay the response (sanity check for 2e3482e setup)', async () => {

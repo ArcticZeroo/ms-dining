@@ -7,7 +7,6 @@ import {
 } from '../../../../models/buy-ondemand.js';
 import { isNonEmptyArray } from '../../../../../shared/util/typeguard.js';
 import { Nullable } from '@msdining/common/models/util';
-import hat from 'hat';
 import { IOrderingContext } from '../../../../../shared/models/cart.js';
 import { IEnhancedOrderItem } from '../../../../models/ordering.js';
 import { ICafeConfig } from '../../../../../shared/models/cafe.js';
@@ -86,9 +85,12 @@ interface IBuildItemForCartAddParams {
     cartGuid: string;
     // Distinct per line (shape: {itemId}-{ts}); must differ from cartGuid.
     uniqueId: string;
+    // Distinct per line; generated once when the cart is enhanced so the same value
+    // is reused across add / wait-time / receipt rebuilds.
+    cartItemId: string;
 }
 
-export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig, cartGuid, uniqueId }: IBuildItemForCartAddParams): IBuyOnDemandCartItem => {
+export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig, cartGuid, uniqueId, cartItemId }: IBuildItemForCartAddParams): IBuyOnDemandCartItem => {
     const { quantity, menuItem, station, modifiers: orderItemModifiers, specialInstructions } = orderItem;
     const amount = menuItem.price.toFixed(2);
     const receiptText = menuItem.receiptText ?? menuItem.name;
@@ -96,8 +98,6 @@ export const buildItemForCartAdd = ({ orderItem, orderingContext, cafeConfig, ca
     const choicesByModifierId = toChoicesByModifierId(orderItemModifiers);
     const modifiers = convertModifierChoicesToBuyOnDemand(orderingContext, choicesByModifierId, menuItem);
     const modifierTotal = modifiers.reduce((sum, modifier) => sum + Number(modifier.amount), 0);
-
-    const cartItemId = hat();
 
     return {
         id:                    menuItem.id,

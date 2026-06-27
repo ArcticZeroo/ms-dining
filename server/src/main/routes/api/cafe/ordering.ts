@@ -9,18 +9,9 @@ import { webserverHost } from '../../../../shared/constants/config.js';
 import { isDev } from '../../../../shared/util/env.js';
 import { setTelemetryProperties } from '../../../middleware/telemetry.js';
 import { executeTrackedOrderStep } from '../../../../shared/ordering/order-telemetry.js';
-import type { ISynthesisFlags } from '../../../../shared/services/order.js';
-
-const SynthesisFlagsSchema = z.object({
-    conceptSchedule: z.boolean(),
-    orderingContext: z.boolean(),
-    payConfig:       z.boolean(),
-    kioskItems:      z.boolean(),
-});
 
 const PreparePaymentSchema = z.object({
-    items:          z.array(OrderItemSchema).min(1),
-    synthesisFlags: SynthesisFlagsSchema.optional(),
+    items: z.array(OrderItemSchema).min(1),
 });
 
 const CompleteOrderSchema = z.object({

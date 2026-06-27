@@ -8,8 +8,6 @@ import { usePaymentIdentityContext } from '../context/payment-identity.ts';
 import { getErrorMessage } from '../util/mutation.ts';
 import { PaymentPopup } from '../components/pages/order/payment/payment-popup.tsx';
 
-import type { ISynthesisFlags } from '../api/ordering.ts';
-
 const paymentPopupId = Symbol('order-cafe-payment');
 
 const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
@@ -22,7 +20,6 @@ const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
 interface IUseCafePaymentFlowParams {
     cafeId: string;
     items: ICartItemRecord[];
-    synthesisFlags?: ISynthesisFlags;
 }
 
 export type PaymentState =
@@ -77,7 +74,6 @@ const derivePaymentState = ({
 export const useCafePaymentFlow = ({
     cafeId,
     items,
-    synthesisFlags,
 }: IUseCafePaymentFlowParams): ICafePaymentFlowResult => {
     const openPopup = usePopupOpener();
     const closePopup = usePopupCloserAlways();
@@ -99,7 +95,6 @@ export const useCafePaymentFlow = ({
             const prepareResult = await preparePayment.mutateAsync({
                 cafeId,
                 items: items.map(toOrderItem),
-                synthesisFlags,
             });
 
             openPopup({
@@ -125,7 +120,7 @@ export const useCafePaymentFlow = ({
         } catch {
             // Error is captured in preparePayment.error
         }
-    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, synthesisFlags, openPopup, closePopup, alias, phoneNumber]);
+    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, openPopup, closePopup, alias, phoneNumber]);
 
     const paymentState = useMemo(
         () => derivePaymentState({

@@ -16,7 +16,6 @@ import type { ICartEstimateResponse, IWaitTimeResponse } from '@msdining/common/
 import { phone } from 'phone';
 import { isFakeOrderingEnabled } from '../../../shared/constants/env.js';
 import { completeOrder, getPaymentSession, keepalivePrewarm, ORDER_SESSION_TTL_MS, getOrCreatePrewarmedSession } from './order-session-manager.js';
-import type { ISynthesisFlags } from '../../../shared/services/order.js';
 import { trackDbPersistFailed, trackPostCloseRecovery, trackPreKitchenFailure } from '../../../shared/ordering/order-telemetry.js';
 import { getServices } from '../../../shared/services/registry.js';
 import { CAFES_BY_ID } from '../../../shared/constants/cafes.js';
