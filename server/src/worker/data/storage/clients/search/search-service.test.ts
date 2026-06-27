@@ -18,6 +18,7 @@ import { CAFES_BY_ID } from '../../../../../shared/constants/cafes.js';
 import type { ICafe, ICafeConfig, ICafeStation, IMenuItemBase } from '../../../../../shared/models/cafe.js';
 import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { SearchMatchReason } from '@msdining/common/models/search';
 
 let ctx: IntegrationTestContext;
 
@@ -146,4 +147,46 @@ test('getRecommendations returns an array', async () => {
         cafeIdFilter: [CAFE.id],
     }).catch(() => []);
     assert.ok(Array.isArray(recommendations));
+});
+
+test('explainSearch explains a title-matching item by name', async () => {
+    const explanation = await getServices().data.search.explainSearch({
+        query:                          MENU_ITEM.name,
+        name:                           MENU_ITEM.name,
+        // Local-noon so new Date(...) -> toDateString(...) round-trips to DATE_STRING
+        // regardless of the host timezone (UTC-midnight would shift the day back).
+        date:                           `${DATE_STRING}T12:00:00`,
+        allowResultsWithoutAppearances: false,
+    });
+
+    assert.equal(explanation.query, MENU_ITEM.name);
+    assert.ok(Array.isArray(explanation.items));
+
+    const item = explanation.items.find(explained => explained.menuItemId === MENU_ITEM.id);
+    assert.ok(item, 'should resolve and explain the seeded menu item by name');
+
+    // Query equals the item name, so it must match by title and land in the results.
+    assert.ok(item.nameMatchReasons.includes(SearchMatchReason.title), 'should match by title');
+    assert.equal(item.appearsInSearchWindow, true, 'item is on the published menu');
+    assert.equal(item.wouldRegisterAsMatch, true, 'a title match registers as a match');
+    assert.equal(item.isInFinalResults, true, 'a title match should be in the final results');
+    assert.ok(item.reasons.length > 0, 'should provide human-readable reasons');
+});
+
+test('explainSearch explains why an unrelated query does not text-match', async () => {
+    const explanation = await getServices().data.search.explainSearch({
+        query:                          'zzz nonsense unrelated qqq',
+        name:                           MENU_ITEM.name,
+        date:                           `${DATE_STRING}T12:00:00`,
+        allowResultsWithoutAppearances: false,
+    });
+
+    const item = explanation.items.find(explained => explained.menuItemId === MENU_ITEM.id);
+    assert.ok(item, 'should still resolve the item by name');
+
+    // Deterministic regardless of whether embeddings are indexed in the test:
+    assert.equal(item.nameMatchReasons.length, 0, 'nonsense query should not text-match');
+    assert.equal(item.isExactSubstringMatch, false, 'nonsense query should not substring-match');
+    assert.equal(item.appearsInSearchWindow, true, 'item is still on the published menu');
+    assert.ok(Array.isArray(item.reasons));
 });

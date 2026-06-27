@@ -333,6 +333,21 @@ const cosineDistance = (vectorA: Float32Array, vectorB: Float32Array): number =>
 };
 
 /**
+ * Cosine distance between an arbitrary embedding (e.g. a query) and a stored
+ * entity's embedding. Returns null when the entity has no embedding. Used by the
+ * search-explain debug tool to report how close an item is even when it didn't
+ * make the vector top-K.
+ */
+export const getCosineDistanceToEntity = (queryEmbedding: Float32Array, entityType: SearchEntityType, id: string): number | null => {
+    const entityEmbedding = getSearchEntityEmbedding(entityType, id);
+    if (!entityEmbedding) {
+        return null;
+    }
+
+    return cosineDistance(queryEmbedding, entityEmbedding);
+};
+
+/**
  * Greedy MMR (Maximal Marginal Relevance) ordering with random tiebreaking.
  * Balances relevance (score) with diversity (cosine distance from already-selected items).
  * Items without embeddings are placed at the end in original score order.

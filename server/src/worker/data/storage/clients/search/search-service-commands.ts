@@ -50,6 +50,8 @@ export const searchServiceCommands = {
         materializeSearchResults(await SearchManager.search(query, parseDate(date), shouldUseExactMatch)),
     searchVector: async ({ query, date, allowResultsWithoutAppearances }: { query: string; date: string | null; allowResultsWithoutAppearances: boolean }) =>
         materializeSearchResults(await SearchManager.searchVector(query, parseDate(date), allowResultsWithoutAppearances)),
+    explainSearch: async ({ query, name, menuItemId, date, allowResultsWithoutAppearances }: { query: string; name?: string; menuItemId?: string; date: string | null; allowResultsWithoutAppearances: boolean }) =>
+        SearchManager.explainSearch(query, { name, menuItemId }, parseDate(date), allowResultsWithoutAppearances),
     searchForSimilarEntities: async ({ entityName, entityType, date }: { entityName: string; entityType: SearchEntityType; date: string | null }) => {
         if (date == null) {
             throw new ServiceError(SERVICE_ERROR_CODES.BAD_REQUEST, 'date is required');

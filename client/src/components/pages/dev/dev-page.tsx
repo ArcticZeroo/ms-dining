@@ -6,13 +6,15 @@ import { GroupList } from './groups/group-list.js';
 import { GroupZeroContextCandidateList } from './groups/group-zero-context-candidate-list.js';
 import { ScrollTopContext } from '../../../context/scroll.js';
 import { AllItemsWithoutGroup } from './groups/all-items-without-group.js';
+import { SearchExplainPanel } from './search-explain/search-explain-panel.js';
 import './dev-page.css';
 
 const tabs = {
     'Refresh Menu': <ForceRefreshMenu/>,
     'Group List': <GroupList/>,
     'Suggested Groups': <GroupZeroContextCandidateList/>,
-    'Items Without Group': <AllItemsWithoutGroup/>
+    'Items Without Group': <AllItemsWithoutGroup/>,
+    'Search Explain': <SearchExplainPanel/>
 } satisfies Record<string, React.ReactNode>;
 
 type TabName = keyof typeof tabs;

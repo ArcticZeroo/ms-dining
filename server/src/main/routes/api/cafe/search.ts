@@ -9,6 +9,7 @@ import {
     attachRouter,
     getEntityTypeAndName,
     getTrimmedQueryParam,
+    requireAdmin,
     serializeMapOfStringToSet,
     serializeSearchResults
 } from '../../../util/koa.js';
@@ -162,6 +163,36 @@ export const registerSearchRoutes = (parent: Router) => {
             }
 
             ctx.body = { results: await getServices().data.search.autocomplete({ query }) };
+        });
+
+    router.get('/explain',
+        requireAdmin,
+        async ctx => {
+            const query = getTrimmedQueryParam(ctx, 'q');
+            const name = getTrimmedQueryParam(ctx, 'name');
+            const menuItemId = getTrimmedQueryParam(ctx, 'id');
+
+            if (!query) {
+                ctx.throw(400, 'Missing query (q)');
+                return;
+            }
+
+            if (!name && !menuItemId) {
+                ctx.throw(400, 'Provide an item name (name) or menu item id (id)');
+                return;
+            }
+
+            const date = getDateForMenuRequest(ctx);
+
+            ctx.body = await getServices().data.search.explainSearch({
+                query,
+                name:                           name || undefined,
+                menuItemId:                     menuItemId || undefined,
+                date:                           date?.toISOString() ?? null,
+                // Mirror the main search default: when no date is pinned, allow
+                // vector-only results that aren't on the current menu.
+                allowResultsWithoutAppearances: date == null,
+            });
         });
 
     attachRouter(parent, router);

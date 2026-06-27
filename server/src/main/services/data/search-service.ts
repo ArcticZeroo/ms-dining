@@ -6,6 +6,8 @@ export const searchService: ISearchService = {
         dataHandler.sendRequest('search', 'search', data),
     searchVector: (data) =>
         dataHandler.sendRequest('search', 'searchVector', data),
+    explainSearch: (data) =>
+        dataHandler.sendRequest('search', 'explainSearch', data),
     searchForSimilarEntities: (data) =>
         dataHandler.sendRequest('search', 'searchForSimilarEntities', data),
     searchFavorites: (data) =>

@@ -2,6 +2,10 @@ import { IMenuItemBase } from '@msdining/common/models/cafe';
 import {
     DB_ID_TO_SEARCH_ENTITY_TYPE,
     ISearchQuery,
+    type ISearchExplanation,
+    type ISearchExplanationAppearance,
+    type ISearchExplanationItem,
+    type ISearchExplanationNearestItem,
     SearchEntityType,
     SearchMatchReason
 } from '@msdining/common/models/search';
@@ -22,6 +26,7 @@ import { getServices } from '../../../shared/services/registry.js';
 
 import { NON_ENTREE_FILTER } from '../../../shared/util/menu-item-filter.js';
 import { shouldPromoteByHitRate, getAverageDistance, type IStationHitStats } from './search-hit-rate.js';
+import { MenuItemStorageClient } from './clients/menu-item/menu-item.js';
 
 interface IMultiQuerySearchParams {
     queries: Array<ISearchQuery>;
@@ -740,6 +745,206 @@ export abstract class SearchManager {
 
     public static async searchVector(query: string, date: Date | null, allowResultsWithoutAppearances: boolean): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         return SearchManager._searchVectorInner(query, date, () => vectorClient.searchVectorRawFromQuery(query), allowResultsWithoutAppearances);
+    }
+
+    /**
+     * Diagnostic for the search-explain debug tool: explains why a given menu item
+     * (by id or by name) did or did not match a query. Reuses the same building
+     * blocks as the real search — the vector top-K, SearchSession.getMenuItemMatch,
+     * isVectorMatch, isExactSubstring, getMenusForSearch, and the real searchVector
+     * output as ground truth — so it stays in sync if the search logic changes.
+     */
+    public static async explainSearch(
+        query: string,
+        target: { menuItemId?: string; name?: string },
+        date: Date | null,
+        allowResultsWithoutAppearances: boolean,
+    ): Promise<ISearchExplanation> {
+        const session = new SearchSession({ queries: [{ text: query }], shouldUseExactMatch: false, date });
+        const normalizedQuery = normalizeNameForSearch(query);
+
+        const targetItems = target.menuItemId
+            ? [await MenuItemStorageClient.retrieveMenuItemAsync(target.menuItemId)].filter((item): item is IMenuItemBase => item != null)
+            : target.name
+                ? await MenuItemStorageClient.getMenuItemsByNormalizedName(target.name)
+                : [];
+
+        const [rawResults, realResults, menus] = await Promise.all([
+            vectorClient.searchVectorRawFromQuery(query),
+            SearchManager.searchVector(query, date, allowResultsWithoutAppearances),
+            session.getMenusAsync(),
+        ]);
+
+        // The vector top-K is ordered by distance and mixes all entity types; an
+        // item is "retrieved by vector" iff it lands inside this window.
+        const overallSorted = [...rawResults].sort((resultA, resultB) => resultA.distance - resultB.distance);
+        const worstIncludedDistance = overallSorted.length > 0 ? overallSorted[overallSorted.length - 1]!.distance : null;
+
+        const rankByMenuItemId = new Map<string, number>();
+        const distanceByMenuItemId = new Map<string, number>();
+        overallSorted.forEach((result, index) => {
+            if (DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] === SearchEntityType.menuItem && !rankByMenuItemId.has(result.id)) {
+                rankByMenuItemId.set(result.id, index + 1);
+                distanceByMenuItemId.set(result.id, result.distance);
+            }
+        });
+
+        const nearestMenuItemRows = overallSorted
+            .filter(result => DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] === SearchEntityType.menuItem)
+            .slice(0, 15);
+        const nearestMenuItems: ISearchExplanationNearestItem[] = await Promise.all(
+            nearestMenuItemRows.map(async result => {
+                const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(result.id);
+                return {
+                    menuItemId: result.id,
+                    name:       menuItem?.name ?? null,
+                    distance:   result.distance,
+                    rank:       rankByMenuItemId.get(result.id)!,
+                };
+            }),
+        );
+
+        const appearancesByMenuItemId = new Map<string, ISearchExplanationAppearance[]>();
+        for (const { dateString, cafeId, station, categories } of menus) {
+            for (const category of categories) {
+                for (const dailyMenuItem of category.menuItems) {
+                    const appearances = appearancesByMenuItemId.get(dailyMenuItem.menuItemId) ?? [];
+                    appearances.push({ cafeId, dateString, stationName: station.name });
+                    appearancesByMenuItemId.set(dailyMenuItem.menuItemId, appearances);
+                }
+            }
+        }
+
+        const finalMenuItemNames = new Set<string>();
+        for (const result of realResults.get(SearchEntityType.menuItem)?.values() ?? []) {
+            finalMenuItemNames.add(normalizeNameForSearch(result.name));
+        }
+
+        const items: ISearchExplanationItem[] = await Promise.all(targetItems.map(menuItem =>
+            SearchManager._explainMenuItem({
+                session,
+                menuItem,
+                query,
+                date,
+                allowResultsWithoutAppearances,
+                topKSize: overallSorted.length,
+                worstIncludedDistance,
+                vectorRank: rankByMenuItemId.get(menuItem.id) ?? null,
+                topKDistance: distanceByMenuItemId.get(menuItem.id),
+                appearances: appearancesByMenuItemId.get(menuItem.id) ?? [],
+                isInFinalResults: finalMenuItemNames.has(normalizeNameForSearch(menuItem.name)),
+            }),
+        ));
+
+        return {
+            query,
+            normalizedQuery,
+            date:        date ? date.toISOString() : null,
+            allowResultsWithoutAppearances,
+            vectorTopKSize: overallSorted.length,
+            worstIncludedDistance,
+            items,
+            nearestMenuItems,
+        };
+    }
+
+    private static async _explainMenuItem({
+        session,
+        menuItem,
+        query,
+        date,
+        allowResultsWithoutAppearances,
+        topKSize,
+        worstIncludedDistance,
+        vectorRank,
+        topKDistance,
+        appearances,
+        isInFinalResults,
+    }: {
+        session: SearchSession;
+        menuItem: IMenuItemBase;
+        query: string;
+        date: Date | null;
+        allowResultsWithoutAppearances: boolean;
+        topKSize: number;
+        worstIncludedDistance: number | null;
+        vectorRank: number | null;
+        topKDistance: number | undefined;
+        appearances: ISearchExplanationAppearance[];
+        isInFinalResults: boolean;
+    }): Promise<ISearchExplanationItem> {
+        const cosineDistance = await vectorClient.getQueryEntityCosineDistance(query, SearchEntityType.menuItem, menuItem.id);
+        const cosineSimilarity = cosineDistance != null ? 1 - cosineDistance : null;
+        const isInVectorTopK = vectorRank != null;
+
+        const { matchReasons } = session.getMenuItemMatch(menuItem);
+
+        const exactMatchCandidates: Array<Nullable<string>> = [
+            menuItem.name,
+            menuItem.description,
+            ...menuItem.searchTags,
+            ...menuItem.tags,
+            ...menuItem.modifiers.flatMap(modifier => [modifier.description, ...modifier.choices.map(choice => choice.description)]),
+        ];
+        const isExactSubstringMatch = exactMatchCandidates.some(candidate => candidate != null && session.isExactSubstring(candidate, SearchEntityType.menuItem));
+
+        const isVectorMatch = session.isVectorMatch(topKDistance, SearchEntityType.menuItem, exactMatchCandidates);
+        const appearsInSearchWindow = appearances.length > 0;
+        const wouldRegisterAsMatch = isVectorMatch || matchReasons.size > 0;
+
+        const windowLabel = date ? `selected date's` : `current week's`;
+        const formatSimilarity = (value: number | null) => value == null ? 'n/a' : value.toFixed(3);
+
+        const reasons: string[] = [];
+        if (cosineDistance == null) {
+            reasons.push('This item has no embedding, so vector search can never surface it.');
+        }
+
+        if (isInFinalResults) {
+            if (isInVectorTopK) {
+                reasons.push(`Matched by vector similarity (rank ${vectorRank} of ${topKSize}, cosine similarity ${formatSimilarity(cosineSimilarity)}).`);
+            }
+            if (matchReasons.size > 0) {
+                reasons.push(`Matched by text on: ${[...matchReasons].join(', ')}.`);
+            } else if (isExactSubstringMatch && !isInVectorTopK) {
+                reasons.push('Matched by exact substring fallback.');
+            }
+        } else {
+            if (!isInVectorTopK) {
+                const cutoff = worstIncludedDistance != null ? `, below the top-${topKSize} cutoff similarity of ${formatSimilarity(1 - worstIncludedDistance)}` : '';
+                reasons.push(`Not in the vector top ${topKSize} (cosine similarity ${formatSimilarity(cosineSimilarity)}${cutoff}).`);
+            } else if (!appearsInSearchWindow && !allowResultsWithoutAppearances) {
+                reasons.push(`In the vector top ${topKSize} (rank ${vectorRank}) but does not appear in the ${windowLabel} menu, and results without an appearance are not allowed for this search.`);
+            }
+
+            if (matchReasons.size === 0 && !isExactSubstringMatch) {
+                reasons.push('No text match on name, description, tags, search tags, or modifiers.');
+            }
+
+            if (!appearsInSearchWindow && !isInVectorTopK) {
+                reasons.push(`Does not appear in the ${windowLabel} menu.`);
+            }
+        }
+
+        return {
+            menuItemId: menuItem.id,
+            name:       menuItem.name,
+            cafeId:     menuItem.cafeId,
+            stationId:  menuItem.stationId,
+            hasEmbedding: cosineDistance != null,
+            cosineDistance,
+            cosineSimilarity,
+            vectorRank,
+            isInVectorTopK,
+            nameMatchReasons: [...matchReasons],
+            isExactSubstringMatch,
+            appearsInSearchWindow,
+            appearances,
+            isVectorMatch,
+            wouldRegisterAsMatch,
+            isInFinalResults,
+            reasons,
+        };
     }
 
     public static async searchForSimilarEntities({

@@ -1,5 +1,6 @@
 import type {
     IAutocompleteSuggestion,
+    ISearchExplanation,
     ISearchQuery,
     SearchEntityType,
 } from '@msdining/common/models/search';
@@ -9,6 +10,7 @@ import type { ICheapItemSearchResult, IServerSearchResult } from '../models/sear
 export interface ISearchService {
     search(data: { query: string; date: string | null; shouldUseExactMatch?: boolean }): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>>;
     searchVector(data: { query: string; date: string | null; allowResultsWithoutAppearances: boolean }): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>>;
+    explainSearch(data: { query: string; name?: string; menuItemId?: string; date: string | null; allowResultsWithoutAppearances: boolean }): Promise<ISearchExplanation>;
     searchForSimilarEntities(data: { entityName: string; entityType: SearchEntityType; date: string | null }): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>>;
     searchFavorites(data: { queries: ISearchQuery[]; date: string | null }): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>>;
     searchForCheapItems(data: { minPrice: number; maxPrice: number; date: string | null }): Promise<ICheapItemSearchResult[]>;

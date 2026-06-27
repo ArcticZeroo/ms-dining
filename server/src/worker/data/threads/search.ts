@@ -49,6 +49,10 @@ const onGetSearchEntityEmbedding = async ({ entityType, id }: { entityType: Sear
     return db.getSearchEntityEmbedding(entityType, id);
 }
 
+const onGetCosineDistanceToEntity = async ({ queryEmbedding, entityType, id }: { queryEmbedding: Float32Array, entityType: SearchEntityType, id: string }) => {
+    return db.getCosineDistanceToEntity(queryEmbedding, entityType, id);
+}
+
 const onGetSimilarQueries = async ({ query, queryEmbedding }: { query: string, queryEmbedding: Float32Array }) => {
     return db.searchForSimilarQueries(queryEmbedding, query, SIMILAR_QUERY_SEARCH_LIMIT);
 }
@@ -133,6 +137,7 @@ const COMMANDS = {
     getAllEmbeddedEntities: onGetAllEmbeddedEntities,
     getAllSearchQueries: onGetAllSearchQueries,
     getSearchEntityEmbedding: onGetSearchEntityEmbedding,
+    getCosineDistanceToEntity: onGetCosineDistanceToEntity,
     getSimilarQueries: onGetSimilarQueries,
     clearDuplicatedQueries: onClearDuplicatedQueries,
     deleteSearchEmbedding: onDeleteSearchEmbedding,

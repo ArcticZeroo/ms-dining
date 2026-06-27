@@ -1,0 +1,73 @@
+.search-explain .search-explain-form {
+    gap: var(--default-padding);
+}
+
+.search-explain .search-explain-form input {
+    flex-grow: 1;
+    min-width: 12rem;
+    padding: var(--constant-padding);
+}
+
+.explain-summary,
+.explain-signals {
+    gap: var(--default-padding);
+}
+
+.explain-signal {
+    gap: 0.125rem;
+    min-width: 8rem;
+}
+
+.explain-signal-label {
+    font-size: 0.75rem;
+    color: var(--color-almost-white);
+    opacity: 0.7;
+}
+
+.explain-signal-value {
+    font-weight: bold;
+}
+
+.explain-item.matched {
+    border-left: 4px solid var(--color-theme-green);
+}
+
+.explain-item.not-matched {
+    border-left: 4px solid var(--color-error);
+}
+
+.explain-item-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.explain-item-sub {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.explain-verdict.matched {
+    color: var(--color-theme-green-light);
+}
+
+.explain-verdict.not-matched {
+    color: var(--color-error-light);
+}
+
+.explain-reasons {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.explain-nearest-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--constant-padding);
+}
+
+.explain-nearest-table th,
+.explain-nearest-table td {
+    text-align: left;
+    padding: 0.25rem var(--constant-padding);
+    border-bottom: 1px solid var(--color-background-raised-2);
+}

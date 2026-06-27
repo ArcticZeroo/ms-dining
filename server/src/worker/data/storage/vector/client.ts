@@ -48,6 +48,16 @@ export const getSearchEntityEmbedding = async (entityType: SearchEntityType, id:
     return SEARCH_THREAD_HANDLER.sendRequest('search', 'getSearchEntityEmbedding', { entityType, id });
 }
 
+/**
+ * Cosine distance between the (cached) query embedding and a stored entity's
+ * embedding. Reuses the same query-embedding cache as real search, so the
+ * search-explain tool reports the exact distance search would see.
+ */
+export const getQueryEntityCosineDistance = async (query: string, entityType: SearchEntityType, id: string): Promise<number | null> => {
+    const embedding = await getQueryEmbedding(query);
+    return SEARCH_THREAD_HANDLER.sendRequest('search', 'getCosineDistanceToEntity', { queryEmbedding: embedding, entityType, id });
+}
+
 export const searchSimilarEntities = async (entityType: SearchEntityType, id: string): Promise<Array<IVectorSearchResult>> => {
     const embedding = await getSearchEntityEmbedding(entityType, id);
     if (!embedding) {
