@@ -46,7 +46,7 @@ export type IRecentOrderSummary = z.infer<typeof RecentOrderSummarySchema>;
 export const CafeOrderReviewSchema = z.object({
     rating:    z.number(),
     comment:   z.string().nullish(),
-    createdAt: z.date()
+    createdAt: z.string().transform(createdAt => new Date(createdAt))
 });
 
 export type ICafeOrderReviewData = z.infer<typeof CafeOrderReviewSchema>;

@@ -243,7 +243,8 @@ test('getOrderHistory enriches items with the user\'s own review when present', 
                 assert.ok(item.review, 'reviewed item should carry review');
                 assert.equal(item.review.rating, 8);
                 assert.equal(item.review.comment, 'Solid burger');
-                assert.ok(item.review.createdAt instanceof Date);
+                assert.equal(typeof item.review.createdAt, 'string');
+                assert.ok(!Number.isNaN(new Date(item.review.createdAt).getTime()));
                 reviewedItemCount++;
             } else if (item.menuItemId === GROUPED_MENU_ITEM_ID) {
                 assert.equal(item.review, undefined, 'unreviewed item should have review === undefined');

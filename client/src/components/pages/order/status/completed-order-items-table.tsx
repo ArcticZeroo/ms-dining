@@ -6,13 +6,14 @@ import { StationItemGroup } from '../cart/station-item-group.tsx';
 import { OrderItemReviewRow } from '../history/order-item-review-row.tsx';
 import '../cart/cart-contents-table.css';
 
-const COLUMN_COUNT = 4;
+const COLUMN_COUNT = 3;
 
 interface ICompletedOrderItemsTableProps {
     items: ICafeOrderItem[];
     subtotal: number;
     tax: number;
     total: number;
+    orderCompletedAt: Date;
     /** When true, show an inline review badge/CTA beneath each item. */
     showReviewRow?: boolean;
 }
@@ -22,6 +23,7 @@ export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> 
     subtotal,
     tax,
     total,
+    orderCompletedAt,
     showReviewRow = false,
 }) => {
     const cafeId = items[0]?.menuItem.cafeId;
@@ -43,18 +45,26 @@ export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> 
                                 </tr>
                                 {
                                     showReviewRow && (
-                                        <OrderItemReviewRow item={item} columnCount={COLUMN_COUNT}/>
+                                        <OrderItemReviewRow
+                                            item={item}
+                                            columnCount={COLUMN_COUNT}
+                                            orderCompletedAt={orderCompletedAt}
+                                        />
                                     )
                                 }
                             </React.Fragment>
                         ))}
                     </StationItemGroup>
                 ))}
-                <tr>
-                    <td></td>
-                    <td>Subtotal</td>
-                    <td className="price">{formatPrice(subtotal)}</td>
-                </tr>
+                {
+                    items.length > 1 && (
+                        <tr>
+                            <td></td>
+                            <td>Subtotal</td>
+                            <td className="price">{formatPrice(subtotal)}</td>
+                        </tr>
+                    )
+                }
                 <tr>
                     <td></td>
                     <td>Tax</td>

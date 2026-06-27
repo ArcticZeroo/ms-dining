@@ -5,8 +5,9 @@ import { formatEstimatedReadyTime } from '../../../../util/order.js';
 import { CompletedOrderItemsTable } from '../status/completed-order-items-table.js';
 import type { ICafeOrder, ICafeOrderItem } from '@msdining/common/models/order';
 import { getViewName } from '../../../../util/cafe.js';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { ApplicationContext } from '../../../../context/app.js';
+import { isSameDate } from '@msdining/common/util/date-util';
 
 interface ICompletedOrderItemProps {
     order: ICafeOrder;
@@ -22,6 +23,10 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
     const { viewsById } = useContext(ApplicationContext);
     const view = viewsById.get(order.cafeId);
     const cafeName = view == null ? order.cafeId : getViewName({ view, showGroupName: true });
+    const isToday = useMemo(
+        () => isSameDate(order.completedAt, new Date()),
+        [order.completedAt],
+    );
 
     return (
         <div className="card bg-raised-2">
@@ -33,16 +38,30 @@ export const CompletedOrderCard: React.FC<ICompletedOrderItemProps> = ({
                             : cafeName
                     }
                 </div>
+                {
+                    !isToday && (
+                        <div className="text-muted">
+                            {formatTimeToHoursMinutes(order.completedAt)}
+                        </div>
+                    )
+                }
                 <div>Order #{order.buyOnDemandOrderNumber}</div>
             </div>
-            <div className="text-center">Placed at {formatTimeToHoursMinutes(order.completedAt)}</div>
-            <div className="text-center">Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
+            {
+                isToday && (
+                    <>
+                        <div className="text-center">Placed at {formatTimeToHoursMinutes(order.completedAt)}</div>
+                        <div className="text-center">Estimated ready: {formatEstimatedReadyTime(order.completedAt, order.waitTimeMin, order.waitTimeMax)}</div>
+                    </>
+                )
+            }
             <div className="card">
                 <CompletedOrderItemsTable
                     items={order.items}
                     subtotal={order.subtotal}
                     tax={order.tax}
                     total={order.total}
+                    orderCompletedAt={order.completedAt}
                     showReviewRow={true}
                 />
             </div>

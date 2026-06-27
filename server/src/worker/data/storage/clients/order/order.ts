@@ -80,6 +80,8 @@ const enrichOrders = async (userId: string, orders: OrderWithItems[]): Promise<I
                 return [];
             }
 
+            const review = reviewInfoById.get(item.menuItemId);
+
             return [{
                 menuItemId:          item.menuItemId,
                 quantity:            item.quantity,
@@ -93,7 +95,11 @@ const enrichOrders = async (userId: string, orders: OrderWithItems[]): Promise<I
                     overallRating:    0,
                     firstAppearance:  '',
                 },
-                review: reviewInfoById.get(item.menuItemId)
+                review: review && {
+                    rating:    review.rating,
+                    comment:   review.comment,
+                    createdAt: review.createdAt.toISOString()
+                }
             }];
         }),
     }));
