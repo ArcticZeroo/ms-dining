@@ -1,7 +1,7 @@
+import type { PluginOption } from 'vite';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
-import type { PluginOption } from 'vite';
 
 const defaultLocalProxy = {
     target:       'http://localhost:3002',
@@ -44,9 +44,15 @@ export default defineConfig(({ mode }) => ({
     },
     build: {
         // Don't wipe dist/ — we keep old hashed assets around so stale
-        // tabs can still load them after a deploy. A post-build script
-        // cleans up assets older than 14 days.
+        // tabs can still load them after a deploy. The post-build
+        // cleanup-stale-assets script prunes them once a newer build has
+        // superseded them long enough for users to migrate.
         emptyOutDir: false,
+        // Emit a build manifest so cleanup-stale-assets can tell which assets
+        // the current build still references (and must be kept) apart from
+        // ones that were replaced/removed. Written under .vite/ so koa-static
+        // (which denies dotfiles) doesn't serve it publicly.
+        manifest: '.vite/manifest.json',
         rollupOptions: {
             output: {
                 entryFileNames: 'assets/[name]-[hash].js',
