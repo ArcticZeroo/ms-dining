@@ -21,6 +21,7 @@ export abstract class WorkerQueue<TKey, TValue> {
     readonly #failedPollInterval: Duration;
     readonly #entriesByKey: Map<TKey, TValue> = new Map<TKey, TValue>();
     readonly #keysInOrder: TKey[] = [];
+    readonly #failureCountByKey: Map<TKey, number> = new Map<TKey, number>();
     #runningSymbol: symbol | undefined;
 
     protected constructor({ successPollInterval, emptyPollInterval, failedPollInterval }: IWorkerQueueParams) {
@@ -112,6 +113,7 @@ export abstract class WorkerQueue<TKey, TValue> {
             this.doWorkAsync(entry)
                 .then((result) => {
                     this.#entriesByKey.delete(key);
+                    this.#failureCountByKey.delete(key);
                     if (result === WorkerQueue.QUEUE_SKIP_ENTRY) {
                         setTimeout(doQueueIteration, 0);
                     } else {
@@ -123,11 +125,28 @@ export abstract class WorkerQueue<TKey, TValue> {
                         this.#keysInOrder.unshift(key);
                         this.#logger.info(`Rate limited, pausing queue for ${Math.ceil(err.retryAfterMs / 1000)}s`);
                         setTimeout(doQueueIteration, err.retryAfterMs);
-                    } else {
-                        this.#logger.debug('Failed to process queue entry', key, err);
-                        this.#entriesByKey.delete(key);
-                        setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds);
+                        return;
                     }
+
+                    // A broken entry must not block the queue. Retry once immediately,
+                    // then move it to the back so other items can proceed, then drop it
+                    // if it still fails after coming back around.
+                    const failureCount = (this.#failureCountByKey.get(key) ?? 0) + 1;
+                    this.#failureCountByKey.set(key, failureCount);
+
+                    if (failureCount === 1) {
+                        this.#logger.debug('Failed to process queue entry, retrying once', key, err);
+                        this.#keysInOrder.unshift(key);
+                    } else if (failureCount === 2) {
+                        this.#logger.debug('Queue entry failed retry, moving to back of queue', key, err);
+                        this.#keysInOrder.push(key);
+                    } else {
+                        this.#logger.error('Dropping queue entry after repeated failures', key, err);
+                        this.#entriesByKey.delete(key);
+                        this.#failureCountByKey.delete(key);
+                    }
+
+                    setTimeout(doQueueIteration, this.#failedPollInterval.inMilliseconds);
                 });
         };
 

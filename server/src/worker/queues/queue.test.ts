@@ -115,11 +115,35 @@ describe('WorkerQueue — RetryAfterError handling', () => {
             'all items must be processed in order after rate limit clears');
     });
 
-    it('non-rate-limit errors still drop the item (no re-queue)', async () => {
+    it('retries a transiently failing item once and then processes it', async () => {
         const processed: string[] = [];
+        let attempts = 0;
+
+        queue.workFn = async (entry) => {
+            attempts++;
+            if (attempts === 1) {
+                throw new Error('transient failure');
+            }
+            processed.push(entry);
+        };
+
+        queue.add('flaky');
+        queue.start();
+
+        await flush();
+
+        assert.deepEqual(processed, ['flaky'], 'item must be processed after its retry');
+        assert.equal(attempts, 2, 'item must be retried once immediately after the first failure');
+        assert.equal(queue.remainingItems, 0);
+    });
+
+    it('retries a broken item, moves it to the back so it does not block others, then drops it', async () => {
+        const processed: string[] = [];
+        let badAttempts = 0;
 
         queue.workFn = async (entry) => {
             if (entry === 'bad') {
+                badAttempts++;
                 throw new Error('generic failure');
             }
             processed.push(entry);
@@ -132,8 +156,11 @@ describe('WorkerQueue — RetryAfterError handling', () => {
         await flush();
 
         assert.deepEqual(processed, ['good'],
-            'non-rate-limit failure must not re-queue the item');
-        assert.equal(queue.remainingItems, 0);
+            'a broken item must not block a healthy item behind it');
+        assert.equal(badAttempts, 3,
+            'broken item: initial attempt + immediate retry + one back-of-queue retry');
+        assert.equal(queue.remainingItems, 0,
+            'broken item must be dropped after its retries are exhausted');
     });
 
     it('QUEUE_SKIP_ENTRY still works correctly', async () => {
