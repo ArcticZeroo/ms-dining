@@ -28,7 +28,7 @@
 import { after, before, describe, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { SearchEntityType } from '@msdining/common/models/search';
+import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
 import { SearchManager } from './search.js';
 import { usePrismaWrite } from './client.js';
@@ -313,6 +313,74 @@ describe('SearchManager.search — description/imageUrl backfill (8948cc7)', () 
         // Empty description should round-trip as null/undefined without
         // any backfill candidate; the assertion is "didn't throw".
         assert.ok(entry.description == null);
+    });
+});
+
+describe('SearchManager.explainSearch — verdict uses entityKey, not display name', () => {
+    test('a grouped sibling that did not match directly is still reported as in results', async () => {
+        // Two differently-named members of the same group. Only "Alpha Tacos"
+        // matches the query by title; "Beta Tacos" does not match directly but
+        // shares the group's result bucket. The verdict must reflect the shared
+        // bucket (entityKey group:...), which a display-name comparison — the bug
+        // this guards — would miss because the bucket only stores Alpha's name.
+        await seedSearchableMenu([
+            {
+                id:          'alpha-tacos',
+                name:        'Alpha Tacos',
+                description: null,
+                imageUrl:    null,
+                price:       5,
+                calories:    100,
+                maxCalories: 100,
+                groupId:     GROUP_ID,
+            },
+            {
+                id:          'beta-tacos',
+                name:        'Beta Tacos',
+                description: null,
+                imageUrl:    null,
+                price:       5,
+                calories:    100,
+                maxCalories: 100,
+                groupId:     GROUP_ID,
+            },
+        ]);
+
+        const explanation = await SearchManager.explainSearch('alpha tacos', { name: 'Beta Tacos' }, FAKE_NOW, false);
+
+        const beta = explanation.items.find(item => item.menuItemId === 'beta-tacos');
+        assert.ok(beta, 'should resolve Beta Tacos by name');
+        assert.equal(beta.nameMatchReasons.length, 0, 'Beta should not text-match the Alpha query');
+        assert.equal(
+            beta.isInFinalResults,
+            true,
+            'a grouped sibling shares the result bucket, so it must be reported as in results',
+        );
+    });
+
+    test('a same-name item in another group is not falsely reported as matched', async () => {
+        // "Gamma Roll" matches by title and creates its own (ungrouped) bucket.
+        // A different "Gamma Roll" that lives in a separate group must NOT inherit
+        // that verdict — its entityKey (group:...) differs from the ungrouped
+        // bucket's (name:gammaroll), so a name comparison would false-positive.
+        await seedSearchableMenu([
+            {
+                id:          'gamma-ungrouped',
+                name:        'Gamma Roll',
+                description: null,
+                imageUrl:    null,
+                price:       5,
+                calories:    100,
+                maxCalories: 100,
+                groupId:     null,
+            },
+        ]);
+
+        const explanation = await SearchManager.explainSearch('gamma roll', { menuItemId: 'gamma-ungrouped' }, FAKE_NOW, false);
+        const gamma = explanation.items.find(item => item.menuItemId === 'gamma-ungrouped');
+        assert.ok(gamma, 'should resolve the ungrouped Gamma Roll');
+        assert.equal(gamma.nameMatchReasons.includes(SearchMatchReason.title), true, 'Gamma Roll matches by title');
+        assert.equal(gamma.isInFinalResults, true, 'the matching item is in results');
     });
 });
 

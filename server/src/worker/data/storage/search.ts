@@ -815,9 +815,14 @@ export abstract class SearchManager {
             }
         }
 
-        const finalMenuItemNames = new Set<string>();
+        // Match against the result's entityKey (group:<id> or name:<normalized>),
+        // not the display name — the real results are bucketed by group, and a
+        // bucket stores only its first item's name, so a name comparison would
+        // both miss grouped members and falsely match same-name items in other
+        // cafes. entityKey is exactly the bucket identity.
+        const finalMenuItemEntityKeys = new Set<string>();
         for (const result of realResults.get(SearchEntityType.menuItem)?.values() ?? []) {
-            finalMenuItemNames.add(normalizeNameForSearch(result.name));
+            finalMenuItemEntityKeys.add(result.entityKey);
         }
 
         const items: ISearchExplanationItem[] = await Promise.all(targetItems.map(menuItem =>
@@ -832,7 +837,7 @@ export abstract class SearchManager {
                 vectorRank: rankByMenuItemId.get(menuItem.id) ?? null,
                 topKDistance: distanceByMenuItemId.get(menuItem.id),
                 appearances: appearancesByMenuItemId.get(menuItem.id) ?? [],
-                isInFinalResults: finalMenuItemNames.has(normalizeNameForSearch(menuItem.name)),
+                isInFinalResults: finalMenuItemEntityKeys.has(menuItem.entityKey),
             }),
         ));
 
@@ -908,6 +913,12 @@ export abstract class SearchManager {
                 reasons.push(`Matched by text on: ${[...matchReasons].join(', ')}.`);
             } else if (isExactSubstringMatch && !isInVectorTopK) {
                 reasons.push('Matched by exact substring fallback.');
+            }
+            // The result bucket is shared across a cross-cafe group / same name, so it
+            // can be in the results because a sibling item matched even though this
+            // specific item did not match or does not appear in the window.
+            if (!isInVectorTopK && matchReasons.size === 0 && !isExactSubstringMatch) {
+                reasons.push('Included via a sibling item that shares this group/name; this specific item did not match directly (see signals).');
             }
         } else {
             if (!isInVectorTopK) {

@@ -417,9 +417,10 @@ export abstract class MenuItemStorageClient {
      * Returns every menu item (across cafes) whose normalized name matches the
      * given name. Used by the search-explain debug tool to resolve an item the
      * user typed by name into concrete ids/embeddings, even when it isn't on the
-     * current menu.
+     * current menu. Capped so a very common name (e.g. "coffee") can't fan out
+     * into hundreds of hydrations + per-item vector RPCs.
      */
-    public static async getMenuItemsByNormalizedName(name: string): Promise<IMenuItemBase[]> {
+    public static async getMenuItemsByNormalizedName(name: string, limit: number = 50): Promise<IMenuItemBase[]> {
         const normalizedName = normalizeNameForSearch(name);
         if (normalizedName.length === 0) {
             return [];
@@ -428,6 +429,7 @@ export abstract class MenuItemStorageClient {
         const rows = await usePrismaClient(prismaClient => prismaClient.menuItem.findMany({
             where:  { normalizedName },
             select: { id: true },
+            take:   limit,
         }));
 
         const items = await Promise.all(rows.map(row => this.retrieveMenuItemAsync(row.id)));
