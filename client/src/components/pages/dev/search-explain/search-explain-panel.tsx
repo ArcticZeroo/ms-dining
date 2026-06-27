@@ -1,6 +1,8 @@
-import { ISearchExplanation, ISearchExplanationItem } from '@msdining/common/models/search';
+import { ISearchExplanation, ISearchExplanationItem, SearchEntityType } from '@msdining/common/models/search';
 import React, { useState } from 'react';
 import { useExplainSearchMutation } from '../../../../store/queries/search-explain.ts';
+import { useAutocompleteSuggestionsQuery } from '../../../../store/queries/search.ts';
+import { useDebouncedValue } from '../../../../hooks/debounce.ts';
 import { classNames } from '../../../../util/react.ts';
 import { getErrorMessage } from '../../../../util/mutation.ts';
 import './search-explain.css';
@@ -8,12 +10,64 @@ import './search-explain.css';
 const formatNumber = (value: number | null, digits = 3): string =>
     value == null ? 'n/a' : value.toFixed(digits);
 
-const Signal: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const InfoTip: React.FC<{ text: string }> = ({ text }) => (
+    <span className="explain-info" tabIndex={0} title={text} aria-label={text}>?</span>
+);
+
+const Signal: React.FC<{ label: string; tip?: string; children: React.ReactNode }> = ({ label, tip, children }) => (
     <div className="explain-signal flex-col">
-        <span className="explain-signal-label">{label}</span>
+        <span className="explain-signal-label">
+            {label}{tip && <> <InfoTip text={tip}/></>}
+        </span>
         <span className="explain-signal-value">{children}</span>
     </div>
 );
+
+const ItemNameInput: React.FC<{ value: string; onChange: (value: string) => void }> = ({ value, onChange }) => {
+    const [isFocused, setIsFocused] = useState(false);
+    const debouncedQuery = useDebouncedValue(value.trim(), 200);
+    const { data: suggestions } = useAutocompleteSuggestionsQuery(debouncedQuery);
+
+    // The explain tool resolves menu items, so only suggest those.
+    const menuItemSuggestions = (suggestions ?? []).filter(suggestion => suggestion.entityType === SearchEntityType.menuItem);
+    const showDropdown = isFocused && menuItemSuggestions.length > 0 && value.trim().length > 0;
+
+    return (
+        <div className="explain-autocomplete-wrapper flex-grow">
+            <input
+                type="text"
+                placeholder="Item name (e.g. Quesabirria Tacos)"
+                value={value}
+                onChange={event => onChange(event.target.value)}
+                onFocus={() => setIsFocused(true)}
+                // Delay so a click on a suggestion registers before the dropdown hides.
+                onBlur={() => setTimeout(() => setIsFocused(false), 150)}
+            />
+            {
+                showDropdown && (
+                    <div className="explain-autocomplete-dropdown card">
+                        {
+                            menuItemSuggestions.slice(0, 8).map(suggestion => (
+                                <button
+                                    type="button"
+                                    key={suggestion.name}
+                                    className="explain-autocomplete-item"
+                                    onMouseDown={event => event.preventDefault()}
+                                    onClick={() => {
+                                        onChange(suggestion.name);
+                                        setIsFocused(false);
+                                    }}
+                                >
+                                    {suggestion.name}
+                                </button>
+                            ))
+                        }
+                    </div>
+                )
+            }
+        </div>
+    );
+};
 
 const ExplainItemCard: React.FC<{ item: ISearchExplanationItem }> = ({ item }) => (
     <div className={classNames('card explain-item flex-col', item.isInFinalResults ? 'matched' : 'not-matched')}>
@@ -32,14 +86,14 @@ const ExplainItemCard: React.FC<{ item: ISearchExplanationItem }> = ({ item }) =
         </ul>
 
         <div className="explain-signals flex flex-wrap">
-            <Signal label="Cosine similarity">{formatNumber(item.cosineSimilarity)}</Signal>
+            <Signal label="Cosine similarity" tip="How semantically close the query is to this item, from -1 (opposite) to 1 (identical). Embeddings are usually positive; near 0 means unrelated.">{formatNumber(item.cosineSimilarity)}</Signal>
             <Signal label="Cosine distance">{formatNumber(item.cosineDistance)}</Signal>
-            <Signal label="Vector rank">{item.vectorRank == null ? '—' : `#${item.vectorRank}`}</Signal>
+            <Signal label="Vector rank" tip="This item's position among the query's nearest neighbors. Only the top 50 are retrieved by vector search.">{item.vectorRank == null ? '—' : `#${item.vectorRank}`}</Signal>
             <Signal label="In vector top-K">{item.isInVectorTopK ? 'yes' : 'no'}</Signal>
             <Signal label="Has embedding">{item.hasEmbedding ? 'yes' : 'no'}</Signal>
-            <Signal label="Text match">{item.nameMatchReasons.length > 0 ? item.nameMatchReasons.join(', ') : 'none'}</Signal>
+            <Signal label="Text match" tip="Which fields the query matched as a fuzzy subsequence: title, description, tags, search tags, or modifiers.">{item.nameMatchReasons.length > 0 ? item.nameMatchReasons.join(', ') : 'none'}</Signal>
             <Signal label="Substring match">{item.isExactSubstringMatch ? 'yes' : 'no'}</Signal>
-            <Signal label="On menu (window)">{item.appearsInSearchWindow ? `yes (${item.appearances.length})` : 'no'}</Signal>
+            <Signal label="On menu (window)" tip="Whether this item appears on a menu in the search window (whole current week, or the chosen date).">{item.appearsInSearchWindow ? `yes (${item.appearances.length})` : 'no'}</Signal>
             <Signal label="isVectorMatch">{item.isVectorMatch ? 'yes' : 'no'}</Signal>
             <Signal label="Would register">{item.wouldRegisterAsMatch ? 'yes' : 'no'}</Signal>
         </div>
@@ -64,12 +118,12 @@ const ExplainResult: React.FC<{ explanation: ISearchExplanation }> = ({ explanat
         <div className="card explain-summary flex flex-wrap">
             <Signal label="Query">{explanation.query}</Signal>
             <Signal label="Normalized">{explanation.normalizedQuery}</Signal>
-            <Signal label="Vector top-K size">{explanation.vectorTopKSize}</Signal>
-            <Signal label="Top-K cutoff similarity">
+            <Signal label="Vector top-K size" tip="Number of nearest-neighbor entities retrieved for the query (across items, stations, etc.). Inclusion in this set is the de-facto cosine cutoff.">{explanation.vectorTopKSize}</Signal>
+            <Signal label="Top-K cutoff similarity" tip="Cosine similarity of the least-similar entity still inside the top-K. An item below this is not retrieved by vector search. Can be negative (range -1..1) when even the cutoff entity is unrelated to the query.">
                 {explanation.worstIncludedDistance == null ? 'n/a' : formatNumber(1 - explanation.worstIncludedDistance)}
             </Signal>
-            <Signal label="Window">{explanation.date ?? 'current week'}</Signal>
-            <Signal label="Allow no-appearance">{explanation.allowResultsWithoutAppearances ? 'yes' : 'no'}</Signal>
+            <Signal label="Window" tip="The menu dates considered. Empty date = the whole current week (matching a normal search); a chosen date = that single day.">{explanation.date ?? 'current week'}</Signal>
+            <Signal label="Allow no-appearance" tip="Whether vector matches that aren't on any menu in the window can still be returned. True for a whole-week search, false when a specific date is pinned.">{explanation.allowResultsWithoutAppearances ? 'yes' : 'no'}</Signal>
         </div>
 
         {
@@ -121,25 +175,22 @@ export const SearchExplainPanel = () => {
         <div className="flex-col search-explain">
             <div className="subtitle">
                 Explain why a menu item did or did not match a search query. Reuses the live search
-                vector top-K, cosine distance, text-match, and menu-appearance logic.
+                vector top-K, cosine distance, text-match, and menu-appearance logic. Currently covers
+                menu items only.
             </div>
 
             <form className="flex flex-wrap search-explain-form" onSubmit={onSubmit}>
                 <input
                     type="text"
+                    className="flex-grow"
                     placeholder="Search query (e.g. birria)"
                     value={query}
                     onChange={event => setQuery(event.target.value)}
                 />
-                <input
-                    type="text"
-                    placeholder="Item name (e.g. Quesabirria Tacos)"
-                    value={itemName}
-                    onChange={event => setItemName(event.target.value)}
-                />
+                <ItemNameInput value={itemName} onChange={setItemName}/>
                 <input
                     type="date"
-                    title="Optional: scope to a single date instead of the current week"
+                    title="Optional: scope to a single date. Leave empty to search the whole current week, like a normal search."
                     value={date}
                     onChange={event => setDate(event.target.value)}
                 />
@@ -151,6 +202,11 @@ export const SearchExplainPanel = () => {
                     {explainMutation.isPending ? 'Explaining…' : 'Explain'}
                 </button>
             </form>
+
+            <div className="explain-hint subtitle">
+                Leave the date empty to match a normal search (the whole current week). Pick a date to
+                scope to that single day.
+            </div>
 
             {
                 explainMutation.isError && (
