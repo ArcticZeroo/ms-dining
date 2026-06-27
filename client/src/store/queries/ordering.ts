@@ -192,17 +192,23 @@ export const useAggregatedCartEstimate = (cafeIds: string[]) => {
     const loaded = results.filter(result => result.data != null).map(result => result.data!);
 
     if (loaded.length === 0) {
-        return undefined;
+        return {
+            data:      undefined,
+            isLoading: results.some(result => result.isLoading),
+        };
     }
 
     return {
-        waitTime: {
-            minTime: Math.max(...loaded.map(entry => entry.waitTime.minTime)),
-            maxTime: Math.max(...loaded.map(entry => entry.waitTime.maxTime)),
+        data: {
+            waitTime: {
+                minTime: Math.max(...loaded.map(entry => entry.waitTime.minTime)),
+                maxTime: Math.max(...loaded.map(entry => entry.waitTime.maxTime)),
+            },
+            subtotal: loaded.reduce((sum, entry) => sum + entry.subtotal, 0),
+            tax:      loaded.reduce((sum, entry) => sum + entry.tax, 0),
+            total:    loaded.reduce((sum, entry) => sum + entry.total, 0),
         },
-        subtotal: loaded.reduce((sum, entry) => sum + entry.subtotal, 0),
-        tax:      loaded.reduce((sum, entry) => sum + entry.tax, 0),
-        total:    loaded.reduce((sum, entry) => sum + entry.total, 0),
+        isLoading: false,
     };
 };
 

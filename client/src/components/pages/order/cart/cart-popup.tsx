@@ -17,7 +17,7 @@ import { getErrorMessage } from '../../../../util/mutation.js';
 const useCartEstimate = () => {
     const cartItemsByCafe = useServerAvailableCartItemsByCafe();
     const cafeIds = useMemo(() => cartItemsByCafe.map(group => group.cafeId), [cartItemsByCafe]);
-    return useAggregatedCartEstimate(cafeIds);
+    return useAggregatedCartEstimate(cafeIds).data;
 }
 
 const CartPopupBody = () => {
