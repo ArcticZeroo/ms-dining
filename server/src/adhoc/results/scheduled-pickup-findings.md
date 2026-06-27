@@ -7,14 +7,74 @@ a pickup instead of ordering ASAP.
 
 ## Verdict
 
-- **We have enough to *describe* scheduling and generate candidate slots**: the config that
-  governs slot interval, buffer/lead time, and the open/close windows is all present in the
-  HARs.
-- **We do NOT have enough to *implement* a scheduled checkout end-to-end.** Every captured
-  order is ASAP/now — no HAR contains a request that actually books a future slot, so we
-  can't see the exact request field(s) that flip an order from ASAP to scheduled.
-- **Action required Monday:** capture a real "schedule for later" checkout and diff the
-  create-order / wait-time / close-order bodies against an ASAP order (see Test plan below).
+- **Live config confirms same-day scheduling is enabled** on cafe25, bobae, foodhall4, and cafe16 (`isScheduleOrderEnabled: true`, future/calendar scheduling disabled).
+- **The API accepts the scheduled-field candidates through order creation and close-order param validation**: `scheduleType`, `scheduleTime`, `daysToAdd`, `timezone`, `calendarDaysToAdd`; close-order also accepts `scheduledTime`/`scheduledDay`.
+- **Remaining caveat:** fake-card close-order stops at `CC_SALE_TRANSACTION_FAILED`, so a successful paid scheduled order still has not echoed which scheduled-time spelling BoD persists. Send both `scheduleTime` and `scheduledTime` at close until a successful scheduled HAR is captured.
+
+
+## Live findings (2026-06-27)
+
+Live probes were run against `cafe25`, `bobae`, `foodhall4`, and `cafe16` with anonymous auth. `POST /api/sites/107/getKitchenLeadTimesForHomePage` must use the browser body shape `[{ "id": "<contextId>", "timeZone": "PST8PDT" }]`; posting `{}` returns HTTP 500.
+
+| Site | contextId | `bufferTime` | `intervalTime` | lead times | min prep |
+|------|-----------|--------------|----------------|------------|----------|
+| cafe25 | `b0380cda-899f-492b-88fa-0cbbaf71dc18` | 20 | 15 | `delivery:27`, `pickup:20`, `dineIn:10` | 5 |
+| bobae | `d80bcb86-03bc-4fd2-be1b-afd5046519c3` | 30 | 15 | `delivery:15`, `pickup:15`, `foodLocker:15`, `dineIn:15` | 5 |
+| foodhall4 | `8cf3ef7a-4781-40c0-a40e-49d765bd0967` | 30 | 15 | `delivery:15`, `pickup:20`, `foodLocker:15`, `dineIn:15` | 5 |
+| cafe16 | `75a4ba14-102d-4d26-aa73-e3d22d59706f` | 20 | 15 | `delivery:28`, `pickup:20`, `dineIn:15` | 10 |
+
+All four sites returned `todaySchedulingEnabled: true`, `isScheduleOrderEnabled: true`, `isAsapOrderDisabled: false`, `isFutureSchedulingEnabled: false`, `isCalendarSchedulingEnabled: false`, `futureScheduledDays: 0`. So the live config still supports same-day scheduled ordering only.
+
+### Scheduled pickup request probes
+
+Using live cafe25 menu data, the probe selected an orderable item (`Espresso con Panna`) from station `Onda Origins`. The concepts endpoint accepts the browser-style schedule body:
+
+```json
+POST /api/sites/107/b0380cda-899f-492b-88fa-0cbbaf71dc18/concepts/1596
+{ "scheduleTime": { "startTime": "11:00 AM", "endTime": "11:15 PM" }, "scheduledDay": 0 }
+```
+
+`POST /api/order/107/b0380cda-899f-492b-88fa-0cbbaf71dc18/getWaitTimeForItems` accepted both ASAP pickup and scheduled pickup bodies. The scheduled body added these fields:
+
+```json
+{
+  "deliveryType": "pickup",
+  "scheduleType": "laterToday",
+  "scheduleTime": "11:15 AM - 11:30 AM",
+  "daysToAdd": 0,
+  "timezone": "PST8PDT",
+  "calendarDaysToAdd": 0,
+  "scheduledDay": 0
+}
+```
+
+The response stayed the normal min/max wait-time shape (`minTime.minutes: 11`, `maxTime.minutes: 12` in the probe), so wait-time accepts these fields but does not echo or visibly transform the selected slot.
+
+`POST /api/order/{tenant}/{context}/orders` accepted two scheduled candidate create bodies:
+
+1. UI-state field names: `scheduleType`, `scheduleTime`, `daysToAdd`, `timezone`, `calendarDaysToAdd`.
+2. Close/payment-style alias: `scheduledTime`, `daysToAdd`, `timezone`, `calendarDaysToAdd`.
+
+Both returned HTTP 200 and created only PENDING orders. The order response did **not** echo the scheduled fields at top level; the only schedule-ish response properties were the normal concept window cron strings, e.g. `openScheduleExpression: "0 0 11 * * FRI"` and `closeScheduleExpression: "0 0 14 * * FRI"`.
+
+`POST /api/order/{tenant}/{context}/orderId/{orderId}/processPaymentAndClosedOrder` was then called with obviously fake payment data. Both top-level scheduled variants were accepted through fulfillment/order validation and failed at card sale:
+
+```json
+// variant A
+{ "scheduleType": "laterToday", "scheduleTime": "11:15 AM - 11:30 AM", "daysToAdd": 0, "timezone": "PST8PDT", "calendarDaysToAdd": 0 }
+
+// variant B
+{ "scheduledTime": "11:15 AM - 11:30 AM", "scheduledDay": 0, "daysToAdd": 0, "timezone": "PST8PDT", "calendarDaysToAdd": 0 }
+
+// response for both
+{ "statusCode": 400, "error": "Bad Request", "message": "CC_SALE_TRANSACTION_FAILED" }
+```
+
+This confirms order/fulfillment params are validated before card processing and these scheduled fields are not rejected before the payment stage. The CDN bundle maps the scheduler UI state as `{ scheduleType, scheduleTime, daysToAdd, timezone, calendarDaysToAdd }`; later pages receive `scheduledTime` from `scheduleOrderData.scheduleTime` and `scheduledDay` from `scheduleOrderData.calendarDaysToAdd`.
+
+### Updated verdict
+
+We can implement same-day scheduled pickup slot selection using the UI-state values above and send them through wait-time/create-order/close-order. The live API accepts the fields and reaches payment validation. Remaining limitation: because fake card data intentionally stops at `CC_SALE_TRANSACTION_FAILED`, the server never returns a successful closed scheduled order, so it does not conclusively prove whether BoD persists `scheduleTime` or `scheduledTime` on a paid close; send both names at close for maximum compatibility until a real scheduled checkout HAR confirms the final successful payload.
 
 ## Where the scheduling config lives
 

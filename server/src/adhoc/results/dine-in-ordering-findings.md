@@ -6,14 +6,83 @@ repo root.
 
 ## Verdict
 
-- **BoD definitely has a dine-in concept** — it's enumerated in config, site-data, and
-  lead-time responses across every captured site.
-- **But it is disabled on all captured sites** (`dineInConfig.featureEnabled: false`), and no
-  HAR contains a dine-in order, so we cannot confirm the exact request payload that books a
-  dine-in order.
-- **Action required Monday:** find a site/profile where dine-in is enabled (or test the
-  hypothesized flags against the wait-time endpoint, which is safe) and capture a dine-in
-  order to confirm the close-order payload. See Test plan.
+- **BoD has live-confirmed dine-in request switches**: wait-time accepts `deliveryType: "dineIn"`; close-order accepts `deliveryOption.id: "dineIn"` plus `fulfillmentType: "dineInFormFields"` through fulfillment validation.
+- **Param validation happens before card processing**: fake-card close-order for dine-in reaches `CC_SALE_TRANSACTION_FAILED`, not a fulfillment schema error.
+- **Do not expose dine-in for tested cafes yet** because `dineInConfig.featureEnabled` remains `false` and `tableNumberConfig` is empty on cafe25, bobae, foodhall4, and cafe16.
+
+
+## Live findings (2026-06-27)
+
+Live probes were run against `cafe25`, `bobae`, `foodhall4`, and `cafe16`. All four still expose dine-in config but keep it disabled: `dineInConfig.featureEnabled: false`, `dineInConfig.kitchenText: "DINE IN"`, `dineInConfig.buttonText: "DINE IN"`, `tableNumberConfig: {}`. Pickup remains enabled.
+
+Lead-time response from `POST /api/sites/107/getKitchenLeadTimesForHomePage` (body `[{ "id": "<contextId>", "timeZone": "PST8PDT" }]`) includes dine-in on every tested site:
+
+| Site | dine-in lead time | pickup lead time | min prep |
+|------|-------------------|------------------|----------|
+| cafe25 | 10 | 20 | 5 |
+| bobae | 15 | 15 | 5 |
+| foodhall4 | 15 | 20 | 5 |
+| cafe16 | 15 | 20 | 10 |
+
+### Wait-time probe
+
+On cafe25, `POST /api/order/107/b0380cda-899f-492b-88fa-0cbbaf71dc18/getWaitTimeForItems` accepted the dine-in switch:
+
+```json
+{
+  "cartItems": ["<live cart item>"],
+  "varianceEnabled": true,
+  "variancePercentage": 5,
+  "kitchenContextId": null,
+  "deliveryType": "dineIn"
+}
+```
+
+It returned HTTP 200 with the same normal response shape as pickup (`minTime.minutes: 11`, `maxTime.minutes: 12` in the probe). Adding scheduled fields to the dine-in wait-time request was also accepted.
+
+### Close-order/payment validation probe
+
+A PENDING cafe25 order was created, then `POST /api/order/107/b0380cda-899f-492b-88fa-0cbbaf71dc18/orderId/{orderId}/processPaymentAndClosedOrder` was called with fake payment data and dine-in delivery properties:
+
+```json
+{
+  "deliveryProperties": {
+    "deliveryOption": {
+      "id": "dineIn",
+      "kitchenText": "DINE IN",
+      "displayText": "DINE IN",
+      "defaultConfirmationText": "Thank you!",
+      "conceptEntries": {},
+      "isEnabled": true,
+      "orderSequence": 1
+    },
+    "fulfillmentDetails": {
+      "fulfillmentType": "dineInFormFields",
+      "tableNumber": "TEST-1"
+    },
+    "isCutleryEnabled": false,
+    "nameCapture": { "firstName": "BoD Test", "lastInitial": "" },
+    "nameString": "BoD Test ",
+    "tableNumber": "TEST-1"
+  },
+  "tokenizedData": {
+    "paymentDetails": { "apiToken": "00000000-0000-0000-0000-000000000000", "cardIssuer": "visa" },
+    "token": "4111111111111111"
+  }
+}
+```
+
+Result:
+
+```json
+{ "statusCode": 400, "error": "Bad Request", "message": "CC_SALE_TRANSACTION_FAILED" }
+```
+
+The same fake-payment result occurred **without** `tableNumber` in either `deliveryProperties.fulfillmentDetails` or top-level `deliveryProperties`. On the currently tested disabled sites, table number is therefore not validated as required before payment.
+
+### Updated verdict
+
+Dine-in request params are now live-confirmed up to payment validation: wait-time uses `deliveryType: "dineIn"`; close-order uses `deliveryProperties.deliveryOption.id: "dineIn"` and `fulfillmentDetails.fulfillmentType: "dineInFormFields"` with DINE IN labels from `dineInConfig`. Param validation happens before card processing and accepts these fields, then fake card processing fails with `CC_SALE_TRANSACTION_FAILED`. Do not expose dine-in for these cafes yet because `dineInConfig.featureEnabled` is still false; if a future site enables it, table-number prompting should be driven by non-empty `tableNumberConfig` rather than assumed mandatory.
 
 ## Evidence that dine-in exists
 
