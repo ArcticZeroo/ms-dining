@@ -29,11 +29,12 @@ const getPayButtonTitle = (isIdentityValid: boolean, hasUnavailableItems: boolea
 export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, totalQuantity, totalPrice, hasUnavailableItems, onPay }) => {
     const cafe = useContext(CurrentCafeContext);
     const { isValid: isIdentityValid } = usePaymentIdentityContext();
-    const { data: estimate } = useCartEstimateQuery(cafe.id, hasUnavailableItems);
+    const { data: estimate, isPlaceholderData } = useCartEstimateQuery(cafe.id, hasUnavailableItems);
 
-    const displayPrice = estimate && estimate.total > 0
-        ? estimate.total
-        : totalPrice;
+    // Only trust the server total when it's freshly loaded for the current cart.
+    // While it's still loading (or showing kept-previous data after a cart change),
+    // show the local subtotal plus a "+ tax" hint rather than a stale total.
+    const hasFreshServerTotal = estimate != null && estimate.total > 0 && !isPlaceholderData;
 
     return (
         <div className="flex-col">
@@ -46,7 +47,11 @@ export const ReadyToPayFooter: React.FC<IReadyToPayFooterProps> = ({ notice, tot
                     onClick={onPay}
                     title={getPayButtonTitle(isIdentityValid, hasUnavailableItems)}
                 >
-                    Pay {formatPrice(displayPrice)}
+                    {
+                        hasFreshServerTotal
+                            ? `Pay ${formatPrice(estimate!.total)}`
+                            : `Pay ${formatPrice(totalPrice)} + tax`
+                    }
                 </button>
             </div>
             {
