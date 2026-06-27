@@ -33,9 +33,6 @@ const getNextDate = (date: Date) => {
     return newDate;
 };
 
-const MINIMUM_DATE = DateUtil.getMinimumDateForMenu();
-const MAXIMUM_DATE = DateUtil.getMaximumDateForMenu();
-
 export const CafeDatePicker: React.FC = () => {
     const selectedDate = useSelectedDate();
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
@@ -52,10 +49,16 @@ export const CafeDatePicker: React.FC = () => {
         nextDateDisplay,
         selectedDateDisplay
     } = useMemo(() => {
+        // Recompute the bounds on every selected-date change (rather than once at
+        // module load) so that when the date auto-advances across the weekend
+        // (Friday -> Monday) the min/max menu dates roll forward too — otherwise
+        // the user can't advance past the previous week's Friday.
+        const minimumDate = DateUtil.getMinimumDateForMenu();
+        const maximumDate = DateUtil.getMaximumDateForMenu();
         const previousDate = getPreviousDate(selectedDate);
         const nextDate = getNextDate(selectedDate);
-        const canGoBackwards = DateUtil.isDateAfter(selectedDate, MINIMUM_DATE);
-        const canGoForwards = DateUtil.isDateBefore(selectedDate, MAXIMUM_DATE);
+        const canGoBackwards = DateUtil.isDateAfter(selectedDate, minimumDate);
+        const canGoForwards = DateUtil.isDateBefore(selectedDate, maximumDate);
         const isAtToday = DateUtil.isSameDate(selectedDate, DiningClient.getTodayDateForMenu());
 
         const previousDateDisplay = getDateDisplay(previousDate);
