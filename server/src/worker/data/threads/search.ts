@@ -29,8 +29,8 @@ const onGetQueryEmbedding = async (query: string) => {
     return db.getQueryEmbedding(query);
 }
 
-const onGetSearchResults = async ({ query }: { query: Float32Array }) => {
-    return db.searchVectorRaw(query, VECTOR_SEARCH_ITEM_LIMIT);
+const onGetSearchResults = async ({ query, limit }: { query: Float32Array, limit?: number }) => {
+    return db.searchVectorRaw(query, limit ?? VECTOR_SEARCH_ITEM_LIMIT);
 }
 
 const onGetSearchResultsByType = async ({ query, entityType, limit }: { query: Float32Array, entityType: SearchEntityType, limit: number }) => {

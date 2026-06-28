@@ -27,17 +27,17 @@ const getQueryEmbedding = async (query: string): Promise<Float32Array> => {
     });
 }
 
-export const searchVectorRawFromEmbedding = async (embedding: Float32Array): Promise<Array<IVectorSearchResult>> => {
-    return SEARCH_THREAD_HANDLER.sendRequest('search', 'getSearchResults', { query: embedding });
+export const searchVectorRawFromEmbedding = async (embedding: Float32Array, limit?: number): Promise<Array<IVectorSearchResult>> => {
+    return SEARCH_THREAD_HANDLER.sendRequest('search', 'getSearchResults', { query: embedding, limit });
 }
 
 export const searchVectorRawByType = async (embedding: Float32Array, entityType: SearchEntityType, limit: number): Promise<Array<IVectorSearchResult>> => {
     return SEARCH_THREAD_HANDLER.sendRequest('search', 'getSearchResultsByType', { query: embedding, entityType, limit });
 }
 
-export const searchVectorRawFromQuery = async (query: string): Promise<Array<IVectorSearchResult>> => {
+export const searchVectorRawFromQuery = async (query: string, limit?: number): Promise<Array<IVectorSearchResult>> => {
     const embedding = await getQueryEmbedding(query);
-    return searchVectorRawFromEmbedding(embedding);
+    return searchVectorRawFromEmbedding(embedding, limit);
 }
 
 export const isEmbeddedEntity = async (entityType: SearchEntityType, id: string): Promise<boolean> => {

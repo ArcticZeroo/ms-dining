@@ -28,10 +28,12 @@
 import { after, before, describe, test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { DateUtil } from '@msdining/common';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
+import { SearchEntityType, SearchMatchReason, SEARCH_ENTITY_TYPE_TO_DB_ID } from '@msdining/common/models/search';
 import { normalizeNameForSearch } from '@msdining/common/util/search-util';
+import { getEntityKeyFromParts } from '@msdining/common/util/entity-key';
 import { SearchManager } from './search.js';
 import { usePrismaWrite } from './client.js';
+import { IVectorSearchResult } from '../../../shared/models/vector.js';
 import {
     createIntegrationTestContext,
     IntegrationTestContext,
@@ -381,6 +383,65 @@ describe('SearchManager.explainSearch — verdict uses entityKey, not display na
         assert.ok(gamma, 'should resolve the ungrouped Gamma Roll');
         assert.equal(gamma.nameMatchReasons.includes(SearchMatchReason.title), true, 'Gamma Roll matches by title');
         assert.equal(gamma.isInFinalResults, true, 'the matching item is in results');
+    });
+});
+
+describe('SearchManager._dedupeVectorResultsByEntityKey — collapse cross-cafe dupes', () => {
+    // The vector index stores one embedding per menu-item id, so the same dish in
+    // multiple cafes returns several neighbors that share one entityKey. The dedupe
+    // step must collapse them into a single distinct entityKey, keep the closest
+    // instance as the representative, and respect the distinct-key cap.
+    const DUPE_NAME = 'Quesabirria Tacos';
+    const SOLO_NAME = 'Caesar Salad';
+    const DUPE_ENTITY_KEY = getEntityKeyFromParts(null, normalizeNameForSearch(DUPE_NAME));
+    const SOLO_ENTITY_KEY = getEntityKeyFromParts(null, normalizeNameForSearch(SOLO_NAME));
+    const MENU_ITEM_DB_ID = SEARCH_ENTITY_TYPE_TO_DB_ID[SearchEntityType.menuItem];
+
+    interface IDedupedVectorResults {
+        bestDistanceByEntityKey: Map<SearchEntityType, Map<string, number>>;
+        representativeIdByEntityKey: Map<SearchEntityType, Map<string, string>>;
+    }
+
+    const dedupe = (rawResults: IVectorSearchResult[], distinctLimit: number): Promise<IDedupedVectorResults> =>
+        (SearchManager as unknown as {
+            _dedupeVectorResultsByEntityKey(rawResults: IVectorSearchResult[], distinctLimit: number): Promise<IDedupedVectorResults>;
+        })._dedupeVectorResultsByEntityKey(rawResults, distinctLimit);
+
+    const rawResults: IVectorSearchResult[] = [
+        { id: 'dupe-far', entity_type: MENU_ITEM_DB_ID, distance: 0.5 },
+        { id: 'dupe-near', entity_type: MENU_ITEM_DB_ID, distance: 0.3 },
+        { id: 'solo', entity_type: MENU_ITEM_DB_ID, distance: 0.7 },
+    ];
+
+    before(async () => {
+        // dupe-far and dupe-near are the same dish in two cafes (same name, no
+        // group) so they share one entityKey; solo is a distinct dish.
+        await seedSearchableMenu([
+            { id: 'dupe-far', name: DUPE_NAME, description: null, imageUrl: null, price: 5, calories: 100, maxCalories: 100, groupId: null },
+            { id: 'dupe-near', name: DUPE_NAME, description: null, imageUrl: null, price: 5, calories: 100, maxCalories: 100, groupId: null },
+            { id: 'solo', name: SOLO_NAME, description: null, imageUrl: null, price: 5, calories: 100, maxCalories: 100, groupId: null },
+        ]);
+    });
+
+    test('collapses same-entityKey neighbors into one entry, keeping the closest instance', async () => {
+        const { bestDistanceByEntityKey, representativeIdByEntityKey } = await dedupe(rawResults, 50);
+        const distances = bestDistanceByEntityKey.get(SearchEntityType.menuItem)!;
+        const representatives = representativeIdByEntityKey.get(SearchEntityType.menuItem)!;
+
+        assert.equal(distances.size, 2, 'the two same-name neighbors collapse into one distinct entityKey');
+        assert.equal(distances.get(DUPE_ENTITY_KEY), 0.3, 'keeps the minimum distance for the duped dish');
+        assert.equal(representatives.get(DUPE_ENTITY_KEY), 'dupe-near', 'keeps the closest instance as the representative');
+        assert.equal(distances.get(SOLO_ENTITY_KEY), 0.7);
+        assert.equal(representatives.get(SOLO_ENTITY_KEY), 'solo');
+    });
+
+    test('respects the distinct-key cap, keeping the closest distinct keys', async () => {
+        const { bestDistanceByEntityKey } = await dedupe(rawResults, 1);
+        const distances = bestDistanceByEntityKey.get(SearchEntityType.menuItem)!;
+
+        assert.equal(distances.size, 1, 'the distinct cap limits the number of kept entityKeys');
+        assert.equal(distances.has(DUPE_ENTITY_KEY), true, 'the closest distinct key (0.3) is kept');
+        assert.equal(distances.has(SOLO_ENTITY_KEY), false, 'the farther distinct key is dropped by the cap');
     });
 });
 

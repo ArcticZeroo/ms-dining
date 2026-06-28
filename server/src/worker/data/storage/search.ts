@@ -84,6 +84,23 @@ const createMenuItemImageUrlGetter = (menuItem: IMenuItemBase): (() => MaybeProm
     };
 }
 
+// The vector index stores one embedding per menu-item id, so a dish offered in N
+// cafes yields N near-identical neighbors that share a single entityKey. We
+// over-fetch raw neighbors and collapse them to distinct entityKeys (keeping the
+// closest instance) so the top-K budget holds distinct dishes rather than dupes.
+// The KNN cost is dominated by the full-index scan, so a larger raw limit is
+// effectively free (see server/src/adhoc/bench-vector-search.ts).
+const VECTOR_SEARCH_DISTINCT_LIMIT = 50;
+const VECTOR_SEARCH_OVERFETCH_MULTIPLIER = 4;
+const VECTOR_SEARCH_RAW_LIMIT = VECTOR_SEARCH_DISTINCT_LIMIT * VECTOR_SEARCH_OVERFETCH_MULTIPLIER;
+
+interface IDedupedVectorResults {
+    // Keyed by entityKey for menu items (group:<id> or name:<normalized>), and by
+    // id for other entity types (which have no entityKey concept here).
+    bestDistanceByEntityKey: Map<SearchEntityType, Map<string, number>>;
+    representativeIdByEntityKey: Map<SearchEntityType, Map<string, string>>;
+}
+
 class SearchResults {
     readonly searchResultsByNameByEntityType = new Map<SearchEntityType, Map<string, IServerSearchResult>>();
 
@@ -561,45 +578,85 @@ export abstract class SearchManager {
         });
     }
 
-    private static async _searchVectorInner(query: string, date: Date | null, doVectorSearch: () => Promise<IVectorSearchResult[]>, allowResultsWithoutAppearances: boolean): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
+    /**
+     * Collapses raw vector neighbors (which may contain several ids for the same
+     * dish across cafes) down to distinct entityKeys, keeping the closest instance
+     * of each. entityKey is resolved live from the menu-item source of truth so it
+     * never goes stale on group join/leave. Other entity types are keyed by id.
+     */
+    private static async _dedupeVectorResultsByEntityKey(rawResults: IVectorSearchResult[], distinctLimit: number): Promise<IDedupedVectorResults> {
+        const sorted = [...rawResults].sort((resultA, resultB) => resultA.distance - resultB.distance);
+
+        const entityKeys = await Promise.all(sorted.map(async result => {
+            const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] as SearchEntityType;
+            if (!entityType) {
+                throw new Error(`Invalid entity type: ${result.entity_type}`);
+            }
+
+            if (entityType === SearchEntityType.menuItem) {
+                const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(result.id);
+                return menuItem?.entityKey ?? null;
+            }
+
+            return result.id;
+        }));
+
+        const bestDistanceByEntityKey = new Map<SearchEntityType, Map<string, number>>();
+        const representativeIdByEntityKey = new Map<SearchEntityType, Map<string, string>>();
+
+        for (let i = 0; i < sorted.length; i++) {
+            const result = sorted[i]!;
+            const entityKey = entityKeys[i];
+            if (entityKey == null) {
+                continue;
+            }
+
+            const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] as SearchEntityType;
+
+            let distanceByEntityKey = bestDistanceByEntityKey.get(entityType);
+            if (distanceByEntityKey == null) {
+                distanceByEntityKey = new Map();
+                bestDistanceByEntityKey.set(entityType, distanceByEntityKey);
+                representativeIdByEntityKey.set(entityType, new Map());
+            }
+
+            // sorted ascending, so the first time we see a key is its min distance.
+            if (distanceByEntityKey.has(entityKey) || distanceByEntityKey.size >= distinctLimit) {
+                continue;
+            }
+
+            distanceByEntityKey.set(entityKey, result.distance);
+            representativeIdByEntityKey.get(entityType)!.set(entityKey, result.id);
+        }
+
+        return { bestDistanceByEntityKey, representativeIdByEntityKey };
+    }
+
+    private static async _searchVectorInner(query: string, date: Date | null, doVectorSearch: () => Promise<IDedupedVectorResults>, allowResultsWithoutAppearances: boolean): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
         const session = new SearchSession({
             queries:             [{ text: query }],
             shouldUseExactMatch: false,
             date,
         });
 
-        const [rawResults, menus] = await Promise.all([
+        const [{ bestDistanceByEntityKey, representativeIdByEntityKey }, menus] = await Promise.all([
             doVectorSearch(),
             session.getMenusAsync()
         ]);
 
-        const vectorFoundItemsWithoutAppearances = new Map<SearchEntityType, Set<string /*id*/>>();
-        const vectorFoundItems = new Map<SearchEntityType, Map<string /*id*/, number /*distance*/>>();
-        for (const result of rawResults) {
-            const entityType = DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] as SearchEntityType;
-            if (!entityType) {
-                throw new Error(`Invalid entity type: ${result.entity_type}`);
-            }
-
-            if (!vectorFoundItems.has(entityType)) {
-                vectorFoundItems.set(entityType, new Map());
-            }
-
-            if (!vectorFoundItemsWithoutAppearances.has(entityType)) {
-                vectorFoundItemsWithoutAppearances.set(entityType, new Set());
-            }
-
-            vectorFoundItems.get(entityType)!.set(result.id, result.distance);
-            vectorFoundItemsWithoutAppearances.get(entityType)!.add(result.id);
+        const vectorFoundItemsWithoutAppearances = new Map<SearchEntityType, Set<string /*entityKey*/>>();
+        for (const [entityType, distanceByEntityKey] of bestDistanceByEntityKey) {
+            vectorFoundItemsWithoutAppearances.set(entityType, new Set(distanceByEntityKey.keys()));
         }
 
-        const getVectorDistanceAndMarkSeen = (entityType: SearchEntityType, id: string) => {
-            if (!vectorFoundItems.has(entityType)) {
+        const getVectorDistanceAndMarkSeen = (entityType: SearchEntityType, entityKey: string) => {
+            const distanceByEntityKey = bestDistanceByEntityKey.get(entityType);
+            if (distanceByEntityKey == null) {
                 return undefined;
             }
 
-            vectorFoundItemsWithoutAppearances.get(entityType)?.delete(id);
-            return vectorFoundItems.get(entityType)?.get(id);
+            vectorFoundItemsWithoutAppearances.get(entityType)?.delete(entityKey);
+            return distanceByEntityKey.get(entityKey);
         };
 
         const cafeHitStats = new Map<string /*cafeId*/, IStationHitStats>();
@@ -637,7 +694,7 @@ export abstract class SearchManager {
 
                     stationStats.totalCount++;
 
-                    const menuItemDistance = getVectorDistanceAndMarkSeen(SearchEntityType.menuItem, menuItem.id);
+                    const menuItemDistance = getVectorDistanceAndMarkSeen(SearchEntityType.menuItem, menuItem.entityKey);
 
                     const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
 
@@ -702,11 +759,17 @@ export abstract class SearchManager {
         }
 
         if (allowResultsWithoutAppearances) {
-            for (const [entityType, ids] of vectorFoundItemsWithoutAppearances) {
-                for (const id of ids) {
+            for (const [entityType, entityKeys] of vectorFoundItemsWithoutAppearances) {
+                const representativeIds = representativeIdByEntityKey.get(entityType);
+                for (const entityKey of entityKeys) {
+                    const representativeId = representativeIds?.get(entityKey);
+                    if (representativeId == null) {
+                        continue;
+                    }
+
                     if (entityType === SearchEntityType.menuItem) {
                         // todo: find the last appearance maybe? would be nice to have cafe/station data.
-                        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id });
+                        const menuItem = await getServices().data.menuItem.retrieveMenuItem({ id: representativeId });
                         if (menuItem != null) {
                             logDebug('Adding vector menu item result without appearance', menuItem.name);
                             const { matchReasons, matchedModifiers } = session.getMenuItemMatch(menuItem);
@@ -727,13 +790,13 @@ export abstract class SearchManager {
                             });
                         }
                     } else if (entityType === SearchEntityType.cafe) {
-                        // Find the cafe by ID
-                        const cafe = CAFES_BY_ID.get(id);
+                        // For cafes the entityKey is the cafe id.
+                        const cafe = CAFES_BY_ID.get(representativeId);
                         if (cafe != null) {
                             logDebug('Adding vector cafe result without appearance', cafe.name);
                             await session.registerCafe(true /*isMatch*/, cafe);
                         } else {
-                            logDebug('Cafe not found for vector result', id);
+                            logDebug('Cafe not found for vector result', representativeId);
                         }
                     }
                 }
@@ -744,7 +807,15 @@ export abstract class SearchManager {
     }
 
     public static async searchVector(query: string, date: Date | null, allowResultsWithoutAppearances: boolean): Promise<Map<SearchEntityType, Map<string, IServerSearchResult>>> {
-        return SearchManager._searchVectorInner(query, date, () => vectorClient.searchVectorRawFromQuery(query), allowResultsWithoutAppearances);
+        return SearchManager._searchVectorInner(
+            query,
+            date,
+            async () => SearchManager._dedupeVectorResultsByEntityKey(
+                await vectorClient.searchVectorRawFromQuery(query, VECTOR_SEARCH_RAW_LIMIT),
+                VECTOR_SEARCH_DISTINCT_LIMIT
+            ),
+            allowResultsWithoutAppearances
+        );
     }
 
     /**
@@ -770,36 +841,36 @@ export abstract class SearchManager {
                 : [];
 
         const [rawResults, realResults, menus] = await Promise.all([
-            vectorClient.searchVectorRawFromQuery(query),
+            vectorClient.searchVectorRawFromQuery(query, VECTOR_SEARCH_RAW_LIMIT),
             SearchManager.searchVector(query, date, allowResultsWithoutAppearances),
             session.getMenusAsync(),
         ]);
 
-        // The vector top-K is ordered by distance and mixes all entity types; an
-        // item is "retrieved by vector" iff it lands inside this window.
-        const overallSorted = [...rawResults].sort((resultA, resultB) => resultA.distance - resultB.distance);
-        const worstIncludedDistance = overallSorted.length > 0 ? overallSorted[overallSorted.length - 1]!.distance : null;
+        // De-dupe the raw neighbors to distinct entityKeys exactly like real search,
+        // so the explained ranks/cutoff and the "nearest items" list reflect distinct
+        // dishes rather than the same dish repeated across cafes.
+        const deduped = await SearchManager._dedupeVectorResultsByEntityKey(rawResults, VECTOR_SEARCH_DISTINCT_LIMIT);
+        const distanceByEntityKey = deduped.bestDistanceByEntityKey.get(SearchEntityType.menuItem) ?? new Map<string, number>();
+        const representativeIdByEntityKey = deduped.representativeIdByEntityKey.get(SearchEntityType.menuItem) ?? new Map<string, string>();
 
-        const rankByMenuItemId = new Map<string, number>();
-        const distanceByMenuItemId = new Map<string, number>();
-        overallSorted.forEach((result, index) => {
-            if (DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] === SearchEntityType.menuItem && !rankByMenuItemId.has(result.id)) {
-                rankByMenuItemId.set(result.id, index + 1);
-                distanceByMenuItemId.set(result.id, result.distance);
-            }
-        });
+        // Distinct menu-item entityKeys ordered by distance; an item is "retrieved by
+        // vector" iff its entityKey lands inside this de-duped window.
+        const sortedEntityKeys = [...distanceByEntityKey.entries()].sort((entryA, entryB) => entryA[1] - entryB[1]);
+        const topKSize = sortedEntityKeys.length;
+        const worstIncludedDistance = topKSize > 0 ? sortedEntityKeys[topKSize - 1]![1] : null;
 
-        const nearestMenuItemRows = overallSorted
-            .filter(result => DB_ID_TO_SEARCH_ENTITY_TYPE[result.entity_type] === SearchEntityType.menuItem)
-            .slice(0, 15);
+        const rankByEntityKey = new Map<string, number>();
+        sortedEntityKeys.forEach(([entityKey], index) => rankByEntityKey.set(entityKey, index + 1));
+
         const nearestMenuItems: ISearchExplanationNearestItem[] = await Promise.all(
-            nearestMenuItemRows.map(async result => {
-                const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(result.id);
+            sortedEntityKeys.slice(0, 15).map(async ([entityKey, distance], index) => {
+                const representativeId = representativeIdByEntityKey.get(entityKey)!;
+                const menuItem = await MenuItemStorageClient.retrieveMenuItemAsync(representativeId);
                 return {
-                    menuItemId: result.id,
+                    menuItemId: representativeId,
                     name:       menuItem?.name ?? null,
-                    distance:   result.distance,
-                    rank:       rankByMenuItemId.get(result.id)!,
+                    distance,
+                    rank:       index + 1,
                 };
             }),
         );
@@ -832,10 +903,10 @@ export abstract class SearchManager {
                 query,
                 date,
                 allowResultsWithoutAppearances,
-                topKSize: overallSorted.length,
+                topKSize,
                 worstIncludedDistance,
-                vectorRank: rankByMenuItemId.get(menuItem.id) ?? null,
-                topKDistance: distanceByMenuItemId.get(menuItem.id),
+                vectorRank: rankByEntityKey.get(menuItem.entityKey) ?? null,
+                topKDistance: distanceByEntityKey.get(menuItem.entityKey),
                 appearances: appearancesByMenuItemId.get(menuItem.id) ?? [],
                 isInFinalResults: finalMenuItemEntityKeys.has(menuItem.entityKey),
             }),
@@ -846,7 +917,7 @@ export abstract class SearchManager {
             normalizedQuery,
             date:        date ? date.toISOString() : null,
             allowResultsWithoutAppearances,
-            vectorTopKSize: overallSorted.length,
+            vectorTopKSize: topKSize,
             worstIncludedDistance,
             items,
             nearestMenuItems,
