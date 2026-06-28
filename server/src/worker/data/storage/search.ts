@@ -953,6 +953,15 @@ export abstract class SearchManager {
         const cosineSimilarity = cosineDistance != null ? 1 - cosineDistance : null;
         const isInVectorTopK = vectorRank != null;
 
+        // The vector top-K is de-duped to distinct dishes by entityKey, so the rank
+        // belongs to the dish and is set by its closest cross-cafe instance. That
+        // representative distance — not this exact instance's cosineDistance — is the
+        // value consistent with vectorRank / the cutoff.
+        const representativeCosineDistance = topKDistance ?? null;
+        const representativeCosineSimilarity = representativeCosineDistance != null ? 1 - representativeCosineDistance : null;
+        const isClosestInstance = cosineDistance == null || representativeCosineDistance == null
+            || Math.abs(cosineDistance - representativeCosineDistance) < 1e-9;
+
         const { matchReasons } = session.getMenuItemMatch(menuItem);
 
         const exactMatchCandidates: Array<Nullable<string>> = [
@@ -978,7 +987,11 @@ export abstract class SearchManager {
 
         if (isInFinalResults) {
             if (isInVectorTopK) {
-                reasons.push(`Matched by vector similarity (rank ${vectorRank} of ${topKSize}, cosine similarity ${formatSimilarity(cosineSimilarity)}).`);
+                if (isClosestInstance) {
+                    reasons.push(`Matched by vector similarity (rank ${vectorRank} of ${topKSize}, cosine similarity ${formatSimilarity(representativeCosineSimilarity)}).`);
+                } else {
+                    reasons.push(`Matched by vector similarity: this dish ranks ${vectorRank} of ${topKSize} via its closest cross-cafe instance (cosine similarity ${formatSimilarity(representativeCosineSimilarity)}); this specific item's cosine similarity is ${formatSimilarity(cosineSimilarity)}.`);
+                }
             }
             if (matchReasons.size > 0) {
                 reasons.push(`Matched by text on: ${[...matchReasons].join(', ')}.`);
@@ -1016,6 +1029,8 @@ export abstract class SearchManager {
             hasEmbedding: cosineDistance != null,
             cosineDistance,
             cosineSimilarity,
+            representativeCosineDistance,
+            representativeCosineSimilarity,
             vectorRank,
             isInVectorTopK,
             nameMatchReasons: [...matchReasons],

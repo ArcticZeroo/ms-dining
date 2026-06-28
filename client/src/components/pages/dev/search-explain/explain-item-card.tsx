@@ -26,9 +26,10 @@ export const ExplainItemCard: React.FC<IExplainItemCardProps> = ({ item }) => (
         </ul>
 
         <div className="explain-signals flex flex-wrap">
-            <Signal label="Cosine similarity" tip="How semantically close the query is to this item, from -1 (opposite) to 1 (identical). Embeddings are usually positive; near 0 means unrelated.">{formatNumber(item.cosineSimilarity)}</Signal>
+            <Signal label="Cosine similarity" tip="How semantically close the query is to this specific menu-item instance, from -1 (opposite) to 1 (identical). Embeddings are usually positive; near 0 means unrelated.">{formatNumber(item.cosineSimilarity)}</Signal>
             <Signal label="Cosine distance">{formatNumber(item.cosineDistance)}</Signal>
-            <Signal label="Vector rank" tip="This item's position among the query's nearest neighbors. Only the top 50 are retrieved by vector search.">{item.vectorRank == null ? '—' : `#${item.vectorRank}`}</Signal>
+            <Signal label="Rank similarity" tip="Vector results are de-duped to distinct dishes by entityKey, so the rank is set by the closest cross-cafe instance of this dish. This is that instance's cosine similarity — it equals the cosine similarity above when this exact item is the closest one.">{formatNumber(item.representativeCosineSimilarity)}</Signal>
+            <Signal label="Vector rank" tip="This dish's position among the query's nearest neighbors, after de-duping to distinct dishes (by entityKey) and ranking each by its closest cross-cafe instance. Only the top 50 distinct dishes are retrieved.">{item.vectorRank == null ? '—' : `#${item.vectorRank}`}</Signal>
             <Signal label="In vector top-K">{item.isInVectorTopK ? 'yes' : 'no'}</Signal>
             <Signal label="Has embedding">{item.hasEmbedding ? 'yes' : 'no'}</Signal>
             <Signal label="Text match" tip="Which fields the query matched as a fuzzy subsequence: title, description, tags, search tags, or modifiers.">{item.nameMatchReasons.length > 0 ? item.nameMatchReasons.join(', ') : 'none'}</Signal>

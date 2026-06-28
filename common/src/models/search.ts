@@ -110,11 +110,21 @@ export interface ISearchExplanationItem {
     // ── Embedding signals ──
     /** Whether this item has a stored embedding at all. */
     hasEmbedding: boolean;
-    /** Raw cosine distance between the query and this item (0 = identical, 2 = opposite). */
+    /** Raw cosine distance between the query and this specific menu-item instance (0 = identical, 2 = opposite). */
     cosineDistance: number | null;
-    /** 1 - cosineDistance, for convenience. */
+    /** 1 - cosineDistance, for this specific instance. */
     cosineSimilarity: number | null;
-    /** 1-based rank within the overall vector top-K, or null if it didn't make the cut. */
+    /**
+     * Cosine distance of the closest cross-cafe instance sharing this item's
+     * entityKey — the value that actually set this dish's vectorRank (vector
+     * results are de-duped to distinct dishes by entityKey). Equals
+     * cosineDistance when this exact item is the closest instance; null if the
+     * dish didn't make the de-duped top-K.
+     */
+    representativeCosineDistance: number | null;
+    /** 1 - representativeCosineDistance, for convenience. */
+    representativeCosineSimilarity: number | null;
+    /** 1-based rank of this item's dish (entityKey) within the de-duped vector top-K, or null if it didn't make the cut. */
     vectorRank: number | null;
     /** Whether the item is within the vector top-K (the de-facto cosine cutoff). */
     isInVectorTopK: boolean;
