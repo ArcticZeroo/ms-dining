@@ -6,10 +6,48 @@ repo root.
 
 ## Verdict
 
-- **BoD has live-confirmed dine-in request switches**: wait-time accepts `deliveryType: "dineIn"`; close-order accepts `deliveryOption.id: "dineIn"` plus `fulfillmentType: "dineInFormFields"` through fulfillment validation.
-- **Param validation happens before card processing**: fake-card close-order for dine-in reaches `CC_SALE_TRANSACTION_FAILED`, not a fulfillment schema error.
-- **Do not expose dine-in for tested cafes yet** because `dineInConfig.featureEnabled` remains `false` and `tableNumberConfig` is empty on cafe25, bobae, foodhall4, and cafe16.
+- **Downgraded:** the live controls show `deliveryType`, `deliveryOption.id`, and `fulfillmentDetails.fulfillmentType` are **not validated** by the probed BoD endpoints before payment. Garbage values were accepted the same way as `dineIn`.
+- **`CC_SALE_TRANSACTION_FAILED` is only a weak signal:** it proves some top-level order payload checks passed (missing/malformed `order` failed differently), but it does **not** prove fulfillment fields validated; omitting `deliveryProperties` entirely still reached card processing.
+- **Do not expose dine-in for tested cafes.** `dineInConfig.featureEnabled` remains `false`, and the previous “dine-in accepted” conclusion is not reliable evidence of actual dine-in support.
 
+
+## Validation control experiments (2026-06-27)
+
+Live controls were run against `cafe25` and `bobae` using `server/src/adhoc/investigate-dinein-validation.ts`. Both cafes were unavailable for same-day concepts during the run, so the script used `scheduledDay: 2` (the next available Monday concepts) for the shared cart item/order setup. Within each wait-time control the bodies are identical except `deliveryType`; within each close-order delivery-option control the shared pending order is reused and the bodies are identical except `deliveryProperties.deliveryOption.id` and `deliveryProperties.fulfillmentDetails.fulfillmentType`.
+
+### Control result summary
+
+| Cafe | Experiment | Variant | Status | Response body summary |
+|------|------------|---------|--------|-----------------------|
+| cafe25 | wait-time deliveryType control | deliveryType=pickup | 200 OK | `{"minTime":{"minutes":11,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}},"maxTime":{"minutes":12,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}}}` |
+| cafe25 | wait-time deliveryType control | deliveryType=dineIn | 200 OK | `{"minTime":{"minutes":11,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}},"maxTime":{"minutes":12,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}}}` |
+| cafe25 | wait-time deliveryType control | deliveryType=thisIsNotAValidDeliveryType_zzz | 200 OK | `{"minTime":{"minutes":11,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}},"maxTime":{"minutes":12,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}}}` |
+| cafe25 | close-order deliveryOption control | pickup id=pickup fulfillmentType=pickupFormFields | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| cafe25 | close-order deliveryOption control | dineIn id=dineIn fulfillmentType=dineInFormFields | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| cafe25 | close-order deliveryOption control | garbage id=thisIsNotValid_zzz fulfillmentType=thisIsNotValid_zzz | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| cafe25 | close-order schema-break control | missing top-level order | 400 Bad Request | `PAYMENT_PAGE_ERROR_TRANSACTION` |
+| cafe25 | close-order schema-break control | malformed top-level order string | 400 Bad Request | `ORDER_ID_INVALID` |
+| cafe25 | close-order schema-break control | omitted deliveryProperties | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| bobae | wait-time deliveryType control | deliveryType=pickup | 200 OK | `{"minTime":{"minutes":6,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}},"maxTime":{"minutes":7,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}}}` |
+| bobae | wait-time deliveryType control | deliveryType=dineIn | 200 OK | `{"minTime":{"minutes":6,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}},"maxTime":{"minutes":7,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}}}` |
+| bobae | wait-time deliveryType control | deliveryType=thisIsNotAValidDeliveryType_zzz | 200 OK | `{"minTime":{"minutes":6,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}},"maxTime":{"minutes":7,"fieldType":{"name":"minutes"},"periodType":{"name":"Minutes"}}}` |
+| bobae | close-order deliveryOption control | pickup id=pickup fulfillmentType=pickupFormFields | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| bobae | close-order deliveryOption control | dineIn id=dineIn fulfillmentType=dineInFormFields | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| bobae | close-order deliveryOption control | garbage id=thisIsNotValid_zzz fulfillmentType=thisIsNotValid_zzz | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+| bobae | close-order schema-break control | missing top-level order | 400 Bad Request | `PAYMENT_PAGE_ERROR_TRANSACTION` |
+| bobae | close-order schema-break control | malformed top-level order string | 400 Bad Request | `ORDER_ID_INVALID` |
+| bobae | close-order schema-break control | omitted deliveryProperties | 400 Bad Request | `CC_SALE_TRANSACTION_FAILED` |
+
+### Revised interpretation
+
+- `getWaitTimeForItems` does **not** validate `deliveryType` in these probes: `pickup`, `dineIn`, and `thisIsNotAValidDeliveryType_zzz` all returned HTTP 200 with identical wait-time bodies for both cafes.
+- `processPaymentAndClosedOrder` does **not** validate `deliveryOption.id` / `fulfillmentType` before card processing in these probes: `pickup`, `dineIn`, and `thisIsNotValid_zzz` all returned `CC_SALE_TRANSACTION_FAILED` for both cafes.
+- Reaching `CC_SALE_TRANSACTION_FAILED` is still meaningful for some unrelated top-level fields: removing top-level `order` returned `PAYMENT_PAGE_ERROR_TRANSACTION`, and replacing top-level `order` with a string returned `ORDER_ID_INVALID`.
+- But it is **not** meaningful evidence that fulfillment fields validated: omitting `deliveryProperties` entirely still returned `CC_SALE_TRANSACTION_FAILED` for both cafes.
+
+### Exact request/response log
+
+The exact request bodies, response statuses, and response bodies for every control call (plus the setup `POST /orders` calls that created the pending orders) are saved in `server/src/adhoc/results/dine-in-validation-control-results-2026-06-27.json`.
 
 ## Live findings (2026-06-27)
 
@@ -80,9 +118,9 @@ Result:
 
 The same fake-payment result occurred **without** `tableNumber` in either `deliveryProperties.fulfillmentDetails` or top-level `deliveryProperties`. On the currently tested disabled sites, table number is therefore not validated as required before payment.
 
-### Updated verdict
+### Corrected verdict after validation controls
 
-Dine-in request params are now live-confirmed up to payment validation: wait-time uses `deliveryType: "dineIn"`; close-order uses `deliveryProperties.deliveryOption.id: "dineIn"` and `fulfillmentDetails.fulfillmentType: "dineInFormFields"` with DINE IN labels from `dineInConfig`. Param validation happens before card processing and accepts these fields, then fake card processing fails with `CC_SALE_TRANSACTION_FAILED`. Do not expose dine-in for these cafes yet because `dineInConfig.featureEnabled` is still false; if a future site enables it, table-number prompting should be driven by non-empty `tableNumberConfig` rather than assumed mandatory.
+The earlier close-order/payment conclusion was too strong. The validation controls above show that BoD reaches `CC_SALE_TRANSACTION_FAILED` even when `deliveryOption.id` / `fulfillmentType` are obvious garbage, and even when `deliveryProperties` is omitted. Therefore the fake-card failure does **not** prove dine-in fulfillment fields were validated. It only proves the payload got far enough for payment after some unrelated top-level order checks.
 
 ## Evidence that dine-in exists
 
