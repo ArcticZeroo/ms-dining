@@ -171,11 +171,68 @@ export const useCartEstimateQuery = (cafeId: string, hasUnavailableItems: boolea
     });
 };
 
+interface ICartEstimate {
+    waitTime: { minTime: number; maxTime: number };
+    subtotal: number;
+    tax:      number;
+    total:    number;
+}
+
+interface ICartEstimateResultLike {
+    data:      ICartEstimate | undefined;
+    isLoading: boolean;
+}
+
+/**
+ * Discriminated on `isLoading`: while loading there is never a (partial) total,
+ * so `data` is always `undefined`. Once not loading, `data` is the complete
+ * aggregate, or `undefined` when estimates are simply unavailable (e.g. the
+ * queries are disabled / the user isn't logged in).
+ */
+export type IAggregatedCartEstimateResult =
+    | { isLoading: true;  data: undefined }
+    | { isLoading: false; data: ICartEstimate | undefined };
+
+/**
+ * Aggregates per-cafe cart estimates into one total. The aggregate is only
+ * meaningful once EVERY cafe's estimate has loaded — summing just the loaded
+ * cafes would understate the real subtotal/tax/total and the wait time. So while
+ * any cafe is still missing data we never return a partial total: we report
+ * `{ isLoading: true }` if a query is in flight, otherwise `{ isLoading: false,
+ * data: undefined }`.
+ */
+export const aggregateCartEstimates = (
+    results: ReadonlyArray<ICartEstimateResultLike>,
+): IAggregatedCartEstimateResult => {
+    const loaded = results.filter(result => result.data != null).map(result => result.data!);
+
+    const isComplete = results.length > 0 && loaded.length === results.length;
+
+    if (!isComplete) {
+        return results.some(result => result.isLoading)
+            ? { isLoading: true, data: undefined }
+            : { isLoading: false, data: undefined };
+    }
+
+    return {
+        isLoading: false,
+        data:      {
+            waitTime: {
+                minTime: Math.max(...loaded.map(entry => entry.waitTime.minTime)),
+                maxTime: Math.max(...loaded.map(entry => entry.waitTime.maxTime)),
+            },
+            subtotal: loaded.reduce((sum, entry) => sum + entry.subtotal, 0),
+            tax:      loaded.reduce((sum, entry) => sum + entry.tax, 0),
+            total:    loaded.reduce((sum, entry) => sum + entry.total, 0),
+        },
+    };
+};
+
 /**
  * Fetches cart estimates for all cafes in the cart in parallel and aggregates
  * wait time to the worst-case (max) range and sums pricing.
  */
-export const useAggregatedCartEstimate = (cafeIds: string[]) => {
+export const useAggregatedCartEstimate = (cafeIds: string[]): IAggregatedCartEstimateResult => {
     const isLoggedIn = useIsLoggedIn();
 
     const results = useQueries({
@@ -189,27 +246,7 @@ export const useAggregatedCartEstimate = (cafeIds: string[]) => {
         })),
     });
 
-    const loaded = results.filter(result => result.data != null).map(result => result.data!);
-
-    if (loaded.length === 0) {
-        return {
-            data:      undefined,
-            isLoading: results.some(result => result.isLoading),
-        };
-    }
-
-    return {
-        data: {
-            waitTime: {
-                minTime: Math.max(...loaded.map(entry => entry.waitTime.minTime)),
-                maxTime: Math.max(...loaded.map(entry => entry.waitTime.maxTime)),
-            },
-            subtotal: loaded.reduce((sum, entry) => sum + entry.subtotal, 0),
-            tax:      loaded.reduce((sum, entry) => sum + entry.tax, 0),
-            total:    loaded.reduce((sum, entry) => sum + entry.total, 0),
-        },
-        isLoading: false,
-    };
+    return aggregateCartEstimates(results);
 };
 
 const PREWARM_KEEPALIVE_INTERVAL_MS = 2 * 60 * 1000;
