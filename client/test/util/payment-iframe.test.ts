@@ -3,26 +3,64 @@ import { describe, it } from 'vitest';
 import { parseFrameMessage } from '../../src/util/payment-iframe.ts';
 
 describe('parseFrameMessage', () => {
-    // ─── Unknown / falsy inputs ──────────────────────────────────────
+    // ─── Idle / falsy inputs ─────────────────────────────────────────
+    // Falsy values are benign, non-terminal iframe signals (null = no token,
+    // "" = duplicate submit), so they disarm the stall watchdog via 'idle'.
 
-    it('returns unknown for null', () => {
-        assert.strictEqual(parseFrameMessage(null).type, 'unknown');
+    it('returns idle for null', () => {
+        assert.strictEqual(parseFrameMessage(null).type, 'idle');
     });
 
-    it('returns unknown for undefined', () => {
-        assert.strictEqual(parseFrameMessage(undefined).type, 'unknown');
+    it('returns idle for undefined', () => {
+        assert.strictEqual(parseFrameMessage(undefined).type, 'idle');
     });
 
-    it('returns unknown for empty string', () => {
-        assert.strictEqual(parseFrameMessage('').type, 'unknown');
+    it('returns idle for empty string', () => {
+        assert.strictEqual(parseFrameMessage('').type, 'idle');
     });
 
-    it('returns unknown for 0', () => {
-        assert.strictEqual(parseFrameMessage(0).type, 'unknown');
+    it('returns idle for 0', () => {
+        assert.strictEqual(parseFrameMessage(0).type, 'idle');
     });
+
+    // ─── Unknown ─────────────────────────────────────────────────────
 
     it('returns unknown for unrecognized object', () => {
         assert.strictEqual(parseFrameMessage({ foo: 'bar' }).type, 'unknown');
+    });
+
+    // ─── Lifecycle: processing ───────────────────────────────────────
+
+    it('returns processing for iframe_submitted', () => {
+        const result = parseFrameMessage({ event_id: 'iframe_submitted', data: '' });
+        assert.strictEqual(result.type, 'processing');
+        assert.strictEqual((result as { reason: string }).reason, 'submitted');
+    });
+
+    it('returns processing for payment_processing', () => {
+        const result = parseFrameMessage({ event_id: 'payment_processing', data: '' });
+        assert.strictEqual(result.type, 'processing');
+        assert.strictEqual((result as { reason: string }).reason, 'processing');
+    });
+
+    it('returns processing for datadome_blocked', () => {
+        const result = parseFrameMessage({ event_id: 'datadome_blocked', status: 403 });
+        assert.strictEqual(result.type, 'processing');
+        assert.strictEqual((result as { reason: string }).reason, 'datadome');
+    });
+
+    // ─── Lifecycle: idle ─────────────────────────────────────────────
+
+    it('returns idle for iframe_validationerror', () => {
+        assert.strictEqual(parseFrameMessage({ event_id: 'iframe_validationerror', data: '' }).type, 'idle');
+    });
+
+    it('returns idle for 3dsInitiated', () => {
+        assert.strictEqual(parseFrameMessage({ '3dsInitiated': true }).type, 'idle');
+    });
+
+    it('returns unknown for an unrecognized event_id', () => {
+        assert.strictEqual(parseFrameMessage({ event_id: 'some_future_event' }).type, 'unknown');
     });
 
     // ─── Cancel ──────────────────────────────────────────────────────

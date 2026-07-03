@@ -18,24 +18,21 @@
     left: 0;
 }
 
-.modal .payment-error {
-    padding: var(--default-padding);
-    background: var(--color-payment-info-field-invalid);
-    color: var(--color-text);
-    text-align: center;
+.modal .iframe-container > .iframe-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-index-above-content);
+    background: color-mix(in srgb, var(--color-background) 88%, transparent);
+    padding: calc(var(--default-padding) * 2);
 }
 
-.modal .payment-error button {
-    margin-top: 0.5rem;
-    cursor: pointer;
-}
-
-.modal .payment-completing {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: calc(var(--default-padding) * 4);
-    gap: 0.5rem;
-    color: var(--color-text-secondary);
+/*
+ * The overlay lives inside the .modal.card, so the generic `.card .card` rule
+ * (which paints nested cards with a raised grey background) out-specifies
+ * `.card.error` and would leave the notice grey. Re-apply the red background the
+ * error class already defines via its --color-card-background variable.
+ */
+.modal .iframe-overlay .card.error {
+    background: var(--color-card-background);
+    max-width: 20rem;
 }

@@ -36,6 +36,22 @@ const FrameCancelSchema = z.object({
     cancel: z.literal(true),
 });
 
+// Non-terminal signals the iframe posts as it works. These are advisory only:
+// they tell us the form is doing something (arm/refresh the stall watchdog) or
+// that it has returned to an idle, user-interactive state (disarm the watchdog).
+const IDLE_EVENT_IDS = new Set(['iframe_validationerror']);
+
+const FrameEventSchema = z.object({
+    event_id: z.string(),
+}).passthrough();
+
+// The iframe posts { "3dsInitiated": true } when a 3DS challenge begins. This is
+// a long, user-interactive flow, so we treat it as idle and stop watching for a
+// stall.
+const Frame3dsInitiatedSchema = z.object({
+    '3dsInitiated': z.literal(true),
+}).passthrough();
+
 const tryParseJson = (value: string): unknown => {
     try {
         return JSON.parse(value);
@@ -63,11 +79,30 @@ interface IPaymentFrameMessageUnknown {
     type: 'unknown';
 }
 
+type ProcessingReason = 'submitted' | 'processing' | 'datadome';
+
+interface IPaymentFrameMessageProcessing {
+    type: 'processing';
+    reason: ProcessingReason;
+}
+
+interface IPaymentFrameMessageIdle {
+    type: 'idle';
+}
+
 type PaymentFrameMessage =
     IPaymentFrameMessageSuccess
     | IPaymentFrameMessageCancelled
     | IPaymentFrameMessageFailure
+    | IPaymentFrameMessageProcessing
+    | IPaymentFrameMessageIdle
     | IPaymentFrameMessageUnknown;
+
+const PROCESSING_REASON_BY_EVENT_ID: Record<string, ProcessingReason> = {
+    iframe_submitted:   'submitted',
+    payment_processing: 'processing',
+    datadome_blocked:   'datadome',
+};
 
 const parseFrameErrorString = (data: string): PaymentFrameMessage => {
     const frameErrorParseResult = FrameErrorSchema.safeParse(tryParseJson(data));
@@ -120,9 +155,36 @@ const tryParseFrameCompletionMessage = (data: unknown): PaymentFrameMessage | un
     }
 }
 
+const tryParseFrameLifecycleMessage = (data: unknown): PaymentFrameMessage | undefined => {
+    const threeDsResult = Frame3dsInitiatedSchema.safeParse(data);
+    if (threeDsResult.success) {
+        return { type: 'idle' };
+    }
+
+    const eventResult = FrameEventSchema.safeParse(data);
+    if (!eventResult.success) {
+        return undefined;
+    }
+
+    const eventId = eventResult.data.event_id;
+    const processingReason = PROCESSING_REASON_BY_EVENT_ID[eventId];
+    if (processingReason) {
+        return { type: 'processing', reason: processingReason };
+    }
+
+    if (IDLE_EVENT_IDS.has(eventId)) {
+        return { type: 'idle' };
+    }
+
+    return undefined;
+};
+
 export const parseFrameMessage = (data: unknown): PaymentFrameMessage => {
     if (!data) {
-        return { type: 'unknown' };
+        // Falsy values are benign, non-terminal iframe signals: null (AJAX 200 with
+        // no token, form re-enabled for retry) and "" (duplicate submit after
+        // success). Treat them as idle so the stall watchdog disarms.
+        return { type: 'idle' };
     }
 
     if (typeof data === 'string') {
@@ -131,6 +193,11 @@ export const parseFrameMessage = (data: unknown): PaymentFrameMessage => {
 
     if (isFrameUserCancellationMessage(data)) {
         return { type: 'cancel' };
+    }
+
+    const lifecycleMessage = tryParseFrameLifecycleMessage(data);
+    if (lifecycleMessage) {
+        return lifecycleMessage;
     }
 
     return tryParseFrameCompletionMessage(data) ?? { type: 'unknown' };

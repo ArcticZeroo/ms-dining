@@ -1,9 +1,22 @@
 import React, { useCallback, useState } from 'react';
 import { GenericIFrame } from '../../../iframe/generic-iframe.js';
+import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { type IPaymentSuccessResult, parseFrameMessage } from '../../../../util/payment-iframe.js';
+import { useStallWatchdog } from '../../../../hooks/stall-watchdog.js';
 import { PaymentDetailsSkeleton } from './payment-details-skeleton.js';
 
 const FRAME_LOAD_TIMEOUT_MS = 15_000;
+
+// The iframe fires one gateway round-trip between submit and a terminal message,
+// so a stall isn't instant. If nothing terminal arrives within this window we
+// surface an advisory (non-blocking) notice — a real message can still supersede
+// it, so we never wrongly abort a slow-but-legitimate flow.
+const PAYMENT_STALL_TIMEOUT_MS = 20_000;
+
+const PROCESSING_MESSAGE = 'Processing your payment…';
+const STALL_MESSAGE = 'This is taking longer than expected. You have not been charged — please refresh the page and try again.';
+const FRAME_ERROR_MESSAGE = 'Payment form encountered an error. Please refresh the page and try again.';
+const FRAME_LOAD_TIMEOUT_MESSAGE = 'Payment form doesn\'t seem to be loading. Please refresh the page and try again.';
 
 interface IPaymentFormBodyProps {
     iframeUrl: string;
@@ -26,6 +39,8 @@ export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
 }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const { isStalled, arm: armStallTimer, disarm: disarmStallTimer } = useStallWatchdog(PAYMENT_STALL_TIMEOUT_MS);
 
     const onFrameMessage = useCallback((event: MessageEvent) => {
         if (!isAllowedMessageOrigin(event.origin)) {
@@ -33,55 +48,86 @@ export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
         }
 
         const result = parseFrameMessage(event.data);
-        if (result.type === 'unknown') {
+        switch (result.type) {
+        case 'unknown':
             console.warn('Unknown postMessage from payment iframe:', event);
             return;
-        }
-
-        if (result.type === 'error') {
-            setError(result.message);
+        case 'processing':
+            setIsProcessing(true);
+            armStallTimer();
             return;
-        }
-
-        if (result.type === 'cancel') {
+        case 'idle':
+            setIsProcessing(false);
+            disarmStallTimer();
+            return;
+        case 'error':
+            setError(result.message);
+            setIsProcessing(false);
+            disarmStallTimer();
+            return;
+        case 'cancel':
+            disarmStallTimer();
             onPaymentCancelled();
             return;
-        }
-
-        if (result.type === 'success') {
+        case 'success':
+            disarmStallTimer();
             onPaymentSuccess({
-                token: result.token,
+                token:    result.token,
                 cardInfo: result.cardInfo
             });
+            return;
+        }
+    }, [onPaymentCancelled, onPaymentSuccess, armStallTimer, disarmStallTimer]);
+
+    // Overlay precedence: a terminal error wins, then the escalated stall notice,
+    // then the in-progress spinner.
+    const renderNotice = (message: string, actionLabel: string, onAction: () => void) => (
+        <div className="card error">
+            <div>{message}</div>
+            <button className="default-container" onClick={onAction}>
+                {actionLabel}
+            </button>
+        </div>
+    );
+
+    const renderOverlayContent = () => {
+        if (error) {
+            return renderNotice(error, 'Dismiss', () => setError(null));
         }
 
-        throw new Error('Unexpected result type - should never be hit');
-    }, [onPaymentCancelled, onPaymentSuccess]);
+        if (isStalled) {
+            return renderNotice(STALL_MESSAGE, 'Close', onPaymentCancelled);
+        }
+
+        if (isProcessing) {
+            return (
+                <>
+                    <HourglassLoadingSpinner/>
+                    <span>{PROCESSING_MESSAGE}</span>
+                </>
+            );
+        }
+
+        return null;
+    };
+
+    const overlayContent = renderOverlayContent();
 
     return (
-        <>
-            {error && (
-                <div className="card error">
-                    <div>{error}</div>
-                    <button className="default-container" onClick={() => setError(null)}>
-                        Dismiss
-                    </button>
-                </div>
-            )}
-            <div className="iframe-container default-container">
-                {!error && isLoading && <PaymentDetailsSkeleton/>}
-                <GenericIFrame
-                    src={iframeUrl}
-                    title="Payment Form"
-                    sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
-                    loadTimeoutMs={FRAME_LOAD_TIMEOUT_MS}
-                    onError={() => setError('Payment form encountered an error. Please refresh the page and try again.')}
-                    onLoadTimeout={() => setError('Payment form doesn\'t seem to be loading. Please refresh the page and try again.')}
-                    onMessage={onFrameMessage}
-                    onLoadComplete={() => setIsLoading(false)}
-                    isVisible={!isLoading}
-                />
-            </div>
-        </>
+        <div className="iframe-container default-container">
+            {!overlayContent && isLoading && <PaymentDetailsSkeleton/>}
+            {overlayContent && <div className="iframe-overlay centered-content">{overlayContent}</div>}
+            <GenericIFrame
+                src={iframeUrl}
+                title="Payment Form"
+                sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+                loadTimeoutMs={FRAME_LOAD_TIMEOUT_MS}
+                onError={() => setError(FRAME_ERROR_MESSAGE)}
+                onLoadTimeout={() => setError(FRAME_LOAD_TIMEOUT_MESSAGE)}
+                onMessage={onFrameMessage}
+                onLoadComplete={() => setIsLoading(false)}
+                isVisible={!isLoading}
+            />
+        </div>
     );
 };
