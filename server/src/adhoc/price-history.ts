@@ -1,24 +1,44 @@
 import { ICafe } from '../shared/models/cafe.js';
-import { usePrismaClient } from '../worker/data/storage/client.js';
+import { usePrismaClient, disconnectPrismaClient } from '../worker/data/storage/client.js';
 import { ALL_CAFES } from '../shared/constants/cafes.js';
 import * as fs from 'node:fs/promises';
 import { BuyOnDemandClient, JSON_HEADERS } from '../shared/buy-ondemand/buy-ondemand-client.js';
 import { isDuckTypeArray } from '@arcticzeroo/typeguard';
 import { ICafeMenuItemListResponseItem } from '../shared/models/buyondemand/responses.js';
 import { retrieveStationListAsync } from '../worker/data/cafe/buy-ondemand/stations.js';
+import * as dotenv from 'dotenv';
+import { setDefaultServices } from '../shared/services/registry.js';
+import type { Services } from '../shared/services/types.js';
+
+// Load DATABASE_URL (and friends) for usePrismaClient — adhoc scripts don't go
+// through main.ts/preflight.ts, which are the only places that call dotenv.config().
+dotenv.config();
+
+// Adhoc scripts don't boot the production services bag; doing so would spawn the
+// data worker thread and keep the process alive forever. BuyOnDemandClient only
+// touches `telemetry` (optional) and `data.cafe.createCafe`, so a minimal stub
+// is enough to let it log in and fetch prices.
+setDefaultServices({
+    telemetry: null,
+    data:      { cafe: { createCafe: async () => {} } },
+} as unknown as Services);
 
 const OUTPUT_FILE_NAME = 'price-history.csv';
 
 const PRICE_YEAR_BY_LEVEL = {
-    '70': 2019,
-    '71': 2023,
-    '87': 2024
+    '70':  2019,
+    '71':  2023,
+    '87':  2024,
+    '96':  2025,
+    '104': 2026
 } as const;
 
 const PRICE_LEVEL_BY_YEAR = {
     2019: '70',
     2023: '71',
-    2024: '87'
+    2024: '87',
+    2025: '96',
+    2026: '104'
 } as const;
 
 type PricesByLevel = Record<string, number>;
@@ -231,7 +251,7 @@ const createPriceHistoryOutput = async () => {
     console.log('Retrieving station names...');
     const stationNamesById = await retrieveAllStationNamesById();
 
-    const output = ['Cafe,Station,Item,2024 Price,2023 Price,2019 Price'];
+    const output = ['Cafe,Station,Item,2026 Price,2025 Price,2024 Price,2023 Price,2019 Price'];
     for (const cafe of ALL_CAFES) {
         const cafePriceHistory = priceHistory.get(cafe.id);
 
@@ -248,15 +268,17 @@ const createPriceHistoryOutput = async () => {
             }
 
             for (const [item, prices] of itemPrices) {
+                const price2026 = prices[PRICE_LEVEL_BY_YEAR[2026]];
+                const price2025 = prices[PRICE_LEVEL_BY_YEAR[2025]];
                 const price2024 = prices[PRICE_LEVEL_BY_YEAR[2024]];
                 const price2023 = prices[PRICE_LEVEL_BY_YEAR[2023]];
                 const price2019 = prices[PRICE_LEVEL_BY_YEAR[2019]];
 
-                if (!price2024 || !price2023 || !price2019) {
+                if (!price2026 || !price2025 || !price2024 || !price2023 || !price2019) {
                     continue;
                 }
 
-                output.push(`${cafe.name},${stationName},${item.replaceAll(/,/g, '')},${price2024},${price2023},${price2019}`);
+                output.push(`${cafe.name},${stationName},${item.replaceAll(/,/g, '')},${price2026},${price2025},${price2024},${price2023},${price2019}`);
             }
         }
     }
@@ -266,3 +288,4 @@ const createPriceHistoryOutput = async () => {
 }
 
 await createPriceHistoryOutput();
+await disconnectPrismaClient();
