@@ -1,0 +1,99 @@
+#price-history-page .price-year-selectors {
+    margin-bottom: var(--default-padding);
+}
+
+#price-history-page select {
+    margin-left: var(--constant-padding);
+}
+
+.price-stat-row,
+.price-lists {
+    width: 100%;
+}
+
+.price-lists {
+    align-items: flex-start;
+}
+
+.price-stat {
+    flex-grow: 1;
+    align-items: center;
+    text-align: center;
+    min-width: 8rem;
+}
+
+.price-stat-value {
+    font-weight: bold;
+}
+
+.price-stat-label {
+    color: var(--color-almost-white);
+}
+
+.price-chart-container {
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.price-change-list {
+    flex-grow: 1;
+    min-width: 18rem;
+    overflow-x: auto;
+}
+
+.price-change-list-title {
+    font-weight: bold;
+}
+
+.price-change-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.price-change-table th,
+.price-change-table td {
+    padding: var(--constant-padding);
+    text-align: left;
+}
+
+.price-change-table thead tr {
+    border-bottom: 1px solid var(--color-background-raised-3);
+}
+
+.price-generated-at {
+    color: var(--color-almost-white);
+}
+
+.price-percafe,
+.price-item-search {
+    width: 100%;
+}
+
+.price-percafe-grid {
+    align-items: stretch;
+}
+
+.price-percafe-chip {
+    min-width: 9rem;
+    flex-grow: 1;
+    align-items: flex-start;
+}
+
+.price-percafe-value {
+    font-weight: bold;
+}
+
+.price-percafe-sub {
+    color: var(--color-almost-white);
+}
+
+.price-search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--constant-padding);
+    background-color: var(--color-background-raised-2);
+    color: var(--color-foreground);
+    border: 1px solid var(--color-background-raised-3);
+}

@@ -8,6 +8,7 @@ import { SearchPage } from './components/pages/search/search-page.tsx';
 import { HomePage } from './components/pages/home/home-page.tsx';
 import { InfoPage } from './components/pages/info/info-page.tsx';
 import { LazyAnalyticsPage } from './components/pages/analytics/lazy-analytics-page.tsx';
+import { LazyPriceHistoryPage } from './components/pages/price-history/lazy-price-history-page.tsx';
 import { ErrorPage } from './components/pages/error/error-page.tsx';
 import { CheapItemsPage } from './components/pages/cheap/cheap-items-page.tsx';
 import { LazyOrderPage } from './components/pages/order/lazy-order-page.tsx';
@@ -39,6 +40,7 @@ const startApp = () => {
                 <Route path="/info" element={<InfoPage/>}/>
                 <Route path="/order/*" element={<LazyOrderPage/>}/>
                 <Route path="/analytics" element={<LazyAnalyticsPage/>}/>
+                <Route path="/price-history" element={<LazyPriceHistoryPage/>}/>
                 <Route path="/location-test" element={<LocationTestPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>

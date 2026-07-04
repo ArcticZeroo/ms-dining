@@ -1,6 +1,6 @@
 import { DateUtil } from '@msdining/common';
 import { ENVIRONMENT_SETTINGS } from '../../../../shared/util/env.js';
-import { logInfo } from '../../../../shared/util/log.js';
+import { logInfo, logError } from '../../../../shared/util/log.js';
 import { populateDailySessionsAsync, scheduleDailyUpdateJob } from './daily.js';
 import { DailyCafeUpdateSession } from './update.js';
 import { scheduleWeeklyUpdateJob } from './weekly.js';
@@ -9,6 +9,7 @@ import { getServices } from '../../../../shared/services/registry.js';
 import Duration from '@arcticzeroo/duration';
 import { seedAutocompleteFromDatabaseAsync } from '../../cache/autocomplete.js';
 import { runWithDbPriority } from '../../../../shared/util/db-priority.js';
+import { maybeGeneratePriceHistoryOnBootAsync, schedulePriceHistoryJob } from '../../price-history/schedule.js';
 
 const repairMissingMenusAsync = async (i: number): Promise<boolean> => {
     const date = DateUtil.getNowWithDaysInFuture(i);
@@ -111,4 +112,8 @@ export const performMenuBootTasks = async () => {
     );
 
     await seedAutocompleteFromDatabaseAsync();
+
+    schedulePriceHistoryJob();
+    maybeGeneratePriceHistoryOnBootAsync()
+        .catch(error => logError('[price-history] boot generation check failed:', error));
 };

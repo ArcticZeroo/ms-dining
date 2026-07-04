@@ -11,6 +11,12 @@ export const rootFolderPath = path.resolve(serverFolderPath, '../');
 
 export const serverStaticPath = path.join(serverFolderPath, 'static');
 
+// Generated data that should NOT be publicly served via koa-static (unlike
+// serverStaticPath). Read on demand by API routes.
+export const serverDataPath = path.join(serverFolderPath, 'data');
+
+export const priceHistoryJsonPath = path.join(serverDataPath, 'price-history.json');
+
 export const serverMenuItemThumbnailPath = path.join(serverStaticPath, 'menu-items', 'thumbnail');
 
 export const serverThumbnailPath = path.join(serverStaticPath, 'thumbnails');

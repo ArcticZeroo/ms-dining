@@ -45,4 +45,7 @@ export const queryKeys = {
         hourlyVisits: (daysAgo: number, scenarioName: string | undefined) =>
             ['analytics', 'hourly-visits', daysAgo, scenarioName ?? null] as const,
     },
+    priceHistory: {
+        all: ['price-history', 'all'] as const,
+    },
 } as const;

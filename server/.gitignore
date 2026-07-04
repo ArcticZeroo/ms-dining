@@ -1,6 +1,7 @@
 node_modules
 dist
 static/menu-items/thumbnail
+/data/
 *.db
 *.db-*
 .env

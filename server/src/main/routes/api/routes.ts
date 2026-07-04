@@ -4,6 +4,7 @@ import { attachRouter, CATCH_ALL_PATH } from '../../util/koa.js';
 import { registerAnalyticsRoutes } from './analytics.js';
 import { registerAdminRoutes } from './admin.js';
 import { registerAuthRoutes } from './auth.js';
+import { registerPriceHistoryRoutes } from './price-history.js';
 
 export const registerApiRoutes = (parent: Router) => {
     const router = new Router({
@@ -14,6 +15,7 @@ export const registerApiRoutes = (parent: Router) => {
     registerAnalyticsRoutes(router);
     registerAdminRoutes(router);
     registerAuthRoutes(router);
+    registerPriceHistoryRoutes(router);
 
     // Bad routes under /api should not hit the catch-all for the SPA
     router.all(CATCH_ALL_PATH, (ctx) => {
