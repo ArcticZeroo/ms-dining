@@ -1,4 +1,5 @@
 import type { ICafeOrder } from '@msdining/common/models/order';
+import React from 'react';
 import { classNames } from '../../../../util/react.ts';
 import { getErrorMessage } from '../../../../util/mutation.ts';
 import { RetryButton } from '../../../button/retry-button.tsx';
@@ -14,7 +15,7 @@ interface IOrderHistoryBodyProps {
     onRetry: () => void;
 }
 
-export const OrderHistoryBody = ({ orders, isLoading, isFetching, isError, error, onRetry }: IOrderHistoryBodyProps) => {
+export const OrderHistoryBody: React.FC<IOrderHistoryBodyProps> = ({ orders, isLoading, isFetching, isError, error, onRetry }) => {
     if (isError) {
         return (
             <>

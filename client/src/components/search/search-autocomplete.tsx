@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { IAutocompleteSuggestion, SearchEntityType } from '@msdining/common/models/search';
-import { entityDisplayDataByType } from '../../constants/search.ts';
-import { classNames } from '../../util/react.ts';
+import { AutocompleteSuggestionItem } from './autocomplete-suggestion-item.tsx';
 
 import './search-autocomplete.css';
 
@@ -58,20 +57,13 @@ export const SearchAutocomplete: React.FC<ISearchAutocompleteProps> = ({ suggest
                         {/*<div className="autocomplete-group-label">{group.label}</div>*/}
                         {suggestions.map(suggestion => {
                             const currentIndex = flatIndex++;
-                            const isSelected = currentIndex === selectedIndex;
                             return (
-                                <button
+                                <AutocompleteSuggestionItem
                                     key={`${entityType}-${suggestion.name}`}
-                                    className={classNames('autocomplete-item', isSelected && 'selected')}
-                                    onClick={() => onSelect(suggestion)}
-                                    title={suggestion.name}
-                                    type="button"
-                                >
-                                    <span className="material-symbols-outlined autocomplete-item-icon flex flex-center">
-                                        {entityDisplayDataByType[suggestion.entityType].iconName}
-                                    </span>
-                                    <span className="autocomplete-item-name">{suggestion.name}</span>
-                                </button>
+                                    suggestion={suggestion}
+                                    isSelected={currentIndex === selectedIndex}
+                                    onSelect={onSelect}
+                                />
                             );
                         })}
                     </div>

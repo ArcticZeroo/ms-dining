@@ -1,4 +1,5 @@
 import type { OrderHistoryRange } from '../../../../api/ordering.ts';
+import React from 'react';
 import { classNames } from '../../../../util/react.ts';
 import { HomepageCafesFilterButton } from '../../../button/homepage-cafes-filter-button.tsx';
 
@@ -17,13 +18,13 @@ const ORDER_HISTORY_RANGE_OPTIONS: Array<{ label: string; since: OrderHistoryRan
     { label: 'All Time', since: 'all' },
 ];
 
-export const OrderHistoryFilters = ({
+export const OrderHistoryFilters: React.FC<IOrderHistoryFiltersProps> = ({
     selectedSince,
     onSinceChanged,
     isHomepageOnly,
     onHomepageOnlyChanged,
     hasHomepageViews,
-}: IOrderHistoryFiltersProps) => {
+}) => {
     return (
         <div className="order-history-filters flex flex-wrap">
             <div className="tab-selector flex flex-wrap">

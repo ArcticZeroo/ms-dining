@@ -2,6 +2,7 @@ import { IGroupMember } from '@msdining/common/models/group';
 import React, { useContext } from 'react';
 import { ApplicationContext } from '../../../../../context/app.js';
 import { getViewName } from '../../../../../util/cafe.js';
+import { GroupMemberMetadataRow } from './group-member-metadata-row.tsx';
 
 interface ICafeDisplayProps {
     cafeId: string;
@@ -36,6 +37,7 @@ interface IGroupMemberProps {
     member: IGroupMember;
 }
 
+// eslint-disable-next-line react/no-multi-comp -- CafeDisplay is a tiny co-located sub-display used only here
 export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
     return (
         <div className="flex-col align-center flex-around">
@@ -51,12 +53,7 @@ export const GroupMember: React.FC<IGroupMemberProps> = ({ member }) => {
                     <>
                         {
                             Object.entries(member.metadata).map(([key, value]) => value && (
-                                <div key={key} className="flex flex-between">
-                                    <span>{key}:</span>
-                                    <span>
-                                        {key === 'stationLogoUrl' ? <img src={value} loading="lazy" alt="<station logo img>" style={{ maxWidth: '3rem' }}/> : String(value)}
-                                    </span>
-                                </div>
+                                <GroupMemberMetadataRow key={key} metadataKey={key} value={value}/>
                             ))
                         }
                     </>

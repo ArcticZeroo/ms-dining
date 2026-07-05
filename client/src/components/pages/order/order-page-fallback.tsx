@@ -1,9 +1,15 @@
+/* eslint-disable react/no-multi-comp -- this file is a set of tiny route-specific loading skeletons that only make sense together */
 import type React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import './order-page.css';
 
-const SkeletonCard = ({ height = '4rem', style }: { height?: string; style?: React.CSSProperties }) => (
+interface ISkeletonCardProps {
+    height?: string;
+    style?: React.CSSProperties;
+}
+
+const SkeletonCard: React.FC<ISkeletonCardProps> = ({ height = '4rem', style }) => (
     <div className="card" style={{ height, ...style }}/>
 );
 

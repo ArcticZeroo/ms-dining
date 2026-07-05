@@ -26,6 +26,7 @@ const CampusMapMarkers: React.FC<ICampusMapMarkersProps> = ({ onMarkerClick }) =
     );
 };
 
+// eslint-disable-next-line react/no-multi-comp -- CampusMapMarkers is the co-located marker layer used only here
 const CampusMapView = () => {
     const [selectedView, setSelectedView] = useState<CafeView | null>(null);
 

@@ -104,6 +104,7 @@ const CartPopupBody = () => {
     );
 };
 
+// eslint-disable-next-line react/no-multi-comp -- CartPopup is a thin visibility gate over the co-located CartPopupBody
 export const CartPopup = () => {
     const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
     const location = useLocation();

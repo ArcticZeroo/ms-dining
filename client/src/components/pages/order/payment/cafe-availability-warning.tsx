@@ -3,7 +3,12 @@ import React from 'react';
 import { minutesToTimeString } from '@msdining/common/util/date-util';
 import { UnhandledDefaultError } from '@msdining/common/util/switch-util';
 
-const WarningCard: React.FC<{ icon: string; children: React.ReactNode }> = ({ icon, children }) => (
+interface IWarningCardProps {
+    icon: string;
+    children: React.ReactNode;
+}
+
+const WarningCard: React.FC<IWarningCardProps> = ({ icon, children }) => (
     <div className="card warning-overlay horizontal align-center">
         <span className="material-symbols-outlined">{icon}</span>
         {children}
@@ -14,6 +19,7 @@ interface ICafeAvailabilityWarningProps {
     availability: ICafeAvailability;
 }
 
+// eslint-disable-next-line react/no-multi-comp -- WarningCard is a tiny co-located presentational wrapper used only here
 export const CafeAvailabilityWarning: React.FC<ICafeAvailabilityWarningProps> = ({ availability }) => {
     switch (availability.status) {
     case 'open': {

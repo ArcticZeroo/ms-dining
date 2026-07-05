@@ -18,6 +18,11 @@ export const MyComponent: React.FC<IMyComponentProps> = ({ prop1, prop2 = false 
 };
 ```
 
+These conventions are enforced by ESLint (see `client/eslint-plugin-msdining` + `client/.eslintrc.cjs`, `*.tsx` override):
+- **`msdining/functional-component-style`** — components are arrow consts; any component that accepts props must be typed `React.FC<INameProps>` with a *named* interface (no `function` components, no inline/anonymous prop types). Prop-less components may omit the annotation.
+- **`react/no-multi-comp`** — one component per file. A genuinely trivial, tightly-coupled private helper (spinner/fallback, dispatcher) may opt out with an inline `// eslint-disable-next-line react/no-multi-comp -- <reason>`; substantial/reusable helpers get their own file instead.
+- **`msdining/no-complex-inline-map`** — a `.map()` returning host markup (a `<div>`/`<span>`/… root) with more than 3 JSX elements must be extracted into its own component rather than nesting rendering logic inline.
+
 ### Promise Handling
 
 #### Server state — TanStack Query (preferred)

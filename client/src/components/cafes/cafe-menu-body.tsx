@@ -3,7 +3,7 @@ import { CurrentCafeContext } from '../../context/menu-item.ts';
 import { RetryButton } from '../button/retry-button.tsx';
 import { StationList } from './station/station-list.tsx';
 import { StationListSkeleton } from '../skeleton/station-list-skeleton.tsx';
-import { IngredientsInfoBanner } from './station/ingredients-menu-view.tsx';
+import { IngredientsInfoBanner } from './station/ingredients-info-banner.tsx';
 import { ICafeMenuView } from './cafe-menu-view.tsx';
 
 interface ICollapsibleCafeMenuBodyProps {

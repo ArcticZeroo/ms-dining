@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { knownTags } from '../../constants/tags.tsx';
 import { useValueNotifier } from '../../hooks/events.ts';
 import { ApplicationSettings } from '../../constants/settings.ts';
+import { HighlightTagChip } from './highlight-tag-chip.tsx';
 export const HighlightTagsSetting = () => {
     const selectedTags = useValueNotifier(ApplicationSettings.highlightTagNames);
 
@@ -19,18 +20,13 @@ export const HighlightTagsSetting = () => {
                 <div className="setting-chips">
                     {
                         Object.entries(knownTags).map(([tagId, tag]) => (
-                            <label htmlFor={`tag-${tagId}`} className="setting-chip flex" key={tagId} style={{ backgroundColor: tag.color }}>
-                                <span>
-                                    {tag.icon}
-                                </span>
-                                <span>
-                                    {tag.name}
-                                </span>
-                                <input type="checkbox"
-								       id={`tag-${tagId}`}
-								       checked={selectedTags.has(tagId)}
-								       onChange={() => onToggleClicked(tagId)}/>
-                            </label>
+                            <HighlightTagChip
+                                key={tagId}
+                                tagId={tagId}
+                                tag={tag}
+                                isSelected={selectedTags.has(tagId)}
+                                onToggle={() => onToggleClicked(tagId)}
+                            />
                         ))
                     }
                 </div>

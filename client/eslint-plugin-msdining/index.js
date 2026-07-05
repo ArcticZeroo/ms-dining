@@ -1,4 +1,9 @@
+const functionalComponentStyle = require('./rules/functional-component-style.js');
+const noComplexInlineMap = require('./rules/no-complex-inline-map.js');
+
 const requirePromiseStateStageName = 'require-promise-state-stage';
+const functionalComponentStyleName = 'functional-component-style';
+const noComplexInlineMapName = 'no-complex-inline-map';
 
 const HOOK_NAMES = new Set([
     'useDelayedPromiseState',
@@ -58,5 +63,7 @@ const requirePromiseStateStage = {
 module.exports = {
     rules: {
         [requirePromiseStateStageName]: requirePromiseStateStage,
+        [functionalComponentStyleName]: functionalComponentStyle,
+        [noComplexInlineMapName]:       noComplexInlineMap,
     },
 };

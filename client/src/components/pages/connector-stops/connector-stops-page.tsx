@@ -4,8 +4,8 @@ import { usePageData } from '../../../hooks/location.js';
 import { GenericMapView } from '../../map/generic-map-view.js';
 import { BuildingOutlineLayer } from '../../map/building-outline-layer.js';
 import { ConnectorStopMarker } from './connector-stop-marker.js';
+import { StopListItem } from './connector-stop-list-item.tsx';
 import { CONNECTOR_STOPS, IConnectorStop } from '@msdining/common/constants/connector-stops';
-import { classNames } from '../../../util/react.js';
 import { CollapsibleContainer } from '../../collapsible/collapsible-container.js';
 import { CollapsibleHeader } from '../../collapsible/collapsible-header.js';
 import { CollapsibleBody } from '../../collapsible/collapsible-body.js';
@@ -18,7 +18,11 @@ const FLY_TO_ZOOM = 16;
 const noopBuilding = () => {};
 const noopBuildingNullable = () => {};
 
-const FlyToStop: React.FC<{ stop: IConnectorStop | null }> = ({ stop }) => {
+interface IFlyToStopProps {
+    stop: IConnectorStop | null;
+}
+
+const FlyToStop: React.FC<IFlyToStopProps> = ({ stop }) => {
     const map = useMap();
 
     if (stop) {
@@ -27,34 +31,6 @@ const FlyToStop: React.FC<{ stop: IConnectorStop | null }> = ({ stop }) => {
 
     return null;
 };
-
-interface IStopListItemProps {
-    stop: IConnectorStop;
-    isSelected: boolean;
-    onClick(): void;
-    onMouseEnter(): void;
-    onMouseLeave(): void;
-}
-
-const StopListItem: React.FC<IStopListItemProps> = ({ stop, isSelected, onClick, onMouseEnter, onMouseLeave }) => (
-    <div
-        className={classNames('map-search-result flex-col', isSelected && 'selected')}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        title={stop.description || stop.name}
-    >
-        <div className="result-header flex">
-            <span className="result-name">{stop.name}</span>
-        </div>
-        {stop.route && (
-            <span className="result-description subtitle">{stop.route}</span>
-        )}
-        {stop.hasParking && (
-            <span className="result-cafes subtitle">🅿️ Parking available</span>
-        )}
-    </div>
-);
 
 interface IStopGroup {
     area: string;
@@ -76,6 +52,7 @@ const groupStopsByArea = (stops: IConnectorStop[]): IStopGroup[] => {
         .map(([area, stops]) => ({ area, stops }));
 };
 
+// eslint-disable-next-line react/no-multi-comp -- FlyToStop is a tiny co-located map fly-to effect used only here
 export const ConnectorStopsPage = () => {
     usePageData('Connector Stops', 'View Microsoft Connector shuttle bus stops around the Seattle area.');
 

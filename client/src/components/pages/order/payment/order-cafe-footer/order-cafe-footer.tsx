@@ -42,6 +42,7 @@ const OrderCafeFooterChild: React.FC<IOrderCafeFooterProps> = ({
     }
 }
 
+// eslint-disable-next-line react/no-multi-comp -- OrderCafeFooterChild is the co-located status dispatcher for this footer
 export const OrderCafeFooter: React.FC<IOrderCafeFooterProps> = ({
     paymentState,
     totalQuantity,

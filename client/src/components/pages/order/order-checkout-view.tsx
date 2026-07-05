@@ -31,6 +31,7 @@ const InlineTodayOrders = () => {
     );
 };
 
+// eslint-disable-next-line react/no-multi-comp -- InlineTodayOrders is a co-located query wrapper used only here
 export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();

@@ -55,6 +55,7 @@ const GroupAddMembersBody: React.FC<IGroupAddMembersBodyProps> = ({ group, allIt
     );
 }
 
+// eslint-disable-next-line react/no-multi-comp -- GroupAddMembersBody is the co-located loading/error body for this component
 export const GroupAddMembers: React.FC<IGroupAddMembersProps> = ({ group }) => {
     const { data: allItemsWithoutGroup, isError, refetch } = useItemsWithoutGroup();
     const suggestedCandidates = useSuggestedGroupMembers(group);

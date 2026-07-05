@@ -9,7 +9,7 @@ interface IBooleanSwitchProps {
     onChange: (value: boolean) => void;
 }
 
-export const BooleanSwitch = ({ disabled = false, value, onChange }: IBooleanSwitchProps) => {
+export const BooleanSwitch: React.FC<IBooleanSwitchProps> = ({ disabled = false, value, onChange }) => {
     const id = useMemo(
         () => `boolean-switch-${randomString(8)}`,
         []

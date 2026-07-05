@@ -137,6 +137,7 @@ const MapPageViewContent = () => {
     );
 };
 
+// eslint-disable-next-line react/no-multi-comp -- MapPageViewContent is the co-located inner content for this page
 export const MapPage = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') ?? '';

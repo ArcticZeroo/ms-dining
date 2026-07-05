@@ -48,6 +48,7 @@ const AppInner = () => {
     );
 };
 
+// eslint-disable-next-line react/no-multi-comp -- App is a thin provider wrapper around the co-located AppInner
 export const App = () => {
     return (
         <QueryClientProvider client={QUERY_CLIENT}>

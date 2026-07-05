@@ -12,6 +12,7 @@ const DevPageFallback = () => (
     </div>
 );
 
+// eslint-disable-next-line react/no-multi-comp -- DevPageFallback is a co-located Suspense fallback used only here
 export const LazyDevPage = () => (
     <Suspense fallback={<DevPageFallback/>}>
         <DevPage/>

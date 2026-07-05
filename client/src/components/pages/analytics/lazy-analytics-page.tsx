@@ -12,6 +12,7 @@ const AnalyticsPageFallback = () => (
     </div>
 );
 
+// eslint-disable-next-line react/no-multi-comp -- AnalyticsPageFallback is a co-located Suspense fallback used only here
 export const LazyAnalyticsPage = () => (
     <Suspense fallback={<AnalyticsPageFallback/>}>
         <AnalyticsPage/>

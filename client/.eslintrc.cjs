@@ -9,7 +9,10 @@ module.exports = {
     ],
     ignorePatterns: ['dist', '.eslintrc.cjs'],
     parser: '@typescript-eslint/parser',
-    plugins: ['react-refresh', 'msdining'],
+    plugins: ['react-refresh', 'react', 'msdining'],
+    settings: {
+        react: { version: 'detect' },
+    },
     rules: {
         'react-refresh/only-export-components': [
             'warn',
@@ -22,4 +25,22 @@ module.exports = {
         'msdining/require-promise-state-stage': 'error',
         'id-length': ['error', { min: 3, exceptions: ['i', 'j', 'k', 'x', 'y', 'id', 'z', 'a', 'b', '_', 'ms', 'dx', 'dy', 'dt', 'px', 'L', 'on'], properties: 'never' }],
     },
+    overrides: [
+        {
+            // Component-structure conventions (JSX only). Intentional exceptions
+            // (e.g. a tightly-coupled private helper, or a trivial one-element map)
+            // opt out with an inline eslint-disable and a short justification.
+            files: ['*.tsx'],
+            rules: {
+                // One component per file, including stateless function components.
+                'react/no-multi-comp': ['error', { ignoreStateless: false }],
+                // Components must be `const X: React.FC<IXProps>` arrows with a named
+                // props interface when they accept props (no `function`, no inline prop types).
+                'msdining/functional-component-style': 'error',
+                // Complex JSX in an array .map() should be its own component,
+                // not nested rendering logic inline in the parent.
+                'msdining/no-complex-inline-map': 'error',
+            },
+        },
+    ],
 }
