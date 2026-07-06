@@ -13,7 +13,8 @@
     "prepare": "git -C .. config core.hooksPath .githooks"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx}": "eslint --max-warnings 0 --report-unused-disable-directives"
+    "src/**/*.{ts,tsx}": "eslint --max-warnings 0 --report-unused-disable-directives",
+    "{src,test}/**/*.{ts,tsx}": "vitest related --run --passWithNoTests"
   },
   "workspaces": [
     "../common"

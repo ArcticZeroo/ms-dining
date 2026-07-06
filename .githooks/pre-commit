@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
-# Runs lint-staged for client/ on every commit. Only lints files actually
-# staged for commit, so the hook is fast and unrelated baseline issues
+# Runs lint-staged for client/ on every commit: eslint on staged src files,
+# plus `vitest related` (only the tests covering the staged src/test files).
+# Scoped to staged files so the hook is fast and unrelated baseline issues
 # won't block work.
 #
 # Bypass with `git commit --no-verify` if you genuinely need to.
