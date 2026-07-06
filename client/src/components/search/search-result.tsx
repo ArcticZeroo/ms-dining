@@ -1,136 +1,14 @@
-import { DateUtil, SearchTypes } from '@msdining/common';
-import { SearchEntityType, SearchMatchReason } from '@msdining/common/models/search';
-import { isSameDate } from '@msdining/common/util/date-util';
-import React, { useContext, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ApplicationSettings } from '../../constants/settings.ts';
-import { ApplicationContext } from '../../context/app.ts';
-import { useIsFavoriteItem } from '../../hooks/cafe.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
-import { useMenuItemOrderCount } from '../../store/queries/ordering.ts';
-import { useSelectedDate } from '../../store/zustand/selected-date.ts';
-import { CafeView, CafeViewType } from '../../models/cafe.ts';
-import { classNames } from '../../util/react';
-import { compareNormalizedCafeIds, compareViewNames } from '../../util/sorting.ts';
-import { getSearchUrl } from '../../util/url.ts';
-import { FavoriteSearchableItemButton } from '../button/favorite/favorite-searchable-item-button.tsx';
-import { MenuItemTags } from '../cafes/station/menu-items/menu-item-tags.tsx';
-import { SearchResultHits } from './search-result-hits.tsx';
-import { SearchResultHitsSkeleton } from './skeleton/search-result-hits-skeleton.tsx';
-import { SearchResultFindButton } from './search-result-find-button.tsx';
-import { SearchResultVisitHistoryButton } from './schedule/search-result-visit-history-button.tsx';
-import { getViewMenuUrl } from '../../util/link.ts';
-import { FavoriteCafeSearchResultButton } from '../button/favorite/favorite-cafe-search-result-button.tsx';
+import { SearchTypes } from '@msdining/common';
+import { SearchMatchReason } from '@msdining/common/models/search';
+import React from 'react';
+import { useIsSearchResultFavorite, useSearchResultCafeDetails } from '../../hooks/search-result.ts';
+import { classNames } from '../../util/react.ts';
+import { SearchResultInfo } from './search-result-info.tsx';
+import { SearchResultTypeColumn } from './search-result-type-column.tsx';
+import type { ISearchResultField } from './search-result-types.ts';
 import './search.css';
-import { getParentView } from '../../util/view.ts';
-import { normalizeCafeId } from '@msdining/common/util/cafe-util';
-import { entityDisplayDataByType } from '../../constants/search.js';
-import { formatReviewScore } from '../../util/reviews.js';
-import { formatOrderCount } from '../../util/order.js';
-import { navigateToSearch } from '../../util/search.js';
 
-const getLocationEntries = (locationDatesByCafeId: Map<string, Date[]>, onlyShowLocationsOnDate: Date | undefined): Array<[string, Array<Date>]> => {
-    const locationEntries = Array.from(locationDatesByCafeId.entries());
-
-    if (!onlyShowLocationsOnDate) {
-        return locationEntries;
-    }
-
-    const resultEntries: Array<[string, Array<Date>]> = [];
-    for (const [cafeId, dates] of locationEntries) {
-        const filteredDates = dates.filter(date => DateUtil.isSameDate(date, onlyShowLocationsOnDate));
-        if (filteredDates.length > 0) {
-            resultEntries.push([cafeId, filteredDates]);
-        }
-    }
-
-    return resultEntries;
-};
-
-const cleanModifierDescription = (description: string) => {
-    if (description.endsWith(':')) {
-        return description.slice(0, description.length - 1);
-    }
-
-    return description;
-};
-
-interface IUseLocationEntriesParams {
-    viewsById: Map<string, CafeView>;
-    locationDatesByCafeId: Map<string, Date[]>;
-    onlyShowLocationsOnDate?: Date;
-}
-
-const useLocationEntries = ({
-    viewsById,
-    locationDatesByCafeId,
-    onlyShowLocationsOnDate
-}: IUseLocationEntriesParams): Array<[string, Array<Date>]> => {
-    return useMemo(
-        () => {
-            const locationEntries = getLocationEntries(locationDatesByCafeId, onlyShowLocationsOnDate);
-
-            if (onlyShowLocationsOnDate != null) {
-                return locationEntries.sort(([cafeA], [cafeB]) => {
-                    const viewA = viewsById.get(cafeA);
-                    const viewB = viewsById.get(cafeB);
-
-                    if (!viewA || !viewB) {
-                        console.error('Cannot sort views due to missing entry in map');
-                        return 0;
-                    }
-
-                    return compareViewNames(viewA.value.name, viewB.value.name);
-                });
-            }
-
-            return locationEntries.sort(([cafeA, datesA], [cafeB, datesB]) => {
-                const firstDateA = datesA[0];
-                const firstDateB = datesB[0];
-
-                if (!firstDateA || !firstDateB) {
-                    throw new Error('Cannot sort views due to missing dates');
-                }
-
-                if (DateUtil.isDateBefore(firstDateA, firstDateB)) {
-                    return -1;
-                }
-
-                if (DateUtil.isDateAfter(firstDateA, firstDateB)) {
-                    return 1;
-                }
-
-                // The more "limited time only" locations get to go first
-                const lastDateA = datesA[datesA.length - 1]!;
-                const lastDateB = datesB[datesB.length - 1]!;
-
-                if (DateUtil.isDateBefore(lastDateA, lastDateB)) {
-                    return -1;
-                }
-
-                if (DateUtil.isDateAfter(lastDateA, lastDateB)) {
-                    return 1;
-                }
-
-                const viewA = viewsById.get(cafeA);
-                const viewB = viewsById.get(cafeB);
-
-                if (!viewA || !viewB) {
-                    return compareNormalizedCafeIds(normalizeCafeId(cafeA), normalizeCafeId(cafeB));
-                } else {
-                    return compareViewNames(viewA.value.name, viewB.value.name);
-                }
-            });
-        },
-        [locationDatesByCafeId, onlyShowLocationsOnDate, viewsById]
-    );
-};
-
-export interface ISearchResultField {
-    key: string;
-    iconName: string;
-    value: React.ReactNode;
-}
+export type { ISearchResultField } from './search-result-types.ts';
 
 export interface ISearchResultProps {
     isVisible: boolean;
@@ -188,103 +66,25 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
     totalReviewCount,
     entityKey,
 }) => {
-    const { viewsById } = useContext(ApplicationContext);
-    const showImages = useValueNotifier(ApplicationSettings.showImages);
-    const showTags = useValueNotifier(ApplicationSettings.showTags);
-    const showSearchTags = useValueNotifier(ApplicationSettings.showSearchTags);
-    const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
-    const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
-    const showReviews = useValueNotifier(ApplicationSettings.showReviews);
-    const selectedDate = useSelectedDate();
-    const navigate = useNavigate();
+    const {
+        entityView,
+        description: resolvedDescription,
+        hasMissingRequiredCafeView,
+    } = useSearchResultCafeDetails({
+        cafeId,
+        description,
+        entityType,
+    });
 
-    const entityDisplayData = entityDisplayDataByType[entityType];
+    const isFavoriteItem = useIsSearchResultFavorite({
+        entityType,
+        entityView,
+        name,
+    });
 
-    const shouldShowLocationDates = onlyShowLocationsOnDate != null
-        ? !isSameDate(selectedDate, onlyShowLocationsOnDate)
-        : allowFutureMenus;
-
-    if (onlyShowLocationsOnDate == null && !allowFutureMenus) {
-        onlyShowLocationsOnDate = selectedDate;
-    }
-
-    const locationEntriesInOrder = useLocationEntries({ viewsById, locationDatesByCafeId, onlyShowLocationsOnDate });
-
-    const imageElement = showImages && (
-        imageUrl
-            ? <img src={imageUrl} alt={name} className="search-result-image" decoding="async" loading="lazy"/>
-            : isSkeleton && <div className="search-result-image"/>
-    );
-
-    if (!isCompact && matchedModifiers.size > 0) {
-        for (const [modifierDescription, choiceDescriptions] of matchedModifiers) {
-            extraFields.push({
-                iconName: 'list',
-                value:    `${cleanModifierDescription(modifierDescription)}${choiceDescriptions.size > 0 ? `: ${Array.from(choiceDescriptions).join(', ')}` : ''}`,
-                key:      modifierDescription
-            });
-        }
-    }
-
-    const entityView = useMemo(() => {
-        if (entityType !== SearchTypes.SearchEntityType.cafe || !cafeId) {
-            return undefined;
-        }
-
-        return viewsById.get(cafeId);
-    }, [entityType, cafeId, viewsById]);
-
-    const favoriteButton = useMemo(
-        () => {
-            if (entityView) {
-                return (
-                    <FavoriteCafeSearchResultButton 
-                        view={entityView}
-                    />
-                );
-            }
-
-            return showFavoriteButton && (
-                <div>
-                    <FavoriteSearchableItemButton
-                        name={name}
-                        type={entityType}
-                    />
-                </div>
-            );
-        },
-        [showFavoriteButton, name, entityType, entityView]
-    );
-
-    const targetFavoriteId = useMemo(
-        () => {
-            if (entityType === SearchTypes.SearchEntityType.cafe && entityView) {
-                return getParentView(viewsById, entityView, shouldUseGroups).value.id;
-            }
-
-            return name; // For menu items and stations, we use the name as the favorite ID
-        },
-        [entityType, entityView, name, shouldUseGroups, viewsById]
-    );
-
-    const isFavoriteItem = useIsFavoriteItem(targetFavoriteId, entityType);
-
-    const orderCount = useMenuItemOrderCount(entityKey);
-    const orderCountDisplay = formatOrderCount(orderCount);
-
-    if (entityType == SearchTypes.SearchEntityType.cafe) {
-        if (!entityView) {
-            console.error('SearchResult component requires entityView for entityType cafe');
-            return null;
-        }
-
-        if (!description && entityView.type === CafeViewType.single && entityView.value.group && !entityView.value.group.alwaysExpand && entityView.value.name !== entityView.value.group.name) {
-            description = entityView.value.group.name;
-        }
-    }
-
-    const onNavigateToSearchClicked = () => {
-        navigateToSearch(navigate, name);
+    if (hasMissingRequiredCafeView) {
+        console.error('SearchResult component requires entityView for entityType cafe');
+        return null;
     }
 
     return (
@@ -297,168 +97,38 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
             shouldStretchResults && 'self-stretch',
             isSkeleton && 'loading-skeleton'
         )}>
-            <div className={classNames('flex-col search-result-type', entityDisplayData.className)}>
-                {
-                    isCompact && favoriteButton
-                }
-                {
-                    isCompact && <SearchResultVisitHistoryButton entityType={entityType} name={name}/>
-                }
-                {
-                    isCompact && (
-                        <button
-                            className="default-container icon-container"
-                            title={`Click to search for "${name}"`}
-                            onClick={onNavigateToSearchClicked}
-                        >
-                            <span className="material-symbols-outlined">
-                                search
-                            </span>
-                        </button>
-                    )
-                }
-                <span className="material-symbols-outlined">
-                    {entityDisplayData.iconName}
-                </span>
-            </div>
-            <div className="search-result-info">
-                <div className="search-result-info-header">
-                    <div className="flex">
-                        {!isCompact && favoriteButton}
-                        {
-                            !isCompact && entityType !== SearchEntityType.cafe && (
-                                <SearchResultVisitHistoryButton entityType={entityType} name={name}/>
-                            )
-                        }
-                        <div className="title">
-                            <span>
-                                {name}
-                            </span>
-                            {
-                                !isCompact && description &&
-                                <div className="search-result-description">{description}</div>
-                            }
-                            {
-                                showReviews && overallRating != null && totalReviewCount != null && totalReviewCount > 0 && (
-                                    <div className="search-result-review-score">
-                                        {formatReviewScore(overallRating, totalReviewCount)}
-                                    </div>
-                                )
-                            }
-                            {
-                                orderCountDisplay && (
-                                    <div className="search-result-review-score">
-                                        {orderCountDisplay}
-                                    </div>
-                                )
-                            }
-                            {
-                                tags && (showTags || matchReasons.has(SearchMatchReason.tags)) && (
-                                    <MenuItemTags tags={tags} showName={!isCompact}/>
-                                )
-                            }
-                        </div>
-                    </div>
-                    {
-                        showSearchTags && (
-                            <div className="search-tags">
-                                {
-                                    (searchTags != null && searchTags.size > 0) && Array.from(searchTags).map(tag => (
-                                        <Link to={getSearchUrl(tag)} className="search-result-chip" key={tag}
-                                            title={`Click to search for "${tag}"`}>
-                                            {tag}
-                                        </Link>
-                                    ))
-                                }
-                            </div>
-                        )
-                    }
-                    {
-                        extraFields.length > 0 && (
-                            <div className="search-result-fields">
-                                {
-                                    extraFields.map(({ iconName, value, key }) => (
-                                        value && (
-                                            <div className="search-result-field" key={key}>
-                                                <span className="material-symbols-outlined icon">
-                                                    {iconName}
-                                                </span>
-                                                <span className="value">
-                                                    {value}
-                                                </span>
-                                            </div>
-                                        )
-                                    ))
-                                }
-                            </div>
-                        )
-                    }
-                    {
-                        isCompact && imageElement
-                    }
-                    {
-                        entityView && (
-                            <>
-                                <Link
-                                    to={getViewMenuUrl({
-                                        view: entityView,
-                                        viewsById,
-                                        shouldUseGroups,
-                                    })}
-                                    className="search-result-link flex default-button default-container flex-center"
-                                    title={`Click to view menu for "${name}"`}
-                                >
-                                    <span className="material-symbols-outlined">
-                                        restaurant_menu
-                                    </span>
-                                    View Menu
-                                </Link>
-                                <Link
-                                    to={`/map/overview/${cafeId}`}
-                                    className="search-result-link flex default-button default-container flex-center"
-                                    title={`Details and overview for "${name}"`}
-                                >
-                                    <span className="material-symbols-outlined">
-                                        map
-                                    </span>
-                                    Details + Overview
-                                </Link>
-                            </>
-                        )
-                    }
-                    {
-                        !showSearchButtonInsteadOfLocations && (
-                            isSkeleton
-                                ? <SearchResultHitsSkeleton/>
-                                : (
-                                    <SearchResultHits
-                                        name={name}
-                                        entityType={entityType}
-                                        onlyShowLocationsOnDate={onlyShowLocationsOnDate}
-                                        isCompact={isCompact}
-                                        locationEntriesInOrder={locationEntriesInOrder}
-                                        shouldShowLocationDates={shouldShowLocationDates}
-                                        priceByCafeId={priceByCafeId}
-                                        stationByCafeId={stationByCafeId}
-                                        showOnlyCafeNames={showOnlyCafeNames}
-                                    />
-                                )
-                        )
-                    }
-                    {
-                        showSearchButtonInsteadOfLocations && (
-                            <SearchResultFindButton
-                                name={name}
-                                isSkeleton={isSkeleton}
-                                cafeCount={locationEntriesInOrder.length}
-                            />
-                        )
-                    }
-                </div>
-                {
-                    !isCompact && imageElement
-                }
-            </div>
+            <SearchResultTypeColumn
+                entityType={entityType}
+                entityView={entityView}
+                isCompact={isCompact}
+                name={name}
+                showFavoriteButton={showFavoriteButton}
+            />
+            <SearchResultInfo
+                cafeId={cafeId}
+                description={resolvedDescription}
+                entityKey={entityKey}
+                entityType={entityType}
+                entityView={entityView}
+                extraFields={extraFields}
+                imageUrl={imageUrl}
+                isCompact={isCompact}
+                isSkeleton={isSkeleton}
+                locationDatesByCafeId={locationDatesByCafeId}
+                matchReasons={matchReasons}
+                matchedModifiers={matchedModifiers}
+                name={name}
+                onlyShowLocationsOnDate={onlyShowLocationsOnDate}
+                overallRating={overallRating}
+                priceByCafeId={priceByCafeId}
+                searchTags={searchTags}
+                showFavoriteButton={showFavoriteButton}
+                showOnlyCafeNames={showOnlyCafeNames}
+                showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
+                stationByCafeId={stationByCafeId}
+                tags={tags}
+                totalReviewCount={totalReviewCount}
+            />
         </div>
     );
 };
