@@ -1,7 +1,7 @@
 import React from 'react';
-import { ICafe } from '../../../../models/cafe.ts';
-import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.tsx';
-import { CafeOverviewWithData } from '../../../cafes/cafe-overview-with-data.js';
+import { ICafe } from '../../models/cafe.ts';
+import { HourglassLoadingSpinner } from '../icon/hourglass-loading-spinner.tsx';
+import { CafeOverviewWithData } from './cafe-overview-with-data.js';
 import { ICafeOverviewStation, ICafeShutdownState } from '@msdining/common/models/cafe';
 
 interface ICafeOverviewProps {

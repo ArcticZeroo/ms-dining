@@ -6,7 +6,7 @@ import { getCafeName } from '../../../../util/cafe.js';
 import { classNames } from '../../../../util/react.js';
 import { Link } from 'react-router-dom';
 import { getViewMenuUrl } from '../../../../util/link.js';
-import { CafeOverview } from './cafe-overview.js';
+import { CafeOverview } from '../../../cafes/cafe-overview.js';
 import { ApplicationContext } from '../../../../context/app.js';
 import { useValueNotifier } from '../../../../hooks/events.js';
 import { ApplicationSettings } from '../../../../constants/settings.js';

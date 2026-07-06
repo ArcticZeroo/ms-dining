@@ -1,7 +1,7 @@
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 import React, { useContext } from 'react';
 import { Modal } from '../popup/modal.js';
-import { CafeOverviewWithData } from './cafe-overview-with-data.js';
+import { CafeOverview } from './cafe-overview.js';
 import { usePopupOpener } from '../../hooks/popup.js';
 import { CurrentCafeContext } from '../../context/menu-item.js';
 import { classNames } from '../../util/react.js';
@@ -49,11 +49,14 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
     const deviceType = useDeviceType();
 
     const stations = menuData.data?.stations;
-    const isOverviewDisabled = !stations || stations.length === 0;
-    const overviewTitle = getOverviewTitle(menuData, isOverviewDisabled);
+    const shutdownState = menuData.data?.shutdownState;
+    // A fully-closed cafe has no stations but still has a closure message to show,
+    // so the overview is meaningful whenever there are stations OR a shutdown state.
+    const hasOverviewContent = (stations?.length ?? 0) > 0 || shutdownState != null;
+    const overviewTitle = getOverviewTitle(menuData, !hasOverviewContent);
 
     const onOpenMenuOverviewClicked = () => {
-        if (!stations || stations.length === 0) {
+        if (!hasOverviewContent) {
             return;
         }
 
@@ -63,9 +66,10 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
                 <Modal
                     title={`Menu Overview for ${cafeName}`}
                     body={
-                        <CafeOverviewWithData
+                        <CafeOverview
                             cafe={cafe}
-                            overviewStations={stations}
+                            stations={stations}
+                            shutDownState={shutdownState}
                             showAllStations={true}
                         />
                     }
@@ -108,7 +112,7 @@ export const CafeMenuControls: React.FC<ICafeMenuControlsProps> = ({ cafeName, m
                 className={childElementClassName}
                 title={overviewTitle}
                 onClick={onOpenMenuOverviewClicked}
-                disabled={isOverviewDisabled}
+                disabled={!hasOverviewContent}
             >
                 <span className="material-symbols-outlined">
                     menu_book_2
