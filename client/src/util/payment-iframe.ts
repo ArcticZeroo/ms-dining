@@ -39,6 +39,7 @@ const FrameCancelSchema = z.object({
 // Non-terminal signals the iframe posts as it works. These are advisory only:
 // they tell us the form is doing something (arm/refresh the stall watchdog) or
 // that it has returned to an idle, user-interactive state (disarm the watchdog).
+const PROCESSING_EVENT_IDS = new Set(['iframe_submitted', 'payment_processing', 'datadome_blocked']);
 const IDLE_EVENT_IDS = new Set(['iframe_validationerror']);
 
 const FrameEventSchema = z.object({
@@ -79,11 +80,8 @@ interface IPaymentFrameMessageUnknown {
     type: 'unknown';
 }
 
-type ProcessingReason = 'submitted' | 'processing' | 'datadome';
-
 interface IPaymentFrameMessageProcessing {
     type: 'processing';
-    reason: ProcessingReason;
 }
 
 interface IPaymentFrameMessageIdle {
@@ -97,12 +95,6 @@ type PaymentFrameMessage =
     | IPaymentFrameMessageProcessing
     | IPaymentFrameMessageIdle
     | IPaymentFrameMessageUnknown;
-
-const PROCESSING_REASON_BY_EVENT_ID: Record<string, ProcessingReason> = {
-    iframe_submitted:   'submitted',
-    payment_processing: 'processing',
-    datadome_blocked:   'datadome',
-};
 
 const parseFrameErrorString = (data: string): PaymentFrameMessage => {
     const frameErrorParseResult = FrameErrorSchema.safeParse(tryParseJson(data));
@@ -167,9 +159,8 @@ const tryParseFrameLifecycleMessage = (data: unknown): PaymentFrameMessage | und
     }
 
     const eventId = eventResult.data.event_id;
-    const processingReason = PROCESSING_REASON_BY_EVENT_ID[eventId];
-    if (processingReason) {
-        return { type: 'processing', reason: processingReason };
+    if (PROCESSING_EVENT_IDS.has(eventId)) {
+        return { type: 'processing' };
     }
 
     if (IDLE_EVENT_IDS.has(eventId)) {

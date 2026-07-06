@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { GenericIFrame } from '../../../iframe/generic-iframe.js';
-import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { type IPaymentSuccessResult, parseFrameMessage } from '../../../../util/payment-iframe.js';
 import { useStallWatchdog } from '../../../../hooks/stall-watchdog.js';
 import { PaymentDetailsSkeleton } from './payment-details-skeleton.js';
+import { PaymentOverlay } from './payment-overlay.js';
 
 const FRAME_LOAD_TIMEOUT_MS = 15_000;
 
@@ -13,8 +13,6 @@ const FRAME_LOAD_TIMEOUT_MS = 15_000;
 // it, so we never wrongly abort a slow-but-legitimate flow.
 const PAYMENT_STALL_TIMEOUT_MS = 20_000;
 
-const PROCESSING_MESSAGE = 'Processing your payment…';
-const STALL_MESSAGE = 'This is taking longer than expected. You have not been charged — please refresh the page and try again.';
 const FRAME_ERROR_MESSAGE = 'Payment form encountered an error. Please refresh the page and try again.';
 const FRAME_LOAD_TIMEOUT_MESSAGE = 'Payment form doesn\'t seem to be loading. Please refresh the page and try again.';
 
@@ -79,44 +77,18 @@ export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
         }
     }, [onPaymentCancelled, onPaymentSuccess, armStallTimer, disarmStallTimer]);
 
-    // Overlay precedence: a terminal error wins, then the escalated stall notice,
-    // then the in-progress spinner.
-    const renderNotice = (message: string, actionLabel: string, onAction: () => void) => (
-        <div className="card error">
-            <div>{message}</div>
-            <button className="default-container" onClick={onAction}>
-                {actionLabel}
-            </button>
-        </div>
-    );
-
-    const renderOverlayContent = () => {
-        if (error) {
-            return renderNotice(error, 'Dismiss', () => setError(null));
-        }
-
-        if (isStalled) {
-            return renderNotice(STALL_MESSAGE, 'Close', onPaymentCancelled);
-        }
-
-        if (isProcessing) {
-            return (
-                <>
-                    <HourglassLoadingSpinner/>
-                    <span>{PROCESSING_MESSAGE}</span>
-                </>
-            );
-        }
-
-        return null;
-    };
-
-    const overlayContent = renderOverlayContent();
+    const isOverlayVisible = Boolean(error) || isStalled || isProcessing;
 
     return (
         <div className="iframe-container default-container">
-            {!overlayContent && isLoading && <PaymentDetailsSkeleton/>}
-            {overlayContent && <div className="iframe-overlay centered-content">{overlayContent}</div>}
+            {!isOverlayVisible && isLoading && <PaymentDetailsSkeleton/>}
+            <PaymentOverlay
+                error={error}
+                isStalled={isStalled}
+                isProcessing={isProcessing}
+                onDismissError={() => setError(null)}
+                onClose={onPaymentCancelled}
+            />
             <GenericIFrame
                 src={iframeUrl}
                 title="Payment Form"

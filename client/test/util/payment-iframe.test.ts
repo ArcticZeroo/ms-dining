@@ -32,21 +32,15 @@ describe('parseFrameMessage', () => {
     // ─── Lifecycle: processing ───────────────────────────────────────
 
     it('returns processing for iframe_submitted', () => {
-        const result = parseFrameMessage({ event_id: 'iframe_submitted', data: '' });
-        assert.strictEqual(result.type, 'processing');
-        assert.strictEqual((result as { reason: string }).reason, 'submitted');
+        assert.strictEqual(parseFrameMessage({ event_id: 'iframe_submitted', data: '' }).type, 'processing');
     });
 
     it('returns processing for payment_processing', () => {
-        const result = parseFrameMessage({ event_id: 'payment_processing', data: '' });
-        assert.strictEqual(result.type, 'processing');
-        assert.strictEqual((result as { reason: string }).reason, 'processing');
+        assert.strictEqual(parseFrameMessage({ event_id: 'payment_processing', data: '' }).type, 'processing');
     });
 
     it('returns processing for datadome_blocked', () => {
-        const result = parseFrameMessage({ event_id: 'datadome_blocked', status: 403 });
-        assert.strictEqual(result.type, 'processing');
-        assert.strictEqual((result as { reason: string }).reason, 'datadome');
+        assert.strictEqual(parseFrameMessage({ event_id: 'datadome_blocked', status: 403 }).type, 'processing');
     });
 
     // ─── Lifecycle: idle ─────────────────────────────────────────────
