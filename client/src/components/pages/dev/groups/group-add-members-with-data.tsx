@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { IGroupData, IGroupMember } from '@msdining/common/models/group';
-import { SearchEntityType } from '@msdining/common/models/search';
-import { GroupMember } from './group-member/group-member.js';
 import { classNames } from '../../../../util/react.js';
 import { pluralize } from '../../../../util/string.js';
-import { useAddGroupMembers } from '../../../../store/queries/groups.ts';
 import { AllItemsWithoutGroupByType } from '../../../../models/groups.js';
+import { useGroupMemberSelection } from '../../../../hooks/group-member-selection.js';
+import { SelectedGroupMembersSection } from './selected-group-members-section.js';
+import { SuggestedGroupMembersSection } from './suggested-group-members-section.js';
+import { SearchResultsGroupMembersSection } from './search-results-group-members-section.js';
 
 interface IGroupAddMembersWithDataProps {
     group: IGroupData;
@@ -13,115 +14,28 @@ interface IGroupAddMembersWithDataProps {
     suggestedCandidates: IGroupMember[];
 }
 
-interface IUseVisibleItemsWithoutGroupParams {
-    groupType: SearchEntityType;
-    selectedMemberIds: Set<string>;
-    allItemsWithoutGroup: AllItemsWithoutGroupByType;
-    substringQuery: string;
-    suggestedCandidateIds: Set<string>;
-}
-
-const useVisibleItemsWithoutGroup = ({
-    groupType,
-    selectedMemberIds,
-    allItemsWithoutGroup,
-    substringQuery,
-    suggestedCandidateIds
-}: IUseVisibleItemsWithoutGroupParams): IGroupMember[] => {
-    return useMemo(() => {
-        const lowerSubstringQuery = substringQuery.trim().toLowerCase();
-        if (lowerSubstringQuery.length === 0) {
-            return [];
-        }
-
-        const allItemsForGroupType = allItemsWithoutGroup.get(groupType);
-        if (!allItemsForGroupType) {
-            return [];
-        }
-
-        const visibleItems: IGroupMember[] = [];
-
-        for (const [memberId, member] of allItemsForGroupType) {
-            const isSelected = selectedMemberIds.has(memberId) ?? false;
-            if (isSelected) {
-                continue;
-            }
-
-            if (suggestedCandidateIds.has(memberId)) {
-                continue;
-            }
-
-            if (member.name.toLowerCase().includes(lowerSubstringQuery)) {
-                visibleItems.push(member);
-                continue;
-            }
-        }
-
-        return visibleItems;
-    }, [allItemsWithoutGroup, groupType, selectedMemberIds, substringQuery, suggestedCandidateIds]);
-};
-
-const useVisibleSuggestedCandidates = (suggestedCandidates: IGroupMember[], selectedMemberIds: Set<string>): IGroupMember[] => {
-    return useMemo(
-        () => suggestedCandidates.filter(candidate => !selectedMemberIds.has(candidate.id)),
-        [selectedMemberIds, suggestedCandidates]
-    );
-}
-
 export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = ({
     group,
     allItemsWithoutGroup,
     suggestedCandidates
 }) => {
-    const [substringQuery, setSubstringQuery] = useState<string>('');
-    const suggestedCandidateIds = useMemo(
-        () => new Set(suggestedCandidates.map(candidate => candidate.id)),
-        [suggestedCandidates]
-    );
-    const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(() => new Set(suggestedCandidateIds));
-
-    const selectedCount = selectedMemberIds.size;
-    const availableItemsOfType = allItemsWithoutGroup.get(group.type);
-    const allItemsCount = availableItemsOfType?.size ?? 0;
-
-    const visibleItemsWithoutGroup = useVisibleItemsWithoutGroup({
-        groupType: group.type,
-        selectedMemberIds,
-        allItemsWithoutGroup,
+    const {
         substringQuery,
-        suggestedCandidateIds,
+        selectedCount,
+        allItemsCount,
+        selectedMembers,
+        visibleItemsWithoutGroup,
+        visibleSuggestedCandidates,
+        isAddDisabled,
+        isSelectDisabled,
+        onSubstringQueryChanged,
+        onAddClicked,
+        onToggleSelection,
+    } = useGroupMemberSelection({
+        group,
+        allItemsWithoutGroup,
+        suggestedCandidates,
     });
-
-    const visibleSuggestedCandidates = useVisibleSuggestedCandidates(suggestedCandidates, selectedMemberIds);
-
-    const selectedMembers = useMemo(
-        () => {
-            if (!availableItemsOfType) {
-                return [];
-            }
-
-            const members: IGroupMember[] = [];
-            for (const memberId of selectedMemberIds) {
-                const member = availableItemsOfType.get(memberId);
-                if (member) {
-                    members.push(member);
-                } else {
-                    console.error(`Selected member ID ${memberId} of type ${group.type} not found in available members`);
-                }
-            }
-            return members;
-        },
-        [availableItemsOfType, group.type, selectedMemberIds]
-    );
-
-    const addMutation = useAddGroupMembers();
-
-    const onAddClicked = () => {
-        addMutation.mutate(
-            { groupId: group.id, members: selectedMembers },
-            { onSuccess: () => setSelectedMemberIds(new Set()) },
-        );
-    };
 
     if (allItemsWithoutGroup.size === 0) {
         return (
@@ -130,24 +44,6 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
             </div>
         );
     }
-
-    const isAddDisabled = addMutation.isPending || selectedCount === 0;
-    const isSelectDisabled = addMutation.isPending;
-
-    const toggleSelection = (member: IGroupMember) => {
-        if (isSelectDisabled) {
-            return;
-        }
-
-        const newSelectedMembers = new Set(selectedMemberIds);
-        if (newSelectedMembers.has(member.id)) {
-            newSelectedMembers.delete(member.id);
-        } else {
-            newSelectedMembers.add(member.id);
-        }
-
-        setSelectedMemberIds(newSelectedMembers);
-    };
 
     const scrollAnchorId = `search-members-${group.id}`;
 
@@ -162,7 +58,7 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
                     type="text"
                     placeholder="Search members..."
                     value={substringQuery}
-                    onChange={(event) => setSubstringQuery(event.target.value)}
+                    onChange={(event) => onSubstringQueryChanged(event.target.value)}
                     disabled={isSelectDisabled}
                 />
                 <span>
@@ -170,95 +66,19 @@ export const GroupAddMembersWithData: React.FC<IGroupAddMembersWithDataProps> = 
                 </span>
             </div>
             <div className="flex-col member-toggle">
-                {
-                    selectedMembers.length > 0 && (
-                        <>
-                            <span>
-                                Selected Members
-                            </span>
-                            <div className="flex flex-wrap">
-                                {
-                                    Array.from(selectedMembers).map((member) => {
-                                        return (
-                                            <button
-                                                key={`${member.type}-${member.id}`}
-                                                className={classNames('card selected-button member active')}
-                                                onClick={() => toggleSelection(member)}
-                                            >
-                                                <GroupMember
-                                                    member={member}
-                                                />
-                                            </button>
-                                        );
-                                    })
-                                }
-                            </div>
-                        </>
-                    )
-                }
-                {
-                    visibleSuggestedCandidates.length > 0 && (
-                        <>
-                            <span>
-                                Suggested Members
-                            </span>
-                            <div className="flex flex-wrap">
-                                {
-                                    visibleSuggestedCandidates.map((member) => (
-                                        <button
-                                            key={`${member.type}-${member.id}`}
-                                            className={classNames('card default-button member')}
-                                            onClick={() => toggleSelection(member)}
-                                        >
-                                            <GroupMember
-                                                key={`${member.type}-${member.id}`}
-                                                member={member}
-                                            />
-                                        </button>
-                                    ))
-                                }
-                            </div>
-                        </>
-                    )
-                }
-                {
-                    visibleItemsWithoutGroup.length > 0 && (
-                        <>
-                            <span>
-                                Search Results
-                            </span>
-                            <div className="flex flex-wrap">
-                                {
-                                    visibleItemsWithoutGroup.slice(0, 100).map((member) =>
-                                        (
-                                            <button
-                                                key={`${member.type}-${member.id}`}
-                                                className={classNames('card default-button member')}
-                                                onClick={() => toggleSelection(member)}
-                                            >
-                                                <GroupMember
-                                                    key={`${member.type}-${member.id}`}
-                                                    member={member}
-                                                />
-                                            </button>
-                                        ))
-                                }
-                            </div>
-                            {
-                                visibleItemsWithoutGroup.length > 100 && (
-                                    <div className="flex-col">
-                                        <span>
-                                            Showing first 100 of {visibleItemsWithoutGroup.length} results. Please refine your search to see more.
-                                        </span>
-                                        <a href={`#${scrollAnchorId}`} className="default-container default-button">
-                                            Jump to Search Box
-                                        </a>
-                                    </div>
-                                )
-                            }
-                        </>
-                    )
-                }
+                <SelectedGroupMembersSection
+                    members={selectedMembers}
+                    onToggleSelection={onToggleSelection}
+                />
+                <SuggestedGroupMembersSection
+                    members={visibleSuggestedCandidates}
+                    onToggleSelection={onToggleSelection}
+                />
+                <SearchResultsGroupMembersSection
+                    members={visibleItemsWithoutGroup}
+                    scrollAnchorId={scrollAnchorId}
+                    onToggleSelection={onToggleSelection}
+                />
             </div>
         </div>
     );
