@@ -1,6 +1,11 @@
 import React from 'react';
+import { PaymentSkeletonExpirationField } from './payment-skeleton-expiration-field.tsx';
+import { PaymentSkeletonInputField } from './payment-skeleton-input-field.tsx';
 
 import './payment-details-skeleton.css';
+
+const CARD_INFORMATION_FIELD_LABELS = ['Card Holder Name', 'Card Number'];
+const CARD_VERIFICATION_FIELD_LABELS = ['CVV', 'Zip/Postal Code'];
 
 /**
  * A placeholder that mimics the rguest card-entry form. Shown while the payment
@@ -12,39 +17,13 @@ export const PaymentDetailsSkeleton: React.FC = () => {
 
     return (
         <div className="payment-skeleton flex-col loading-skeleton" aria-hidden={true}>
-            <div className="field">
-                <label>
-                    Card Holder Name
-                </label>
-                <input disabled/>
-            </div>
-            <div className="field">
-                <label>
-                    Card Number
-                </label>
-                <input disabled/>
-            </div>
-            <div className="field">
-                <label>
-                    Expiration Date
-                </label>
-                <div className="flex">
-                    <select value={currentDate.getMonth() + 1} disabled/>
-                    <select value={currentDate.getFullYear()} disabled/>
-                </div>
-            </div>
-            <div className="field">
-                <label>
-                    CVV
-                </label>
-                <input disabled/>
-            </div>
-            <div className="field">
-                <label>
-                    Zip/Postal Code
-                </label>
-                <input disabled/>
-            </div>
+            {CARD_INFORMATION_FIELD_LABELS.map(label => (
+                <PaymentSkeletonInputField key={label} label={label}/>
+            ))}
+            <PaymentSkeletonExpirationField currentDate={currentDate}/>
+            {CARD_VERIFICATION_FIELD_LABELS.map(label => (
+                <PaymentSkeletonInputField key={label} label={label}/>
+            ))}
             <button disabled className="default-button default-container">
                 PROCESS
             </button>
