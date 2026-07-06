@@ -22,8 +22,7 @@ These conventions are enforced by ESLint (see `client/eslint-plugin-msdining` + 
 - **`msdining/functional-component-style`** — components are arrow consts; any component that accepts props must be typed `React.FC<INameProps>` with a *named* interface (no `function` components, no inline/anonymous prop types). Prop-less components may omit the annotation.
 - **`react/no-multi-comp`** — one component per file. A genuinely trivial, tightly-coupled private helper (spinner/fallback, dispatcher) may opt out with an inline `// eslint-disable-next-line react/no-multi-comp -- <reason>`; substantial/reusable helpers get their own file instead.
 - **`msdining/no-complex-inline-map`** — a `.map()` returning host markup (a `<div>`/`<span>`/… root) with more than 3 JSX elements must be extracted into its own component rather than nesting rendering logic inline.
-- **`msdining/no-overloaded-component`** — a component whose render complexity (raw host elements + conditionally-rendered branches) exceeds 12 is doing too many things; decompose it into a thin composition root plus cohesive, self-serving child sections (each reading its own settings/context) and move non-render logic into hooks/helpers. Don't decompose just to pass the threshold — refactor for genuine readability. See `client/src/components/cafes/station/menu-items/menu-item.tsx` for the pattern.
-- **`no-restricted-syntax` (IIFEs)** — immediately-invoked function expressions are banned; use a named helper function or a module-scope constant instead.
+- **`msdining/no-overloaded-component`** — flags components that render too much (a signal they're doing too many things). To resolve, invoke Skill(reduce-component-complexity) — do not decompose just to pass the threshold.
 
 ### Promise Handling
 
