@@ -1,102 +1,47 @@
-import { SearchTypes } from '@msdining/common';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useDateForSearch } from '../../../hooks/date-picker.tsx';
-import { SearchEntityFilterType } from '../../../models/search.ts';
-import { useSearchResultsQuery } from '../../../store/queries/search.ts';
-import { SearchResultsList } from '../../search/search-results-list.tsx';
+import React from 'react';
 import { SimilarQueries } from '../../search/similar-queries.tsx';
-import { RetryButton } from '../../button/retry-button.tsx';
-import { SearchWaiting } from '../../search/search-waiting.tsx';
-import { SearchFilters } from '../../search/filters/search-filters.tsx';
-import { classNames } from '../../../util/react.ts';
-import { useAllowedSearchViewIds } from '../../../hooks/search.ts';
-import { EntityTypeSelector } from './entity-type-selector.js';
+import { useSearchPageWithQuery } from '../../../hooks/search-page-with-query.ts';
+import { SearchPageError } from './search-page-error.tsx';
+import { SearchPageHeader } from './search-page-header.tsx';
+import { SearchPageResults } from './search-page-results.tsx';
 
 interface ISearchPageWithQueryProps {
     queryText: string;
 }
 
 export const SearchPageWithQuery: React.FC<ISearchPageWithQueryProps> = ({ queryText }) => {
-    const allowedViewIds = useAllowedSearchViewIds();
-    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
-    const [entityFilterType, setEntityFilterType] = useState<SearchEntityFilterType>(SearchEntityFilterType.all);
-    const dateForSearch = useDateForSearch();
-
-    const searchQuery = useSearchResultsQuery(queryText, dateForSearch);
-    const results = useMemo(() => searchQuery.data ?? [], [searchQuery.data]);
-
-    const tabCounts = useMemo(() => {
-        const counts = new Map<SearchTypes.SearchEntityType, number>();
-        for (const result of results) {
-            const count = counts.get(result.entityType) ?? 0;
-            counts.set(result.entityType, count + 1);
-        }
-        return counts;
-    }, [results]);
-
-    useEffect(() => {
-        setEntityFilterType(SearchEntityFilterType.all);
-    }, [queryText]);
+    const {
+        entityFilterType,
+        isError,
+        isFetching,
+        isFilterMenuOpen,
+        isSuccess,
+        results,
+        retrySearch,
+        setEntityFilterType,
+        tabCounts,
+        toggleFilterMenu,
+    } = useSearchPageWithQuery(queryText);
 
     return (
         <div className="search-page flex-col">
-            <div className="search-page-header">
-                <div className="search-info flex flex-col default-container">
-                    <div className="query flex flex-between default-container">
-                        <span className="icon-sized"/>
-                        <span>
-                            "{queryText}"
-                        </span>
-                        <SearchWaiting isPending={searchQuery.isFetching}/>
-                    </div>
-                    <div className="flex">
-                        <button
-                            className={classNames('search-filters-button default-container flex transition-background', isFilterMenuOpen && 'open')}
-                            onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}>
-                            <span className="material-symbols-outlined icon">
-                                filter_list
-                            </span>
-                            <span>
-                                Filters
-                            </span>
-                        </button>
-                        <EntityTypeSelector
-                            selectedType={entityFilterType}
-                            onSelectedTypeChanged={setEntityFilterType}
-                            showTypesWithZeroCount={true}
-                            tabCounts={tabCounts}
-                        />
-                    </div>
-                    {
-                        isFilterMenuOpen && (
-                            <SearchFilters/>
-                        )
-                    }
-                </div>
-            </div>
-            {
-                searchQuery.isError && (
-                    <div className="error-card">
-                        <p>
-                            Error loading search results!
-                        </p>
-                        <p>
-                            <RetryButton onClick={() => searchQuery.refetch()}/>
-                        </p>
-                    </div>
-                )
-            }
+            <SearchPageHeader
+                entityFilterType={entityFilterType}
+                isFetching={isFetching}
+                isFilterMenuOpen={isFilterMenuOpen}
+                onFilterMenuToggled={toggleFilterMenu}
+                onSelectedTypeChanged={setEntityFilterType}
+                queryText={queryText}
+                tabCounts={tabCounts}
+            />
+            <SearchPageError isError={isError} onRetry={retrySearch}/>
             <SimilarQueries queryText={queryText}/>
-            {
-                searchQuery.isSuccess && (
-                    <SearchResultsList
-                        searchResults={results}
-                        queryText={queryText}
-                        filter={entityFilterType}
-                        allowedViewIds={allowedViewIds}
-                    />
-                )
-            }
+            <SearchPageResults
+                filter={entityFilterType}
+                isSuccess={isSuccess}
+                queryText={queryText}
+                searchResults={results}
+            />
         </div>
     );
 };
