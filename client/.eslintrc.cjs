@@ -53,6 +53,9 @@ module.exports = {
                 // Complex JSX in an array .map() should be its own component,
                 // not nested rendering logic inline in the parent.
                 'msdining/no-complex-inline-map': 'error',
+                // A single component that renders too much (raw host markup + conditional branches)
+                // is a signal it is doing too many things; extract cohesive sections into sub-components.
+                'msdining/no-overloaded-component': ['error', { maxJsxElements: 12 }],
             },
         },
     ],
