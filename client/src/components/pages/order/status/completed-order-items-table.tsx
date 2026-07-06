@@ -1,12 +1,10 @@
 import type { ICafeOrderItem } from '@msdining/common/models/order';
 import React from 'react';
-import { formatPrice, groupByStation } from '../../../../util/cart.ts';
-import { CartItemDetailCells } from '../cart/cart-item-detail-cells.tsx';
+import { useCompletedOrderItemsTable } from '../../../../hooks/completed-order-items-table.ts';
 import { StationItemGroup } from '../cart/station-item-group.tsx';
-import { OrderItemReviewRow } from '../history/order-item-review-row.tsx';
+import { CompletedOrderItemRow } from './completed-order-item-row.tsx';
+import { CompletedOrderSummaryRow } from './completed-order-summary-row.tsx';
 import '../cart/cart-contents-table.css';
-
-const COLUMN_COUNT = 3;
 
 interface ICompletedOrderItemsTableProps {
     items: ICafeOrderItem[];
@@ -26,8 +24,7 @@ export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> 
     orderCompletedAt,
     showReviewRow = false,
 }) => {
-    const cafeId = items[0]?.menuItem.cafeId;
-    const stationGroups = groupByStation(items);
+    const { cafeId, stationGroups } = useCompletedOrderItemsTable(items);
 
     return (
         <table className="cart-contents">
@@ -39,42 +36,22 @@ export const CompletedOrderItemsTable: React.FC<ICompletedOrderItemsTableProps> 
                         cafeId={cafeId}
                     >
                         {stationItems.map((item, index) => (
-                            <React.Fragment key={`${item.menuItemId}-${index}`}>
-                                <tr className="cart-item">
-                                    <CartItemDetailCells item={item}/>
-                                </tr>
-                                {
-                                    showReviewRow && (
-                                        <OrderItemReviewRow
-                                            item={item}
-                                            columnCount={COLUMN_COUNT}
-                                            orderCompletedAt={orderCompletedAt}
-                                        />
-                                    )
-                                }
-                            </React.Fragment>
+                            <CompletedOrderItemRow
+                                key={`${item.menuItemId}-${index}`}
+                                item={item}
+                                orderCompletedAt={orderCompletedAt}
+                                showReviewRow={showReviewRow}
+                            />
                         ))}
                     </StationItemGroup>
                 ))}
                 {
                     items.length > 1 && (
-                        <tr>
-                            <td></td>
-                            <td>Subtotal</td>
-                            <td className="price">{formatPrice(subtotal)}</td>
-                        </tr>
+                        <CompletedOrderSummaryRow label="Subtotal" price={subtotal}/>
                     )
                 }
-                <tr>
-                    <td></td>
-                    <td>Tax</td>
-                    <td className="price">{formatPrice(tax)}</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><strong>Total</strong></td>
-                    <td className="price"><strong>{formatPrice(total)}</strong></td>
-                </tr>
+                <CompletedOrderSummaryRow label="Tax" price={tax}/>
+                <CompletedOrderSummaryRow label="Total" price={total} isEmphasized/>
             </tbody>
         </table>
     );
