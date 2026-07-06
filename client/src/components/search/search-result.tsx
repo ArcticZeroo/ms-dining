@@ -3,12 +3,17 @@ import { SearchMatchReason } from '@msdining/common/models/search';
 import React from 'react';
 import { useIsSearchResultFavorite, useSearchResultCafeDetails } from '../../hooks/search-result.ts';
 import { classNames } from '../../util/react.ts';
-import { SearchResultInfo } from './search-result-info.tsx';
+import { SearchResultCafeLinks } from './search-result-cafe-links.tsx';
+import { SearchResultExtraFields } from './search-result-extra-fields.tsx';
+import { SearchResultImageSection } from './search-result-image-section.tsx';
+import { SearchResultLocationsSection } from './search-result-locations-section.tsx';
+import { SearchResultSearchTags } from './search-result-search-tags.tsx';
+import { SearchResultTitleSection } from './search-result-title-section.tsx';
 import { SearchResultTypeColumn } from './search-result-type-column.tsx';
-import type { ISearchResultField } from './search-result-types.ts';
+import type { ISearchResultField } from '../../models/search.ts';
 import './search.css';
 
-export type { ISearchResultField } from './search-result-types.ts';
+export type { ISearchResultField } from '../../models/search.ts';
 
 export interface ISearchResultProps {
     isVisible: boolean;
@@ -104,31 +109,60 @@ export const SearchResult: React.FC<ISearchResultProps> = ({
                 name={name}
                 showFavoriteButton={showFavoriteButton}
             />
-            <SearchResultInfo
-                cafeId={cafeId}
-                description={resolvedDescription}
-                entityKey={entityKey}
-                entityType={entityType}
-                entityView={entityView}
-                extraFields={extraFields}
-                imageUrl={imageUrl}
-                isCompact={isCompact}
-                isSkeleton={isSkeleton}
-                locationDatesByCafeId={locationDatesByCafeId}
-                matchReasons={matchReasons}
-                matchedModifiers={matchedModifiers}
-                name={name}
-                onlyShowLocationsOnDate={onlyShowLocationsOnDate}
-                overallRating={overallRating}
-                priceByCafeId={priceByCafeId}
-                searchTags={searchTags}
-                showFavoriteButton={showFavoriteButton}
-                showOnlyCafeNames={showOnlyCafeNames}
-                showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
-                stationByCafeId={stationByCafeId}
-                tags={tags}
-                totalReviewCount={totalReviewCount}
-            />
+            <div className="search-result-info">
+                <div className="search-result-info-header">
+                    <SearchResultTitleSection
+                        description={resolvedDescription}
+                        entityKey={entityKey}
+                        entityType={entityType}
+                        entityView={entityView}
+                        isCompact={isCompact}
+                        matchReasons={matchReasons}
+                        name={name}
+                        overallRating={overallRating}
+                        showFavoriteButton={showFavoriteButton}
+                        tags={tags}
+                        totalReviewCount={totalReviewCount}
+                    />
+                    <SearchResultSearchTags searchTags={searchTags}/>
+                    <SearchResultExtraFields
+                        extraFields={extraFields}
+                        isCompact={isCompact}
+                        matchedModifiers={matchedModifiers}
+                    />
+                    {
+                        isCompact && (
+                            <SearchResultImageSection
+                                imageUrl={imageUrl}
+                                isSkeleton={isSkeleton}
+                                name={name}
+                            />
+                        )
+                    }
+                    <SearchResultCafeLinks cafeId={cafeId} entityView={entityView} name={name}/>
+                    <SearchResultLocationsSection
+                        entityType={entityType}
+                        isCompact={isCompact}
+                        isSkeleton={isSkeleton}
+                        locationDatesByCafeId={locationDatesByCafeId}
+                        name={name}
+                        onlyShowLocationsOnDate={onlyShowLocationsOnDate}
+                        priceByCafeId={priceByCafeId}
+                        showOnlyCafeNames={showOnlyCafeNames}
+                        showSearchButtonInsteadOfLocations={showSearchButtonInsteadOfLocations}
+                        stationByCafeId={stationByCafeId}
+                    />
+                </div>
+                {
+                    !isCompact && (
+                        <SearchResultImageSection
+                            imageUrl={imageUrl}
+                            isSkeleton={isSkeleton}
+                            name={name}
+                        />
+                    )
+                }
+            </div>
         </div>
     );
 };

@@ -2,7 +2,7 @@ import { DateUtil, SearchTypes } from '@msdining/common';
 import { normalizeCafeId } from '@msdining/common/util/cafe-util';
 import { isSameDate } from '@msdining/common/util/date-util';
 import { useContext, useMemo } from 'react';
-import type { ISearchResultField } from '../components/search/search-result-types.ts';
+import type { ISearchResultField } from '../models/search.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
 import { ApplicationContext } from '../context/app.ts';
 import { CafeView, CafeViewType } from '../models/cafe.ts';

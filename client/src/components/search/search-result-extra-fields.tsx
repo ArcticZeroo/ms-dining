@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchResultFields } from '../../hooks/search-result.ts';
-import { ISearchResultField } from './search-result-types.ts';
+import { ISearchResultField } from '../../models/search.ts';
 
 interface ISearchResultExtraFieldsProps {
     extraFields: ISearchResultField[];

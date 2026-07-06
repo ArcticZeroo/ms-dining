@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { SearchTypes } from '@msdining/common';
 import { SearchMatchReason } from '@msdining/common/models/search';
 
@@ -65,4 +66,10 @@ export interface IServerCheapItemSearchResult {
     price: number;
     minCalories: number;
     maxCalories: number;
+}
+
+export interface ISearchResultField {
+    key: string;
+    iconName: string;
+    value: ReactNode;
 }
