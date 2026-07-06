@@ -17,14 +17,14 @@ export const SearchResultFavoriteButton: React.FC<ISearchResultFavoriteButtonPro
     name,
     showFavoriteButton,
 }) => {
+    if (!showFavoriteButton) {
+        return null;
+    }
+
     if (entityView) {
         return (
             <FavoriteCafeSearchResultButton view={entityView}/>
         );
-    }
-
-    if (!showFavoriteButton) {
-        return null;
     }
 
     return (
