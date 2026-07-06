@@ -13,7 +13,7 @@ import { useSelectedDateStore } from '../../../../../store/zustand/selected-date
 import { SearchResultVisitHistoryButton } from '../../../../search/schedule/search-result-visit-history-button.tsx';
 
 interface IMenuItemButtonsProps {
-    cafeId: string;
+    cafeId: string; // Required so that we can use this component in the popup
     menuItem: IMenuItemBase;
     onClose?: () => void;
 }
@@ -75,7 +75,7 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
             });
     };
     return (
-        <>
+        <div className="menu-item-buttons">
             <FavoriteSearchableItemButton name={menuItem.name} type={SearchEntityType.menuItem}/>
             <button title="Click to copy link" onClick={onCopyClicked} className="copy-button flex flex-justify-center">
                 <span className="material-symbols-outlined transition-background"
@@ -90,6 +90,6 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
                 </span>
             </button>
             <SearchResultVisitHistoryButton entityType={SearchEntityType.menuItem} name={menuItem.name}/>
-        </>
+        </div>
     );
 };

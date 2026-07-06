@@ -1,187 +1,27 @@
-import { IMenuItem, IMenuItemBase } from '@msdining/common/models/cafe';
-import { SearchEntityType } from '@msdining/common/models/search';
-import { normalizeNameForSearch } from '@msdining/common/util/search-util';
-import React, { useContext, useMemo } from 'react';
-import { ApplicationSettings } from '../../../../constants/settings.ts';
-import { isTagHighlighted, knownTags } from '../../../../constants/tags.tsx';
-import { CafeHeaderHeightContext, StationHeaderHeightContext } from '../../../../context/html.ts';
-import { CurrentCafeContext, StationInfoContext } from '../../../../context/menu-item.ts';
-import { useIsFavoriteItem, useIsOnlineOrderingAllowed } from '../../../../hooks/cafe.ts';
-import { useValueNotifier } from '../../../../hooks/events.ts';
-import { useMenuItemOrderCount } from '../../../../store/queries/ordering.ts';
-import { formatPrice, getMinRequiredPrice, hasModifierPriceBeyondMinimum } from '../../../../util/cart.ts';
-import { formatOrderCount } from '../../../../util/order.ts';
-import { getSearchAnchorId } from '../../../../util/link.ts';
-import { classNames } from '../../../../util/react.ts';
-import { ScrollAnchor } from '../../../button/scroll-anchor.tsx';
-import { MenuItemImage } from './menu-item-image.tsx';
-import { MenuItemTags } from './menu-item-tags.tsx';
-import { MenuItemPopup } from './popup/menu-item-popup.tsx';
+import { IMenuItem } from '@msdining/common/models/cafe';
+import React, { useContext } from 'react';
+import { CurrentCafeContext } from '../../../../context/menu-item.ts';
+import { MenuItemCard } from './menu-item-card.tsx';
+import { MenuItemHeader } from './menu-item-header.tsx';
+import { MenuItemImageSection } from './menu-item-image-section.tsx';
+import { MenuItemPrice } from './menu-item-price.tsx';
+import { MenuItemStats } from './menu-item-stats.tsx';
 import { MenuItemButtons } from './popup/menu-item-buttons.tsx';
-import { usePopupOpener } from '../../../../hooks/popup.ts';
-import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
-import { formatReviewScore } from '../../../../util/reviews.js';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;
 }
 
-const getCaloriesDisplay = (menuItem: IMenuItemBase) => {
-    if (!menuItem.calories || Number(menuItem.calories) < 1) {
-        return false;
-    }
-
-    const parts = [menuItem.calories];
-    if (menuItem.maxCalories && Number(menuItem.maxCalories) > 0) {
-        parts.push(menuItem.maxCalories);
-    }
-
-    return `${parts.join(' - ')} Calories`;
-};
-
-const useScrollAnchorMargin = () => {
-    const cafeHeaderHeight = useContext(CafeHeaderHeightContext);
-    const stationHeaderHeight = useContext(StationHeaderHeightContext);
-
-    return useMemo(
-        // 1rem of padding vertically on cafe header, plus 1rem from the bottom of the station header
-        () => `calc(${cafeHeaderHeight + stationHeaderHeight}px + 1rem)`,
-        [cafeHeaderHeight, stationHeaderHeight]
-    );
-};
-
-const menuItemModalSymbol = Symbol('menuItem');
-
 export const MenuItem: React.FC<IMenuItemProps> = ({ menuItem }) => {
     const cafe = useContext(CurrentCafeContext);
-    const stationInfo = useContext(StationInfoContext);
-    const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
-    const showImages = useValueNotifier(ApplicationSettings.showImages);
-    const showCalories = useValueNotifier(ApplicationSettings.showCalories);
-    const showDescriptions = useValueNotifier(ApplicationSettings.showDescriptions);
-    const showTags = useValueNotifier(ApplicationSettings.showTags);
-    const showReviews = useValueNotifier(ApplicationSettings.showReviews);
-    const showModifierMinPrice = useValueNotifier(ApplicationSettings.showModifierMinPrice);
-    const highlightTagNames = useValueNotifier(ApplicationSettings.highlightTagNames);
-    const caloriesDisplay = getCaloriesDisplay(menuItem);
-    const isFavoriteItem = useIsFavoriteItem(menuItem.name, SearchEntityType.menuItem);
-    const scrollAnchorMargin = useScrollAnchorMargin();
-    const openModal = usePopupOpener();
-
-    const canShowImage = showImages && (menuItem.hasThumbnail || menuItem.imageUrl != null);
-
-    const onOpenModalClick = () => {
-        openModal({
-            id:   menuItemModalSymbol,
-            body: <MenuItemPopup
-                cafeId={cafe.id}
-                menuItem={menuItem}
-                modalSymbol={menuItemModalSymbol}
-                stationId={stationInfo.id}
-                stationName={stationInfo.name}
-            />,
-        });
-    };
-
-    const currentHighlightTag = useMemo(() => {
-        for (const tagName of menuItem.tags) {
-            if (isTagHighlighted(tagName, highlightTagNames)) {
-                return knownTags[tagName];
-            }
-        }
-    }, [highlightTagNames, menuItem.tags]);
-
-    const normalizedName = useMemo(
-        () => normalizeNameForSearch(menuItem.name),
-        [menuItem.name]
-    );
-
-    const scrollAnchorId = useMemo(
-        () => getSearchAnchorId({ cafeId: cafe.id, name: normalizedName, entityType: SearchEntityType.menuItem }),
-        [cafe.id, normalizedName]
-    );
-
-    const title = isOnlineOrderingAllowed
-        ? `Click to open item details (online ordering enabled)`
-        : 'Click to open item details';
-
-    const isRecentlyOpened = useMemo(
-        () => getIsRecentlyAvailable(menuItem.firstAppearance),
-        [menuItem.firstAppearance]
-    );
-
-    const orderCount = useMenuItemOrderCount(menuItem.entityKey);
-    const orderCountDisplay = formatOrderCount(orderCount);
 
     return (
-        <div
-            className={classNames('flex-col menu-item pointer', isFavoriteItem && 'is-favorite')}
-            onClick={onOpenModalClick}
-            title={title}
-            style={{ backgroundColor: currentHighlightTag?.color }}
-        >
-            <div className="menu-item-head">
-                {/*Scroll anchor is in the head to avoid extra gap*/}
-                <ScrollAnchor id={scrollAnchorId} margin={scrollAnchorMargin}/>
-                <span className="menu-item-name">{menuItem.name}</span>
-                {
-                    showDescriptions
-                    && menuItem.description
-                    && <span className="menu-item-description">{menuItem.description}</span>
-                }
-            </div>
-            <div className="menu-item-buttons">
-                <MenuItemButtons
-                    cafeId={cafe.id}
-                    menuItem={menuItem}
-                />
-            </div>
-            {
-                canShowImage && (
-                    <div className="centered-content">
-                        <MenuItemImage menuItem={menuItem}/>
-                    </div>
-                )
-            }
-            <div className="flex">
-                <span>
-                    {formatPrice(showModifierMinPrice ? getMinRequiredPrice(menuItem) : menuItem.price)}
-                    {showModifierMinPrice && hasModifierPriceBeyondMinimum(menuItem) && '+'}
-                </span>
-                {
-                    showCalories && (
-                        <span>
-                            {caloriesDisplay}
-                        </span>
-                    )
-                }
-            </div>
-            {
-                isRecentlyOpened && (
-                    <div className="default-container flex flex-center recently-opened-notice">
-                        New to this cafe!
-                    </div>
-                )
-            }
-            {
-                showTags && (
-                    <MenuItemTags tags={menuItem.tags}/>
-                )
-            }
-            {
-                showReviews && menuItem.totalReviewCount > 0 && (
-                    <span>
-                        {formatReviewScore(menuItem.overallRating, menuItem.totalReviewCount)}
-                    </span>
-                )
-            }
-            {
-                orderCountDisplay && (
-                    <span>
-                        {orderCountDisplay}
-                    </span>
-                )
-            }
-        </div>
+        <MenuItemCard menuItem={menuItem}>
+            <MenuItemHeader menuItem={menuItem}/>
+            <MenuItemButtons cafeId={cafe.id} menuItem={menuItem}/>
+            <MenuItemImageSection menuItem={menuItem}/>
+            <MenuItemPrice menuItem={menuItem}/>
+            <MenuItemStats menuItem={menuItem}/>
+        </MenuItemCard>
     );
 };

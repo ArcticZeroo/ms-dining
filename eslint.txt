@@ -1,0 +1,193 @@
+// ESLint flat config for hxcore-electron.
+//
+// Base: Spencer's shared rules from hxcomm/tools/src/HxTools.Shared/js
+// (@stylistic-based — single quotes, value-aligned keys, 4-space, 1tbs, etc.).
+// Added on top: func-style + prefer-arrow-callback (always use arrow functions
+// unless `function` is required), and ignores for the C++/build dirs.
+
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import stylistic from '@stylistic/eslint-plugin';
+import reactHooks from 'eslint-plugin-react-hooks';
+import react from 'eslint-plugin-react';
+import { defineConfig } from 'eslint/config';
+
+export default defineConfig([
+    {
+        // Includes our scripts/*.js (hand-written ESM source); dist/ build
+        // output is excluded via ignores below.
+        files:   ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+        plugins: {
+            js,
+            '@stylistic':  stylistic,
+            'react-hooks': reactHooks,
+            react
+        },
+        extends: [
+            'js/recommended',
+            tseslint.configs.recommended
+        ],
+        languageOptions: { globals: { ...globals.browser, ...globals.node } },
+        rules:           {
+            'curly':        ['error', 'all'],
+            'prefer-const': ['error', {
+                destructuring:          'all',
+                ignoreReadBeforeAssign: true
+            }],
+
+            // React hooks correctness: enforce the rules of hooks and complete effect
+            // dependency arrays (intentional once-on-mount effects opt out explicitly
+            // with an inline eslint-disable-next-line).
+            'react-hooks/rules-of-hooks':  'error',
+            'react-hooks/exhaustive-deps': 'error',
+
+            // Always arrow functions unless `function` is required (generators,
+            // generic args in .tsx — see the .tsx override below).
+            'func-style':            ['error', 'expression', { allowArrowFunctions: true }],
+            'prefer-arrow-callback': 'error',
+
+            '@stylistic/arrow-parens':                   ['error', 'always'],
+            '@stylistic/arrow-spacing':                  'error',
+            '@stylistic/block-spacing':                  'error',
+            '@stylistic/brace-style':                    'error',
+            '@stylistic/comma-dangle':                   'error',
+            '@stylistic/comma-spacing':                  'error',
+            '@stylistic/comma-style':                    'error',
+            '@stylistic/computed-property-spacing':      'error',
+            '@stylistic/curly-newline':                  ['error', 'always'],
+            '@stylistic/dot-location':                   ['error', 'property'],
+            '@stylistic/function-call-argument-newline': ['error', 'consistent'],
+            '@stylistic/function-call-spacing':          'error',
+            '@stylistic/function-paren-newline':         ['error', 'consistent'],
+            '@stylistic/generator-star-spacing':         ['error', { before: false, after: false }],
+            '@stylistic/implicit-arrow-linebreak':       'error',
+            '@stylistic/indent':                         ['error', 4],
+            '@stylistic/indent-binary-ops':              ['error', 4],
+            '@stylistic/jsx-child-element-spacing':      'warn',
+            '@stylistic/jsx-closing-bracket-location':   'error',
+            '@stylistic/jsx-closing-tag-location':       'error',
+            '@stylistic/jsx-curly-brace-presence':       ['error', {
+                props:             'never',
+                children:          'never',
+                propElementValues: 'always'
+            }],
+            '@stylistic/jsx-curly-newline':         'error',
+            '@stylistic/jsx-curly-spacing':         ['error', 'never'],
+            '@stylistic/jsx-equals-spacing':        'error',
+            '@stylistic/jsx-first-prop-new-line':   'error',
+            '@stylistic/jsx-function-call-newline': 'error',
+            '@stylistic/jsx-indent-props':          ['error', 4],
+            '@stylistic/jsx-max-props-per-line':    ['error', { maximum: 1, when: 'multiline' }],
+            '@stylistic/jsx-newline':               ['error', { prevent: true }],
+            '@stylistic/jsx-pascal-case':           'error',
+            '@stylistic/jsx-quotes':                'error',
+            '@stylistic/jsx-self-closing-comp':     'error',
+            '@stylistic/jsx-tag-spacing':           ['error', {
+                closingSlash:      'never',
+                beforeSelfClosing: 'never',
+                afterOpening:      'never',
+                beforeClosing:     'never'
+            }],
+            '@stylistic/jsx-wrap-multilines':           'error',
+            '@stylistic/key-spacing':                   ['error', { align: 'value' }],
+            '@stylistic/member-delimiter-style':        'error',
+            '@stylistic/multiline-ternary':             ['error', 'always-multiline'],
+            '@stylistic/new-parens':                    'error',
+            '@stylistic/newline-per-chained-call':      'error',
+            '@stylistic/no-confusing-arrow':            'error',
+            '@stylistic/no-extra-semi':                 'error',
+            '@stylistic/no-floating-decimal':           'error',
+            '@stylistic/no-mixed-operators':            'error',
+            '@stylistic/no-mixed-spaces-and-tabs':      'error',
+            '@stylistic/no-multiple-empty-lines':       ['error', { max: 1 }],
+            '@stylistic/no-trailing-spaces':            'error',
+            '@stylistic/no-whitespace-before-property': 'error',
+            '@stylistic/object-curly-newline':          ['error', { consistent: true }],
+            '@stylistic/object-curly-spacing':          ['error', 'always'],
+            '@stylistic/object-property-newline':       ['error', { allowAllPropertiesOnSameLine: true }],
+            '@stylistic/operator-linebreak':            ['error', 'before'],
+            '@stylistic/padded-blocks':                 ['error', 'never'],
+            '@stylistic/quote-props':                   ['error', 'consistent-as-needed'],
+            '@stylistic/quotes':                        ['error', 'single', { allowTemplateLiterals: 'avoidEscape' }],
+            '@stylistic/rest-spread-spacing':           'error',
+            '@stylistic/semi':                          ['error', 'always'],
+            '@stylistic/semi-spacing':                  'error',
+            '@stylistic/semi-style':                    'error',
+            '@stylistic/space-before-blocks':           'error',
+            '@stylistic/space-before-function-paren':   ['error', {
+                anonymous:  'never',
+                named:      'never',
+                asyncArrow: 'always',
+                catch:      'always'
+            }],
+            '@stylistic/space-infix-ops':          'error',
+            '@stylistic/space-unary-ops':          'error',
+            '@stylistic/switch-colon-spacing':     'error',
+            '@stylistic/template-curly-spacing':   'error',
+            '@stylistic/template-tag-spacing':     'error',
+            '@stylistic/type-annotation-spacing':  'error',
+            '@stylistic/type-named-tuple-spacing': 'error',
+            '@stylistic/yield-star-spacing':       'error',
+            '@typescript-eslint/no-namespace':     [
+                'error',
+                {
+                    allowDeclarations:    true,
+                    allowDefinitionFiles: true
+                }
+            ],
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern:  '^_',
+                    varsIgnorePattern:  '^_',
+                    ignoreRestSiblings: true
+                }
+            ]
+        }
+    },
+
+    // .tsx — relax func-style so generic-arg `function` declarations stay legal (the only common
+    // reason to reach for `function` in .tsx), and enforce the component conventions:
+    //  - one component per file (react/no-multi-comp),
+    //  - named I<Component>Props interfaces, not inline prop object types,
+    //  - non-trivial JSX in an array .map() should be a component, not inline host markup.
+    // The last two are heuristics via no-restricted-syntax; intentional exceptions (e.g. the
+    // recursive folder-tree, or a trivial one-element map) opt out with an inline eslint-disable.
+    {
+        files:    ['**/*.tsx'],
+        settings: { react: { version: 'detect' } },
+        rules:    {
+            'func-style':           'off',
+            'react/no-multi-comp':  ['error', { ignoreStateless: false }],
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: ':matches(ArrowFunctionExpression, FunctionDeclaration, FunctionExpression) > ObjectPattern > TSTypeAnnotation > TSTypeLiteral',
+                    message:  'Declare component props as a named I<Component>Props interface, not an inline object type.'
+                },
+                {
+                    selector: 'CallExpression[callee.property.name=\'map\'] > ArrowFunctionExpression > JSXElement[openingElement.name.name=/^[a-z]/]',
+                    message:  'Extract the map body into its own component (separate file), not inline host markup.'
+                },
+                {
+                    selector: 'CallExpression[callee.property.name=\'map\'] > ArrowFunctionExpression > BlockStatement > ReturnStatement > JSXElement[openingElement.name.name=/^[a-z]/]',
+                    message:  'Extract the map body into its own component (separate file), not inline host markup.'
+                }
+            ]
+        }
+    },
+
+    {
+        ignores: [
+            'out/**',  // electron-vite build output
+            'dist/**',
+            'build/**',
+            'node_modules/**',
+            'src/addon/**',     // C++ files (incl. generated src/addon/gen/)
+            'src/domain/gen/**', // generated TS bindings (see binding-generation.md)
+            'src/test/**',      // C++ test files
+            '**/*.d.ts'         // .d.ts has different conventions
+        ]
+    }
+]);

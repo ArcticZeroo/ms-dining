@@ -24,6 +24,19 @@ module.exports = {
         'brace-style': ['error', '1tbs', { allowSingleLine: false }],
         'msdining/require-promise-state-stage': 'error',
         'id-length': ['error', { min: 3, exceptions: ['i', 'j', 'k', 'x', 'y', 'id', 'z', 'a', 'b', '_', 'ms', 'dx', 'dy', 'dt', 'px', 'L', 'on'], properties: 'never' }],
+        // Ban immediately-invoked function expressions (IIFEs). Prefer a named helper
+        // function or a module-scope constant over inline self-invoking functions.
+        'no-restricted-syntax': [
+            'error',
+            {
+                selector: 'CallExpression[callee.type=\'FunctionExpression\']',
+                message:  'Do not use IIFEs; extract a named helper function or compute the value at module scope instead.',
+            },
+            {
+                selector: 'CallExpression[callee.type=\'ArrowFunctionExpression\']',
+                message:  'Do not use IIFEs; extract a named helper function or compute the value at module scope instead.',
+            },
+        ],
     },
     overrides: [
         {

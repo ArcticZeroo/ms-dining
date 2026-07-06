@@ -71,12 +71,14 @@ const GEOJSON_DATA: GeoJSON.FeatureCollection = {
 };
 
 // Average centroid of all buildings — used as the campus marker position
-const CAMPUS_CENTROID = (() => {
+const computeCampusCentroid = () => {
     const buildings = MICROSOFT_BUILDINGS;
     const lat = buildings.reduce((sum, b) => sum + b.centroid.lat, 0) / buildings.length;
     const lng = buildings.reduce((sum, b) => sum + b.centroid.long, 0) / buildings.length;
     return { lat, lng };
-})();
+};
+
+const CAMPUS_CENTROID = computeCampusCentroid();
 
 const CAMPUS_MARKER_ICON = leaflet.divIcon({
     html:      '<span style="font-size: 1.5rem; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.7));">💼</span>',
