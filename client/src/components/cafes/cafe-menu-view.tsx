@@ -1,27 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
-import { ApplicationSettings, DebugSettings } from '../../constants/settings.ts';
+import { ApplicationSettings } from '../../constants/settings.ts';
 import { CafeHeaderHeightContext } from '../../context/html.ts';
 import { CurrentCafeContext } from '../../context/menu-item.ts';
-import { useValueNotifier } from '../../hooks/events.ts';
 import { useElementHeight, useScrollCollapsedHeaderIntoView } from '../../hooks/html.ts';
 import { CafeMenu, ICafe } from '../../models/cafe.ts';
-import { getCafeName } from '../../util/cafe.ts';
 import { classNames } from '../../util/react.ts';
 import { ScrollAnchor } from '../button/scroll-anchor.tsx';
-import { ExpandIcon } from '../icon/expand.tsx';
 import { CafeMenuBody } from './cafe-menu-body.tsx';
+import { CafeMenuHeader } from './cafe-menu-header.tsx';
 import { useTrackThisCafeOnPage } from '../../hooks/cafes-on-page.ts';
-import { getIsRecentlyAvailable, minutesToTimeString } from '@msdining/common/util/date-util';
+import { getIsRecentlyAvailable } from '@msdining/common/util/date-util';
 import { useSelectedDate } from '../../store/zustand/selected-date.ts';
 import { collapseCafe, expandCafe, useIsCafeCollapsed } from '../../store/zustand/collapse.ts';
 import { useCafeMenuQuery } from '../../store/queries/cafe.ts';
-import { CafeMenuControls } from './cafe-menu-controls.js';
-import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
-
-const useCafeName = (cafe: ICafe, showGroupName: boolean) => {
-    return useMemo(() => getCafeName({ cafe, showGroupName }), [cafe, showGroupName]);
-};
 
 /**
  * Minimal view passed down to body/controls so they can consume the cafe menu
@@ -56,29 +48,6 @@ const useCafeMenu = (cafe: ICafe, shouldCountTowardsLastUsed: boolean): ICafeMen
     };
 };
 
-const useCafeHoursString = (menuData: ICafeMenuView): string | undefined => {
-    return useMemo(() => {
-        const stations = menuData.data?.stations;
-        if (!stations || stations.length === 0) {
-            return undefined;
-        }
-
-        let minOpensAt = Infinity;
-        let maxClosesAt = -Infinity;
-        for (const station of stations) {
-            minOpensAt = Math.min(minOpensAt, station.opensAt);
-            maxClosesAt = Math.max(maxClosesAt, station.closesAt);
-        }
-
-        if (!isFinite(minOpensAt) || !isFinite(maxClosesAt)) {
-            console.error('Unexpected Infinity for opensAt/closesAt', stations);
-            return undefined;
-        }
-
-        return `${minutesToTimeString(minOpensAt)} – ${minutesToTimeString(maxClosesAt)}`;
-    }, [menuData.data]);
-}
-
 interface ICafeMenuViewProps {
 	cafe: ICafe;
 	showGroupName: boolean;
@@ -93,16 +62,9 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
     }) => {
     useTrackThisCafeOnPage(cafe.id);
 
-    const deviceType = useDeviceType();
-    const showImages = useValueNotifier(ApplicationSettings.showImages);
-    const showCafeHours = useValueNotifier(DebugSettings.showCafeHours);
     const [cafeHeaderElement, setCafeHeaderElement] = useState<HTMLDivElement | null>(null);
     const cafeHeaderHeight = useElementHeight(cafeHeaderElement);
     const menuData = useCafeMenu(cafe, shouldCountTowardsLastUsed);
-    const cafeHoursString = useCafeHoursString(menuData);
-
-    const showCafeLogo = showImages && cafe.logoUrl != null;
-    const cafeName = useCafeName(cafe, showGroupName);
 
     const isCollapsed = useIsCafeCollapsed(cafe.id);
 
@@ -145,52 +107,15 @@ export const CafeMenuView: React.FC<ICafeMenuViewProps> = (
                         )}
                         key={cafe.id}
                     >
-                        <div className="cafe-header" ref={setCafeHeaderElement}>
-                            <div role="button" className="collapse-toggle" onClick={toggleIsExpanded}>
-                                <span className="grid-justify-start">
-                                    {
-                                        showCafeLogo && (
-                                            <img src={cafe.logoUrl}
-                                                alt={`${cafe.name} logo`}
-                                                className="logo"
-                                            />
-                                        )
-                                    }
-                                </span>
-                                <div className="flex-col constant-gap">
-                                    <span className="cafe-name">
-                                        {cafeName}
-                                        <ExpandIcon isExpanded={!isCollapsed}/>
-                                    </span>
-                                    {
-                                        showCafeHours && cafeHoursString && (
-                                            <span className="cafe-hours">{cafeHoursString}</span>
-                                        )
-                                    }
-                                </div>
-                                <span className="flex grid-justify-end">
-                                    {
-                                        deviceType === DeviceType.Desktop && (
-                                            <CafeMenuControls
-                                                cafeName={cafeName}
-                                                menuData={menuData}
-                                            />
-                                        )
-                                    }
-                                    {
-                                        openedRecently && <span className="default-container recently-opened-notice">New!</span>
-                                    }
-                                </span>
-                            </div>
-                            {
-                                deviceType === DeviceType.Mobile && !isCollapsed && (
-                                    <CafeMenuControls
-                                        cafeName={cafeName}
-                                        menuData={menuData}
-                                    />
-                                )
-                            }
-                        </div>
+                        <CafeMenuHeader
+                            cafe={cafe}
+                            showGroupName={showGroupName}
+                            isCollapsed={isCollapsed}
+                            openedRecently={openedRecently}
+                            menuData={menuData}
+                            onToggle={toggleIsExpanded}
+                            headerRef={setCafeHeaderElement}
+                        />
                         <CafeMenuBody
                             isExpanded={!isCollapsed}
                             menuData={menuData}
