@@ -15,6 +15,7 @@ import { usePageData } from '../../../hooks/location.js';
 import { OnlineOrderingPrivacy } from '../../notice/online-ordering-privacy.js';
 
 import './order-page.css';
+import { OrderAdblockWarning } from './order-adblock-warning.js';
 
 const InlineTodayOrders = () => {
     const historyQuery = useOrderHistoryQuery('today');
@@ -88,6 +89,7 @@ export const OrderCheckoutView = () => {
     return (
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
+            <OrderAdblockWarning/>
             <PaymentInfoForm
                 alias={alias}
                 phoneValidation={phoneValidation}
