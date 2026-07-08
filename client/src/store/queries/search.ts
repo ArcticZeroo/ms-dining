@@ -3,6 +3,9 @@ import { toDateString } from '@msdining/common/util/date-util';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { DiningClient } from '../../api/client/dining.ts';
+import { getSearchPageTarget } from '../../util/url.ts';
+import { getDateForSearch } from '../zustand/selected-date.ts';
+import { QUERY_CLIENT } from '../query-client.ts';
 import { queryKeys } from './keys.ts';
 
 // ---------- Pure helpers (exported for testing) ----------
@@ -126,3 +129,36 @@ export const useVisitHistoryQuery = (entityType: SearchEntityType, name: string)
         queryKey: queryKeys.search.visitHistory(entityType, name),
         queryFn:  () => DiningClient.retrieveVisitHistory(entityType, name),
     });
+
+// ---------- Prefetch ----------
+
+/**
+ * Warms the TanStack cache with the search results the destination page will
+ * read, so the fetch runs in parallel with navigation (the map page is lazy and
+ * takes a second or two to mount). Uses the exact same key + queryFn as the
+ * destination hook, so the mount is served from cache (fresh within staleTime).
+ *
+ * Branches on getSearchPageTarget() identically to getSearchUrl: the map view is
+ * date-less (useMapSearchResultsQuery), the search view is date-scoped
+ * (useSearchResultsQuery).
+ */
+export const prefetchSearchResultsForNavigation = (query: string): void => {
+    if (query.length === 0) {
+        return;
+    }
+
+    if (getSearchPageTarget() === 'map') {
+        void QUERY_CLIENT.prefetchQuery({
+            queryKey: queryKeys.search.mapResults(query),
+            queryFn:  () => DiningClient.retrieveSearchResults({ query }),
+        });
+        return;
+    }
+
+    const date = getDateForSearch();
+    const dateString = date ? toDateString(date) : '';
+    void QUERY_CLIENT.prefetchQuery({
+        queryKey: queryKeys.search.results(dateString, query),
+        queryFn:  () => DiningClient.retrieveSearchResults({ query, date }),
+    });
+};

@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useRecommendedQueries } from '../../hooks/search.ts';
-import { getSearchUrl } from '../../util/url.ts';
+import { SearchLink } from './search-link.tsx';
 import { repeatComponent } from '../../util/react.ts';
 
 const LOADING_SKELETON_COUNT = 5;
@@ -32,14 +31,14 @@ export const SimilarQueries: React.FC<ISimilarQueriesProps> = ({ queryText }) =>
             }
             {
                 recommendedQueries.data && recommendedQueries.data.map(recommendedQuery => (
-                    <Link
+                    <SearchLink
                         key={recommendedQuery}
-                        to={getSearchUrl(recommendedQuery)}
+                        query={recommendedQuery}
                         className="recommended-query default-container default-button"
                         title={`Click to search for "${recommendedQuery}"`}
                     >
                         {recommendedQuery}
-                    </Link>
+                    </SearchLink>
                 ))
             }
         </div>

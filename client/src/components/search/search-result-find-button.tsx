@@ -1,6 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { getSearchUrl } from "../../util/url.ts";
+import { SearchLink } from "./search-link.tsx";
 import { pluralize } from "../../util/string.ts";
 
 interface ISearchResultFindButtonProps {
@@ -13,10 +12,10 @@ export const SearchResultFindButton: React.FC<ISearchResultFindButtonProps> = ({
     const text = `🔍 find in ${isSkeleton ? '...' : cafeCount} ${pluralize('cafe', cafeCount)}`;
 
     return (
-        <Link
-            to={getSearchUrl(name)}
+        <SearchLink
+            query={name}
             className="default-container default-button text-center text-nowrap">
             {text}
-        </Link>
+        </SearchLink>
     )
 }

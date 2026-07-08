@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
 import { beforeEach, describe, it } from 'vitest';
-import { initializeSelectedDate, useSelectedDateStore } from '../../../src/store/zustand/selected-date.ts';
+import { getDateForSearch, initializeSelectedDate, resolveDateForSearch, useSelectedDateStore } from '../../../src/store/zustand/selected-date.ts';
 import { ApplicationSettings } from '../../../src/constants/settings.ts';
 
 const seed = (date: Date) => useSelectedDateStore.setState({ date });
@@ -44,6 +44,36 @@ describe('useSelectedDateStore', () => {
             const stored = useSelectedDateStore.getState().date;
             const drift = Math.abs(stored.getTime() - Date.now());
             assert.ok(drift < 7 * 24 * 60 * 60 * 1000, `stored too far from now: drift=${drift}ms`);
+        } finally {
+            ApplicationSettings.allowFutureMenus.value = originalAllowFutureMenus;
+        }
+    });
+});
+
+describe('resolveDateForSearch', () => {
+    const selectedDate = new Date('2026-03-15T00:00:00Z');
+
+    it('returns the selected date when future menus are disabled (single-day search)', () => {
+        assert.strictEqual(resolveDateForSearch(false, selectedDate), selectedDate);
+    });
+
+    it('returns undefined when future menus are enabled (whole-week search)', () => {
+        assert.strictEqual(resolveDateForSearch(true, selectedDate), undefined);
+    });
+});
+
+describe('getDateForSearch', () => {
+    it('mirrors resolveDateForSearch against the live store + allowFutureMenus setting', () => {
+        const originalAllowFutureMenus = ApplicationSettings.allowFutureMenus.value;
+        const selectedDate = new Date('2026-04-20T00:00:00Z');
+        try {
+            seed(selectedDate);
+
+            ApplicationSettings.allowFutureMenus.value = false;
+            assert.strictEqual(getDateForSearch(), selectedDate);
+
+            ApplicationSettings.allowFutureMenus.value = true;
+            assert.strictEqual(getDateForSearch(), undefined);
         } finally {
             ApplicationSettings.allowFutureMenus.value = originalAllowFutureMenus;
         }

@@ -51,3 +51,21 @@ export const useSelectedDate = (): Date => useSelectedDateStore((state) => state
  */
 export const setSelectedDate = (date: Date) => useSelectedDateStore.getState().setDate(date);
 export const resetSelectedDateToToday = () => useSelectedDateStore.getState().resetToToday();
+
+/**
+ * Maps the selected date to the date a search should use: when future menus are
+ * enabled we omit the date entirely (search spans the whole week), otherwise we
+ * scope to the selected day. Pure so it can back both the hook and the non-hook
+ * getter below.
+ *
+ * todo: the whole-week (undefined) case may break on weekends/end-of-week.
+ */
+export const resolveDateForSearch = (allowFutureMenus: boolean, selectedDate: Date): Date | undefined =>
+    allowFutureMenus ? undefined : selectedDate;
+
+/**
+ * Non-hook variant of useDateForSearch, for imperative contexts (e.g. prefetching
+ * on navigation) that can't call hooks. Reads the date + setting singletons.
+ */
+export const getDateForSearch = (): Date | undefined =>
+    resolveDateForSearch(ApplicationSettings.allowFutureMenus.value, useSelectedDateStore.getState().date);

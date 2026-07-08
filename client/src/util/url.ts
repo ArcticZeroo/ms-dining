@@ -28,7 +28,9 @@ export const getInitialDateFromUrl = () => {
     return DiningClient.getTodayDateForMenu();
 }
 
+export const getSearchPageTarget = (): 'map' | 'search' =>
+    DebugSettings.enableMapPageSearch.value ? 'map' : 'search';
+
 export const getSearchUrl = (query: string) => {
-    const pageTarget = DebugSettings.enableMapPageSearch.value ? 'map' : 'search';
-    return `/${pageTarget}?q=${encodeURIComponent(query)}`;
+    return `/${getSearchPageTarget()}?q=${encodeURIComponent(query)}`;
 }

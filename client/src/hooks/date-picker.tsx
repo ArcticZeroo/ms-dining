@@ -2,7 +2,7 @@ import { isSameDate } from '@msdining/common/util/date-util';
 import { useEffect, useMemo, useRef } from 'react';
 import { DiningClient } from '../api/client/dining.ts';
 import { ApplicationSettings } from '../constants/settings.ts';
-import { setSelectedDate, useSelectedDate, useSelectedDateStore } from '../store/zustand/selected-date.ts';
+import { resolveDateForSearch, setSelectedDate, useSelectedDate, useSelectedDateStore } from '../store/zustand/selected-date.ts';
 import { addDateToUrl } from '../util/url.ts';
 import { useValueNotifier } from './events.ts';
 
@@ -24,16 +24,12 @@ export const useIsTodaySelected = () => {
 }
 
 export const useDateForSearch = () => {
+    // Both subscribed values are passed to the pure resolver, so the component
+    // re-renders when either changes (the logic itself lives in resolveDateForSearch).
     const allowFutureMenus = useValueNotifier(ApplicationSettings.allowFutureMenus);
     const selectedDate = useSelectedDate();
 
-    if (!allowFutureMenus) {
-        return selectedDate;
-    }
-
-    // If we don't provide a date, we'll get results for the whole week
-    // todo: this breaks on weekends/eow?
-    return undefined;
+    return resolveDateForSearch(allowFutureMenus, selectedDate);
 }
 
 export const useSelectedDisplayDateString = () => {

@@ -1,8 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ApplicationSettings } from '../../constants/settings.ts';
 import { useValueNotifier } from '../../hooks/events.ts';
-import { getSearchUrl } from '../../util/url.ts';
+import { SearchLink } from './search-link.tsx';
 
 interface ISearchResultSearchTagsProps {
     searchTags?: Set<string>;
@@ -19,10 +18,10 @@ export const SearchResultSearchTags: React.FC<ISearchResultSearchTagsProps> = ({
         <div className="search-tags">
             {
                 (searchTags != null && searchTags.size > 0) && Array.from(searchTags).map(tag => (
-                    <Link to={getSearchUrl(tag)} className="search-result-chip" key={tag}
+                    <SearchLink query={tag} className="search-result-chip" key={tag}
                         title={`Click to search for "${tag}"`}>
                         {tag}
-                    </Link>
+                    </SearchLink>
                 ))
             }
         </div>

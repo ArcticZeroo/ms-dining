@@ -1,6 +1,7 @@
 import { DateUtil, SearchTypes } from '@msdining/common';
 import { NavigateFunction } from 'react-router-dom';
 import { IQuerySearchResult, SearchEntityFilterType } from '../models/search.ts';
+import { prefetchSearchResultsForNavigation } from '../store/queries/search.ts';
 import { getSearchUrl } from './url.ts';
 import { formatPrice } from './cart.js';
 
@@ -41,6 +42,7 @@ export const getSearchTabCount = (type: SearchEntityFilterType, tabCounts: Map<S
 }
 
 export const navigateToSearch = (navigate: NavigateFunction, searchText: string) => {
+    prefetchSearchResultsForNavigation(searchText);
     navigate(getSearchUrl(searchText));
 }
 
