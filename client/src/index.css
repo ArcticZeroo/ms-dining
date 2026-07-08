@@ -381,6 +381,10 @@ html, body, #root, .App {
     transition: background-color 0.125s ease;
 }
 
+.default-button.grey {
+    background: #777;
+}
+
 .default-button.no-bg {
     background: none;
 }

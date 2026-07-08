@@ -109,7 +109,7 @@
 }
 
 .map-search-result.tag-highlighted {
-    border-left: 5px solid var(--highlight-tag-color);
+    border: var(--highlight-tag-color) 0.125rem solid;
 }
 
 .map-result-detail-card {

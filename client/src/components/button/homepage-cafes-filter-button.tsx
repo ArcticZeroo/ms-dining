@@ -15,6 +15,8 @@ export const HomepageCafesFilterButton: React.FC<IHomepageCafesFilterButtonProps
         title={isActive ? 'Showing only your homepage cafes' : 'Filter to your homepage cafes'}
     >
         <img src={starIcon} alt="" className="icon-sized"/>
-        My Cafes
+        <span>
+            My Cafes
+        </span>
     </button>
 );

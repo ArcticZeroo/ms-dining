@@ -40,6 +40,7 @@ export const MapSearchResultItem: React.FC<IMapSearchResultItemProps> = ({ resul
     const allCafeNames = cafeIds.map(id => viewsById.get(id)?.value.name ?? id);
     const visibleNames = allCafeNames.slice(0, MAX_VISIBLE_CAFES);
     const remainingCount = allCafeNames.length - visibleNames.length;
+    const highlightProperties = highlightTag ? { '--highlight-tag-color': highlightTag.color } as React.CSSProperties : undefined;
 
     return (
         <div
@@ -48,7 +49,7 @@ export const MapSearchResultItem: React.FC<IMapSearchResultItemProps> = ({ resul
             onMouseLeave={onMouseLeave}
             onClick={onClick}
             title={`Click to open details for ${result.name}`}
-            style={highlightTag ? { '--highlight-tag-color': highlightTag.color } as React.CSSProperties : undefined}
+            style={highlightProperties}
         >
             <div className="result-header flex">
                 <span className={classNames('material-symbols-outlined result-icon centered-content', displayData.className)}>

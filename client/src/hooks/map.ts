@@ -363,16 +363,6 @@ export const useMapSearchFilterViews = () => {
             && Array.from(actualFilterViewIds).every(id => homepageViewIds.has(id));
     }, [actualFilterViewIds, homepageViewIds]);
 
-    const onFilterToHomeCafes = useCallback(() => {
-        const homeViewIds = Array.from(homepageViewIds)
-            .filter(id => viewsById.has(id));
-        setSearchParams(prev => {
-            const next = new URLSearchParams(prev);
-            next.set('views', homeViewIds.join('+'));
-            return next;
-        }, { replace: true });
-    }, [homepageViewIds, viewsById, setSearchParams]);
-
     const onClearFilteredViews = useCallback(() => {
         setSearchParams(prev => {
             const next = new URLSearchParams(prev);
@@ -380,6 +370,21 @@ export const useMapSearchFilterViews = () => {
             return next;
         }, { replace: true });
     }, [setSearchParams]);
+
+    const onFilterToHomeCafes = useCallback(() => {
+        if (isFilteredToHomeCafes) {
+            onClearFilteredViews();
+            return;
+        }
+        
+        const homeViewIds = Array.from(homepageViewIds)
+            .filter(id => viewsById.has(id));
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('views', homeViewIds.join('+'));
+            return next;
+        }, { replace: true });
+    }, [isFilteredToHomeCafes, homepageViewIds, setSearchParams, onClearFilteredViews, viewsById]);
 
     const filterViewName = useMemo(() => {
         if (actualFilterViewIds.size === 0) {
