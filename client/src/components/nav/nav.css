@@ -131,6 +131,18 @@ nav a.active {
     transition: height 0.5s ease;
 }
 
+#site-header a {
+    text-decoration: none;
+    border-radius: var(--default-padding);
+    padding: var(--default-padding);
+    background: var(--color-card-dark-blue);
+}
+
+#site-header a.active {
+    background: var(--color-nav-active);
+    color: white;
+}
+
 nav form {
     display: inline;
 }

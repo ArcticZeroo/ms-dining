@@ -1,19 +1,18 @@
 import { SearchBar } from '../search/search-bar.tsx';
-import { SiteHeader } from '../auth/site-header.tsx';
+import { NavProfileButton } from '../auth/nav-profile-button.tsx';
 import { NavClosingLink } from '../button/nav-closing-link.tsx';
 
 export const NavListHeaderItems = () => {
     return (
         <>
-            <SiteHeader>
+            <li id="site-header">
                 <img src={'/penguin.svg'} alt="Site Icon"/>
-            </SiteHeader>
-            <li>
-                <NavClosingLink to="/settings" className="link-button settings">
+                <NavClosingLink to="/settings" className="settings">
                     <span className="material-symbols-outlined">
                         settings
                     </span>
                 </NavClosingLink>
+                <NavProfileButton/>
             </li>
             <li>
                 <NavClosingLink to="/" className="link-button home">
