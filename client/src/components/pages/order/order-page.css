@@ -25,3 +25,24 @@
 .order-cafe-notice.ready {
     background: var(--color-theme-green);
 }
+
+.fulfillment-type-selector {
+    gap: var(--default-padding);
+}
+
+.fulfillment-type-option {
+    gap: calc(var(--default-padding) / 2);
+    padding: calc(var(--default-padding) / 2) var(--default-padding);
+    flex: 1;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.fulfillment-type-option.active {
+    opacity: 1;
+    background: var(--color-theme-green);
+}
+
+.fulfillment-type-option:disabled {
+    cursor: not-allowed;
+}

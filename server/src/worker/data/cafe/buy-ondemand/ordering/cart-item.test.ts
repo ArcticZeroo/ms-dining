@@ -25,6 +25,7 @@ const ORDERING_CONTEXT: IOrderingContext = {
     payClientId:        'pay-client-1',
     fullSiteStoreInfo:  undefined,
     fullPickupConfig:   undefined,
+    fullDineInConfig:   undefined,
 };
 
 const CAFE_CONFIG: ICafeConfig = {

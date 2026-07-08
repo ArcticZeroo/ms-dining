@@ -1,6 +1,6 @@
 import { ICartItemRecord, IPaymentCardInfo, SubmitOrderStage } from '@msdining/common/models/cart';
 import type { IWaitTimeResponse } from '@msdining/common/models/http';
-import type { IOrderItem } from '@msdining/common/models/order';
+import type { FulfillmentType, IOrderItem } from '@msdining/common/models/order';
 import { getTodayDateString } from '@msdining/common/util/date-util';
 import { PhoneValidResult } from 'phone';
 import { BuyOnDemandClient, JSON_HEADERS } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
@@ -53,6 +53,7 @@ interface IClosePaymentPopupParams {
     phoneData: PhoneValidResult;
     paymentToken: string;
     cardInfo: IPaymentCardInfo;
+    fulfillmentType: FulfillmentType;
 }
 
 const enhanceOrderItems = async (orderItems: IOrderItem[]): Promise<Array<IEnhancedOrderItem>> => {
@@ -410,7 +411,7 @@ export class CafeOrderSession implements IOrderSession {
     }
 
     async #sendOrderToKitchenAsync(
-        { alias, phoneData, paymentToken, cardInfo }: IClosePaymentPopupParams,
+        { alias, phoneData, paymentToken, cardInfo, fulfillmentType }: IClosePaymentPopupParams,
         readyTime: IWaitTimeResponse,
     ) {
         if (this.#orderId == null) {
@@ -436,7 +437,9 @@ export class CafeOrderSession implements IOrderSession {
             phoneData,
             orderingContext: this.#orderingContext,
             cardInfo,
+            fulfillmentType,
             pickupConfig: this.#orderingContext.fullPickupConfig ?? {},
+            dineInConfig: this.#orderingContext.fullDineInConfig ?? {},
             siteStoreInfo: this.#orderingContext.fullSiteStoreInfo ?? {},
             price: this.price,
             receiptItems,
@@ -499,6 +502,7 @@ export class CafeOrderSession implements IOrderSession {
         phoneData,
         paymentToken,
         cardInfo,
+        fulfillmentType,
     }: IClosePaymentPopupParams): Promise<IWaitTimeResponse> {
         orderLog.info(`{${this.client.cafe.name}} Completing order ${this.#orderId} with iframe token`);
         let waitTime: IWaitTimeResponse = { minTime: 0, maxTime: 0 };
@@ -518,6 +522,7 @@ export class CafeOrderSession implements IOrderSession {
                 phoneData,
                 paymentToken,
                 cardInfo,
+                fulfillmentType,
             }, readyTime);
 
             this.#lastCompletedStage = SubmitOrderStage.sentToKitchen;

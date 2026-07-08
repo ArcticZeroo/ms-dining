@@ -3,6 +3,7 @@ import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
     ICafeOrderDTO,
     ICompleteOrderResultDTO, IOrderHistorySummaryResponse,
+    FulfillmentType,
     IOrderItem,
     IPreparePaymentResult,
     IRecentOrderSummary,
@@ -25,6 +26,7 @@ export interface IOrderService {
         cardInfo: IPaymentCardInfo;
         alias: string;
         phoneNumberWithCountryCode: string;
+        fulfillmentType: FulfillmentType;
     }): Promise<ICompleteOrderResultDTO>;
 
     getRecentOrders(data: {

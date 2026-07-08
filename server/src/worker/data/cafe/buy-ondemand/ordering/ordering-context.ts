@@ -73,7 +73,8 @@ export const requestDailyOrderingContextAsync = async (client: BuyOnDemandClient
         payClientId:        payConfig.pay.clientId,
         checkTypeId:        siteData.displayOptions['check-type'],
         fullSiteStoreInfo:  siteData.siteStoreInfo,
-        fullPickupConfig:   siteData.pickUpConfig
+        fullPickupConfig:   siteData.pickUpConfig,
+        fullDineInConfig:   siteData.dineInConfig
     };
 
     orderingContext.profitCenterName = await retrieveProfitCenterName(client, orderingContext.profitCenterId);

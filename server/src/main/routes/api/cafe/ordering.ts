@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { z } from 'zod';
-import { IOrderHistorySummaryResponse, OrderItemSchema } from '@msdining/common/models/order';
+import { IOrderHistorySummaryResponse, FulfillmentTypeSchema, OrderItemSchema } from '@msdining/common/models/order';
 import { attachRouter, getUserIdOrThrow, isAdminAsync } from '../../../util/koa.js';
 import { requireAuthenticated } from '../../../middleware/auth.js';
 import { getServices } from '../../../../shared/services/registry.js';
@@ -23,8 +23,9 @@ const CompleteOrderSchema = z.object({
         cardHolderName:      z.string(),
         postalCode:          z.string(),
     }),
-    alias:       z.string().min(1),
-    phoneNumber: z.string().min(1),
+    alias:           z.string().min(1),
+    phoneNumber:     z.string().min(1),
+    fulfillmentType: FulfillmentTypeSchema.optional(),
 });
 
 export const registerOrderingRoutes = (parent: Router) => {
@@ -70,6 +71,7 @@ export const registerOrderingRoutes = (parent: Router) => {
                 cardInfo:                   body.cardInfo,
                 alias:                      body.alias,
                 phoneNumberWithCountryCode: body.phoneNumber,
+                fulfillmentType:            body.fulfillmentType ?? 'pickup',
             }),
             completedProperties: (result) => ({ orderNumber: String(result.buyOnDemandOrderNumber) }),
             durationMetric:      'complete.durationMs',

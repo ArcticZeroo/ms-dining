@@ -3,7 +3,7 @@ import type { ICartItemRecord, IPaymentCardInfo } from '@msdining/common/models/
 import type { PhoneValidResult } from 'phone';
 import type { SubmitOrderStage } from '@msdining/common/models/cart';
 import type { BuyOnDemandClient } from '../../../../shared/buy-ondemand/buy-ondemand-client.js';
-import { IOrderItem } from '@msdining/common/models/order';
+import { FulfillmentType, IOrderItem } from '@msdining/common/models/order';
 import { IOrderTotalPrice } from '../../../models/ordering.js';
 
 interface IFakeBuyOnDemandClient {
@@ -37,5 +37,6 @@ export interface IOrderSession {
         phoneData: PhoneValidResult;
         paymentToken: string;
         cardInfo: IPaymentCardInfo;
+        fulfillmentType: FulfillmentType;
     }): Promise<IWaitTimeResponse>;
 }

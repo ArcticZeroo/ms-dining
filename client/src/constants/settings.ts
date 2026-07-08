@@ -78,6 +78,7 @@ export const DebugSettings = {
     enableMapPageSearch:                       new BooleanSetting('enableMapPage', false /*defaultValue*/),
     showAdminReviewControls:                   new BooleanSetting('showAdminReviewControls', false /*defaultValue*/),
     showCafeHours:                             new BooleanSetting('showCafeHours', false /*defaultValue*/),
+    enableDineInOrdering:                      new BooleanSetting('EXPERIMENTAL_DINE_IN_ORDERING_DO_NOT_USE', false /*defaultValue*/),
 } as const;
 
 const isProbablyNewUser = ApplicationSettings.homepageViews.value.size === 0;

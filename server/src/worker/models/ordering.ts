@@ -3,18 +3,18 @@ import type { IOrderItem } from '@msdining/common/models/order';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
 import { IStationRecord } from '../../shared/services/station.js';
 
-const PickUpConfigSchema = z.object({
+const FulfillmentLabelConfigSchema = z.object({
     kitchenText:             z.string().optional(),
     buttonText:              z.string().optional(),
     defaultConfirmationText: z.string().optional(),
 }).passthrough();
 
-export type IPickupConfig = z.infer<typeof PickUpConfigSchema>;
+export type IFulfillmentLabelConfig = z.infer<typeof FulfillmentLabelConfigSchema>;
 
 export const PayConfigSchema = z.object({
     pay:                 z.object({ clientId: z.string() }),
     displayOptions:      z.record(z.unknown()),
-    pickUpConfig:        PickUpConfigSchema.optional(),
+    pickUpConfig:        FulfillmentLabelConfigSchema.optional(),
     emailReceipt:        z.record(z.unknown()).optional(),
     checkTypeId:         z.string().optional(),
     taxBreakupEnabled:   z.boolean().optional(),
@@ -45,7 +45,8 @@ export const SiteDataItemSchema = z.object({
         'check-type':       z.string().optional(),
     }).passthrough(),
     siteStoreInfo:   SiteStoreInfoSchema.optional(),
-    pickUpConfig:    PickUpConfigSchema.optional(),
+    pickUpConfig:    FulfillmentLabelConfigSchema.optional(),
+    dineInConfig:    FulfillmentLabelConfigSchema.optional(),
 }).passthrough();
 
 export type ISiteData = z.infer<typeof SiteDataItemSchema>;

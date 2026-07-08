@@ -1,5 +1,6 @@
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type {
+    FulfillmentType,
     ICafeOrder,
     ICompleteOrderResult,
     IOrderHistorySummaryResponse,
@@ -56,6 +57,7 @@ export abstract class OrderClient {
         cardInfo: IPaymentCardInfo,
         alias: string,
         phoneNumber: string,
+        fulfillmentType?: FulfillmentType,
     ): Promise<ICompleteOrderResult> {
         return makeJsonRequestWithSchema({
             path:   `${ORDER_BASE}/complete/${pendingOrderId}`,
@@ -63,7 +65,7 @@ export abstract class OrderClient {
             options: {
                 method:  'POST',
                 headers: JSON_HEADERS,
-                body:    JSON.stringify({ paymentToken, cardInfo, alias, phoneNumber }),
+                body:    JSON.stringify({ paymentToken, cardInfo, alias, phoneNumber, fulfillmentType }),
             },
         });
     }

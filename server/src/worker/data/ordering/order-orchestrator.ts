@@ -9,6 +9,7 @@ import { SubmitOrderStage } from '@msdining/common/models/cart';
 import type {
     ICafeOrderDTO,
     ICompleteOrderResultDTO,
+    FulfillmentType,
     IOrderItem,
     IPreparePaymentResult,
 } from '@msdining/common/models/order';
@@ -97,6 +98,7 @@ export abstract class OrderOrchestrator {
         cardInfo: IPaymentCardInfo,
         alias: string,
         phoneNumberWithCountryCode: string,
+        fulfillmentType: FulfillmentType,
     ): Promise<ICompleteOrderResultDTO> {
         const phoneData = phone(phoneNumberWithCountryCode);
         if (!phoneData.isValid) {
@@ -111,6 +113,7 @@ export abstract class OrderOrchestrator {
                     phoneData,
                     paymentToken,
                     cardInfo,
+                    fulfillmentType,
                 });
             } catch (err) {
                 if (!wasOrderSentToKitchen(session)) {

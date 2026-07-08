@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ICafeOrder, IOrderHistorySummaryResponse, IOrderItem } from '@msdining/common/models/order';
+import type { FulfillmentType, ICafeOrder, IOrderHistorySummaryResponse, IOrderItem } from '@msdining/common/models/order';
 import type { IPaymentCardInfo } from '@msdining/common/models/cart';
 import type { OrderHistoryRange } from '../../api/ordering.ts';
 import { OrderClient } from '../../api/ordering.ts';
@@ -67,7 +67,8 @@ export const useCompleteOrderMutation = () => {
             cardInfo: IPaymentCardInfo;
             alias: string;
             phoneNumber: string;
-        }) => OrderClient.completeOrder(data.pendingOrderId, data.paymentToken, data.cardInfo, data.alias, data.phoneNumber),
+            fulfillmentType?: FulfillmentType;
+        }) => OrderClient.completeOrder(data.pendingOrderId, data.paymentToken, data.cardInfo, data.alias, data.phoneNumber, data.fulfillmentType),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
             queryClient.invalidateQueries({ queryKey: COMPLETED_ORDERS_TODAY_KEY });

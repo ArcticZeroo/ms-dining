@@ -10,4 +10,5 @@ export interface IOrderingContext {
     checkTypeId?: string;
     fullSiteStoreInfo: ISiteData['siteStoreInfo'];
     fullPickupConfig: ISiteData['pickUpConfig'];
+    fullDineInConfig: ISiteData['dineInConfig'];
 }

@@ -12,6 +12,10 @@ export const OrderItemSchema = z.object({
 
 export type IOrderItem = z.infer<typeof OrderItemSchema>;
 
+export const FulfillmentTypeSchema = z.enum(['pickup', 'dineIn']);
+
+export type FulfillmentType = z.infer<typeof FulfillmentTypeSchema>;
+
 export const PreparePaymentResultSchema = z.object({
     pendingOrderId:         z.string(),
     siteToken:              z.string(),

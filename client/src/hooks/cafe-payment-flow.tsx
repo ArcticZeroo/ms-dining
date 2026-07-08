@@ -79,7 +79,7 @@ export const useCafePaymentFlow = ({
     const closePopup = usePopupCloserAlways();
     const preparePayment = usePreparePaymentMutation();
     const completeOrder = useCompleteOrderMutation();
-    const { alias, phoneNumber, isValid: isIdentityValid } = usePaymentIdentityContext();
+    const { alias, phoneNumber, isValid: isIdentityValid, fulfillmentType } = usePaymentIdentityContext();
     const [hasCancelled, setHasCancelled] = useState(false);
 
     const handlePay = useCallback(async () => {
@@ -109,6 +109,7 @@ export const useCafePaymentFlow = ({
                             cardInfo:       paymentResult.cardInfo,
                             alias,
                             phoneNumber,
+                            fulfillmentType,
                         });
                     }}
                     onClose={() => {
@@ -120,7 +121,7 @@ export const useCafePaymentFlow = ({
         } catch {
             // Error is captured in preparePayment.error
         }
-    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, openPopup, closePopup, alias, phoneNumber]);
+    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, openPopup, closePopup, alias, phoneNumber, fulfillmentType]);
 
     const paymentState = useMemo(
         () => derivePaymentState({

@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { FulfillmentType } from '@msdining/common/models/order';
 import { useCartSnapshot } from '../../../hooks/cart-snapshot.ts';
 import { usePaymentIdentity } from '../../../hooks/payment-identity.ts';
 import { getErrorMessage } from '../../../util/mutation.ts';
@@ -7,12 +8,14 @@ import { OnlineOrderingExperimental } from '../../notice/online-ordering-experim
 import { MultiCafeOrderWarning } from '../../notice/multi-cafe-order-warning.tsx';
 import { HourglassLoadingSpinner } from '../../icon/hourglass-loading-spinner.tsx';
 import { OrderCafeCard } from './payment/order-cafe-card.tsx';
-import { PaymentInfoForm } from './payment/payment-info-form.tsx';
+import { OrderMetadataForm } from './payment/order-metadata-form.tsx';
 import { OrderHistoryBody } from './history/order-history-body.tsx';
 import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 import { useOrderHistoryQuery, usePrewarmKeepalive } from '../../../store/queries/ordering.ts';
 import { usePageData } from '../../../hooks/location.js';
 import { OnlineOrderingPrivacy } from '../../notice/online-ordering-privacy.js';
+import { useValueNotifier } from '../../../hooks/events.ts';
+import { DebugSettings } from '../../../constants/settings.ts';
 
 import './order-page.css';
 import { OrderAdblockWarning } from './order-adblock-warning.js';
@@ -36,6 +39,8 @@ const InlineTodayOrders = () => {
 export const OrderCheckoutView = () => {
     const snapshot = useCartSnapshot();
     const { alias, phoneValidation, validatedPhoneNumber, setAlias, setPhoneNumber, isValid } = usePaymentIdentity();
+    const isDineInEnabled = useValueNotifier(DebugSettings.enableDineInOrdering);
+    const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>('pickup');
 
     usePrewarmKeepalive();
     usePageData('Order', 'Online ordering checkout');
@@ -90,11 +95,14 @@ export const OrderCheckoutView = () => {
         <div id="order-checkout" className="flex-col">
             <OnlineOrderingExperimental/>
             <OrderAdblockWarning/>
-            <PaymentInfoForm
+            <OrderMetadataForm
                 alias={alias}
                 phoneValidation={phoneValidation}
                 onAliasChanged={setAlias}
                 onPhoneNumberChanged={setPhoneNumber}
+                fulfillmentType={fulfillmentType}
+                onFulfillmentTypeChanged={setFulfillmentType}
+                showFulfillmentTypeSelector={isDineInEnabled}
             />
             {
                 snapshot.groupedItems.length > 1 && (
@@ -102,7 +110,7 @@ export const OrderCheckoutView = () => {
                 )
             }
             <OnlineOrderingPrivacy/>
-            <PaymentIdentityContext.Provider value={{ alias, phoneNumber: validatedPhoneNumber ?? '', isValid }}>
+            <PaymentIdentityContext.Provider value={{ alias, phoneNumber: validatedPhoneNumber ?? '', isValid, fulfillmentType }}>
                 <div className="flex-col">
                     {snapshot.groupedItems.map((group) => (
                         <OrderCafeCard

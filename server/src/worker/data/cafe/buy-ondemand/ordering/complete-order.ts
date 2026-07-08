@@ -8,13 +8,46 @@ import { IWaitTimeResponse } from '@msdining/common/models/http';
 import {
     IOrderTotalPrice,
     IPayConfig,
-    IPickupConfig,
+    IFulfillmentLabelConfig,
     ISiteStoreInfo,
     ORDER_TIMEZONE
 } from '../../../../models/ordering.js';
 import { PhoneValidResult } from 'phone';
 import { IOrderingContext } from '../../../../../shared/models/cart.js';
 import { IPaymentCardInfo } from '@msdining/common/models/cart';
+import { FulfillmentType } from '@msdining/common/models/order';
+
+interface IDeliveryLabelConfigs {
+    pickupConfig: IFulfillmentLabelConfig;
+    dineInConfig: IFulfillmentLabelConfig;
+}
+
+/**
+ * Resolves the BoD delivery-option block, form-fields type, and confirmation text for the given
+ * fulfillment type. Pickup and dine-in share the same config shape; dine-in only differs in the
+ * option id, labels (sourced from dineInConfig), and the `*FormFields` type. There is no table
+ * number — MS dine-in is order-at-terminal, pick up yourself.
+ */
+export const resolveDeliveryOption = (fulfillmentType: FulfillmentType, { pickupConfig, dineInConfig }: IDeliveryLabelConfigs) => {
+    const isDineIn = fulfillmentType === 'dineIn';
+    const config = isDineIn ? dineInConfig : pickupConfig;
+    const defaultLabel = isDineIn ? 'DINE IN' : 'PICKUP';
+    const confirmationText = config?.defaultConfirmationText ?? 'Thank you!';
+
+    return {
+        deliveryOption: {
+            id:                      isDineIn ? 'dineIn' : 'pickup',
+            kitchenText:             config?.kitchenText ?? defaultLabel,
+            displayText:             config?.buttonText ?? defaultLabel,
+            defaultConfirmationText: confirmationText,
+            conceptEntries:          {},
+            isEnabled:               true,
+            orderSequence:           1,
+        },
+        formFieldsType: isDineIn ? 'dineInFormFields' : 'pickupFormFields',
+        confirmationText,
+    };
+};
 
 interface ICompleteOrderAfterIFramePaymentParams {
     client: BuyOnDemandClient;
@@ -26,7 +59,9 @@ interface ICompleteOrderAfterIFramePaymentParams {
     phoneData: PhoneValidResult;
     orderingContext: IOrderingContext;
     cardInfo: IPaymentCardInfo;
-    pickupConfig: IPickupConfig;
+    fulfillmentType: FulfillmentType;
+    pickupConfig: IFulfillmentLabelConfig;
+    dineInConfig: IFulfillmentLabelConfig;
     siteStoreInfo: ISiteStoreInfo;
     price: IOrderTotalPrice;
     receiptItems: Array<IBuyOnDemandReceiptItem>;
@@ -45,7 +80,9 @@ export const completeOrderAfterIframePaymentAsync = async ({
     orderNumber,
     phoneData,
     orderingContext,
+    fulfillmentType,
     pickupConfig,
+    dineInConfig,
     cardInfo,
     siteStoreInfo,
     price,
@@ -67,18 +104,11 @@ export const completeOrderAfterIframePaymentAsync = async ({
         currencyCode:          'USD',
         currencySymbol:        '$'
     };
+    const { deliveryOption, formFieldsType, confirmationText } = resolveDeliveryOption(fulfillmentType, { pickupConfig, dineInConfig });
     const deliveryProperties = {
-        deliveryOption:     {
-            id:                      'pickup',
-            kitchenText:             pickupConfig?.kitchenText ?? 'PICKUP',
-            displayText:             pickupConfig?.buttonText ?? 'PICKUP',
-            defaultConfirmationText: pickupConfig?.defaultConfirmationText ?? 'Thank you!',
-            conceptEntries:          {},
-            isEnabled:               true,
-            orderSequence:           1,
-        },
+        deliveryOption,
         fulfillmentDetails: {
-            fulfillmentType: 'pickupFormFields',
+            fulfillmentType: formFieldsType,
         },
         isCutleryEnabled:   false,
         nameCapture:        {
@@ -236,7 +266,7 @@ export const completeOrderAfterIframePaymentAsync = async ({
                     engageLoyaltyAccountNumberLabelText: 'Account number',
                     engageMemberAccountNumberLabelText:  'Account number',
                     gaAccountInfoList:                   [],
-                    deliveryConfirmationText:            pickupConfig?.defaultConfirmationText ?? 'Thank you!',
+                    deliveryConfirmationText:            confirmationText,
                     orderPlacedTime:                     closedTime,
                     receiptDate:                         receiptDateTime.receiptDate,
                     receiptTime:                         receiptDateTime.receiptTime,
@@ -257,7 +287,7 @@ export const completeOrderAfterIframePaymentAsync = async ({
                     multiPassEnabled:                    false,
                     // Intentional typo.
                     receipientName:              `${alias} `,
-                    orderMessage: `Your order will be ready for pickup at ${client.config.externalName} in about ${readyTime.minTime} to ${readyTime.maxTime} minutes\n\n`,
+                    orderMessage: `Your order will be ready ${fulfillmentType === 'dineIn' ? '' : 'for pickup '}at ${client.config.externalName} in about ${readyTime.minTime} to ${readyTime.maxTime} minutes\n\n`,
                     dateTimeInReceipt:           receiptDateTime.dateTimeInReceipt,
                     timezoneOffsetMinutes:       receiptDateTime.timezoneOffsetMinutes,
                     printDateTime:               receiptDateTime.printDateTime,

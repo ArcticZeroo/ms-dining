@@ -1,9 +1,11 @@
 import { createContext, useContext } from 'react';
+import type { FulfillmentType } from '@msdining/common/models/order';
 
 export interface IPaymentIdentityContext {
     alias: string;
     phoneNumber: string;
     isValid: boolean;
+    fulfillmentType: FulfillmentType;
 }
 
 export const PaymentIdentityContext = createContext<IPaymentIdentityContext | null>(null);
