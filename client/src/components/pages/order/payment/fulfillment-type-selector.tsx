@@ -32,18 +32,20 @@ export const FulfillmentTypeSelector: React.FC<IFulfillmentTypeSelectorProps> = 
                 </span>
             </div>
         </div>
-        {FULFILLMENT_OPTIONS.map(option => (
-            <button
-                key={option.type}
-                type="button"
-                disabled={disabled}
-                aria-pressed={value === option.type}
-                className={classNames('default-container fulfillment-type-option flex flex-center', value === option.type && 'active')}
-                onClick={() => onChange(option.type)}
-            >
-                <MaterialIcon name={option.icon}/>
-                <span>{option.label}</span>
-            </button>
-        ))}
+        <div className="flex flex-wrap">
+            {FULFILLMENT_OPTIONS.map(option => (
+                <button
+                    key={option.type}
+                    type="button"
+                    disabled={disabled}
+                    aria-pressed={value === option.type}
+                    className={classNames('default-container fulfillment-type-option flex flex-center', value === option.type && 'active')}
+                    onClick={() => onChange(option.type)}
+                >
+                    <MaterialIcon name={option.icon}/>
+                    <span>{option.label}</span>
+                </button>
+            ))}
+        </div>
     </div>
 );
