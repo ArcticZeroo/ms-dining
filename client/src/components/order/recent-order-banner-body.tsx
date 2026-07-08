@@ -27,6 +27,7 @@ const getBannerMessage = (orders: Array<IRecentOrderSummary>, viewsById: Map<str
         const parentView = getParentView(viewsById, view, shouldUseGroups);
         const ordersForView = ordersByView.get(parentView) ?? [];
         ordersForView.push(order.orderNumber);
+        ordersByView.set(parentView, ordersForView);
     }
 
     const parts: string[] = [];
