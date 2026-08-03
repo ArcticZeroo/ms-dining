@@ -1,58 +1,52 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { HourglassLoadingSpinner } from '../../../icon/hourglass-loading-spinner.js';
 import { OverlayNotice } from './overlay-notice.js';
+import { PaymentToast } from './payment-toast.js';
 
 const PROCESSING_MESSAGE = 'Processing your payment...';
-const STALL_MESSAGE = 'This is taking longer than expected. You have not been charged, you can refresh and try again.';
+const STALL_MESSAGE = 'Taking longer than expected. You have not been charged - you can refresh and try again.';
 
 interface IPaymentOverlayProps {
     error: string | null;
     isStalled: boolean;
     isProcessing: boolean;
     onDismissError: () => void;
-    onClose: () => void;
 }
 
 /**
- * The layer that sits on top of the payment iframe. Shows (in precedence order) a
- * dismissible error, an advisory stall notice, or an in-progress spinner. Renders
- * nothing when the iframe is idle so the form underneath is interactive.
+ * The status layer for the payment iframe. In precedence order:
+ *  - a terminal error covers the frame as a dismissable card (the iframe is done);
+ *  - a stall or in-progress state shows a small non-blocking toast that never
+ *    covers or disables the frame, so the iframe's own form and any post-submit
+ *    verification step stay interactive.
+ * Renders nothing when the iframe is idle.
  */
 export const PaymentOverlay: React.FC<IPaymentOverlayProps> = ({
     error,
     isStalled,
     isProcessing,
     onDismissError,
-    onClose,
 }) => {
-    const content = useMemo<React.ReactNode>(() => {
-        if (error) {
-            return <OverlayNotice message={error} actionLabel="Dismiss" onAction={onDismissError}/>;
-        }
-
-        if (isStalled) {
-            return <OverlayNotice message={STALL_MESSAGE} actionLabel="Close" onAction={onClose}/>;
-        }
-
-        if (isProcessing) {
-            return (
-                <>
-                    <HourglassLoadingSpinner/>
-                    <span>{PROCESSING_MESSAGE}</span>
-                </>
-            );
-        }
-
-        return null;
-    }, [error, isStalled, isProcessing, onDismissError, onClose]);
-
-    if (!content) {
-        return null;
+    if (error) {
+        return (
+            <div className="iframe-overlay centered-content">
+                <OverlayNotice message={error} actionLabel="Dismiss" onAction={onDismissError}/>
+            </div>
+        );
     }
 
-    return (
-        <div className="iframe-overlay centered-content">
-            {content}
-        </div>
-    );
+    if (isStalled) {
+        return (
+            <PaymentToast
+                icon={<span className="material-symbols-outlined">warning</span>}
+                message={STALL_MESSAGE}
+            />
+        );
+    }
+
+    if (isProcessing) {
+        return <PaymentToast icon={<HourglassLoadingSpinner/>} message={PROCESSING_MESSAGE}/>;
+    }
+
+    return null;
 };

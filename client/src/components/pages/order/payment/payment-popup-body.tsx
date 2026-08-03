@@ -87,7 +87,6 @@ export const PaymentPopupBody: React.FC<IPaymentFormBodyProps> = ({
                 isStalled={isStalled}
                 isProcessing={isProcessing}
                 onDismissError={() => setError(null)}
-                onClose={onPaymentCancelled}
             />
             <GenericIFrame
                 src={iframeUrl}

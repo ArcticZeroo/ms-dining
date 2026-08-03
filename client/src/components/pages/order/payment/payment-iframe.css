@@ -36,3 +36,23 @@
     background: var(--color-card-background);
     max-width: 20rem;
 }
+
+/*
+ * The processing / stall toast is a small, informational status pill centered at
+ * the bottom of the frame. It has no interactive content, so it's fully
+ * pointer-events: none — it never blocks the iframe's own form or any post-submit
+ * verification step, even directly underneath it. Reuses .card for its surface,
+ * overriding the column direction so the icon and message sit in a row.
+ */
+.modal .iframe-container > .iframe-toast {
+    position: absolute;
+    left: 50%;
+    bottom: var(--default-padding);
+    transform: translateX(-50%);
+    max-width: calc(100% - var(--default-padding) * 2);
+    z-index: var(--z-index-above-content);
+    flex-direction: row;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
