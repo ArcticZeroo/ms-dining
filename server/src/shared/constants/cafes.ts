@@ -286,7 +286,7 @@ export const CAFE_GROUP_LIST: CafeGroup[] = [
                 name:  'Due Cucina',
                 id:    'duecucina',
                 emoji: '🍝',
-                firstAvailable: new Date(2026, 7, 3) //
+                firstAvailable: new Date(2026, 7, 10)
             },
             {
                 name:  'Typhoon!',
