@@ -38,6 +38,25 @@ describe('isCafeAvailable', () => {
         assert(isCafeAvailable(cafe, now));
     });
 
+    it('returns true throughout the first available date', () => {
+        const firstAvailable = fromDateString('2022-01-01');
+        firstAvailable.setHours(18);
+
+        const cafe: ICafe = {
+            name: 'Test Cafe',
+            id: 'test',
+            firstAvailable
+        };
+
+        const earlierOnFirstAvailableDate = fromDateString('2022-01-01');
+        earlierOnFirstAvailableDate.setHours(6);
+        const laterOnFirstAvailableDate = fromDateString('2022-01-01');
+        laterOnFirstAvailableDate.setHours(23);
+
+        assert(isCafeAvailable(cafe, earlierOnFirstAvailableDate));
+        assert(isCafeAvailable(cafe, laterOnFirstAvailableDate));
+    });
+
     it('returns false when cafe is not available (fixed date)', () => {
         const now = fromDateString('2021-01-01');
         const firstAvailable = fromDateString('2022-01-01');

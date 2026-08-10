@@ -27,19 +27,22 @@ export const createDenoisedCafeLogger = (logger: Logger, baseMessage: string) =>
         }
 
         timer = setTimeout(() => {
+            timer = undefined;
+            const cafeIdsByDateString = new Map(pendingCafeIdsByDateString);
+            pendingCafeIdsByDateString.clear();
+
             const subMessages: string[] = [];
 
             // If there's only one entry, don't bother adding a newline before it. This is a hack to force the newline in a nice-ish way.
-            if (pendingCafeIdsByDateString.size > 1) {
+            if (cafeIdsByDateString.size > 1) {
                 subMessages.push('');
             }
 
-            for (const [dateString, cafeIds] of pendingCafeIdsByDateString.entries()) {
+            for (const [dateString, cafeIds] of cafeIdsByDateString.entries()) {
                 subMessages.push(`\t- ${dateString}: ${Array.from(cafeIds).sort().join(', ')} (${cafeIds.size})`);
             }
 
             logger.info(`${baseMessage}: ${subMessages.join('\n')}`);
-            pendingCafeIdsByDateString.clear();
         }, LOG_INTERVAL_MS);
     };
 };

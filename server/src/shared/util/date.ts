@@ -34,7 +34,7 @@ export const isCafeAvailable = (cafe: ICafe, date = new Date()) => {
         return true;
     }
 
-    return DateUtil.isDateBefore(cafe.firstAvailable, date);
+    return !DateUtil.isDateBefore(date, cafe.firstAvailable);
 };
 
 export const isDateValid = (date: Date | null | undefined): date is Date => date != null && !Number.isNaN(date.getTime());
