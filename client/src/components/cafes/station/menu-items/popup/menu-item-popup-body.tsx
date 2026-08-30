@@ -1,9 +1,17 @@
+import { SearchEntityType } from '@msdining/common/models/search';
+import React, { JSX, useCallback, useMemo } from 'react';
+import { ITabOption, TabView } from '../../../../view/tab-view.tsx';
+import { MenuItemReviewsTab } from '../../../../reviews/menu-item-reviews-tab.tsx';
+import { ReviewsTabTitle } from '../../../../reviews/reviews-tab-title.tsx';
+import { SearchResultVisitHistory } from '../../../../search/schedule/search-result-visit-history.tsx';
 import { CafeTypes } from '@msdining/common';
 import { IMenuItemBase } from '@msdining/common/models/cafe';
-import React from 'react';
-import { MenuItemModifierPicker } from '../../../../pages/order/menu-item-modifier-picker.tsx';
-import { MenuItemReviewsView } from '../../../../reviews/menu-item-reviews-view.tsx';
+import { MenuItemOverviewTab } from './menu-item-overview-tab.tsx';
 import type { MenuItemPopupMode } from './menu-item-popup.tsx';
+
+export const TAB_ID_OVERVIEW = 'overview';
+export const TAB_ID_REVIEWS = 'reviews';
+export const TAB_ID_HISTORY = 'history';
 
 interface IMenuItemPopupBodyProps {
     menuItem: IMenuItemBase;
@@ -17,6 +25,9 @@ interface IMenuItemPopupBodyProps {
     showReviews: boolean;
     stationId?: string;
     stationName?: string;
+    // Controlled by the popup so its footer can react to the active tab.
+    selectedTabId: string;
+    onSelectedTabChanged: (tabId: string) => void;
 }
 
 export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
@@ -30,67 +41,71 @@ export const MenuItemPopupBody: React.FC<IMenuItemPopupBodyProps> = ({
     showReviews,
     stationId,
     stationName,
+    selectedTabId,
+    onSelectedTabChanged,
 }) => {
     const isOrderReview = mode === 'orderReview';
 
+    const lookup = useMemo(() => ({ menuItemId: menuItem.id, menuItemName: menuItem.name }), [menuItem.id, menuItem.name]);
+    const stationLookup = useMemo(
+        () => stationId ? { stationId, stationName: stationName ?? '' } : undefined,
+        [stationId, stationName]
+    );
+
+    const tabOptions = useMemo(() => {
+        const tabs: ITabOption[] = [
+            { id: TAB_ID_OVERVIEW, name: isOnlineOrderingAllowed ? 'Overview & Order' : 'Overview' }
+        ];
+
+        if (showReviews) {
+            tabs.push({ id: TAB_ID_REVIEWS, name: <ReviewsTabTitle lookup={lookup} stationId={stationId}/> });
+        }
+
+        tabs.push({ id: TAB_ID_HISTORY, name: 'Visit History' });
+
+        return tabs;
+    }, [isOnlineOrderingAllowed, showReviews, lookup, stationId]);
+
+    const effectiveTabId = tabOptions.some(tab => tab.id === selectedTabId) ? selectedTabId : TAB_ID_OVERVIEW;
+
+    const renderTab = useCallback((tabId: string): JSX.Element => {
+        switch (tabId) {
+        case TAB_ID_REVIEWS:
+            return (
+                <MenuItemReviewsTab
+                    cafeId={menuItem.cafeId}
+                    lookup={lookup}
+                    stationLookup={stationLookup}
+                    stationId={stationId}
+                />
+            );
+        case TAB_ID_HISTORY:
+            return <SearchResultVisitHistory entityType={SearchEntityType.menuItem} name={menuItem.name}/>;
+        case TAB_ID_OVERVIEW:
+        default:
+            return (
+                <MenuItemOverviewTab
+                    menuItem={menuItem}
+                    notes={notes}
+                    getSelectedChoiceIdsForModifier={getSelectedChoiceIdsForModifier}
+                    onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
+                    onNotesChanged={onNotesChanged}
+                    isOnlineOrderingAllowed={isOnlineOrderingAllowed}
+                    isOrderReview={isOrderReview}
+                />
+            );
+        }
+    }, [menuItem, notes, getSelectedChoiceIdsForModifier, onSelectedChoiceIdsChanged, onNotesChanged, isOnlineOrderingAllowed, isOrderReview, lookup, stationLookup, stationId]);
+
     return (
         <div className="menu-item-popup-body">
-            <div className="flex-col flex-center">
-                {
-                    menuItem.description && (
-                        <div className="menu-item-description">{menuItem.description}</div>
-                    )
-                }
-                {
-                    menuItem.imageUrl != null && (
-                        <div className="menu-item-image-container">
-                            <img src={menuItem.imageUrl}
-                                alt="Menu item image"
-                                className="menu-item-image"/>
-                        </div>
-                    )
-                }
-            </div>
-            {
-                !isOrderReview && menuItem.modifiers.length > 0 && (
-                    <div className="menu-item-configuration">
-                        <div className="menu-item-modifiers">
-                            {
-                                menuItem.modifiers.map(modifier => (
-                                    <MenuItemModifierPicker
-                                        key={modifier.id}
-                                        modifier={modifier}
-                                        selectedChoiceIds={getSelectedChoiceIdsForModifier(modifier)}
-                                        onSelectedChoiceIdsChanged={selection => onSelectedChoiceIdsChanged(modifier, selection)}
-                                    />
-                                ))
-                            }
-                        </div>
-                        {
-                            isOnlineOrderingAllowed && (
-                                <div className="menu-item-notes">
-                                    <label htmlFor="notes">Special Requests & Preparation Notes</label>
-                                    <textarea id="notes"
-                                        placeholder="Enter Special Requests & Preparation Notes Here"
-                                        value={notes}
-                                        onChange={event => onNotesChanged(event.target.value)}/>
-                                </div>
-                            )
-                        }
-                    </div>
-                )
-            }
-            {
-                showReviews && (
-                    <MenuItemReviewsView
-                        menuItemId={menuItem.id}
-                        menuItemName={menuItem.name}
-                        cafeId={menuItem.cafeId}
-                        stationId={stationId}
-                        stationName={stationName}
-                    />
-                )
-            }
+            <TabView
+                options={tabOptions}
+                selectedTabId={effectiveTabId}
+                onTabIdChanged={onSelectedTabChanged}
+                renderTab={renderTab}
+                enableSwipe
+            />
         </div>
     );
 };

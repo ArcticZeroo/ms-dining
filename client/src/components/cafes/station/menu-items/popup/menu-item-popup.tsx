@@ -11,7 +11,7 @@ import {
 import { calculatePrice } from '../../../../../util/cart.ts';
 import { Modal } from '../../../../popup/modal.tsx';
 import { MenuItemButtons } from './menu-item-buttons.tsx';
-import { MenuItemPopupBody } from './menu-item-popup-body.tsx';
+import { MenuItemPopupBody, TAB_ID_OVERVIEW, TAB_ID_REVIEWS } from './menu-item-popup-body.tsx';
 import { MenuItemPopupFooter } from './menu-item-popup-footer.tsx';
 
 import './menu-item-popup.css';
@@ -84,6 +84,8 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
 
     const [notes, setNotes] = useState(fromCartItem?.specialInstructions ?? '');
     const [quantity, setQuantity] = useState(fromCartItem?.quantity ?? 1);
+    // Owned here (not in the body) so the pinned footer can show only on the order tab.
+    const [selectedTabId, setSelectedTabId] = useState(isOrderReview ? TAB_ID_REVIEWS : TAB_ID_OVERVIEW);
 
     const addToCart = useAddToCartMutation();
     const updateCartItem = useUpdateCartItemMutation();
@@ -160,6 +162,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     cafeId={cafeId}
                     menuItem={menuItem}
                     onClose={() => closeModal(modalSymbol)}
+                    showVisitHistory={false}
                 />
             }
             body={(
@@ -174,9 +177,11 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     showReviews={isOrderReview || !isUpdate}
                     stationId={stationId}
                     stationName={stationName}
+                    selectedTabId={selectedTabId}
+                    onSelectedTabChanged={setSelectedTabId}
                 />
             )}
-            footer={isOrderReview ? undefined : (
+            footer={(!isOrderReview && selectedTabId === TAB_ID_OVERVIEW) ? (
                 <MenuItemPopupFooter
                     isUpdate={isUpdate}
                     totalPrice={totalPrice}
@@ -187,7 +192,7 @@ export const MenuItemPopup: React.FC<IMenuItemPopupProps> = ({ menuItem, modalSy
                     onAddQuantityClicked={onAddQuantityClicked}
                     onRemoveQuantityClicked={onRemoveQuantityClicked}
                 />
-            )}
+            ) : undefined}
         />
     );
 };

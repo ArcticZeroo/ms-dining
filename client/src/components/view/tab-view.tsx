@@ -3,7 +3,7 @@ import { classNames } from '../../util/react.js';
 import { DeviceType, useDeviceType } from '../../hooks/media-query.js';
 
 export interface ITabOption {
-    name: string;
+    name: React.ReactNode;
     id: string;
 }
 
@@ -169,6 +169,15 @@ export const TabView: React.FC<ITabViewProps> = ({ options, renderTab, selectedT
     const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
     const { dragOffsetX, isDragging } = useTabSwipe(contentElement, options, selectedTabId, onTabIdChanged, swipeEnabled);
 
+    const tabSelectorRef = useRef<HTMLDivElement>(null);
+
+    // Scroll the selected tab into view (centered) when it changes, so an
+    // off-screen tab in the horizontally-scrolling strip becomes visible.
+    useEffect(() => {
+        const activeButton = tabSelectorRef.current?.querySelector<HTMLElement>('.tab-option.active');
+        activeButton?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }, [selectedTabId]);
+
     const contentStyle = useMemo(() => {
         if (!swipeEnabled) {
             return undefined;
@@ -183,21 +192,23 @@ export const TabView: React.FC<ITabViewProps> = ({ options, renderTab, selectedT
 
     return (
         <div className="flex-col tab-view">
-            <div className="flex flex-wrap tab-selector">
-                {
-                    options.map((option) => (
-                        <button className={classNames('tab-option', option.id === selectedTabId && 'active')} key={option.id} onClick={() => onTabIdChanged(option.id)}>
-                            {option.name}
-                        </button>
-                    ))
-                }
-                {
-                    Array.from({ length: loadingTabCount }, (_, index) => (
-                        <button className="tab-option loading-skeleton" key={`loading-${index}`} disabled>
-                            ...
-                        </button>
-                    ))
-                }
+            <div ref={tabSelectorRef} className="tab-selector">
+                <div className="tab-strip">
+                    {
+                        options.map((option) => (
+                            <button className={classNames('tab-option', option.id === selectedTabId && 'active')} key={option.id} onClick={() => onTabIdChanged(option.id)}>
+                                {option.name}
+                            </button>
+                        ))
+                    }
+                    {
+                        Array.from({ length: loadingTabCount }, (_, index) => (
+                            <button className="tab-option loading-skeleton" key={`loading-${index}`} disabled>
+                                ...
+                            </button>
+                        ))
+                    }
+                </div>
             </div>
             <div ref={setContentElement} className="tab-content" style={contentStyle}>
                 {options.length > 0 && <React.Fragment key={selectedTabId}>{renderTab(selectedTabId)}</React.Fragment>}

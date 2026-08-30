@@ -16,9 +16,11 @@ interface IMenuItemButtonsProps {
     cafeId: string; // Required so that we can use this component in the popup
     menuItem: IMenuItemBase;
     onClose?: () => void;
+    /** Hidden in the popup, where Visit History is its own tab. Defaults to shown (e.g. on the card). */
+    showVisitHistory?: boolean;
 }
 
-export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuItem, onClose }) => {
+export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuItem, onClose, showVisitHistory = true }) => {
     const { viewsById } = useContext(ApplicationContext);
     const shouldUseGroups = useValueNotifier(ApplicationSettings.shouldUseGroups);
     const navigate = useNavigate();
@@ -89,7 +91,11 @@ export const MenuItemButtons: React.FC<IMenuItemButtonsProps> = ({ cafeId, menuI
                     search
                 </span>
             </button>
-            <SearchResultVisitHistoryButton entityType={SearchEntityType.menuItem} name={menuItem.name}/>
+            {
+                showVisitHistory && (
+                    <SearchResultVisitHistoryButton entityType={SearchEntityType.menuItem} name={menuItem.name}/>
+                )
+            }
         </div>
     );
 };

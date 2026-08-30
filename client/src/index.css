@@ -721,7 +721,7 @@ html, body, #root, .App {
         --cafe-logo-height: 2rem;
     }
 
-    .menu-item-popup-body {
+    .menu-item-overview {
         flex-wrap: wrap;
         justify-content: center;
     }
@@ -747,11 +747,26 @@ html, body, #root, .App {
         overflow-x: auto;
     }
 
-    .menu-item-popup-body {
+    .menu-item-overview {
         flex-direction: column;
         flex-wrap: nowrap;
-        overflow-y: scroll;
-        scrollbar-gutter: stable;
+    }
+
+    /* Fill the available height so the swipeable content is a full-height target,
+       even for short tabs (e.g. an item with no customization). */
+    .menu-item-popup-body {
+        height: 100%;
+    }
+
+    .menu-item-popup-body .tab-view {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .menu-item-popup-body .tab-content {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
     }
 
     .reviews {
@@ -835,11 +850,28 @@ html, body, #root, .App {
 
 .tab-selector {
     display: flex;
-    gap: var(--default-padding);
     padding: var(--default-padding);
     background: var(--color-background-raised-2);
     border-radius: var(--default-padding);
-    justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    /* Never let a height-constrained flex-column parent (e.g. the map side panel)
+       squish the tab bar — with overflow set, that squish would clip the buttons. */
+    flex-shrink: 0;
+}
+
+.tab-selector::-webkit-scrollbar {
+    display: none;
+}
+
+/* Inner strip centers via auto margins when it fits, and the outer scroller takes
+   over (margins collapse) when the tabs overflow — so tabs stay centered but every
+   tab is reachable. overflow-y is pinned to avoid a vertical scroll container. */
+.tab-strip {
+    display: flex;
+    gap: var(--default-padding);
+    margin: auto;
 }
 
 .tab-selector .tab-option {
@@ -848,6 +880,8 @@ html, body, #root, .App {
     border-radius: var(--default-padding);
     background: var(--color-button-radio-option);
     transition: background-color 0.2s ease-in-out;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .tab-selector .tab-option:hover, .tab-selector .tab-option.active {
