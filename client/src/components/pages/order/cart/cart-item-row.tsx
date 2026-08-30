@@ -68,6 +68,7 @@ const CartItemRow: React.FC<ICartItemProps> = ({
 
     return (
         <tr className={classNames('cart-item', !item.isAvailable && 'unavailable', isPending && 'pending')} title={isPending ? 'Adding this item to your cart...' : ''}>
+            <CartItemDetailCells item={item}/>
             {
                 isPending && (
                     <td>
@@ -77,7 +78,6 @@ const CartItemRow: React.FC<ICartItemProps> = ({
                     </td>
                 )
             }
-            <CartItemDetailCells item={item}/>
             {
                 !isPending && (
                     <td>
