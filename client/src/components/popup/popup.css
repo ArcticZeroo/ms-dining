@@ -78,6 +78,13 @@
 }
 
 @media screen and (max-width: 800px) {
+    #popup-wrapper {
+        /* Collapse the wrapper so the body lays out as a direct child of
+           #top-overlay (full-screen), while keeping a single, stable DOM parent
+           across breakpoints so the body never remounts. */
+        display: contents;
+    }
+
     .modal {
         margin: 0;
         max-height: 100%;
