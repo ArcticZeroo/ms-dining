@@ -90,8 +90,10 @@ export type OnlineOrderingBlockedReason = 'setting-disabled' | 'weekend' | 'toda
  * notices can be contextual.
  *
  * Reasons:
- *  - 'setting-disabled': debug-flag is off (the default; ordering is an
- *    experimental opt-in feature).
+ *  - 'setting-disabled': the allowOnlineOrdering debug gate is off. Not produced
+ *    during the initial rollout (see useOnlineOrderingStatus), but retained so
+ *    ordering can be pulled back behind the setting.
+ *  - 'not-logged-in': online ordering requires a signed-in account.
  *  - 'weekend': the server has no menu for today's calendar date because
  *    today is Saturday/Sunday. Hydration would fail and the server-side
  *    order-prepare endpoint can't price anything.
@@ -104,7 +106,6 @@ export type IOnlineOrderingState =
 
 export const useOnlineOrderingStatus = (): IOnlineOrderingState => {
     const isOnlineOrderingForceEnabled = useValueNotifier(DebugSettings.forceAllowOnlineOrdering);
-    const isOnlineOrderingEnabled = useIsOnlineOrderingEnabled();
     const isTodaySelected = useIsTodaySelected();
     const isLoggedIn = useIsLoggedIn();
 
@@ -112,9 +113,13 @@ export const useOnlineOrderingStatus = (): IOnlineOrderingState => {
         return { allowed: true };
     }
 
-    if (!isOnlineOrderingEnabled) {
-        return { allowed: false, reason: 'setting-disabled' };
-    }
+    // Online ordering is enabled for everyone during the initial rollout. To pull
+    // it back behind the allowOnlineOrdering debug setting, make
+    // useIsOnlineOrderingEnabled read the setting again and uncomment:
+    // const isOnlineOrderingEnabled = useIsOnlineOrderingEnabled();
+    // if (!isOnlineOrderingEnabled) {
+    //     return { allowed: false, reason: 'setting-disabled' };
+    // }
 
     if (!isLoggedIn) {
         return { allowed: false, reason: 'not-logged-in' };
@@ -132,9 +137,10 @@ export const useOnlineOrderingStatus = (): IOnlineOrderingState => {
 };
 
 export const useIsOnlineOrderingEnabled = (): boolean => {
-    const isOnlineOrderingEnabled = useValueNotifier(DebugSettings.allowOnlineOrdering);
-    const isOnlineOrderingForceEnabled = useValueNotifier(DebugSettings.forceAllowOnlineOrdering);
-    return isOnlineOrderingForceEnabled || isOnlineOrderingEnabled;
+    // Online ordering is enabled for everyone during the initial rollout. This is
+    // the single feature switch, so it can be re-gated later; the allowOnlineOrdering
+    // debug setting is retained for that purpose.
+    return true;
 };
 
 export const useIsOnlineOrderingAllowed = (): boolean => useOnlineOrderingStatus().allowed;

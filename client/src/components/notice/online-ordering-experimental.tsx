@@ -9,20 +9,17 @@ export const OnlineOrderingExperimental = () => {
     }
 
     return (
-        <div className="card notice visible flash">
+        <div className="card notice visible flex-col">
             <p>
-                Warning: Online ordering is extremely experimental. Any or all of the following might occur:
-                <ul className="left-align">
-                    <li>The cafe might be closed when you arrive (this app does not use cafe schedules)</li>
-                    <li>Your credit card might be charged multiple times</li>
-                    <li>Your credit card might be charged but the order might not make it to the cafe</li>
-                    <li>The cafe receives incorrect order information (or none at all)</li>
-                </ul>
-                You probably shouldn't even use this feature while this warning exists!
-                <br/>
-                If you ignore this warning, you are ordering at your own risk.
-                <br/>
-                If you have any questions or feedback, please contact me.
+                Online ordering is an experimental feature, so something on this site might
+                occasionally go wrong. Two things worth knowing if it does:
+            </p>
+            <ul className="left-align">
+                <li>Your card is only charged if the order actually makes it to the cafe's kitchen.</li>
+                <li>You'll get a text confirmation once the order is placed — even if this site shows an error.</li>
+            </ul>
+            <p>
+                If something looks off, it's safe to try again. Questions or feedback are always welcome!
             </p>
             <div className="flex">
                 <a href="mailto:spnovick@microsoft.com" target="_blank">Email Me</a>
