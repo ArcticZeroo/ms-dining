@@ -13,6 +13,7 @@ import { OrderHistoryBody } from './history/order-history-body.tsx';
 import { PaymentIdentityContext } from '../../../context/payment-identity.ts';
 import { useOrderHistoryQuery, usePrewarmKeepalive } from '../../../store/queries/ordering.ts';
 import { usePageData } from '../../../hooks/location.js';
+import { usePaymentCoordinationEffects } from '../../../hooks/payment-coordination-effects.ts';
 import { OnlineOrderingPrivacy } from '../../notice/online-ordering-privacy.js';
 import { useValueNotifier } from '../../../hooks/events.ts';
 import { DebugSettings } from '../../../constants/settings.ts';
@@ -44,6 +45,9 @@ export const OrderCheckoutView = () => {
 
     usePrewarmKeepalive();
     usePageData('Order', 'Online ordering checkout');
+    // Owns the cross-cafe payment guards (unload, modal-close confirm, lock
+    // release) for the whole checkout. Called before any early return.
+    usePaymentCoordinationEffects();
 
     const snapshotCallbacks = useMemo(() => ({
         removeItem: snapshot.removeItem,

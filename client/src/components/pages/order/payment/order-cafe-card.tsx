@@ -29,7 +29,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
 }) => {
     const { viewsById } = useContext(ApplicationContext);
     const { onRemove, onEdit, onChangeQuantity } = useCartItemActions(snapshotCallbacks);
-    const { handlePay, paymentState } = useCafePaymentFlow({
+    const { handlePay, paymentState, payAvailability, hasUnavailableItems } = useCafePaymentFlow({
         cafeId,
         items,
     });
@@ -55,11 +55,6 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
         [items],
     );
 
-    const hasUnavailableItems = useMemo(
-        () => items.some(item => !item.isAvailable),
-        [items],
-    );
-
     const isReadOnly = paymentState.status !== 'ready-to-pay';
 
     return (
@@ -81,6 +76,7 @@ export const OrderCafeCard: React.FC<IOrderCafeCardProps> = ({
                 </div>
                 <OrderCafeFooter
                     paymentState={paymentState}
+                    payAvailability={payAvailability}
                     totalQuantity={totalQuantity}
                     totalPrice={totalPrice}
                     hasUnavailableItems={hasUnavailableItems}

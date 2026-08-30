@@ -1,14 +1,14 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ICompleteOrderResult, IOrderItem } from '@msdining/common/models/order';
 import type { ICartItemRecord } from '@msdining/common/models/cart';
 import type { Nullable } from '@msdining/common/models/util';
 import { usePopupCloserAlways, usePopupOpener } from './popup.ts';
 import { useCompleteOrderMutation, usePreparePaymentMutation } from '../store/queries/ordering.ts';
 import { usePaymentIdentityContext } from '../context/payment-identity.ts';
+import { PAYMENT_POPUP_ID, useIsOtherPaymentActive, usePaymentCoordinationStore } from '../store/zustand/payment-coordination.ts';
+import { type IPayAvailability, derivePayAvailability } from '../util/pay-availability.ts';
 import { getErrorMessage } from '../util/mutation.ts';
 import { PaymentPopup } from '../components/pages/order/payment/payment-popup.tsx';
-
-const paymentPopupId = Symbol('order-cafe-payment');
 
 const toOrderItem = (item: ICartItemRecord): IOrderItem => ({
     menuItemId:          item.menuItemId,
@@ -31,6 +31,8 @@ export type PaymentState =
 export interface ICafePaymentFlowResult {
     handlePay: () => void;
     paymentState: PaymentState;
+    payAvailability: IPayAvailability;
+    hasUnavailableItems: boolean;
 }
 
 interface IDerivePaymentStateParams {
@@ -82,7 +84,43 @@ export const useCafePaymentFlow = ({
     const { alias, phoneNumber, isValid: isIdentityValid, fulfillmentType } = usePaymentIdentityContext();
     const [hasCancelled, setHasCancelled] = useState(false);
 
+    const startPaymentFlow = usePaymentCoordinationStore(state => state.startPaymentFlow);
+    const endPaymentFlow = usePaymentCoordinationStore(state => state.endPaymentFlow);
+    const startCompleting = usePaymentCoordinationStore(state => state.startCompleting);
+    const endCompleting = usePaymentCoordinationStore(state => state.endCompleting);
+    const isOtherPaymentActive = useIsOtherPaymentActive(cafeId);
+
+    // Track this cafe's send-to-kitchen so the coordination hook's unload guard
+    // blocks while it's in flight — without gating other cafes' Pay buttons.
+    useEffect(() => {
+        if (!completeOrder.isPending) {
+            return;
+        }
+
+        startCompleting(cafeId);
+        return () => endCompleting(cafeId);
+    }, [completeOrder.isPending, cafeId, startCompleting, endCompleting]);
+
+    // handlePay takes the modal lock before an async prepare round-trip, during
+    // which the modal isn't open yet so no navigation guard is armed. Track whether
+    // this cafe is still mounted so a leave mid-prepare releases the lock and skips
+    // opening the modal on the page the user navigated to.
+    const isMountedRef = useRef(true);
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
     const handlePay = useCallback(async () => {
+        // Only one payment modal may be active at a time; bail if another cafe owns
+        // the lock (its Pay button gating should already prevent reaching here).
+        const { activeModal } = usePaymentCoordinationStore.getState();
+        if (activeModal != null && activeModal.cafeId !== cafeId) {
+            return;
+        }
+
         if (!isIdentityValid || preparePayment.isPending || completeOrder.isPending) {
             return;
         }
@@ -90,6 +128,7 @@ export const useCafePaymentFlow = ({
         preparePayment.reset();
         completeOrder.reset();
         setHasCancelled(false);
+        startPaymentFlow(cafeId);
 
         try {
             const prepareResult = await preparePayment.mutateAsync({
@@ -97,8 +136,17 @@ export const useCafePaymentFlow = ({
                 items: items.map(toOrderItem),
             });
 
+            if (!isMountedRef.current) {
+                endPaymentFlow(cafeId);
+                return;
+            }
+
             openPopup({
-                id:   paymentPopupId,
+                id:   PAYMENT_POPUP_ID,
+                // Close by popping history so Back/Forward can't resurrect the
+                // torn-down payment state, and so closing doesn't strand a
+                // duplicate order-page entry in history.
+                popHistoryOnClose: true,
                 body: <PaymentPopup
                     iframeUrl={prepareResult.iframeUrl}
                     onPaymentComplete={(paymentResult) => {
@@ -119,9 +167,11 @@ export const useCafePaymentFlow = ({
                 />,
             });
         } catch {
-            // Error is captured in preparePayment.error
+            // Prepare failed and no modal opened, so release the lock here. (Once
+            // the modal opens, the coordination observer releases on close.)
+            endPaymentFlow(cafeId);
         }
-    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, openPopup, closePopup, alias, phoneNumber, fulfillmentType]);
+    }, [isIdentityValid, preparePayment, completeOrder, cafeId, items, openPopup, closePopup, alias, phoneNumber, fulfillmentType, startPaymentFlow, endPaymentFlow]);
 
     const paymentState = useMemo(
         () => derivePaymentState({
@@ -135,5 +185,20 @@ export const useCafePaymentFlow = ({
         [completeOrder.data, completeOrder.isPending, completeOrder.error, preparePayment.isPending, preparePayment.error, hasCancelled],
     );
 
-    return { handlePay, paymentState };
+    const hasUnavailableItems = useMemo(
+        () => items.some(item => !item.isAvailable),
+        [items],
+    );
+
+    const payAvailability = useMemo(
+        () => derivePayAvailability({
+            isReadyToPay: paymentState.status === 'ready-to-pay',
+            isIdentityValid,
+            hasUnavailableItems,
+            isOtherPaymentActive,
+        }),
+        [paymentState.status, isIdentityValid, hasUnavailableItems, isOtherPaymentActive],
+    );
+
+    return { handlePay, paymentState, payAvailability, hasUnavailableItems };
 };
