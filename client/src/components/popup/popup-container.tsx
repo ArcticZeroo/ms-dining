@@ -22,11 +22,20 @@ export const PopupContainer = () => {
 
     useEffect(() => {
         if (popup == null && isPopupHash) {
-            navigate({
-                hash: ''
-            });
+            // Replace (not push) so an orphaned #popup entry — e.g. reached by
+            // Forward after a pop-close, or a direct deep-link — is overwritten
+            // rather than re-stacked, which would trap the Back button on it.
+            navigate({ hash: '' }, { replace: true });
+            return;
         }
-    }, [isPopupHash, navigate, popup]);
+
+        // A popHistoryOnClose popup keeps its history entry in the forward stack
+        // after we pop back out of it. Drop the stored popup once we've left it so
+        // the Forward button can't re-render its (now stale) body.
+        if (popup != null && !isPopupHash && popup.popHistoryOnClose) {
+            popupNotifier.value = null;
+        }
+    }, [isPopupHash, navigate, popup, popupNotifier]);
 
     useEffect(() => {
         if (!isPopupActive) {
@@ -64,19 +73,17 @@ export const PopupContainer = () => {
             className={classNames(deviceType === DeviceType.Desktop && 'fade-in')}
             onClick={onOverlayClicked}
         >
-            {
-                deviceType === DeviceType.Mobile && (
-                    popup.body
-                )
-            }
-            {
-                deviceType === DeviceType.Desktop && (
-                    // Avoids the popup being vertically stretched in the flexbox*
-                    <div id="popup-wrapper" onClick={onOverlayClicked}>
-                        {popup.body}
-                    </div>
-                )
-            }
+            {/*
+              * Render the body once, in a single stable position, so resizing across
+              * the mobile/desktop breakpoint doesn't reparent (and therefore remount)
+              * it — which would reload an open iframe and lose its state. On mobile the
+              * wrapper collapses to `display: contents` so layout matches a bare child
+              * of #top-overlay; on desktop it centers the modal to avoid vertical
+              * stretch in the flexbox.
+              */}
+            <div id="popup-wrapper" onClick={onOverlayClicked}>
+                {popup.body}
+            </div>
         </div>
     );
 };
