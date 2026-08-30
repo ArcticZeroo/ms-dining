@@ -639,6 +639,9 @@ html, body, #root, .App {
 .icon-container {
     width: var(--icon-container-size);
     height: var(--icon-container-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .transition-background {
