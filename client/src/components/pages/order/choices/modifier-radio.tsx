@@ -16,28 +16,9 @@ export const ModifierRadio: React.FC<IModifierRadioProps> = ({
     onSelectedChoiceIdChanged
 }) => {
     const isOnlineOrderingAllowed = useIsOnlineOrderingAllowed();
-    const noneChoiceId = `${modifier.id}-none`;
 
     return (
         <div className="modifier-choice-option-list">
-            {
-                modifier.minimum === 0 && (
-                    <label className="modifier-choice-option" htmlFor={noneChoiceId}>
-                        {
-                            isOnlineOrderingAllowed && (
-                                <input type="radio"
-                                    id={noneChoiceId}
-                                    name={modifier.id}
-                                    value="none"
-                                    checked={selectedChoiceId == null}
-                                    onChange={() => onSelectedChoiceIdChanged(null)}
-                                />
-                            )
-                        }
-                        <label htmlFor={noneChoiceId}>None</label>
-                    </label>
-                )
-            }
             {modifier.choices.map(choice => (
                 <label key={choice.id} htmlFor={getChoiceHtmlId(modifier, choice)} className="modifier-choice-option">
                     {

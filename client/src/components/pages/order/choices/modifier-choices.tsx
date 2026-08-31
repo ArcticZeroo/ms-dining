@@ -10,6 +10,16 @@ interface IModifierChoicesProps {
 }
 
 export const ModifierChoices: React.FC<IModifierChoicesProps> = ({ modifier, selectedChoiceIds, onSelectedChoiceIdsChanged }) => {
+    if (modifier.choiceType === CafeTypes.ModifierChoices.checkbox || (modifier.choiceType === CafeTypes.ModifierChoices.radio && modifier.minimum === 0)) {
+        return (
+            <ModifierCheckboxes
+                modifier={modifier}
+                selectedChoiceIds={selectedChoiceIds}
+                onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
+            />
+        );
+    }
+
     if (modifier.choiceType === CafeTypes.ModifierChoices.radio) {
         const choice = selectedChoiceIds.size === 0 ? null : Array.from(selectedChoiceIds)[0]!;
 
@@ -26,16 +36,6 @@ export const ModifierChoices: React.FC<IModifierChoicesProps> = ({ modifier, sel
                 modifier={modifier}
                 selectedChoiceId={choice}
                 onSelectedChoiceIdChanged={onRadioChoiceChanged}
-            />
-        );
-    }
-
-    if (modifier.choiceType === CafeTypes.ModifierChoices.checkbox) {
-        return (
-            <ModifierCheckboxes
-                modifier={modifier}
-                selectedChoiceIds={selectedChoiceIds}
-                onSelectedChoiceIdsChanged={onSelectedChoiceIdsChanged}
             />
         );
     }
