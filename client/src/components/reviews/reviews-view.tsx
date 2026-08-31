@@ -5,6 +5,8 @@ import { ReviewsViewWithData } from './reviews-view-with-data.tsx';
 import { ReviewsSkeleton } from './reviews-skeleton.tsx';
 import { IReviewLookup, IReviewLookupForStation } from '../../models/reviews.js';
 
+import './reviews.css';
+
 interface IReviewsViewProps {
     status: 'pending' | 'success' | 'error';
     response: IReviewSummary | undefined;
